@@ -39,8 +39,9 @@ function fillRegions(file, text, regions) {
     return `<!-- generated: ${name} -->\n${regions[name].trim()}\n<!-- end generated: ${name} -->`
   })
   const missing = Object.keys(regions).filter(name => !seen.has(name))
-  if (missing.length)
+  if (missing.length) {
     fail(`${file}: add the generated region${missing.length > 1 ? 's' : ''} ${missing.map(name => `"${name}"`).join(', ')}`)
+  }
   return filled
 }
 
@@ -160,9 +161,11 @@ export async function builtins() {
   }
   for (const kind of ['extractors', 'renderers', 'comparators']) {
     const names = await readdir(join(root, builtinsDir, kind)).catch(() => [])
-    for (const name of names)
-      if (!regionsByFile.has(`${builtinsDir}/${kind}/${name}`))
+    for (const name of names) {
+      if (!regionsByFile.has(`${builtinsDir}/${kind}/${name}`)) {
         fail(`${builtinsDir}/${kind}/${name} describes no built-in; remove it or rename it after one`)
+      }
+    }
   }
   return pages
 }

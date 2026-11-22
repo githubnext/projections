@@ -32,9 +32,11 @@ test('dense scrubbing in the real host frame keeps every frame coherent, still a
     for (const card of frame.cards) {
       const known = positions.get(card.id)
       if (!known) positions.set(card.id, card.box)
-      else
-        for (const key of ['x', 'y', 'width', 'height'] as const)
+      else {
+        for (const key of ['x', 'y', 'width', 'height'] as const) {
           expect(Math.abs(card.box[key] - known[key]), `${card.id} ${key} at ${progress}`).toBeLessThan(0.5)
+        }
+      }
     }
     const previous = painted.get(progress)
     if (previous === undefined) painted.set(progress, frame.html)
@@ -232,8 +234,9 @@ test('the scoring pair rewires through an inserted unit with every frame coheren
     const previous = painted.get(progress)
     if (previous === undefined) painted.set(progress, frame.html)
     else expect(frame.html, `the same scoring frame in either direction at ${progress}`).toBe(previous)
-    if (review && [0, 0.25, 0.5, 0.7, 1].includes(progress))
+    if (review && [0, 0.25, 0.5, 0.7, 1].includes(progress)) {
       await renderer.iframe.screenshot({path: `${review}/di-scoring-${testInfo.project.name}-${progress}.png`})
+    }
   })
 })
 
@@ -258,9 +261,7 @@ test('type names, keys and parameters are monospace identifiers that never run i
           card.querySelectorAll('.di-contract, .di-implementation').length ===
           card.querySelectorAll('.di-contract[data-projections-identifier], .di-implementation[data-projections-identifier]').length,
         lifetimeMarked: card.querySelector('.di-lifetime-label')!.hasAttribute('data-projections-identifier'),
-        keyMarked: card.querySelector('.di-key')
-          ? card.querySelector('.di-key')!.hasAttribute('data-projections-identifier') === false
-          : true,
+        keyMarked: card.querySelector('.di-key') ? !card.querySelector('.di-key')!.hasAttribute('data-projections-identifier') : true,
         clear:
           (!contract || contract.right <= lifetime.left) &&
           (!note || implementation.right <= note.left) &&
@@ -296,8 +297,9 @@ for (const [scenario, units] of [
         expect(checkRenderedFrame(frame), `${scenario} frame at ${progress}`).toEqual([])
         expect(frame.viewBox).toBe(viewBox)
         for (const card of frame.cards) ids.add(card.id)
-        if (review && [0, 0.5, 1].includes(progress))
+        if (review && [0, 0.5, 1].includes(progress)) {
           await renderer.iframe.screenshot({path: `${review}/di-${scenario}-${colorMode}-${testInfo.project.name}-${progress}.png`})
+        }
       })
       expect(ids.size, 'every card of either revision').toBe(units)
       // Container scope names, and for Nest the alias, are on the cards and in the legend.

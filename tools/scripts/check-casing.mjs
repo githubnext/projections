@@ -52,8 +52,9 @@ async function visit(directory) {
 }
 
 for (const tree of trees) await visit(join(root, tree))
-if (failures.length)
+if (failures.length) {
   throw new Error(
     `Styles must not recase text (show data verbatim; write human text in sentence case; quiet a label with the type scale and muted tone):\n${failures.join('\n')}`,
   )
+}
 console.log(`Casing: ${files} UI style and source files recase no text`)

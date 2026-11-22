@@ -260,8 +260,9 @@ test('the real backend lists comparator tests and runs them: a pass, and a failu
     const example = fileURLToPath(new URL('../../../../examples/comparators/priority-order/', import.meta.url))
     await mkdir(path.join(root, 'tools/fixtures'), {recursive: true})
     await copyFile(path.join(example, 'priority-order.comparator.yaml'), path.join(root, 'tools/order.comparator.yaml'))
-    for (const name of ['before.json', 'after.json'])
+    for (const name of ['before.json', 'after.json']) {
       await copyFile(path.join(example, 'fixtures', name), path.join(root, 'tools/fixtures', name))
+    }
     await writeFile(
       path.join(root, 'tools/order.comparator.test.yaml'),
       [

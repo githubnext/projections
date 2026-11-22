@@ -1,7 +1,7 @@
 import type {PageView, ViewContext, ViewFigure} from './types.ts'
 
 /** The comparison modes' names, in the order the host offers them: Diff, Side by side, Animated, then Swipe. */
-export const modeNames: {[mode: string]: string} = {
+export const modeNames: Record<string, string> = {
   diff: 'Diff',
   'side-by-side': 'Side by side',
   animated: 'Animated',
@@ -74,16 +74,18 @@ export function contextText(context: ViewContext): string {
 /** What the page says of generated values: those regenerated, and the selection's. */
 function generatedLines(page: PageView): string[] {
   const lines: string[] = []
-  if (page.variation?.regenerated)
+  if (page.variation?.regenerated) {
     lines.push(
       `Regenerated: ${page.variation.regenerated} item${page.variation.regenerated === 1 ? "'s generated values were" : "s' generated values were"} regenerated from the same inputs (within tolerance, so not a change).`,
     )
-  if (page.generated?.length)
+  }
+  if (page.generated?.length) {
     lines.push(
       `The selection's generated values (written by the extractor's generator, such as a language model; not extracted facts): ${page.generated
         .map(field => `${field.name} (${field.form === 'plain' ? 'unchanged' : (field.words ?? field.form).toLowerCase()})`)
         .join(', ')}.`,
     )
+  }
   return lines
 }
 
@@ -96,10 +98,10 @@ export function pageLines(page: PageView | undefined): string[] {
   for (const notice of page.notices ?? []) lines.push(`Notice: ${notice}`)
   if (page.figures?.length) lines.push(`Summary bar: ${page.figures.map(figureText).join(' · ')}.`)
   lines.push(...changeLines(page), ...generatedLines(page))
-  if (page.selection)
+  if (page.selection) {
     lines.push(
       `Selected: ${page.selection.kind} ${page.selection.label} [${page.selection.id}]${page.selection.status ? `, ${page.selection.status}` : ''}.`,
     )
-  else lines.push('Selected: nothing.')
+  } else lines.push('Selected: nothing.')
   return lines
 }

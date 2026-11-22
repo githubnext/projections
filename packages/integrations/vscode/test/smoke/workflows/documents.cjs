@@ -31,8 +31,9 @@ module.exports = async function documents({folder}) {
   )
   await until('the workbench', async () => (await elements('[data-fixtures-workbench]', undefined, 'fixtures')).length > 0)
   const scenario = '[data-scenario="api/dotnet-payments-compatibility"]'
-  if (!(await elements('[data-scenario]', undefined, 'fixtures')).length)
+  if (!(await elements('[data-scenario]', undefined, 'fixtures')).length) {
     await control({op: 'click', selector: 'button[aria-label="Show explorer sidebar"]'}, 'fixtures')
+  }
   await until('the scenario', async () => (await elements(scenario, undefined, 'fixtures')).length > 0)
   await control({op: 'click', selector: `${scenario} button, button${scenario}`}, 'fixtures')
   await until(

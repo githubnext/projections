@@ -5,14 +5,18 @@
 import {posix} from 'node:path'
 import type {Unit} from './packages.ts'
 
-export type LockfileReach = {
+export interface LockfileReach {
   /** Workspaces and crates whose dependencies, direct or transitive, changed. */
   units: string[]
   /** Whether the root package's own dependencies (the repository's tooling) changed. */
   root: boolean
 }
 
-type Graph = {entries: Map<string, string>; edges: Map<string, string[]>; members: Map<string, string>}
+interface Graph {
+  entries: Map<string, string>
+  edges: Map<string, string[]>
+  members: Map<string, string>
+}
 
 function reach(before: Graph, after: Graph, root: string | undefined): LockfileReach {
   const keys = new Set([...before.entries.keys(), ...after.entries.keys()])
@@ -22,7 +26,7 @@ function reach(before: Graph, after: Graph, root: string | undefined): LockfileR
       const seen = new Set<string>()
       const queue = [start]
       while (queue.length) {
-        const key = queue.pop() as string
+        const key = queue.pop()!
         if (seen.has(key)) continue
         seen.add(key)
         if (changed.has(key)) return true
@@ -37,7 +41,11 @@ function reach(before: Graph, after: Graph, root: string | undefined): LockfileR
 
 // ── npm ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-type NpmEntry = {link?: boolean; resolved?: string; [field: string]: unknown}
+interface NpmEntry {
+  link?: boolean
+  resolved?: string
+  [field: string]: unknown
+}
 const dependencyFields = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']
 
 /** Where `name` resolves from the package at `from`: its own node_modules, then each enclosing one, as Node looks. */
@@ -83,7 +91,13 @@ export function npmLockfileReach(before: string | undefined, after: string | und
 
 // ── Cargo ───────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-type CargoPackage = {name: string; version: string; source: string | undefined; dependencies: string[]; text: string}
+interface CargoPackage {
+  name: string
+  version: string
+  source: string | undefined
+  dependencies: string[]
+  text: string
+}
 
 export function parseCargoLock(text: string): CargoPackage[] {
   return text
@@ -96,7 +110,7 @@ export function parseCargoLock(text: string): CargoPackage[] {
         name: field('name') ?? '',
         version: field('version') ?? '',
         source: field('source'),
-        dependencies: [...list.matchAll(/"([^"]+)"/g)].map(match => match[1] as string),
+        dependencies: [...list.matchAll(/"([^"]+)"/g)].map(match => match[1]!),
         text: block.trim(),
       }
     })

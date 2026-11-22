@@ -30,7 +30,7 @@ export interface RecentChange {
   title: string
   date?: string
   /** The projections it changes, in the run's order, with how many changes each. */
-  projections: Array<{id: string; title: string; changes: number}>
+  projections: {id: string; title: string; changes: number}[]
 }
 
 /** The most recent commits that change a projection the Viewing view lists. */

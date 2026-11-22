@@ -180,7 +180,7 @@ export interface FixtureRenderer {
 }
 /** The comparator a fixture scenario compares with: the default one with its options, or a custom comparator file. */
 export type FixtureComparator =
-  | {default: true; options?: {[key: string]: unknown}}
+  | {default: true; options?: Record<string, unknown>}
   /** A custom comparator: its comparator file's base64 bytes, its path as written and its options. */
   | {rules: string; id: string; options?: unknown}
 /** One scenario of the Inspector's fixtures mode: a subject to present with a renderer, from a scenarios file. */

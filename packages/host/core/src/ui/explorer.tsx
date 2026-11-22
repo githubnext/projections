@@ -89,7 +89,7 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
   const session = useComparisonSession({...props, presentation: pair.presentation})
   const {after, outcome, subject, document, resolution} = pair
   const fill = props.fill !== false
-  if (!after || !document)
+  if (!after || !document) {
     return (
       <ScopedRoot colorMode={colorMode} className={cn('ph-explorer', props.className)}>
         <p
@@ -100,6 +100,7 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
         </p>
       </ScopedRoot>
     )
+  }
   const comparator = outcome.status === 'compared' ? outcome.result.comparator : undefined
   const picker = (compact: boolean, form?: PairForm) => <PairPicker pair={pair} form={form ?? (compact ? 'merged' : 'full')} />
   return (

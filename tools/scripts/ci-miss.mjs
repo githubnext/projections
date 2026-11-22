@@ -61,11 +61,13 @@ try {
   if (!failed.length) lines = ['No job failed.']
   else {
     const found = misses({failed, plan: plan(), parent: parent()})
-    for (const {job, verdict} of found)
-      if (verdict === 'likely miss')
+    for (const {job, verdict} of found) {
+      if (verdict === 'likely miss') {
         console.log(
           `::warning title=CI rules miss?::${job} failed on main, passed on the parent commit, and the pull request's plan skipped it`,
         )
+      }
+    }
     lines = ['| Failed job | Verdict |', '| --- | --- |', ...found.map(({job, verdict}) => `| ${job} | ${verdict} |`)]
   }
 } catch (error) {

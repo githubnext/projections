@@ -23,10 +23,12 @@ export function wordDiff(before: string, after: string): WordRun[] | undefined {
   // Longest common subsequence, by suffix lengths.
   const width = b.length + 1
   const lengths = new Uint16Array((a.length + 1) * width)
-  for (let i = a.length - 1; i >= 0; i--)
-    for (let j = b.length - 1; j >= 0; j--)
+  for (let i = a.length - 1; i >= 0; i--) {
+    for (let j = b.length - 1; j >= 0; j--) {
       lengths[i * width + j] =
         a[i] === b[j] ? lengths[(i + 1) * width + j + 1]! + 1 : Math.max(lengths[(i + 1) * width + j]!, lengths[i * width + j + 1]!)
+    }
+  }
   const runs: WordRun[] = []
   const push = (text: string, op: WordRun['op']) => {
     const last = runs.at(-1)

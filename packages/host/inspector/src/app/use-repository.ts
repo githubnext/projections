@@ -27,7 +27,7 @@ export function useRepository({
   const [revisions, setRevisions] = useState<InspectorRevision[]>([])
   const [projection, setProjection] = useState('')
   const [definitionRevision, setDefinitionRevision] = useState(openedDefinitionRevision ?? workingTree)
-  const [lists, setLists] = useState<{[ref: string]: InspectorDefinitionList}>({})
+  const [lists, setLists] = useState<Record<string, InspectorDefinitionList>>({})
   const [loading, setLoading] = useState(Boolean(api))
   const [connected, setConnected] = useState<boolean | undefined>(undefined)
   // This repository's identity in this browser (`repositoryKey`), for remembering its pairs and tip.

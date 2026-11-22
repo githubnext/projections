@@ -60,8 +60,9 @@ export async function createDemoRepository(cli, {acme = false} = {}) {
   )
   // Its tests, for the Testing view: one case passes, one fails at its `order` line (15).
   const example = new URL('../../../../../examples/comparators/priority-order/fixtures/', import.meta.url)
-  for (const name of ['before.json', 'after.json'])
+  for (const name of ['before.json', 'after.json']) {
     await write(root, `tools/fixtures/${name}`, await readFile(new URL(name, example), 'utf8'))
+  }
   await write(root, 'tools/first.comparator.test.yaml', comparatorTests)
   git('add', '-A')
   if (acme) date = daysAgo(9)

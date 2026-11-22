@@ -16,7 +16,7 @@ export const membershipKinds = new Set(['resolved'])
 export const sideOf = <T>(row: EntityChange<T>): T => (row.after ?? row.before)!
 
 export function isRootEntity(entity: Entity): boolean {
-  return entity.data?.['workspaceMember'] === true || rootKinds.has(entity.kind)
+  return entity.data?.workspaceMember === true || rootKinds.has(entity.kind)
 }
 
 /**
@@ -24,7 +24,7 @@ export function isRootEntity(entity: Entity): boolean {
  * and Cargo), `package` for installed packages; other kinds as extracted.
  */
 export function displayKind(entity: Entity): string {
-  if (entity.data?.['workspaceMember'] === true) return 'workspace'
+  if (entity.data?.workspaceMember === true) return 'workspace'
   return entity.kind === 'external-package' ? 'package' : entity.kind
 }
 
@@ -47,5 +47,5 @@ export function summaryOwner(id: string): string {
 
 /** Whether a summary card collapses its expanded owner's packages rather than showing them. */
 export function isCollapseCard(entity: Entity): boolean {
-  return entity.data?.['expanded'] === true
+  return entity.data?.expanded === true
 }

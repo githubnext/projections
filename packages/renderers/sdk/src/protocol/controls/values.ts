@@ -21,8 +21,8 @@ export function isControlValue(control: RendererControl, value: unknown): value 
 }
 
 /** Each control's value from `options`, or its default when absent or invalid. */
-export function controlValues(controls: readonly RendererControl[], options: RendererOptions = {}): {[id: string]: ControlValue} {
-  const values: {[id: string]: ControlValue} = {}
+export function controlValues(controls: readonly RendererControl[], options: RendererOptions = {}): Record<string, ControlValue> {
+  const values: Record<string, ControlValue> = {}
   for (const control of controls) {
     if (control.type === 'action') continue
     const value = options[control.id]

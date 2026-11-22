@@ -63,11 +63,12 @@ test('every built-in renderer bundle lists every npm package its script includes
       bundled.some(name => name.startsWith('react ')),
       `${directory}: the probe build found its packages`,
     )
-    if (/[\\/](graph|dag|architecture)$/.test(directory))
+    if (/[\\/](graph|dag|architecture)$/.test(directory)) {
       assert.ok(
         bundled.some(name => name.startsWith('elkjs ')),
         `${directory} bundles ELK`,
       )
+    }
     assert.deepEqual(
       bundled.filter(name => !listed.includes(name)),
       [],
@@ -112,7 +113,7 @@ test('a renderer build fails when it bundles a package that declares no license'
 
 test('merged notices list each package version once', () => {
   const react = `===== react 19.0.0 (MIT) =====\nMIT text\n`
-  const a = bundleNotices('A', []) + `\n${react}`,
+  const a = `${bundleNotices('A', [])}\n${react}`,
     b = `B\n\n${react}\n===== elkjs 0.12.1 (EPL-2.0) =====\nEPL text\n`
   const merged = mergeNotices('Renderers', [a, b])
   assert.equal(merged.match(/===== react /g).length, 1)

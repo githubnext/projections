@@ -77,7 +77,7 @@ export function dependencyFacts(model: ComparisonModel): SummaryFactItem[] {
         ]
       : []
   })
-  if (directIds.length)
+  if (directIds.length) {
     facts.push({
       type: 'fact',
       id: 'direct',
@@ -85,6 +85,7 @@ export function dependencyFacts(model: ComparisonModel): SummaryFactItem[] {
       noun: noun('direct dependency changed', 'direct dependencies changed'),
       ids: directIds,
     })
+  }
   return facts
 }
 
@@ -94,19 +95,21 @@ export function dependencyFacts(model: ComparisonModel): SummaryFactItem[] {
  * (`dev dependency`), and NuGet's `resolved` target memberships aren't counted. Workspaces come first, then packages,
  * then dependencies.
  */
-export function dependencyNouns(model: ComparisonModel): {[kind: string]: {singular: string; plural: string} | false} {
+export function dependencyNouns(model: ComparisonModel): Record<string, {singular: string; plural: string} | false> {
   const kinds = new Map<string, boolean>()
-  for (const row of model.entities)
-    for (const entity of [row.before, row.after])
-      if (entity) kinds.set(entity.kind, (kinds.get(entity.kind) ?? true) && entity.data?.['workspaceMember'] === true)
-  const nouns: {[kind: string]: {singular: string; plural: string} | false} = {}
+  for (const row of model.entities) {
+    for (const entity of [row.before, row.after]) {
+      if (entity) kinds.set(entity.kind, (kinds.get(entity.kind) ?? true) && entity.data?.workspaceMember === true)
+    }
+  }
+  const nouns: Record<string, {singular: string; plural: string} | false> = {}
   for (const [kind, members] of kinds) if (members) nouns[kind] = noun('workspace', 'workspaces')
-  if (kinds.has('project')) nouns['project'] = noun('project', 'projects')
+  if (kinds.has('project')) nouns.project = noun('project', 'projects')
   if (kinds.has('target-framework')) nouns['target-framework'] = noun('target framework', 'target frameworks')
-  if (kinds.has('target')) nouns['target'] = noun('target', 'targets')
-  if (kinds.has('product')) nouns['product'] = noun('product', 'products')
+  if (kinds.has('target')) nouns.target = noun('target', 'targets')
+  if (kinds.has('product')) nouns.product = noun('product', 'products')
   for (const kind of ['package', 'external-package']) if (kinds.has(kind) && !nouns[kind]) nouns[kind] = noun('package', 'packages')
-  const dependencyKinds: {[kind: string]: string} = {
+  const dependencyKinds: Record<string, string> = {
     dependencies: 'dependency',
     'depends-on': 'dependency',
     'direct-dependency': 'direct dependency',
@@ -116,7 +119,7 @@ export function dependencyNouns(model: ComparisonModel): {[kind: string]: {singu
   }
   for (const [kind, singular] of Object.entries(dependencyKinds)) nouns[kind] = noun(singular, `${singular.slice(0, -1)}ies`)
   // A Swift product's targets.
-  nouns['includes'] = noun('product target', 'product targets')
+  nouns.includes = noun('product target', 'product targets')
   for (const kind of membershipKinds) nouns[kind] = false
   return nouns
 }

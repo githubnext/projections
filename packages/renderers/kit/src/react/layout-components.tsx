@@ -17,7 +17,10 @@ import {Icon} from './icons.js'
 import type {IconName} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ChangeClassification} from '../emphasis.js'
 
-type StatusChange = {status: Status; renamed?: boolean | undefined}
+interface StatusChange {
+  status: Status
+  renamed?: boolean | undefined
+}
 const join = (...names: (string | false | undefined)[]) => names.filter(Boolean).join(' ')
 
 /**

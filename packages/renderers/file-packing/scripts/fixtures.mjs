@@ -77,7 +77,7 @@ function revisionFiles(revision, prefix) {
       return {mode, type, object, path: path.slice(prefix.length)}
     })
     .filter(entry => entry.type === 'blob' && ['100644', '100755', '120000'].includes(entry.mode))
-  const output = git(['cat-file', '--batch'], entries.map(entry => entry.object).join('\n') + '\n')
+  const output = git(['cat-file', '--batch'], `${entries.map(entry => entry.object).join('\n')}\n`)
   let cursor = 0
   return entries.map(entry => {
     const end = output.indexOf(10, cursor)
@@ -225,11 +225,12 @@ function settings() {
   }
   const kindOf = flags => (flags.includes('secret') ? 'secret' : (flags[0] ?? 'setting'))
   const keys = []
-  for (const [group, count] of groups)
+  for (const [group, count] of groups) {
     for (let index = 0; index < count; index++) {
       const word = words[(index * 5 + group.length) % words.length]
       keys.push({group, index, name: index < words.length ? word : `${word}${index}`, flags: attributes(group, index)})
     }
+  }
   const document = list => {
     const entities = [{id: 'settings', kind: 'group', label: 'settings'}]
     const relationships = []

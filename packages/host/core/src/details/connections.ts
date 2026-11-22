@@ -21,9 +21,11 @@ export interface DetailConnection {
 /** Each entity id's row, by its current and former ids. */
 function entityRows(rows: readonly Row[]): Map<string, Row> {
   const entityRow = new Map<string, Row>()
-  for (const candidate of rows)
-    if (candidate.collection === 'entities')
+  for (const candidate of rows) {
+    if (candidate.collection === 'entities') {
       for (const id of [...candidate.after, ...candidate.before, candidate.id]) if (!entityRow.has(id)) entityRow.set(id, candidate)
+    }
+  }
   return entityRow
 }
 
@@ -67,7 +69,7 @@ function relationshipEndpoints(row: Row, rows: readonly Row[]): DetailConnection
     ['to', row.to],
   ] as const) {
     const endpoint = id === undefined ? undefined : entityRow.get(id)
-    if (endpoint)
+    if (endpoint) {
       connections.push({
         rowId: endpoint.id,
         direction,
@@ -76,6 +78,7 @@ function relationshipEndpoints(row: Row, rows: readonly Row[]): DetailConnection
         rowLabel: endpoint.label,
         parts: changeParts(endpoint),
       })
+    }
   }
   return connections
 }

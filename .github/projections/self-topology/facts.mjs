@@ -88,13 +88,15 @@ export function firstSentence(text) {
 /** `cargo llvm-cov … -p <crate> … --fail-under-lines <n>` commands in package scripts and workflows: crate → percent. */
 function coverageGates(texts) {
   const gates = new Map()
-  for (const text of texts)
+  for (const text of texts) {
     for (const command of text.match(/cargo llvm-cov[^\n"]*/g) ?? []) {
       const floor = /--fail-under-lines[ =](\d+(\.\d+)?)/.exec(command)?.[1]
       if (!floor) continue
-      for (const [, name] of command.matchAll(/(?:^|\s)(?:-p|--package)[ =]([\w-]+)/g))
+      for (const [, name] of command.matchAll(/(?:^|\s)(?:-p|--package)[ =]([\w-]+)/g)) {
         gates.set(name, Math.max(gates.get(name) ?? 0, Number(floor)))
+      }
     }
+  }
   return gates
 }
 
@@ -198,9 +200,11 @@ export function unitFacts(context) {
     })
   }
   // A unit that depends on proved code runs it: the proofs cover its decisions too.
-  for (const {kind, from, to} of relationships.values())
-    if (kind === 'depends-on' && facts.get(to)?.provedFunctions && !facts.get(from).verification.length)
+  for (const {kind, from, to} of relationships.values()) {
+    if (kind === 'depends-on' && facts.get(to)?.provedFunctions && !facts.get(from).verification.length) {
       facts.get(from).verification.push(usesProved)
+    }
+  }
   const runs = whereUnitsRun(context)
   for (const [id, places] of runs) if (places.size) facts.get(id).runs = [...places].sort()
   return facts
@@ -265,12 +269,14 @@ function whereUnitsRun({units, relationships, read, roots}) {
   const edges = [...relationships.values()].filter(relationship => carries.includes(relationship.kind))
   for (let changed = true; changed;) {
     changed = false
-    for (const {from, to} of edges)
-      for (const place of places.get(from))
+    for (const {from, to} of edges) {
+      for (const place of places.get(from)) {
         if (!places.get(to).has(place)) {
           places.get(to).add(place)
           changed = true
         }
+      }
+    }
   }
   return places
 }

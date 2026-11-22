@@ -54,7 +54,7 @@ export function Closed<P extends TProperties>(properties: P, options: object = {
 
 /** An object whose every property is `value`, as `additionalProperties` rather than a pattern. */
 export function Dictionary<T extends TSchema>(value: T, options: object = {}) {
-  return Type.Unsafe<{[key: string]: Static<T>}>({type: 'object', ...options, additionalProperties: value})
+  return Type.Unsafe<Record<string, Static<T>>>({type: 'object', ...options, additionalProperties: value})
 }
 
 /** A string that isn't empty or only whitespace, as the engine requires. */

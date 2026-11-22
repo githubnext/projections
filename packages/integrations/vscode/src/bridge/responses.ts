@@ -50,17 +50,19 @@ export function relayed(response: RunnerResponse, blob: boolean): Relayed {
   const bytes = typeof base64 === 'string' ? Buffer.byteLength(base64, 'base64') : response.size
   if (bytes > maxResponseBytes) return {type: 'failure', message: 'The backend response exceeds the bridge limit'}
   if (status >= 200 && status < 300 && blob) return {type: 'response', status, body: {type: contentType, base64: encoded}}
-  if (status >= 200 && status < 300)
+  if (status >= 200 && status < 300) {
     return /^application\/(?:[\w.+-]+\+)?json\b/i.test(contentType)
       ? {type: 'response', status, body: response.body}
       : {type: 'failure', message: 'The backend returned invalid JSON'}
+  }
   return {type: 'response', status, body: bodyText(response.body).slice(0, 2048)}
 }
 
 /** A custom renderer bundle file from the backend's response, or why it is unavailable. */
 export function rendererFileOf(response: RunnerResponse): RendererFile {
-  if (response.status !== 200)
+  if (response.status !== 200) {
     return {error: `The custom renderer is unavailable (${response.status}): ${bodyText(response.body).slice(0, 1024)}`}
+  }
   const base64 = (response.body as {base64?: unknown} | null)?.base64
   const encoded = typeof base64 === 'string' ? base64 : Buffer.from(String(response.body ?? '')).toString('base64')
   if (Buffer.byteLength(encoded, 'base64') > maxResponseBytes) return {error: 'The custom renderer exceeds the bridge limit'}

@@ -254,13 +254,14 @@ function busiestWindow(
   let best = {x: xs[0] ?? 0, y: ys[0] ?? 0, count: -1}
   const earlier = (x: number, y: number) =>
     orientation === 'vertical' ? y < best.y || (y === best.y && x < best.x) : x < best.x || (x === best.x && y < best.y)
-  for (const x of xs)
+  for (const x of xs) {
     for (const y of ys) {
       const count = cards.filter(
         card => card.x >= x && card.y >= y && card.x + card.width <= x + size.width && card.y + card.height <= y + size.height,
       ).length
       if (count > best.count || (count === best.count && earlier(x, y))) best = {x, y, count}
     }
+  }
   return best
 }
 
@@ -280,7 +281,13 @@ function uncutStart(start: ScrollStart, area: FocusArea, content: ContentBox, fi
     const {scale} = view
     if (!scale) return at
     // An axis's padding before the content and its padding before and after it together.
-    type Axis = {position: 'x' | 'y'; size: 'width' | 'height'; extent: number; before: number; padding: number}
+    interface Axis {
+      position: 'x' | 'y'
+      size: 'width' | 'height'
+      extent: number
+      before: number
+      padding: number
+    }
     const horizontal: Axis = {position: 'x', size: 'width', extent: view.width, before: padding.x, padding: 2 * padding.x},
       vertical: Axis = {position: 'y', size: 'height', extent: view.height, before: padding.top, padding: padding.top + padding.y}
     const origin = (axis: Axis) => content[axis.position] - axis.before / scale

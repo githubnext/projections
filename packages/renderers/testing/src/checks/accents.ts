@@ -13,8 +13,9 @@ async function presentations(
 ): Promise<{where: string; load: () => Promise<unknown>}[]> {
   if (subject.mode === 'extraction') return [{where: 'The extraction', load: () => driver.load(subject, {progress: 1})}]
   const views: {where: string; load: () => Promise<unknown>}[] = []
-  if (modes.includes('diff'))
+  if (modes.includes('diff')) {
     views.push({where: 'In the diff', load: () => driver.load(subject, {progress: 1, comparisonMode: 'diff', highlighting: 1})})
+  }
   if (modes.includes('animated')) {
     const {steps} = await driver.load(subject, {progress: 0, comparisonMode: 'animated'})
     const ends = steps.filter(end => end > 0 && end < 1)
@@ -29,11 +30,12 @@ async function presentations(
     )
   } else {
     const progressMode = modes.find(mode => progressModes.includes(mode))
-    if (progressMode)
+    if (progressMode) {
       views.push({
         where: 'At progress 0.5',
         load: () => driver.load(subject, {progress: 0.5, comparisonMode: progressMode, highlighting: 1}),
       })
+    }
   }
   return views
 }

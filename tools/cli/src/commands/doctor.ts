@@ -10,7 +10,12 @@ import {newestMtime, onPath, probe, readText, type Command} from '../lib/repo.ts
 import {availableMemory, gigabytes, playwrightBrowsers} from '../lib/machine.ts'
 import {nightly, toolchains, type Status} from '../lib/toolchains.ts'
 
-export type Finding = {check: string; status: Status; detail: string; fix?: string}
+export interface Finding {
+  check: string
+  status: Status
+  detail: string
+  fix?: string
+}
 
 const PUBLIC_REGISTRY = /registry\.npmjs\.org|registry\.yarnpkg\.com/
 
@@ -18,32 +23,33 @@ const PUBLIC_REGISTRY = /registry\.npmjs\.org|registry\.yarnpkg\.com/
 export function registryFindings(root: string, resolved: string | undefined): Finding[] {
   const configured = /^registry\s*=\s*(\S+)/m.exec(readText(root, '.npmrc') ?? '')?.[1]
   const findings: Finding[] = []
-  if (!configured)
+  if (!configured) {
     findings.push({check: 'registry', status: 'fail', detail: '.npmrc configures no registry', fix: 'restore the committed .npmrc'})
-  else if (PUBLIC_REGISTRY.test(configured))
+  } else if (PUBLIC_REGISTRY.test(configured)) {
     findings.push({
       check: 'registry',
       status: 'fail',
       detail: `.npmrc points at the public registry (${configured})`,
       fix: 'restore the committed .npmrc',
     })
+  }
   const normalize = (url: string | undefined) => url?.replace(/\/?$/, '/')
   if (resolved === undefined) findings.push({check: 'registry', status: 'warn', detail: 'could not ask npm for its registry'})
-  else if (PUBLIC_REGISTRY.test(resolved))
+  else if (PUBLIC_REGISTRY.test(resolved)) {
     findings.push({
       check: 'registry',
       status: 'fail',
       detail: `npm resolves ${resolved}; installs would contact the public registry`,
       fix: 'unset npm_config_registry / NPM_CONFIG_REGISTRY and any user .npmrc registry override',
     })
-  else if (configured && normalize(resolved) !== normalize(configured))
+  } else if (configured && normalize(resolved) !== normalize(configured)) {
     findings.push({
       check: 'registry',
       status: 'warn',
       detail: `npm resolves ${resolved}, not .npmrc's ${configured}`,
       fix: 'unset the overriding npm_config_registry',
     })
-  else if (configured) findings.push({check: 'registry', status: 'ok', detail: `npm resolves ${resolved}`})
+  } else if (configured) findings.push({check: 'registry', status: 'ok', detail: `npm resolves ${resolved}`})
   return findings
 }
 
@@ -83,22 +89,25 @@ export function buildFindings(root: string): Finding[] {
     if (state === 'unbuilt') unbuilt.push(unit.path)
     else if (state === 'stale' || state === 'incomplete') stale.push(unit.path)
   }
-  if (stale.length)
+  if (stale.length) {
     findings.push({
       check: 'workspace builds',
       status: 'warn',
       detail: `dist older than src in ${stale.join(', ')}`,
       fix: `${TOOLS} build ${stale[0]}, or npm run build`,
     })
-  if (unbuilt.length)
+  }
+  if (unbuilt.length) {
     findings.push({
       check: 'workspace builds',
       status: 'warn',
       detail: `${unbuilt.length} workspaces not built (${unbuilt.slice(0, 4).join(', ')}${unbuilt.length > 4 ? ', …' : ''})`,
       fix: 'npm run build',
     })
-  if (!stale.length && !unbuilt.length)
+  }
+  if (!stale.length && !unbuilt.length) {
     findings.push({check: 'workspace builds', status: 'ok', detail: 'every built workspace is newer than its src'})
+  }
   return findings
 }
 
@@ -147,9 +156,9 @@ export function doctorReport(root: string) {
   )
   const lock = join(root, 'node_modules/.package-lock.json')
   if (!existsSync(lock)) findings.push({check: 'dependencies', status: 'fail', detail: 'node_modules is not installed', fix: 'npm ci'})
-  else if (statSync(join(root, 'package-lock.json')).mtimeMs > statSync(lock).mtimeMs + 1000)
+  else if (statSync(join(root, 'package-lock.json')).mtimeMs > statSync(lock).mtimeMs + 1000) {
     findings.push({check: 'dependencies', status: 'warn', detail: 'package-lock.json changed since the last install', fix: 'npm ci'})
-  else findings.push({check: 'dependencies', status: 'ok', detail: 'node_modules matches package-lock.json; npm ci is not needed'})
+  } else findings.push({check: 'dependencies', status: 'ok', detail: 'node_modules matches package-lock.json; npm ci is not needed'})
   findings.push(...registryFindings(root, probe(root, ['npm', 'config', 'get', 'registry'])))
   findings.push(...buildFindings(root))
   const browsers = playwrightBrowsers(root)
@@ -196,7 +205,7 @@ export function doctorReport(root: string) {
     : findings.some(finding => finding.status === 'warn')
       ? 'warn'
       : 'ok'
-  const fixes = findings.filter(finding => finding.status === 'fail' && finding.fix).map(finding => finding.fix as string)
+  const fixes = findings.filter(finding => finding.status === 'fail' && finding.fix).map(finding => finding.fix!)
   return {status, findings, next: fixes.length ? fixes : [`${TOOLS} context`]}
 }
 

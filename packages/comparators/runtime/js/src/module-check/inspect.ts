@@ -18,7 +18,7 @@ export function inspectModule(bytes: Uint8Array): ModuleInfo {
     const listed = imports.slice(0, 5).join(', ')
     fail(
       'forbidden-import',
-      `comparator modules must have zero imports, but this module has ${imports.length}: ${listed}` + (imports.length > 5 ? ', …' : ''),
+      `comparator modules must have zero imports, but this module has ${imports.length}: ${listed}${imports.length > 5 ? ', …' : ''}`,
     )
   }
   return checkExports(sections)

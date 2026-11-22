@@ -7,13 +7,15 @@ import {extract, fail, nightly, outDir, root, run, to} from './shared.mjs'
 
 export async function rustApi() {
   const check = spawnSync('rustup', ['run', nightly, 'rustc', '--version'], {cwd: root, encoding: 'utf8'})
-  if (check.status !== 0)
+  if (check.status !== 0) {
     fail(
       `The Rust SDK references read rustdoc JSON, which needs ${nightly}. Install it with:\n  rustup toolchain install ${nightly} --profile minimal`,
     )
+  }
   const readme = await readFile(join(root, 'packages/extractors/rust-public-api/README.md'), 'utf8')
-  if (!readme.includes(nightly))
+  if (!readme.includes(nightly)) {
     fail(`packages/extractors/rust-public-api/README.md no longer uses ${nightly}; update the pin here to match`)
+  }
   const crates = [
     {name: 'projections-extractor-sdk', page: 'extractor-sdk', title: 'Extractor SDK API', guide: to('packages/extractors/sdk/README.md')},
   ]
@@ -38,8 +40,9 @@ export async function rustApi() {
     // Importing a generated rustdoc JSON file runs nothing, so it needs no trust.
     const extraction = extract('rust-public-api', {rustdocJson: file})
     const docs = new Map()
-    for (const item of Object.values(rustdoc.index))
+    for (const item of Object.values(rustdoc.index)) {
       if (item.docs && item.span && item.crate_id === 0) docs.set(`${item.span.filename}:${item.span.begin[0]}`, item.docs)
+    }
     const crateDocs = rustdoc.index[rustdoc.root]?.docs
     const skip = entity => entity.kind === 'impl' || entity.kind === 'crate'
     pages[`${outDir}/${crate.page}.md`] = apiPage({

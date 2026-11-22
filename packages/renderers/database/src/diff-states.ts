@@ -95,7 +95,7 @@ export function analyse(model: ComparisonModel): Analysis {
   }
   const owner = new Map<string, string>()
   const lines = new Map<string, ChangeLine[]>()
-  for (const [card, ids] of union.columns)
+  for (const [card, ids] of union.columns) {
     for (const id of ids) {
       owner.set(id, card)
       const row = rows.get(id)
@@ -104,6 +104,7 @@ export function analyse(model: ComparisonModel): Analysis {
       const found = kind === 'key' ? keyChanges(row) : columnChanges(row)
       if (found.length) lines.set(id, found)
     }
+  }
   for (const [column, marker] of union.markers) {
     if (!marker.key || !owner.has(column)) continue
     owner.set(marker.key, owner.get(column)!)

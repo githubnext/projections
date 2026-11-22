@@ -23,11 +23,12 @@ export function factPalette(
     const values = model.entities.map(row => colorValue((row.after ?? row.before)!, colorBy)).filter(value => value !== undefined)
     // A field naming programming languages (`Rust`, `TypeScript`) takes their GitHub colors, as everywhere else.
     const languages = colorBy !== 'kind' && values.length > 0 && values.every(value => languageCategory(value).language)
-    for (const value of values)
+    for (const value of values) {
       categories.push({
         category: languages ? {...languageCategory(value), key: `card:${value}`, label: value} : plainCategory(`card:${value}`, value),
         weight: 1,
       })
+    }
   }
   for (const kind of kinds) {
     const count = model.relationships.filter(row => (row.after ?? row.before)!.kind === kind).length
@@ -80,8 +81,9 @@ export function cardFacts(model: ComparisonModel, options: CardFactOptions): Car
   const swatch = (key: string) => palette?.entry(key)?.swatch ?? {}
   const cardItems: LegendItem[] = []
   const edgeItems: LegendItem[] = options.kinds.map(kind => ({label: kind, ...swatch(`edge:${kind}`), shape: 'line'}))
-  for (const entry of palette?.ranked ?? [])
+  for (const entry of palette?.ranked ?? []) {
     if (entry.category.key.startsWith('card:')) cardItems.push({label: entry.category.label, ...entry.swatch})
+  }
   // The title names what colors the cards (a field's name verbatim); relationship kinds are lines, which say what they are.
   const title = colorBy ? (field ?? 'Kind') : options.kinds.length ? 'Relationships' : 'Cards'
   // What the number on each card is has no swatch: it is said in words.
@@ -89,8 +91,9 @@ export function cardFacts(model: ComparisonModel, options: CardFactOptions): Car
   const items = [...cardItems, ...edgeItems, ...sizeItems]
   // Highlights first, then labels and badges on pills, then the quiet tags.
   const badgeParts: ((entity: Entity) => CardBadge[])[] = []
-  if (highlightField !== undefined)
+  if (highlightField !== undefined) {
     badgeParts.push(entity => badgeValues(entity, highlightField).map(text => ({text, tone: 'highlight' as const})))
+  }
   if (labelField !== undefined) badgeParts.push(entity => badgeValues(entity, labelField).map(text => ({text, prose: true})))
   if (badgeField !== undefined) badgeParts.push(entity => badgeValues(entity, badgeField))
   if (tagField !== undefined) badgeParts.push(entity => badgeValues(entity, tagField).map(text => ({text, tone: 'quiet' as const})))

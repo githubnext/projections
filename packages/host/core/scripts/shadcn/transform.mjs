@@ -23,8 +23,9 @@ function replaceIcons(text) {
     if (ts.isJsxSelfClosingElement(node) && node.tagName.getText(sourceFile) === 'IconPlaceholder') {
       const attributes = node.attributes.properties
       const lucide = attributes.find(attribute => ts.isJsxAttribute(attribute) && attribute.name.getText(sourceFile) === 'lucide')
-      if (!lucide?.initializer || !ts.isStringLiteral(lucide.initializer))
+      if (!lucide?.initializer || !ts.isStringLiteral(lucide.initializer)) {
         throw new Error(`IconPlaceholder without a lucide icon: ${node.getText(sourceFile)}`)
+      }
       const icon = lucide.initializer.text
       icons.add(icon)
       const kept = attributes
@@ -46,11 +47,12 @@ function rewriteImport(declaration, sourceFile) {
   const named = bindings && ts.isNamedImports(bindings) ? bindings.elements : []
   if (named.some(element => element.name.text === 'IconPlaceholder')) return []
   if (specifier === 'cn' || /(^|\/)lib\/utils$/.test(specifier)) return [`import {cn} from '../lib/utils.js'`]
-  if (specifier === 'radix-ui')
+  if (specifier === 'radix-ui') {
     return named.map(element => {
       const primitive = (element.propertyName ?? element.name).text
       return `import * as ${element.name.text} from '@radix-ui/react-${kebab(primitive)}'`
     })
+  }
   const sibling = /^@\/registry\/[\w-]+\/ui\/([\w-]+)$/.exec(specifier)
   const text = declaration.getText(sourceFile)
   return [sibling ? text.replace(declaration.moduleSpecifier.getText(sourceFile), `'./${sibling[1]}.js'`) : text]
@@ -83,8 +85,9 @@ async function formatted(text) {
 /** The registry item's single source file. */
 export function itemSource(item) {
   const files = item.files ?? []
-  if (files.length !== 1 || typeof files[0].content !== 'string')
+  if (files.length !== 1 || typeof files[0].content !== 'string') {
     throw new Error(`${item.name}: expected one file with content, got ${files.length}`)
+  }
   return files[0].content
 }
 

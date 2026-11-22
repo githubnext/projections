@@ -108,11 +108,12 @@ export class Sidebar implements vscode.Disposable {
   /** A model for each workspace folder (each holds the folder's backend while the side bar or a tab uses it). */
   private sync() {
     const folders = vscode.workspace.workspaceFolders ?? []
-    for (const [key, model] of this.models)
+    for (const [key, model] of this.models) {
       if (!folders.some(folder => folder.uri.toString() === key)) {
         model.dispose()
         this.models.delete(key)
       }
+    }
     for (const folder of folders) this.model(folder)
     this.changed()
   }
@@ -242,8 +243,9 @@ export class Sidebar implements vscode.Disposable {
       return models[0] ? this.folderRows(models[0]) : []
     }
     if (node.kind === 'folder') return this.folderRows(node.model)
-    if (node.kind === 'invalid')
+    if (node.kind === 'invalid') {
       return node.invalid.diagnostics.map((_, index) => ({kind: 'problem', model: node.model, invalid: node.invalid, index}))
+    }
     return []
   }
 

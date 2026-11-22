@@ -28,8 +28,9 @@ function rankCount(model: SchemaModel): number {
 function sharedRanks(models: readonly SchemaModel[]): SchemaModel[] {
   const tables = [...new Set(models.flatMap(model => model.tables))]
   const edges = new Map<string, {from: string; to: string}>()
-  for (const model of models)
+  for (const model of models) {
     for (const link of model.links) edges.set(`${link.principal}\u0000${link.dependent}`, {from: link.principal, to: link.dependent})
+  }
   const depth = layerDepths(tables, [...edges.values()])
   return models.map(model => {
     const used = [...new Set(model.tables.map(table => depth.get(table)!))].sort((a, b) => a - b)

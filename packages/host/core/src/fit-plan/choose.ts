@@ -35,7 +35,7 @@ export function chooseFitPlan<T>(choice: FitChoice<T>): number {
   const {plans, width, settled, need: needOf, ceiling, hysteresis = toolbarHysteresis, allowed} = choice
   const from = plans[settled]
   const spare = (to: T) => (typeof hysteresis === 'number' ? hysteresis : from === undefined ? 0 : hysteresis(from, to))
-  for (const keep of allowed ? [allowed, undefined] : [undefined])
+  for (const keep of allowed ? [allowed, undefined] : [undefined]) {
     for (const [index, plan] of plans.entries()) {
       if (keep && !keep(plan)) continue
       const need = needOf(plan)
@@ -44,5 +44,6 @@ export function chooseFitPlan<T>(choice: FitChoice<T>): number {
       if (limit !== undefined && width > limit + (index === settled ? spare(plan) : 0)) continue
       if (need <= width + 0.5 - (index < settled ? spare(plan) : 0)) return index
     }
+  }
   return plans.length - 1
 }

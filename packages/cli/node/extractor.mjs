@@ -197,7 +197,8 @@ var Request = class {
   }
   /** Whether the run is trusted (`--trust`). */
   get trusted() {
-    return this.capabilities?.trusted === true
+    const capabilities = this.toJSON().capabilities
+    return typeof capabilities === 'object' && capabilities !== null && 'trusted' in capabilities && capabilities.trusted === true
   }
 }
 /**

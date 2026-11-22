@@ -101,8 +101,9 @@ async function main(): Promise<void> {
       (typeof repository.project !== 'string' ||
         path.isAbsolute(repository.project) ||
         repository.project.split(/[\\/]/).some(part => part === '..')))
-  )
+  ) {
     throw new Error('Invalid extractor worker request')
+  }
   // The definition's project is the root the helper sees: its paths and inputs are relative to it.
   const root = repository.project ? path.join(repository.root, repository.project) : repository.root
   const request: ExtractorRequest = {

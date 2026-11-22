@@ -14,7 +14,7 @@ export type Check =
   | {mode: 'tests'; commands: Command[]}
   | {mode: 'none'; reason: string}
 
-export type Generator = {
+export interface Generator {
   name: string
   description: string
   /** Globs of the committed files it writes. */

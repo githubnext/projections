@@ -18,7 +18,10 @@ export interface ContextPaths {
  * probe, the probe's policy and the hook it attaches to.
  */
 export function followContext(model: ComparisonModel, changes: ReadonlySet<string>, paths: ContextPaths): Set<string> {
-  type Step = {relationship: string; entity: string}
+  interface Step {
+    relationship: string
+    entity: string
+  }
   const next = new Map<string, Step[]>()
   const link = (from: string | undefined, step: Step) => {
     if (from === undefined) return
@@ -27,7 +30,7 @@ export function followContext(model: ComparisonModel, changes: ReadonlySet<strin
     next.set(from, list)
   }
   const ends = new Map<string, string[]>()
-  for (const row of model.relationships)
+  for (const row of model.relationships) {
     for (const side of sides) {
       const item = row[side]
       if (!item) continue
@@ -38,6 +41,7 @@ export function followContext(model: ComparisonModel, changes: ReadonlySet<strin
       if (paths.incoming?.(item.kind)) link(to, {relationship: row.id, entity: from})
       if (paths.outgoing?.(item.kind)) link(from, {relationship: row.id, entity: to})
     }
+  }
   const start = [
     ...model.entities.filter(row => changes.has(row.id)).map(row => row.id),
     ...model.relationships.filter(row => changes.has(row.id)).flatMap(row => ends.get(row.id) ?? []),

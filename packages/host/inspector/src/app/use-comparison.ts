@@ -49,8 +49,8 @@ export function useComparison({
   customRendererBase: string | undefined
   rows: Rows
   definitionRevision: string
-  overrides: {[projection: string]: PartOverrides}
-  lists: {[ref: string]: InspectorDefinitionList}
+  overrides: Record<string, PartOverrides>
+  lists: Record<string, InspectorDefinitionList>
   authorized: boolean
   trusted: boolean
   choices: ExtractionChoice[]
@@ -59,11 +59,12 @@ export function useComparison({
 }) {
   const [computed, setComputed] = useState<InspectorComparison | undefined>()
   // Each projection's custom renderer bundle is reloaded (cache-busted by this version) when its files change.
-  const [rendererVersions, setRendererVersions] = useState<{[projection: string]: number}>({})
+  const [rendererVersions, setRendererVersions] = useState<Record<string, number>>({})
   const definitionOf = useCallback(
     (document: ExtractionDocument) => {
-      for (const state of Object.values(rows[document.projection.id] ?? {}))
+      for (const state of Object.values(rows[document.projection.id] ?? {})) {
         if (state.document?.digest === document.digest) return state.definition ?? definitionRevision
+      }
       return definitionRevision
     },
     [rows, definitionRevision],

@@ -46,9 +46,11 @@ function alignTrunks(ctx: RoutingContext, all: readonly Segment[]): void {
     if (trunk.length < 2) continue
     const middleOf = (segment: Segment) => turnOf(ctx, segment)!.middle
     const earliest = Math.min(...trunk.map(middleOf))
-    for (const segment of trunk)
-      if (Math.abs(middleOf(segment) - earliest) > 0.01 && Math.abs(middleOf(segment) - earliest) < trackSpacing)
+    for (const segment of trunk) {
+      if (Math.abs(middleOf(segment) - earliest) > 0.01 && Math.abs(middleOf(segment) - earliest) < trackSpacing) {
         moveRun(ctx, segment, ctx.along(segment.start) + earliest)
+      }
+    }
   }
 }
 
@@ -64,9 +66,11 @@ function overlappingClusters(runs: ReadonlyMap<Segment, Run>): Segment[][] {
   const members = [...runs.keys()]
   const cluster = new Map(members.map(segment => [segment, segment]))
   const root = (segment: Segment): Segment => (cluster.get(segment) === segment ? segment : root(cluster.get(segment)!))
-  for (let i = 0; i < members.length; i++)
-    for (let j = i + 1; j < members.length; j++)
+  for (let i = 0; i < members.length; i++) {
+    for (let j = i + 1; j < members.length; j++) {
       if (overlapping(members[i]!, members[j]!)) cluster.set(root(members[i]!), root(members[j]!))
+    }
+  }
   const clusters = new Map<Segment, Segment[]>()
   for (const segment of members) clusters.set(root(segment), [...(clusters.get(root(segment)) ?? []), segment])
   return [...clusters.values()]

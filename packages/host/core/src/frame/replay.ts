@@ -32,8 +32,9 @@ export interface FrameState {
  * capability, as a renderer that checks comparisons against an older schema rejects it.
  */
 export function initMessage(init: InitPayload, capabilities: RendererCapabilities | undefined, generation: number): HostMessage {
-  if (init.mode !== 'comparison' || capabilities?.context || !init.comparison.changes.some(change => change.context))
+  if (init.mode !== 'comparison' || capabilities?.context || !init.comparison.changes.some(change => change.context)) {
     return {type: 'init', generation, ...init}
+  }
   const changes = init.comparison.changes.map(({context: _context, ...change}) => change)
   return {type: 'init', generation, ...init, comparison: {...init.comparison, changes}}
 }

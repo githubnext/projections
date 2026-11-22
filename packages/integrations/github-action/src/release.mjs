@@ -20,8 +20,9 @@ export function releaseTag(version, actionRef) {
   const explicit = (version ?? '').trim()
   if (explicit && explicit !== 'latest') {
     const tag = explicit.startsWith('v') ? explicit : `v${explicit}`
-    if (!versionTag.test(tag) && !majorTag.test(tag))
+    if (!versionTag.test(tag) && !majorTag.test(tag)) {
       throw new Error(`version must be latest, a major version such as v0 or a release tag such as v0.1.0, not ${explicit}`)
+    }
     return tag
   }
   if (!explicit && (versionTag.test(actionRef ?? '') || majorTag.test(actionRef ?? ''))) return actionRef

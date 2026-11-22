@@ -6,7 +6,11 @@ import ts from 'typescript'
 export const sources = /\.(?:[cm]?[jt]sx?)$/
 export const skipped = /(?:^|\/)(?:node_modules|dist|fixtures|test-results|playwright-report|storybook-static)(?:\/|$)/
 
-export type Import = {specifier: string; names: string[] | '*'; typeOnly?: boolean}
+export interface Import {
+  specifier: string
+  names: string[] | '*'
+  typeOnly?: boolean
+}
 
 /** Every import and re-export of a module, with the names it takes ('*' for a namespace or side-effect-free use of all). */
 export function importsOf(path: string, text: string): Import[] {
@@ -94,11 +98,11 @@ export function exportedNames(root: string, path: string, seen = new Set<string>
         modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword,
       )
       if (isDefault) names.push('default')
-      else if (ts.isVariableStatement(statement))
+      else if (ts.isVariableStatement(statement)) {
         for (const declaration of statement.declarationList.declarations) {
           if (ts.isIdentifier(declaration.name)) names.push(declaration.name.text)
         }
-      else {
+      } else {
         const name = (statement as ts.DeclarationStatement).name
         if (name && ts.isIdentifier(name)) names.push(name.text)
       }

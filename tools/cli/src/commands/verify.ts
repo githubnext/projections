@@ -5,7 +5,7 @@ import {spawn} from 'node:child_process'
 import {join} from 'node:path'
 import {PrerequisiteError} from './install.ts'
 
-export type VerifyReport = {
+export interface VerifyReport {
   status: 'pass' | 'fail'
   verified: number
   seconds: number
@@ -14,7 +14,7 @@ export type VerifyReport = {
   next: string[]
 }
 
-type ScriptReport = {
+interface ScriptReport {
   status: 'pass' | 'fail' | 'prerequisite'
   proof?: {verified: number; seconds: number; output: string}
   mutation?: {caught: number; total: number; seconds: number}

@@ -11,8 +11,9 @@ import {harnessInspector} from '@githubnext/projections-renderer-harness/playwri
 test.use({deviceScaleFactor: 2})
 
 async function attachPictures(report: CornerReport, label: string) {
-  for (const [name, url] of Object.entries(report.pictures ?? {}))
+  for (const [name, url] of Object.entries(report.pictures ?? {})) {
     await test.info().attach(`${label} ${name}.png`, {body: Buffer.from(url.split(',')[1]!, 'base64'), contentType: 'image/png'})
+  }
 }
 
 const cases = [

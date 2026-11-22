@@ -18,7 +18,14 @@ async function settled(page: Page) {
   await pill(page).evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
 }
 
-type Box = {left: number; top: number; right: number; bottom: number; width: number; height: number}
+interface Box {
+  left: number
+  top: number
+  right: number
+  bottom: number
+  width: number
+  height: number
+}
 const box = (locator: Locator) =>
   locator.evaluate(element => {
     const {left, top, right, bottom, width, height} = element.getBoundingClientRect()
@@ -86,7 +93,7 @@ const pillColors = (page: Page) =>
 
 test.use({viewport: {width: 1280, height: 800}, deviceScaleFactor: 2})
 
-for (const theme of ['dark-modern', 'light-modern', 'dark-high-contrast', 'light-high-contrast', 'solarized-dark'] as ThemeId[])
+for (const theme of ['dark-modern', 'light-modern', 'dark-high-contrast', 'light-high-contrast', 'solarized-dark'] as ThemeId[]) {
   test(`${theme}: the notice floats over the stage's top centre, its edge and icon at least 3:1 against its fill`, async ({page}) => {
     await page.goto(story('projection-view--out-of-date', theme))
     await ready(page)
@@ -113,6 +120,7 @@ for (const theme of ['dark-modern', 'light-modern', 'dark-high-contrast', 'light
     expect.soft(ratios.icon, `icon ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(3)
     expect.soft(ratios.text, `text ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(4.5)
   })
+}
 
 test('a capital E sits optically centred in the notice and in its Refresh button', async ({page}) => {
   await page.goto(story('projection-view--out-of-date'))
@@ -166,7 +174,7 @@ test('the notice stays put while the table view scrolls under it', async ({page}
   expect(await box(pill(page))).toEqual(before)
 })
 
-for (const width of [320, 400])
+for (const width of [320, 400]) {
   test(`${width}px wide: the notice fits the stage on one line, the count truncating first and Refresh whole`, async ({page}) => {
     await page.setViewportSize({width, height: 700})
     await page.goto(story('projection-view--out-of-date'))
@@ -190,13 +198,14 @@ for (const width of [320, 400])
     await refresh.focus()
     await expect(refresh).toBeFocused()
   })
+}
 
 /**
  * With header bands over the panes (side by side and swipe), the pill covers no revision name: 12px below the bands
  * along the stage's top (the top pane's when side by side stacks them), still centred over the whole stage.
  */
-for (const mode of ['side-by-side', 'swipe'] as const)
-  for (const width of [1280, 360])
+for (const mode of ['side-by-side', 'swipe'] as const) {
+  for (const width of [1280, 360]) {
     test(`${mode}, ${width}px wide: the notice sits 12px below the pane header bands, over none of them`, async ({page}) => {
       await page.setViewportSize({width, height: 800})
       await page.goto(story('projection-view--out-of-date', 'dark-modern', `initialMode:${mode}`))
@@ -225,3 +234,5 @@ for (const mode of ['side-by-side', 'swipe'] as const)
       expect(Math.abs(where.pill.left + where.pill.width / 2 - (where.stage.left + where.stage.width / 2)), measured).toBeLessThanOrEqual(1)
       await expect(pill(page).getByRole('button', {name: 'Refresh'})).toBeVisible()
     })
+  }
+}

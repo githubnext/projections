@@ -27,8 +27,9 @@ export function useFocusRetention(
     const leave = () => {
       const left = focus.current
       queueMicrotask(() => {
-        if (focus.current === left && left?.element.isConnected && !element.contains(element.ownerDocument.activeElement))
+        if (focus.current === left && left?.element.isConnected && !element.contains(element.ownerDocument.activeElement)) {
           focus.current = null
+        }
       })
     }
     element.addEventListener('focusin', track)

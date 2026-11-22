@@ -68,9 +68,9 @@ export function InspectorApp({
   const [panelRequest, setPanelRequest] = useState<{tab: string; at: number}>()
   const [added, setAdded] = useState<string[]>([])
   const [newRef, setNewRef] = useState('')
-  const [marks, setMarks] = useState<{[projection: string]: Marks}>({})
+  const [marks, setMarks] = useState<Record<string, Marks>>({})
   // Session overrides of each projection's parts; the definition file stays the source of truth.
-  const [overrides, setOverrides] = useState<{[projection: string]: PartOverrides}>({})
+  const [overrides, setOverrides] = useState<Record<string, PartOverrides>>({})
   const [setupDismissed, setSetupDismissed] = useState(false)
   // The title bar's projection switcher, and the presented view's controller for the docked Details panel.
   const [switcher, setSwitcher] = useState(false)
@@ -473,12 +473,13 @@ export function InspectorApp({
       }}
     />
   )
-  if (bare)
+  if (bare) {
     return (
       <BareFrame colorMode={theme.colorMode} viewer={viewer} mode={mode} banner={banner} aside={aside}>
         {body}
       </BareFrame>
     )
+  }
   return (
     <InspectorWorkbench
       shell={{

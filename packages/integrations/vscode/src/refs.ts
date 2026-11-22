@@ -240,7 +240,7 @@ export async function defaultBranch(cwd: string): Promise<string> {
 }
 
 /** The commits refs name here (`working-tree` and unknown refs name none). */
-export async function resolveCommits(cwd: string, refs: string[]): Promise<Array<string | undefined>> {
+export async function resolveCommits(cwd: string, refs: string[]): Promise<(string | undefined)[]> {
   return Promise.all(
     refs.map(ref =>
       ref && ref !== 'working-tree'

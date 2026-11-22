@@ -120,9 +120,11 @@ export class RendererBuilds implements vscode.Disposable {
       for (const build of entry.builds.values()) build.terminal?.end(null)
       entry.builds.clear()
       this.changed.fire()
-      for (const definition of this.host.projections(folder))
-        if (this.host.hasTab(folder, definition.id) && rendererPackage(definition))
+      for (const definition of this.host.projections(folder)) {
+        if (this.host.hasTab(folder, definition.id) && rendererPackage(definition)) {
           void this.send(folder, definition.id, waiting.includes(definition.id) ? 'saved' : 'opened')
+        }
+      }
     })
     entry.stop = () => {
       unsubscribe?.()
@@ -235,9 +237,11 @@ export class RendererBuilds implements vscode.Disposable {
 
   /** A watcher stops once no tab of its projection is open. */
   private tabsChanged() {
-    for (const entry of this.folders.values())
-      for (const projection of [...entry.builds.keys()])
+    for (const entry of this.folders.values()) {
+      for (const projection of [...entry.builds.keys()]) {
         if (!this.host.hasTab(entry.folder, projection)) void this.send(entry.folder, projection, 'closed')
+      }
+    }
   }
 
   dispose() {

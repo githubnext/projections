@@ -60,11 +60,12 @@ export function analyze([neutralUrl, ringedUrl, origin, scale, lines, mode]: [
       const n = ts.map(t => at(neutral, t)),
         r = ts.map(t => at(ringed, t))
       const crossing = (values: number[], threshold: number, from = 0) => {
-        for (let index = Math.max(1, from); index < values.length; index++)
+        for (let index = Math.max(1, from); index < values.length; index++) {
           if (values[index - 1]! < threshold && values[index]! >= threshold) {
             const fraction = (threshold - values[index - 1]!) / (values[index]! - values[index - 1]! || 1)
             return {t: ts[index - 1]! + fraction * step, index}
           }
+        }
         return values[0]! >= threshold && from === 0 ? {t: 0, index: 0} : null
       }
       const change = n.map((color, index) => distance(color, r[index]!))
@@ -78,12 +79,13 @@ export function analyze([neutralUrl, ringedUrl, origin, scale, lines, mode]: [
         if (start) {
           ring = start.t
           ringEnd = line.length
-          for (let index = start.index + 1; index < change.length; index++)
+          for (let index = start.index + 1; index < change.length; index++) {
             if (change[index]! < threshold) {
               const fraction = (change[index - 1]! - threshold) / (change[index - 1]! - change[index]! || 1)
               ringEnd = ts[index - 1]! + fraction * step
               break
             }
+          }
         }
       }
       // The item's edge: where the neutral picture leaves the outside color, at half its first peak.

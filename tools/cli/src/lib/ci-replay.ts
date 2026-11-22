@@ -58,7 +58,13 @@ export const PRICES = {
   },
 }
 
-export type Priced = {runners: number; minutes: number; macos: number; checks: string[]; unpriced: string[]}
+export interface Priced {
+  runners: number
+  minutes: number
+  macos: number
+  checks: string[]
+  unpriced: string[]
+}
 
 /** JSON with object keys sorted, so two executions that differ only in key order compare equal. */
 function canonical(value: unknown): string {
@@ -79,27 +85,27 @@ export function price(checks: readonly Execution[]): Priced {
       const suites = check.suites ?? []
       for (const suite of suites) if (!(suite in PRICES.rest.suites)) priced.unpriced.push(`browser (rest): ${suite}`)
       minutes = PRICES.rest.setup + suites.reduce((sum, suite) => sum + (PRICES.rest.suites[suite] ?? 0), 0)
-    } else if (check.job === 'browser')
+    } else if (check.job === 'browser') {
       minutes = check.project
         ? (check.grepInvert ? PRICES.narrowed : PRICES.browser)[check.project]
         : PRICES.browser[check.suites?.[0] ?? '']
-    else minutes = PRICES.checks[check.check]
+    } else minutes = PRICES.checks[check.check]
     if (minutes === undefined) priced.unpriced.push(check.check)
     priced.runners += 1
     priced.minutes += minutes ?? 0
-    if (check.job === 'browser-macos' || check.with?.['os']?.startsWith('macos')) priced.macos += minutes ?? 0
+    if (check.job === 'browser-macos' || check.with?.os?.startsWith('macos')) priced.macos += minutes ?? 0
   }
   return priced
 }
 
 /** A planner: the rules and plan functions of one version of tools/cli/src/lib. */
-export type Planner = {
+export interface Planner {
   rules: CiRules
   plan: (change: Change) => CiPlan
   checks: (plan: CiPlan) => Execution[]
 }
 
-type PlannerModules = {
+interface PlannerModules {
   facts: {repoFacts: (root: string) => unknown}
   plan: {ciPlan: (facts: unknown, rules: CiRules, change: Change) => CiPlan; executions?: (plan: CiPlan, rules: CiRules) => Execution[]}
   rules: {loadCiRules: (root: string) => CiRules}
@@ -133,7 +139,11 @@ export function checkoutPlanner(root: string, ref: string): {directory: string; 
   return {directory, remove: () => rmSync(directory, {recursive: true, force: true})}
 }
 
-export type Commit = {sha: string; subject: string; paths: string[]}
+export interface Commit {
+  sha: string
+  subject: string
+  paths: string[]
+}
 
 /** The last `count` commits on `ref`'s first-parent history (squash-merged pull requests), with their changed files. */
 export function mergedCommits(root: string, ref: string, count: number): Commit[] {
@@ -145,20 +155,37 @@ export function mergedCommits(root: string, ref: string, count: number): Commit[
       const [sha = '', subject = ''] = line.split('\t')
       const diff = git(root, ['diff-tree', '--no-commit-id', '--name-only', '-r', '--no-renames', `${sha}^`, sha])
       // A shallow clone's last commit has no parent to compare with: replaying it as an empty change would be wrong.
-      if (diff === undefined)
+      if (diff === undefined) {
         throw new Error(`Can't diff ${sha.slice(0, 12)} with its parent; fetch more history (git fetch --deepen ${count})`)
+      }
       return {sha, subject, paths: diff.split('\n').filter(Boolean)}
     })
 }
 
-export type Difference = {name: string; added: string[]; removed: string[]; changedChecks: string[]; minutes: number}
+export interface Difference {
+  name: string
+  added: string[]
+  removed: string[]
+  changedChecks: string[]
+  minutes: number
+}
 
-export type Side = {runners: number; minutes: number; macos: number}
+export interface Side {
+  runners: number
+  minutes: number
+  macos: number
+}
 
 /** Files whose plans differ in the same way. */
-export type Kind = {count: number; added: string[]; removed: string[]; changed: string[]; examples: string[]}
+export interface Kind {
+  count: number
+  added: string[]
+  removed: string[]
+  changed: string[]
+  examples: string[]
+}
 
-export type Replay = {
+export interface Replay {
   commits: {before: Side; after: Side; selective: {before: Side; after: Side}; full: number; differences: Difference[]}
   files?: {count: number; changed: number; minutes: number; kinds: Kind[]}
   unpriced: string[]
@@ -178,7 +205,7 @@ function difference(name: string, before: Priced, after: Priced): Difference | u
   const names = (priced: Priced) => priced.checks.map(check => (JSON.parse(check) as Execution).check)
   const [a, b] = [names(before), names(after)]
   if (before.checks.join('\n') === after.checks.join('\n')) return undefined
-  const changedChecks = b.filter(check => a.includes(check) && !after.checks.includes(before.checks[a.indexOf(check)] as string))
+  const changedChecks = b.filter(check => a.includes(check) && !after.checks.includes(before.checks[a.indexOf(check)]!))
   return {
     name,
     added: b.filter(check => !a.includes(check)),

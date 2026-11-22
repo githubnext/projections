@@ -54,13 +54,14 @@ function arc([x0, y0], rx, ry, rotation, large, sweep, [x, y]) {
   if (x0 === x && y0 === y) return []
   rx = Math.abs(rx)
   ry = Math.abs(ry)
-  if (!rx || !ry)
+  if (!rx || !ry) {
     return [
       [
         [(x0 + x) / 2, (y0 + y) / 2],
         [x, y],
       ],
     ]
+  }
   const phi = (rotation * Math.PI) / 180
   const [cos, sin] = [Math.cos(phi), Math.sin(phi)]
   const dx = (x0 - x) / 2

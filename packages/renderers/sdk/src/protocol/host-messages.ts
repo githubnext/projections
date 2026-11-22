@@ -15,7 +15,7 @@ import {filter} from './filter-message.js'
 type Fields = Record<string, unknown>
 
 // The engine normalizes missing `data` to `{}`; renderers receive the same.
-function withData(extraction: {[key: string]: unknown}): {[key: string]: unknown} {
+function withData(extraction: Record<string, unknown>): Record<string, unknown> {
   const fill = (items: unknown) =>
     Array.isArray(items) ? items.map(item => (record(item) && item.data === undefined ? {...item, data: {}} : item)) : items
   return {...extraction, entities: fill(extraction.entities), relationships: fill(extraction.relationships)}
@@ -30,8 +30,9 @@ function init(message: Fields): HostMessage | undefined {
     typeof raw.id !== 'string' ||
     typeof raw.title !== 'string' ||
     typeof raw.renderer !== 'string'
-  )
+  ) {
     return undefined
+  }
   // Kinds are presentation hints: malformed entries are dropped rather than refusing the document.
   const {kinds: rawKinds, ...rest} = raw as Fields
   const kinds = parseKinds(rawKinds)
@@ -39,25 +40,28 @@ function init(message: Fields): HostMessage | undefined {
   if (message.generation !== undefined && !isGeneration(message.generation)) return undefined
   const {projections: _projections, channel: _channel, ...fields} = message
   const payload = {...fields, projection}
-  if (message.mode === 'extraction' && record(message.extraction))
+  if (message.mode === 'extraction' && record(message.extraction)) {
     return {...payload, extraction: withData(message.extraction)} as unknown as HostMessage
+  }
   if (
     message.mode === 'comparison' &&
     record(message.before) &&
     record(message.after) &&
     record(message.comparison) &&
     (message.comparisonMode === undefined || comparisonModes.includes(message.comparisonMode as ComparisonMode))
-  )
+  ) {
     return {...payload, before: withData(message.before), after: withData(message.after)} as unknown as HostMessage
+  }
   return undefined
 }
 
 /** The parser of each message a host may send, by type. */
-const parsers: {[type: string]: (message: Fields) => HostMessage | undefined} = {
+const parsers: Record<string, (message: Fields) => HostMessage | undefined> = {
   init,
   progress(message) {
-    if (!finite(message.progress) || !finite(message.highlighting) || (message.direction !== 1 && message.direction !== -1))
+    if (!finite(message.progress) || !finite(message.highlighting) || (message.direction !== 1 && message.direction !== -1)) {
       return undefined
+    }
     return {type: 'progress', progress: message.progress, highlighting: message.highlighting, direction: message.direction}
   },
   select(message) {

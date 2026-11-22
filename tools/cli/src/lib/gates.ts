@@ -13,7 +13,7 @@ import {join} from 'node:path'
 
 export {TOOLS}
 
-export type GateContext = {
+export interface GateContext {
   root: string
   units: readonly Unit[]
   affected?: Affected | undefined
@@ -25,7 +25,7 @@ export type GateContext = {
 /** Commands to run (`note` says what they leave out), a reason to skip, or a check done in process. */
 export type Plan = {commands: Command[]; note?: string} | {skip: string} | {internal: () => Problem[]}
 
-export type Gate = {
+export interface Gate {
   name: string
   description: string
   /** Gates that must pass first. */
@@ -46,14 +46,14 @@ function affectedWorkspaces(context: GateContext, script: string): Unit[] {
   if (!affected) return []
   const paths = inDependencyOrder(context.units, [...affected.changed, ...affected.dependants])
   return paths
-    .map(path => context.units.find(unit => unit.path === path) as Unit)
+    .map(path => context.units.find(unit => unit.path === path)!)
     .filter(unit => unit.kinds.includes('npm') && unit.scripts.includes(script))
 }
 
 function workspaceCommands(context: GateContext, script: string): Plan {
   const units = affectedWorkspaces(context, script)
   return units.length
-    ? {commands: units.map(unit => npm('run', script, '--workspace', unit.names[0] as string))}
+    ? {commands: units.map(unit => npm('run', script, '--workspace', unit.names[0]!))}
     : {skip: `no affected workspace has a ${script} script`}
 }
 
@@ -64,7 +64,7 @@ const affectedCrates = (context: GateContext, changedOnly = false) =>
         unit.kinds.includes('crate') &&
         [...(context.affected?.changed ?? []), ...(changedOnly ? [] : (context.affected?.dependants ?? []))].includes(unit.path),
     )
-    .map(unit => unit.names.at(-1) as string)
+    .map(unit => unit.names.at(-1)!)
 
 export const gates: Gate[] = [
   {
@@ -228,8 +228,9 @@ export const gates: Gate[] = [
         context.affected &&
         !context.affected.regenerate.some(generator => generator.name === 'reference-docs' || generator.name === 'builtin-docs') &&
         !(context.files ?? []).some(path => /^docs\/(reference|agents|builtins)\//.test(path))
-      )
+      ) {
         return {skip: 'no reference docs source changed'}
+      }
       const missing = unmet(context.root, ['nightly'])
       if (missing.length) return {skip: `needs the pinned nightly: ${missing[0]?.fix}`}
       if (!existsSync(join(context.root, cliBinary))) return {skip: 'needs the built CLI: npm run build'}
@@ -296,7 +297,7 @@ export const gates: Gate[] = [
   },
 ]
 
-export type GateResult = {
+export interface GateResult {
   gate: string
   status: 'pass' | 'fail' | 'skip'
   durationMs?: number

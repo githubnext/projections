@@ -158,13 +158,14 @@ export function useFitPlan<T>(
     m.needs.set(sign(plan), measured)
     m.shown = plan
     const later = pending?.(element)
-    if (later)
+    if (later) {
       void later.then(() => {
         if (memo.current.key !== key || memo.current.plans !== plans) return
         if (shift) memo.current.stale = true
         memo.current.fresh = true
         send({type: 'rendered'})
       })
+    }
     if (ceiling) m.ceilings.set(sign(plan), ceiling(element, plan))
     const lock = lockOf?.(element, plan)
     const needOf = (candidate: T) => (need ? need(candidate, m.needs.get(sign(candidate))) : m.needs.get(sign(candidate)))
@@ -190,9 +191,9 @@ export function useFitPlan<T>(
     }
     const known = needOf(plans[target]!) !== undefined
     const switches = known && target !== index ? ++m.steps : m.steps
-    if (target !== index && (!known || switches <= 4 || (!fits(plan) && switches <= 4 + plans.length)))
+    if (target !== index && (!known || switches <= 4 || (!fits(plan) && switches <= 4 + plans.length))) {
       send({type: 'tried', plan: plans[target]!})
-    else {
+    } else {
       m.regionWidths = new Map([...element.querySelectorAll(regions)].map(region => [region, region.getBoundingClientRect().width]))
       send({type: 'fitted', plan, locked: Boolean(lock)})
     }
@@ -217,8 +218,9 @@ export function useFitPlan<T>(
       const m = memo.current
       const regions = entries.filter(entry => entry.target !== element)
       if (latest.current.shift && regions.length) m.stale = true
-      if (regions.some(({target}) => Math.abs(target.getBoundingClientRect().width - (m.regionWidths.get(target) ?? NaN)) >= 0.5))
+      if (regions.some(({target}) => Math.abs(target.getBoundingClientRect().width - (m.regionWidths.get(target) ?? NaN)) >= 0.5)) {
         m.fresh = true
+      }
       send({type: 'observed'})
     })
     observer.current = resize

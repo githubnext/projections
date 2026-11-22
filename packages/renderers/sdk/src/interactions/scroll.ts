@@ -51,8 +51,9 @@ function scrollerOf(view: Window, element: Element): Element | null {
     if (
       (scrolls(style.overflowY) && parent.scrollHeight > parent.clientHeight + 1) ||
       (scrolls(style.overflowX) && parent.scrollWidth > parent.clientWidth + 1)
-    )
+    ) {
       return parent
+    }
   }
   return element === document.scrollingElement ? null : document.scrollingElement
 }

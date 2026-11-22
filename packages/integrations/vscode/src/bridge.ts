@@ -45,11 +45,12 @@ export function createBridge(
     runner.request({method, path, ...(body === undefined ? {} : {body})}, abort.signal).then(
       response => settle(id, abort, relayed(response, blob)),
       (error: unknown) => {
-        if (!abort.signal.aborted)
+        if (!abort.signal.aborted) {
           settle(id, abort, {
             type: 'failure',
             message: `The Projections backend failed: ${error instanceof Error ? error.message : String(error)}`,
           })
+        }
       },
     )
   }

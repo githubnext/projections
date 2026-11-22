@@ -129,5 +129,6 @@ function extract(files) {
   }
 }
 
-for (const [name, files] of Object.entries({before, after}))
+for (const [name, files] of Object.entries({before, after})) {
   writeFileSync(join(fixtures, `gallery-${name}.json`), `${JSON.stringify(extract(files), null, 2)}\n`)
+}

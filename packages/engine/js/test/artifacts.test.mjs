@@ -217,7 +217,7 @@ test('a comparison made by a custom comparator verifies only with its comparator
     try {
       await loadArtifact(encode(value), {engine, rules: supplied})
     } catch (error) {
-      return error.diagnostics[0].code + ' ' + error.diagnostics[0].path
+      return `${error.diagnostics[0].code} ${error.diagnostics[0].path}`
     }
     return 'verified'
   }

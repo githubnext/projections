@@ -101,8 +101,9 @@ export class StatusBar implements vscode.Disposable {
     if (!model || !shown) return this.apply()
     this.item.text = shown.text
     // A new tooltip only when it says something new, so an open hover doesn't flicker.
-    if (!(this.item.tooltip instanceof vscode.MarkdownString) || this.item.tooltip.value !== shown.tooltip)
+    if (!(this.item.tooltip instanceof vscode.MarkdownString) || this.item.tooltip.value !== shown.tooltip) {
       this.item.tooltip = new vscode.MarkdownString(shown.tooltip)
+    }
     this.item.accessibilityInformation = {label: shown.accessibility}
     this.item.command = {title: 'Choose What to Show…', command: 'projections.changePair', arguments: [model.folder.uri]}
     this.apply()

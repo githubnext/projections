@@ -1,7 +1,7 @@
 // The browser jobs of a CI plan (ci-plan.ts): the affected suites in the shards .github/ci-rules.json gives them, and,
 // for a change to some renderers alone, the renderer harness without the other renderers' tests.
 
-export type BrowserJob = {
+export interface BrowserJob {
   /** The job's name in the checks list, after `browser`. */
   name: string
   /** A workspace directory, or `rest`: every other affected browser suite in one job. */
@@ -28,7 +28,11 @@ export function rendererGrep(renderers: readonly string[]): string {
   return `(^|[\\s/])(${names})/browser/|\\.spec\\.ts (${names})[/:]`
 }
 
-type Narrow = {suite: string; kept: string[]; others: readonly string[]}
+interface Narrow {
+  suite: string
+  kept: string[]
+  others: readonly string[]
+}
 
 function shards(suite: string, projects: Record<string, number>, filter: Narrow | undefined): BrowserJob[] {
   return Object.entries(projects).flatMap(([project, count]) => {

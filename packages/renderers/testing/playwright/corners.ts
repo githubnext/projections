@@ -27,7 +27,7 @@ export interface CornerReport {
   corners: CornerMeasure[]
   failures: string[]
   /** With failures, each failing corner's picture (a PNG data URL), to attach. */
-  pictures?: {[corner: string]: string}
+  pictures?: Record<string, string>
 }
 
 /**
@@ -213,13 +213,15 @@ function cornerFailures(corner: CornerMeasure, scale: number, label: string): st
     if (ray.thickness !== null && sides.length) {
       const low = Math.min(...sides) - tolerance,
         high = Math.max(...sides) + tolerance
-      if (ray.thickness < low || ray.thickness > high)
+      if (ray.thickness < low || ray.thickness > high) {
         failures.push(
           `${at}: the border is ${ray.thickness.toFixed(2)} px around the curve but ${sides.map(side => side.toFixed(2)).join(' and ')} px on its sides`,
         )
+      }
     }
-    if (ray.foreign > stray)
+    if (ray.foreign > stray) {
       failures.push(`${at}: a colour that is neither the border nor what it edges shows in the border (a fill not concentric with it)`)
+    }
     if (ray.outside > stray) failures.push(`${at}: paint shows outside the curve`)
   }
   return failures

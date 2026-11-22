@@ -8,7 +8,7 @@ import {run, type Command} from '../../lib/repo.ts'
 import {availableMemory, gigabytes} from '../../lib/machine.ts'
 import {changeSet, UsageError} from './change-set.ts'
 
-export type TestOptions = {
+export interface TestOptions {
   target?: string | undefined
   affected?: boolean | undefined
   since?: string | undefined
@@ -19,9 +19,12 @@ export type TestOptions = {
   limit?: number | undefined
 }
 
-export type Run = {target: string; command: Command}
+export interface Run {
+  target: string
+  command: Command
+}
 
-export type TestRun = {
+export interface TestRun {
   target: string
   command: string
   status: 'pass' | 'fail'
@@ -63,7 +66,7 @@ const MAX_BROWSER_WORKERS = 2
  * (`node --test test/*.test.mjs`), and node reads options only before those, so an appended one is ignored.
  */
 export function nodeTestPattern(filter: string): string {
-  return [process.env['NODE_OPTIONS'], `--test-name-pattern="${filter.replace(/[\\"]/g, '\\$&')}"`].filter(Boolean).join(' ')
+  return [process.env.NODE_OPTIONS, `--test-name-pattern="${filter.replace(/[\\"]/g, '\\$&')}"`].filter(Boolean).join(' ')
 }
 
 /** The test commands for the options: workspace suites, Rust crates and, only when asked, one browser project. */
@@ -72,8 +75,9 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
   const notes: string[] = []
   const runs: Run[] = []
   const filter = options.filter
-  if (filter !== undefined && !options.target && !options.affected && options.since === undefined)
+  if (filter !== undefined && !options.target && !options.affected && options.since === undefined) {
     throw new UsageError('--filter needs a target or --affected', `${TOOLS} test packages/renderers/graph --filter layout`)
+  }
   let targets: Unit[] | undefined
   if (options.target) {
     const unit = findUnit(units, options.target)
@@ -82,7 +86,7 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
   } else if (options.affected || options.since !== undefined) {
     const set = changeSet(root, options.since)
     const paths = inDependencyOrder(units, [...set.affected.changed, ...set.affected.dependants])
-    targets = paths.map(path => units.find(unit => unit.path === path) as Unit)
+    targets = paths.map(path => units.find(unit => unit.path === path)!)
     if (!targets.length) notes.push('No workspace or crate changed.')
   }
   if (options.browser) {
@@ -100,7 +104,7 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
             'run',
             'test:browser',
             '--workspace',
-            unit.names[0] as string,
+            unit.names[0]!,
             ...(playwright
               ? ['--', '--project', project, '--workers', String(MAX_BROWSER_WORKERS), ...(filter === undefined ? [] : ['--grep', filter])]
               : []),
@@ -110,10 +114,11 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
       if (!playwright) notes.push(`${unit.path}'s browser suite isn't Playwright; it runs as its script defines.`)
     }
     const memory = availableMemory()
-    if (memory.available < 4 * 1024 ** 3)
+    if (memory.available < 4 * 1024 ** 3) {
       notes.push(
         `Only ${gigabytes(memory.available)} memory available; browser suites run one at a time with ${MAX_BROWSER_WORKERS} workers.`,
       )
+    }
     return {runs, notes}
   }
   if (!targets) {
@@ -123,23 +128,25 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
   }
   const crates: string[] = []
   for (const unit of targets) {
-    if (unit.kinds.includes('npm') && unit.scripts.includes('test'))
+    if (unit.kinds.includes('npm') && unit.scripts.includes('test')) {
       runs.push({
         target: unit.path,
         command: {
-          argv: ['npm', 'test', '--workspace', unit.names[0] as string],
+          argv: ['npm', 'test', '--workspace', unit.names[0]!],
           ...(filter === undefined ? {} : {env: {NODE_OPTIONS: nodeTestPattern(filter)}}),
         },
       })
+    }
     // A crate-only target, or any crate when Rust is asked for or affected.
     const rust = options.rust || !unit.kinds.includes('npm') || options.affected || options.since !== undefined
-    if (unit.kinds.includes('crate') && rust) crates.push(unit.names.at(-1) as string)
+    if (unit.kinds.includes('crate') && rust) crates.push(unit.names.at(-1)!)
   }
-  if (crates.length)
+  if (crates.length) {
     runs.push({
-      target: crates.length === 1 ? (crates[0] as string) : `${crates.length} crates`,
+      target: crates.length === 1 ? crates[0]! : `${crates.length} crates`,
       command: {argv: ['cargo', 'test', '--locked', ...crates.flatMap(crate => ['-p', crate]), ...(filter === undefined ? [] : [filter])]},
     })
+  }
   if (!runs.length && targets.length) notes.push('The selected targets have no test script; pass --rust for their crates.')
   return {runs, notes}
 }

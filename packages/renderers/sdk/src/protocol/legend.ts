@@ -25,11 +25,13 @@ function parseLegendItem(item: unknown): LegendItem | undefined {
 
 /** Validates a `legend` message's title and items, `fields` being the message's envelope fields besides them. */
 export function parseLegend(message: Record<string, unknown>, fields: readonly string[]): RendererLegend | undefined {
-  if (!keys(message, [...fields, 'title', 'items']) || !Array.isArray(message.items) || message.items.length > rendererLimits.legendItems)
+  if (!keys(message, [...fields, 'title', 'items']) || !Array.isArray(message.items) || message.items.length > rendererLimits.legendItems) {
     return undefined
+  }
   const {title} = message
-  if (title !== undefined && !(typeof title === 'string' && title.length > 0 && title.length <= rendererLimits.legendLabel))
+  if (title !== undefined && !(typeof title === 'string' && title.length > 0 && title.length <= rendererLimits.legendLabel)) {
     return undefined
+  }
   const items: LegendItem[] = []
   for (const value of message.items as unknown[]) {
     const item = parseLegendItem(value)

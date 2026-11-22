@@ -18,7 +18,11 @@ const offsets = (control: Locator) =>
     ...(element.classList.contains('pj-lens') ? [getComputedStyle(element, '::before').translate] : []),
   ])
 
-type Press = {control: Element | null; active: boolean; offsets: string[]}
+interface Press {
+  control: Element | null
+  active: boolean
+  offsets: string[]
+}
 /**
  * The next press, read as it lands: the control under the pointer, whether it is `:active`, and its content's offsets
  * then. A press can open a menu or move focus, after which WebKit may recompute what the pointer presses; a later read
@@ -31,11 +35,12 @@ const nextPress = (page: Page) =>
         const record = (event: Event) => {
           const control = (event.target as Element).closest(selector)
           const press: Press = {control, active: Boolean(control?.matches(':active')), offsets: []}
-          if (control)
+          if (control) {
             press.offsets = [
               ...[...control.children].filter(child => child.tagName !== 'INPUT').map(child => getComputedStyle(child).translate),
               ...(control.classList.contains('pj-lens') ? [getComputedStyle(control, '::before').translate] : []),
             ]
+          }
           ;(window as unknown as {press?: Press}).press = press
         }
         delete (window as unknown as {press?: Press}).press
@@ -84,7 +89,7 @@ async function pressAll(page: Page, expected: string) {
 for (const [view, query] of [
   ['renderer', 'before=v1&after=v3'],
   ['table', 'before=v1&after=v3&view=table'],
-] as const)
+] as const) {
   test(`every ${view} toolbar control moves its content, never its box, while pressed`, async ({page}) => {
     await page.setViewportSize({width: 1600, height: 900})
     await page.goto(explorer(query))
@@ -95,9 +100,11 @@ for (const [view, query] of [
     if (view === 'renderer') expect(seen).toEqual(expect.arrayContaining(['Zoom out', 'Fit to view', 'Zoom in', 'Swap', 'Animated']))
     else expect(seen.some(name => name.startsWith('Showing table'))).toBe(true)
     // At rest nothing is offset.
-    for (const control of await page.getByRole('group', {name: 'Projection toolbar'}).locator(pressable).filter({visible: true}).all())
+    for (const control of await page.getByRole('group', {name: 'Projection toolbar'}).locator(pressable).filter({visible: true}).all()) {
       expect(new Set(await offsets(control))).not.toContain('0px 1px')
+    }
   })
+}
 
 test('a menu trigger springs back on release, even while its menu is open; reduced motion presses nothing', async ({page}) => {
   await page.setViewportSize({width: 1600, height: 900})

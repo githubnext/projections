@@ -83,7 +83,7 @@ function stagger(ctx: RoutingContext, a: Segment, b: Segment): boolean {
   // Or their trunks change places, so the routes leaving each port the same way still turn together.
   if (a.band && b.band && swapTrunks(ctx, a, b) && fixed()) return true
   // Or one gives up turning with its card's trunk, for a later gap; or, last, follows ELK's course around the cards.
-  for (const flag of ['late', 'around'] as const)
+  for (const flag of ['late', 'around'] as const) {
     for (const segment of [a, b]) {
       if (segment[flag]) continue
       segment[flag] = true
@@ -92,6 +92,7 @@ function stagger(ctx: RoutingContext, a: Segment, b: Segment): boolean {
       delete segment[flag]
       build(ctx, segment)
     }
+  }
   return false
 }
 

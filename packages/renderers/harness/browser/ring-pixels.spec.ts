@@ -15,8 +15,9 @@ import {scenarios} from './scenarios.js'
 /** Attaches a failing report's neutral and ringed pictures, to see what each line crossed. */
 async function attachPictures(report: RingPixelReport, label: string) {
   if (!report.pictures) return
-  for (const [name, url] of Object.entries(report.pictures))
+  for (const [name, url] of Object.entries(report.pictures)) {
     await test.info().attach(`${label} ${name}.png`, {body: Buffer.from(url.split(',')[1]!, 'base64'), contentType: 'image/png'})
+  }
 }
 
 const perScenario = 6
@@ -37,12 +38,13 @@ for (const directory of [...new Set(scenarios.map(item => item.directory))]) {
         for (const state of ['selected', 'focus'] as const) {
           const show = async () => {
             if (state === 'selected') await stage.select(id)
-            else
+            else {
               await element.evaluate(item => {
                 const focusable = '[tabindex]:not([tabindex="-1"]), button:not([disabled]), a[href], input, select, textarea, summary'
                 const target = (item.matches(focusable) ? item : item.querySelector(focusable)) as HTMLElement | null
                 target?.focus({preventScroll: true, focusVisible: true} as FocusOptions)
               })
+            }
             await stage.measure('settle')
           }
           const hide = async () => {
@@ -93,7 +95,7 @@ for (const directory of [...new Set(scenarios.map(item => item.directory))]) {
 for (const {scenario, diff} of [
   {scenario: 'dependency-injection/spring-orders', diff: false},
   {scenario: 'graph/terraform-database-replacement', diff: true},
-])
+]) {
   test(`${scenario}${diff ? ' (diff)' : ''}: rings stay on their items through scroll and zoom`, async ({page}) => {
     test.slow()
     const stage = await openStage(page, harnessInspector(), {scenario, progress: 1, ...(diff ? {comparisonMode: 'diff' as const} : {})})
@@ -157,3 +159,4 @@ for (const {scenario, diff} of [
     expect(measuredAt).toContain('scrolled into view')
     expect(measuredAt.some(where => where.startsWith('after zoom'))).toBe(true)
   })
+}

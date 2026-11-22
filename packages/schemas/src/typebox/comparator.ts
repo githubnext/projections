@@ -73,15 +73,15 @@ export interface ComparatorFile {
   format: 'projections.comparator'
   version: 0
   description?: string
-  defaults?: {[option: string]: unknown}
+  defaults?: Record<string, unknown>
   checks?: ComparatorCheck[]
   variables?: ComparatorVariable[]
-  functions?: {[name: string]: ComparatorFunction}
+  functions?: Record<string, ComparatorFunction>
   identity?: ComparatorIdentityPass[]
   classify?: {where?: string; summary?: string; annotation?: string; variables?: ComparatorVariable[]}
   context?: ComparatorContextRule[]
   steps?: ComparatorSteps
-  metadata?: {values: {[key: string]: string}; variables?: ComparatorVariable[]}
+  metadata?: {values: Record<string, string>; variables?: ComparatorVariable[]}
 }
 
 /**

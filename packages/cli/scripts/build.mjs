@@ -37,8 +37,9 @@ const executable = `projections${windows ? '.exe' : ''}`
 const output = target ? path.join(cli, 'dist', target) : path.join(cli, 'dist')
 await mkdir(output, {recursive: true})
 // Layouts of earlier builds shipped helpers and notices beside the executable.
-for (const stale of ['collectors', 'LICENSE', 'THIRD_PARTY_NOTICES.txt', 'platform.json'])
+for (const stale of ['collectors', 'LICENSE', 'THIRD_PARTY_NOTICES.txt', 'platform.json']) {
   await rm(path.join(cli, 'dist', stale), {recursive: true, force: true})
+}
 // Replace rather than overwrite, so an already running executable keeps its own file.
 await rm(path.join(output, executable), {force: true})
 await copyFile(path.join(root, 'target', ...(target ? [target] : []), 'release', executable), path.join(output, executable))

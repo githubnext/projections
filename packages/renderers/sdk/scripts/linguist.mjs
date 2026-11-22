@@ -143,7 +143,7 @@ const rows = names.map(name => {
 // it at all, in `common` order then by name.
 const index = new Map(rows.map((row, position) => [row[0], position]))
 const extensions = {}
-for (const primary of [true, false])
+for (const primary of [true, false]) {
   for (const name of names) {
     const list = document[name].extensions ?? []
     for (const [position, extension] of list.entries()) {
@@ -152,9 +152,11 @@ for (const primary of [true, false])
       if (!(key in extensions)) extensions[key] = index.get(name)
     }
   }
+}
 const filenames = {}
-for (const name of names)
+for (const name of names) {
   for (const filename of document[name].filenames ?? []) if (!(filename in filenames)) filenames[filename] = index.get(name)
+}
 const aliases = {}
 // Aliases name languages in other tools' terms (`sh`, `bash`, `golang`); data and prose languages keep only their name.
 for (const name of names) {

@@ -56,9 +56,9 @@ export function variedValue(item: unknown, path: string): unknown {
   let value: unknown = item
   for (const segment of pointerSegments(path)) {
     if (Array.isArray(value)) value = /^(0|[1-9][0-9]*)$/.test(segment) ? value[Number(segment)] : undefined
-    else if (value !== null && typeof value === 'object' && Object.hasOwn(value, segment))
+    else if (value !== null && typeof value === 'object' && Object.hasOwn(value, segment)) {
       value = (value as Record<string, unknown>)[segment]
-    else return undefined
+    } else return undefined
   }
   return value
 }

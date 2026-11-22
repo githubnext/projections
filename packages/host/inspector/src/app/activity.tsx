@@ -62,7 +62,7 @@ export function inspectorActivity({
   marked: Marks
   live: boolean
   definitionRevision: string
-  projectionRows: {[ref: string]: RowState}
+  projectionRows: Record<string, RowState>
   replay: {kinds: string[]; complete: boolean; at: number} | undefined
   definition: Definition | undefined
   policy: InspectorPolicy
@@ -72,10 +72,11 @@ export function inspectorActivity({
     return row?.status === 'done' && row.started !== undefined ? row.started + (row.ms ?? 0) : undefined
   }
   const code = (value: string) => <code className="pj:font-mono">{value}</code>
-  if (!api)
+  if (!api) {
     return artifact
       ? {kind: 'artifact', message: `Showing a saved artifact: ${artifact.name}`, plain: `Showing a saved artifact: ${artifact.name}`}
       : {kind: 'offline', message: 'Offline inspection · open a saved artifact', plain: 'Offline inspection · open a saved artifact'}
+  }
   if (loading && !definitions) return {kind: 'reading', message: 'Reading repository…', plain: 'Reading repository…'}
   if (connected === false) return {kind: 'unavailable', message: 'Runner unavailable', plain: 'Runner unavailable'}
   if (showing === 'artifact' && artifact) {

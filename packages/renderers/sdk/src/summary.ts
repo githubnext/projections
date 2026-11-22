@@ -37,7 +37,7 @@ export interface SummaryCount {
  * first, in its order; as a function (given the kind and its collection), `undefined` keeps the host's words.
  */
 export type SummaryNouns =
-  | {readonly [kind: string]: SummaryNoun | false}
+  | Readonly<Record<string, SummaryNoun | false>>
   | ((kind: string, collection: 'entities' | 'relationships') => SummaryNoun | false | undefined)
 
 type Collection = 'entities' | 'relationships'
@@ -57,8 +57,9 @@ export function summaryCounts(subject: SummarySubject): SummaryCount[] {
     return found
   }
   const total = (extraction: Extraction) => {
-    for (const collection of ['entities', 'relationships'] as const)
+    for (const collection of ['entities', 'relationships'] as const) {
       for (const item of extraction[collection] as (Entity | Relationship)[]) entry(item.kind, collection).count++
+    }
   }
   if (subject.mode === 'extraction') total(subject.extraction)
   else {
@@ -69,8 +70,9 @@ export function summaryCounts(subject: SummarySubject): SummaryCount[] {
       relationships: new Map<string, Entity | Relationship>(extraction.relationships.map(item => [item.id, item])),
     })
     const sides = {before: index(before), after: index(after)}
-    for (const collection of ['entities', 'relationships'] as const)
+    for (const collection of ['entities', 'relationships'] as const) {
       for (const item of before[collection] as (Entity | Relationship)[]) entry(item.kind, collection)
+    }
     for (const change of comparison.changes) {
       if (change.status === 'unchanged') continue
       const side = change.status === 'removed' || change.after[0] === undefined ? 'before' : 'after'

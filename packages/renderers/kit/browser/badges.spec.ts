@@ -186,7 +186,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
         // The cut's darkest pixel in each column and row: an edge pixel's coverage places the edge within it.
         const columns = new Map<number, number>()
         const rows = new Map<number, number>()
-        for (let row = Math.floor(top); row < Math.ceil(top + size * scale); row++)
+        for (let row = Math.floor(top); row < Math.ceil(top + size * scale); row++) {
           for (let column = Math.floor(left); column < Math.ceil(left + size * scale); column++) {
             if (Math.hypot(column + 0.5 - centre.x, row + 0.5 - centre.y) >= inner) continue
             const cut = cutAt(column, row)
@@ -196,6 +196,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
             columns.set(column, Math.max(columns.get(column) ?? 0, cut))
             rows.set(row, Math.max(rows.get(row) ?? 0, cut))
           }
+        }
         const middle = (profile: Map<number, number>) => {
           const inked = [...profile].filter(([, cut]) => cut > 0.05).sort(([a], [b]) => a - b)
           if (!inked.length) return NaN
@@ -218,7 +219,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
   )
 }
 
-for (const density of densities)
+for (const density of densities) {
   test(`badge glyphs' boxes are centred on their discs and drawn at one stroke, in pixels (${density}x)`, async ({browser}, info) => {
     test.skip(info.project.name.endsWith('-mobile'), 'the desktop projects cover both engines; each density is set here')
     const context = await browser.newContext({deviceScaleFactor: density, viewport: {width: 480, height: 160}})
@@ -234,35 +235,40 @@ for (const density of densities)
     const failures: string[] = []
     for (const cell of measured) {
       const label = `${cell.kind} ${cell.name} at ${cell.size}px`
-      if (!ringCentred.has(cell.name) && !(Math.hypot(cell.geometry.x, cell.geometry.y) <= 0.05))
+      if (!ringCentred.has(cell.name) && !(Math.hypot(cell.geometry.x, cell.geometry.y) <= 0.05)) {
         failures.push(
           `${label}: drawn with its ink's box centred ${cell.geometry.x.toFixed(2)}, ${cell.geometry.y.toFixed(2)} units from the disc's centre`,
         )
+      }
       const expected = {x: (cell.geometry.x * cell.size) / box, y: (cell.geometry.y * cell.size) / box}
       const off = Math.hypot(cell.centre.x - expected.x, cell.centre.y - expected.y)
-      if (!(off <= 0.25))
+      if (!(off <= 0.25)) {
         failures.push(
           `${label}: cut's box centred ${cell.centre.x.toFixed(2)}, ${cell.centre.y.toFixed(2)} CSS px from the disc's centre, drawn at ${expected.x.toFixed(2)}, ${expected.y.toFixed(2)}`,
         )
+      }
     }
-    for (const kind of ['icon', 'svg-icon'])
+    for (const kind of ['icon', 'svg-icon']) {
       for (const size of sizes) {
         const group = measured.filter(cell => cell.kind === kind && cell.size === size)
         const strokes = group.map(cell => cell.stroke)
         const spread = Math.max(...strokes) - Math.min(...strokes)
         // Within a device pixel at 1x, where Chromium's mask rasterisation moves a glyph's cut by up to a few tenths of a
         // pixel either way with how its strokes meet the pixel grid; within 0.2 CSS px at 2x.
-        if (!(spread <= (density === 1 ? 0.35 : 0.2)))
+        if (!(spread <= (density === 1 ? 0.35 : 0.2))) {
           failures.push(
             `${kind} at ${size}px: glyphs cut at strokes ${spread.toFixed(2)} CSS px apart (${group.map(cell => `${cell.name} ${cell.stroke.toFixed(2)}`).join(', ')})`,
           )
+        }
         // As heavy as drawn: a CSS mask cuts each glyph at its stroke (an SVG mask's images are resampled, a little heavier in Chromium).
         const drawn = (glyphs.added!.stroke / box) * size
         const median = [...strokes].sort((a, b) => a - b)[Math.floor(strokes.length / 2)]!
-        if (!(median >= drawn * 0.9 && median <= drawn * (kind === 'icon' ? 1.1 : 1.25)))
+        if (!(median >= drawn * 0.9 && median <= drawn * (kind === 'icon' ? 1.1 : 1.25))) {
           failures.push(`${kind} at ${size}px: glyphs cut at a stroke of ${median.toFixed(2)} CSS px, drawn at ${drawn.toFixed(2)}`)
+        }
       }
-    if (process.env.BADGE_REPORT)
+    }
+    if (process.env.BADGE_REPORT) {
       console.log(
         info.project.name,
         density,
@@ -273,5 +279,7 @@ for (const density of densities)
           ),
         ),
       )
+    }
     expect(failures).toEqual([])
   })
+}

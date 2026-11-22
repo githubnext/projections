@@ -73,7 +73,7 @@ const read = async (frame: Frame): Promise<Reading> =>
         top = Math.max(0, rect.top + scroller.clientTop)
       const right = Math.min(innerWidth, rect.left + scroller.clientLeft + scroller.clientWidth)
       const bottom = Math.min(innerHeight, rect.top + scroller.clientTop + scroller.clientHeight)
-      const entities = [...document.querySelectorAll<Element>('[data-entity-id]')].filter(element => {
+      const entities = [...document.querySelectorAll('[data-entity-id]')].filter(element => {
         const box = element.getBoundingClientRect()
         return (box.width > 0 || box.height > 0) && getComputedStyle(element).visibility !== 'hidden'
       })
@@ -125,8 +125,9 @@ async function settled(page: Page) {
     const frames = await visibleFrames(page)
     const readings = await Promise.all(frames.map(({frame}) => read(frame)))
     const key = JSON.stringify(readings)
-    if (readings.length && readings.every(reading => reading.entities > 0 && reading.scale !== '0') && key === previous)
+    if (readings.length && readings.every(reading => reading.entities > 0 && reading.scale !== '0') && key === previous) {
       return {frames, readings}
+    }
     previous = key
     await page.waitForTimeout(250)
   }
@@ -151,9 +152,9 @@ async function expectAllInView(page: Page, label: string, panes: number, floored
   return readings
 }
 
-for (const story of stories)
-  for (const size of sizes)
-    for (const mode of modes)
+for (const story of stories) {
+  for (const size of sizes) {
+    for (const mode of modes) {
       test(`${story.name} at ${size.width}px, ${mode.toLowerCase()}: opens fitted or at the text floor, Fit and the least zoom show everything`, async ({
         page,
         theme,
@@ -193,3 +194,6 @@ for (const story of stories)
         const least = await expectAllInView(page, 'at the least zoom', panes)
         expect(least.map(reading => reading.scale)).toEqual(fitted.map(reading => reading.scale))
       })
+    }
+  }
+}

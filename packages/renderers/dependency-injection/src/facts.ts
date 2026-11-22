@@ -29,7 +29,7 @@ export function diFacts(model: ComparisonModel<DependencyInjectionExtraction>): 
   })
   const facts: SummaryFactItem[] = []
   const fact = (id: string, units: typeof both, noun: readonly [string, string], icon: IconName) => {
-    if (units.length)
+    if (units.length) {
       facts.push({
         type: 'fact',
         id,
@@ -38,6 +38,7 @@ export function diFacts(model: ComparisonModel<DependencyInjectionExtraction>): 
         noun: {singular: noun[0], plural: noun[1]},
         ids: [...new Set(units.flatMap(unit => unit.parts))],
       })
+    }
   }
   for (const facet of Object.keys(facetNouns) as DiFacet[]) {
     const [singular, plural] = facetNouns[facet]
@@ -51,12 +52,13 @@ export function diFacts(model: ComparisonModel<DependencyInjectionExtraction>): 
   const kinds = [...new Set(both.map(unit => unitKind(unit.unit)))].sort((a, b) =>
     a === 'service' ? -1 : b === 'service' ? 1 : compareIds(a, b),
   )
-  for (const kind of kinds)
+  for (const kind of kinds) {
     fact(
       `${kind}-renamed`,
       both.filter(unit => unit.renamed && unitKind(unit.unit) === kind),
       [`${kind} renamed`, `${pluralOf(kind)} renamed`],
       'renamed',
     )
+  }
   return facts
 }

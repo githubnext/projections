@@ -41,7 +41,7 @@ export const schemaMetrics = {
 /** One state of the schema, in presented row IDs: an endpoint, or the state after some comparison steps. */
 export interface SchemaState {
   entities: ReadonlyMap<string, Entity>
-  relationships: readonly {id: string; kind: string; from: string; to: string; data?: {[key: string]: Json} | undefined}[]
+  relationships: readonly {id: string; kind: string; from: string; to: string; data?: Record<string, Json> | undefined}[]
 }
 
 /**

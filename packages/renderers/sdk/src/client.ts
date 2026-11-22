@@ -216,8 +216,9 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
     rendered: (progress, init) =>
       post({type: 'rendered', progress: Math.min(1, Math.max(0, progress)), ...echoedGeneration(messages.get('init'), init)}),
     select(id, path) {
-      if (path !== undefined && !isPropertyPath(path))
+      if (path !== undefined && !isPropertyPath(path)) {
         throw new RendererConnectionError('A selection path must be an RFC 6901 JSON pointer')
+      }
       rings?.controller.set({selected: id})
       post({type: 'select', id: id ? id.slice(0, rendererLimits.textLength) : null, ...(id && path !== undefined ? {path} : {})})
     },
@@ -226,14 +227,16 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
     },
     legend(legend) {
       const message = {projections: rendererProtocolVersion, channel, type: 'legend' as const, ...legend}
-      if (!parseRendererMessage(message, channel))
+      if (!parseRendererMessage(message, channel)) {
         throw new RendererConnectionError('The legend is invalid; see LegendItem and rendererLimits')
+      }
       post({type: 'legend', ...legend})
     },
     summary(summary) {
       const message = {projections: rendererProtocolVersion, channel, type: 'summary' as const, ...summary}
-      if (!parseRendererMessage(message, channel))
+      if (!parseRendererMessage(message, channel)) {
         throw new RendererConnectionError('The summary is invalid; see SummaryItem and rendererLimits')
+      }
       post({type: 'summary', items: summary.items})
     },
     height: px => post({type: 'height', px: clamp(px)}),

@@ -31,8 +31,9 @@ function fakeRunner(answers) {
     request(request, signal) {
       seen.push(request)
       const answer = answers[request.path]
-      if (answer === 'hang')
+      if (answer === 'hang') {
         return new Promise((_, reject) => signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError'))))
+      }
       if (answer instanceof Error) return Promise.reject(answer)
       return Promise.resolve({size: JSON.stringify(answer?.body ?? null).length, ...answer})
     },
@@ -396,8 +397,9 @@ test('custom renderer files are fetched from the backend for the webview; nothin
     base64: Buffer.from('<p>map</p>').toString('base64'),
   })
   assert.match((await bridge.rendererFile('/custom-renderers/cap/working-tree/x/index.html')).error, /unavailable \(403\).*trust/)
-  for (const path of ['/api/definitions', '/custom-renderers/../api/x', '/custom-renderers/a#b', 'http://x/custom-renderers/a', 7])
+  for (const path of ['/api/definitions', '/custom-renderers/../api/x', '/custom-renderers/a#b', 'http://x/custom-renderers/a', 7]) {
     assert.equal((await bridge.rendererFile(path)).error, 'Not a custom renderer path', String(path))
+  }
   assert.equal(customRendererPath('/custom-renderers/a/b/index.html'), true)
   assert.equal(runner.seen.length, 2)
 })

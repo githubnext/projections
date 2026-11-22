@@ -48,12 +48,13 @@ export function FieldRow({
       <ValueChange before={change.before} after={change.after} />
     </>
   )
-  if (!property || !item)
+  if (!property || !item) {
     return (
       <li data-field={change.key}>
         <div className="phv-field">{content}</div>
       </li>
     )
+  }
   const selected = p.selection?.rowId === row.id && p.selection.target !== undefined && sameTarget(p.selection.target, property)
   const count = marks
     .filter(annotation => sameTarget(annotation.target, property))

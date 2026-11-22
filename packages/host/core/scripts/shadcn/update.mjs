@@ -56,20 +56,23 @@ const conflictLine = text => text.split('\n').findIndex(line => line.startsWith(
 async function resolveRelease(manifest, adding) {
   const target = normalizeVersion(options.version ?? (adding ? manifest.version : await latestRelease()))
   const provenance = await changesSince(target).catch(error => {
-    if (error instanceof RegistryError && [404, 422].includes(error.status) && options.version)
+    if (error instanceof RegistryError && [404, 422].includes(error.status) && options.version) {
       throw new UsageError(`No release ${tagOf(target)} in ${repository}`, 'Pass a released version, such as 4.23.0')
+    }
     throw error
   })
   const moved = provenance.changes.length > 0
   const summary = moved
-    ? `the registry (${repository} main@${provenance.head.slice(0, 7)}) has moved past ${tagOf(target)}:\n` +
-      provenance.changes.map(change => `  ${change.sha.slice(0, 7)} ${change.message} (${change.path})`).join('\n')
+    ? `the registry (${repository} main@${provenance.head.slice(0, 7)}) has moved past ${tagOf(target)}:\n${provenance.changes
+        .map(change => `  ${change.sha.slice(0, 7)} ${change.message} (${change.path})`)
+        .join('\n')}`
     : `the registry (${repository} main@${provenance.head.slice(0, 7)}) builds ${tagOf(target)}: no build input changed since the tag`
-  if (moved && !options.unreleased && !options.check)
+  if (moved && !options.unreleased && !options.check) {
     throw new UsageError(
       `${summary}\nIts items are no longer ${tagOf(target)}.`,
       `Re-run with --unreleased to take them as ${target}+<main sha>, or pass an older --version`,
     )
+  }
   const version = moved && options.unreleased ? `${target}+${provenance.head.slice(0, 7)}` : target
   say(`shadcn/ui ${manifest.style}: ours ${tagOf(manifest.version)}, upstream ${tagOf(version)}\n${summary}\n`)
   return {
@@ -113,12 +116,13 @@ async function update(manifest, release, names, items) {
   for (const {name, status, conflicts} of results) say(`  ${name.padEnd(16)} ${status === 'conflict' ? `conflict (${conflicts})` : status}`)
   const conflicted = results.filter(result => result.status === 'conflict')
   if (!dryRun) {
-    if (release.version !== manifest.version)
+    if (release.version !== manifest.version) {
       for (const doc of versionedDocs) {
         const url = new URL(doc, components)
         const text = await readFile(url, 'utf8')
         await writeFile(url, text.replaceAll(tagOf(manifest.version), tagOf(release.version)))
       }
+    }
     const {version, tag, commit, registryCommit} = release
     await writeFile(manifestUrl, `${JSON.stringify({...manifest, version, tag, commit, registryCommit}, null, 2)}\n`)
   }
@@ -141,8 +145,9 @@ async function main() {
   const names = positionals.length ? positionals : tracked
   const release = await resolveRelease(manifest, positionals.length > 0 && names.every(name => !tracked.includes(name)))
   const writes = !options.check && !options['dry-run']
-  if (writes && release.version !== manifest.version && tracked.some(name => !names.includes(name)))
+  if (writes && release.version !== manifest.version && tracked.some(name => !names.includes(name))) {
     throw new UsageError(`Moving to ${tagOf(release.version)} updates every vendored component`, 'Omit the component names')
+  }
   const items = await Promise.all(names.map(name => fetchItem(manifest.style, name)))
   const missing = names.filter((_, index) => items[index] == null)
   if (missing.length) throw new UsageError(`Not in the ${manifest.style} registry: ${missing.join(', ')}`)

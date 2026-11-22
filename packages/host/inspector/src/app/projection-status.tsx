@@ -19,14 +19,16 @@ export interface RunStatus {
 }
 
 /** A projection's marked pair's extraction: extracting, failed, or OK once both sides are done. */
-export function projectionStatus(marks: {[projection: string]: Marks}, rows: Rows, id: string): RunStatus | undefined {
+export function projectionStatus(marks: Record<string, Marks>, rows: Rows, id: string): RunStatus | undefined {
   const pairOf = marks[id] ?? {}
   const states = [pairOf.a, pairOf.b].filter((ref): ref is string => Boolean(ref)).map(ref => rows[id]?.[ref]?.status)
-  if (states.some(state => state === 'running' || state === 'queued'))
+  if (states.some(state => state === 'running' || state === 'queued')) {
     return {kind: 'extracting', text: 'Extracting', icon: <LoaderCircle className="pj:animate-spin pj:motion-reduce:animate-none" />}
+  }
   if (states.includes('failed')) return {kind: 'failed', text: 'Failed', icon: <CircleAlert className="pj:text-destructive" />}
-  if (states.length && states.every(state => state === 'done'))
+  if (states.length && states.every(state => state === 'done')) {
     return {kind: 'ok', text: 'OK', icon: <CircleCheck className="pj:text-added" />}
+  }
   return undefined
 }
 

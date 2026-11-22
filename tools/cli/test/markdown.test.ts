@@ -19,8 +19,8 @@ test('front matter: plain, quoted and folded values, and the body after it', () 
   assert.deepEqual(parsed.data, {description: 'The core crate', name: 'Quoted: with colon', other: "it's"})
   assert.equal(parsed.body, '\n# Core\n')
   const folded = parseFrontMatter('---\ndescription: >-\n  A long description\n  over two lines\n---\n# T\n')
-  assert.equal(folded.data['description'], 'A long description over two lines')
-  assert.equal(parseFrontMatter('---\r\ndescription: CRLF\r\n---\r\n# T').data['description'], 'CRLF')
+  assert.equal(folded.data.description, 'A long description over two lines')
+  assert.equal(parseFrontMatter('---\r\ndescription: CRLF\r\n---\r\n# T').data.description, 'CRLF')
 })
 
 test('no front matter: a horizontal rule later on is not front matter', () => {

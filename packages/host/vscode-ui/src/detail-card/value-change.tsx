@@ -6,12 +6,13 @@ const short = (text: string) => (text.length > 160 ? `${text.slice(0, 157)}…` 
  * only the other pill; an unchanged value (one extraction) is plain.
  */
 export function ValueChange({before, after}: {before?: string | undefined; after?: string | undefined}) {
-  if (before !== undefined && before === after)
+  if (before !== undefined && before === after) {
     return (
       <span className="phv-value" title={after}>
         {short(after)}
       </span>
     )
+  }
   return (
     <span className="phv-value-change">
       {before !== undefined && (

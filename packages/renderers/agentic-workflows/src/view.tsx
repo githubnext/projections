@@ -56,7 +56,7 @@ export function AgenticWorkflowsView(props: RendererProps<typeof accepts>) {
   }
   return (
     <div className="aw-view pk-stage" data-side={side} data-comparing={comparing ? '' : undefined} data-projections-content="">
-      {props.controls['view'] === 'matrix' ? (
+      {props.controls.view === 'matrix' ? (
         <Matrix view={view} frame={frame} />
       ) : (
         view.groups

@@ -33,23 +33,25 @@ function check(plan: CiPlan, expect: CiPlanCase['expect'], label: string) {
     assert.deepEqual(names(plan.browser), names(everything.browser), `${label}: browser`)
     assert.deepEqual(names(plan.browserMacos), names(everything.browserMacos), `${label}: browser-macos`)
   }
-  if (expect.harnessJobs !== undefined)
+  if (expect.harnessJobs !== undefined) {
     assert.equal(
       plan.browser.filter(job => job.suite === 'packages/renderers/harness').length,
       expect.harnessJobs,
       `${label}: harness jobs`,
     )
+  }
   for (const suite of expect.suitesInclude ?? []) assert.ok(plan.suites.includes(suite), `${label}: runs ${suite}`)
   for (const suite of expect.suitesExclude ?? []) assert.ok(!plan.suites.includes(suite), `${label}: doesn't run ${suite}`)
   for (const unit of expect.changedInclude ?? []) assert.ok(plan.changed.includes(unit), `${label}: changes ${unit}`)
   for (const unit of expect.dependantsInclude ?? []) assert.ok(unit in plan.dependants, `${label}: reaches ${unit}`)
   for (const unit of expect.dependantsExclude ?? []) assert.ok(!(unit in plan.dependants), `${label}: doesn't reach ${unit}`)
-  if (expect.classes)
+  if (expect.classes) {
     assert.deepEqual(
       plan.files.map(file => file.class),
       expect.classes,
       `${label}: classes (${plan.files.map(file => file.rule).join('; ')})`,
     )
+  }
 }
 
 const table = JSON.parse(readFileSync(new URL('ci-plan.cases.json', import.meta.url), 'utf8')) as CiPlanCases
@@ -62,11 +64,12 @@ test('the table of cases matches its schema', () => {
 for (const item of table.cases) {
   test(item.name, () => {
     const changes = item.each ? item.files.map(file => [file]) : [item.files]
-    for (const events of item.events ?? ['pull_request'])
+    for (const events of item.events ?? ['pull_request']) {
       for (const paths of changes) {
         const label = `${paths.join(', ') || 'no files'} (${events})`
         check(ciPlan(facts, rules, {paths, event: events, labels: item.labels ?? []}), item.expect, label)
       }
+    }
   })
 }
 
@@ -96,7 +99,7 @@ test('the rules checks catch references to groups, conditions and suites that do
 
 test('the workflow gates each job on the rules decision of the same name', () => {
   const workflow = readFileSync(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8')
-  const gated = new Set([...workflow.matchAll(/needs\.changes\.outputs\.([\w-]+)/g)].map(match => match[1] as string))
+  const gated = new Set([...workflow.matchAll(/needs\.changes\.outputs\.([\w-]+)/g)].map(match => match[1]!))
   const mapped = new Set(
     [...workflow.matchAll(/^ {6}([\w-]+): \$\{\{ steps\.plan\.outputs\.([\w-]+) \}\}$/gm)].filter(m => m[1] === m[2]).map(m => m[1]),
   )
@@ -108,7 +111,7 @@ test('the workflow gates each job on the rules decision of the same name', () =>
 
 test("public-product's output is the workflow's matrix.include: each chosen entry's name, runner and part", () => {
   const include = (paths: string[], event = 'pull_request') =>
-    JSON.parse(planOutputs(ciPlan(facts, rules, {paths, event}))['public-product'] as string) as unknown
+    JSON.parse(planOutputs(ciPlan(facts, rules, {paths, event}))['public-product']!) as unknown
   const linux = {name: 'ubuntu-latest', os: 'ubuntu-latest', part: 'all'}
   const macos = [
     {name: 'macos-latest, Rust', os: 'macos-latest', part: 'rust'},
@@ -174,7 +177,7 @@ test("a lockfile change runs the jobs for what its changed packages reach; the r
   assert.deepEqual(vscode.full, [])
   assert.deepEqual(vscode.changed, ['packages/integrations/vscode'])
   assert.deepEqual(plan(bump('node_modules/eslint'), lock).full.length, 1)
-  assert.match(plan(lock, undefined).full[0] as string, /no earlier version/)
+  assert.match(plan(lock, undefined).full[0]!, /no earlier version/)
 })
 
 test('a unit is reached through what it depends on, not through a crate whose tests alone read the change', () => {

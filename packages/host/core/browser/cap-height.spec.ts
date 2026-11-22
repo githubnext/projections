@@ -8,7 +8,11 @@ import {story} from './harness.js'
  * bar"). Measured in pixels at 2× on a screenshot: the probe "E" replaces the label's text, and its ink is where the
  * screenshot departs from the container's background by half its peak contrast.
  */
-type Gaps = {top: number; bottom: number; left: number}
+interface Gaps {
+  top: number
+  bottom: number
+  left: number
+}
 
 /**
  * The gaps around a capital "E" in place of `label`'s text, inside `container`'s border box (a strip's hairline is its
@@ -18,11 +22,12 @@ type Gaps = {top: number; bottom: number; left: number}
 async function capGaps(page: Page, container: Locator, label: Locator, afterIcon = false): Promise<Gaps> {
   await label.evaluate(element => {
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
-    for (let node = walker.nextNode(); node; node = walker.nextNode())
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       if (node.textContent?.trim()) {
         node.textContent = 'E'
         return
       }
+    }
   })
   const box = await container.evaluate(
     (element, label) => {
@@ -88,13 +93,15 @@ async function capGaps(page: Page, container: Locator, label: Locator, afterIcon
       let peak = 0
       for (let y = above; y < below; y++) for (let x = from; x < to; x++) peak = Math.max(peak, contrast(x, y))
       let [top, bottom, left] = [Infinity, -Infinity, Infinity]
-      for (let y = above; y < below; y++)
-        for (let x = from; x < to; x++)
+      for (let y = above; y < below; y++) {
+        for (let x = from; x < to; x++) {
           if (contrast(x, y) >= peak / 2) {
             top = Math.min(top, y)
             bottom = Math.max(bottom, y + 1)
             left = Math.min(left, x)
           }
+        }
+      }
       // Measured from inside the container's borders: a strip's hairline is its edge.
       return {
         top: (top - above) / scale,
@@ -124,10 +131,11 @@ const withoutTextBox = (page: Page) =>
   page.evaluate(() => {
     const fallbacks: string[] = []
     const visit = (rules: CSSRuleList) => {
-      for (const rule of rules)
-        if (rule instanceof CSSSupportsRule && /not\s*\(\s*text-box/.test(rule.conditionText))
+      for (const rule of rules) {
+        if (rule instanceof CSSSupportsRule && /not\s*\(\s*text-box/.test(rule.conditionText)) {
           fallbacks.push(...[...rule.cssRules].map(inner => inner.cssText))
-        else if ('cssRules' in rule) visit((rule as CSSGroupingRule).cssRules)
+        } else if ('cssRules' in rule) visit((rule as CSSGroupingRule).cssRules)
+      }
     }
     for (const sheet of document.styleSheets) visit(sheet.cssRules)
     const style = document.createElement('style')
@@ -145,7 +153,7 @@ async function open(page: Page, id: string) {
 
 test.use({viewport: {width: 1280, height: 800}, deviceScaleFactor: 2})
 
-for (const fallback of [false, true])
+for (const fallback of [false, true]) {
   test(`a capital E sits optically centred in the summary bar and in a hovered figure's pill${fallback ? ', without text-box' : ''}`, async ({
     page,
   }) => {
@@ -169,6 +177,7 @@ for (const fallback of [false, true])
     await total.hover()
     expectCentred(await capGaps(page, total, total), 'pill')
   })
+}
 
 test("a capital E sits optically centred in the toolbar's text buttons", async ({page}) => {
   // The comparison mode's segments, each a label after its icon.

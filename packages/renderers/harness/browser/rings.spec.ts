@@ -50,11 +50,11 @@ const wellFormed = [
 ]
 const states = ['hover', 'selected', 'focus'] as const
 
-for (const color of ['light', 'dark'] as const)
+for (const color of ['light', 'dark'] as const) {
   test(`rings are each well-formed item's own edge, in pixels (${color})`, async ({page}) => {
     await open(page, `approach=sdk&color=${color}`)
     const failures: string[] = []
-    for (const state of states)
+    for (const state of states) {
       for (const id of wellFormed) {
         await page.evaluate(([id, state]) => window.ring(id, state), [id, state] as const)
         const [geometry] = await ringGeometry(page.mainFrame(), id)
@@ -69,8 +69,10 @@ for (const color of ['light', 'dark'] as const)
         })
         failures.push(...report.failures)
       }
+    }
     expect(failures).toEqual([])
   })
+}
 
 /** The `rings` check's failures for `id`, selected. */
 async function check(page: Page, id: string): Promise<string[]> {

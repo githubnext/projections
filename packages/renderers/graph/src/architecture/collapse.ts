@@ -171,10 +171,11 @@ export function architectureView(
     relationships.push(unchanged({id, kind, from: entry.from, to: entry.to, data: {count: entry.kinds.length}}))
     if (kind !== 'contains') links.set(id, [...entry.boundaries].sort(compareIds))
   }
-  for (const id of [...opened, ...reopened])
+  for (const id of [...opened, ...reopened]) {
     relationships.push(
       unchanged({id: `${linkPrefix}${id}->${collapsePrefix}${id}`, kind: 'contains', from: id, to: `${collapsePrefix}${id}`}),
     )
+  }
 
   const entityRow = {before: new Map(model.entityRow.before), after: new Map(model.entityRow.after)}
   for (const row of extra) {

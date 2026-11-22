@@ -49,12 +49,13 @@ export function resolveChoice(choice: Choice, facts: RepositoryFacts): Pair | un
 export function unavailableReason(choice: Choice, facts: RepositoryFacts): string | undefined {
   if (resolveChoice(choice, facts)) return undefined
   if (choice.id === 'uncommitted' || choice.id === 'last-commit') return facts.head ? 'no earlier commit' : 'no commits yet'
-  if (choice.id === 'branch')
+  if (choice.id === 'branch') {
     return facts.branch && facts.branch === facts.defaultBranch
       ? `you're on ${facts.branch}`
       : facts.defaultBranch
         ? `no merge base with ${facts.defaultBranch}`
         : 'no default branch'
+  }
   if (choice.id === 'release') return 'no earlier tag'
   return 'not here'
 }

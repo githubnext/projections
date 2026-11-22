@@ -122,10 +122,11 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
         if (typeof result === 'function') {
           if (live) cleanups.push(result as () => void)
           else safely(result as () => void)
-        } else if (result instanceof Promise)
+        } else if (result instanceof Promise) {
           result.then(undefined, error => {
             if (live) report(error)
           })
+        }
       },
       end() {
         if (!live) return
@@ -169,21 +170,23 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
       if (wanted.has(activity.key)) throw new TypeError(`State "${state.kind}" lists two activities keyed "${activity.key}"`)
       wanted.set(activity.key, activity)
     }
-    for (const [key, current] of activities)
+    for (const [key, current] of activities) {
       if (!wanted.has(key)) {
         activities.delete(key)
         current.end()
       }
+    }
     return wanted
   }
   /** Starts the listed activities that aren't running. */
   const startListed = (wanted: ReadonlyMap<string, A | After<E>>) => {
-    for (const [key, activity] of wanted)
+    for (const [key, activity] of wanted) {
       if (!activities.has(key)) {
         const into = generation()
         activities.set(key, into)
         invoke(activityRunners, activity, into)
       }
+    }
   }
 
   // Takes waiting events in batches: every listener hears a batch before the events they send are taken.

@@ -30,8 +30,9 @@ export function parsePace(value: unknown): RendererPace | undefined {
     !Number.isInteger(stepMs) ||
     stepMs < rendererLimits.paceStepMs.min ||
     stepMs > rendererLimits.paceStepMs.max
-  )
+  ) {
     return undefined
+  }
   return {stepMs}
 }
 

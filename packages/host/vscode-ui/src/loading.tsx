@@ -6,7 +6,7 @@ import type {LoadingStatusProps} from '@githubnext/projections-host'
 export const loadingDelay = 300
 
 /** The loads in progress in this document, newest last: one progress bar stands for all of them. */
-const loads: Array<{label: string; still: boolean}> = []
+const loads: {label: string; still: boolean}[] = []
 let bar: HTMLElement | undefined
 let timer: ReturnType<typeof setTimeout> | undefined
 let started = false
@@ -56,7 +56,7 @@ function update() {
     return
   }
   if (!bar) {
-    if (timer === undefined)
+    if (timer === undefined) {
       timer = setTimeout(() => {
         timer = undefined
         if (!loads.length) return
@@ -64,6 +64,7 @@ function update() {
         document.body.append(bar)
         update()
       }, wait())
+    }
     return
   }
   bar.setAttribute('aria-label', current.label)

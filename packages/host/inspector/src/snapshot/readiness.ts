@@ -21,12 +21,14 @@ export interface SnapshotState {
 
 /** Why no renderer presents the snapshot, if none does. */
 function rendererFailure({projection, settings, requested, custom, notice}: SnapshotState): string | undefined {
-  if (typeof requested !== 'string' && !settings.withheld && !custom)
+  if (typeof requested !== 'string' && !settings.withheld && !custom) {
     return `The custom renderer ${requested.bundle} is not served for this snapshot`
-  if (!projection.renderer)
+  }
+  if (!projection.renderer) {
     return typeof requested === 'string'
       ? `The renderer "${requested}" is not available in this build of Projections`
       : (notice ?? 'No renderer can present this projection')
+  }
   return undefined
 }
 
@@ -41,10 +43,12 @@ function paneFailure(title: string, panes: Pane[]): string | undefined {
 
 /** A requested mode or progress the renderer doesn't have. */
 function modeFailure(title: string, {projection, settings}: SnapshotState): string | undefined {
-  if (settings.mode && !projection.availableModes.includes(settings.mode))
+  if (settings.mode && !projection.availableModes.includes(settings.mode)) {
     return `The ${title} renderer has no ${settings.mode} mode; it offers ${projection.availableModes.join(', ')}`
-  if (settings.progress !== undefined && !projection.availableModes.includes('animated'))
+  }
+  if (settings.progress !== undefined && !projection.availableModes.includes('animated')) {
     return `--progress applies to animated comparisons; the ${title} renderer offers ${projection.availableModes.join(', ')} (use --mode)`
+  }
   return undefined
 }
 

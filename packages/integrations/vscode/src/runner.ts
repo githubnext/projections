@@ -86,24 +86,32 @@ export function parseInfo(value: unknown): RunnerInfo {
     typeof info.repository !== 'string' ||
     typeof info.trusted !== 'boolean' ||
     typeof info.explore !== 'boolean'
-  )
+  ) {
     throw new Error(`projections serve speaks an unsupported protocol: ${JSON.stringify(value)?.slice(0, 200)}`)
+  }
   return info as RunnerInfo
 }
 
 /** Validates a `request` result. */
 function parseResponse({result, size}: {result: unknown; size: number}): RunnerResponse {
   const response = result as Partial<RunnerResponse> | null
-  if (typeof response !== 'object' || response === null || typeof response.status !== 'number' || typeof response.contentType !== 'string')
+  if (
+    typeof response !== 'object' ||
+    response === null ||
+    typeof response.status !== 'number' ||
+    typeof response.contentType !== 'string'
+  ) {
     throw new Error('The backend returned an invalid response')
+  }
   return {status: response.status, contentType: response.contentType, body: response.body, size}
 }
 
 /** Validates a `tools/list` result. */
 export function parseTools(value: unknown): ToolDescription[] {
   const tools = (value as {tools?: unknown} | null)?.tools
-  if (!Array.isArray(tools) || !tools.every(tool => typeof tool?.name === 'string' && typeof tool.inputSchema === 'object'))
+  if (!Array.isArray(tools) || !tools.every(tool => typeof tool?.name === 'string' && typeof tool.inputSchema === 'object')) {
     throw new Error('The backend listed invalid tools')
+  }
   return tools as ToolDescription[]
 }
 

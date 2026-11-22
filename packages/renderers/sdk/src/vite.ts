@@ -206,8 +206,9 @@ export function rendererEntryPlugin(options: Omit<RendererBuildOptions, 'outDir'
     },
     buildStart() {
       const path = options.view ?? options.entry
-      if (path && !file(path).exists)
+      if (path && !file(path).exists) {
         this.error(`The renderer's ${options.view ? 'view' : 'entry'} ${path} doesn't exist (rendererConfig in vite.config.ts)`)
+      }
     },
     resolveId(id) {
       return id === rendererEntryId || id === resolvedEntryId ? resolvedEntryId : null
@@ -439,20 +440,24 @@ export function rendererStyleLintPlugin(): Plugin {
  */
 export function rendererConfig(options: RendererBuildOptions): UserConfig {
   if (!/^[a-z0-9][a-z0-9-]{0,63}$/.test(options.name)) throw new Error('Renderer name must be a lowercase identifier')
-  if (!options.view === !options.entry)
+  if (!options.view === !options.entry) {
     throw new Error(
       options.view
         ? 'rendererConfig takes a view or an entry, not both: `view` generates the entry that mounts it'
         : 'rendererConfig needs a view (`view: "src/view.tsx"`, the usual) or an entry of your own (`entry: "src/main.tsx"`)',
     )
-  if (options.entry && (options.changeHighlighting || options.capabilities || options.kit))
+  }
+  if (options.entry && (options.changeHighlighting || options.capabilities || options.kit)) {
     throw new Error(
       'changeHighlighting, capabilities and kit configure the entry rendererConfig generates for a view; an entry of your own declares its capabilities to mountRenderer',
     )
-  if (options.comparisonModes && !parseComparisonModes(options.comparisonModes))
+  }
+  if (options.comparisonModes && !parseComparisonModes(options.comparisonModes)) {
     throw new Error('Renderer comparisonModes must be distinct comparison modes')
-  if (options.accepts && !parseAccepts(options.accepts))
+  }
+  if (options.accepts && !parseAccepts(options.accepts)) {
     throw new Error('Renderer accepts must be distinct domain schemas, each with an optional vocabulary')
+  }
   return {
     publicDir: false,
     define: {'process.env.NODE_ENV': JSON.stringify('production')},

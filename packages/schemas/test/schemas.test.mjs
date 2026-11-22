@@ -72,11 +72,12 @@ test('every published schema is draft 2020-12 at its URL, compiles strictly and 
     assert.equal(schema.$schema, 'https://json-schema.org/draft/2020-12/schema')
     assert.equal(schema.$id, id(name))
     for (const reference of JSON.stringify(schema).matchAll(/"\$ref":"([^"#]*)/g)) {
-      if (reference[1])
+      if (reference[1]) {
         assert.ok(
           names.some(other => id(other) === reference[1]),
           reference[1],
         )
+      }
     }
   }
 })
@@ -179,7 +180,7 @@ test('public schemas accept extractions, any-language extractors, component defi
     ['packages/app/', false],
     ['/packages', false],
     ['./app', false],
-  ])
+  ]) {
     assert.equal(
       validate('extractor-request', {
         protocolVersion: 0,
@@ -190,6 +191,7 @@ test('public schemas accept extractions, any-language extractors, component defi
       valid,
       project,
     )
+  }
   assert.equal(
     validate('extraction-document', {
       ...document,
@@ -281,14 +283,16 @@ test('version 1 shapes, unknown fields, numeric bounds, dirty commits and secret
     'x.yaml',
     './x.comparator.yaml',
     'default',
-  ])
+  ]) {
     assert.equal(validate('definition', {...definition, comparator}), false, JSON.stringify(comparator))
+  }
   for (const sources of [['/absolute'], ['a/../b'], ['a', 'a'], ['a//b'], ['C:\\x'], ['../'], ['./a']]) {
     assert.equal(validate('definition', {...definition, extractor: {command: ['x'], sources}}), false, sources.join())
   }
   // Paths are relative to the definition's project: leading `..` segments leave a nested one.
-  for (const sources of [['../shared'], ['../../a/b.mjs'], ['..']])
+  for (const sources of [['../shared'], ['../../a/b.mjs'], ['..']]) {
     assert.equal(validate('definition', {...definition, extractor: {command: ['x'], sources}}), true, sources.join())
+  }
   assert.equal(validate('definition', {...definition, comparator: '../x.comparator.yaml'}), true)
 })
 
@@ -297,8 +301,9 @@ test('comparison schema bounds shapes structurally without replacing engine vali
     ['status', 'renamed'],
     ['correspondence', 'fuzzy'],
     ['collection', 'nodes'],
-  ])
+  ]) {
     assert.equal(validate('comparison', {...comparison, changes: [{...change, [field]: value}]}), false, field)
+  }
   for (const invalid of [
     {...change, before: ['x']},
     {...change, status: 'removed'},
@@ -306,8 +311,9 @@ test('comparison schema bounds shapes structurally without replacing engine vali
     {...change, status: 'modified', correspondence: 'split', before: ['x'], after: ['a']},
     {...change, status: 'modified', correspondence: 'merge', before: ['x'], after: ['a']},
     {...change, position: {x: 1}},
-  ])
+  ]) {
     assert.equal(validate('comparison', {...comparison, changes: [invalid]}), false, JSON.stringify(invalid))
+  }
   assert.equal(
     validate('comparison', {
       ...comparison,
@@ -361,8 +367,9 @@ test('scenarios schema accepts inline, path, single-extraction, custom-comparato
       ],
     },
     scenarios(),
-  ])
+  ]) {
     assert.equal(validate('scenarios', valid), true, JSON.stringify(ajv.getSchema(id('scenarios')).errors))
+  }
 })
 
 test('scenarios schema rejects unknown fields, mixed forms, misplaced comparators and invalid identifiers or paths', () => {
@@ -398,8 +405,9 @@ test('scenarios schema rejects unknown fields, mixed forms, misplaced comparator
     {...base, presentation: {mode: 'zoom'}},
     {...base, group: ''},
     {...base, description: 'x'.repeat(4097)},
-  ])
+  ]) {
     assert.equal(validate('scenarios', document(invalid)), false, JSON.stringify(invalid))
+  }
   assert.equal(validate('scenarios', {format: 'projections.scenarios', version: 0, scenarios: [base]}), false, 'no renderer')
   assert.equal(validate('scenarios', {...document(base), version: 1}), false)
   assert.equal(validate('scenarios', {...document(base), extra: true}), false)
@@ -424,8 +432,9 @@ test('every renderer package scenarios file has unique scenario IDs and referenc
     assert.equal(new Set(ids).size, ids.length, `${name}: duplicate scenario IDs`)
     for (const scenario of document.scenarios) {
       for (const side of ['before', 'after', 'extraction']) {
-        if (typeof scenario[side] === 'string')
+        if (typeof scenario[side] === 'string') {
           assert.ok(existsSync(new URL(scenario[side], file)), `${name}/${scenario.id}: ${scenario[side]}`)
+        }
       }
     }
   }
@@ -460,8 +469,9 @@ test('artifact manifest binds one run to a PR or push and records every document
     {...manifest, projections: [{id: 'flags', status: 'error', diagnostics: []}]},
     {...manifest, repository: {...manifest.repository, id: 0}},
     {...manifest, extra: true},
-  ])
+  ]) {
     assert.equal(validate('artifact', invalid), false, JSON.stringify(invalid))
+  }
 })
 
 test('the environment schema accepts prepare steps, a toolchain and a strategy, and rejects unsafe or unknown ones', () => {
@@ -495,8 +505,9 @@ test('the environment schema accepts prepare steps, a toolchain and a strategy, 
     {...valid, prepare: [{...step, timeoutMs: 0}]},
     {...valid, prepare: [{...step, shell: 'npm ci'}]},
     {...valid, workspace: {strategy: 'magic'}},
-  ])
+  ]) {
     assert.equal(validate('environment', invalid), false, JSON.stringify(invalid))
+  }
 })
 
 test('the bookmarks schema follows what the CLI accepts: identifiers, nonempty revisions and no unknown fields', () => {
@@ -512,8 +523,9 @@ test('the bookmarks schema follows what the CLI accepts: identifiers, nonempty r
     {...valid, bookmarks: [{...bookmark, after: 'x'.repeat(1025)}]},
     {...valid, bookmarks: [{...bookmark, title: undefined}]},
     {...valid, bookmarks: Array.from({length: 101}, (_, index) => ({...bookmark, id: `b${index}`}))},
-  ])
+  ]) {
     assert.equal(validate('bookmarks', JSON.parse(JSON.stringify(invalid))), false, JSON.stringify(invalid))
+  }
 })
 
 test('the renderer manifest schema follows parseRendererManifest: names, handles, distinct modes and known accepts', () => {
@@ -542,6 +554,7 @@ test('the renderer manifest schema follows parseRendererManifest: names, handles
     {...valid, accepts: [{schema: 'graph/v9'}]},
     {...valid, accepts: [{schema: 'graph/v0', vocabulary: 'unknown/v0'}]},
     {...valid, accepts: [{schema: 'graph/v0'}, {schema: 'graph/v0'}]},
-  ])
+  ]) {
     assert.equal(validate('renderer', invalid), false, JSON.stringify(invalid))
+  }
 })

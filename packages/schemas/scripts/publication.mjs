@@ -18,18 +18,20 @@ const directory = join(root, 'schemas')
 export function releaseVersion(tag) {
   const version = String(tag).replace(/^.*\//, '').replace(/^v/, '')
   // Build metadata (`+…`) is excluded: it isn't part of a release's identity and doesn't belong in a URL.
-  if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/.test(version))
+  if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/.test(version)) {
     throw new Error(`${tag} is not a release version, such as v0.2.0 or v0.2.0-beta.1`)
+  }
   return {version, prerelease: version.includes('-')}
 }
 
 function* references(value) {
   if (Array.isArray(value)) for (const item of value) yield* references(item)
-  else if (value && typeof value === 'object')
+  else if (value && typeof value === 'object') {
     for (const [key, item] of Object.entries(value)) {
       if (key === '$ref' && typeof item === 'string') yield item
       else yield* references(item)
     }
+  }
 }
 
 function resolvePointer(document, pointer) {
@@ -86,8 +88,9 @@ export async function publication() {
   const emitted = new Set(emit(schemaDocuments).map(({path}) => path))
   for (const path of emitted) if (!paths.includes(path)) problems.push(`${path} is missing; run npm run generate`)
   for (const path of paths) if (!emitted.has(path)) problems.push(`${path} isn't generated from the TypeBox sources`)
-  for (const name of [...domainSchemas, ...vocabularyNames.map(name => `vocabularies/${name}`)])
+  for (const name of [...domainSchemas, ...vocabularyNames.map(name => `vocabularies/${name}`)]) {
     if (!paths.includes(`${name}.json`)) problems.push(`${name}.json, a domain schema or vocabulary, is missing`)
+  }
 
   return {base: schemaBaseUrl, files: files.map(({path, bytes}) => ({path, bytes})), problems}
 }
@@ -123,17 +126,18 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     for (const [kind, list] of [
       ['snapshots', release.snapshots],
       ['current', release.current],
-    ])
+    ]) {
       for (const {path, bytes} of list) {
         mkdirSync(dirname(join(out, kind, path)), {recursive: true})
         writeFileSync(join(out, kind, path), bytes)
       }
+    }
     console.log(
-      `${release.snapshots.length} snapshots for ${release.version}` +
-        (release.prerelease
+      `${release.snapshots.length} snapshots for ${release.version}${
+        release.prerelease
           ? ' (a prerelease: the schemas at their IDs are unchanged)'
-          : `, and ${release.current.length} schemas at their IDs`) +
-        ` in ${out}, for ${base}`,
+          : `, and ${release.current.length} schemas at their IDs`
+      } in ${out}, for ${base}`,
     )
   }
 }

@@ -13,8 +13,9 @@ test('names break after separators first, then at case and digit changes, and re
   assert.deepEqual(segments('IX_Users_OrganizationId'), ['IX_', 'Users_', 'OrganizationId'])
   assert.deepEqual(subsegments('line12'), ['line', '12'])
   assert.deepEqual(segments('app.kubernetes.io/part-of'), ['app.', 'kubernetes.', 'io/', 'part-', 'of'])
-  for (const text of ['ExternalSettlementReferenceIdentifierFromUpstreamClearingHouse', 'member_id, due', 'x', 'enum:OrderStatus'])
+  for (const text of ['ExternalSettlementReferenceIdentifierFromUpstreamClearingHouse', 'member_id, due', 'x', 'enum:OrderStatus']) {
     assert.equal(segments(text).join(''), text)
+  }
 })
 
 test('wrapping fills lines greedily at break points, and breaks a piece longer than a line between characters', () => {

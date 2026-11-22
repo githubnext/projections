@@ -66,8 +66,9 @@ export function statisticsCount(entity: Entity | undefined, key: StatisticsKey, 
  * each entity's `data.value`, in its `data.unit`.
  */
 export function hasCodeCounts(entities: Iterable<Entity | undefined>): boolean {
-  for (const entity of entities)
+  for (const entity of entities) {
     if (count(entity, 'code') !== undefined || count(entity, 'lines') !== undefined || count(entity, 'files') !== undefined) return true
+  }
   return false
 }
 

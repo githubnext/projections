@@ -19,7 +19,7 @@ export const partIcons = {
 function partFact(node: DefinitionNode): string {
   if (node.file) return node.file.split('/').at(-1) ?? node.file
   const value = node.value ?? ''
-  if (node.kind === 'renderer' && /\//.test(value)) return value.replace(/\/+$/, '').split('/').slice(-2).join('/')
+  if (node.kind === 'renderer' && value.includes('/')) return value.replace(/\/+$/, '').split('/').slice(-2).join('/')
   return value
 }
 

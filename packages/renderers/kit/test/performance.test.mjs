@@ -57,12 +57,13 @@ function denseGraph(seed) {
   const layers = [3, 9, 16, 20, 14, 8]
   const ids = layers.map((count, layer) => Array.from({length: count}, (_, index) => `l${layer}n${index}`))
   const relationships = []
-  for (let layer = 1; layer < layers.length; layer++)
+  for (let layer = 1; layer < layers.length; layer++) {
     for (const id of ids[layer]) {
       const parents = new Set([ids[layer - 1][Math.floor(random() * ids[layer - 1].length)]])
       if (random() < 0.5) parents.add(ids[Math.floor(random() * layer)][0])
       for (const parent of parents) relationships.push(relationship(`${parent}->${id}`, parent, id))
     }
+  }
   return extraction(
     'graph/v0',
     ids.flat().map(id => entity(id)),
@@ -124,8 +125,9 @@ test("a transition's steps take their union's order, alignment and gap: one ELK 
     const budget = unionRuns + 2
     assert.ok(runs <= budget, `${scenario.id}: ${runs} ELK runs for ${transition.layouts.length} layouts (budget ${budget})`)
     // Without boundaries, every step places its cards as the union did.
-    if (transition.layouts.every(layout => !layout.groups.size))
+    if (transition.layouts.every(layout => !layout.groups.size)) {
       for (const layout of transition.layouts) assert.equal(layout.alignment, transition.layouts[0].alignment, scenario.id)
+    }
   }
 })
 

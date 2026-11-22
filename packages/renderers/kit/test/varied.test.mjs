@@ -31,13 +31,15 @@ test('a modified change with a volatile value beyond tolerance shows the neutral
 
 test('the marker is absent without a value beyond tolerance, and at zero emphasis', () => {
   for (const change of [withinModified, {status: 'modified'}, {status: 'added'}, within]) {
-    for (const component of [ChangeFooter, ChangeStatus, StatusTab])
+    for (const component of [ChangeFooter, ChangeStatus, StatusTab]) {
       assert.equal(markers(html(createElement(component, {change, emphasis: 1}))), 0, `${component.name} ${JSON.stringify(change)}`)
+    }
     const svg = html(createElement('svg', null, createElement(SvgChangeStatus, {change, emphasis: 1, x: 0, y: 20})))
     assert.equal(markers(svg), 0)
   }
-  for (const component of [ChangeFooter, ChangeStatus])
+  for (const component of [ChangeFooter, ChangeStatus]) {
     assert.equal(markers(html(createElement(component, {change: beyond, emphasis: 0}))), 0)
+  }
   assert.equal(html(createElement(VariedMarker, {emphasis: 0})), '')
   assert.equal(html(createElement(VariedMarker, {change: withinModified})), '')
 })

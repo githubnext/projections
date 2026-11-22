@@ -80,8 +80,9 @@ export function writeKindLine(card: CardLines, kind: KindLine): void {
     if (final && kind.noteText && noteBeside) spans.push({text: kind.noteText, tone: 'note'})
     card.lines.push({x: left, y: nextLine(card), className: 'node-kind', identifier: kind.identifier, spans})
   })
-  if (kind.noteText && !noteBeside)
+  if (kind.noteText && !noteBeside) {
     card.lines.push({x: left, y: nextLine(card), className: 'node-kind', identifier: false, spans: [{text: kind.note, tone: 'note'}]})
+  }
   if (kind.detail !== undefined) writeDetail(card, kind, detailBeside)
 }
 
@@ -144,8 +145,8 @@ function writeFieldValue(card: CardLines, field: FieldLine): void {
   const value = (spans: DiffCardSpan[]) =>
     card.lines.push({x: card.left, y: nextLine(card), className: 'node-field-value', identifier: true, spans})
   const huge = Math.max(field.before.length, field.after.length) > card.room * diffCardMetrics.valueLineLimit
-  if (huge)
-    for (const part of wrapText('Changed; too long to show here, see details', Math.floor(card.width / card.prose)))
+  if (huge) {
+    for (const part of wrapText('Changed; too long to show here, see details', Math.floor(card.width / card.prose))) {
       card.lines.push({
         x: card.left,
         y: nextLine(card),
@@ -153,6 +154,7 @@ function writeFieldValue(card: CardLines, field: FieldLine): void {
         identifier: false,
         spans: [{text: part.trim(), tone: 'note'}],
       })
-  else if (field.before.length + field.after.length + 3 <= card.room) value(inlineChange(field.before, field.after))
+    }
+  } else if (field.before.length + field.after.length + 3 <= card.room) value(inlineChange(field.before, field.after))
   else for (const spans of changeLines(field.before, field.after, card.room)) value(spans)
 }

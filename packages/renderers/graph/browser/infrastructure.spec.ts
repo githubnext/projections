@@ -39,7 +39,7 @@ async function statuses(renderer: Awaited<ReturnType<typeof openRenderer>>) {
 
 test('changes are worded as planned actions: Replace and Destroy differ in icon and word, not only color', async ({page}) => {
   const renderer = await openRenderer(page, {renderer: 'infrastructure', before: terraform.before, after: terraform.after, progress: 0})
-  const seen: {[id: string]: string} = {}
+  const seen: Record<string, string> = {}
   // Every change states itself while it is emphasized; removals only while they fade.
   for (let index = 1; index < 50; index++) {
     await renderer.seek(index / 50, {highlighting: 1})

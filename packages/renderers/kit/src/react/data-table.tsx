@@ -198,7 +198,7 @@ export interface TablePropsSource {
   /** BCP 47 locale for numbers and comparing strings (`RendererProps.locale`). */
   locale: string
   /** The declared controls' values, the sort among them (`RendererProps.controls`). */
-  controls: {[id: string]: ControlValue}
+  controls: Record<string, ControlValue>
   /** Sets a control from the content, as a heading does the sort (`RendererProps.setControl`). */
   setControl: (id: string, value: ControlValue) => void
   /** The Changes scope, which the table folds by (`RendererProps.scope`). */
@@ -215,7 +215,7 @@ export function useTableProps(props: TablePropsSource, id = 'sort') {
   // Parsed once per value, so the table's order isn't sorted again on every frame of a transition.
   const [sortValue, firstValue] = [props.controls[id], props.controls[`${id}ChangesFirst`]]
   const {sort, changesFirst} = useMemo(
-    () => tableSortOf({[id]: sortValue, [`${id}ChangesFirst`]: firstValue} as {[id: string]: ControlValue}, id),
+    () => tableSortOf({[id]: sortValue, [`${id}ChangesFirst`]: firstValue} as Record<string, ControlValue>, id),
     [id, sortValue, firstValue],
   )
   const {setControl, emphasis, onSelect} = props

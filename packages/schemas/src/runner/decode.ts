@@ -18,15 +18,16 @@ export class RunnerResponseError extends Error {
 interface Failure {
   keyword: string
   instancePath: string
-  params: {[key: string]: unknown}
+  params: Record<string, unknown>
   message: string
 }
 
 const depth = (failure: Failure) => (failure.instancePath ? failure.instancePath.split('/').length : 0)
 
 function reason(failure: Failure): string {
-  if (failure.keyword === 'enum')
+  if (failure.keyword === 'enum') {
     return `must be one of ${(failure.params.allowedValues as unknown[]).map(item => JSON.stringify(item)).join(', ')}`
+  }
   if (failure.keyword === 'const') return `must be ${JSON.stringify(failure.params.allowedValue)}`
   return failure.message
 }

@@ -6,9 +6,13 @@ import {executions, type CiPlan, type Execution} from './ci-plan.ts'
 import {holds, resolveGroups, type CiRules, type Context, type When} from './ci-rules.ts'
 import {matches} from './repo.ts'
 
-export type Trace = {holds: boolean; text: string; children: Trace[]}
+export interface Trace {
+  holds: boolean
+  text: string
+  children: Trace[]
+}
 
-export type Explanation = {
+export interface Explanation {
   full: string[]
   files: {path: string; class: string; rule: string}[]
   touched: string[]
@@ -99,15 +103,17 @@ export function explain(plan: CiPlan, rules: CiRules, facts: RepoFacts): Explana
     if (full) return {suite: path, runs, why: full}
     const why: string[] = []
     const reachedBy = [path, ...uses].filter(unit => context.reached.has(unit))
-    for (const unit of reachedBy)
+    for (const unit of reachedBy) {
       why.push(
         `✓ the change reaches ${unit === path ? 'it' : `${unit}, which it builds or tests`}${context.touched.has(unit) ? '' : ` (through ${chain(plan, unit).slice(1).join(' ← ')})`}`,
       )
+    }
     if (!reachedBy.length) why.push('✗ the change reaches neither it nor a workspace it builds or tests')
     const when = rules.browser.suites[path]?.when
     if (when) why.push(...traceLines(trace(when, context, plan)))
-    if (runs && rules.browser.suites[path]?.narrow && plan.renderers.length)
+    if (runs && rules.browser.suites[path]?.narrow && plan.renderers.length) {
       why.push(`narrowed to ${plan.renderers.join(', ')}: the other renderers' tests are left out with --grep-invert`)
+    }
     return {suite: path, runs, why}
   })
   return {

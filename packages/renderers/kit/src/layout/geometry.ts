@@ -21,9 +21,9 @@ export function roundedSpline(polyline: readonly Point[], radius = cornerRadius)
     if (last && Math.hypot(point.x - last.x, point.y - last.y) < 0.01) continue
     const previous = points.at(-2)
     // Collinear: extend the leg instead of adding a corner.
-    if (previous && last && Math.abs((last.x - previous.x) * (point.y - last.y) - (last.y - previous.y) * (point.x - last.x)) < 0.01)
+    if (previous && last && Math.abs((last.x - previous.x) * (point.y - last.y) - (last.y - previous.y) * (point.x - last.x)) < 0.01) {
       points[points.length - 1] = point
-    else points.push(point)
+    } else points.push(point)
   }
   if (points.length < 3) return lineSpline(points[0]!, points.at(-1) ?? points[0]!)
   const leg = (a: Point, b: Point) => Math.hypot(b.x - a.x, b.y - a.y)

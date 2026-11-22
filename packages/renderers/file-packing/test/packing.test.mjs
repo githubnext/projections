@@ -36,7 +36,7 @@ async function sample() {
 /** Visible circles that partly overlap: neither apart nor nested. */
 function overlaps(circles, tolerance = 1) {
   const found = []
-  for (let i = 0; i < circles.length; i++)
+  for (let i = 0; i < circles.length; i++) {
     for (let j = i + 1; j < circles.length; j++) {
       const a = circles[i],
         b = circles[j]
@@ -44,6 +44,7 @@ function overlaps(circles, tolerance = 1) {
       const nested = distance + Math.min(a.r, b.r) <= Math.max(a.r, b.r) + tolerance
       if (!nested && distance < a.r + b.r - tolerance) found.push(`${a.id} / ${b.id}`)
     }
+  }
   return found
 }
 
@@ -93,8 +94,9 @@ test('languages take their Linguist colors; data and docs take distinct palette 
   assert.equal(new Set(palette.ranked.map(entry => entry.paint)).size, 5)
   assert.deepEqual(categoryPalette([...categories].reverse(), 'light').ranked, palette.ranked, 'order never matters')
   const dark = categoryPalette(categories, 'dark')
-  for (const entry of palette.ranked)
+  for (const entry of palette.ranked) {
     assert.equal(dark.entry(entry.category.key).slot, entry.slot, `${entry.category.key} keeps its slot in dark`)
+  }
   const many = categoryPalette(
     Array.from({length: 20}, (_, index) => ({category: fileCategory(`x.e${index}`), weight: 100 - index})),
     'light',
@@ -241,8 +243,9 @@ test('the diff packs both revisions at the after scale, so unchanged files keep 
   const {circles, after} = diffPacking(model, settings, area)
   const ids = new Set(circles.map(circle => circle.id))
   assert.ok(ids.has('file:src/vendor/moment.js') && ids.has('file:src/search/rank.ts'), 'removed and added files are both drawn')
-  for (const circle of circles.filter(circle => circle.row.status === 'unchanged' && circle.filled))
+  for (const circle of circles.filter(circle => circle.row.status === 'unchanged' && circle.filled)) {
     assert.ok(Math.abs(circle.r - after.placements.get(circle.id).r) < 1e-9, `${circle.id} keeps its size`)
+  }
   assert.deepEqual(overlaps(circles), [])
 })
 
@@ -310,9 +313,11 @@ test("kinds take the definition's colors as theme tokens, and the rest the most 
     ]
   }
   let closest = Infinity
-  for (const a of kindSlots)
-    for (const b of kindSlots)
+  for (const a of kindSlots) {
+    for (const b of kindSlots) {
       if (a < b) closest = Math.min(closest, Math.hypot(...lab(tokens[`chart-${a}`]).map((v, i) => v - lab(tokens[`chart-${b}`])[i])))
+    }
+  }
   assert.ok(closest > 0.09, `the closest two kinds are ${closest.toFixed(3)} apart`)
 })
 

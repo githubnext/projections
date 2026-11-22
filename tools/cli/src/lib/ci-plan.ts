@@ -16,7 +16,7 @@ import {classifyFiles, type ClassifiedFile, type Contents} from './ci-files.ts'
 import {ruleProblems} from './ci-rules-check.ts'
 import {FULL, holds, reach, reasons, resolveGroups, RULES, type CiRules, type Context, type When} from './ci-rules.ts'
 
-export type Change = {
+export interface Change {
   paths: readonly string[]
   /** The GitHub Actions event; `pull_request` (the default) follows the change. */
   event?: string
@@ -26,7 +26,7 @@ export type Change = {
   contents?: Contents
 }
 
-export type CiPlan = {
+export interface CiPlan {
   /** Why everything runs; empty when the plan follows the change. */
   full: string[]
   files: ClassifiedFile[]
@@ -52,7 +52,7 @@ export type CiPlan = {
 }
 
 /** One check the plan runs, as GitHub lists it, and what it runs. */
-export type Execution = {
+export interface Execution {
   check: string
   job: string
   /** A matrix entry's values. */

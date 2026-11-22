@@ -9,12 +9,12 @@ import type {ReactNode} from 'react'
 export interface InspectorHostTheme {
   colorMode: 'light' | 'dark'
   accent?: string
-  tokens?: Readonly<{[name: string]: string}>
+  tokens?: Readonly<Record<string, string>>
   /**
    * Token overrides for a color mode other than the host's, sent while the person's theme choice shows that mode (the
    * other mode of a theme seed, which has its own colors for both).
    */
-  modes?: Readonly<Partial<Record<'light' | 'dark', Readonly<{[name: string]: string}>>>>
+  modes?: Readonly<Partial<Record<'light' | 'dark', Readonly<Record<string, string>>>>>
 }
 
 /**
@@ -45,7 +45,7 @@ export interface InspectorHost {
    * and pickers read as the host's own pickers do. Refs it doesn't name get the Inspector's own label.
    */
   revisionLabels?: {
-    get(): {[ref: string]: string} | undefined
+    get(): Record<string, string> | undefined
     subscribe(listener: () => void): () => void
   }
   /**
@@ -69,7 +69,7 @@ export function useInspectorHost(): InspectorHost {
 
 const noTheme = {get: () => undefined, subscribe: () => () => {}}
 /** The host's names for revisions, following its changes; `undefined` without any. */
-export function useHostRevisionLabels(): {[ref: string]: string} | undefined {
+export function useHostRevisionLabels(): Record<string, string> | undefined {
   const labels = useInspectorHost().revisionLabels ?? noTheme
   return useSyncExternalStore(labels.subscribe, labels.get, labels.get)
 }

@@ -16,21 +16,25 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
   const base = new Set<string>(expansion === 'all' ? ids : [...roots, ...direct, ...ids.filter(id => !depth.has(id))])
   const anchors = new Set(ids.filter(id => isChanged(rows.get(id)!)))
   for (const row of edges) if (isChanged(row)) for (const {from, to} of endpoints(row)) anchors.add(from).add(to)
-  for (const anchor of [...anchors].sort(compareIds))
+  for (const anchor of [...anchors].sort(compareIds)) {
     for (let id: string | undefined = anchor; id !== undefined && !base.has(id); id = parent.get(id)) base.add(id)
+  }
   // An expanded package shows its children; an expanded child that shows, in turn, shows its own.
   const reveal = (open: ReadonlySet<string>) => {
     const shown = new Set(base)
     const order = [...open].sort(compareIds)
     for (let grew = true; grew;) {
       grew = false
-      for (const id of order)
-        if (shown.has(id))
-          for (const child of children(id))
+      for (const id of order) {
+        if (shown.has(id)) {
+          for (const child of children(id)) {
             if (!shown.has(child)) {
               shown.add(child)
               grew = true
             }
+          }
+        }
+      }
     }
     return shown
   }
@@ -41,11 +45,12 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
     for (let index = 0; index < queue.length; index += 1) {
       const id = queue[index]!
       const by = shown.has(id) ? id : owner.get(id)!
-      for (const child of children(id))
+      for (const child of children(id)) {
         if (!shown.has(child) && !owner.has(child)) {
           owner.set(child, by)
           queue.push(child)
         }
+      }
     }
     return owner
   }
@@ -60,7 +65,7 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
   // An expanded package that shows keeps a card where its summary was, to collapse it again: it counts what its
   // summary would, so the same card opens and closes the same packages.
   const opened = new Map<string, string[]>()
-  if (expansion !== 'all')
+  if (expansion !== 'all') {
     for (const by of [...expansion].sort(compareIds)) {
       if (!visible.has(by) || owned.has(by)) continue
       const rest = new Set(expansion)
@@ -68,6 +73,7 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
       const members = membersBy(ownership(reveal(rest))).get(by)
       if (members?.length) opened.set(by, members)
     }
+  }
   return {visible, owner, owned, opened}
 }
 

@@ -19,7 +19,7 @@ export interface Contributed {
 /** The confirm tokens of previews the person was asked about, by tool, folder and arguments. */
 export class Asked {
   private readonly tokens = new Map<string, string>()
-  private key = (name: string, folder: vscode.WorkspaceFolder, args: ToolInput) =>
+  private readonly key = (name: string, folder: vscode.WorkspaceFolder, args: ToolInput) =>
     `${name}\n${folder.uri.toString()}\n${JSON.stringify(args)}`
   get(name: string, folder: vscode.WorkspaceFolder, args: ToolInput) {
     return this.tokens.get(this.key(name, folder, args))

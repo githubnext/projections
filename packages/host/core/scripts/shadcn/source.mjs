@@ -5,7 +5,8 @@ export const parse = text => ts.createSourceFile('component.tsx', text, ts.Scrip
 
 export function applyEdits(text, edits) {
   let output = text
-  for (const {start, end, replacement} of [...edits].sort((a, b) => b.start - a.start))
+  for (const {start, end, replacement} of [...edits].sort((a, b) => b.start - a.start)) {
     output = output.slice(0, start) + replacement + output.slice(end)
+  }
   return output
 }

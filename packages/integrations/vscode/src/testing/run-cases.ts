@@ -30,13 +30,13 @@ function reportCases(state: TestState, run: vscode.TestRun, entry: Cases, outcom
       continue
     }
     if (result.status === 'passed') run.passed(item, result.durationMs)
-    else if (result.status === 'failed')
+    else if (result.status === 'failed') {
       run.failed(
         item,
         result.messages.map(message => state.message(entry.folder, message)),
         result.durationMs,
       )
-    else {
+    } else {
       for (const message of result.messages) run.appendOutput(`${item.label}: ${message.message}\r\n`, undefined, item)
       run.skipped(item)
     }

@@ -2,8 +2,8 @@ import type {InspectorWorkspaceChanges} from '../types.js'
 import {workingTree} from './revisions.js'
 import type {RowState} from './revisions.js'
 
-type Versions = {[projection: string]: number}
-type Rows = {[projection: string]: {[ref: string]: RowState}}
+type Versions = Record<string, number>
+type Rows = Record<string, Record<string, RowState>>
 
 /** What a working-tree change (`GET /api/changes`) touched; an incomplete one may have touched anything. */
 export function changeSet({changes, complete}: InspectorWorkspaceChanges) {
@@ -25,16 +25,18 @@ export type ChangeSet = ReturnType<typeof changeSet>
 /** Bumps the renderer version of each projection whose renderer changed (every one shown, when unsure). */
 export function bumpedRenderers(versions: Versions, set: ChangeSet, rows: Rows): Versions {
   const next = {...versions}
-  for (const change of set.complete ? set.changes : Object.keys(rows).map(id => `renderer:${id}`))
+  for (const change of set.complete ? set.changes : Object.keys(rows).map(id => `renderer:${id}`)) {
     if (change.startsWith('renderer:')) next[change.slice('renderer:'.length)] = (next[change.slice('renderer:'.length)] ?? 0) + 1
+  }
   return next
 }
 
 /** Bumps the scenario version of each projection whose scenarios (or the code they're made with) changed. */
 export function bumpedScenarios(versions: Versions, set: ChangeSet, projection: string): Versions {
   const next = {...versions}
-  for (const id of new Set([projection, ...Object.keys(versions)]))
+  for (const id of new Set([projection, ...Object.keys(versions)])) {
     if (set.changed('definitions') || set.changed(`scenarios:${id}`) || set.changed(`extractor:${id}`)) next[id] = (next[id] ?? 0) + 1
+  }
   return next
 }
 

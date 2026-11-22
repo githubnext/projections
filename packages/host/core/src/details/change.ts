@@ -48,21 +48,23 @@ export function changeTags(subject: ViewSubject, rowId: string): string[] {
   const metadata = subject.comparison.metadata
   if (!isRecord(metadata)) return []
   const tags: string[] = []
-  const compatibility = metadata['compatibility']
-  if (isRecord(compatibility) && isRecord(compatibility['changes'])) {
-    const entry = Object.hasOwn(compatibility['changes'], rowId) ? compatibility['changes'][rowId] : undefined
-    const level = isRecord(entry) && typeof entry['level'] === 'string' ? entry['level'] : undefined
+  const compatibility = metadata.compatibility
+  if (isRecord(compatibility) && isRecord(compatibility.changes)) {
+    const entry = Object.hasOwn(compatibility.changes, rowId) ? compatibility.changes[rowId] : undefined
+    const level = isRecord(entry) && typeof entry.level === 'string' ? entry.level : undefined
     if (level && Object.hasOwn(compatibilityWords, level)) tags.push(compatibilityWords[level]!)
   }
-  const runtime = metadata['runtimePolicy']
-  const interpretations = isRecord(runtime) && isRecord(runtime['interpretations']) ? runtime['interpretations'] : undefined
+  const runtime = metadata.runtimePolicy
+  const interpretations = isRecord(runtime) && isRecord(runtime.interpretations) ? runtime.interpretations : undefined
   const names = interpretations && Object.hasOwn(interpretations, rowId) ? interpretations[rowId] : undefined
   if (Array.isArray(names)) for (const name of names) if (typeof name === 'string' && humanize(name)) tags.push(humanize(name))
-  const agentic = metadata['agenticWorkflows']
-  const findings = isRecord(agentic) && isRecord(agentic['interpretations']) ? agentic['interpretations'] : undefined
+  const agentic = metadata.agenticWorkflows
+  const findings = isRecord(agentic) && isRecord(agentic.interpretations) ? agentic.interpretations : undefined
   const found = findings && Object.hasOwn(findings, rowId) ? findings[rowId] : undefined
-  if (Array.isArray(found))
-    for (const finding of found)
-      if (isRecord(finding) && typeof finding['name'] === 'string' && humanize(finding['name'])) tags.push(humanize(finding['name']))
+  if (Array.isArray(found)) {
+    for (const finding of found) {
+      if (isRecord(finding) && typeof finding.name === 'string' && humanize(finding.name)) tags.push(humanize(finding.name))
+    }
+  }
   return [...new Set(tags)]
 }

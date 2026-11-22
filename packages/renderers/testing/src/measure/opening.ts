@@ -40,8 +40,9 @@ export function opening(root: Element = document.body, relationships: readonly s
           ? [Math.min(content[0], edges[0]), Math.min(content[1], edges[1]), Math.max(content[2], edges[2]), Math.max(content[3], edges[3])]
           : edges
         // A pixel of slack for borders and anti-aliasing at the area's edges.
-        if (edges[0] < area[0] - 1 || edges[1] < area[1] - 1 || edges[2] > area[2] + 1 || edges[3] > area[3] + 1)
+        if (edges[0] < area[0] - 1 || edges[1] < area[1] - 1 || edges[2] > area[2] + 1 || edges[3] > area[3] + 1) {
           outside.push(`${describe(entity)} at [${edges.map(Math.round).join(', ')}]`)
+        }
       }
       return {
         element: describe(element),

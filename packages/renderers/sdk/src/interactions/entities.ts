@@ -19,7 +19,7 @@ export function entityOf({root, attribute}: Entities, target: EventTarget | null
 
 /** An item's elements, in document order. */
 export function elementsOf({root, attribute, excluded}: Entities, id: string): Element[] {
-  return [...root.querySelectorAll<Element>(`[${attribute}="${CSS.escape(id)}"]`)].filter(element => !excluded(element))
+  return [...root.querySelectorAll(`[${attribute}="${CSS.escape(id)}"]`)].filter(element => !excluded(element))
 }
 
 /**
@@ -34,8 +34,9 @@ export function markFiltered(entities: Entities, isVisible: (id: string) => bool
   const holding = new Set<Element>()
   for (const element of elements) {
     if (!isVisible(element.getAttribute(attribute) ?? '')) continue
-    for (let parent = element.parentElement; parent && parent !== root && !holding.has(parent); parent = parent.parentElement)
+    for (let parent = element.parentElement; parent && parent !== root && !holding.has(parent); parent = parent.parentElement) {
       holding.add(parent)
+    }
   }
   // Elements in document order, so each one's enclosing entity is decided before it.
   const receding = new Set<Element>()

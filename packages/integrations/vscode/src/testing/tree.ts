@@ -33,7 +33,7 @@ function nodeItem(state: TestState, watched: Watched, node: TestNode, existing: 
 }
 
 /** The folder's tree (`testTree`) as test items, reusing the items it had so their results stay. */
-export function applyTree(state: TestState, watched: Watched, projections: Array<{id: string; title: string}>): void {
+export function applyTree(state: TestState, watched: Watched, projections: {id: string; title: string}[]): void {
   const {folder} = watched
   const nodes = testTree({projections, files: watched.files, reported: watched.reported})
   const errors = watched.files.map(file => file.diagnostics.map(item => item.message).join('\n'))

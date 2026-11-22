@@ -30,7 +30,7 @@ export class RowDecorations implements vscode.FileDecorationProvider {
   }
 
   /** Sets every row's decoration; rows whose decoration changed are told. */
-  set(rows: ReadonlyArray<{uri: vscode.Uri; status: RowStatus}>) {
+  set(rows: readonly {uri: vscode.Uri; status: RowStatus}[]) {
     const next = new Map<string, vscode.FileDecoration>()
     for (const {uri, status} of rows) {
       if (!status.badge && !status.color) continue

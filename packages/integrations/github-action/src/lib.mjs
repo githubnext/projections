@@ -86,14 +86,16 @@ export function splitBatch(batch, {subject, repository, run, cli, action, trust}
   if (batch?.format !== 'projections.batch' || batch.version !== 0 || batch.operation !== operation || !Array.isArray(batch.results)) {
     throw new Error(`The CLI did not produce a ${operation} batch document`)
   }
-  if (batch.results.length > maxProjections)
+  if (batch.results.length > maxProjections) {
     throw new Error(`At most ${maxProjections} projections fit in one artifact; this run produced ${batch.results.length}`)
+  }
   const files = new Map()
   const projections = []
   for (const item of batch.results) {
     const id = item?.id
-    if (typeof id !== 'string' || !projectionId.test(id) || projections.some(value => value.id === id))
+    if (typeof id !== 'string' || !projectionId.test(id) || projections.some(value => value.id === id)) {
       throw new Error(`Invalid or duplicate projection ID ${JSON.stringify(id)}`)
+    }
     if (item.status === 'error') {
       const title = item.definition?.title
       projections.push({
@@ -220,8 +222,9 @@ function comparisonCounts(status, comparison) {
   const changes = comparison?.changes ?? []
   const counts = new Map()
   const tally = word => counts.set(word, (counts.get(word) ?? 0) + 1)
-  for (const change of changes)
+  for (const change of changes) {
     tally(change.status !== 'unchanged' ? change.status : change.correspondence === 'exact' ? 'varied' : 'renamed')
+  }
   const words = {renamed: 'renamed without other changes', varied: 'varied within tolerance'}
   const parts = ['added', 'removed', 'modified', 'renamed', 'varied']
     .filter(word => counts.has(word))

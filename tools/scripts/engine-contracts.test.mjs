@@ -21,8 +21,9 @@ test('code outside the engine that re-derives its pairing or review is flagged',
     'document.comparison.changes.length > 0',
     'if (!comparison.changes.length) skip()',
     'comparison.changes.some(change => change.status !== "unchanged")',
-  ])
+  ]) {
     assert.ok(flagged(code) > 0, code)
+  }
 })
 
 test('reading those fields, or comparing a digest with something else, is not', () => {
@@ -36,6 +37,7 @@ test('reading those fields, or comparing a digest with something else, is not', 
     // Counting what's listed, for display, isn't deciding whether anything changed.
     'label(comparison.changes.length)',
     'await engine.review(comparison)',
-  ])
+  ]) {
     assert.equal(flagged(code), 0, code)
+  }
 })

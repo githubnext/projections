@@ -5,9 +5,9 @@ import {request, result} from '@githubnext/projections/extractor'
 
 const testCase = JSON.parse(process.argv[2])
 try {
-  if (testCase.accessors)
+  if (testCase.accessors) {
     process.stdout.write(JSON.stringify(Object.fromEntries(testCase.accessors.map(name => [name, request[name] ?? null]))))
-  else result(testCase.result)
+  } else result(testCase.result)
 } catch (error) {
   process.stderr.write(`error: ${error.message}\n`)
   process.exitCode = 1

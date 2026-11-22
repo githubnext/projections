@@ -81,8 +81,9 @@ function expectAttached(samples: Sample[], label: string) {
   expect(samples.filter(sample => sample.moving).length, `${label}: the schema moves over several frames`).toBeGreaterThan(3)
   // A relationship's link drawn whole and attached at a frame (a relationship of several columns has several).
   const drawn = (sample: Sample, key: string) => sample.links.find(item => item.key === key && item.opacity > 0.99 && item.attached)
-  for (const [index, sample] of samples.entries())
+  for (const [index, sample] of samples.entries()) {
     for (const key of kept) expect(drawn(sample, key), `${label}: ${key} is drawn whole, on its cards, at frame ${index}`).toBeTruthy()
+  }
   // A link that travels far glides there over several frames, rather than jumping.
   for (const key of kept) {
     const starts = samples.map(sample => drawn(sample, key)!)
@@ -166,12 +167,13 @@ async function doubledLines(frame: Frame): Promise<string[]> {
       // Only what its clipping ancestors leave in view is drawn.
       let top = -Infinity,
         bottom = Infinity
-      for (let parent = element.parentElement; parent; parent = parent.parentElement)
+      for (let parent = element.parentElement; parent; parent = parent.parentElement) {
         if (getComputedStyle(parent).overflow !== 'visible' || getComputedStyle(parent).clipPath.startsWith('inset(')) {
           const clip = parent.getBoundingClientRect()
           top = Math.max(top, clip.top)
           bottom = Math.min(bottom, clip.bottom)
         }
+      }
       const add = (y: number, width: number, left = box.left, right = box.right) => {
         if (y >= top && y < bottom) lines.push({y, width, left, right, by: name(element)})
       }
@@ -181,13 +183,14 @@ async function doubledLines(frame: Frame): Promise<string[]> {
           width > 0 &&
           style.getPropertyValue(`border-${side.toLowerCase()}-style`) !== 'none' &&
           drawn(style.getPropertyValue(`border-${side.toLowerCase()}-color`))
-        )
+        ) {
           add(side === 'Top' ? box.top : box.bottom - width, width)
+        }
       }
       // An inset shadow with only a vertical offset, or a spread, draws a top or bottom edge. An outer shadow without blur
       // draws the element's box moved by its offset and grown by its spread: what shows above or below the box is a line.
       for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/)) {
-        const color = shadow.match(/(rgba?|color)\([^)]*\)/)?.[0] ?? ''
+        const color = /(rgba?|color)\([^)]*\)/.exec(shadow)?.[0] ?? ''
         if (!drawn(color)) continue
         const [x = 0, y = 0, blur = 0, spread = 0] = (shadow.replace(color, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat)
         if (!shadow.includes('inset')) {
@@ -209,13 +212,14 @@ async function doubledLines(frame: Frame): Promise<string[]> {
       }
     }
     const doubled: string[] = []
-    for (const [index, a] of lines.entries())
+    for (const [index, a] of lines.entries()) {
       for (const b of lines.slice(index + 1)) {
         const across = Math.min(a.right, b.right) - Math.max(a.left, b.left)
         // Lines that share pixels draw as one; lines that touch, or nearly, draw as two.
         const gap = Math.max(a.y, b.y) - Math.min(a.y + a.width, b.y + b.width)
         if (across > 8 && gap > -0.5 && gap < 2) doubled.push(`${a.by} at ${a.y.toFixed(1)} beside ${b.by} at ${b.y.toFixed(1)}`)
       }
+    }
     return doubled
   })
 }
@@ -231,7 +235,7 @@ test('the measure finds a change edge drawn beside the line it should cover', as
   expect(await doubledLines(page.mainFrame()), 'beside it').not.toEqual([])
 })
 
-for (const story of ['api', 'database', 'text-diff', 'text-diff-one-column', 'code-statistics', 'runtime-policy'])
+for (const story of ['api', 'database', 'text-diff', 'text-diff-one-column', 'code-statistics', 'runtime-policy']) {
   test(`${story}: every boundary between rows is one line, in Diff and Animated, Changes and All`, async ({page, theme}, testInfo) => {
     // Lines are laid out alike in every engine; the light and dark projects cover both themes. Four presentations a test.
     test.skip(
@@ -240,7 +244,7 @@ for (const story of ['api', 'database', 'text-diff', 'text-diff-one-column', 'co
     )
     test.setTimeout(120_000)
     await page.setViewportSize({width: 1440, height: 900})
-    for (const mode of ['diff', 'animated'])
+    for (const mode of ['diff', 'animated']) {
       for (const changesOnly of [true, false]) {
         await page.goto(
           new URL(
@@ -254,7 +258,9 @@ for (const story of ['api', 'database', 'text-diff', 'text-diff-one-column', 'co
         await page.waitForTimeout(800)
         expect(await doubledLines(frame), `${story}, ${mode}, ${changesOnly ? 'Changes' : 'All'}`).toEqual([])
       }
+    }
   })
+}
 
 /**
  * Every entity element the renderer draws: where it is, whether the host's filter leaves it out and how far that
@@ -265,9 +271,9 @@ async function entities(frame: Frame) {
     const recede = (element: Element) => {
       if (!element.hasAttribute('data-projections-filtered')) return 1
       const style = getComputedStyle(element)
-      return element.closest('svg') ? Number(style.opacity) : Number(style.filter.match(/opacity\(([\d.]+)\)/)?.[1] ?? 1)
+      return element.closest('svg') ? Number(style.opacity) : Number(/opacity\(([\d.]+)\)/.exec(style.filter)?.[1] ?? 1)
     }
-    return [...document.querySelectorAll<Element>('[data-entity-id]')].map(element => {
+    return [...document.querySelectorAll('[data-entity-id]')].map(element => {
       const box = element.getBoundingClientRect()
       let composed = 1
       for (let node: Element | null = element; node; node = node.parentElement) composed *= recede(node)
@@ -285,7 +291,7 @@ async function entities(frame: Frame) {
 for (const [story, noun] of [
   ['dependency-injection', 'registrations'],
   ['database', 'foreign keys'],
-] as const)
+] as const) {
   test(`${story}: a summary figure recedes what it leaves out once and moves nothing, in Changes and in All`, async ({
     page,
     theme,
@@ -340,3 +346,4 @@ for (const [story, noun] of [
       await expect(figure).toHaveAttribute('aria-pressed', 'false')
     }
   })
+}

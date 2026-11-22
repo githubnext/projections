@@ -158,8 +158,9 @@ function Figure({
   /** In the "…" popover: a full-width row, its counts in columns (`rowClass`). */
   menu?: boolean
 }) {
-  if (figure.type === 'fact')
+  if (figure.type === 'fact') {
     return <Fact projection={p} figure={figure} first={first} {...(measure ? {measure} : {})} {...(menu ? {menu} : {})} />
+  }
   const toggle = (status?: SummaryDelta) => p.setSummaryFilter(summaryToggle(p.summaryFilter, figure, status).next)
   const pressed = (status?: SummaryDelta) => summaryToggle(p.summaryFilter, figure, status).pressed
   const total = summaryCountText(figure.count, figure.noun)

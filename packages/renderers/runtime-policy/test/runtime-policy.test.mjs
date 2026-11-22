@@ -90,8 +90,9 @@ test('effects and subjects read as words', () => {
     'Kill (Sigkill) (elided in monitor mode)',
     'Teleport',
     'Suppress event (NoPost), Track socket (TrackSock)',
-  ])
+  ]) {
     assert.ok(effects.has(expected), `${expected} in ${[...effects]}`)
+  }
   const kmod = rules.flatMap(rule => rule.chips).find(chip => chip.subject.entity.label === '/usr/bin/kmod')
   assert.equal(chipPrefix(kmod), 'except')
   const parent = rules.flatMap(rule => rule.chips).find(chip => chip.subject.entity.label === '/usr/local/bin/')
@@ -134,8 +135,9 @@ test('the diff places every rule once, with old and new scope as chips and the c
 })
 
 test("the comparator's interpretations are notes after a change's status: outline icons, never badges", () => {
-  for (const icon of [...Object.values(interpretationIcons), ...findingLabels.map(label => label.icon)])
+  for (const icon of [...Object.values(interpretationIcons), ...findingLabels.map(label => label.icon)]) {
     assert.ok(!badgeIconNames.includes(icon), icon)
+  }
   assert.equal(interpretationIcons['scope-changed'], 'rescoped')
   assert.equal(interpretationIcons['nodes-changed'], 'rescoped')
 })
@@ -163,8 +165,9 @@ test('markup: identifiers are marked, effects are words, and status footers are 
   assert.match(single, /Kill \(<code class="pk-code" data-projections-identifier="">Sigkill<\/code>\)/)
   assert.match(single, /starts with <code class="pk-code" data-projections-identifier="">\/root\/<wbr\/>.ssh<\/code> or/)
   // Long code values wrap only after their separators, never inside a word.
-  for (const code of single.match(/<code class="pk-code"[^>]*>.*?<\/code>/g))
+  for (const code of single.match(/<code class="pk-code"[^>]*>.*?<\/code>/g)) {
     for (const [, before] of code.matchAll(/(.)<wbr\/>/g)) assert.match(before, /[/.\-=,:]/)
+  }
   assert.doesNotMatch(single, /class="rp-cell rp-status"/)
   assert.doesNotMatch(single, /class="rp-sign"/)
 
@@ -297,8 +300,9 @@ test('each section is a titled panel: a heading in the UI font, then one table, 
     ),
   ]
   assert.equal(lanes.length, 2)
-  for (const [, head] of lanes)
+  for (const [, head] of lanes) {
     assert.deepEqual(plain(head.replace(/></g, '> <')).split(' ').filter(Boolean), ['Rule', 'Effect', 'Applies', 'to'])
+  }
 })
 
 test('in the diff, changed rows marked the same way join into one change run, as text diff marks lines', async () => {
@@ -370,7 +374,7 @@ test("the Changes scope keeps a changed rule's matched and excluded subjects, so
   const edited = structuredClone(library)
   const ruled = new Set(edited.relationships.filter(item => ['matches', 'excludes'].includes(item.kind)).map(item => item.from))
   assert.equal(ruled.size, 2)
-  for (const rule of edited.entities.filter(entity => ruled.has(entity.id)))
+  for (const rule of edited.entities.filter(entity => ruled.has(entity.id))) {
     rule.data = {
       ...rule.data,
       conditions: [
@@ -378,6 +382,7 @@ test("the Changes scope keeps a changed rule's matched and excluded subjects, so
         {display: '`arg1` (`int`) = `4`', filter: 'matchArgs', index: 1, operator: 'Equal', values: ['4']},
       ],
     }
+  }
   const comparison = await interpreted(library, edited)
   const model = comparisonModel(library, edited, comparison)
   const rules = view =>

@@ -23,10 +23,11 @@ type Finding = {failure: string} | {note: string}
  */
 function canvasFinding(canvas: OpeningCanvas, where: string, opening: boolean, diff = false): Finding {
   const text = canvas.smallestText === null ? 'no text' : `smallest text ${canvas.smallestText}px`
-  if (!(canvas.zoom >= 1))
+  if (!(canvas.zoom >= 1)) {
     return {
       failure: `${where}, ${canvas.element} opens at zoom ${canvas.zoom}, below the fit (${text}); open fitted (the kit's useStageZoom).`,
     }
+  }
   if (canvas.zoom === 1) return fittedFinding(canvas, where, text)
   return diff && canvas.changes.count ? changesFinding(canvas, where, text) : zoomedFinding(canvas, where, text, opening)
 }
@@ -37,56 +38,66 @@ function canvasFinding(canvas: OpeningCanvas, where: string, opening: boolean, d
  */
 function changesFinding(canvas: OpeningCanvas, where: string, text: string): Finding {
   const {count, inView, whole} = canvas.changes
-  if (canvas.smallestText !== null && canvas.smallestText < openingFloorPx - floorTolerance)
+  if (canvas.smallestText !== null && canvas.smallestText < openingFloorPx - floorTolerance) {
     return {
       failure: `${where}, ${canvas.element} opens zoomed (${canvas.zoom}) with ${text}, below the ${openingFloorPx}px floor; open at the scale where the smallest text is ${openingFloorPx}px (the kit's useOpeningFloor).`,
     }
-  if (canvas.smallestText !== null && canvas.smallestText / canvas.zoom >= openingFloorPx - floorTolerance)
+  }
+  if (canvas.smallestText !== null && canvas.smallestText / canvas.zoom >= openingFloorPx - floorTolerance) {
     return {
       failure: `${where}, ${canvas.element} opens zoomed (${canvas.zoom}) although fitted its smallest text would be ${Math.round((canvas.smallestText / canvas.zoom) * 100) / 100}px, at least the ${openingFloorPx}px floor; open fitted.`,
     }
-  if (!inView)
+  }
+  if (!inView) {
     return {
       failure: `${where}, ${canvas.element} opens zoomed (${canvas.zoom}) with none of its ${count} changes in view; a diff that doesn't fit opens on its changes (the graph canvas's focusArea).`,
     }
-  if (canvas.smallestText !== null && canvas.smallestText > openingFloorPx * floorReach && whole < count)
+  }
+  if (canvas.smallestText !== null && canvas.smallestText > openingFloorPx * floorReach && whole < count) {
     return {
       failure: `${where}, ${canvas.element} opens zoomed (${canvas.zoom}) further than the ${openingFloorPx}px floor (${text}) with ${count - whole} of its ${count} changes not wholly in view; zoom past the floor only to fit every change.`,
     }
+  }
   return {note: `${where}: on its changes (zoom ${canvas.zoom}), ${whole} of ${count} wholly in view, ${text}.`}
 }
 
 /** Opened fitted (zoom 1): everything it draws must be in view. */
 function fittedFinding(canvas: OpeningCanvas, where: string, text: string): Finding {
-  if (canvas.outside.length)
+  if (canvas.outside.length) {
     return {
       failure: `${where}, ${canvas.outside.length === 5 ? 'at least 5' : canvas.outside.length} of ${canvas.entities} entities are outside the visible canvas [${canvas.area.join(', ')}], for example ${canvas.outside[0]}; fit all of the content to the stage (the kit's useFitScale), or open at the ${openingFloorPx}px text floor when the fit is smaller.`,
     }
+  }
   return {note: `${where}: fitted, ${canvas.entities} entities in view, ${text}.`}
 }
 
 /** Opened zoomed in: only to the text floor, no further, and on the start of its content. */
 function zoomedFinding(canvas: OpeningCanvas, where: string, text: string, opening: boolean): Finding {
-  if (canvas.smallestText === null)
+  if (canvas.smallestText === null) {
     return {failure: `${where}, ${canvas.element} opens zoomed (${canvas.zoom}) with no text; open fitted (the kit's useStageZoom).`}
-  if (canvas.smallestText < openingFloorPx - floorTolerance)
+  }
+  if (canvas.smallestText < openingFloorPx - floorTolerance) {
     return {
       failure: `${where}, ${canvas.element} opens zoomed (${canvas.zoom}) with ${text}, below the ${openingFloorPx}px floor, and not everything fits; open at the scale where the smallest text is ${openingFloorPx}px (the kit's useOpeningFloor).`,
     }
-  if (canvas.smallestText / canvas.zoom >= openingFloorPx - floorTolerance)
+  }
+  if (canvas.smallestText / canvas.zoom >= openingFloorPx - floorTolerance) {
     return {
       failure: `${where}, ${canvas.element} opens zoomed (${canvas.zoom}) although fitted its smallest text would be ${Math.round((canvas.smallestText / canvas.zoom) * 100) / 100}px, at least the ${openingFloorPx}px floor; open fitted.`,
     }
-  if (canvas.smallestText > openingFloorPx * floorReach)
+  }
+  if (canvas.smallestText > openingFloorPx * floorReach) {
     return {
       failure: `${where}, ${canvas.element} opens zoomed (${canvas.zoom}) further than the ${openingFloorPx}px floor (${text}); open at the floor, the least zoom whose text is readable.`,
     }
-  if (opening && !canvas.start?.inView)
+  }
+  if (opening && !canvas.start?.inView) {
     return {
       failure:
         `${where}, ${canvas.element} opens at the ${openingFloorPx}px floor scrolled away from the start of its content: ${canvas.start ? `${canvas.start.element} at [${canvas.start.corner.join(', ')}] is outside the visible canvas [${canvas.area.join(', ')}]` : 'no entity is drawn'}; ` +
         "open at its top left (or the top centre of a centred layout, or the drawing's top left where the top row can't be in view without cutting a card).",
     }
+  }
   if (opening && canvas.cut.length) {
     const count = canvas.cut.length === 5 ? 'at least 5 entities' : canvas.cut.length === 1 ? 'an entity' : `${canvas.cut.length} entities`
     return {
@@ -142,10 +153,11 @@ export const openingChecks: Pick<Checks, 'opens-fitted'> = {
         }
       }
     }
-    if (!zoomable)
+    if (!zoomable) {
       throw new Skip(
         'The renderer has no zoomable canvas (no scroll container marked data-zoom): document-style content (lists, tables, text) scrolls naturally, and a layout drawn at the frame size is always in view.',
       )
+    }
     if (!failures.length) throw new Passed(notes)
     return failures.slice(0, limit)
   },

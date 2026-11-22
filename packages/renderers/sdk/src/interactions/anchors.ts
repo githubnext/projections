@@ -91,7 +91,7 @@ export function createAnchorReporter(view: Window, client: RendererClient, sched
         client.anchor(id, rect)
       }
       if (reportSecondary(secondary, annotated)) deferred = true
-      if (deferred && !retry)
+      if (deferred && !retry) {
         retry = view.setTimeout(
           () => {
             retry = 0
@@ -99,6 +99,7 @@ export function createAnchorReporter(view: Window, client: RendererClient, sched
           },
           Math.ceil(1000 / annotatedAnchorRate),
         )
+      }
     },
     dispose: () => view.clearTimeout(retry),
   }

@@ -166,7 +166,7 @@ export interface EntitySample {
    * change emphasis; `neutral-endpoints` instead checks that each key keeps one
    * colour from Before to After.
    */
-  categories: {[key: string]: string}
+  categories: Record<string, string>
 }
 
 /** The links a renderer routes between cards (`data-projections-route`): how many, and those that cross cards. */
@@ -244,7 +244,7 @@ export interface OpeningMeasurement {
 /** The theme's token values as this document resolves them, for the styling checks. */
 export interface StyleTokens {
   /** Color tokens by name (without `--projections-`), as `rgba(r, g, b, a)`. */
-  colors: {[name: string]: string}
+  colors: Record<string, string>
   /** `font-size-*` and `label-font-size`, in px. */
   fontSizes: number[]
   /** `font-family` and `font-family-mono`, as computed. */
@@ -264,14 +264,14 @@ export interface StyledElement {
   element: string
   index: number
   /** Painted colors by property (`color`, `background-color`, `border-top-color`, `fill`, `box-shadow`, …), normalized. */
-  colors: {[property: string]: string}
+  colors: Record<string, string>
   /** Set for elements with text of their own: font size in px, family and weight. */
   font?: {size: number; family: string; weight: number; text: string}
   /** Padding, margin and gap in px, by property; auto-centring margins and percentages are left out. */
-  spacing: {[property: string]: number}
+  spacing: Record<string, number>
   /** Corner radii in px (or `pill` for fully rounded), and border widths in px, of the sides and corners drawn. */
-  radii: {[corner: string]: number | 'pill'}
-  borders: {[side: string]: number}
+  radii: Record<string, number | 'pill'>
+  borders: Record<string, number>
   /** In a categorical-colour part (`data-projections-category`): its colours follow the category palette. */
   category: boolean
 }

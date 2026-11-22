@@ -29,8 +29,9 @@ test('only src/react.ts and src/react/ import React, and nothing else imports th
     if (file.endsWith('.tsx')) problems.push(`${relative(root, file)} is JSX outside src/react/`)
     for (const specifier of specifiers(readFileSync(file, 'utf8'))) {
       if (react.test(specifier)) problems.push(`${relative(root, file)} imports ${specifier}`)
-      else if (specifier.startsWith('.') && reactSide(resolve(dirname(file), specifier).replace(/\.js$/, '.ts')))
+      else if (specifier.startsWith('.') && reactSide(resolve(dirname(file), specifier).replace(/\.js$/, '.ts'))) {
         problems.push(`${relative(root, file)} imports ${specifier}, a React module`)
+      }
     }
   }
   assert.deepEqual(problems, [])

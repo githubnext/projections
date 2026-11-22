@@ -22,11 +22,12 @@ async function still(timeoutMs = 1500): Promise<void> {
   const running = document
     .getAnimations()
     .filter(animation => animation.playState === 'running' && animation.effect?.getTiming().iterations !== Infinity)
-  if (running.length)
+  if (running.length) {
     await Promise.race([
       Promise.allSettled(running.map(animation => animation.finished)),
       new Promise(resolve => setTimeout(resolve, timeoutMs)),
     ])
+  }
   await settle()
 }
 

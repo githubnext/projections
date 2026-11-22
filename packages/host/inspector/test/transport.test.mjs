@@ -13,8 +13,9 @@ import {
 import {externalUrl} from '../dist/ui/host.js'
 
 test('API paths are server-relative /api/ paths without traversal, fragments or control characters', () => {
-  for (const path of ['/api/definitions?ref=working-tree', '/api/jobs/abc/cancel', '/api/changes?since=3'])
+  for (const path of ['/api/definitions?ref=working-tree', '/api/jobs/abc/cancel', '/api/changes?since=3']) {
     assert.equal(isApiPath(path), true, path)
+  }
   for (const path of [
     'http://127.0.0.1/api/x',
     '//evil.example/api/x',
@@ -26,8 +27,9 @@ test('API paths are server-relative /api/ paths without traversal, fragments or 
     '/api/x\n',
     ''.padEnd(5000, 'a'),
     42,
-  ])
+  ]) {
     assert.equal(isApiPath(path), false, String(path))
+  }
 })
 
 /** A bridge on the other side of a message channel, answering with `answer(path)`. */
@@ -160,9 +162,9 @@ test('a message transport with subscriptions asks its bridge for the next change
     post: message => {
       posted.push(message)
       const parsed = parseTransportMessage(message)
-      if (parsed?.type === 'next' && parsed.since === 3)
+      if (parsed?.type === 'next' && parsed.since === 3) {
         queueMicrotask(() => {
-          for (const listener of listeners)
+          for (const listener of listeners) {
             listener({
               tag: transportTag,
               id: parsed.id,
@@ -170,7 +172,9 @@ test('a message transport with subscriptions asks its bridge for the next change
               status: 200,
               body: {generation: 4, changes: ['definitions'], complete: true},
             })
+          }
         })
+      }
     },
     listen: listener => {
       listeners.add(listener)
@@ -198,8 +202,9 @@ test('a message transport with subscriptions asks its bridge for the next change
     {tag: transportTag, type: 'next', id: 1, channel: 'other', since: 0},
     {tag: transportTag, type: 'next', id: 1, channel: 'changes', since: -1},
     {tag: transportTag, type: 'next', id: 1, channel: 'changes', since: 1.5},
-  ])
+  ]) {
     assert.equal(parseTransportMessage(message), undefined)
+  }
   transport.dispose()
 })
 

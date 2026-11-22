@@ -84,8 +84,9 @@ export function appThemeTokens(
   /** A fill behind plain `color-fg` text: as translucent as needed for that text to keep 4.5:1. */
   const fill = (value: Rgba) => {
     let candidate = value
-    for (let tries = 0; tries < 20 && contrast(text, composite(candidate, raised)) < 4.5; tries++)
+    for (let tries = 0; tries < 20 && contrast(text, composite(candidate, raised)) < 4.5; tries++) {
       candidate = withAlpha(candidate, candidate.a * 0.8)
+    }
     return candidate
   }
 

@@ -73,8 +73,9 @@ export function overriddenDefinition(definition: Definition, overrides: PartOver
 /** The parts that differ between two definitions, as `POST /api/definition` takes them: `null` removes one. */
 export function changedParts(definition: Definition, saved: Definition): Record<string, unknown> {
   const parts: Record<string, unknown> = {}
-  for (const part of ['extractor', 'comparator', 'renderer'] as const)
+  for (const part of ['extractor', 'comparator', 'renderer'] as const) {
     if (JSON.stringify(definition[part]) !== JSON.stringify(saved[part])) parts[part] = saved[part] ?? null
+  }
   return parts
 }
 

@@ -8,7 +8,7 @@ type Runner = Awaited<ReturnType<Lease['current']>>
 
 /** A refusal's diagnostics as sentences, never its raw body. */
 export function readable(status: number, body: unknown): string {
-  const diagnostics = (body as {diagnostics?: Array<{message?: unknown}>} | null)?.diagnostics
+  const diagnostics = (body as {diagnostics?: {message?: unknown}[]} | null)?.diagnostics
   const messages = Array.isArray(diagnostics) ? diagnostics.flatMap(item => (typeof item?.message === 'string' ? [item.message] : [])) : []
   return messages.length ? messages.join('; ') : `The Projections backend refused the request (${status})`
 }
@@ -60,7 +60,7 @@ export async function countChanges(
     )
     if (created.status !== 202) throw new Error(readable(created.status, created.body))
     const id = (created.body as {id?: string}).id
-    let job = created.body as {status?: string; diagnostics?: Array<{message?: string}>}
+    let job = created.body as {status?: string; diagnostics?: {message?: string}[]}
     while (job.status === 'running') {
       if (signal.aborted) {
         await runner.request({method: 'POST', path: `/api/jobs/${id}/cancel`, body: {}}).catch(() => {})

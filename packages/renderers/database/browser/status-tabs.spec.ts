@@ -22,7 +22,7 @@ const after = {
   entities: [...invoicing.entities, ...[...kept, 'alive', 'usersd', 'authgateway', 'ingest_scheduler', 'rated'].map(extension)],
 }
 
-for (const colorMode of ['light', 'dark'] as const)
+for (const colorMode of ['light', 'dark'] as const) {
   test(`status tabs join their tag at its left, and are flush with a tag no wider than them (${colorMode})`, async ({page}, info) => {
     const renderer = await openRenderer(page, {renderer: 'database', before, after, comparisonMode: 'diff', colorMode} as Parameters<
       typeof openRenderer
@@ -64,10 +64,11 @@ for (const colorMode of ['light', 'dark'] as const)
     }
     if (shots) {
       const file = (name: string) => `${shots}/${name}-${colorMode}-${info.project.name}.png`
-      for (const name of ['alive', 'usersd', long])
+      for (const name of ['alive', 'usersd', long]) {
         await tag(name)
           .locator('xpath=..')
           .screenshot({path: file(name === long ? 'long' : name), scale: 'device'})
+      }
       const row = (await renderer.frame.locator('.database-tags').boundingBox())!
       const margin = 8
       await page.screenshot({
@@ -77,3 +78,4 @@ for (const colorMode of ['light', 'dark'] as const)
       })
     }
   })
+}

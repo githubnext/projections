@@ -10,7 +10,7 @@ export const domainDocument = (schema: DomainSchema) => schema.replace(/\/v\d+$/
 export const vocabularyDocument = (vocabulary: Vocabulary) => `vocabularies/${vocabulary.replace(/\/v\d+$/, '')}`
 
 // As the engine checks them: numbers are any finite JSON number.
-const primitiveSchemas: {[type in PrimitiveType]: () => object} = {
+const primitiveSchemas: Record<PrimitiveType, () => object> = {
   text: () => Text,
   string: () => ({type: 'string'}),
   number: () => ({type: 'number'}),
@@ -33,11 +33,12 @@ function shapeSchema(shape: Shape, schema: DomainSchema): TSchema {
       return {type: 'array', items: shapeSchema(shape.items, schema)} as unknown as TSchema
     case 'record': {
       const key = `${schema}#${shape.name}`
-      if (!records.has(key))
+      if (!records.has(key)) {
         records.set(
           key,
           define(domainDocument(schema), shape.name, Type.Unsafe({description: shape.about, ...fieldsSchema(shape.fields, schema)})),
         )
+      }
       return records.get(key)!
     }
     default:
@@ -46,7 +47,7 @@ function shapeSchema(shape: Shape, schema: DomainSchema): TSchema {
 }
 
 /** A closed object of typed fields. */
-function fieldsSchema(fields: {readonly [name: string]: FieldRule}, schema: DomainSchema) {
+function fieldsSchema(fields: Readonly<Record<string, FieldRule>>, schema: DomainSchema) {
   const required = Object.entries(fields).flatMap(([name, field]) => (field.required ? [name] : []))
   return {
     type: 'object',
@@ -84,7 +85,7 @@ function itemsSchema(rules: DataRule[]) {
 
 function refinementOf(rules: DataRule[], schema: object, description: string) {
   const of = (collection: DataRule['collection']) => rules.filter(rule => rule.collection === collection)
-  const properties: {[key: string]: object} = {schema}
+  const properties: Record<string, object> = {schema}
   if (of('entities').length) properties.entities = itemsSchema(of('entities'))
   if (of('relationships').length) properties.relationships = itemsSchema(of('relationships'))
   return Type.Unsafe({description, type: 'object', properties})
@@ -106,7 +107,7 @@ export const domainRefinements = Object.fromEntries(
       ),
     ),
   ]),
-) as unknown as {[schema in DomainSchema]: TSchema}
+) as unknown as Record<DomainSchema, TSchema>
 
 /** What each vocabulary adds to an extraction that declares it, including the schemas it applies to. */
 export const vocabularyRefinements = Object.fromEntries(
@@ -125,7 +126,7 @@ export const vocabularyRefinements = Object.fromEntries(
       ),
     ]
   }),
-) as unknown as {[vocabulary in Vocabulary]: TSchema}
+) as unknown as Record<Vocabulary, TSchema>
 
 /** Each domain schema's document: the extraction envelope with its schema's refinement. */
 export const domainSchemaDocuments = [

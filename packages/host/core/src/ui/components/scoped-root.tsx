@@ -12,10 +12,7 @@ export interface ScopedRootProps extends HTMLAttributes<HTMLDivElement> {
  * dark mode) and an in-scope container for Radix portals, so menus and tooltips keep the scoped styles.
  * Utilities only match descendants (`.pj-root .pj\:…`), so style this element with your own CSS, not `pj:` classes.
  */
-export const ScopedRoot = forwardRef<HTMLDivElement, ScopedRootProps>(function ScopedRoot(
-  {colorMode = 'light', className, children, ...props},
-  ref,
-) {
+export const ScopedRoot = forwardRef<HTMLDivElement, ScopedRootProps>(({colorMode = 'light', className, children, ...props}, ref) => {
   const [portal, setPortal] = useState<HTMLDivElement | null>(null)
   return (
     <div ref={ref} className={cn('pj-root', colorMode === 'dark' && 'pj-dark', className)} data-color-mode={colorMode} {...props}>

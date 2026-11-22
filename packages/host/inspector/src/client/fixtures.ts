@@ -23,8 +23,9 @@ export function parseFixtureCatalog(value: unknown, origin: string): FixtureCata
       typeof source.path !== 'string' ||
       !optionalText(source.title) ||
       !optionalText(source.error)
-    )
+    ) {
       throw invalid('source')
+    }
   }
   for (const renderer of value.renderers) {
     if (
@@ -34,8 +35,9 @@ export function parseFixtureCatalog(value: unknown, origin: string): FixtureCata
       !optionalText(renderer.error) ||
       !optionalText(renderer.withheld) ||
       !optionalText(renderer.url)
-    )
+    ) {
       throw invalid('renderer')
+    }
     // Withheld for trust: never served, so it has no URL to present.
     if (renderer.withheld !== undefined && renderer.url !== undefined) throw invalid('renderer')
     if (renderer.url !== undefined && renderer.development === true) {
@@ -46,8 +48,9 @@ export function parseFixtureCatalog(value: unknown, origin: string): FixtureCata
       if (url.origin !== new URL(origin).origin || !url.pathname.startsWith('/custom-renderers/')) throw invalid('renderer URL')
       renderer.url = url.href
     }
-    if (renderer.error === undefined && renderer.withheld === undefined && (!record(renderer.manifest) || renderer.url === undefined))
+    if (renderer.error === undefined && renderer.withheld === undefined && (!record(renderer.manifest) || renderer.url === undefined)) {
       throw invalid('renderer')
+    }
   }
   for (const scenario of value.scenarios) {
     if (
@@ -60,8 +63,9 @@ export function parseFixtureCatalog(value: unknown, origin: string): FixtureCata
     }
     if (scenario.error !== undefined) continue
     const subject = scenario.subject
-    if (typeof scenario.renderer !== 'string' && !(record(scenario.renderer) && typeof scenario.renderer.bundle === 'string'))
+    if (typeof scenario.renderer !== 'string' && !(record(scenario.renderer) && typeof scenario.renderer.bundle === 'string')) {
       throw invalid('scenario renderer')
+    }
     if (
       !record(subject) ||
       !(subject.mode === 'extraction'

@@ -5,7 +5,7 @@ import {setReleaseVersion} from '../lib/release-bump.ts'
 import {versionProblems} from '../lib/release-check.ts'
 import {UsageError} from './work/change-set.ts'
 
-export type VersionReport = {
+export interface VersionReport {
   status: 'pass' | 'fail'
   version: string
   tag?: string
@@ -17,8 +17,9 @@ export type VersionReport = {
 
 export function versionReport(root: string, options: {set?: string | undefined; tag?: string | undefined}): VersionReport {
   if (options.tag !== undefined && !tagVersion(options.tag)) throw new UsageError(`${options.tag} is not a release tag such as v0.1.0`)
-  if (options.set !== undefined && !isVersion(options.set))
+  if (options.set !== undefined && !isVersion(options.set)) {
     throw new UsageError(`${options.set} is not a release version`, 'MAJOR.MINOR.PATCH, optionally with a prerelease: 0.2.0, 0.2.0-beta.1')
+  }
   const changed = options.set === undefined ? undefined : setReleaseVersion(root, options.set)
   const {version, crates, workspaces} = readRelease(root)
   const problems = versionProblems(root, options.tag)

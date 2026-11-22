@@ -100,8 +100,9 @@ try {
     /^vendor\/linguist\/(languages\.js|languages\.d\.ts|LICENSE|vendor\.json)$/,
   ]
   for (const file of files) if (!allowed.some(pattern => pattern.test(file))) fail(`The tarball has a file it shouldn't: ${file}`)
-  for (const required of ['README.md', 'LICENSE', 'vendor/linguist/LICENSE', 'vendor/linguist/vendor.json'])
+  for (const required of ['README.md', 'LICENSE', 'vendor/linguist/LICENSE', 'vendor/linguist/vendor.json']) {
     if (!files.includes(required)) fail(`The tarball has no ${required}`)
+  }
   // Every file `exports` and `imports` name is in the tarball.
   const targets = [
     ...Object.values(manifest.exports).flatMap(target => (typeof target === 'string' ? [target] : Object.values(target))),
@@ -127,8 +128,9 @@ try {
   if (packedManifest.devDependencies) fail('The published package.json has devDependencies')
   // A release attaches the tarball under npm pack's name, at the checkout's version.
   const filename = `${manifest.name.slice(1).replace('/', '-')}-${manifest.version}.tgz`
-  if (packedManifest.version !== manifest.version)
+  if (packedManifest.version !== manifest.version) {
     fail(`The tarball is ${packedManifest.version}, the checkout's package ${manifest.version}`)
+  }
   if (given && basename(tarball) !== filename) fail(`The tarball is named ${basename(tarball)}, not ${filename}`)
 
   if (!options.has('--contents')) {
@@ -282,8 +284,9 @@ export const build: RendererBuildOptions = {entry: 'src/main.ts', name: 'x', tit
         if (!existsSync(bundle) || !statSync(bundle).size) fail('The scaffold built no dist/index.html')
         const notices = readFileSync(join(renderer, 'dist/THIRD_PARTY_NOTICES.txt'), 'utf8')
         console.log(`  built dist/: ${readdirSync(join(renderer, 'dist')).join(', ')}`)
-        for (const name of ['react', 'react-dom'])
+        for (const name of ['react', 'react-dom']) {
           if (!notices.includes(`===== ${name} `)) fail(`The scaffold's notices don't attribute ${name}`)
+        }
       } catch (error) {
         fail(`The scaffolded renderer failed to build or pass its checks (${error.message.split('\n')[0]})`)
       }

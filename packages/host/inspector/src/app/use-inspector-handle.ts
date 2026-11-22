@@ -36,7 +36,7 @@ export function useInspectorHandle({
   state: HandleState
   actions: HandleActions
   setSource: Dispatch<SetStateAction<'live' | 'artifact'>>
-  setMarks: Dispatch<SetStateAction<{[projection: string]: Marks}>>
+  setMarks: Dispatch<SetStateAction<Record<string, Marks>>>
   dropQueued: (drop: (item: QueuedExtraction) => boolean) => void
   setRows: Dispatch<SetStateAction<Rows>>
 }) {

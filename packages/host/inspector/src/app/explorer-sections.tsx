@@ -82,9 +82,9 @@ export function explorerSections({
   marked: Marks
   pairsHere: InspectorPairs | null | undefined
   revisions: readonly InspectorRevision[]
-  recent: {[projection: string]: Marks[]}
+  recent: Record<string, Marks[]>
   revisionRows: readonly RevisionRow[]
-  projectionRows: {[ref: string]: RowState}
+  projectionRows: Record<string, RowState>
   showing: 'live' | 'artifact'
   before: string
   after: string | undefined
@@ -99,7 +99,7 @@ export function explorerSections({
   swap: () => void
   ownDefinition: Definition | undefined
   allDefinitions: readonly Definition[]
-  overrides: {[projection: string]: PartOverrides}
+  overrides: Record<string, PartOverrides>
   partRows: PartRow[]
   resetParts: () => void
   writer: DefinitionWriter | undefined

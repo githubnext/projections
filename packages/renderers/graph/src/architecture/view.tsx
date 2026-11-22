@@ -51,12 +51,12 @@ export function ArchitectureRenderer(props: RendererProps) {
     setExpanded(new Set())
     setAnchor(undefined)
   }
-  const all = props.controls['components'] === true
+  const all = props.controls.components === true
   const focused = props.focusRequest?.id
   const pinned = useMemo(() => new Set(focused ? [focused] : []), [focused])
   // Only the relationships the **Relationships** control draws join summary cards.
   const kinds = useMemo(() => drawnKinds(model, 'architecture'), [model])
-  const shown = kinds.length > 1 ? String(props.controls['relationships'] ?? 'all') : 'all'
+  const shown = kinds.length > 1 ? String(props.controls.relationships ?? 'all') : 'all'
   const drawn = useMemo(() => withRelationships(model, shown), [model, shown])
   const view = useMemo(() => architectureView(drawn, all ? 'all' : expanded, pinned), [drawn, all, expanded, pinned])
   const extraControls = view.collapsible ? componentsControls : undefined

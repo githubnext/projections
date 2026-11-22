@@ -37,17 +37,18 @@ export function columnChanges(row: EntityChange<Entity>): ChangeLine[] {
   if (before.label !== after.label) lines.push({key: 'label', word: 'Renamed', before: before.label, after: after.label})
   const from = baseType(before),
     to = baseType(after)
-  const declared = [text(before.data?.['type']), text(after.data?.['type'])] as const
+  const declared = [text(before.data?.type), text(after.data?.type)] as const
   if (from !== to) lines.push({key: 'type', word: 'Type changed', before: from, after: to})
-  else if (declared[0] !== declared[1])
+  else if (declared[0] !== declared[1]) {
     lines.push({
       key: 'type',
       word: 'Type changed',
       before: declared[0] ?? formatValue(undefined),
       after: declared[1] ?? formatValue(undefined),
     })
-  const was = before.data?.['nullable'] === true,
-    now = after.data?.['nullable'] === true
+  }
+  const was = before.data?.nullable === true,
+    now = after.data?.nullable === true
   if (was && !now) lines.push({key: 'nullable', word: 'Made required'})
   if (!was && now) lines.push({key: 'nullable', word: 'Made optional'})
   return lines.length ? lines : otherFields(before, after, [])
@@ -60,7 +61,7 @@ export function columnChanges(row: EntityChange<Entity>): ChangeLine[] {
  */
 export function referentialAction(value: unknown, {qualified = false}: {qualified?: boolean} = {}): string {
   if (typeof value === 'string' && value.length > 0) return value
-  const callable = value && typeof value === 'object' ? text((value as Record<string, unknown>)['callable']) : undefined
+  const callable = value && typeof value === 'object' ? text((value as Record<string, unknown>).callable) : undefined
   if (callable) return qualified ? callable : callable.split('.').at(-1)!
   return value === undefined || value === null ? 'default' : formatValue(value)
 }
@@ -75,7 +76,7 @@ const actions = [
 ] as const
 
 /** A key's own name: its database name, else its label. */
-const keyName = (entity: Entity) => text(entity.data?.['databaseName']) ?? entity.label
+const keyName = (entity: Entity) => text(entity.data?.databaseName) ?? entity.label
 
 /**
  * What changed about a key or index: its name (`Renamed`), the columns it covers, its kind, a foreign key's referential

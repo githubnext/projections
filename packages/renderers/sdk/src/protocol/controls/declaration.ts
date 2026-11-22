@@ -87,8 +87,9 @@ function parseChoices(value: unknown[]): {value: string; label: string}[] | unde
       choice.value.length > 64 ||
       values.has(choice.value) ||
       !label(choice.label)
-    )
+    ) {
       return undefined
+    }
     values.add(choice.value)
     choices.push({value: choice.value, label: choice.label})
   }
@@ -96,15 +97,16 @@ function parseChoices(value: unknown[]): {value: string; label: string}[] | unde
 }
 
 /** The parser of each control type's own fields, given the shared ones. */
-const parsers: {[type: string]: (item: Fields, base: ControlBase) => RendererControl | undefined} = {
+const parsers: Record<string, (item: Fields, base: ControlBase) => RendererControl | undefined> = {
   choice(item, base) {
     if (
       !keys(item, [...common, 'choices', 'default']) ||
       !Array.isArray(item.choices) ||
       !item.choices.length ||
       item.choices.length > rendererLimits.choices
-    )
+    ) {
       return undefined
+    }
     const choices = parseChoices(item.choices)
     if (!choices) return undefined
     if (typeof item.default !== 'string' || !choices.some(choice => choice.value === item.default)) return undefined
@@ -122,8 +124,9 @@ const parsers: {[type: string]: (item: Fields, base: ControlBase) => RendererCon
       !finite(max) ||
       !finite(step) ||
       !finite(item.default)
-    )
+    ) {
       return undefined
+    }
     if (!(min < max) || !(step > 0) || item.default < min || item.default > max) return undefined
     if (item.unit !== undefined && !label(item.unit, 16)) return undefined
     return {...base, type: 'range', min, max, step, default: item.default, ...(item.unit === undefined ? {} : {unit: item.unit as string})}

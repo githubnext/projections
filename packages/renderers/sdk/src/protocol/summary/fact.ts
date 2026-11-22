@@ -58,8 +58,9 @@ export function parseFactItem(item: Fields, facts: ReadonlySet<string>): Summary
   if (
     ids !== undefined &&
     !(Array.isArray(ids) && ids.length <= rendererLimits.summaryFactIds && ids.every(entry => text(entry) && entry.length > 0))
-  )
+  ) {
     return undefined
+  }
   if (description !== undefined && !label(description, rendererLimits.summaryDescription)) return undefined
   const noun = summaryNoun(item.noun)
   const deltas = summaryChanges(item)

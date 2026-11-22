@@ -25,6 +25,7 @@ test('without the settled form in the other order, the first step', () => {
 })
 
 test('by default the modes are never centred: they lead the row', () => {
-  for (const playback of [false, true])
+  for (const playback of [false, true]) {
     assert.ok(toolbarSteps({pickers: true, modes: true, playback, actions: true}).every(layout => layout.cluster === 'start'))
+  }
 })

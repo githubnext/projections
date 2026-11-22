@@ -19,20 +19,24 @@ export function invariants(root: string): string[] {
   return body ? listItems(body) : []
 }
 
-export type Area = {path: string; packages: number; description: string}
+export interface Area {
+  path: string
+  packages: number
+  description: string
+}
 
 /** Top-level directories holding workspaces or crates, each described by its own README or its packages. */
 export function areas(root: string, units: readonly Unit[]): Area[] {
   const groups = new Map<string, Unit[]>()
   for (const unit of units) {
-    const top = unit.path.split('/')[0] as string
+    const top = unit.path.split('/')[0]!
     groups.set(top, [...(groups.get(top) ?? []), unit])
   }
   return [...groups].map(([path, members]) => {
     const own = existsSync(join(root, path, 'README.md')) ? describe(readText(root, `${path}/README.md`)).description : undefined
     const fallback = members.length === 1 ? members[0]?.description : undefined
     const list = members.map(member => member.path.slice(path.length + 1) || member.path)
-    return {path, packages: members.length, description: clip(own ?? fallback ?? `${list.join(', ')}`, 140)}
+    return {path, packages: members.length, description: clip(own ?? fallback ?? list.join(', '), 140)}
   })
 }
 
@@ -111,8 +115,9 @@ function testsFor(root: string, path: string, unit: Unit | undefined): string[] 
   }
   look(directory)
   if (unit) for (const dir of ['test', 'tests', 'browser']) look(`${unit.path}/${dir}`)
-  if (path.endsWith('.rs') && existsSync(join(root, path)) && /#\[cfg\(test\)\]/.test(readText(root, path) ?? ''))
+  if (path.endsWith('.rs') && existsSync(join(root, path)) && (readText(root, path) ?? '').includes('#[cfg(test)]')) {
     found.add(`${path} (#[cfg(test)] module)`)
+  }
   const suites = unit
     ? ['test', 'tests', 'browser']
         .map(dir => `${unit.path}/${dir}`)

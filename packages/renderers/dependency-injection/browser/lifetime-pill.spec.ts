@@ -23,8 +23,9 @@ test('the lifetime is a pill, aligned optically, and its hover stays in its shap
   const scale = Number(await frame.locator('svg.di-canvas').getAttribute('data-scale'))
 
   // The pill's edges are on whole card units.
-  for (const attribute of ['x', 'y', 'width', 'height'])
+  for (const attribute of ['x', 'y', 'width', 'height']) {
     expect(Number.isInteger(Number(await pill.getAttribute(attribute))), attribute).toBe(true)
+  }
 
   // A capital E first and a capital H last: as much space above the E, below it, left of its stem and right of the H's.
   await label.evaluate(text => (text.textContent = 'EH'))

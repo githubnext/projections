@@ -33,7 +33,7 @@ export interface Presentation {
   mode?: string
   rendererOptions?: RendererOptions
   /** How the scenario presents its kinds, as a definition's `presentation.kinds` does; the nested renderer validates it. */
-  kinds?: {[kind: string]: RendererKind}
+  kinds?: Record<string, RendererKind>
 }
 
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)

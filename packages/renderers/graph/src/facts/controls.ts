@@ -35,7 +35,7 @@ export function factControls(fields: FactFields, kinds: readonly string[]): Rend
   const choices = (names: readonly string[]) => names.slice(0, fieldLimit).map(field => ({value: fieldPointer(field), label: field}))
   const none = {value: 'none', label: 'None'}
   const controls: RendererControl[] = []
-  if (fields.texts.length)
+  if (fields.texts.length) {
     controls.push({
       id: 'subtitle',
       label: 'Subtitle',
@@ -45,6 +45,7 @@ export function factControls(fields: FactFields, kinds: readonly string[]): Rend
       default: 'none',
       choices: [none, ...choices(fields.texts)],
     })
+  }
   // Always offered, with the conventional `icon` field always a choice: a definition presets it for revisions that
   // predate their icons too, which then draw none rather than refuse the preset.
   controls.push({
@@ -56,7 +57,7 @@ export function factControls(fields: FactFields, kinds: readonly string[]): Rend
     default: 'none',
     choices: [none, ...choices([...new Set(['icon', ...fields.icons])])],
   })
-  if (fields.numbers.length)
+  if (fields.numbers.length) {
     controls.push({
       id: 'sizeBy',
       label: 'Size by',
@@ -66,7 +67,8 @@ export function factControls(fields: FactFields, kinds: readonly string[]): Rend
       default: 'none',
       choices: [none, ...choices(fields.numbers)],
     })
-  if (fields.badges.length)
+  }
+  if (fields.badges.length) {
     controls.push(
       {
         id: 'badges',
@@ -105,6 +107,7 @@ export function factControls(fields: FactFields, kinds: readonly string[]): Rend
         choices: [none, ...choices(fields.badges)],
       },
     )
+  }
   controls.push({
     id: 'colorBy',
     label: 'Color by',
@@ -114,7 +117,7 @@ export function factControls(fields: FactFields, kinds: readonly string[]): Rend
     default: 'none',
     choices: [{value: 'none', label: 'None'}, {value: 'kind', label: 'Kind'}, ...choices(fields.colors)],
   })
-  if (kinds.length > 1)
+  if (kinds.length > 1) {
     controls.push({
       id: 'relationships',
       label: 'Relationships',
@@ -124,7 +127,8 @@ export function factControls(fields: FactFields, kinds: readonly string[]): Rend
       default: 'all',
       choices: [{value: 'all', label: 'All kinds'}, ...kinds.slice(0, fieldLimit).map(kind => ({value: kind, label: kind}))],
     })
-  if (kinds.length > 1)
+  }
+  if (kinds.length > 1) {
     controls.push({
       id: 'relationshipColors',
       label: 'Relationship colors',
@@ -133,5 +137,6 @@ export function factControls(fields: FactFields, kinds: readonly string[]): Rend
       ...group,
       default: false,
     })
+  }
   return controls
 }

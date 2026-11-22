@@ -11,14 +11,16 @@ import {join} from 'node:path'
  */
 export function pinToWorkspace(file, workspace) {
   const scaffold = JSON.parse(readFileSync(file, 'utf8'))
-  for (const field of ['dependencies', 'devDependencies'])
+  for (const field of ['dependencies', 'devDependencies']) {
     for (const [name, range] of Object.entries(scaffold[field] ?? {})) {
       const installed = join(workspace, 'node_modules', name, 'package.json')
       if (!/^[\^~]?\d/.test(range) || !existsSync(installed)) continue
       const {version} = JSON.parse(readFileSync(installed, 'utf8'))
-      if (version.split('.')[0] !== range.replace(/^[\^~]/, '').split('.')[0])
+      if (version.split('.')[0] !== range.replace(/^[\^~]/, '').split('.')[0]) {
         throw new Error(`The scaffold asks for ${name}@${range}, but this workspace installs ${version}`)
+      }
       scaffold[field][name] = version
     }
+  }
   writeFileSync(file, `${JSON.stringify(scaffold, null, 2)}\n`)
 }

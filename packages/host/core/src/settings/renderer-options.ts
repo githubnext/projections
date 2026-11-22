@@ -95,7 +95,7 @@ function uniqueLabel(label: string, taken: Set<string>): string {
 export function rendererOptionGroups(
   controls: readonly RendererControl[],
   rendererTitle: string | undefined,
-  taken: Set<string> = new Set(),
+  taken = new Set<string>(),
 ): {id: string; label: string; controls: RendererControl[]}[] {
   const ungrouped = '\u0000'
   const byGroup = new Map<string, RendererControl[]>()

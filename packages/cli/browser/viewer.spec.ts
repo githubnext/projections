@@ -455,8 +455,9 @@ test('the toolbar and stage lie flat, edge to edge, under the header, and the su
       const {header, toolbar: bar, rows, stage: top} = await edges()
       expect(header, at).toEqual([0, 35])
       expect(bar[0], at).toBe(35)
-      for (const edge of [...bar, ...rows.flat(), top])
+      for (const edge of [...bar, ...rows.flat(), top]) {
         expect(Number.isInteger(edge), `${at}: ${JSON.stringify({bar, rows, top})}`).toBe(true)
+      }
     }
     await page.setViewportSize(canvas)
   }
@@ -743,8 +744,9 @@ test('the person pins the projections pane from the title, and closes it back to
   await trigger.focus()
   await page.keyboard.press('ArrowDown')
   const dialog = page.getByRole('dialog', {name: 'Switch projection'})
-  for (let step = 0; step < 3 && (await dialog.locator('[data-pin-pane][aria-selected="true"]').count()) === 0; step++)
+  for (let step = 0; step < 3 && (await dialog.locator('[data-pin-pane][aria-selected="true"]').count()) === 0; step++) {
     await page.keyboard.press('ArrowDown')
+  }
   await page.keyboard.press('Enter')
 
   // A navigation landmark at the page's start, 240px wide, its current projection focused; the title is the title alone.

@@ -34,7 +34,7 @@ interface Frame {
   bar: string
 }
 const frames: Frame[] = []
-const rendererMessages: {[type: string]: number} = {}
+const rendererMessages: Record<string, number> = {}
 
 /** What the page drew so far; `reset` starts its frames and renderer messages again. */
 export function probeReport(reset: boolean) {
@@ -85,8 +85,9 @@ function sampleFirstStates() {
 function countRendererMessages() {
   addEventListener('message', event => {
     const data = event.data as {projections?: unknown; type?: unknown} | null
-    if (event.origin === 'null' && data?.projections !== undefined && typeof data.type === 'string')
+    if (event.origin === 'null' && data?.projections !== undefined && typeof data.type === 'string') {
       rendererMessages[data.type] = (rendererMessages[data.type] ?? 0) + 1
+    }
   })
 }
 

@@ -79,8 +79,9 @@ test('frames follow the comparison steps and hold still between them', () => {
       })
     }
     const reference = still((start + end) / 2)
-    for (let index = 1; index < 10; index++)
+    for (let index = 1; index < 10; index++) {
       assert.equal(still(start + ((end - start) * index) / 10), reference, `motion inside ${start}..${end}`)
+    }
   }
   // Relationships never outlive their endpoints.
   for (let index = 0; index <= 100; index++) {

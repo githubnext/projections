@@ -38,13 +38,14 @@ function FieldRow({
   const property = item && change.path ? {...item, path: change.path} : undefined
   const value = <ValueChange before={change.before} after={change.after} />
   const name = <span className="ph-field-name pj:break-words pj:font-mono pj:text-xs pj:text-muted-foreground">{change.name}</span>
-  if (!property || !item)
+  if (!property || !item) {
     return (
       <li key={change.key} className="ph-field pj:flex pj:min-w-0 pj:flex-col pj:gap-0.5 pj:px-2 pj:py-1.5" data-field={change.key}>
         {name}
         {value}
       </li>
     )
+  }
   const selected = p.selection?.rowId === row.id && p.selection.target !== undefined && sameTarget(p.selection.target, property)
   const count = marks
     .filter(annotation => sameTarget(annotation.target, property))

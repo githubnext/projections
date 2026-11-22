@@ -214,8 +214,9 @@ export function withHolders(drawn: readonly Drawn[]): readonly Drawn[] {
   const holders = new Set<string>()
   for (const item of drawn) {
     if (!(item.changed && item.emphasis > 0.01)) continue
-    for (let parent = item.circle.parent; parent !== undefined && !holders.has(parent); parent = byId.get(parent)?.circle.parent)
+    for (let parent = item.circle.parent; parent !== undefined && !holders.has(parent); parent = byId.get(parent)?.circle.parent) {
       holders.add(parent)
+    }
   }
   return holders.size ? drawn.map(item => (holders.has(item.id) ? {...item, holdsChanges: true} : item)) : drawn
 }

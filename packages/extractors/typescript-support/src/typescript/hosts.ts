@@ -6,7 +6,10 @@ import {slash} from './model.js'
 import type {SourceFiles} from './files.js'
 
 /** The compiler's own declaration libraries: the only files read outside the input boundary. */
-export type Libraries = {directory: string; texts: Map<string, string>}
+export interface Libraries {
+  directory: string
+  texts: Map<string, string>
+}
 
 export async function readLibraries(): Promise<Libraries> {
   const directory = path.dirname(ts.getDefaultLibFilePath({}))

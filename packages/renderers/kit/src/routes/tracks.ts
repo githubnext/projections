@@ -47,7 +47,7 @@ export function routeTracks(runs: readonly TrackRun[], spacing = trackSpacing): 
   const tracks = runs.map(() => 0)
   const parent = runs.map((_, index) => index)
   const root = (index: number): number => (parent[index] === index ? index : (parent[index] = root(parent[index]!)))
-  for (let i = 0; i < runs.length; i++)
+  for (let i = 0; i < runs.length; i++) {
     for (let j = i + 1; j < runs.length; j++) {
       const p = info[i],
         q = info[j]
@@ -61,6 +61,7 @@ export function routeTracks(runs: readonly TrackRun[], spacing = trackSpacing): 
       }
       if (Math.abs(p.along - q.along) < spacing && Math.min(p.high, q.high) - Math.max(p.low, q.low) > 2) parent[root(i)] = root(j)
     }
+  }
   const groups = new Map<number, number[]>()
   runs.forEach((_, index) => info[index] && groups.set(root(index), [...(groups.get(root(index)) ?? []), index]))
   for (const group of groups.values()) {

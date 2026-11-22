@@ -49,7 +49,7 @@ export function declaredFiles(definition: ProjectionDefinition, prefix = ''): st
  * an extraction reads.
  */
 export function presentationFiles(definition: ProjectionDefinition, prefix = ''): string[] {
-  const files: Array<string | undefined> = []
+  const files: (string | undefined)[] = []
   const add = (path: unknown) => files.push(inRepository(prefix, path))
   const comparator = definition.comparator as unknown
   if (typeof comparator === 'string') add(comparator)

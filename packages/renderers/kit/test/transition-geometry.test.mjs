@@ -27,8 +27,9 @@ async function both(before, after, schedule = scheduleSteps) {
 /** Each boundary's members, in any layout of the transition, and whether one row contains another. */
 function containment(transition) {
   const parent = new Map()
-  for (const layout of transition.layouts)
+  for (const layout of transition.layouts) {
     for (const [group, children] of layout.groups) for (const child of children) parent.set(child, group)
+  }
   return (child, ancestor) => {
     for (let at = parent.get(child); at !== undefined; at = parent.get(at)) if (at === ancestor) return true
     return false
@@ -39,7 +40,7 @@ function containment(transition) {
 function collisions(transition, within, progress) {
   const nodes = transition(progress).nodes
   const found = []
-  for (let i = 0; i < nodes.length; i++)
+  for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i],
         b = nodes[j]
@@ -48,6 +49,7 @@ function collisions(transition, within, progress) {
       const y = Math.min(a.y + a.height / 2, b.y + b.height / 2) - Math.max(a.y - a.height / 2, b.y - b.height / 2)
       if (x > 0.5 && y > 0.5) found.push(`${progress}: ${a.id} / ${b.id}`)
     }
+  }
   return found
 }
 
@@ -74,8 +76,8 @@ test('namespaces losing and gaining methods move without collisions', async () =
     const spaces = 3 + Math.floor(random() * 5),
       scopes = 2 + Math.floor(random() * 4)
     const methods = []
-    for (let space = 0; space < spaces; space++)
-      for (let index = 0, count = 1 + Math.floor(random() * 3); index < count; index++)
+    for (let space = 0; space < spaces; space++) {
+      for (let index = 0, count = 1 + Math.floor(random() * 3); index < count; index++) {
         methods.push({
           id: `m${space}.${index}`,
           space: `ns${space}`,
@@ -83,6 +85,8 @@ test('namespaces losing and gaining methods move without collisions', async () =
           gone: random() < 0.4,
           fresh: random() < 0.2,
         })
+      }
+    }
     const side = skip => {
       const kept = methods.filter(method => !method[skip])
       return extraction(
@@ -100,8 +104,9 @@ test('namespaces losing and gaining methods move without collisions', async () =
     }
     for (const {transition} of await both(side('fresh'), side('gone'))) {
       const within = containment(transition)
-      for (const t of samples.filter((_, index) => index % 2 === 0))
+      for (const t of samples.filter((_, index) => index % 2 === 0)) {
         assert.deepEqual(collisions(transition, within, t), [], `trial ${trial}`)
+      }
     }
   }
 })
@@ -122,8 +127,9 @@ test('a leaving card fades evenly through its window, and its relationships neve
   assert.ok(Math.abs(opacity(forward.transition, (start + end) / 2) - 0.5) < 0.15)
   for (const t of samples) {
     const card = opacity(forward.transition, t)
-    for (const edge of forward.transition(t).edges.filter(edge => edge.fromId === id || edge.toId === id))
+    for (const edge of forward.transition(t).edges.filter(edge => edge.fromId === id || edge.toId === id)) {
       assert.ok(edge.opacity <= card + 1e-9, `${edge.key} outlasts its card at ${t}`)
+    }
   }
   // Without reading time, the reverse comparison draws the same fade in, mirrored.
   const [motion, mirror] = await both(before, after, unread)
@@ -143,7 +149,7 @@ test('Before and After draw their own boundaries, even when components move betw
         relationship('api->db', 'api', 'db', 'references'),
       ],
     )
-  for (const {transition} of await both(side(false), side(true)))
+  for (const {transition} of await both(side(false), side(true))) {
     for (const t of [0, 1]) {
       const groups = transition(t)
         .nodes.filter(node => node.group)
@@ -152,4 +158,5 @@ test('Before and After draw their own boundaries, even when components move betw
       const expected = transition(t).nodes.some(node => node.id === 'storage') ? ['application', 'storage'] : ['application']
       assert.deepEqual(groups, expected, `boundaries at ${t}`)
     }
+  }
 })

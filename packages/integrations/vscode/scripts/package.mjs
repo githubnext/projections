@@ -56,8 +56,9 @@ export async function stage({root, target, binary, out, version}) {
   await writeFile(path.join(directory, 'package.json'), `${JSON.stringify(shipped, null, 2)}\n`)
   if (binary) {
     const version = execFileSync(binary, ['--version'], {encoding: 'utf8'}).trim()
-    if (version !== `projections ${manifest.version}`)
+    if (version !== `projections ${manifest.version}`) {
       throw new Error(`${binary} is ${version}; this extension (${manifest.version}) ships projections ${manifest.version}`)
+    }
     const name = target.startsWith('win32') ? 'projections.exe' : 'projections'
     const destination = path.join(directory, 'bin', targets[target], name)
     await mkdir(path.dirname(destination), {recursive: true})

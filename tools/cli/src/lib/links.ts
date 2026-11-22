@@ -25,7 +25,7 @@ export function anchors(markdown: string): Set<string> {
     seen.set(base, count + 1)
     found.add(count ? `${base}-${count}` : base)
   }
-  for (const match of blankCode(markdown).matchAll(/<[a-z][^>]*?\s(?:id|name)=["']([^"']+)["']/gi)) found.add(match[1] as string)
+  for (const match of blankCode(markdown).matchAll(/<[a-z][^>]*?\s(?:id|name)=["']([^"']+)["']/gi)) found.add(match[1]!)
   return found
 }
 
@@ -49,7 +49,10 @@ function blankCode(markdown: string): string {
   return kept.join('\n').replace(/(\x60+)(?!\x60)[\s\S]*?(?<!\x60)\1(?!\x60)/g, blank)
 }
 
-export type Link = {target: string; line: number}
+export interface Link {
+  target: string
+  line: number
+}
 
 /** Every link target in Markdown outside code: inline links and images, reference definitions, HTML `href`/`src`. */
 export function links(markdown: string): Link[] {
@@ -59,11 +62,12 @@ export function links(markdown: string): Link[] {
   const inline = /\]\(\s*(<[^>\n]*>|[^\s()<>]*(?:\([^\s()]*\)[^\s()<>]*)*)(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g
   const definition = /^ {0,3}\[[^\]\n]+\]:[ \t]*(<[^>\n]*>|\S+)/gm
   const html = /<(?:a|img|source|link)\b[^>]*?\s(?:href|src|srcset)=["']([^"']+)["']/gi
-  for (const pattern of [inline, definition, html])
+  for (const pattern of [inline, definition, html]) {
     for (const match of text.matchAll(pattern)) {
-      const target = (match[1] as string).replace(/^<(.*)>$/, '$1').trim()
+      const target = match[1]!.replace(/^<(.*)>$/, '$1').trim()
       if (target) found.push({target, line: lineAt(match.index)})
     }
+  }
   return found.sort((a, b) => a.line - b.line)
 }
 
@@ -87,7 +91,9 @@ function kind(root: string, path: string): 'file' | 'directory' | undefined {
   }
 }
 
-type Pages = {anchors(path: string): Set<string>}
+interface Pages {
+  anchors(path: string): Set<string>
+}
 
 /** Reads and caches each page's anchors. */
 function pagesIn(root: string): Pages {

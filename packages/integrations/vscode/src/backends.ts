@@ -117,11 +117,12 @@ export class BackendPool<S> {
 
   /** Stops every backend. */
   dispose() {
-    for (const entry of this.entries.values())
+    for (const entry of this.entries.values()) {
       void entry.runner?.then(
         runner => runner.stop(),
         () => {},
       )
+    }
     this.entries.clear()
   }
 }

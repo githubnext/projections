@@ -151,9 +151,11 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
         ['peerDependencies', 'depends-on', 'npm peer dependency'],
         ['optionalDependencies', 'depends-on', 'npm optional dependency'],
         ['devDependencies', 'dev-depends-on', 'npm dev dependency'],
-      ])
-        for (const name of Object.keys(pkg[section] ?? {}).sort(byText))
+      ]) {
+        for (const name of Object.keys(pkg[section] ?? {}).sort(byText)) {
           manifestDependencies.push({from: id, name, kind, via, source: manifest})
+        }
+      }
     }
 
     // Components without a manifest, named by the `components` input's directory patterns; a matching directory with a
@@ -171,7 +173,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
         .filter(directory => componentPatterns.some(pattern => pattern.test(directory)))
         .filter(directory => !fileSet.has(`${prefix}${directory}/package.json`) && !fileSet.has(`${prefix}${directory}/Cargo.toml`)),
     )
-    for (const directory of componentDirectories)
+    for (const directory of componentDirectories) {
       addUnit({
         id: `component:${stable(directory)}`,
         kind: 'component',
@@ -182,6 +184,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
         scan,
         data: {area, path: join(rootPath, directory)},
       })
+    }
 
     // Out-of-process helpers: a `helper` directory inside a unit, written in another language.
     const helperLanguages = {'.go': 'go', '.py': 'python', '.java': 'java', '.cs': 'csharp'}

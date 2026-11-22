@@ -45,10 +45,13 @@ export function refusal(response: RunnerResponse): string {
 
 export function parseWrite(value: unknown): OnboardingWrite {
   const write = value as Partial<OnboardingWrite> | null
-  if (!write || !Array.isArray(write.files) || typeof write.digest !== 'string' || typeof write.written !== 'boolean')
+  if (!write || !Array.isArray(write.files) || typeof write.digest !== 'string' || typeof write.written !== 'boolean') {
     throw new Error('The Projections backend returned an invalid preview')
-  for (const file of write.files)
-    if (typeof file?.path !== 'string' || typeof file.after !== 'string' || (file.before !== null && typeof file.before !== 'string'))
+  }
+  for (const file of write.files) {
+    if (typeof file?.path !== 'string' || typeof file.after !== 'string' || (file.before !== null && typeof file.before !== 'string')) {
       throw new Error('The Projections backend returned an invalid preview')
+    }
+  }
   return write as OnboardingWrite
 }

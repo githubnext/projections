@@ -12,7 +12,7 @@ import {parseProblems, tail, type Problem} from '../../lib/problems.ts'
 import {newestOutput, run} from '../../lib/repo.ts'
 import {changeSet, UsageError} from './change-set.ts'
 
-export type BuildOptions = {
+export interface BuildOptions {
   target?: string | undefined
   affected?: boolean | undefined
   since?: string | undefined
@@ -21,7 +21,7 @@ export type BuildOptions = {
   limit?: number | undefined
 }
 
-export type BuildStep = {
+export interface BuildStep {
   workspace: string
   status: 'built' | 'unchanged' | 'current' | 'planned' | 'failed' | 'skip'
   reason: string
@@ -31,14 +31,20 @@ export type BuildStep = {
   tail?: string[]
 }
 
-type Times = {atime: Date; mtime: Date}
+interface Times {
+  atime: Date
+  mtime: Date
+}
 
 /**
  * A workspace's build outputs: every file under its dist and artifacts with its content hash and times, and every
  * directory with its times. Watchers such as Cargo's `rerun-if-changed` on a directory read directories' times too,
  * and a build that empties and refills one changes them.
  */
-type Snapshot = {files: Map<string, Times & {hash: string}>; directories: Map<string, Times>}
+interface Snapshot {
+  files: Map<string, Times & {hash: string}>
+  directories: Map<string, Times>
+}
 
 export function snapshot(root: string, unit: Unit): Snapshot {
   const taken: Snapshot = {files: new Map(), directories: new Map()}
@@ -89,8 +95,9 @@ const builds = (unit: Unit | undefined): boolean => Boolean(unit?.kinds.includes
 /** Why `unit` needs building, or undefined when its dist is current. `rebuilt` holds the workspaces built this run. */
 export function staleness(root: string, units: readonly Unit[], unit: Unit, rebuilt: ReadonlySet<string>): string | undefined {
   // Cargo decides for itself what a Rust build needs; outside the workspace's directory, too.
-  if (unit.kinds.includes('crate') || unit.dependsOn.some(path => units.find(entry => entry.path === path)?.kinds.includes('crate')))
+  if (unit.kinds.includes('crate') || unit.dependsOn.some(path => units.find(entry => entry.path === path)?.kinds.includes('crate'))) {
     return 'builds Rust, which Cargo keeps current'
+  }
   const records = buildRecords(root)
   const status = buildStatus(root, unit, records)
   if (status === undefined) return 'has no src and dist to compare'
@@ -115,9 +122,10 @@ export async function buildReport(root: string, options: BuildOptions, progress?
     targets = [unit]
   } else if (options.affected || options.since !== undefined) {
     const set = changeSet(root, options.since)
-    targets = set.affected.changed.map(path => units.find(unit => unit.path === path) as Unit).filter(unit => unit.kinds.includes('npm'))
-  } else
+    targets = set.affected.changed.map(path => units.find(unit => unit.path === path)!).filter(unit => unit.kinds.includes('npm'))
+  } else {
     throw new UsageError('Name a workspace, or pass --affected', `${TOOLS} build packages/renderers/graph; npm run build builds everything`)
+  }
   const wanted = new Set(targets.map(unit => unit.path))
   const closure = new Set<string>()
   for (const target of targets) {
@@ -125,7 +133,7 @@ export async function buildReport(root: string, options: BuildOptions, progress?
     for (const dependency of dependenciesOf(units, target)) closure.add(dependency.path)
   }
   const order = inDependencyOrder(units, closure)
-    .map(path => units.find(unit => unit.path === path) as Unit)
+    .map(path => units.find(unit => unit.path === path)!)
     .filter(builds)
   const steps: BuildStep[] = []
   const rebuilt = new Set<string>()
@@ -161,7 +169,7 @@ export async function buildReport(root: string, options: BuildOptions, progress?
     // Until it succeeds: a build that fails part way can leave outputs newer than their src.
     const previous = buildRecords(root)[unit.path] ?? {}
     recordBuild(root, unit.path, {...previous, building: true})
-    const ran = await run(root, {argv: ['npm', 'run', 'build', '--workspace', unit.names[0] as string]})
+    const ran = await run(root, {argv: ['npm', 'run', 'build', '--workspace', unit.names[0]!]})
     const seconds = Math.round(ran.durationMs / 100) / 10
     if (ran.exitCode === 0) {
       const unchanged = recordSuccess(root, unit, inputs, before, started)

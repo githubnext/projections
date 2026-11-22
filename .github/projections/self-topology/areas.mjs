@@ -27,11 +27,12 @@ export function topologyEntities(cx) {
   const carried = [...relationships.values()].filter(({kind}) => ['depends-on', 'bundles', 'compiles-to', 'loads'].includes(kind))
   for (let grew = true; grew;) {
     grew = false
-    for (const {from, to} of carried)
+    for (const {from, to} of carried) {
       if (shipped.has(from) && !shipped.has(to)) {
         shipped.add(to)
         grew = true
       }
+    }
   }
   const unshipped = 'Built and run only here; no release ships it'
   const grouped = new Set([...areaGroups.values()].filter(members => members.length >= 2).flat())
@@ -55,7 +56,7 @@ export function topologyEntities(cx) {
       const source = (written || icon) && readme ? `${directory}/README.md` : undefined
       return {id: `area:${key}`, key, label: key, members, directory, description, icon, readme: source}
     })
-  if (tooling.length >= 2)
+  if (tooling.length >= 2) {
     boundaries.push({
       id: 'group:repository-tooling',
       key: '',
@@ -63,6 +64,7 @@ export function topologyEntities(cx) {
       members: tooling,
       description: unshipped,
     })
+  }
 
   const entities = []
   for (const {id, key, label, members, directory, description, icon, readme} of boundaries.sort((a, b) => byText(a.id, b.id))) {

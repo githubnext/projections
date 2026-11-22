@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
 
-process.env['TOOLS_ROOT'] = fileURLToPath(new URL('fixtures/repo/', import.meta.url))
+process.env.TOOLS_ROOT = fileURLToPath(new URL('fixtures/repo/', import.meta.url))
 const {default: cli, exitCodes} = await import('../src/cli.ts')
 const {docsRead, docsSearch} = await import('../src/commands/docs.ts')
 const {feedbackReport} = await import('../src/commands/feedback.ts')
@@ -24,7 +24,10 @@ async function run(argv: string[]): Promise<{output: string; exit: number}> {
 
 // What a command prints with --json: its report, or the envelope of the error that stopped it.
 type Report<F extends (...args: never[]) => unknown> = Awaited<ReturnType<F>>
-type Failure = {code: string; message: string}
+interface Failure {
+  code: string
+  message: string
+}
 
 async function runJson<T>(argv: string[]): Promise<{json: T; exit: number}> {
   const {output, exit} = await run(argv)
@@ -153,6 +156,7 @@ test('the manifest lists every command', async () => {
     'fix',
     'feedback',
     'update shadcn',
-  ])
+  ]) {
     assert.match(output, new RegExp(`\\| \`tools ${command}[\` ]`), command)
+  }
 })

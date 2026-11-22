@@ -123,7 +123,7 @@ export function Splitter({
   }
   const key = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     const step = event.shiftKey ? 48 : 16
-    const grow: {[key: string]: number} = vertical ? {ArrowRight: sign * step, ArrowLeft: -sign * step} : {ArrowUp: step, ArrowDown: -step}
+    const grow: Record<string, number> = vertical ? {ArrowRight: sign * step, ArrowLeft: -sign * step} : {ArrowUp: step, ArrowDown: -step}
     const delta = grow[event.key]
     if (delta) {
       event.preventDefault()

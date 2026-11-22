@@ -16,8 +16,9 @@ export function unwrap({ts}, node) {
     ts.isTypeAssertionExpression(node) ||
     ts.isSatisfiesExpression(node) ||
     ts.isNonNullExpression(node)
-  )
+  ) {
     node = node.expression
+  }
   return node
 }
 
@@ -29,8 +30,9 @@ export function initializer(project, checker, node, seen = new Set()) {
   if (symbol && !seen.has(symbol)) {
     seen.add(symbol)
     const declaration = symbol.valueDeclaration
-    if (declaration && ts.isVariableDeclaration(declaration) && declaration.initializer)
+    if (declaration && ts.isVariableDeclaration(declaration) && declaration.initializer) {
       return initializer(project, checker, declaration.initializer, seen)
+    }
   }
   return node
 }

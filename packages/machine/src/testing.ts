@@ -97,8 +97,9 @@ export function stableKey(value: unknown): string {
     if (item instanceof Map) return {'@map': sortedEntries([...item])}
     if (item instanceof Set) return {'@set': [...item].map(stableKey).sort()}
     if (typeof item === 'function') return `@function ${item.name}`
-    if (item && typeof item === 'object' && !Array.isArray(item))
+    if (item && typeof item === 'object' && !Array.isArray(item)) {
       return Object.fromEntries(Object.entries(item).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+    }
     return item
   })
 }
@@ -116,7 +117,10 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
   const key = options.key ?? stableKey
   const starts = (Array.isArray(options.from) ? options.from : [options.from]) as readonly S[]
   // A timer fires once while states keep listing its key, as in an actor: the walk tracks the keys that fired.
-  type Node = {path: ExplorePath<S, E, F>; fired: ReadonlySet<string>}
+  interface Node {
+    path: ExplorePath<S, E, F>
+    fired: ReadonlySet<string>
+  }
   const pending = (state: S, fired: ReadonlySet<string>) =>
     machine
       .activities(state)
@@ -150,8 +154,9 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
     seen.add(at)
     if (!states.has(id)) {
       states.set(id, node.path.state)
-      for (const [name, check] of Object.entries(invariants))
+      for (const [name, check] of Object.entries(invariants)) {
         if (!check(node.path.state, node.path)) fail(name, `in "${node.path.state.kind}"`, node.path)
+      }
     }
     frontier.push(node)
   }
@@ -159,16 +164,19 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
   for (let level = 0; level < depth && frontier.length; level++) {
     const current = frontier
     frontier = []
-    for (const {path, fired} of current)
+    for (const {path, fired} of current) {
       for (const {event, timer} of eventsIn(path.state, fired)) {
         const {state: to, effects, handled} = machine.transition(path.state, event)
         const step: ExploreStep<S, E, F> = {from: path.state, event, to, effects, handled}
         if (handled) taken.add(`${path.state.kind}.${event.type}`)
-        for (const [name, check] of Object.entries(transitions))
-          if (!check(step, path))
+        for (const [name, check] of Object.entries(transitions)) {
+          if (!check(step, path)) {
             fail(name, `on "${event.type}" in "${path.state.kind}"`, {...path, steps: [...path.steps, step], state: to})
+          }
+        }
         visit({path: {start: path.start, steps: [...path.steps, step], state: to}, fired: firedIn(to, fired, timer)})
       }
+    }
   }
 
   const listed = Object.entries(machine.definition.states as Record<string, {on: Record<string, unknown>}>).flatMap(([kind, node]) =>
@@ -176,7 +184,8 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
   )
   const except = new Set(typeof options.complete === 'object' ? (options.complete.except ?? []) : [])
   const untaken = listed.filter(handler => !taken.has(handler) && !except.has(handler))
-  if (options.complete && untaken.length)
+  if (options.complete && untaken.length) {
     throw new ExplorationError('complete', `Handlers never taken within depth ${depth}: ${untaken.join(', ')}`)
+  }
   return {states, taken, untaken, truncated}
 }

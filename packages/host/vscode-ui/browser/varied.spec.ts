@@ -13,7 +13,7 @@ const toggle = (page: Page) => page.getByRole('button', {name: '2 varied within 
 
 test.use({viewport: {width: 1280, height: 800}})
 
-for (const theme of ['light-modern', 'dark-modern'] as const)
+for (const theme of ['light-modern', 'dark-modern'] as const) {
   test(`${theme}: the varied count toggles a filter and the detail card lists varied paths`, async ({page}) => {
     await page.goto(story('projection-view--volatile-variation', theme))
     await ready(page)
@@ -43,6 +43,7 @@ for (const theme of ['light-modern', 'dark-modern'] as const)
     await toggle(page).click()
     await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true')
   })
+}
 
 test('the count sits at the end of the summary bar, never in the toolbar, at any width', async ({page}) => {
   await page.setViewportSize({width: 320, height: 800})

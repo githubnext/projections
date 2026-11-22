@@ -39,13 +39,13 @@ export function Agent({agent, frame, run}: {agent: Item; frame: Frame; run?: Run
 
 export function Kernel({kernel, frame, run}: {kernel: Item; frame: Frame; run?: Run | undefined}) {
   const options = (entity: Entity): string => {
-    const config = (entity.data?.['config'] ?? {}) as Record<string, unknown>
+    const config = (entity.data?.config ?? {}) as Record<string, unknown>
     return Object.entries(config)
       .map(([option, enabled]) => codeSpan(`${option}=${enabled ? 'y' : 'n'}`))
       .join(' ')
   }
   const version = (entity: Entity): string =>
-    typeof entity.data?.['kernel'] === 'string' ? `kernel ${codeSpan(entity.data['kernel'])}` : 'any kernel'
+    typeof entity.data?.kernel === 'string' ? `kernel ${codeSpan(entity.data.kernel)}` : 'any kernel'
   return (
     <Row
       item={kernel}
@@ -97,7 +97,7 @@ export function Policy({policy, frame, run}: {policy: PolicyItem; frame: Frame; 
             {'\u00a0· mode '}
             {field(policy, frame, value => codeSpan(data(value, 'mode')))}
             {'\u00a0· loads on '}
-            {field(policy, frame, value => proseOf(value.data?.['nodes'], 'all nodes'))}
+            {field(policy, frame, value => proseOf(value.data?.nodes, 'all nodes'))}
           </span>
         </>
       }

@@ -17,7 +17,7 @@ export function databaseContext(all: ComparisonModel, changes: ReadonlySet<strin
   // holds that), with the containment between them, in either revision.
   for (let added = true; added;) {
     added = false
-    for (const row of all.relationships)
+    for (const row of all.relationships) {
       for (const side of ['before', 'after'] as const) {
         const item = row[side]
         if (item?.kind !== 'contains') continue
@@ -27,6 +27,7 @@ export function databaseContext(all: ComparisonModel, changes: ReadonlySet<strin
         found.add(from).add(row.id)
         added = true
       }
+    }
   }
   return found
 }

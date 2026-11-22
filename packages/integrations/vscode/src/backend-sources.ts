@@ -42,10 +42,11 @@ export async function launch(context: vscode.ExtensionContext, output: vscode.Lo
   const version = String((context.extension.packageJSON as {version?: unknown}).version ?? '0.0.0')
   const path = source.kind === 'document' ? source.file.fsPath : source.kind === 'fixtures' ? source.directory.fsPath : undefined
   const scenarios = source.kind === 'fixtures' && path ? scenarioRenderer(path, vscode.workspace.isTrusted) : undefined
-  if (scenarios?.withheld)
+  if (scenarios?.withheld) {
     void vscode.window.showWarningMessage(
       "This renderer package's own renderer is repository code, which runs only in a trusted workspace: its scenarios use the built-in renderer for their schema.",
     )
+  }
   return startRunner({
     executable: cli.path,
     repository: sourceRoot(source).fsPath,

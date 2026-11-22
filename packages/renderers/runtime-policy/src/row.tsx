@@ -48,8 +48,9 @@ const continuing = (words: string) => words.charAt(0).toLowerCase() + words.slic
 export function Status({item, strength, inherited}: {item: Item; strength: number; inherited: boolean}) {
   const parts = statusParts(item.row)
   if (!parts.length) return <span className="rp-cell rp-status" />
-  if (inherited)
+  if (inherited) {
     return <span className="rp-cell rp-status">{strength > 0.01 && <span className="sr-only">{describeChange(item.row)}</span>}</span>
+  }
   const words = item.interpretations.filter(name => interpretationText[name])
   const shown = strength > 0.01
   const sentence = [describeChange(item.row), ...words.map(name => continuing(interpretationText[name]!))].join(', ')

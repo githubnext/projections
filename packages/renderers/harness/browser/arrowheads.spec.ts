@@ -15,10 +15,10 @@ import {scenarios} from './scenarios.js'
  */
 const drawing = ['graph', 'dependency-injection', 'database']
 
-for (const scale of [1, 2])
+for (const scale of [1, 2]) {
   test.describe(`at a device pixel ratio of ${scale}`, () => {
     test.use({deviceScaleFactor: scale})
-    for (const directory of drawing)
+    for (const directory of drawing) {
       test(`${directory}: arrowheads touch their card's border without covering it, animated and in diff mode`, async ({page}) => {
         test.slow()
         const inspector = harnessInspector()
@@ -40,4 +40,6 @@ for (const scale of [1, 2])
         }
         expect(measured, 'arrowheads measured').toBeGreaterThan(0)
       })
+    }
   })
+}

@@ -102,11 +102,12 @@ export async function modeGroup(scope: Scope): Promise<Locator> {
   const inline = scope.locator('.ph-toolbar').getByRole('radiogroup', {name: 'Comparison mode'}).first()
   if (await inline.isVisible()) return inline
   const menu = openDialog(scope, 'Comparison mode')
-  if (!(await menu.isVisible()))
+  if (!(await menu.isVisible())) {
     await scope
       .getByRole('button', {name: /^Comparison mode: /})
       .first()
       .click()
+  }
   await menu.waitFor()
   return menu.getByRole('radiogroup', {name: 'Comparison mode'})
 }
@@ -140,11 +141,12 @@ export async function pairSelect(scope: Scope, label: 'Compare from' | 'To' | 'S
   const inline = scope.getByLabel(label, {exact: true}).first()
   if (await inline.isVisible()) return inline
   const popover = openDialog(scope, 'Revisions')
-  if (!(await popover.isVisible()))
+  if (!(await popover.isVisible())) {
     await scope
       .getByRole('button', {name: /^Revisions?: /})
       .first()
       .click()
+  }
   await popover.waitFor()
   return popover.getByLabel(label, {exact: true})
 }

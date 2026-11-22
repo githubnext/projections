@@ -770,8 +770,9 @@ test('snapshots: listed IDs, file names, what each projection renders, and where
   })
   const fork = {...pullEvent, pull_request: {...pullEvent.pull_request, head: {ref: 'feature', repo: {full_name: 'someone/delivery'}}}}
   assert.match(snapshotTarget(pull, fork, branch, 'octo-org/delivery').reason, /forks/)
-  for (const name of ['main', 'feature', '-x', 'a..b', 'a.lock', 'a b'])
+  for (const name of ['main', 'feature', '-x', 'a..b', 'a.lock', 'a b']) {
     assert.throws(() => snapshotTarget(pull, pullEvent, {...inputs, branch: name}, 'octo-org/delivery'), /snapshots-branch/)
+  }
   // Git's own blob ID.
   const bytes = Buffer.from('snapshot\n')
   const directory = mkdtempSync(path.join(tmpdir(), 'projections-blob-'))
@@ -928,8 +929,9 @@ async function fakeGitHub({branches = {}, fail} = {}) {
       const blob = tree?.get(match[1].split('/').map(decodeURIComponent).join('/'))
       return blob ? reply(200, {sha: blob}) : reply(404)
     }
-    if (request.method === 'GET' && (match = /^\/git\/commits\/(.+)$/.exec(route)))
+    if (request.method === 'GET' && (match = /^\/git\/commits\/(.+)$/.exec(route))) {
       return reply(200, {tree: {sha: commits.get(match[1]).tree}})
+    }
     if (request.method === 'POST' && route === '/git/blobs') {
       const bytes = Buffer.from(body.content, 'base64')
       const sha = gitBlobSha(bytes)

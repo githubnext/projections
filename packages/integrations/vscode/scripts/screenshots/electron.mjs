@@ -49,9 +49,9 @@ export async function launch({
     executablePath: executable,
     args: [
       repository,
-      '--extensionDevelopmentPath=' + extension,
-      '--user-data-dir=' + user,
-      '--extensions-dir=' + join(user, 'extensions'),
+      `--extensionDevelopmentPath=${extension}`,
+      `--user-data-dir=${user}`,
+      `--extensions-dir=${join(user, 'extensions')}`,
       '--skip-welcome',
       '--skip-release-notes',
       '--disable-workspace-trust',
@@ -114,8 +114,9 @@ export async function inspectorFrame(window, timeoutMs = 60_000) {
           .locator('#projections-config')
           .count()
           .catch(() => 0)
-      )
+      ) {
         return frame
+      }
     }
     await new Promise(resolve => setTimeout(resolve, 250))
   }

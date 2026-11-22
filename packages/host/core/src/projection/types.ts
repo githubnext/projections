@@ -44,9 +44,9 @@ export const highlightingModes: readonly Highlighting[] = ['animated', 'on', 'of
 export type PresentationDefaults = PresentationSettings
 
 /** One piece of state an embedder may control: pass the value and handle changes, or let the core own it. */
-type Controllable<Name extends string, T> = {[K in Name]?: T} & {[K in `initial${Capitalize<Name>}`]?: T} & {
-  [K in `on${Capitalize<Name>}Change`]?: (value: T) => void
-}
+type Controllable<Name extends string, T> = Partial<Record<Name, T>> &
+  Partial<Record<`initial${Capitalize<Name>}`, T>> &
+  Partial<Record<`on${Capitalize<Name>}Change`, (value: T) => void>>
 
 /**
  * The options of `useProjection`: the subject and the renderers that can present it, then the projection's
@@ -75,7 +75,7 @@ export type ProjectionOptions = {
   presentation?: PresentationDefaults | undefined
   colorMode?: ColorMode | 'auto'
   /** Theme token overrides, keyed by token name, for example from a design system. */
-  themeTokens?: {[name: string]: string}
+  themeTokens?: Record<string, string>
   /** Called when a renderer or the host asks to open a source location. The embedder decides whether to navigate. */
   onOpen?: (path: string, line?: number) => void
   /** Called when an action control is activated, after it is sent to the renderer. */
@@ -183,7 +183,7 @@ export type ProjectionOptions = {
   Controllable<'selectedId', string | null> &
   Controllable<'rendererName', string> & {
     /** Controlled values of the renderer's declared controls. */
-    controlValues?: {[id: string]: ControlValue}
+    controlValues?: Record<string, ControlValue>
     /** Called with each requested control value; values are validated against the declaration first. */
     onControlChange?: (id: string, value: ControlValue) => void
   }
@@ -234,7 +234,7 @@ export interface ProjectionController {
   theme: RendererTheme
   colorMode: ColorMode
   /** The theme as `--projections-*` custom properties, for styling host UI with the same tokens. */
-  themeStyle: {[property: string]: string}
+  themeStyle: Record<string, string>
   reducedMotion: boolean
 
   renderer: RendererEntry | undefined
@@ -332,7 +332,7 @@ export interface ProjectionController {
   /** Annotations whose targets this subject doesn't present, for example on an item that was removed or renamed since. */
   unplacedAnnotations: readonly TargetAnnotation[]
   controls: readonly RendererControl[]
-  controlValues: {readonly [id: string]: ControlValue}
+  controlValues: Readonly<Record<string, ControlValue>>
   /** The renderer's legend (from the after pane in two-pane modes), for the host to draw once. */
   legend: RendererLegend | undefined
 
@@ -414,10 +414,10 @@ export interface StageBinding {
   endpoints: Record<Side, ProgressPayload>
   /** In diff mode, the one progress to send (highlighting off), else none. */
   diffProgress: ProgressPayload | undefined
-  options: {[id: string]: ControlValue}
+  options: Record<string, ControlValue>
   action: {id: string; sequence: number} | undefined
   filter: FilterPayload
-  anchors: Record<Side, {[id: string]: AnchorRect | null}>
+  anchors: Record<Side, Record<string, AnchorRect | null>>
   frames: {current: Record<Side, RendererFrame | null>}
   onPaneState: Record<PaneKey, (state: PaneState) => void>
   onAnchor: Record<Side, (id: string, rect: AnchorRect | null) => void>

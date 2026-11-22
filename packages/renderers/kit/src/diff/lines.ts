@@ -35,12 +35,14 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
  */
 export function leafChanges(a: unknown, b: unknown, path: string): {key: string; before: unknown; after: unknown}[] {
   if (sameValue(a, b)) return []
-  if (isRecord(a) && isRecord(b))
+  if (isRecord(a) && isRecord(b)) {
     return [...new Set([...Object.keys(a), ...Object.keys(b)])]
       .sort()
       .flatMap(key => leafChanges(a[key], b[key], path ? `${path}.${key}` : key))
-  if (Array.isArray(a) && Array.isArray(b) && a.length === b.length && path)
+  }
+  if (Array.isArray(a) && Array.isArray(b) && a.length === b.length && path) {
     return a.flatMap((value, index) => leafChanges(value, b[index], `${path}[${index}]`))
+  }
   return [{key: path, before: a, after: b}]
 }
 

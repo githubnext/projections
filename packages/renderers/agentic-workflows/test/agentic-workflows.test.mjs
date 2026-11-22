@@ -182,8 +182,9 @@ test('cards and the matrix draw the comparison, and an empty revision says so', 
   const model = comparisonModel(before, after, comparison)
   const init = {mode: 'comparison', comparisonMode: 'diff', comparison, before, after}
   const cards = plain(renderToStaticMarkup(createElement(AgenticWorkflowsView, props(model, init))))
-  for (const text of ['Widened', 'Narrowed', 'Lock stale', 'octo-org/docs-site', 'is stale: its front matter or imports changed'])
+  for (const text of ['Widened', 'Narrowed', 'Lock stale', 'octo-org/docs-site', 'is stale: its front matter or imports changed']) {
     assert.ok(cards.includes(text), text)
+  }
   const matrix = renderToStaticMarkup(createElement(AgenticWorkflowsView, props(model, init, {controls: {view: 'matrix'}})))
   assert.match(matrix, /data-cell="removed"/)
   assert.match(plain(matrix), /Capabilities/)
@@ -241,8 +242,9 @@ test('a card says what changed beyond its entries: engine, strict mode, lock, de
   // A named workflow still shows its path; the meta line reads old → new.
   assert.match(plain(markup), /\.github\/workflows\/a\.md/)
   const meta = plain(markup.match(/<p class="aw-meta">.*?<\/p>/)[0])
-  for (const text of ['was copilot, now claude', 'was strict mode on, now strict mode off', 'was Lock current, now Lock stale'])
+  for (const text of ['was copilot, now claude', 'was strict mode on, now strict mode off', 'was Lock current, now Lock stale']) {
     assert.ok(meta.replace(/→/g, '').includes(text), `${text} in ${meta}`)
+  }
   // Side by side, an entry changed in place takes its pane's hue while highlighted.
   const pane = progress =>
     renderToStaticMarkup(

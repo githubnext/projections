@@ -44,8 +44,9 @@ if (editor.status !== 0) process.exit(editor.status ?? 1)
 for (const [from, to] of [
   ['rules-editor.wasm', 'rules-editor.wasm'],
   ['THIRD_PARTY_NOTICES.txt', 'LICENSE.rules-editor.txt'],
-])
+]) {
   await cp(fileURLToPath(new URL(`../../../comparators/rules/editor/dist/${from}`, import.meta.url)), `${root}dist/${to}`)
+}
 await build({
   ...common,
   entryPoints: [`${root}src/rules-worker.ts`],
@@ -65,7 +66,7 @@ await build({
 for (const [name, entry] of [
   ['engine', `${client}engine/worker-entry.js`],
   ['comparator', `${client}comparator/worker-entry.js`],
-])
+]) {
   await build({
     ...common,
     entryPoints: [entry],
@@ -74,14 +75,16 @@ for (const [name, entry] of [
     format: 'esm',
     target: 'chrome120',
   })
+}
 await cp(client, `${root}dist/inspector`, {recursive: true})
 const vscodeUi = fileURLToPath(new URL('./', import.meta.resolve('@githubnext/projections-host-vscode/package.json')))
 for (const [from, to] of [
   ['src/inspector.css', 'inspector.css'],
   ['dist/codicons', 'codicons'],
   ['THIRD_PARTY_NOTICES.md', 'THIRD_PARTY_NOTICES.md'],
-])
+]) {
   await cp(`${vscodeUi}${from}`, `${root}dist/vscode-ui/${to}`, {recursive: true})
+}
 // The stylesheet's parts, inlined: the webview links one file.
 await writeFile(`${root}dist/vscode-ui/styles.css`, await inlineImports(`${vscodeUi}src/styles.css`))
 // The JSON Schemas, for offline validation of definitions (`jsonValidation`) and rules files (`yamlValidation`).

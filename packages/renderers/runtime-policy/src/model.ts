@@ -146,8 +146,8 @@ export const interpretationIcons: Record<string, IconName> = {
 
 /** The icon beside a rule's effect: enforcing rules are marked, monitor-elided ones too. */
 export function effectIcon(entity: Entity | undefined): IconName | undefined {
-  if (entity?.data?.['effect'] !== 'enforce') return undefined
-  return entity.data['enforcement'] === 'elided' ? 'unenforced' : 'enforced'
+  if (entity?.data?.effect !== 'enforce') return undefined
+  return entity.data.enforcement === 'elided' ? 'unenforced' : 'enforced'
 }
 
 /**
@@ -161,7 +161,7 @@ export function proseOf(value: unknown, fallback: string | undefined): string {
 }
 
 /** Whether a rule enforces (`effect: enforce`) and its enforcement is active, not elided by monitor mode. */
-export const isEnforcing = (entity: Entity | undefined) => entity?.data?.['effect'] === 'enforce' && entity.data['enforcement'] === 'active'
+export const isEnforcing = (entity: Entity | undefined) => entity?.data?.effect === 'enforce' && entity.data.enforcement === 'active'
 
 /** The runtime policy comparator's interpretations (`metadata.runtimePolicy.interpretations`), by change or item ID. */
 export function interpretationsOf(metadata: unknown): Map<string, string[]> | undefined {

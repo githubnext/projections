@@ -24,10 +24,11 @@ assert.match(document('services'), /service:payments/, 'the Node extractor saw t
 if (snapshots) {
   const images = readdirSync(snapshots).filter(file => file.endsWith('.png'))
   assert.ok(images.length >= 2 && images.every(file => file.startsWith('teams')), images.join(', '))
-  for (const scheme of ['light', 'dark'])
+  for (const scheme of ['light', 'dark']) {
     assert.ok(
       images.some(file => file.includes(scheme)),
       `a ${scheme} snapshot: ${images.join(', ')}`,
     )
+  }
 }
 console.log(`The Action compared ${manifest.projections.length} projections${snapshots ? ' and rendered their snapshots' : ''}`)

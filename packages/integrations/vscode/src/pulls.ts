@@ -29,8 +29,9 @@ export function parsePullRequests(text: string): PullRequest[] {
       typeof item.headRefOid !== 'string' ||
       !/^[0-9a-f]{40}$/.test(item.headRefOid) ||
       typeof item.baseRefName !== 'string'
-    )
+    ) {
       return []
+    }
     const author = (item.author as {login?: unknown} | undefined)?.login
     return [
       {
@@ -87,7 +88,7 @@ export async function branchPullRequest(cwd: string, branch: string): Promise<nu
       timeout: 30_000,
       env: {...process.env, GH_PROMPT_DISABLED: '1'},
     })
-    const [first] = JSON.parse(stdout) as Array<{number?: unknown}>
+    const [first] = JSON.parse(stdout) as {number?: unknown}[]
     return typeof first?.number === 'number' ? first.number : undefined
   } catch {
     return undefined
@@ -108,12 +109,13 @@ async function hasCommit(cwd: string, commit: string): Promise<boolean> {
  */
 export async function pullRequestPair(cwd: string, pull: PullRequest): Promise<Pair> {
   const env = {...process.env, GIT_TERMINAL_PROMPT: '0'}
-  if (!(await hasCommit(cwd, pull.headRefOid)))
+  if (!(await hasCommit(cwd, pull.headRefOid))) {
     await run('git', ['fetch', '--quiet', '--no-tags', '--no-write-fetch-head', 'origin', `refs/pull/${pull.number}/head`], {
       cwd,
       env,
       timeout: 120_000,
     })
+  }
   if (!(await hasCommit(cwd, pull.headRefOid))) throw new Error(`Couldn't fetch the head of pull request #${pull.number}`)
   for (const base of [`refs/remotes/origin/${pull.baseRefName}`, `refs/heads/${pull.baseRefName}`]) {
     try {

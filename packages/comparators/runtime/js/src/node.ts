@@ -97,8 +97,9 @@ export function createNativeRulesRuntime(options: NativeRulesRuntimeOptions = {}
 
 function rulesSource(rules: Uint8Array): string {
   if (!(rules instanceof Uint8Array)) throw new TypeError('rules must be a Uint8Array')
-  if (rules.length > limits.inputBytes)
+  if (rules.length > limits.inputBytes) {
     throw new ComparatorRuntimeError('invalid-module', `a rules file is limited to ${limits.inputBytes} bytes`)
+  }
   try {
     return new TextDecoder('utf-8', {fatal: true}).decode(rules)
   } catch {

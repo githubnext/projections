@@ -27,8 +27,9 @@ for (const [name, value] of [
   ['user.email', 'fixture@example.invalid'],
   ['commit.gpgsign', 'false'],
   ['core.autocrlf', 'true'],
-])
+]) {
   git('config', name, value)
+}
 
 write(
   '.github/projections/teams.json',

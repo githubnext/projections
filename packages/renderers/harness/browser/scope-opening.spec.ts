@@ -19,9 +19,9 @@ async function recordGraphViews(page: Page): Promise<void> {
     const record = () => {
       const scroller = document.querySelector<HTMLElement>('.graph-scroll')
       const drawing = scroller?.querySelector<SVGSVGElement>('svg.graph')
-      if (!scroller || !drawing || !Number(drawing.dataset['scale'])) return
+      if (!scroller || !drawing || !Number(drawing.dataset.scale)) return
       window.graphViews!.push({
-        zoom: Number(scroller.dataset['zoom']),
+        zoom: Number(scroller.dataset.zoom),
         drawn: parseFloat(drawing.style.width),
         stage: scroller.clientWidth,
         left: scroller.scrollLeft,
@@ -71,7 +71,7 @@ function addedItem(subject: StageSubject): string {
  * whole graph's fit until the focus was framed again. The stage is narrow enough that the old layout opens fitted
  * below full size (and above the text floor), so the changes alone, or one item, would fill it larger.
  */
-for (const focused of [false, true])
+for (const focused of [false, true]) {
   test(`a graph keeps its opening view${focused ? ' on a focused item' : ''} while the Changes scope is laid out`, async ({page}, info) => {
     test.skip(info.project.name !== 'chromium-desktop', 'One host timing case, in desktop Chromium.')
     await recordGraphViews(page)
@@ -92,15 +92,17 @@ for (const focused of [false, true])
     await stage.seek(1)
     const views = await frame.evaluate(() => window.graphViews!.splice(0))
     for (const view of views) {
-      if (view.label === everything)
+      if (view.label === everything) {
         expect({zoom: view.zoom, left: view.left, top: view.top}, 'the old layout keeps its opening view').toEqual({
           zoom: opened.zoom,
           left: opened.left,
           top: opened.top,
         })
+      }
       if (!focused) expect(view.drawn, `${view.label} at zoom ${view.zoom}`).toBeLessThanOrEqual(view.stage + 1)
     }
   })
+}
 
 /**
  * A host that has its scope before the frame is ready sends it right after the documents, so it arrives while the

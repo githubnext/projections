@@ -44,10 +44,12 @@ export function stageLayout(
         if (active.has(old.from) && active.has(old.to)) result.push({...old, id: change.id, kind: displayed(change, moment).kind})
         continue
       }
-      if (old && (bridge || moment < oldEvent) && active.has(old.from) && active.has(old.to))
+      if (old && (bridge || moment < oldEvent) && active.has(old.from) && active.has(old.to)) {
         result.push({...old, id: `${change.id}:before`, kind: change.before!.kind})
-      if (next && (bridge || moment >= nextEvent) && active.has(next.from) && active.has(next.to))
+      }
+      if (next && (bridge || moment >= nextEvent) && active.has(next.from) && active.has(next.to)) {
         result.push({...next, id: `${change.id}:after`, kind: change.after!.kind})
+      }
     }
     return result
   }

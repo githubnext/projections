@@ -21,8 +21,9 @@ test('preparing starts a run, reports each new event once and returns the finish
   const runner = {
     async request(request) {
       requests.push(request)
-      if (request.method === 'POST')
+      if (request.method === 'POST') {
         return {status: 202, contentType: 'application/json', body: {id: 'r1', status: 'running', events: []}, size: 1}
+      }
       return {status: 200, contentType: 'application/json', body: states.shift(), size: 1}
     },
   }

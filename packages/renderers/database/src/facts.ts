@@ -29,8 +29,9 @@ export function databaseFacts(model: ComparisonModel): SummaryFactItem[] {
   const facts: SummaryFactItem[] = []
   const comparing = model.mode === 'comparison'
   const fact = (id: string, ids: readonly string[], noun: readonly [string, string], icon?: IconName) => {
-    if (ids.length)
+    if (ids.length) {
       facts.push({type: 'fact', id, ...(icon ? {icon} : {}), count: ids.length, noun: {singular: noun[0], plural: noun[1]}, ids: [...ids]})
+    }
   }
   const has = (id: string, key: string, word?: string) =>
     (lines.get(id) ?? []).some(line => line.key === key && (!word || line.word === word))
@@ -64,7 +65,7 @@ export function databaseFacts(model: ComparisonModel): SummaryFactItem[] {
       ['table', ['table renamed', 'tables renamed']],
       ['view', ['view renamed', 'views renamed']],
       ['enum', ['enum renamed', 'enums renamed']],
-    ] as const)
+    ] as const) {
       fact(
         `${kind}-renamed`,
         union.tables.filter(id => {
@@ -77,6 +78,7 @@ export function databaseFacts(model: ComparisonModel): SummaryFactItem[] {
         noun,
         'renamed',
       )
+    }
     fact(
       'columns-renamed',
       changed(id => renamed(rows.get(id)!, lines.get(id))),
@@ -99,7 +101,7 @@ export function databaseFacts(model: ComparisonModel): SummaryFactItem[] {
       )
     }
     // Everything else the schema draws as tags, by its own kind.
-    for (const kind of [...new Set(union.others.map(id => state.entities.get(id)!.kind))].sort())
+    for (const kind of [...new Set(union.others.map(id => state.entities.get(id)!.kind))].sort()) {
       fact(
         `${kind}-renamed`,
         union.others.filter(id => {
@@ -112,6 +114,7 @@ export function databaseFacts(model: ComparisonModel): SummaryFactItem[] {
         [`${kind} renamed`, `${pluralKind(kind)} renamed`],
         'renamed',
       )
+    }
   }
   // The enums' values: data, not entities, so a fact with its own changes, filtering to the enums whose values changed.
   if (union.values.size) {

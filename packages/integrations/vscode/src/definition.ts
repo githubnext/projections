@@ -53,7 +53,9 @@ export function sourceParts(definition: Parameters<typeof parts>[0], index: Docs
   })
 }
 
-type Node = {node: DefinitionNode}
+interface Node {
+  node: DefinitionNode
+}
 
 const key = (target: {folder: vscode.WorkspaceFolder; projection: string}) => `${target.folder.uri.toString()}#${target.projection}`
 
@@ -101,8 +103,9 @@ export class DefinitionView implements vscode.TreeDataProvider<Node>, vscode.Dis
       vscode.commands.registerCommand('projections.openPartEntry', (node?: Node) => {
         const shown = this.shown
         const part = node?.node.kind
-        if (shown && (part === 'extractor' || part === 'comparator' || part === 'renderer'))
+        if (shown && (part === 'extractor' || part === 'comparator' || part === 'renderer')) {
           return vscode.commands.executeCommand('projections.openPart', shown.folder.uri, shown.projection, part)
+        }
       }),
     )
     void vscode.commands.executeCommand('setContext', 'projections.definitionPinned', false)
@@ -202,8 +205,9 @@ export class DefinitionView implements vscode.TreeDataProvider<Node>, vscode.Dis
   private showExtraction() {
     const shown = this.shown
     if (!shown) return
-    if (!shown.documents.length)
+    if (!shown.documents.length) {
       this.output.info(`${shown.projection}: nothing extracted yet${shown.kind === 'none' ? ': open its tab to extract it' : ''}.`)
+    }
     for (const item of shown.documents) {
       const text = JSON.stringify(item.document, null, 2)
       this.output.info(

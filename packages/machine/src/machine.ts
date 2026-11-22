@@ -2,22 +2,32 @@
 // and what each state keeps running. Nothing here runs anything; `createActor` does.
 
 /** A machine's state: one member of a discriminated union keyed by `kind`, each carrying only the data it owns. */
-export type MachineState = {readonly kind: string}
+export interface MachineState {
+  readonly kind: string
+}
 
 /** An event a machine is sent: one member of a discriminated union keyed by `type`. */
-export type MachineEvent = {readonly type: string}
+export interface MachineEvent {
+  readonly type: string
+}
 
 /**
  * An effect a transition asks for, as data: the actor runs it with its runner. An effect with a `key` supersedes a
  * running effect with the same key, whose events are then dropped.
  */
-export type MachineEffect = {readonly type: string; readonly key?: string}
+export interface MachineEffect {
+  readonly type: string
+  readonly key?: string
+}
 
 /**
  * A task a state keeps running while it lasts (a poll, an observer, a timer), as data. Its `key` is its identity: the
  * actor starts it when a state first lists the key and stops it when a state no longer does, dropping its events.
  */
-export type MachineActivity = {readonly type: string; readonly key: string}
+export interface MachineActivity {
+  readonly type: string
+  readonly key: string
+}
 
 /** Marks an event a state doesn't handle: the state stays as it is. Listing it says the event was considered. */
 export const ignore: unique symbol = Symbol('projections.machine.ignore')
@@ -37,7 +47,7 @@ export interface Step<S, F> {
   readonly effects: readonly F[]
 }
 
-const steps = new WeakSet<object>()
+const steps = new WeakSet()
 
 /**
  * A transition to `state` that also asks for `effects`, run in order once the state is current: after the activities it
@@ -50,7 +60,12 @@ export function emit<S, F>(state: S, ...effects: F[]): Step<S, F> {
 }
 
 /** The activity of a timer: `event` is sent `ms` milliseconds after a state first lists `key`, unless one stops listing it. */
-export type After<E> = {readonly type: 'machine.after'; readonly key: string; readonly ms: number; readonly event: E}
+export interface After<E> {
+  readonly type: 'machine.after'
+  readonly key: string
+  readonly ms: number
+  readonly event: E
+}
 
 /** A timer activity: `event` is sent once `ms` milliseconds have passed in the states that list it under `key`. */
 export function after<E extends MachineEvent>(key: string, ms: number, event: E): After<E> {
@@ -97,7 +112,7 @@ export interface Machine<S extends MachineState, E extends MachineEvent, F exten
   activities(state: S): readonly (A | After<E>)[]
 }
 
-type Node = {
+interface Node {
   on: Record<string, ((state: MachineState, event: MachineEvent) => unknown) | Ignore>
   activities?: (state: MachineState) => unknown
 }

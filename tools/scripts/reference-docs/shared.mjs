@@ -148,8 +148,9 @@ export function markWideTables(text) {
 export async function formatMarkdown(file, text) {
   const config = JSON.parse(await readFile(join(root, '.oxfmtrc.json'), 'utf8'))
   const options = Object.fromEntries(Object.entries(config).filter(([key]) => !['$schema', 'ignorePatterns', 'overrides'].includes(key)))
-  for (const override of config.overrides ?? [])
+  for (const override of config.overrides ?? []) {
     if (override.files.some(glob => posix.matchesGlob(file, glob))) Object.assign(options, override.options)
+  }
   const formatted = await format(file, markWideTables(text), options)
   if (formatted.errors.length) fail(`${file}: ${formatted.errors[0].message}`)
   return formatted.code

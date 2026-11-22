@@ -28,7 +28,11 @@ export function useFitScale(
   const {padding = 16, maxScale = 1, minHeight = 200, floor = 0, aspect, drawnScale = 0} = options
   const pad = fitPadding(padding)
   const down = fitPaddingDown(padding).total
-  type Measured = {width: number; height: number; chrome: number | undefined}
+  interface Measured {
+    width: number
+    height: number
+    chrome: number | undefined
+  }
   const [measured, setMeasured] = useState<Measured>()
   const hold = usePaintHold()
   const sizing = useFrameSizing()
@@ -116,8 +120,9 @@ export function useFitScale(
     natural === undefined || sizing !== 'content' || cap === undefined
       ? natural
       : Math.min(natural, Math.max(cap, measured!.chrome! + least))
-  if (preferred !== undefined && natural !== undefined && preferred < natural && size && measured && measured.width > 0)
+  if (preferred !== undefined && natural !== undefined && preferred < natural && size && measured && measured.width > 0) {
     fit = fitScale(size, {width: measured.width, height: preferred - measured.chrome!}, {padding, maxScale})
+  }
   // Zoomed in past where it opens, the stage grows to the content's height at the drawn scale, up to the cap.
   const zoomed =
     preferred !== undefined && sizing === 'content' && drawnScale > opening && size

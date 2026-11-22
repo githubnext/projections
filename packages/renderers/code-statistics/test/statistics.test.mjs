@@ -57,8 +57,9 @@ test('each language changes in its own comparison step: enter empty then grow, s
     assert.ok(python.size >= python.opacity && ruby.size >= ruby.opacity, 'slots open before and close after the fade')
     // A resize mirrors itself about the middle of its motion.
     const mirrored = 2 * centre - t
-    if (mirrored >= 0 && mirrored <= 1)
+    if (mirrored >= 0 && mirrored <= 1) {
       assert.ok(Math.abs(motion('language:TypeScript', t).mix - (1 - motion('language:TypeScript', mirrored).mix)) < 1e-9)
+    }
   }
 })
 
@@ -114,8 +115,9 @@ test('nothing moves inside the holds between steps', async () => {
   const schedule = scheduleSteps(model)
   for (const {start, end} of stepHolds(schedule)) {
     const reference = await render((start + end) / 2, 1)
-    for (let index = 1; index < 10; index++)
+    for (let index = 1; index < 10; index++) {
       assert.equal(await render(start + ((end - start) * index) / 10, 1), reference, `motion inside ${start}..${end}`)
+    }
   }
 })
 
@@ -247,8 +249,9 @@ const slots = html =>
   ].map(([, id, rows, opacity, width, colour]) => ({id, rows: Number(rows), opacity: Number(opacity), width: Number(width), colour}))
 
 test('endpoints are neutral and the midpoint interpolates every count', async () => {
-  for (const progress of [0, 1])
+  for (const progress of [0, 1]) {
     assert.doesNotMatch(await render(progress, 0), /stat-gain|stat-loss|stat-delta-label|class="badge|pk-status-text/)
+  }
   assert.deepEqual(await total(), {count: 2700, change: 460, noun: 'lines of code'})
   assert.doesNotMatch(await render(1, 0), /<strong>/, "the total is the host's summary bar's")
   const mid = await render('mid', 1)
@@ -278,8 +281,9 @@ test('languages enter and leave without mounting, unmounting or changing colour'
   const at = (frame, name) => frame.find(slot => slot.id === `language:${name}`)
   for (const slot of frames[0]) assert.equal(at(frames.at(-1), slot.id.slice(9)).colour, slot.colour)
   for (const frame of frames) {
-    for (const name of ['Python', 'Ruby'])
+    for (const name of ['Python', 'Ruby']) {
       if (at(frame, name).opacity > 0 && at(frame, name).opacity < 1) assert.equal(at(frame, name).width, 0)
+    }
   }
   assert.equal(at(slots(await render(1, 0)), 'Ruby').rows, 0)
   assert.equal(at(slots(await render(0, 0)), 'Python').rows, 0)

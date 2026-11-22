@@ -90,11 +90,12 @@ function addDevDependency(toolchain: Toolchain, name: string): string {
 function missingTypeScript(toolchain: Toolchain, start: string, extractor: string, where: string): string {
   const native = NATIVE_COMPILERS.map(name => resolvePackage(toolchain, start, name)).find(found => found !== undefined)
   const lead = `${extractor} uses the TypeScript ${SUPPORTED_TYPESCRIPT} compiler API from the repository's own installation, resolved from ${where} in the repository checkout.`
-  if (native)
+  if (native) {
     return (
       `${lead} The repository has ${native.name} ${native.version} (TypeScript 7's native compiler), which has no JavaScript compiler API. ` +
       `Add the TypeScript 6 API package beside it: \`${addDevDependency(toolchain, TYPESCRIPT_6_API)}\`.`
     )
+  }
   return (
     `${lead} No \`typescript\` package is installed there. Run your package manager's install (for example \`npm ci\`), ` +
     `or, if the project doesn't depend on TypeScript, add it: \`${addDevDependency(toolchain, 'typescript@6')}\`. ` +
@@ -120,17 +121,19 @@ export function loadTypeScript(
   if (!selected && installed && major(installed.version) >= 7) {
     const api = resolvePackage(toolchain, start, TYPESCRIPT_6_API)
     if (compatible(api)) selected = api
-    else
+    else {
       throw new Error(
         `${extractor} uses the TypeScript ${SUPPORTED_TYPESCRIPT} compiler API. The repository's typescript ${installed.version} ` +
           `(resolved from ${where}) is the native compiler without that API; add ${TYPESCRIPT_6_API} as a development dependency and install it.`,
       )
+    }
   }
   if (!selected) {
-    if (installed)
+    if (installed) {
       throw new Error(
         `${extractor} requires TypeScript ${SUPPORTED_TYPESCRIPT}; the repository has typescript ${installed.version} (resolved from ${where}).`,
       )
+    }
     throw new Error(missingTypeScript(toolchain, start, extractor, where))
   }
   const required = createRequire(path.join(selected.directory, 'package.json'))(selected.directory) as typeof TypeScript

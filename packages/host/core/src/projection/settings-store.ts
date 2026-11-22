@@ -52,7 +52,7 @@ export function initialSettings(options: ProjectionOptions) {
     search: options.initialSearch ?? '',
     selectedId: options.initialSelectedId ?? (null as string | null),
     rendererName: options.initialRendererName ?? options.renderers?.[0]?.name ?? '',
-    controlValues: {} as {[id: string]: ControlValue},
+    controlValues: {} as Record<string, ControlValue>,
   }
 }
 

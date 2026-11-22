@@ -19,8 +19,9 @@ import {PanelProjectionView, TabProjectionView} from './views.js'
 
 // The part icons at codicon weight, as the side bar's Definition tree draws them: the Inspector's Parts section draws
 // `--projections-icon-<part>`.
-for (const part of ['extractor', 'comparator', 'renderer'] as const)
+for (const part of ['extractor', 'comparator', 'renderer'] as const) {
   document.documentElement.style.setProperty(`--projections-icon-${part}`, codiconTokens[`icon-${part}`])
+}
 
 // For tests, from the page's first paint (the `probe` control).
 watchPage()

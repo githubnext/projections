@@ -19,8 +19,9 @@ export function architecture(project, name) {
   }
   const edge = (kind, from, to, at) => {
     const identity = id(name, kind, from, to)
-    if (!relationships.has(identity))
+    if (!relationships.has(identity)) {
       relationships.set(identity, {id: identity, kind, from, to, confidence: 'derived', evidence: evidence(project, at)})
+    }
   }
   const packageNode = at => {
     const pkg = owner(project, at.getSourceFile().fileName)

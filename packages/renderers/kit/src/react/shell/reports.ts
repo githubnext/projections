@@ -24,14 +24,14 @@ export function useDeclaredControls(
   initial: readonly RendererControl[] | undefined,
   options: RendererOptions,
 ): {
-  controls: {[id: string]: ControlValue}
+  controls: Record<string, ControlValue>
   declareControls: (controls: readonly RendererControl[]) => void
   setControl: (id: string, value: ControlValue) => void
 } {
   const [declared, setDeclared] = useState<readonly RendererControl[]>(() => initial ?? [])
   // A value set from the content, shown until the host's next options, which carry it (or, from a host that ignores
   // the message, leave it out).
-  const [pending, setPending] = useState<{options: RendererOptions; values: {[id: string]: ControlValue}}>({options, values: {}})
+  const [pending, setPending] = useState<{options: RendererOptions; values: Record<string, ControlValue>}>({options, values: {}})
   const declareControls = useCallback((controls: readonly RendererControl[]) => {
     setDeclared(previous => (JSON.stringify(previous) === JSON.stringify(controls) ? previous : controls))
   }, [])

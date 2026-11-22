@@ -82,12 +82,13 @@ function EvidenceLocation({
 }) {
   const text = `${location.path}${location.line ? `:${location.line}` : ''}`
   const href = evidenceLink?.({path: location.path, ...(location.line ? {line: location.line} : {})}, location.side)
-  if (href)
+  if (href) {
     return (
       <a className="phv-link phv-evidence-link" href={href} target="_blank" rel="noreferrer noopener">
         {text}
       </a>
     )
+  }
   return onOpen ? (
     <button type="button" className="phv-link phv-evidence-link" onClick={() => onOpen(location.path, location.line)}>
       {text}

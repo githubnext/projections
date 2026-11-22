@@ -44,8 +44,9 @@ export function parseTransportMessage(value: unknown): TransportMessage | undefi
       (message.channel !== 'changes' && message.channel !== 'fixtures') ||
       !Number.isSafeInteger(message.since) ||
       (message.since as number) < 0
-    )
+    ) {
       return undefined
+    }
     return {tag: transportTag, type: 'next', id: message.id as number, channel: message.channel, since: message.since as number}
   }
   if (message.type !== 'request' || (message.method !== 'GET' && message.method !== 'POST') || !isApiPath(message.path)) return undefined

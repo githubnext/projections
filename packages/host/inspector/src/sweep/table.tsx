@@ -63,12 +63,13 @@ function AdoptionStatus({
   onSelect: (id: string, selected: boolean) => void
 }) {
   const checkbox = `pi-adopt-${row.projection}`
-  if (adoption?.adopted)
+  if (adoption?.adopted) {
     return (
       <Badge variant="secondary" className="pj:mt-1 pj:w-fit">
         Adopted
       </Badge>
     )
+  }
   if (!adoption) return <span className="pj:mt-1 pj:text-xs pj:font-normal pj:text-muted-foreground">Defined here</span>
   return (
     <span className="pj:mt-1 pj:flex pj:items-center pj:gap-2 pj:font-normal">

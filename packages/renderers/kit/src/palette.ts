@@ -67,7 +67,7 @@ export const otherToken = 'color-border-emphasis' satisfies ThemeTokenName
  * or Markdown is usually the same color from one repository to the next.
  * Others prefer a slot from a hash of their key.
  */
-const preferredSlots: {[key: string]: number} = {
+const preferredSlots: Record<string, number> = {
   JSON: 2,
   'JSON with Comments': 2,
   JSON5: 2,
@@ -127,7 +127,7 @@ export function kindColorToken(color: KindColor): ThemeTokenName {
   return `chart-${slot || 1}` as ThemeTokenName
 }
 /** The hue each meaning takes: danger red, warning amber, success green, info blue. */
-const toneHues: {[tone in Exclude<KindTone, 'neutral'>]: KindHue} = {danger: 'red', warning: 'amber', success: 'green', info: 'blue'}
+const toneHues: Record<Exclude<KindTone, 'neutral'>, KindHue> = {danger: 'red', warning: 'amber', success: 'green', info: 'blue'}
 
 /** How `categoryPalette` assigns colors beyond its defaults. */
 export interface PaletteOptions {
@@ -291,11 +291,12 @@ export function paletteLegend(palette: Palette, title: string, limit = 14, shape
   const shown = named.slice(0, limit)
   const rest = palette.ranked.length - shown.length
   const items: LegendItem[] = shown.map(entry => ({label: entry.category.label, ...entry.swatch, ...(shape ? {shape} : {})}))
-  if (rest > 0)
+  if (rest > 0) {
     items.push({
       label: `${rest.toLocaleString('en-US')} other ${rest === 1 ? 'type' : 'types'}`,
       token: otherToken,
       ...(shape ? {shape} : {}),
     })
+  }
   return {title, items}
 }

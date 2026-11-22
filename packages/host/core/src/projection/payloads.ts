@@ -15,7 +15,7 @@ import type {Highlighting, ProjectionOptions} from './types.js'
 
 type Kinds = NonNullable<ProjectionOptions['presentation']>['kinds']
 
-export type RendererPayloadsInput = {
+export interface RendererPayloadsInput {
   options: ProjectionOptions
   renderer: RendererEntry | undefined
   mode: ComparisonMode

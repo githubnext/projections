@@ -199,7 +199,7 @@ export function ApiView(props: RendererProps<typeof accepts>) {
         ) : (
           <div className="api-declarations">
             {entries.map(entry => {
-              if (entry.type === 'fold')
+              if (entry.type === 'fold') {
                 return (
                   <Fold
                     key={`fold:${entry.key}`}
@@ -209,6 +209,7 @@ export function ApiView(props: RendererProps<typeof accepts>) {
                     onToggle={() => (entry.open ? collapse : expand)(entry.key)}
                   />
                 )
+              }
               const row = entry.item
               const common = {row, comparing, selected: selectedId === row.id, onSelect, compatibility, diff, names}
               if (diff) {

@@ -7,8 +7,9 @@ import {statusWords} from './status.js'
 export const endpointChecks: Pick<Checks, 'neutral-endpoints' | 'quiet-endpoints'> = {
   async 'neutral-endpoints'(driver, subject, {modes}) {
     if (subject.mode !== 'comparison') throw new Skip('Single extractions have no endpoints.')
-    if (!modes.some(mode => progressModes.includes(mode)))
+    if (!modes.some(mode => progressModes.includes(mode))) {
       throw new Skip('The renderer presents comparisons only in diff mode, which has no endpoints.')
+    }
     const failures: string[] = []
     let compared = 0
     // Categorical colours may be ranked over both revisions; what matters is that each keeps one colour.
@@ -23,10 +24,11 @@ export const endpointChecks: Pick<Checks, 'neutral-endpoints' | 'quiet-endpoints
         for (const [category, color] of Object.entries(sample.categories)) {
           const seen = palette.get(category)
           if (!seen) palette.set(category, {color, at: label(progress)})
-          else if (seen.color !== color)
+          else if (seen.color !== color) {
             failures.push(
               `Category "${category}" is painted ${seen.color} at ${seen.at} but ${color} at ${label(progress)}; a category keeps one colour for the whole transition.`,
             )
+          }
         }
       }
       const unchanged = await driver.compare(extraction, extraction)
@@ -36,10 +38,11 @@ export const endpointChecks: Pick<Checks, 'neutral-endpoints' | 'quiet-endpoints
         const reference = neutral.get(key)
         if (!reference) continue
         compared++
-        if (looks(sample) !== looks(reference))
+        if (looks(sample) !== looks(reference)) {
           failures.push(
             `At ${label(progress)}, "${key}" is emphasized: compared with an unchanged comparison, ${difference(reference, {...sample, box: reference.box, opacity: reference.opacity})}.`,
           )
+        }
       }
     }
     if (!compared) throw new Skip('No entity is drawn in both the comparison and an unchanged comparison, so there is nothing to compare.')
@@ -48,8 +51,9 @@ export const endpointChecks: Pick<Checks, 'neutral-endpoints' | 'quiet-endpoints
 
   async 'quiet-endpoints'(driver, subject, {modes}) {
     if (subject.mode !== 'comparison') throw new Skip('Single extractions have no endpoints.')
-    if (!modes.some(mode => progressModes.includes(mode)))
+    if (!modes.some(mode => progressModes.includes(mode))) {
       throw new Skip('The renderer presents comparisons only in diff mode, which has no endpoints.')
+    }
     const failures: string[] = []
     for (const progress of [0, 1]) {
       await driver.load(subject, {progress})

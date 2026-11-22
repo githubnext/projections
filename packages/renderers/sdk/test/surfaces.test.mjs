@@ -24,21 +24,24 @@ for (const mode of ['light', 'dark']) {
       [canvas, raised, 'canvas and card'],
       [raised, header, 'card and header band'],
       [raised, inset, 'card and inset gutter'],
-    ])
+    ]) {
       assert.ok(contrast(a, b) >= 1.07, `${label} are a visible step apart (${contrast(a, b).toFixed(2)})`)
-    for (const name of surfaces)
+    }
+    for (const name of surfaces) {
       assert.ok(
         contrast(tokens['color-divider'], tokens[name]) >= 3,
         `divider on ${name}: ${contrast(tokens['color-divider'], tokens[name]).toFixed(2)}`,
       )
+    }
   })
   test(`${mode}: every change region pairs its fill with an edge in the same hue at 3:1 or more`, () => {
     for (const change of ['added', 'removed', 'modified', 'moved']) {
       assert.ok(tokens[`color-${change}-muted`], `${change} fill`)
       const edge = tokens[`color-${change}-border`]
       assert.match(edge, /^#[0-9a-f]{6}$/, `${change} edge`)
-      for (const surface of ['color-surface-raised', 'color-surface-canvas'])
+      for (const surface of ['color-surface-raised', 'color-surface-canvas']) {
         assert.ok(contrast(edge, tokens[surface]) >= 3, `${change} edge on ${surface}: ${contrast(edge, tokens[surface]).toFixed(2)}`)
+      }
     }
   })
 }

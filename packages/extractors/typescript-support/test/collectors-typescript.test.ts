@@ -136,7 +136,7 @@ test('overload order survives method, constructor and structural callable render
 test('private and hash-private nominal brands change class APIs without exposing private details', async t => {
   const source = (privateMember: string): string => `export class Token { readonly value: number = 1; ${privateMember} }`
   // The markers are TypeScript's own contract facts; false ones are left out.
-  const brand = (node: {data?: {[key: string]: unknown}} | undefined, name: 'nominalBrand' | 'staticNominalBrand') =>
+  const brand = (node: {data?: Record<string, unknown>} | undefined, name: 'nominalBrand' | 'staticNominalBrand') =>
     ((node?.data?.contract as {native?: Record<string, Json>} | undefined)?.native?.[name] ?? false) as boolean
   const structural = await collectTypeScript(await fixture(t, {'index.ts': source('')}, 'typescript-public-api'))
   const unbranded = structural.entities.find(node => node.label === 'Token')!

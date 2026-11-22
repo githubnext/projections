@@ -37,7 +37,7 @@ interface Drawn {
  * summary bar. A badge is its disc with the glyph cut out (two mask layers), any other icon its glyph alone, and the
  * kit draws each in its status color from the panel's tokens.
  */
-for (const story of stories)
+for (const story of stories) {
   test(`${story.id} draws each icon from its token in every theme`, async ({page, theme}) => {
     await page.goto(new URL(`iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}`, process.env.PROJECTIONS_STORYBOOK_URL).href)
     const panels = page.locator('[data-icon-panel]')
@@ -91,6 +91,7 @@ for (const story of stories)
     expect(drawn.filter(icon => icon.layers !== (badgeIconNames.includes(icon.name as IconName) ? 2 : 1))).toEqual([])
     expect(drawn.filter(icon => !icon.colored)).toEqual([])
   })
+}
 
 /** Every computed style of the story's page: the document, the body and each element the story rendered. */
 const pageStyles = (page: Page) =>
@@ -133,7 +134,7 @@ const neighbours = [
   {id: 'default-ui-components--buttons', rendered: 'button', icons: 'default-ui-icons--badges'},
   {id: 'vs-code-ui-building-blocks--menus-and-range', rendered: 'input[type="range"]', icons: 'vs-code-ui-icons--in-renderers'},
 ]
-for (const neighbour of neighbours)
+for (const neighbour of neighbours) {
   test(`${neighbour.id} renders the same after ${neighbour.icons} in the same preview`, async ({page, theme}) => {
     await page.goto(
       new URL(`iframe.html?id=${neighbour.id}&viewMode=story&globals=theme:${theme}`, process.env.PROJECTIONS_STORYBOOK_URL).href,
@@ -148,3 +149,4 @@ for (const neighbour of neighbours)
     expect(after.length).toBe(before.length)
     expect(after.filter((style, index) => style !== before[index])).toEqual([])
   })
+}

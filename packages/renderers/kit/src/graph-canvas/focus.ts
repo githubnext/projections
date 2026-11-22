@@ -39,8 +39,9 @@ export function focusArea(
   const wanted = new Set<string>()
   if (request?.id !== undefined) {
     wanted.add(request.id)
-    for (const edge of edges)
+    for (const edge of edges) {
       if (edge.id === request.id || edge.fromId === request.id || edge.toId === request.id) wanted.add(edge.fromId).add(edge.toId)
+    }
   } else for (const row of model.entities) if (isChanged(row) || shown?.has(row.id)) wanted.add(row.id)
   const routes = edges.filter(edge => (request?.id === undefined ? isChanged(edge) : edge.id === request.id))
   for (const edge of routes) wanted.add(edge.fromId).add(edge.toId)

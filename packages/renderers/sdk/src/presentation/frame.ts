@@ -149,7 +149,7 @@ export function createFrame(after: Extraction, changes?: PresentedChanges, progr
     if (!entity) throw new Error(`Comparison node ${change.id} has no entity`)
     const opacity = presence(change, q)
     const scale = rise(change.id)
-    if (opacity > 0)
+    if (opacity > 0) {
       nodes.push({
         id: change.id,
         entity,
@@ -159,6 +159,7 @@ export function createFrame(after: Extraction, changes?: PresentedChanges, progr
         local: q,
         rise: scale,
       })
+    }
   }
   const visible = new Map(nodes.map(node => [node.id, node.opacity]))
   const edges: PresentedEdge[] = []
@@ -179,7 +180,7 @@ export function createFrame(after: Extraction, changes?: PresentedChanges, progr
     }
     opacity = Math.min(opacity, visible.get(from) ?? 0, visible.get(to) ?? 0)
     const scale = rise(change.id)
-    if (opacity > 0)
+    if (opacity > 0) {
       edges.push({
         id: change.id,
         entity,
@@ -191,6 +192,7 @@ export function createFrame(after: Extraction, changes?: PresentedChanges, progr
         local: q,
         rise: scale,
       })
+    }
   }
   return {progress: t, staged, emphasis, nodes, edges, schedule}
 }

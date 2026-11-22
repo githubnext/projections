@@ -46,8 +46,9 @@ export function typeText(schema) {
       if (type === 'array') return `${grouped(typeText(schema.items))}[]`
       if (type !== 'object') return type
       if (schema.properties && Object.keys(schema.properties).length) return '{…}'
-      if (schema.additionalProperties && schema.additionalProperties !== true)
+      if (schema.additionalProperties && schema.additionalProperties !== true) {
         return `{[key: string]: ${typeText(schema.additionalProperties)}}`
+      }
       return 'object'
     })
     .join(' | ')
@@ -69,15 +70,18 @@ export function fields(schema, pointer) {
   }
   const visit = (current, at) => {
     if (!current || typeof current !== 'object' || current.$ref) return
-    for (const [name, field] of Object.entries(current.properties ?? {}))
+    for (const [name, field] of Object.entries(current.properties ?? {})) {
       add(name, field, (current.required ?? []).includes(name), `${at}/properties/${name}`)
-    for (const key of ['anyOf', 'oneOf', 'allOf'])
-      (current[key] ?? []).forEach((part, index) => {
+    }
+    for (const key of ['anyOf', 'oneOf', 'allOf']) {
+      ;(current[key] ?? []).forEach((part, index) => {
         for (const field of fields(part, `${at}/${key}/${index}`)) add(field.name, field.schema, field.required, field.pointer)
       })
+    }
     if (current.items) visit(current.items, `${at}/items`)
-    if (current.additionalProperties && typeof current.additionalProperties === 'object')
+    if (current.additionalProperties && typeof current.additionalProperties === 'object') {
       visit(current.additionalProperties, `${at}/additionalProperties`)
+    }
   }
   visit(schema, pointer)
   return [...found.values()]

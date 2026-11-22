@@ -28,8 +28,9 @@ export function compose(input: Composition): Extraction {
 
   // Application registrations, and the framework registrations they inject.
   const kept = new Set<Registration>()
-  for (const registration of registrations.byWrapper.values())
+  for (const registration of registrations.byWrapper.values()) {
     if (input.include === 'all' || registration.application) kept.add(registration)
+  }
   for (const link of links) if (kept.has(link.from)) kept.add(link.to)
 
   const keptModules = new Set([...input.modules.filter(items.applicationModule), ...[...kept].map(registration => registration.module)])

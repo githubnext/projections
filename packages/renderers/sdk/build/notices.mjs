@@ -118,8 +118,9 @@ export function packageNotice(entry) {
   const licenses = readdirSync(entry.directory)
     .filter(name => licenseFile.test(name) && statSync(join(entry.directory, name)).isFile())
     .sort()
-  if (!licenses.length && !entry.license)
+  if (!licenses.length && !entry.license) {
     throw new Error(`Bundled package ${entry.name}@${entry.version} has no license file or license field`)
+  }
   const lines = [`===== ${entry.name} ${entry.version} (${entry.license || 'see license file'}) =====`]
   const copyleft = sourceRequired.test(entry.license)
   if (copyleft) {
@@ -170,10 +171,11 @@ export function noticeSections(text) {
  */
 export function mergeNotices(title, texts, exclude = new Set()) {
   const sections = new Map()
-  for (const text of texts)
+  for (const text of texts) {
     for (const [heading, section] of noticeSections(text)) {
       if (!exclude.has(heading.slice(6).split(' ')[0])) sections.set(heading, section)
     }
+  }
   return `${title}\n\n${[...sections]
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([, section]) => section)

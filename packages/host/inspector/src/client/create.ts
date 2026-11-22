@@ -59,8 +59,9 @@ export function createInspectorClient({transport}: {transport: InspectorTranspor
       return value
     },
     async revisions(signal, limit) {
-      if (limit !== undefined && (!Number.isInteger(limit) || limit < 1 || limit > 100))
+      if (limit !== undefined && (!Number.isInteger(limit) || limit < 1 || limit > 100)) {
         throw new RangeError('limit must be an integer from 1 to 100')
+      }
       const value = await request(`/api/revisions${limit === undefined ? '' : `?limit=${limit}`}`, signal)
       assertRevisionList(value)
       return value

@@ -22,12 +22,13 @@ export async function cli() {
     // A default the help describes in words, such as `[default: every one the working tree defines]`.
     const help = (argument.longHelp ?? argument.help ?? '').replace(/\s*\[default: ([^\]]*)\]\s*$/, (_, value) => `. Default: ${value}`)
     const parts = [sentence(help)]
-    if (argument.possibleValues.length)
+    if (argument.possibleValues.length) {
       parts.push(
         argument.possibleValues.some(value => value.help)
           ? `One of: ${argument.possibleValues.map(value => `${code(value.name)}${value.help ? ` — ${value.help.replace(/\.$/, '')}` : ''}`).join('; ')}.`
           : `One of ${argument.possibleValues.map(value => code(value.name)).join(', ')}.`,
       )
+    }
     if (argument.defaults.length && argument.valueNames.length) parts.push(`Default: ${argument.defaults.map(code).join(', ')}.`)
     if (argument.required) parts.push('Required.')
     if (argument.multiple && !argument.positional) parts.push('Repeatable.')

@@ -39,7 +39,7 @@ function expect(reader: Reader, char: string) {
  * its namespace dropped.
  */
 function segmentsOf(full: string): {name: string; arity: number}[] {
-  const lastDot = full.lastIndexOf('.', full.indexOf('+') < 0 ? full.length : full.indexOf('+'))
+  const lastDot = full.lastIndexOf('.', !full.includes('+') ? full.length : full.indexOf('+'))
   return full
     .slice(lastDot + 1)
     .split('+')

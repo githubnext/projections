@@ -72,8 +72,8 @@ export const record = (value: unknown): Record<string, unknown> | undefined =>
   typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : undefined
 export const text = (value: unknown): string | undefined => (typeof value === 'string' ? value : undefined)
 /** `{key: value}`, or nothing when the value is absent. */
-export function given<K extends string, V>(key: K, value: V | undefined): {[P in K]?: V} {
-  return value === undefined ? {} : ({[key]: value} as {[P in K]?: V})
+export function given<K extends string, V>(key: K, value: V | undefined): Partial<Record<K, V>> {
+  return value === undefined ? {} : ({[key]: value} as Partial<Record<K, V>>)
 }
 export const strings = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []

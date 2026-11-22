@@ -89,7 +89,7 @@ export function useDetailCard(
       )
       if (button) anchor = button.getBoundingClientRect()
     }
-    anchor = anchor && intersect(anchor, bounds)
+    anchor &&= intersect(anchor, bounds)
     const frame = card.offsetHeight - card.clientHeight
     const next = placeDetailCard({anchor, height: card.scrollHeight + frame, bounds, sheetBelow})
     // The card is positioned in its container's padding box.
@@ -112,11 +112,12 @@ export function useDetailCard(
     if (!row) return
     let frame = 0
     const schedule = () => {
-      if (!frame)
+      if (!frame) {
         frame = requestAnimationFrame(() => {
           frame = 0
           measure()
         })
+      }
     }
     addEventListener('scroll', schedule, {capture: true, passive: true})
     addEventListener('resize', schedule)

@@ -29,8 +29,9 @@ const genuineEdits = {
 test('every vendored shadcn/ui file has a pristine base, and every base a file', async () => {
   const bases = (await readdir(upstream)).filter(file => file !== 'manifest.json').map(file => file.replace(/\.json$/, ''))
   const vendored = []
-  for (const file of await readdir(components))
+  for (const file of await readdir(components)) {
     if (file.endsWith('.tsx') && parseHeader(await readFile(new URL(file, components), 'utf8'))) vendored.push(file.replace(/\.tsx$/, ''))
+  }
   assert.deepEqual(vendored.sort(), bases.sort())
 })
 

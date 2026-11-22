@@ -234,8 +234,9 @@ async function clone(name, commits) {
   }
   for (const commit of commits) {
     const sha = commit.replace(/\^$/, '')
-    if (spawnSync('git', ['-C', directory, 'cat-file', '-e', `${sha}^{commit}`]).status !== 0)
+    if (spawnSync('git', ['-C', directory, 'cat-file', '-e', `${sha}^{commit}`]).status !== 0) {
       run('git', ['-C', directory, 'fetch', '--quiet', 'origin', sha])
+    }
   }
   return directory
 }

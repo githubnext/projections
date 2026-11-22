@@ -22,14 +22,15 @@ export function moveCollides(a: GraphLayout, b: GraphLayout): boolean {
   const parent = new Map<string, string>()
   for (const layout of [a, b]) for (const [group, children] of layout.groups) for (const child of children) parent.set(child, group)
   const within = (child: string, ancestor: string) => {
-    for (let at = parent.get(child), seen = 0; at !== undefined && seen < parent.size; at = parent.get(at), seen++)
+    for (let at = parent.get(child), seen = 0; at !== undefined && seen < parent.size; at = parent.get(at), seen++) {
       if (at === ancestor) return true
+    }
     return false
   }
   const ids = [...a.points.keys()].filter(id => b.points.has(id))
   const box = (layout: GraphLayout, id: string) => ({...layout.points.get(id)!, ...layout.sizes.get(id)!})
   const boxes = ids.map(id => ({id, from: box(a, id), to: box(b, id)}))
-  for (let i = 0; i < boxes.length; i++)
+  for (let i = 0; i < boxes.length; i++) {
     for (let j = i + 1; j < boxes.length; j++) {
       const p = boxes[i]!,
         q = boxes[j]!
@@ -54,5 +55,6 @@ export function moveCollides(a: GraphLayout, b: GraphLayout): boolean {
       }
       if (span[0] < span[1]) return true
     }
+  }
   return false
 }

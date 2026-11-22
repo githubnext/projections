@@ -13,8 +13,9 @@ export function compilerOptions(root: string, configured: string | undefined, di
   let options: ts.CompilerOptions = {}
   if (file) {
     const read = ts.readConfigFile(file, ts.sys.readFile)
-    if (read.error && configured)
+    if (read.error && configured) {
       throw new Error(`Cannot read ${slash(path.relative(root, file))}: ${ts.flattenDiagnosticMessageText(read.error.messageText, '\n')}`)
+    }
     // A base config extended from an uninstalled package is not fatal: only module
     // resolution and decorator emit matter here, and those are set below.
     if (!read.error) options = ts.parseJsonConfigFileContent(read.config, ts.sys, path.dirname(file)).options
@@ -37,7 +38,7 @@ export function compilerOptions(root: string, configured: string | undefined, di
   }
 }
 
-type ModuleClass = {
+interface ModuleClass {
   _resolveFilename: (request: string, parent: unknown, isMain: boolean, options?: unknown) => string
   _extensions: Record<string, (module: {_compile(code: string, file: string): void}, file: string) => void>
   _nodeModulePaths: (directory: string) => string[]

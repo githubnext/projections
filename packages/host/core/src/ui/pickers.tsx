@@ -29,12 +29,13 @@ function RevisionSelect({
   children,
   ...props
 }: Omit<ComponentProps<'select'>, 'size'> & {short: boolean; label: string}) {
-  if (!short)
+  if (!short) {
     return (
       <NativeSelect size="sm" className={className} {...props}>
         {children}
       </NativeSelect>
     )
+  }
   return (
     <span
       data-slot="revision-trigger"

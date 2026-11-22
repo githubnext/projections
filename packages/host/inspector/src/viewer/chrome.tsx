@@ -175,12 +175,13 @@ function Pill({className, title, children, ...rest}: {className: string; title: 
 /** What is compared, at the header's end: two named revisions as pills, short and in full on hover, or the choice in words. */
 function Compared({state}: {state: ViewerState}) {
   const sides = state.sides
-  if (!sides)
+  if (!sides) {
     return state.compared ? (
       <Pill className="pi-viewer-compared pj:max-w-[55%] pj:shrink-0" title={state.compared}>
         {state.compared}
       </Pill>
     ) : null
+  }
   const pill = (name: string, side: 'before' | 'after') => (
     <Pill className="pi-viewer-revision pj:max-w-[32ch]" title={name} data-side={side}>
       {name}

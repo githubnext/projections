@@ -190,7 +190,7 @@ export const runnerResponses = {
   changes: {request: 'GET /api/changes', schema: ChangesResponseSchema},
   fixturesChanges: {request: 'GET /api/fixtures/changes', schema: FixturesChangesResponseSchema},
   document: {request: 'GET /api/document', schema: DocumentResponseSchema},
-} as const satisfies {[name: string]: {request: string; schema: TSchema}}
+} as const satisfies Record<string, {request: string; schema: TSchema}>
 
 /** The name of a decoded runner response, such as `explore`. */
 export type RunnerResponseName = keyof typeof runnerResponses
@@ -223,7 +223,7 @@ export type DefinitionSave = Static<typeof DefinitionSaveResponseSchema>
 export type WorkspaceChanges = Static<typeof ChangesResponseSchema>
 
 /** The generated `internal/runner-api.json`: each response's schema as the `$defs` entry of its name. */
-export function runnerApiSchema(): {[key: string]: unknown} {
+export function runnerApiSchema(): Record<string, unknown> {
   return {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     title: 'Projections local runner API responses (internal)',

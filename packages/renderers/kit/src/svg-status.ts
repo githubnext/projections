@@ -5,7 +5,11 @@ import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentati
 import type {StatusPart} from './emphasis.js'
 
 /** A row's change, as a status line shows it. */
-export type StatusChange = {status: ChangeStatus; renamed?: boolean | undefined; varied?: EntityChange<unknown>['varied'] | undefined}
+export interface StatusChange {
+  status: ChangeStatus
+  renamed?: boolean | undefined
+  varied?: EntityChange<unknown>['varied'] | undefined
+}
 
 /**
  * Icon size, gap after an icon, gap between parts of an SVG status line, and the estimated advance of a status

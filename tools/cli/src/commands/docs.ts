@@ -29,7 +29,7 @@ export function docsRead(root: string, target: string, options: {section?: strin
   let text = doc.text
   if (options.section) {
     const body = section(doc.text, options.section)
-    if (body === undefined)
+    if (body === undefined) {
       throw new UsageError(
         `${doc.path} has no section "${options.section}"`,
         `Sections: ${headings(doc.text)
@@ -37,6 +37,7 @@ export function docsRead(root: string, target: string, options: {section?: strin
           .slice(0, 20)
           .join('; ')}`,
       )
+    }
     text = body
   }
   const lines = text.split('\n')

@@ -1,3 +1,4 @@
+import {readdirSync} from 'node:fs'
 import js from '@eslint/js'
 import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
@@ -6,6 +7,12 @@ import tseslint from 'typescript-eslint'
 import {consideredPlugin} from './tools/scripts/considered-rule.mjs'
 import {engineContractsRule} from './tools/scripts/engine-contracts.mjs'
 import {lifecycleFiles, machinesPlugin} from './tools/scripts/check-machines/lifecycle-rule.mjs'
+
+// Vendored shadcn/ui components: each with a pristine base in upstream/, which test/shadcn.test.mjs reproduces it from.
+const shadcn = 'packages/host/core/src/ui/components'
+const vendored = readdirSync(`${import.meta.dirname}/${shadcn}/upstream`)
+  .filter(file => file.endsWith('.json') && file !== 'manifest.json')
+  .map(file => `${shadcn}/${file.replace(/\.json$/, '.tsx')}`)
 
 export default defineConfig(
   {
@@ -36,6 +43,7 @@ export default defineConfig(
       'packages/integrations/vscode/.package/**',
       'packages/extractors/typescript-support/.runtime-*/**',
       'tools/storybook/screenshots/**',
+      ...vendored,
     ],
   },
   js.configs.recommended,
@@ -105,7 +113,6 @@ export default defineConfig(
       '@typescript-eslint/no-loop-func': 'error',
       '@typescript-eslint/no-unsafe-type-assertion': 'error',
       '@typescript-eslint/prefer-readonly': 'error',
-      '@typescript-eslint/promise-function-async': 'error',
       '@typescript-eslint/strict-void-return': 'error',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
       // The TypeScript versions above replace these.
@@ -113,6 +120,8 @@ export default defineConfig(
       'consistent-return': 'off',
       curly: ['error', 'multi-line'],
       eqeqeq: ['error', 'always'],
+      // `!!value` narrows `value` in TypeScript; `Boolean(value)` doesn't.
+      'no-implicit-coercion': ['error', {allow: ['!!']}],
       ...Object.fromEntries(
         [
           'array-callback-return',
@@ -126,7 +135,6 @@ export default defineConfig(
           'no-eval',
           'no-extend-native',
           'no-extra-bind',
-          'no-implicit-coercion',
           'no-labels',
           'no-lone-blocks',
           'no-lonely-if',
@@ -223,16 +231,10 @@ export default defineConfig(
     // Each comes off this list in the change that fixes the last of them; nothing is added to it.
     rules: Object.fromEntries(
       [
-        '@typescript-eslint/array-type',
         '@typescript-eslint/await-thenable',
         '@typescript-eslint/class-methods-use-this',
-        '@typescript-eslint/consistent-generic-constructors',
-        '@typescript-eslint/consistent-indexed-object-style',
         '@typescript-eslint/consistent-return',
-        '@typescript-eslint/consistent-type-definitions',
-        '@typescript-eslint/consistent-type-exports',
         '@typescript-eslint/default-param-last',
-        '@typescript-eslint/dot-notation',
         '@typescript-eslint/method-signature-style',
         '@typescript-eslint/no-base-to-string',
         '@typescript-eslint/no-confusing-void-expression',
@@ -240,7 +242,6 @@ export default defineConfig(
         '@typescript-eslint/no-dynamic-delete',
         '@typescript-eslint/no-empty-function',
         '@typescript-eslint/no-generated-empty-object-type',
-        '@typescript-eslint/no-import-type-side-effects',
         '@typescript-eslint/no-invalid-void-type',
         '@typescript-eslint/no-loop-func',
         '@typescript-eslint/no-meaningless-void-operator',
@@ -248,10 +249,7 @@ export default defineConfig(
         '@typescript-eslint/no-misused-spread',
         '@typescript-eslint/no-non-null-assertion',
         '@typescript-eslint/no-shadow',
-        '@typescript-eslint/no-unnecessary-boolean-literal-compare',
         '@typescript-eslint/no-unnecessary-condition',
-        '@typescript-eslint/no-unnecessary-template-expression',
-        '@typescript-eslint/no-unnecessary-type-arguments',
         '@typescript-eslint/no-unnecessary-type-assertion',
         '@typescript-eslint/no-unnecessary-type-conversion',
         '@typescript-eslint/no-unnecessary-type-parameters',
@@ -263,18 +261,13 @@ export default defineConfig(
         '@typescript-eslint/no-unsafe-type-assertion',
         '@typescript-eslint/no-unused-vars',
         '@typescript-eslint/no-use-before-define',
-        '@typescript-eslint/non-nullable-type-assertion-style',
         '@typescript-eslint/parameter-properties',
         '@typescript-eslint/prefer-find',
         '@typescript-eslint/prefer-for-of',
-        '@typescript-eslint/prefer-includes',
         '@typescript-eslint/prefer-nullish-coalescing',
         '@typescript-eslint/prefer-optional-chain',
         '@typescript-eslint/prefer-promise-reject-errors',
-        '@typescript-eslint/prefer-readonly',
-        '@typescript-eslint/prefer-regexp-exec',
         '@typescript-eslint/prefer-string-starts-ends-with',
-        '@typescript-eslint/promise-function-async',
         '@typescript-eslint/require-array-sort-compare',
         '@typescript-eslint/require-await',
         '@typescript-eslint/restrict-plus-operands',
@@ -285,11 +278,8 @@ export default defineConfig(
         '@typescript-eslint/unbound-method',
         '@typescript-eslint/use-unknown-in-catch-callback-variable',
         'array-callback-return',
-        'curly',
         'eqeqeq',
-        'logical-assignment-operators',
         'no-console',
-        'no-implicit-coercion',
         'no-labels',
         'no-multi-assign',
         'no-new-func',
@@ -299,11 +289,7 @@ export default defineConfig(
         'no-sequences',
         'no-template-curly-in-string',
         'no-unmodified-loop-condition',
-        'no-useless-return',
-        'prefer-arrow-callback',
         'prefer-const',
-        'prefer-object-has-own',
-        'prefer-template',
         'radix',
       ].map(rule => [rule, 'off']),
     ),

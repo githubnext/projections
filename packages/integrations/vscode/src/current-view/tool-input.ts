@@ -51,16 +51,18 @@ export function withTabDefaults(
   const args = {...input}
   const named = tab ? `the "${tab.title}" tab` : 'the tab'
   if (tab) notes.push(projectionNote(tool, args, tab, named))
-  if (!tab && (tool === 'compare' || tool === 'set_part' || tool === 'screenshot') && typeof args.projection !== 'string')
+  if (!tab && (tool === 'compare' || tool === 'set_part' || tool === 'screenshot') && typeof args.projection !== 'string') {
     throw new Error('Name a projection: no projection tab is open to take it from (list_projections lists them)')
+  }
   if (tool === 'compare' || tool === 'screenshot') {
     const given = typeof args.before === 'string' || typeof args.after === 'string'
     notes.push(revisionNote(tool, args, tab, named))
     if (tool === 'compare' && !given && typeof args.before === 'string') definitionAsShown(args, tab)
   }
   if (tool === 'screenshot' && tab?.view && args.projection === tab.projection) presentAsShown(args, tab.view)
-  if (tool === 'describe_part' && tab?.parts && typeof args.id !== 'string' && typeof args.part === 'string')
+  if (tool === 'describe_part' && tab?.parts && typeof args.id !== 'string' && typeof args.part === 'string') {
     notes.push(partNote(args, {...tab, parts: tab.parts}, named))
+  }
   const said = notes.filter(note => note !== undefined)
   return {input: args, ...(said.length ? {note: said.join(' ')} : {})}
 }

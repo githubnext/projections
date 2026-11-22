@@ -60,8 +60,9 @@ export const diffChecks: Pick<Checks, 'diff-changes' | 'diff-neutral' | 'diff-cl
   async 'diff-neutral'(driver, subject, {modes}) {
     requireDiff(subject, modes)
     const touches = new Set(touched(subject).flatMap(set => [...set]))
-    for (const change of subject.comparison.changes)
+    for (const change of subject.comparison.changes) {
       if (change.status !== 'unchanged') for (const id of [change.id, ...change.before, ...change.after]) touches.add(id)
+    }
     const shown = await diffSamples(driver, subject)
     const reference = await unchangedDiff(driver, subject.after)
     const varied = variedWithin(subject)
@@ -72,10 +73,11 @@ export const diffChecks: Pick<Checks, 'diff-changes' | 'diff-neutral' | 'diff-cl
       const neutral = reference.get(key)
       if (!neutral) continue
       compared++
-      if (looks(sample) !== looks(neutral))
+      if (looks(sample) !== looks(neutral)) {
         failures.push(
           `"${key}" is unchanged${varied.has(sample.id) ? ' (it varied only within tolerance)' : ''} but emphasized: compared with an unchanged comparison, ${difference(neutral, {...sample, box: neutral.box, opacity: neutral.opacity})}.`,
         )
+      }
       if (failures.length >= limit) break
     }
     if (!compared) throw new Skip('Every drawn entity is touched by a change, so there is nothing unchanged to compare.')

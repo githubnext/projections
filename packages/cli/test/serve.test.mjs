@@ -167,9 +167,9 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
   assert.ok(cell, JSON.stringify(swept.body.sweep.cells))
   const query = new URLSearchParams({projection: 'repository-map', before: cell.before, after: cell.after})
   const thumbnail = await backend.request('GET', `/api/sweep/thumbnail?${query}`)
-  if (thumbnail.status === 400 && /browser/i.test(JSON.stringify(thumbnail.body)))
+  if (thumbnail.status === 400 && /browser/i.test(JSON.stringify(thumbnail.body))) {
     t.diagnostic(`No browser for thumbnails: ${JSON.stringify(thumbnail.body)}`)
-  else {
+  } else {
     assert.equal(thumbnail.status, 200, JSON.stringify(thumbnail.body))
     assert.equal(thumbnail.contentType, 'image/png')
     assert.deepEqual([...Buffer.from(thumbnail.body.base64, 'base64').subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])

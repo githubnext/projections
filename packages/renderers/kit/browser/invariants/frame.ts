@@ -43,7 +43,7 @@ export function measureFrame(root: Element): FrameMeasurement {
     .filter(card => card.opacity > 0.01)
   // Packed circles nest by design (files in folders); cards and rows must never overlap while visible.
   if (!root.querySelector('svg.fp-packing')) {
-    for (let i = 0; i < cards.length; i++)
+    for (let i = 0; i < cards.length; i++) {
       for (let j = i + 1; j < cards.length; j++) {
         const a = cards[i]!.box,
           b = cards[j]!.box
@@ -51,6 +51,7 @@ export function measureFrame(root: Element): FrameMeasurement {
           issues.push(`cards overlap: ${cards[i]!.id} / ${cards[j]!.id}`)
         }
       }
+    }
     // A boundary and anything else visible either nest or keep apart: boundaries never pass through each other or a card.
     const boundaries = [...root.querySelectorAll<SVGGElement>('.graph-group')]
       .filter(group => opacityOf(group) > 0.01)
@@ -70,10 +71,13 @@ export function measureFrame(root: Element): FrameMeasurement {
     const inside = (a: Box, b: Box) => a.left >= b.left - 1 && a.right <= b.right + 1 && a.top >= b.top - 1 && a.bottom <= b.bottom + 1
     const overlap = (a: Box, b: Box) =>
       Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1
-    for (const [index, boundary] of boundaries.entries())
-      for (const other of [...boundaries.slice(index + 1), ...cards])
-        if (overlap(boundary.box, other.box) && !inside(other.box, boundary.box) && !inside(boundary.box, other.box))
+    for (const [index, boundary] of boundaries.entries()) {
+      for (const other of [...boundaries.slice(index + 1), ...cards]) {
+        if (overlap(boundary.box, other.box) && !inside(other.box, boundary.box) && !inside(boundary.box, other.box)) {
           issues.push(`boundary overlaps: ${boundary.id} / ${other.id}`)
+        }
+      }
+    }
   } else {
     // Two visible circles either nest or keep apart: they never partly overlap.
     const circles = [...root.querySelectorAll<SVGGElement>('.fp-node:not(.fp-root)')]
@@ -83,7 +87,7 @@ export function measureFrame(root: Element): FrameMeasurement {
         return {id: node.dataset.entityId ?? '', x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, r: rect.width / 2}
       })
       .filter(circle => circle.r > 0.5)
-    for (let i = 0; i < circles.length; i++)
+    for (let i = 0; i < circles.length; i++) {
       for (let j = i + 1; j < circles.length; j++) {
         const a = circles[i]!,
           b = circles[j]!
@@ -92,6 +96,7 @@ export function measureFrame(root: Element): FrameMeasurement {
         const nested = distance + Math.min(a.r, b.r) <= Math.max(a.r, b.r) + 1
         if (!apart && !nested) issues.push(`circles overlap: ${a.id} / ${b.id}`)
       }
+    }
   }
   // Every drawn arrow ends on its target card's border, measured in the diagram's own coordinates.
   if (svg) {
@@ -123,8 +128,9 @@ export function measureFrame(root: Element): FrameMeasurement {
       )
       if (!arrowhead) issues.push(`relationship without an arrowhead: ${link.dataset.edgeKey}`)
       // …painted after its target card, so the tip sits on top of the card's border.
-      else if (!(target.compareDocumentPosition(arrowhead) & Node.DOCUMENT_POSITION_FOLLOWING))
+      else if (!(target.compareDocumentPosition(arrowhead) & Node.DOCUMENT_POSITION_FOLLOWING)) {
         issues.push(`arrowhead painted under its card: ${link.dataset.edgeKey}`)
+      }
       const head = arrowhead?.getAttribute('d')
       if (head) {
         const [tip, left, right] = [...head.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
@@ -150,13 +156,14 @@ export function measureFrame(root: Element): FrameMeasurement {
       if (arrowhead && end && before) {
         if (Math.hypot(end.x - bx, end.y - by) > 0.05) issues.push(`shaft misses its arrowhead's base: ${link.dataset.edgeKey}`)
         const length = Math.hypot(end.x - before.x, end.y - before.y)
-        if (length > 0.5 && (ax * (end.x - before.x) + ay * (end.y - before.y)) / length < 0.999)
+        if (length > 0.5 && (ax * (end.x - before.x) + ay * (end.y - before.y)) / length < 0.999) {
           issues.push(`shaft enters its arrowhead at an angle: ${link.dataset.edgeKey}`)
+        }
       }
     }
   }
   const decorated = [
-    ...root.querySelectorAll<Element>(
+    ...root.querySelectorAll(
       '.node-emphasis, .node-status, .fp-emphasis, .badge, .pk-svg-status, .pk-status-text, .graph-edge-emphasis, [data-change], .pk-svg-was, .pk-svg-now',
     ),
   ]

@@ -50,7 +50,7 @@ async function chrome(page: Page) {
 for (const [name, id] of [
   ['a one-revision view', 'default-ui-projection-view--extraction'],
   ['a comparison', 'default-ui-projection-view--comparison'],
-] as const)
+] as const) {
   test(`${name}: the toolbar and stage lie flat, edge to edge, and the summary floats at the stage's foot`, async ({page}) => {
     await page.goto(story(id))
     await expect(page.locator('.ph')).toHaveAttribute('data-renderer-status', 'ready')
@@ -82,3 +82,4 @@ for (const [name, id] of [
       await expect(single).toHaveCSS('border-top-left-radius', '0px')
     }
   })
+}

@@ -21,7 +21,7 @@ export interface SummaryFactContext {
   /** The shell's model of the document (`createModel`). */
   model: ComparisonModel
   /** The value of every declared control, defaults filled in, for facts worded by a control (such as a measure). */
-  controls: {[id: string]: ControlValue}
+  controls: Record<string, ControlValue>
   /** The definition's renderer name (`init.projection.renderer`), for a bundle that presents several. */
   rendererName: string
 }

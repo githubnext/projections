@@ -8,10 +8,10 @@ import {Prose} from './breaks.js'
 
 /** How a covering policy acts on a workload, as prose: its strongest effect, and the containers a container selector picks. */
 function coverage(chip: Chip): string {
-  const effect = chip.subject.entity.data?.['effect']
+  const effect = chip.subject.entity.data?.effect
   const verb =
     effect === 'enforce' ? 'enforces' : effect === 'observe' ? 'observes' : effect === 'unknown' ? 'unknown effect' : 'declares no effect'
-  const containers = chip.data?.['containers']
+  const containers = chip.data?.containers
   if (!Array.isArray(containers) || !containers.length) return ` ${verb}`
   return ` ${verb} on ${containers.map(name => codeSpan(String(name))).join(', ')}`
 }
@@ -19,8 +19,8 @@ function coverage(chip: Chip): string {
 /** A chip's subject, as prose: workloads in the extractor's words, binaries and policies as code. */
 function subjectProse(chip: Chip): string {
   const entity = chip.subject.entity
-  if (entity.kind === 'policy' || entity.data?.['subjectKind'] === 'binary') return codeSpan(entity.label)
-  return proseOf(entity.data?.['display'], entity.label)
+  if (entity.kind === 'policy' || entity.data?.subjectKind === 'binary') return codeSpan(entity.label)
+  return proseOf(entity.data?.display, entity.label)
 }
 
 export function Chips({
@@ -39,13 +39,14 @@ export function Chips({
   label: string
 }) {
   const named = <span className="rp-side-label">{label} </span>
-  if (!chips.length)
+  if (!chips.length) {
     return (
       <span className="rp-any">
         {named}
         {empty}
       </span>
     )
+  }
   const ownerRegion = regionOf(owner)
   return (
     <span className="rp-chips">
@@ -60,7 +61,7 @@ export function Chips({
         // A chip of an added or removed row arrives or leaves with it: marked by its sign, not a second fill.
         const filled = frame.side === 'diff' && change !== 'unchanged' && change !== ownerRegion
         const prefix = chipPrefix(chip)
-        const follow = chip.data?.['followChildren'] === true
+        const follow = chip.data?.followChildren === true
         return (
           <button
             key={chip.key}

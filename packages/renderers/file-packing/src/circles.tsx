@@ -102,7 +102,7 @@ function FlagDots({flags, r}: {flags: readonly DrawnFlag[]; r: number}) {
   )
 }
 
-export type Drawn = {
+export interface Drawn {
   circle: Circle
   id: string
   row: Circle['row']
@@ -135,113 +135,107 @@ export const drawMark = 'file-packing:draw'
  * Every circle, then their names and status in one layer above them, so a child never covers its folder's name;
  * each circle's accessible name carries both. Memoized: hover and tooltips never redraw the circles.
  */
-export const Circles = memo(function Circles({
-  drawn,
-  selectedId,
-  arcIds,
-}: {
-  drawn: readonly Drawn[]
-  selectedId: string | null
-  arcIds: ReadonlyMap<string, string>
-}) {
-  useEffect(() => {
-    performance.mark(drawMark)
-  })
-  return (
-    <>
-      {drawn.map(({circle, id, row, r, emphasis, changed, paint, folder, select, label, removedGhost, flags, ground, holdsChanges}) => (
-        <g
-          key={id}
-          data-entity-id={id}
-          data-projections-unit=""
-          data-ground={ground}
-          className={`fp-node ${folder ? 'fp-folder' : 'fp-file'}${selectedId === id ? ' selected' : ''}`}
-          transform={`translate(${circle.x},${circle.y})`}
-          opacity={circle.opacity}
-          role="button"
-          tabIndex={0}
-          aria-label={label}
-          aria-pressed={selectedId === id}
-          onClick={select}
-          onKeyDown={(event: KeyboardEvent) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault()
-              select()
-            }
-          }}
-        >
-          <circle
-            className="fp-surface"
-            data-projections-edge=""
-            r={r}
-            {...(folder ? {} : {'data-projections-category': circle.category ?? ''})}
-            style={
-              folder
-                ? undefined
-                : {
-                    fill: paint ?? `var(--projections-${otherToken})`,
-                    fillOpacity: removedGhost ? 1 - 0.6 * Math.min(1, emphasis) : undefined,
-                  }
-            }
-          />
-          {!folder && flags.length > 0 && <FlagDots flags={flags} r={r} />}
-          {emphasis > 0.01 && changed && (
+export const Circles = memo(
+  ({drawn, selectedId, arcIds}: {drawn: readonly Drawn[]; selectedId: string | null; arcIds: ReadonlyMap<string, string>}) => {
+    useEffect(() => {
+      performance.mark(drawMark)
+    })
+    return (
+      <>
+        {drawn.map(({circle, id, row, r, emphasis, changed, paint, folder, select, label, removedGhost, flags, ground, holdsChanges}) => (
+          <g
+            key={id}
+            data-entity-id={id}
+            data-projections-unit=""
+            data-ground={ground}
+            className={`fp-node ${folder ? 'fp-folder' : 'fp-file'}${selectedId === id ? ' selected' : ''}`}
+            transform={`translate(${circle.x},${circle.y})`}
+            opacity={circle.opacity}
+            role="button"
+            tabIndex={0}
+            aria-label={label}
+            aria-pressed={selectedId === id}
+            onClick={select}
+            onKeyDown={(event: KeyboardEvent) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                select()
+              }
+            }}
+          >
             <circle
-              className={`fp-emphasis ${classifyChange(row)}${holdsChanges ? ' pk-holds-changes' : ''}`}
+              className="fp-surface"
               data-projections-edge=""
-              r={Math.max(0, r - 1)}
-              opacity={Math.min(1, emphasis)}
+              r={r}
+              {...(folder ? {} : {'data-projections-category': circle.category ?? ''})}
+              style={
+                folder
+                  ? undefined
+                  : {
+                      fill: paint ?? `var(--projections-${otherToken})`,
+                      fillOpacity: removedGhost ? 1 - 0.6 * Math.min(1, emphasis) : undefined,
+                    }
+              }
             />
-          )}
-        </g>
-      ))}
-      <g className="fp-labels" aria-hidden="true">
-        {drawn
-          .filter(({text, status}) => text !== undefined || status !== undefined)
-          .map(({circle, id, row, r, emphasis, folder, text, status, labelY, statusY, arc, ground, holdsChanges}) => (
-            <g
-              key={id}
-              data-label-for={id}
-              {...(holdsChanges ? {className: 'pk-holds-changes'} : {})}
-              data-ground={ground}
-              {...(folder ? {'data-folder': ''} : {})}
-              transform={`translate(${circle.x},${circle.y})`}
-              opacity={circle.opacity}
-            >
-              {text !== undefined &&
-                (folder && arc !== 'inside' ? (
-                  <>
-                    <defs>
-                      {/* Left to right over the top, or under the bottom, so the name reads upright either way. */}
-                      <path id={arcIds.get(id)} d={`M ${-r} 0 A ${r} ${r} 0 0 ${arc === 'bottom' ? 0 : 1} ${r} 0`} />
-                    </defs>
-                    <text className="fp-label fp-folder-label" data-arc={arc} dominantBaseline="central" {...identifier}>
-                      {/* WebKit doesn't inherit dominant-baseline into a textPath: without its own, the name sits above the outline. */}
-                      <textPath href={`#${arcIds.get(id)}`} startOffset="50%" textAnchor="middle" dominantBaseline="central">
-                        {text}
-                      </textPath>
+            {!folder && flags.length > 0 && <FlagDots flags={flags} r={r} />}
+            {emphasis > 0.01 && changed && (
+              <circle
+                className={`fp-emphasis ${classifyChange(row)}${holdsChanges ? ' pk-holds-changes' : ''}`}
+                data-projections-edge=""
+                r={Math.max(0, r - 1)}
+                opacity={Math.min(1, emphasis)}
+              />
+            )}
+          </g>
+        ))}
+        <g className="fp-labels" aria-hidden="true">
+          {drawn
+            .filter(({text, status}) => text !== undefined || status !== undefined)
+            .map(({circle, id, row, r, emphasis, folder, text, status, labelY, statusY, arc, ground, holdsChanges}) => (
+              <g
+                key={id}
+                data-label-for={id}
+                {...(holdsChanges ? {className: 'pk-holds-changes'} : {})}
+                data-ground={ground}
+                {...(folder ? {'data-folder': ''} : {})}
+                transform={`translate(${circle.x},${circle.y})`}
+                opacity={circle.opacity}
+              >
+                {text !== undefined &&
+                  (folder && arc !== 'inside' ? (
+                    <>
+                      <defs>
+                        {/* Left to right over the top, or under the bottom, so the name reads upright either way. */}
+                        <path id={arcIds.get(id)} d={`M ${-r} 0 A ${r} ${r} 0 0 ${arc === 'bottom' ? 0 : 1} ${r} 0`} />
+                      </defs>
+                      <text className="fp-label fp-folder-label" data-arc={arc} dominantBaseline="central" {...identifier}>
+                        {/* WebKit doesn't inherit dominant-baseline into a textPath: without its own, the name sits above the outline. */}
+                        <textPath href={`#${arcIds.get(id)}`} startOffset="50%" textAnchor="middle" dominantBaseline="central">
+                          {text}
+                        </textPath>
+                      </text>
+                    </>
+                  ) : (
+                    <text
+                      className={folder ? 'fp-label fp-folder-label' : 'fp-label'}
+                      y={labelY}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      {...(folder ? {'data-arc': arc} : {})}
+                      {...identifier}
+                    >
+                      {text}
                     </text>
-                  </>
-                ) : (
-                  <text
-                    className={folder ? 'fp-label fp-folder-label' : 'fp-label'}
-                    y={labelY}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    {...(folder ? {'data-arc': arc} : {})}
-                    {...identifier}
-                  >
-                    {text}
-                  </text>
-                ))}
-              {status === 'line' && <StatusLine row={row} emphasis={emphasis} y={statusY} />}
-              {status === 'glyph' && <StatusGlyph row={row} emphasis={emphasis} y={statusY} />}
-            </g>
-          ))}
-      </g>
-    </>
-  )
-})
+                  ))}
+                {status === 'line' && <StatusLine row={row} emphasis={emphasis} y={statusY} />}
+                {status === 'glyph' && <StatusGlyph row={row} emphasis={emphasis} y={statusY} />}
+              </g>
+            ))}
+        </g>
+      </>
+    )
+  },
+)
 
 /** The single root holding everything, drawn as the selectable background rather than a circle. */
 export function RootSurface({

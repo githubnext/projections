@@ -72,8 +72,8 @@ test("withoutNpmConfig: the project's npm doesn't inherit this workspace's npm r
 
 test('findEditor: none installs nowhere; auto prefers code, then code-insiders', () => {
   const only = (name: string) => (path: string) => path.endsWith(`/${name}`) || path.endsWith(`\\${name}.cmd`)
-  const original = process.env['PATH']
-  process.env['PATH'] = process.platform === 'win32' ? 'C:\\bin' : '/opt/bin'
+  const original = process.env.PATH
+  process.env.PATH = process.platform === 'win32' ? 'C:\\bin' : '/opt/bin'
   try {
     assert.equal(
       findEditor('none', () => true),
@@ -83,7 +83,7 @@ test('findEditor: none installs nowhere; auto prefers code, then code-insiders',
     assert.equal(findEditor('auto', only('code-insiders'))?.name, 'code-insiders')
     assert.equal(findEditor('code', only('code-insiders')), undefined)
   } finally {
-    process.env['PATH'] = original
+    process.env.PATH = original
   }
 })
 

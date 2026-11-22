@@ -19,11 +19,11 @@ const node = findNode(root)
 if (!node.matched) say(`Node ${node.pinned} (${root}/.node-version) is not installed; running with Node ${node.version}`)
 
 // As `npm run tools` does: the command runs in the workspace root, and INIT_CWD is where it was invoked.
-process.env['INIT_CWD'] = invokedFrom
+process.env.INIT_CWD = invokedFrom
 if (node.path === process.execPath) {
   process.chdir(root)
   // The launcher sets PROJECTIONS_TOOLS_BIN (read by lib/invocation.ts, so not imported here: importing it removes it).
-  process.argv[1] = process.env['PROJECTIONS_TOOLS_BIN'] ?? bin
+  process.argv[1] = process.env.PROJECTIONS_TOOLS_BIN ?? bin
   await import(pathToFileURL(bin).href)
 } else {
   const child = spawn(node.path, [bin, ...process.argv.slice(2)], {cwd: root, stdio: 'inherit'})

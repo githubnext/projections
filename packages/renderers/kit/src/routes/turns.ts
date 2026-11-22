@@ -46,7 +46,8 @@ export function inflections(route: Spline, threshold = 3): number {
   const runs = turnRuns(route)
   const significant = runs.filter(run => Math.abs(run) >= (threshold * Math.PI) / 180)
   let count = 0
-  for (let index = 1; index < significant.length; index++)
+  for (let index = 1; index < significant.length; index++) {
     if (Math.sign(significant[index]!) !== Math.sign(significant[index - 1]!)) count++
+  }
   return count
 }

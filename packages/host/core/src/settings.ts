@@ -138,7 +138,7 @@ function showAsGroup(showAs: SettingsShowAs): SettingsGroup {
 /** "Playback" while animated: loop and holds (unless motion is reduced) and speed. */
 function playbackEntries(p: ProjectionController, features: SettingsFeatures | undefined): SettingsEntry[] {
   const playback: SettingsEntry[] = []
-  if (on(features, 'playback') && !p.reducedMotion)
+  if (on(features, 'playback') && !p.reducedMotion) {
     playback.push(
       {
         type: 'toggle',
@@ -160,6 +160,7 @@ function playbackEntries(p: ProjectionController, features: SettingsFeatures | u
         ],
       },
     )
+  }
   if (on(features, 'speed')) {
     const known = playbackSpeeds.some(option => Math.abs(option.factor - p.speed) < 1e-6)
     playback.push({
@@ -218,7 +219,7 @@ export function settingsModel(p: ProjectionController, features?: SettingsFeatur
     if (entries.length) submenus.push({type: 'submenu', id, label, detail, groups: submenuGroups(id, label, entries)})
   }
   if (p.comparing && on(features, 'changesOnly')) submenu('scope', 'Show', [scopeChoice(p)])
-  if (p.comparing && on(features, 'highlighting'))
+  if (p.comparing && on(features, 'highlighting')) {
     submenu('highlighting', 'Highlight changes', [
       {
         type: 'choice',
@@ -232,7 +233,8 @@ export function settingsModel(p: ProjectionController, features?: SettingsFeatur
         })),
       },
     ])
-  if (on(features, 'rendererChoice') && p.renderers.length > 1 && p.renderer)
+  }
+  if (on(features, 'rendererChoice') && p.renderers.length > 1 && p.renderer) {
     submenu('renderer', 'Renderer', [
       {
         type: 'choice',
@@ -246,6 +248,7 @@ export function settingsModel(p: ProjectionController, features?: SettingsFeatur
         })),
       },
     ])
+  }
   if (animated) submenu('playback', 'Playback', playbackEntries(p, features), `${p.speed}×`)
   if (submenus.length) groups.push({id: 'settings', entries: submenus})
   const title = p.renderer?.title
@@ -264,11 +267,12 @@ export function settingsLabels(model: SettingsModel): string[][] {
   const top: string[] = []
   for (const group of model.groups) {
     if (group.label) top.push(group.label)
-    for (const entry of group.entries)
+    for (const entry of group.entries) {
       if (entry.type === 'submenu') {
         top.push(entry.label)
         levels.push(entry.groups.flatMap(inner => (inner.label ? [inner.label] : [])))
       }
+    }
   }
   return [top, ...levels]
 }

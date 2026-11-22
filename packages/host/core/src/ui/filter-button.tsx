@@ -72,7 +72,7 @@ export function FilterButton({
     [setOpen],
   )
   const count = `${p.visibleRows.length.toLocaleString()} of ${p.rows.length.toLocaleString()} rows${active ? ' match' : ''}`
-  if (!expanded && inPopover)
+  if (!expanded && inPopover) {
     return (
       <ToolbarPopover
         icon={<ListFilter />}
@@ -88,7 +88,8 @@ export function FilterButton({
         {field(true)}
       </ToolbarPopover>
     )
-  if (!expanded)
+  }
+  if (!expanded) {
     return (
       <Button
         ref={button}
@@ -108,6 +109,7 @@ export function FilterButton({
         <ListFilter />
       </Button>
     )
+  }
   return field(false)
   function field(inPopover: boolean) {
     const full = inline || inPopover

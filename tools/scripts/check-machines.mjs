@@ -42,12 +42,13 @@ const baseline = update && !raised ? sorted : committed
 for (const path of new Set([...Object.keys(counts), ...Object.keys(baseline)])) {
   const count = counts[path] ?? 0
   const allowed = baseline[path] ?? 0
-  if (count > allowed)
+  if (count > allowed) {
     for (const message of first[path].slice(allowed)) problems.push(`${path}:${message.line}: ${message.message} (machines/lifecycle)`)
-  else if (count < allowed)
+  } else if (count < allowed) {
     problems.push(
       `${path}: has ${count} implicit lifecycle patterns, fewer than the baseline's ${allowed}; lower it with node tools/scripts/check-machines.mjs --update`,
     )
+  }
 }
 
 // Every machine is exported and explored by its workspace's tests.
@@ -63,17 +64,19 @@ async function files(directory, match) {
   return found
 }
 const workspaceOf = path => {
-  for (let directory = dirname(path); directory.startsWith(root); directory = dirname(directory))
+  for (let directory = dirname(path); directory.startsWith(root); directory = dirname(directory)) {
     if (existsSync(join(directory, 'package.json'))) return directory
+  }
   return root
 }
 const tests = new Map()
 const testsOf = async workspace => {
-  if (!tests.has(workspace))
+  if (!tests.has(workspace)) {
     tests.set(
       workspace,
       await Promise.all((await files(join(workspace, 'test'), /\.(test\.[cm]?[jt]sx?|[cm]?ts)$/)).map(path => readFile(path, 'utf8'))),
     )
+  }
   return tests.get(workspace)
 }
 const definition = /\b(export\s+)?const\s+(\w+)\s*=\s*defineMachine\s*</g
@@ -83,20 +86,22 @@ for (const path of await files(join(root, 'packages'), /\.tsx?$/)) {
   if (!text.includes('defineMachine')) continue
   const at = index => text.slice(0, index).split('\n').length
   const named = [...text.matchAll(definition)]
-  if (named.length !== (text.match(/\bdefineMachine\s*</g) ?? []).length)
+  if (named.length !== (text.match(/\bdefineMachine\s*</g) ?? []).length) {
     problems.push(
       `${posix(relative(root, path))}:${at(text.indexOf('defineMachine'))}: bind each machine to an exported const, so its explore test can import it`,
     )
+  }
   for (const match of named) {
     const line = `${posix(relative(root, path))}:${at(match.index)}`
     if (!match[1]) problems.push(`${line}: export ${match[2]}, so its explore test can import it`)
     const workspace = workspaceOf(path)
     // Passed to `explore`, perhaps through a namespace import (`explore(machines.name`).
     const explored = (await testsOf(workspace)).some(test => new RegExp(`\\bexplore\\(\\s*(?:\\w+\\.)?${match[2]}\\b`).test(test))
-    if (!explored)
+    if (!explored) {
       problems.push(
         `${line}: ${match[2]} has no explore test in ${posix(relative(root, join(workspace, 'test')))} (docs/guides/state-machines.md#test-it)`,
       )
+    }
   }
 }
 

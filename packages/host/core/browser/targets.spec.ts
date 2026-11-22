@@ -14,7 +14,7 @@ const annotations = encodeURIComponent(
 )
 
 async function open(page: Page, query: string) {
-  await page.goto(explorer(`${query}`))
+  await page.goto(explorer(query))
   await expect(view(page)).toHaveAttribute('data-renderer-status', 'ready')
 }
 

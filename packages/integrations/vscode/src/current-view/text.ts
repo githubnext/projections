@@ -39,18 +39,19 @@ function definitionLines(facts: TabFacts): string[] {
     : []
   if (!facts.definitionFile && !named.length) return []
   return [
-    `Definition: ${facts.definitionFile ? `${facts.definitionFile}` : 'a built-in default'}${named.length ? `; ${named.join(', ')}` : ''}.`,
+    `Definition: ${facts.definitionFile ? facts.definitionFile : 'a built-in default'}${named.length ? `; ${named.join(', ')}` : ''}.`,
   ]
 }
 
 /** What the tab shows: its choice and the revisions it resolved to. */
 function showingLines(facts: TabFacts): string[] {
   const choice = `${facts.choice.name}${facts.choice.detail ? ` (${facts.choice.detail})` : ''}${facts.pinned ? ', pinned to this tab' : ''}`
-  if (facts.before && facts.after)
+  if (facts.before && facts.after) {
     return [
       `Showing: ${choice}. Before ${sideText(facts.before)} → After ${sideText(facts.after)}.`,
       `Revisions: before ${resolved(facts.before)}, after ${resolved(facts.after)}.`,
     ]
+  }
   if (facts.after) return [`Showing: ${choice}. One revision, ${sideText(facts.after)}: nothing is compared.`]
   return [`Showing: ${choice}.`]
 }
@@ -58,17 +59,17 @@ function showingLines(facts: TabFacts): string[] {
 /** Whether the result is out of date, and which definition it applies. */
 function freshnessLines(facts: TabFacts): string[] {
   const lines: string[] = []
-  if (facts.stale)
+  if (facts.stale) {
     lines.push(
       `Out of date: ${facts.stale.why}${facts.stale.files ? ` (${facts.stale.files} file${facts.stale.files === 1 ? '' : 's'} changed since)` : ''}; the person can Refresh it.`,
     )
-  else if (facts.page?.status === 'ok') lines.push('Up to date.')
+  } else if (facts.page?.status === 'ok') lines.push('Up to date.')
   if (facts.edits === 'yours') lines.push("Definition: it uses the person's uncommitted edits to the definition.")
-  else if (facts.edits === 'committed')
+  else if (facts.edits === 'committed') {
     lines.push(
       'Definition: the person has uncommitted edits to the definition, but chose Show committed: this result applies the committed one.',
     )
-  else if (facts.definitionRevision === 'HEAD') lines.push('Definition: the committed one.')
+  } else if (facts.definitionRevision === 'HEAD') lines.push('Definition: the committed one.')
   return lines
 }
 

@@ -39,7 +39,7 @@ export interface RepositoryFacts {
   ahead?: number
   /** `GET /api/pairs`' suggestions (by `source`: `merge-base`, `working-tree`, `parent`, `tag`, `bookmark`). */
   suggestions: SuggestedPair[]
-  bookmarks: Array<SuggestedPair & {id?: string}>
+  bookmarks: (SuggestedPair & {id?: string})[]
 }
 
 /** A pair choice's identity, `pair:<before>..<after>`, for a recent commit chosen in the Viewing view. */

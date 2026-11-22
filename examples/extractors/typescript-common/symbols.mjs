@@ -95,8 +95,9 @@ export function matcher(project, checker, known) {
       }
       if (target?.declarations?.length) {
         const previous = symbols.get(target)
-        if (!previous || `${convention.module}:${convention.symbol}` < `${previous.module}:${previous.symbol}`)
+        if (!previous || `${convention.module}:${convention.symbol}` < `${previous.module}:${previous.symbol}`) {
           symbols.set(target, convention)
+        }
       }
     }
   }
@@ -105,8 +106,9 @@ export function matcher(project, checker, known) {
       (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
       node.moduleSpecifier &&
       ts.isStringLiteralLike(node.moduleSpecifier)
-    )
+    ) {
       inspect(node.moduleSpecifier)
+    }
     if (ts.isSourceFile(node) || ts.isModuleBlock(node) || ts.isModuleDeclaration(node)) ts.forEachChild(node, visitModules)
   }
   for (const program of project.programs) {

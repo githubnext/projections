@@ -33,7 +33,8 @@ const workbench = await startInspector({
   ...(values.cli ? {cli: values.cli} : {}),
 })
 console.log(workbench.url)
-for (const signal of ['SIGINT', 'SIGTERM'] as const)
+for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {
     void workbench.close().then(() => process.exit(0))
   })
+}

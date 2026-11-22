@@ -22,7 +22,7 @@ export interface Circle {
 export function separate(circles: readonly Circle[], gap: number): boolean {
   let moved = false
   const n = circles.length
-  for (let i = 0; i < n; i++)
+  for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       const a = circles[i]!,
         b = circles[j]!
@@ -47,6 +47,7 @@ export function separate(circles: readonly Circle[], gap: number): boolean {
       b.y += dy * push * (1 - share)
       moved = true
     }
+  }
   return moved
 }
 

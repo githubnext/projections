@@ -157,10 +157,11 @@ export function createRowFilter(): Selector<
 function scopeHidden(rows: readonly Row[], summary: readonly SummaryFigure[]): ScopeHidden[] {
   if (!rows.length) return []
   const figures = summary.filter(figure => figure.type === 'count')
-  if (figures.length)
+  if (figures.length) {
     return figures
       .map(figure => ({noun: figure.noun, count: rows.filter(row => rowInSummary(row, {kinds: figure.kinds})).length}))
       .filter(item => item.count > 0)
+  }
   const kinds = new Map<string, number>()
   for (const row of rows) kinds.set(row.kind, (kinds.get(row.kind) ?? 0) + 1)
   return [...kinds].map(([kind, count]) => ({noun: humanizeKind(kind), count}))

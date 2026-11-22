@@ -81,7 +81,7 @@ export function codeStatisticsControlsFor(entities: Iterable<Entity | undefined>
 }
 
 /** Code-statistics options from control values (see `controlValues`). */
-export function codeStatisticsOptions(values: {[id: string]: ControlValue}): CodeStatisticsOptions {
+export function codeStatisticsOptions(values: Record<string, ControlValue>): CodeStatisticsOptions {
   const measure = values.measure,
     chart = values.chart,
     byLanguage = values.byLanguage

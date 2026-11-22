@@ -39,7 +39,7 @@ export interface TabChoice {
 export interface TabRestore {
   tag: typeof restoreTag
   pair?: TabPair
-  results?: {[ref: string]: {document: unknown; job?: string; definition?: string}}
+  results?: Record<string, {document: unknown; job?: string; definition?: string}>
   /** The revision whose definition the tab applies. */
   definitionRevision?: string
   /** The projection's current edits (`editKey`), for a page that keeps Show committed for them. */
@@ -88,7 +88,7 @@ export type HostMessage =
   /** A projection tab page asks what to show as it loads (`TabRestore`): kept results come back without extracting. */
   | {tag: typeof hostTag; op: 'restore'}
   /** A projection tab's new results (the shown pair's extractions), for the extension to keep while the tab is hidden. */
-  | {tag: typeof hostTag; op: 'results'; pair: TabPair; results: {[ref: string]: {document: unknown; job?: string; definition?: string}}}
+  | {tag: typeof hostTag; op: 'results'; pair: TabPair; results: Record<string, {document: unknown; job?: string; definition?: string}>}
   /** A projection tab's summary changed (its pair, status and change counts), for the side bar. */
   | {tag: typeof hostTag; op: 'summary'; summary: unknown}
   /** The tab toolbar's notices: Refresh, and the edits indicator's Show committed and Use my edits. */

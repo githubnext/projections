@@ -51,7 +51,7 @@ export function DetailsDock({
 }) {
   const projection = useSyncExternalStore(store.subscribe, store.get, store.get)
   const row = projection?.selectedRow
-  if (!projection || !row)
+  if (!projection || !row) {
     return (
       <div className="pi-details-empty pj:flex pj:flex-col pj:items-center pj:gap-2 pj:px-4 pj:py-8 pj:text-center pj:text-xs pj:text-muted-foreground">
         <MousePointerClick aria-hidden="true" className="pj:size-5" />
@@ -62,6 +62,7 @@ export function DetailsDock({
         </p>
       </div>
     )
+  }
   return (
     <div className="pi-details-dock pj:flex pj:min-w-0 pj:flex-col">
       <RawDetails projection={projection} onOpen={onOpen} beforeLabel={beforeLabel} afterLabel={afterLabel} />

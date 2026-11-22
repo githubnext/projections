@@ -81,18 +81,18 @@ const record = (value: unknown): Record<string, unknown> =>
 
 /** The comparator's findings by change ID, or `undefined` without its metadata. Comparator metadata is untrusted. */
 export function findingsOf(metadata: unknown): Map<string, Finding[]> | undefined {
-  const found = record(record(record(metadata)['agenticWorkflows'])['interpretations'])
+  const found = record(record(record(metadata).agenticWorkflows).interpretations)
   if (!Object.keys(found).length && !('agenticWorkflows' in record(metadata))) return undefined
   return new Map(
     Object.entries(found).map(([id, findings]) => [
       id,
       (Array.isArray(findings) ? findings : [])
         .map(record)
-        .filter(finding => typeof finding['name'] === 'string')
+        .filter(finding => typeof finding.name === 'string')
         .map(finding => ({
-          name: finding['name'] as string,
-          level: finding['level'] === 'warning' ? 'warning' : 'note',
-          items: (Array.isArray(finding['items']) ? finding['items'] : []).filter((item): item is string => typeof item === 'string'),
+          name: finding.name as string,
+          level: finding.level === 'warning' ? 'warning' : 'note',
+          items: (Array.isArray(finding.items) ? finding.items : []).filter((item): item is string => typeof item === 'string'),
         })),
     ]),
   )
@@ -199,12 +199,17 @@ function categories(workflows: readonly WorkflowItem[], side: Side): MatrixCateg
   return specs
     .map(([section, title, include]) => {
       const columns = new Map<string, Column>()
-      for (const workflow of workflows)
-        for (const entity of side === 'diff' ? [workflow.before, workflow.after] : [workflow[side]])
-          if (entity)
-            for (const value of sectionSpecs.find(spec => spec.id === section)!.read(dataOf(entity)))
-              if (include(value.key) && !columns.has(value.key))
+      for (const workflow of workflows) {
+        for (const entity of side === 'diff' ? [workflow.before, workflow.after] : [workflow[side]]) {
+          if (entity) {
+            for (const value of sectionSpecs.find(spec => spec.id === section)!.read(dataOf(entity))) {
+              if (include(value.key) && !columns.has(value.key)) {
                 columns.set(value.key, {key: value.key, label: columnLabel(value), gate: value.text.includes(' · ')})
+              }
+            }
+          }
+        }
+      }
       return {
         section,
         title,
@@ -231,7 +236,7 @@ export function buildModel(model: ComparisonModel, side: Side, metadata?: unknow
     .sort(byLabel)
   const groupRows = model.entities.filter(row => (row.after ?? row.before)!.kind === 'group')
   const groupOf = (item: WorkflowItem) => {
-    const group = dataOf(item.entity)['group']
+    const group = dataOf(item.entity).group
     return typeof group === 'string' ? group : undefined
   }
   const groups: GroupView[] = groupRows

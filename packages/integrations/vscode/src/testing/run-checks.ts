@@ -7,7 +7,7 @@ import type {Checks, TestState, Watched} from './state.js'
 async function checkSteps(watched: Watched, projection: string, signal: AbortSignal): Promise<CheckStep[]> {
   const runner = await watched.lease.current()
   const result = await runner.callTool('check', {projections: [projection]}, signal)
-  const report = result.structuredContent as {projections?: Array<{steps?: Array<Partial<CheckStep>>}>} | undefined
+  const report = result.structuredContent as {projections?: {steps?: Partial<CheckStep>[]}[]} | undefined
   const listed = report?.projections?.[0]?.steps
   if (!listed) throw new Error(result.content.map(part => part.text ?? '').join('\n') || 'The check reported nothing')
   return listed.map(step => ({
@@ -21,13 +21,14 @@ async function checkSteps(watched: Watched, projection: string, signal: AbortSig
 /** The check items that report: the included ones, and every check of a projection that runs whole. */
 function reportingItems(state: TestState, run: vscode.TestRun, entry: Checks): vscode.TestItem[] {
   const items = [...entry.items]
-  if (entry.whole)
+  if (entry.whole) {
     state.controller.items.get(`${entry.folder.uri.toString()}|projection:${entry.projection}`)?.children.forEach(child => {
       if (state.data.get(child)?.node.kind === 'check' && !items.includes(child)) {
         items.push(child)
         run.started(child)
       }
     })
+  }
   return items
 }
 

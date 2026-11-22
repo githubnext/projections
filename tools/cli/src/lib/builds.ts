@@ -18,7 +18,13 @@ export type BuildStatus = {state: 'current'} | {state: Exclude<BuildState, 'curr
  * signature of its build inputs besides its src (`inputs`, see `inputSignature`), the files it produced (`outputs`,
  * relative to the workspace) and when it recorded them (`recorded`, ms).
  */
-export type BuildRecord = {checked?: number; building?: boolean; inputs?: string; outputs?: string[]; recorded?: number}
+export interface BuildRecord {
+  checked?: number
+  building?: boolean
+  inputs?: string
+  outputs?: string[]
+  recorded?: number
+}
 
 const recordsFile = (root: string) => join(root, 'node_modules', '.cache', 'projections-tools', 'builds.json')
 
@@ -69,17 +75,18 @@ export function buildInputs(root: string, unit: Unit): string[] {
   const inputs = new Set<string>()
   const add = (path: string) => inputs.add(posix(relative(root, path)))
   const tsconfigs: string[] = []
-  for (const entry of readdirSync(directory, {withFileTypes: true}))
+  for (const entry of readdirSync(directory, {withFileTypes: true})) {
     if (entry.isFile() && configFile.test(entry.name)) {
       add(join(directory, entry.name))
       if (entry.name.startsWith('tsconfig')) tsconfigs.push(join(directory, entry.name))
     }
+  }
   // Relative `extends` only: a package's tsconfig is a dependency, which the lockfile versions.
   while (tsconfigs.length) {
-    const tsconfig = tsconfigs.pop() as string
+    const tsconfig = tsconfigs.pop()!
     const extended = /"extends"\s*:\s*("[^"]*"|\[[^\]]*\])/.exec(readFileSync(tsconfig, 'utf8'))?.[1] ?? ''
     for (const [, name] of extended.matchAll(/"(\.{1,2}\/[^"]*)"/g)) {
-      const path = join(dirname(tsconfig), (name as string).endsWith('.json') ? (name as string) : `${name}.json`)
+      const path = join(dirname(tsconfig), name!.endsWith('.json') ? name! : `${name}.json`)
       if (isFile(path) && !inputs.has(posix(relative(root, path)))) {
         add(path)
         tsconfigs.push(path)
@@ -87,9 +94,10 @@ export function buildInputs(root: string, unit: Unit): string[] {
     }
   }
   const visit = (path: string) => {
-    for (const entry of readdirSync(path, {withFileTypes: true}))
+    for (const entry of readdirSync(path, {withFileTypes: true})) {
       if (entry.isDirectory() && entry.name !== 'node_modules') visit(join(path, entry.name))
       else if (entry.isFile()) add(join(path, entry.name))
+    }
   }
   if (existsSync(join(directory, 'scripts'))) visit(join(directory, 'scripts'))
   const manifest = join(directory, 'package.json')
@@ -98,8 +106,9 @@ export function buildInputs(root: string, unit: Unit): string[] {
   for (const name of queue) {
     const script = scripts[name]
     if (script === undefined) continue
-    for (const [, run] of script.matchAll(/\bnpm run ([\w:.-]+)/g))
-      for (const next of [`pre${run}`, run as string, `post${run}`]) if (!queue.includes(next)) queue.push(next)
+    for (const [, run] of script.matchAll(/\bnpm run ([\w:.-]+)/g)) {
+      for (const next of [`pre${run}`, run!, `post${run}`]) if (!queue.includes(next)) queue.push(next)
+    }
     for (const token of script.split(/[\s"'\x60=;&|()<>]+/)) {
       if (!/[./]/.test(token) || token.startsWith('-')) continue
       const path = join(directory, token)

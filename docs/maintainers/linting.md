@@ -24,6 +24,10 @@ dependencies' `dist` is current; `tools check --affected` lints the changed and
 dependent workspaces. Type-aware results can change when another file changes,
 so lint runs without `--cache`.
 
+Vendored code isn't linted as authored code: the shadcn/ui components in
+`packages/host/core/src/ui/components` that have a pristine base in `upstream/`
+must stay reproducible from it (`test/shadcn.test.mjs`).
+
 ## Every TypeScript file has a tsconfig.json
 
 The rules find a file's types through its nearest `tsconfig.json`, as editors
@@ -52,6 +56,7 @@ Each option allows one defined idiom and nothing else.
 | `class-methods-use-this`        | not interface implementations or overrides    | The interface decides the method is an instance method.                                                                                     |
 | `curly`                         | `multi-line`                                  | Braces are required when the body is on its own line, where a second statement can hide; one-line guards (`if (!x) return`) can't hide one. |
 | `no-console`                    | shipped `src` only                            | CLIs, scripts and tests print by design.                                                                                                    |
+| `no-implicit-coercion`          | allows `!!`                                   | `!!value` narrows `value` in TypeScript; `Boolean(value)` doesn't, so its fix breaks type checking.                                         |
 
 ## Rules that stay off
 
@@ -64,6 +69,12 @@ Each option allows one defined idiom and nothing else.
   steps on one browser driver, ordered module resolution); running them in
   parallel would be the bug.
 - `require-atomic-updates`: prone to false positives, by ESLint's own account.
+- `promise-function-async`: its fix changes behaviour. An `async` wrapper
+  returns a new promise on every call, so a function that hands out one cached
+  promise per key stops doing so, and synchronous throws become rejections. In
+  `.tsx` it also takes every component for an async function, because React 19's
+  `ReactNode` includes `Promise`. `no-floating-promises` and
+  `no-misused-promises` catch the promise bugs that matter.
 - Style without a bug class: `no-plusplus`, `no-nested-ternary`,
   `no-negated-condition`, `prefer-destructuring`, `prefer-named-capture-group`.
 

@@ -13,7 +13,11 @@ export const unreleasedVersion = '0.0.0'
 /** A release version: `MAJOR.MINOR.PATCH`, optionally with a prerelease (`0.2.0-beta.1`). */
 const versionPattern = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/
 
-export type VersionProblem = {file: string; line?: number; message: string}
+export interface VersionProblem {
+  file: string
+  line?: number
+  message: string
+}
 
 /** Whether the workspace or crate at `path` (relative to the root, POSIX) is released. */
 export const isReleased = (path: string): boolean => path.startsWith('packages/')
@@ -46,11 +50,25 @@ export function tableVersion(text: string, name: string): {value: string; index:
   if (!found) return undefined
   if (/^version\.workspace\s*=\s*true\s*$/m.test(found.body)) return 'inherited'
   const match = /^version\s*=\s*"([^"]*)"/m.exec(found.body)
-  return match ? {value: match[1] as string, index: found.start + match.index} : undefined
+  return match ? {value: match[1]!, index: found.start + match.index} : undefined
 }
 
-export type Crate = {path: string; file: string; name: string; text: string; version: string | undefined; released: boolean}
-export type Workspace = {path: string; file: string; name: string; manifest: Record<string, unknown>; text: string; released: boolean}
+export interface Crate {
+  path: string
+  file: string
+  name: string
+  text: string
+  version: string | undefined
+  released: boolean
+}
+export interface Workspace {
+  path: string
+  file: string
+  name: string
+  manifest: Record<string, unknown>
+  text: string
+  released: boolean
+}
 
 export const dependencyFields = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'] as const
 
@@ -58,7 +76,7 @@ export const dependencyFields = ['dependencies', 'devDependencies', 'peerDepende
 export const pathDependencies = (text: string) =>
   [...text.matchAll(/^\s*([\w-]+)\s*=\s*\{[^}\n]*\bpath\s*=\s*"[^"]+"[^}\n]*\}/gm)].flatMap(match => {
     const requirement = /\bversion\s*=\s*"([^"]*)"/.exec(match[0])
-    return requirement ? [{name: match[1] as string, requirement: requirement[1] as string, index: match.index + requirement.index}] : []
+    return requirement ? [{name: match[1]!, requirement: requirement[1]!, index: match.index + requirement.index}] : []
   })
 
 /** `[[package]]` entries of Cargo.lock without a source: the workspace's own crates. */
@@ -70,11 +88,11 @@ export function lockedCrates(text: string) {
     const name = /^name = "([^"]+)"$/m.exec(block)?.[1]
     const version = /^version = "([^"]+)"$/m.exec(block)
     if (!block.startsWith('[[package]]') || !name || !version || /^source = /m.test(block)) return []
-    return [{name, version: version[1] as string, index: start + version.index}]
+    return [{name, version: version[1]!, index: start + version.index}]
   })
 }
 
-export type Release = {
+export interface Release {
   /** The Cargo workspace's version. */
   version: string | undefined
   crates: Crate[]
@@ -98,7 +116,7 @@ export function readRelease(root: string): Release {
     const text = readText(root, file)
     if (text === undefined) return []
     const manifest = JSON.parse(text) as Record<string, unknown>
-    return [{path, file, name: String(manifest['name']), manifest, text, released: isReleased(path)}]
+    return [{path, file, name: String(manifest.name), manifest, text, released: isReleased(path)}]
   })
   return {version, crates, workspaces}
 }

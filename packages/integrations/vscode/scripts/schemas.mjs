@@ -12,8 +12,9 @@ async function read(directory, prefix = '') {
   for (const entry of await readdir(path.join(directory, prefix), {withFileTypes: true})) {
     const relative = prefix ? `${prefix}/${entry.name}` : entry.name
     if (entry.isDirectory()) found.push(...(await read(directory, relative)))
-    else if (/^v\d+\.json$/.test(entry.name))
+    else if (/^v\d+\.json$/.test(entry.name)) {
       found.push({file: relative, schema: JSON.parse(await readFile(path.join(directory, relative), 'utf8'))})
+    }
   }
   return found
 }
@@ -22,8 +23,9 @@ async function read(directory, prefix = '') {
 export function schemaBase(schemas) {
   const bases = new Set()
   for (const {file, schema} of schemas) {
-    if (typeof schema.$id !== 'string' || !schema.$id.endsWith(`/${file}`))
+    if (typeof schema.$id !== 'string' || !schema.$id.endsWith(`/${file}`)) {
       throw new Error(`Schema ${file} has no $id ending in its path (${schema.$id})`)
+    }
     bases.add(schema.$id.slice(0, -file.length))
   }
   if (bases.size !== 1) throw new Error(`The schemas' $id bases differ: ${[...bases].join(', ')}`)

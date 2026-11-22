@@ -19,8 +19,12 @@ export interface QueuedExtraction {
   definition: string
   runAs?: string | undefined
 }
-export type Rows = {[projection: string]: {[ref: string]: RowState}}
-export type ActiveExtraction = {projection: string; ref: string; id?: string}
+export type Rows = Record<string, Record<string, RowState>>
+export interface ActiveExtraction {
+  projection: string
+  ref: string
+  id?: string
+}
 
 /** What the coordinator publishes: each row's state, the jobs' raw output, the queue and the extraction running. */
 export interface ExtractionSnapshot {
@@ -128,8 +132,9 @@ export class ExtractionCoordinator {
     const {projection, ref} = run.item
     if (!this.#owns(run)) return this.#publish({active: undefined})
     // Cancelled meanwhile: it isn't extracted again.
-    if (run.cancel)
+    if (run.cancel) {
       return this.#publish({active: undefined, rows: withRow(this.#snapshot.rows, projection, ref, {...run.row, status: 'cancelled'})})
+    }
     this.#publish({
       active: undefined,
       queue: [run.item, ...this.#snapshot.queue],
@@ -186,8 +191,9 @@ export class ExtractionCoordinator {
    */
   readonly cancel = async () => {
     let rows = this.#snapshot.rows
-    for (const item of this.#snapshot.queue)
+    for (const item of this.#snapshot.queue) {
       rows = withRow(rows, item.projection, item.ref, {...rows[item.projection]?.[item.ref], status: 'cancelled'})
+    }
     this.#publish({rows, queue: []})
     const run = this.#run
     if (!run) return

@@ -38,7 +38,7 @@ try {
   else await request(`${base}/${manifest.subject.number}/comments`, {method: 'POST', body})
 } catch (error) {
   // Pull requests from forks get a read-only token; the artifact is still published.
-  if (error.status === 403 || error.status === 404)
+  if (error.status === 403 || error.status === 404) {
     warn(`Could not comment (${error.message}). The workflow needs pull-requests: write; pull requests from forks never get it.`)
-  else throw error
+  } else throw error
 }

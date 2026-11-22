@@ -128,8 +128,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       }
       const comparison = await crop()
       await sidebar.locator('.monaco-list-row', {hasText: 'Current state'}).first().click()
-      for (let tries = 0; tries < 120 && /[+\u2212~]\d/.test((await bar.getAttribute('data-sentence')) ?? '+1'); tries++)
+      for (let tries = 0; tries < 120 && /[+\u2212~]\d/.test((await bar.getAttribute('data-sentence')) ?? '+1'); tries++) {
         await new Promise(resolve => setTimeout(resolve, 500))
+      }
       await new Promise(resolve => setTimeout(resolve, 3000))
       const current = await crop()
       const browser = await chromium.launch()
@@ -194,14 +195,16 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       await tab.waitFor({timeout: 30_000})
       // The bundled page renders, in the preview's frame (its link to the kit's page tells it from the projection tab's).
       const heading = async () => {
-        for (const candidate of window.frames())
+        for (const candidate of window.frames()) {
           if (
             await candidate
               .locator('a[href="kit.md"]')
               .count()
               .catch(() => 0)
-          )
+          ) {
             return candidate
+          }
+        }
         return undefined
       }
       let preview

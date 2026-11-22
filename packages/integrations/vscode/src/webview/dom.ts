@@ -4,8 +4,8 @@
 /** An element with a class, attributes and children. */
 export function el(
   tag: string,
-  props: {[name: string]: string | boolean | undefined} = {},
-  ...children: Array<Node | string | null | undefined>
+  props: Record<string, string | boolean | undefined> = {},
+  ...children: (Node | string | null | undefined)[]
 ): HTMLElement {
   const element = document.createElement(tag)
   for (const [name, value] of Object.entries(props)) {
@@ -20,7 +20,7 @@ export function el(
 export const icon = (name: string) => el('span', {class: `codicon codicon-${name}`, 'aria-hidden': 'true'})
 
 /** A secondary button: an action that runs (Run checks, Sweep again). */
-export function button(label: string, codicon: string, onClick: () => void, extra: {[name: string]: string} = {}) {
+export function button(label: string, codicon: string, onClick: () => void, extra: Record<string, string> = {}) {
   const item = el('button', {...extra, type: 'button', class: `pv-button ${extra.class ?? ''}`}, icon(codicon), label)
   item.addEventListener('click', event => {
     event.stopPropagation()
@@ -33,7 +33,7 @@ export function button(label: string, codicon: string, onClick: () => void, extr
  * A control that opens a quick pick or a file, as VS Code's own pickers are: a flat toolbar text button (an icon, the
  * label and a muted detail) with the toolbar's hover and a focus outline; no box and no chevron.
  */
-export function flat(label: string, codicon: string, onClick: () => void, extra: {[name: string]: string} = {}, detail?: string) {
+export function flat(label: string, codicon: string, onClick: () => void, extra: Record<string, string> = {}, detail?: string) {
   const item = el(
     'button',
     {...extra, type: 'button', class: `pv-flat ${extra.class ?? ''}`},

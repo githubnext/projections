@@ -200,8 +200,9 @@ export async function ringPixelReport(
     height: Math.ceil(geometry.bottom - geometry.top + 2 * margin),
   }
   const viewport = page.viewportSize()
-  if (viewport && (clip.x < 0 || clip.y < 0 || clip.x + clip.width > viewport.width || clip.y + clip.height > viewport.height))
+  if (viewport && (clip.x < 0 || clip.y < 0 || clip.x + clip.width > viewport.width || clip.y + clip.height > viewport.height)) {
     return {lines: [], failures}
+  }
   await clear()
   const neutral = await picture(page, clip)
   await ring()

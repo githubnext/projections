@@ -14,9 +14,11 @@ import {columnMarkers, linksOf} from './schema-links.js'
  */
 export function layerDepths(nodes: readonly string[], edges: readonly {from: string; to: string}[]): Map<string, number> {
   const outgoing = new Map(nodes.map(id => [id, [] as string[]]))
-  for (const edge of edges)
-    if (edge.from !== edge.to && outgoing.has(edge.to) && !outgoing.get(edge.from)?.includes(edge.to))
+  for (const edge of edges) {
+    if (edge.from !== edge.to && outgoing.has(edge.to) && !outgoing.get(edge.from)?.includes(edge.to)) {
       outgoing.get(edge.from)?.push(edge.to)
+    }
+  }
   for (const children of outgoing.values()) children.sort(compareIds)
   const acyclic = new Map(nodes.map(id => [id, new Set<string>()]))
   const walked = new Map<string, 'open' | 'done'>()

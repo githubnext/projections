@@ -27,7 +27,11 @@ function dirtyHashes(root: string): Map<string, string> {
   return hashes
 }
 
-export type FixStep = {name: string; commands: Command[]; reason?: string}
+export interface FixStep {
+  name: string
+  commands: Command[]
+  reason?: string
+}
 
 export function fixPlan(
   root: string,

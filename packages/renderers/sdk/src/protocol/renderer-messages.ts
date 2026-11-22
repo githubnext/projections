@@ -35,7 +35,7 @@ function anchor(message: Fields): RendererMessage | undefined {
 }
 
 /** The parser of each message a renderer may send, by type. */
-const parsers: {[type: string]: (message: Fields) => RendererMessage | undefined} = {
+const parsers: Record<string, (message: Fields) => RendererMessage | undefined> = {
   ready(message) {
     if (!keys(message, [...envelopeKeys, 'capabilities'])) return undefined
     const capabilities = parseCapabilities(message.capabilities)
@@ -47,8 +47,9 @@ const parsers: {[type: string]: (message: Fields) => RendererMessage | undefined
       !finite(message.progress) ||
       message.progress < 0 ||
       message.progress > 1
-    )
+    ) {
       return undefined
+    }
     if (message.generation === undefined) return {type: 'rendered', progress: message.progress}
     return isGeneration(message.generation) ? {type: 'rendered', progress: message.progress, generation: message.generation} : undefined
   },

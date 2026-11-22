@@ -60,9 +60,9 @@ export function useFullscreen(target: RefObject<HTMLElement | null>, {fallbackCl
       void document.exitFullscreen().catch(() => {})
       return
     }
-    if (document.fullscreenEnabled && typeof element.requestFullscreen === 'function')
+    if (document.fullscreenEnabled && typeof element.requestFullscreen === 'function') {
       element.requestFullscreen().catch(() => setFallback(true))
-    else setFallback(true)
+    } else setFallback(true)
   }, [fallback, target])
   return {active: native || fallback, kind: native ? 'native' : fallback ? 'fallback' : undefined, toggle}
 }

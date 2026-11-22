@@ -57,7 +57,7 @@ export class PrerequisiteError extends Error {
   }
 }
 
-export type InstallOptions = {
+export interface InstallOptions {
   only?: string[] | undefined
   project?: string | undefined
   binDir?: string | undefined
@@ -69,8 +69,19 @@ export type InstallOptions = {
 }
 
 type StepStatus = 'ran' | 'skip' | 'planned' | 'failed'
-type Step = {step: string; status: StepStatus; detail: string; commands?: string[]; seconds?: number; tail?: string[]}
-type Installed = {part: string; path: string; version?: string}
+interface Step {
+  step: string
+  status: StepStatus
+  detail: string
+  commands?: string[]
+  seconds?: number
+  tail?: string[]
+}
+interface Installed {
+  part: string
+  path: string
+  version?: string
+}
 /** A step's work: a command, or something done in this process (described for --dry-run when worth showing). */
 type Work = Command | {describe?: string; act: () => void}
 
@@ -107,8 +118,9 @@ function linkCli(binary: string, directory: string): {path: string; previous?: s
     // Shims written before the CLI was renamed from `dev` carry the old marker.
     const markers = [marker, 'rem projections: npm run dev -- install']
     const existing = readText(directory, 'projections.cmd')
-    if (existing !== undefined && !markers.some(known => existing.includes(known)))
+    if (existing !== undefined && !markers.some(known => existing.includes(known))) {
       throw new UsageError(`${path} exists and wasn't made by tools install`, 'Remove it, or pass --bin-dir')
+    }
     writeFileSync(path, `@echo off\r\n${marker}\r\n"${binary}" %*\r\n`)
     return {path}
   }
@@ -120,8 +132,9 @@ function linkCli(binary: string, directory: string): {path: string; previous?: s
   } catch {
     existing = undefined
   }
-  if (existing && !existing.isSymbolicLink())
+  if (existing && !existing.isSymbolicLink()) {
     throw new UsageError(`${path} exists and is not a symlink`, 'Remove it (an earlier install?), or pass --bin-dir')
+  }
   if (existing) {
     previous = readlinkSync(path)
     rmSync(path)
@@ -139,10 +152,12 @@ function writeManifest(path: string, text: string, manifest: unknown) {
 export async function installReport(root: string, options: InstallOptions, progress?: (line: string) => void, echo = false) {
   const selected = selectParts(options.only)
   const project = options.project === undefined ? undefined : fromInvocation(options.project)
-  if (project && !existsSync(join(project, 'package.json')))
+  if (project && !existsSync(join(project, 'package.json'))) {
     throw new UsageError(`${project} has no package.json`, `--project names the renderer package that depends on ${PACKAGE}`)
-  if (project && !selected.includes('npm') && !existsSync(join(root, TARBALL)) && !options.dryRun)
+  }
+  if (project && !selected.includes('npm') && !existsSync(join(root, TARBALL)) && !options.dryRun) {
     throw new UsageError(`--project needs ${TARBALL}, which isn't packed yet`, 'Include npm in --only')
+  }
   const binDir = options.binDir === undefined ? defaultBinDir() : fromInvocation(options.binDir)
   const needsCli = selected.includes('cli') || selected.includes('vscode')
   const steps: Step[] = []
@@ -203,11 +218,12 @@ export async function installReport(root: string, options: InstallOptions, progr
   )
   if (blocking.length) {
     const lines = blocking.map(finding => `${finding.check}: ${finding.detail}${finding.fix ? ` (fix: ${finding.fix})` : ''}`)
-    if (!options.dryRun)
+    if (!options.dryRun) {
       throw new PrerequisiteError(
         `This machine can't build Projections yet:\n  ${lines.join('\n  ')}`,
         `Fix these, then run ${TOOLS} install again (${TOOLS} doctor for everything).`,
       )
+    }
     steps.push({step: 'doctor', status: 'failed', detail: lines.join('; ')})
     failed = true
   } else steps.push({step: 'doctor', status: 'ran', detail: `toolchains ready (${doctor.status})`})
@@ -215,19 +231,20 @@ export async function installReport(root: string, options: InstallOptions, progr
   // ── dependencies and build ──
   const lock = join(root, 'node_modules/.package-lock.json')
   const stale = !existsSync(lock) || statSync(join(root, 'package-lock.json')).mtimeMs > statSync(lock).mtimeMs + 1000
-  if (stale)
+  if (stale) {
     await perform('dependencies', 'package-lock.json changed since the last install', [{argv: ['npm', 'ci', '--no-audit', '--no-fund']}])
-  else skip('dependencies', 'node_modules matches package-lock.json')
+  } else skip('dependencies', 'node_modules matches package-lock.json')
 
   if (!failed) {
     if (options.skipBuild) skip('build', '--skip-build: using the existing build')
     else if (needsCli)
-      // Everything the CLI embeds (Inspector, renderers, comparators, helpers), the extension and the package: the
-      // whole workspace except Storybook, in dependency order; the CLI is a release build (packages/cli/scripts/build.mjs).
+    // Everything the CLI embeds (Inspector, renderers, comparators, helpers), the extension and the package: the
+    // whole workspace except Storybook, in dependency order; the CLI is a release build (packages/cli/scripts/build.mjs).
+    {
       await perform('build', 'the workspaces (except Storybook) and a release build of the CLI', [
         {argv: ['npm', 'run', 'build', '--', '--except', 'tools/storybook']},
       ])
-    else {
+    } else {
       const order = packageBuildOrder(root)
       await perform(
         'build',
@@ -254,15 +271,16 @@ export async function installReport(root: string, options: InstallOptions, progr
     ])
     if (ok && options.dryRun) next.push('projections --version')
     if (ok && linked) {
-      installed.push({part: 'cli', path: linked.path, ...(cliVersion() ? {version: cliVersion() as string} : {})})
+      installed.push({part: 'cli', path: linked.path, ...(cliVersion() ? {version: cliVersion()!} : {})})
       if (linked.previous) warnings.push(`Replaced ${linked.path}, which linked to ${linked.previous}`)
       if (!onPathList(binDir)) {
         warnings.push(`${binDir} is not on PATH`)
         next.push(`Add it to PATH in your shell profile: export PATH="${binDir}:$PATH"`)
       } else {
         const first = firstOnPath(process.platform === 'win32' ? 'projections.cmd' : 'projections')
-        if (first && canonical(first) !== canonical(binary) && first !== linked.path)
+        if (first && canonical(first) !== canonical(binary) && first !== linked.path) {
           warnings.push(`${first} comes first on PATH and shadows ${linked.path}; remove it or reorder PATH`)
+        }
       }
       next.push('projections --version')
     }
@@ -350,7 +368,7 @@ export async function installReport(root: string, options: InstallOptions, progr
     const version = devVersion(manifest?.version ?? '0.0.0', commit, dirty, now)
     const tarball = join(root, TARBALL)
     const staging = options.dryRun ? join(tmpdir(), 'projections-pack-…') : mkdtempSync(join(tmpdir(), 'projections-pack-'))
-    const packed = () => readdirSync(staging).find(name => name.endsWith('.tgz')) as string
+    const packed = () => readdirSync(staging).find(name => name.endsWith('.tgz'))!
     const ok = await perform('npm package', `${PACKAGE} ${version} packed to ${TARBALL}`, [
       // npm pack exactly as publishing would, then the same contents again with the development version.
       {argv: ['npm', 'pack', '--ignore-scripts', '--pack-destination', staging], cwd: 'packages/sdk'},
@@ -410,8 +428,9 @@ export async function installReport(root: string, options: InstallOptions, progr
     }
   }
 
-  if (!failed && !options.dryRun)
+  if (!failed && !options.dryRun) {
     next.push(`To update: git pull && npm ci && ${TOOLS} install${options.only ? ` --only ${split(options.only).join(',')}` : ''}`)
+  }
   return {
     status: failed ? ('fail' as const) : options.dryRun ? ('planned' as const) : ('ok' as const),
     build: {commit, dirty},

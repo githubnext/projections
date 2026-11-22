@@ -144,8 +144,9 @@ export function routingContext(input: RoutingInput): RoutingContext {
   ]
   const leavers = new Map<string, number>()
   for (const segment of all()) leavers.set(segment.from, (leavers.get(segment.from) ?? 0) + 1)
-  for (const segment of all())
+  for (const segment of all()) {
     if (cards.has(segment.from) && cards.has(segment.to) && leavers.get(segment.from) === 1) segment.slides = true
+  }
 
   // Each route's samples and bounds, kept while the route is unchanged: crossing tests skip routes that can't touch.
   const sampledRoutes = new WeakMap<Spline, {points: Point[]; box: readonly [number, number, number, number]}>()

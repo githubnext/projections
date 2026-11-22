@@ -4,7 +4,10 @@
 // that is thrown away (React may render a state it never commits) costs the committed values nothing. `commit` keeps
 // what the last computation used: React's adapter calls it after each committed render, a vanilla host after each read.
 
-type Entry<A, R> = {readonly args: A; readonly result: R}
+interface Entry<A, R> {
+  readonly args: A
+  readonly result: R
+}
 
 const sameArgs = (a: readonly unknown[], b: readonly unknown[]) =>
   a.length === b.length && a.every((arg, index) => Object.is(arg, b[index]))

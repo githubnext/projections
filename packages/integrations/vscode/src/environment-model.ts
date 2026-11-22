@@ -100,8 +100,9 @@ export function provenanceBadge(document: unknown): ProvenanceBadge | undefined 
   if (!execution || typeof execution.source !== 'string') return undefined
   const at = typeof execution.at === 'string' ? ` at ${execution.at}` : ''
   if (execution.fidelity === 'stale') return {label: 'Stale', detail: 'The working tree changed while it was extracted; extract it again.'}
-  if (execution.fidelity === 'approximate')
+  if (execution.fidelity === 'approximate') {
     return {label: 'Approximate', detail: "Extracted with the working tree's dependencies, whose lockfiles differ from this revision's."}
+  }
   if (execution.source === 'ci') {
     const ci = execution.ci as {repository?: string; run?: number} | undefined
     const run = `CI run ${ci?.run ?? '?'} of ${ci?.repository ?? 'this repository'}`

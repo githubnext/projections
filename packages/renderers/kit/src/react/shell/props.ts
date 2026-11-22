@@ -129,7 +129,7 @@ export interface RendererProps<T extends DomainSchema | readonly RendererAccepts
    * `declareControls`), defaults filled in. The host draws the controls and
    * sends their values; renderers draw no settings controls of their own.
    */
-  controls: {[id: string]: ControlValue}
+  controls: Record<string, ControlValue>
   /**
    * Replaces the declared controls, for controls that depend on the document
    * (for example a filter listing its kinds). Repeated identical declarations

@@ -19,10 +19,11 @@ function exportedSymbols(project: Project, entries: Entry[]): Set<ts.Symbol> {
   for (const entry of entries) {
     const {source, checker} = entrySource(project, entry)
     const module = checker.getSymbolAtLocation(source)
-    if (!module)
+    if (!module) {
       throw new Error(
         `Public API entrypoint ${code(slash(path.relative(project.root, entry.file)))} is not an external module; add exports`,
       )
+    }
     for (const symbol of checker.getExportsOfModule(module)) {
       const resolved = resolve(checker, symbol)
       if (resolved) exported.add(resolved)
@@ -44,8 +45,9 @@ export function publicApi(project: Project): Extraction {
     const module = checker.getSymbolAtLocation(source)!
     for (const alias of checker.getExportsOfModule(module)) {
       const symbol = resolve(checker, alias)
-      if (!symbol || !symbol.declarations?.length)
+      if (!symbol || !symbol.declarations?.length) {
         throw new Error(`Cannot resolve public export ${code(`${entry.pkg.name}:${alias.name}`)}; fix module diagnostics`)
+      }
       const declaration = symbol.valueDeclaration ?? symbol.declarations[0]!
       const exportId = id('ts-api', entry.pkg.name, entry.subpath, alias.name)
       const described = describeExport(checker, render, symbol, alias.name, declaration)
@@ -58,10 +60,11 @@ export function publicApi(project: Project): Extraction {
         confidence: 'authoritative',
       }
       const previous = nodes.get(exportId)
-      if (previous && surfaces.get(exportId) !== described.surface)
+      if (previous && surfaces.get(exportId) !== described.surface) {
         throw new Error(
           `Conflicting public exports for ${code(`${entry.pkg.name}:${entry.subpath}:${alias.name}`)}; give entrypoints distinct subpath keys`,
         )
+      }
       if (previous) continue
       surfaces.set(exportId, described.surface)
       nodes.set(exportId, current)

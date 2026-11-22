@@ -213,7 +213,7 @@ The entity kinds a `compound` option lets become boundaries.
 ### `boundaryNouns`
 
 ```ts
-boundaryNouns(model: ComparisonModel<Extraction>, compound: Array<string> | false | true): { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined } | { readonly [key: string]: SummaryNoun | false }
+boundaryNouns(model: ComparisonModel<Extraction>, compound: Array<string> | false | true): Readonly<Record<string, SummaryNoun | false>> | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined }
 ```
 
 Nouns that leave grouping boundaries out of the summary: each of the boundary kinds `compound` names (see
@@ -568,7 +568,7 @@ measurements (`genericMetrics`: values without line or file counts) have one val
 ### `codeStatisticsOptions`
 
 ```ts
-codeStatisticsOptions(values: { [key: string]: false | number | string | true }): CodeStatisticsOptions
+codeStatisticsOptions(values: Record<string, false | number | string | true>): CodeStatisticsOptions
 ```
 
 Code-statistics options from control values (see `controlValues`).
@@ -2425,7 +2425,7 @@ A renderer's legend: an optional title and its items; no items clears it.
 ### `rendererSummary`
 
 ```ts
-rendererSummary(init: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" | "diff" | "side-by-side" | "swipe"; "mode": "comparison" } | RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }, nouns?: undefined | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined } | { readonly [key: string]: SummaryNoun | false }, facts?: Array<SummaryFactItem>): RendererSummary
+rendererSummary(init: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" | "diff" | "side-by-side" | "swipe"; "mode": "comparison" } | RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }, nouns?: Readonly<Record<string, SummaryNoun | false>> | undefined | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined }, facts?: Array<SummaryFactItem>): RendererSummary
 ```
 
 The summary a kit renderer posts for a document: a figure per extraction kind with its counts, worded with the
@@ -3134,7 +3134,7 @@ What a renderer's summary facts are computed from (`MountOptions.facts`): the do
 
 | Member | Signature | Description |
 |---|---|---|
-| `controls` | `"controls": { [key: string]: false \| number \| string \| true }` | The value of every declared control, defaults filled in, for facts worded by a control (such as a measure). |
+| `controls` | `"controls": Record<string, false \| number \| string \| true>` | The value of every declared control, defaults filled in, for facts worded by a control (such as a measure). |
 | `init` | `"init": RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }` | The host's `init` message: the extraction, or both revisions and their comparison. |
 | `model` | `"model": ComparisonModel<Extraction>` | The shell's model of the document (`createModel`). |
 | `rendererName` | `"rendererName": string` | The definition's renderer name (`init.projection.renderer`), for a bundle that presents several. |
@@ -3214,7 +3214,7 @@ A noun of the renderer's domain, for one item and for any other count: `{singula
 ### `SummaryNouns`
 
 ```ts
-type SummaryNouns = { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined } | { readonly [key: string]: SummaryNoun | false }
+type SummaryNouns = Readonly<Record<string, SummaryNoun | false>> | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined }
 ```
 
 A renderer's words for kinds: a noun per kind, or `false` to leave a kind out of the summary. A key may name one
@@ -3295,7 +3295,7 @@ Options of `tableSortControls`.
 ### `tableSortOf`
 
 ```ts
-tableSortOf(values: { readonly [key: string]: false | number | string | true }, id?: string): { "changesFirst": false | true; "sort": null | { "column": string; "direction": "ascending" | "descending" } }
+tableSortOf(values: Readonly<Record<string, false | number | string | true>>, id?: string): { "changesFirst": false | true; "sort": null | { "column": string; "direction": "ascending" | "descending" } }
 ```
 
 A table's sort from control values (`RendererProps.controls`), for the controls `tableSortControls` declares.
@@ -3549,7 +3549,7 @@ A span of progress, centred on `time` and reaching `radius` either side: `[time 
 ### `withDefinitionNouns`
 
 ```ts
-withDefinitionNouns(items: Array<SummaryCountItem>, kinds: undefined | { [key: string]: RendererKind }): Array<SummaryCountItem>
+withDefinitionNouns(items: Array<SummaryCountItem>, kinds: Record<string, RendererKind> | undefined): Array<SummaryCountItem>
 ```
 
 Count figures worded with the definition's nouns (`presentation.kinds.<kind>.noun`, sent as
@@ -3933,9 +3933,9 @@ Everything but the renderer props is optional; the defaults draw every entity as
 | `comparing` | `"comparing": false \| true` | Whether this is a comparison (`init.mode === 'comparison'`). |
 | `comparisonMode` | `"comparisonMode": "animated" \| "diff" \| "side-by-side" \| "swipe" \| undefined` | The comparison mode the host announced in `init`, if any. |
 | `compound` | `"compound"?: Array<string> \| false \| true` | Group containment-only entities into boundaries: `true` for modules (architecture), or the kinds that may become boundaries. |
-| `controls` | `"controls": { [key: string]: false \| number \| string \| true }` | The value of every declared control (from `MountOptions.controls` or `declareControls`), defaults filled in. The host draws the controls and sends their values; renderers draw no settings controls of their own. |
+| `controls` | `"controls": Record<string, false \| number \| string \| true>` | The value of every declared control (from `MountOptions.controls` or `declareControls`), defaults filled in. The host draws the controls and sends their values; renderers draw no settings controls of their own. |
 | `declareControls` | `"declareControls": { (controls: Array<ControlBase & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } \| ControlBase & { "default": false \| true; "type": "toggle" } \| ControlBase & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } \| ControlBase & { "icon"?: "collapse" \| "download" \| "expand" \| "filter" \| "fit" \| "next" \| "previous" \| "reset" \| "search" \| "settings" \| "zoom-in" \| "zoom-out"; "type": "action" }>): void }` | Replaces the declared controls, for controls that depend on the document (for example a filter listing its kinds). Repeated identical declarations are ignored. |
-| `declareNouns` | `"declareNouns": { (nouns: undefined \| { (kind: string, collection: "entities" \| "relationships"): SummaryNoun \| false \| undefined } \| { readonly [key: string]: SummaryNoun \| false }): void }` | Names the document's kinds in the host's summary bar, replacing `MountOptions.nouns` (see `useSummaryNouns`). The shell counts every kind and posts the summary itself; without nouns, the host words kinds from their names. |
+| `declareNouns` | `"declareNouns": { (nouns: Readonly<Record<string, SummaryNoun \| false>> \| undefined \| { (kind: string, collection: "entities" \| "relationships"): SummaryNoun \| false \| undefined }): void }` | Names the document's kinds in the host's summary bar, replacing `MountOptions.nouns` (see `useSummaryNouns`). The shell counts every kind and posts the summary itself; without nouns, the host words kinds from their names. |
 | `describeStatus` | `"describeStatus"?: undefined \| { (node: TransitionNode): Array<StatusPart> \| undefined }` | The domain's wording of a row's change in its status footer and accessible name (see `StatusPart`). |
 | `detail` | `"detail"?: undefined \| { (entity: Entity): string \| undefined }` | A short code identifier drawn in monospace at the right of a card's kind line, such as a package version. When it differs between revisions, the two crossfade with the card's own step. |
 | `diff` | `"diff": false \| true` | Whether the host presents this comparison in `diff` mode: one static frame showing both subjects, with no progress (`progress` stays 1 and `schedule` is empty). Draw the renderer's own static comparison; `highlighting` is the host's change emphasis for it (1 unless the host turned highlighting off). |
@@ -4096,7 +4096,7 @@ How `mountRenderer` connects a renderer component to its host.
 | `facts` | `"facts"?: SummaryFacts` | The renderer's domain facts for the host's summary bar (`SummaryFacts`), computed from the document and the control values whenever either changes, and posted after the kind counts. A renderer draws no summary line of its own: what it would count goes here. |
 | `interactions` | `"interactions"?: false` | Hover, anchors, scroll mirroring, the host's filter and annotation badges through `connectInteractions` over elements carrying `data-entity-id` (default on). `false` opts out and declares none of the interaction capabilities. |
 | `name` | `"name": string` | Bundle name, used for `data-renderer` on the root element. |
-| `nouns` | `"nouns"?: { (kind: string, collection: "entities" \| "relationships"): SummaryNoun \| false \| undefined } \| { readonly [key: string]: SummaryNoun \| false }` | The renderer's words for extraction kinds in the host's summary bar (`SummaryNouns`), for every document; see `declareNouns` for words that depend on the document. |
+| `nouns` | `"nouns"?: Readonly<Record<string, SummaryNoun \| false>> \| { (kind: string, collection: "entities" \| "relationships"): SummaryNoun \| false \| undefined }` | The renderer's words for extraction kinds in the host's summary bar (`SummaryNouns`), for every document; see `declareNouns` for words that depend on the document. |
 | `scope` | `"scope"?: { "context"?: { (all: ComparisonModel<Extraction>, changes: ReadonlySet<string>, renderer: string): Iterable<string, any, any> }; "layout": "subset"; "parts"?: "fold" \| "omit" \| "whole" } \| { "layout": "fold" }` | How the Changes scope reaches the renderer. `fold` (the default): `model` holds every item and the renderer folds what `scope` leaves out, as a list does. `subset`: `model` holds only what the scope shows (`scopedModel`), with the shown entities' `parts` left out, kept whole or folded, so a canvas lays out only that; `scope.all` holds every item. A subset renderer that needs more to place a change than its relationships' endpoints and containers (a package's path from the workspace, a selector's probe and hook) returns those items' row IDs from `context`, given every item, the changes in scope and its renderer name; they show as context. |
 | `steps` | `"steps"?: "manual" \| "schedule"` | `schedule` (default) reports the end of each scheduled step to the host; `manual` leaves it to the component through `reportSteps`. |
 
@@ -4233,9 +4233,9 @@ Everything a kit renderer component receives for one host state.
 | `colorMode` | `"colorMode": "dark" \| "light"` | The host theme's color mode, for colors a renderer computes itself (see `categoryPalette`). |
 | `comparing` | `"comparing": false \| true` | Whether this is a comparison (`init.mode === 'comparison'`). |
 | `comparisonMode` | `"comparisonMode": "animated" \| "diff" \| "side-by-side" \| "swipe" \| undefined` | The comparison mode the host announced in `init`, if any. |
-| `controls` | `"controls": { [key: string]: false \| number \| string \| true }` | The value of every declared control (from `MountOptions.controls` or `declareControls`), defaults filled in. The host draws the controls and sends their values; renderers draw no settings controls of their own. |
+| `controls` | `"controls": Record<string, false \| number \| string \| true>` | The value of every declared control (from `MountOptions.controls` or `declareControls`), defaults filled in. The host draws the controls and sends their values; renderers draw no settings controls of their own. |
 | `declareControls` | `"declareControls": { (controls: Array<ControlBase & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } \| ControlBase & { "default": false \| true; "type": "toggle" } \| ControlBase & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } \| ControlBase & { "icon"?: "collapse" \| "download" \| "expand" \| "filter" \| "fit" \| "next" \| "previous" \| "reset" \| "search" \| "settings" \| "zoom-in" \| "zoom-out"; "type": "action" }>): void }` | Replaces the declared controls, for controls that depend on the document (for example a filter listing its kinds). Repeated identical declarations are ignored. |
-| `declareNouns` | `"declareNouns": { (nouns: undefined \| { (kind: string, collection: "entities" \| "relationships"): SummaryNoun \| false \| undefined } \| { readonly [key: string]: SummaryNoun \| false }): void }` | Names the document's kinds in the host's summary bar, replacing `MountOptions.nouns` (see `useSummaryNouns`). The shell counts every kind and posts the summary itself; without nouns, the host words kinds from their names. |
+| `declareNouns` | `"declareNouns": { (nouns: Readonly<Record<string, SummaryNoun \| false>> \| undefined \| { (kind: string, collection: "entities" \| "relationships"): SummaryNoun \| false \| undefined }): void }` | Names the document's kinds in the host's summary bar, replacing `MountOptions.nouns` (see `useSummaryNouns`). The shell counts every kind and posts the summary itself; without nouns, the host words kinds from their names. |
 | `diff` | `"diff": false \| true` | Whether the host presents this comparison in `diff` mode: one static frame showing both subjects, with no progress (`progress` stays 1 and `schedule` is empty). Draw the renderer's own static comparison; `highlighting` is the host's change emphasis for it (1 unless the host turned highlighting off). |
 | `direction` | `"direction": -1 \| 1` | The host's playback direction (`ProgressPayload.direction`): 1 toward After, -1 back toward Before. Always 1 for an extraction and in diff mode. `schedule` is already ordered for the direction the transition presents. |
 | `emphasis` | `"emphasis": EmphasisOf` | A change's emphasis now: 0 until its comparison step begins, then the host's highlighting; in a held pane, the host's highlighting (see `stepEmphasis`). Pass the row ID as the second argument when the object passed has none. |
@@ -4358,7 +4358,7 @@ What `useTableProps` reads from a kit renderer's props.
 | Member | Signature | Description |
 |---|---|---|
 | `comparing` | `"comparing": false \| true` | Whether this is a comparison (`RendererProps.comparing`). |
-| `controls` | `"controls": { [key: string]: false \| number \| string \| true }` | The declared controls' values, the sort among them (`RendererProps.controls`). |
+| `controls` | `"controls": Record<string, false \| number \| string \| true>` | The declared controls' values, the sort among them (`RendererProps.controls`). |
 | `diff` | `"diff": false \| true` | Whether the host shows the comparison in diff mode (`RendererProps.diff`). |
 | `emphasis` | `"emphasis": { (row: TableRow<unknown> & { "id"?: string }): number }` | A row's change emphasis (`RendererProps.emphasis`). |
 | `locale` | `"locale": string` | BCP 47 locale for numbers and comparing strings (`RendererProps.locale`). |
@@ -4398,7 +4398,7 @@ this from a renderer that fits content another way. Nothing is reported while `r
 ### `useControlActions`
 
 ```ts
-useControlActions(onAction: { (listener: { (id: string): void }): { (): void } }, handlers: { [key: string]: { (): void } }): void
+useControlActions(onAction: { (listener: { (id: string): void }): { (): void } }, handlers: Record<string, { (): void }>): void
 ```
 
 Runs `handlers[id]` when the host activates the declared action control
@@ -4639,7 +4639,7 @@ zoom multiple of the new fit.
 ### `useSummaryNouns`
 
 ```ts
-useSummaryNouns(declare: { (nouns: undefined | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined } | { readonly [key: string]: SummaryNoun | false }): void }, nouns: undefined | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined } | { readonly [key: string]: SummaryNoun | false }): void
+useSummaryNouns(declare: { (nouns: Readonly<Record<string, SummaryNoun | false>> | undefined | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined }): void }, nouns: Readonly<Record<string, SummaryNoun | false>> | undefined | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined }): void
 ```
 
 Names the renderer's kinds in the host's summary bar (`RendererProps.declareNouns`): `{package: {singular:

@@ -161,7 +161,7 @@ test('npm run check and tools check run the same gates: each step of the check s
     script
       .split('&&')
       .map(step => step.trim().replace(/^npm (run )?/, ''))
-      .flatMap(step => (step === 'check:no-test' ? split(scripts[step] as string) : [step]))
+      .flatMap(step => (step === 'check:no-test' ? split(scripts[step]!) : [step]))
   const steps = split(scripts.check!)
   // `npm test` runs the unit suites, which `tools test` covers rather than `tools check`.
   const gateOf = (step: string) => (step === 'test' ? undefined : step.replace(/^check:/, '').replace(/^format:check$/, 'format'))

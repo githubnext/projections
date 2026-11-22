@@ -6,9 +6,11 @@ export function markOccludedEdges(results: RingLineResult[]): void {
   const shown = results.filter(result => result.edgeColor && result.ring !== null && result.clean && !result.hidden)
   if (shown.length >= 3) {
     const median = [0, 1, 2].map(channel => shown.map(result => result.edgeColor![channel]!).sort((a, b) => a - b)[shown.length >> 1]!)
-    for (const result of results)
-      if (result.edgeColor && result.edgeColor.reduce((sum, value, channel) => sum + Math.abs(value - median[channel]!), 0) > 90)
+    for (const result of results) {
+      if (result.edgeColor && result.edgeColor.reduce((sum, value, channel) => sum + Math.abs(value - median[channel]!), 0) > 90) {
         result.hidden = true
+      }
+    }
   }
 }
 
@@ -70,22 +72,23 @@ export function sideFailures(
       'bottom-left': [2, 3],
     }
     const inward = Math.max(0, ...(sides[name as keyof typeof sides] ?? []).map(side => geometry.inward?.[side] ?? 0))
-    if (offsetFromEdge > tolerance + inward)
+    if (offsetFromEdge > tolerance + inward) {
       failures.push(
         `${label}: at its ${name}, the ring starts ${format(offsetFromEdge)} inside the item's edge, which stays visible outside it${where}`,
       )
-    else if (offsetFromEdge < -tolerance - (geometry.outward ?? 0))
+    } else if (offsetFromEdge < -tolerance - (geometry.outward ?? 0)) {
       failures.push(`${label}: at its ${name}, the ring starts ${format(-offsetFromEdge)} outside the item's edge${where}`)
-    else if (
+    } else if (
       !inward &&
       !geometry.outward &&
       result.edgeEnd !== null &&
       result.ringEnd !== null &&
       result.edgeEnd - result.ringEnd > tolerance
-    )
+    ) {
       failures.push(
         `${label}: at its ${name}, the item's edge continues ${format(result.edgeEnd - result.ringEnd)} inside the ring: a second edge${where}`,
       )
+    }
   }
   return failures
 }

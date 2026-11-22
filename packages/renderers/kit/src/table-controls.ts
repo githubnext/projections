@@ -49,8 +49,9 @@ export function tableSortControls<T>(options: TableSortControlsOptions<T>): Rend
   const id = options.id ?? 'sort'
   const group = options.group ?? {id: 'sort', label: 'Sort'}
   const sortable = options.columns.filter(isSortable).slice(0, 24)
-  for (const column of sortable)
+  for (const column of sortable) {
     if (!columnIdPattern.test(column.id)) throw new Error(`Column ID "${column.id}" can't name a sort: use letters, digits, _ . -`)
+  }
   const fallback = tableSortValue(options.default ?? null)
   const choices = [
     {value: 'none', label: 'Original order'},
@@ -86,6 +87,6 @@ export function tableSortControls<T>(options: TableSortControlsOptions<T>): Rend
 }
 
 /** A table's sort from control values (`RendererProps.controls`), for the controls `tableSortControls` declares. */
-export function tableSortOf(values: {readonly [id: string]: ControlValue}, id = 'sort'): {sort: TableSort; changesFirst: boolean} {
+export function tableSortOf(values: Readonly<Record<string, ControlValue>>, id = 'sort'): {sort: TableSort; changesFirst: boolean} {
   return {sort: parseTableSort(values[id]), changesFirst: values[`${id}ChangesFirst`] === true}
 }

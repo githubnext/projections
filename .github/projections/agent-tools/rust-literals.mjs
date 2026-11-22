@@ -127,8 +127,9 @@ export function rustModule(text, file) {
     helpers.set(match[1], {params, tokens: tokenize(balanced(text, open).inner, lineAt(text, open))})
   }
   const consts = new Map()
-  for (const match of text.matchAll(/const (\w+): &(?:'static )?str = ("(?:[^"\\]|\\.)*");/g))
+  for (const match of text.matchAll(/const (\w+): &(?:'static )?str = ("(?:[^"\\]|\\.)*");/g)) {
     consts.set(match[1], quoted(match[2], 0).value)
+  }
 
   /** Evaluates the tokens of one expression, with `scope` binding names. */
   function evaluate(tokens, scope = new Map()) {
@@ -276,11 +277,12 @@ class Parser {
       return value
     }
     if (name === 'vec') return this.list(close, () => this.value())
-    if (name === 'format')
+    if (name === 'format') {
       return format(
         this.list(close, () => this.argument()),
         this.scope,
       )
+    }
     return this.fail(`unsupported macro ${name}!`)
   }
 

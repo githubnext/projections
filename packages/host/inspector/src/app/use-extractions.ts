@@ -32,7 +32,7 @@ export function useExtractions({
   extractorFrom: string
   runnable: boolean
   definitions: InspectorDefinitionList | null
-  marks: {[projection: string]: Marks}
+  marks: Record<string, Marks>
   setError: Dispatch<SetStateAction<string | null>>
   setPanelRequest: Dispatch<SetStateAction<{tab: string; at: number} | undefined>>
   openedInitially: InspectorOpenedOn | undefined

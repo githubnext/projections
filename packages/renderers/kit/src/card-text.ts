@@ -119,11 +119,12 @@ export function proseLines(text: string, room: number, textScale = 1, max: numbe
   if (line) lines.push(line)
   const cut = lines.length > max || lines.join(' ').length < words.join(' ').length
   const shown = lines.slice(0, max).map(item => cutText(item, fits))
-  if (cut && shown.length)
+  if (cut && shown.length) {
     shown[shown.length - 1] = `${shown
       .at(-1)!
       .slice(0, Math.max(1, fits - 1))
       .replace(/\s+$/, '')}…`
+  }
   return shown
 }
 

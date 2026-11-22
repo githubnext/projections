@@ -47,7 +47,7 @@ export function staleText(files: number | undefined): string {
 
 /** Why, as a sentence for a tooltip. */
 export function staleTitle(staleness: Staleness): string {
-  const titles: {[why in Staleness['why']]: string} = {
+  const titles: Record<Staleness['why'], string> = {
     'working tree': 'The working tree changed since this result',
     definition: "The projection's definition changed since this result",
     extractor: "The projection's extractor changed since this result",

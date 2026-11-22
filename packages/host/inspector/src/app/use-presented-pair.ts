@@ -39,7 +39,7 @@ export function usePresentedPair({
   marked: Marks
   projection: string
   rows: Rows
-  overrides: {[projection: string]: PartOverrides}
+  overrides: Record<string, PartOverrides>
   definitions: InspectorDefinitionList | null
   source: 'live' | 'artifact'
   artifact: Artifact | null

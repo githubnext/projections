@@ -86,19 +86,20 @@ export function Row<T>({
         let content: ReactNode
         if (differs && diff) content = <ValueChange layout="inline" before={read(row.before!)} after={read(row.after!)} />
         else if (differs && emphasis > 0)
-          // The version shown, as a pill in its side's hue while the change is emphasized; at the endpoints, plain text
-          // exactly as an unchanged cell draws it.
+        // The version shown, as a pill in its side's hue while the change is emphasized; at the endpoints, plain text
+        // exactly as an unchanged cell draws it.
+        {
           content = (
             <span className="pk-change-pill pk-table-value" data-change={side === 'before' ? 'removed' : 'added'}>
               <span className="sr-only">{side === 'before' ? 'was ' : 'now '}</span>
               {read(item)}
             </span>
           )
-        else content = <span className={join('pk-table-text', struck && 'pk-diff-text')}>{read(item)}</span>
+        } else content = <span className={join('pk-table-text', struck && 'pk-diff-text')}>{read(item)}</span>
         // Outside the diff a cell shows one version at a time; the other is laid out under it, unseen, so the column
         // keeps one width for the whole transition and nothing moves when the value switches. Every cell has the same
         // structure, changed or not.
-        if (!diff)
+        if (!diff) {
           content = (
             <span className="pk-table-reserve">
               {content}
@@ -107,6 +108,7 @@ export function Row<T>({
               </span>
             </span>
           )
+        }
         const align = column.align ?? (column.sort === 'number' ? 'end' : 'start')
         return (
           <div

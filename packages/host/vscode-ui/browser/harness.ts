@@ -87,11 +87,12 @@ export const colors = (locator: Locator) =>
       if (layer.a >= 1) break
     }
     let base = {r: 255, g: 255, b: 255}
-    for (const layer of layers.reverse())
+    for (const layer of layers.reverse()) {
       base = {
         r: layer.r * layer.a + base.r * (1 - layer.a),
         g: layer.g * layer.a + base.g * (1 - layer.a),
         b: layer.b * layer.a + base.b * (1 - layer.a),
       }
+    }
     return {color: getComputedStyle(element).color, background: `rgb(${base.r}, ${base.g}, ${base.b})`}
   })

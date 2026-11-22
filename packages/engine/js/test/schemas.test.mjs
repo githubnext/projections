@@ -22,8 +22,9 @@ const engine = createNativeEngine()
 const root = fileURLToPath(new URL('../../../../', import.meta.url))
 const published = join(root, 'packages/schemas/schemas')
 const ajv = new Ajv2020({allErrors: false, strictTuples: false})
-for (const file of readdirSync(published, {recursive: true}).filter(file => /v\d+\.json$/.test(file)))
+for (const file of readdirSync(published, {recursive: true}).filter(file => /v\d+\.json$/.test(file))) {
   ajv.addSchema(JSON.parse(readFileSync(join(published, file), 'utf8')))
+}
 const extractionSchema = ajv.getSchema(schemaUrl('extraction'))
 const domainSchema = schema => ajv.getSchema(schemaUrl(schema.replace(/\/v\d+$/, '')))
 
@@ -91,8 +92,9 @@ test('engine vectors: what the engine accepts the schema accepts, and what it re
     assert.equal(verdict.ok, !item.expectError, item.id)
     const schema = schemaVerdict(extraction)
     if (verdict.ok) assert.equal(schema.ok, true, `${item.id}: ${JSON.stringify(schema.errors)}`)
-    else if (!engineOnly.has(verdict.code) && !engineOnlyCases.has(item.id))
+    else if (!engineOnly.has(verdict.code) && !engineOnlyCases.has(item.id)) {
       assert.equal(schema.ok, false, `${item.id}: the engine rejects it (${verdict.code}) but the schema accepts it`)
+    }
   }
 })
 
@@ -104,8 +106,9 @@ test('every extraction in this repository that the engine accepts conforms to th
     const verdict = await engineVerdict(value)
     const schema = schemaVerdict(value)
     if (verdict.ok && !schema.ok) mismatches.push(`${file}: schema rejects ${JSON.stringify(schema.errors?.[0])}`)
-    if (!verdict.ok && schema.ok && !engineOnly.has(verdict.code))
+    if (!verdict.ok && schema.ok && !engineOnly.has(verdict.code)) {
       mismatches.push(`${file}: engine rejects ${verdict.code} at ${verdict.path}`)
+    }
   }
   assert.deepEqual(mismatches, [])
 })
@@ -135,23 +138,26 @@ const invalid = {
 function validOf(field) {
   if (field.type === 'enum') return field.values.at(-1)
   if (field.type === 'array') return [validOf(field.items)]
-  if (field.type === 'record')
+  if (field.type === 'record') {
     return Object.fromEntries(Object.entries(field.fields).flatMap(([name, item]) => (item.required ? [[name, validOf(item)]] : [])))
+  }
   return valid[field.type]
 }
 
 /** Invalid values of a field's type, and the path below the field each fails at. */
 function invalidOf(field) {
-  if (field.type === 'enum')
+  if (field.type === 'enum') {
     return [
       {value: 'unknown value', below: ''},
       {value: 1, below: ''},
     ]
-  if (field.type === 'array')
+  }
+  if (field.type === 'array') {
     return [
       {value: {}, below: ''},
       ...invalidOf(field.items).map(({value, below}) => ({value: [validOf(field.items), value], below: `/1${below}`})),
     ]
+  }
   if (field.type === 'record') {
     const base = validOf(field)
     return [
@@ -169,14 +175,16 @@ function invalidOf(field) {
 /** Valid `data` for an item of `kind`: every required field of every rule that applies to it. */
 function data(schema, vocabulary, collection, kind) {
   const result = {}
-  for (const rule of dataRules)
+  for (const rule of dataRules) {
     if (
       rule.schema === schema &&
       (!rule.vocabulary || rule.vocabulary === vocabulary) &&
       rule.collection === collection &&
       (!rule.kinds || rule.kinds.includes(kind))
-    )
+    ) {
       for (const [name, field] of Object.entries(rule.fields)) if (field.required) result[name] = validOf(field)
+    }
+  }
   if (schema === 'treemap/v0' && collection === 'entities') result.value = 1
   return result
 }

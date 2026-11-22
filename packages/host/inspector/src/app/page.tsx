@@ -138,7 +138,7 @@ export function PresentedView({
   artifact: Artifact | null
   colorMode: 'light' | 'dark'
   /** The host theme's renderer token overrides (`InspectorHostTheme.tokens`), for the shown color mode. */
-  themeTokens?: {[name: string]: string} | undefined
+  themeTokens?: Record<string, string> | undefined
   /** The notices shown with the view: the artifact's, or the last job's. */
   notices: readonly string[]
   /** A panel under the view's toolbar, such as a side that didn't extract while the other is shown. */

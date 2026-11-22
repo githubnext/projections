@@ -119,9 +119,10 @@ export class FrameLifecycle {
     if (!this.iframe.getAttribute('src')) return
     this.loads++
     if (this.loads > 1) this.fail('The renderer navigated its frame and was stopped')
-    else if (this.reopen && this.status === 'loading')
+    else if (this.reopen && this.status === 'loading') {
       this.unansweredTimer = this.view.setTimeout(() => {
         if (this.status === 'loading') this.retry()
       }, unansweredLoadMs)
+    }
   }
 }

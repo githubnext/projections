@@ -84,15 +84,13 @@ export default defineConfig({
         this.emitFile({
           type: 'asset',
           fileName: 'THIRD_PARTY_NOTICES.txt',
-          source:
+          source: `${
             (await browserNotices(import.meta.url, [
               new URL('./THIRD_PARTY_NOTICES.txt', import.meta.resolve('@githubnext/projections-engine/engine.wasm')),
               new URL('./LICENSE.schemasafe.txt', import.meta.resolve('@githubnext/projections-engine/artifacts')),
               new URL('LICENSE.rules-interpreter.txt', comparatorDirectory),
-            ])) +
-            (await hostUiNotices()) +
-            '\n' +
-            (await rendererNotices({packages: rendererPackages, from: import.meta.url, exclude: browserNoticePackages})),
+            ])) + (await hostUiNotices())
+          }\n${await rendererNotices({packages: rendererPackages, from: import.meta.url, exclude: browserNoticePackages})}`,
         })
         for (const [url, asset] of assets) {
           this.emitFile({type: 'asset', fileName: url.slice(1), source: await readFile(fileURLToPath(asset.path))})

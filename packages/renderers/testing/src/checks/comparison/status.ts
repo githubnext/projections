@@ -146,8 +146,9 @@ function missingStatus(
     const ids = new Set([id, ...change.before, ...change.after])
     const drawn = texts.filter(text => ids.has(text.id))
     if (!drawn.length) continue
-    if (!drawn.some(text => statusWords.test(text.text)))
+    if (!drawn.some(text => statusWords.test(text.text))) {
       failures.push(`${where}, the ${word.toLowerCase()} "${id}" states no status as text (expected "${word}" or another status word).`)
+    }
   }
   return failures
 }

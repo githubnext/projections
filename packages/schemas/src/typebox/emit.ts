@@ -7,7 +7,7 @@ export interface EmittedSchema {
   /** The document's path below the published schema root, such as `extraction/v0.json`. */
   path: string
   /** The document: `$schema`, `$id`, `title`, the root schema's keywords, then its `$defs`, in that key order. */
-  json: {[key: string]: unknown}
+  json: Record<string, unknown>
 }
 
 const first = ['$schema', '$id', '$ref', 'title', 'description', 'type', 'const', 'enum', 'additionalProperties', 'required', 'properties']
@@ -38,7 +38,7 @@ export function emit(documents: {name: string; title: string; schema: TSchema}[]
       return home.name === undefined ? base || '#' : `${base}#/$defs/${home.name}`
     }
     // Maps of names to schemas keep their order; only schema keywords are ordered.
-    const names = (value: {[key: string]: unknown}) =>
+    const names = (value: Record<string, unknown>) =>
       Object.fromEntries(Object.entries(value).map(([key, item]) => [key, serialize(item, false)]))
     const serialize = (value: unknown, top: boolean): unknown => {
       if (Array.isArray(value)) return value.map(item => serialize(item, false))
@@ -46,7 +46,7 @@ export function emit(documents: {name: string; title: string; schema: TSchema}[]
       const home = top ? undefined : homeOf(value)
       if (home) {
         // A use of a shared definition: a `$ref`, with any annotations the use adds (such as a description).
-        const definition = definitionAt(home) as unknown as {[key: string]: unknown}
+        const definition = definitionAt(home) as unknown as Record<string, unknown>
         const extras = Object.entries(value).filter(([key, item]) => definition[key] !== item)
         return Object.fromEntries(
           ordered([...extras.map(([key, item]) => [key, serialize(item, false)] as [string, unknown]), ['$ref', reference(home)]]),
@@ -56,12 +56,12 @@ export function emit(documents: {name: string; title: string; schema: TSchema}[]
         ordered(
           Object.entries(value).map(([key, item]) => [
             key,
-            ['properties', 'patternProperties', '$defs'].includes(key) ? names(item as {[key: string]: unknown}) : serialize(item, false),
+            ['properties', 'patternProperties', '$defs'].includes(key) ? names(item as Record<string, unknown>) : serialize(item, false),
           ]),
         ),
       )
     }
-    const root = serialize(document.schema, true) as {[key: string]: unknown}
+    const root = serialize(document.schema, true) as Record<string, unknown>
     const definitions = definitionsOf(document.name)
     const json = Object.fromEntries(
       ordered([

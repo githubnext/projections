@@ -103,8 +103,9 @@ export function createPackingTransition(
   const rows = new Map(model.entities.map(row => [row.id, row]))
   // Each stage continues from the one before it, so circles only move where something changed.
   const layouts: Packing[] = []
-  for (const stage of timeline.stages)
+  for (const stage of timeline.stages) {
     layouts.push(packSnapshot(stageSnapshot(model, timeline, stage), settings, size, layouts.length ? {previous: layouts.at(-1)!} : {}))
+  }
   const root = layouts.find(layout => layout.root !== undefined)?.root
   return {
     first: layouts[0]!,

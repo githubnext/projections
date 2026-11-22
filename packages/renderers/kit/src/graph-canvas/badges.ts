@@ -118,10 +118,13 @@ export function badgeCardWidth(
   textScale = 1,
 ): number {
   let widest = 0
-  for (const row of rows)
-    for (const side of [row.before, row.after])
-      for (const value of (side && badges?.(side)) || [])
+  for (const row of rows) {
+    for (const side of [row.before, row.after]) {
+      for (const value of (side && badges?.(side)) || []) {
         widest = Math.max(widest, cardTextWidth(badgeText(value), badgeStyle(value), textScale) + badgeChrome(value))
+      }
+    }
+  }
   if (!widest) return cardWidthRange.min
   return Math.min(badgeWidthLimit, Math.ceil((widest + 2 * cardTextMetrics.inset) / 4) * 4)
 }

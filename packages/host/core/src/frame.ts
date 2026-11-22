@@ -305,8 +305,9 @@ export class RendererFrame {
     this.onEvent({type: 'ready', capabilities})
     const {init, options, selection, selectionPath, marks, hovered, filtering} = this
     const {generation} = this.gate
-    for (const message of replay({init, generation, options, selection, selectionPath, marks, hovered, filtering}, capabilities))
+    for (const message of replay({init, generation, options, selection, selectionPath, marks, hovered, filtering}, capabilities)) {
       this.send(message)
+    }
     this.send({type: 'viewport', ...viewportOf(this.iframe, this.view)})
     if (this.progress) this.flow.send(this.progress)
   }

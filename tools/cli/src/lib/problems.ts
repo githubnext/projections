@@ -2,7 +2,11 @@
 // test, node:test, the repository's check scripts, and a generic `path:line` fallback.
 import {posix} from './repo.ts'
 
-export type Problem = {file: string | undefined; line: number | undefined; message: string}
+export interface Problem {
+  file: string | undefined
+  line: number | undefined
+  message: string
+}
 
 // eslint-disable-next-line no-control-regex -- ANSI escape sequences start with ESC.
 const ansi = /\x1b\[[0-9;]*[A-Za-z]/g
@@ -33,19 +37,19 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
   let directory = cwd
   let eslintFile: string | undefined
   for (let index = 0; index < lines.length; index++) {
-    const line = lines[index] as string
+    const line = lines[index]!
     const workspace = /^npm (?:error|ERR!) path (.+)$/.exec(line)
-    if (workspace) directory = normalizePath(workspace[1] as string, root)
+    if (workspace) directory = normalizePath(workspace[1]!, root)
     // TypeScript: src/a.ts(12,5): error TS2322: message
     let match = /^(.+?)\((\d+),\d+\): error (TS\d+: .+)$/.exec(line)
     if (match) {
-      push(problems, seen, {file: normalizePath(match[1] as string, root, directory), line: Number(match[2]), message: match[3] as string})
+      push(problems, seen, {file: normalizePath(match[1]!, root, directory), line: Number(match[2]), message: match[3]!})
       continue
     }
     // TypeScript (pretty) and vite/esbuild: src/a.ts:12:5 - error TS2322: message
     match = /^(.+?\.[cm]?[jt]sx?):(\d+):\d+ - error (TS\d+: .+)$/.exec(line)
     if (match) {
-      push(problems, seen, {file: normalizePath(match[1] as string, root, directory), line: Number(match[2]), message: match[3] as string})
+      push(problems, seen, {file: normalizePath(match[1]!, root, directory), line: Number(match[2]), message: match[3]!})
       continue
     }
     // rustc and clippy: error[E0308]: message / warning: message, then `  --> path:line:col`
@@ -55,7 +59,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       const at = location && /--> (.+?):(\d+):\d+/.exec(location)
       if (at) {
         push(problems, seen, {
-          file: normalizePath(at[1] as string, root),
+          file: normalizePath(at[1]!, root),
           line: Number(at[2]),
           message: `${match[1]}${match[2] ?? ''}: ${match[3]}`,
         })
@@ -65,14 +69,14 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
     // clippy/rustc --message-format short: path:line:col: error: message
     match = /^([\w./-]+\.rs):(\d+):\d+: (error|warning)(\[[^\]]+\])?: (.+)$/.exec(line)
     if (match) {
-      push(problems, seen, {file: normalizePath(match[1] as string, root), line: Number(match[2]), message: `${match[3]}: ${match[5]}`})
+      push(problems, seen, {file: normalizePath(match[1]!, root), line: Number(match[2]), message: `${match[3]}: ${match[5]}`})
       continue
     }
     // rustfmt --check: Diff in /abs/path.rs:12: (or "at line 12:")
     match = /^Diff in (.+?\.rs)(?::(\d+)| at line (\d+)):?$/.exec(line)
     if (match) {
       push(problems, seen, {
-        file: normalizePath(match[1] as string, root),
+        file: normalizePath(match[1]!, root),
         line: Number(match[2] ?? match[3]),
         message: 'not formatted (cargo fmt)',
       })
@@ -85,7 +89,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
         .slice(index + 1, index + 4)
         .filter(next => next && !next.startsWith('note:') && !next.startsWith('stack backtrace'))
         .join(' ')
-      push(problems, seen, {file: normalizePath(match[2] as string, root), line: Number(match[3]), message: `${match[1]}: ${message}`})
+      push(problems, seen, {file: normalizePath(match[2]!, root), line: Number(match[3]), message: `${match[1]}: ${message}`})
       continue
     }
     // node:test failures: `not ok N - name` with a YAML block holding `location: 'path:line:col'` and `error: '...'`
@@ -97,9 +101,9 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       const location = body.map(next => /location: '(.+?):(\d+):\d+'/.exec(next)).find(Boolean)
       const error = body.map(next => /^\s+error: [|>]?-?\s*'?(.*?)'?$/.exec(next)).find(Boolean)
       const errorText = error?.[1] || body.find((next, at) => at > 0 && /^\s+error:/.test(body[at - 1] ?? ''))?.trim() || 'failed'
-      if (location && !/^\s*#/.test(match[1] as string)) {
+      if (location && !/^\s*#/.test(match[1]!)) {
         push(problems, seen, {
-          file: normalizePath(location[1] as string, root),
+          file: normalizePath(location[1]!, root),
           line: Number(location[2]),
           message: `${match[1]}: ${errorText}`,
         })
@@ -110,7 +114,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
     // first frame outside Node is where the assertion failed.
     match = /^test at (.+?):(\d+):\d+$/.exec(line)
     if (match && /^✖ /.test(lines[index + 1] ?? '')) {
-      const name = (lines[index + 1] as string).replace(/^✖ /, '').replace(/ \([\d.]+m?s\)$/, '')
+      const name = lines[index + 1]!.replace(/^✖ /, '').replace(/ \([\d.]+m?s\)$/, '')
       const block = lines.slice(index + 2, index + 60)
       const end = block.findIndex(next => /^test at /.test(next) || /^ℹ /.test(next))
       const body = end >= 0 ? block.slice(0, end) : block
@@ -121,7 +125,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
           .replace(/^\w*Error \[\w+\]: /, '') ?? 'failed'
       const frame = body.map(next => /^\s+at .*?\(?(?:file:\/\/)?(\/[^():]+?):(\d+):\d+\)?$/.exec(next)).find(Boolean)
       push(problems, seen, {
-        file: frame ? normalizePath(frame[1] as string, root) : normalizePath(match[1] as string, root, directory),
+        file: frame ? normalizePath(frame[1]!, root) : normalizePath(match[1]!, root, directory),
         line: Number(frame ? frame[2] : match[2]),
         message: `${name}: ${error}`,
       })
@@ -140,12 +144,12 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
     // check-boundaries and similar: path:line: message, or path: message
     match = /^([\w@.-]+(?:\/[\w@.-]+)+\.\w+):(\d+): (.+)$/.exec(line)
     if (match) {
-      push(problems, seen, {file: normalizePath(match[1] as string, root, directory), line: Number(match[2]), message: match[3] as string})
+      push(problems, seen, {file: normalizePath(match[1]!, root, directory), line: Number(match[2]), message: match[3]!})
       continue
     }
     match = /^([\w@.-]+(?:\/[\w@.-]+)+\.\w+): (.+)$/.exec(line)
     if (match && !/^https?:/.test(line)) {
-      push(problems, seen, {file: normalizePath(match[1] as string, root, directory), line: undefined, message: match[2] as string})
+      push(problems, seen, {file: normalizePath(match[1]!, root, directory), line: undefined, message: match[2]!})
       continue
     }
   }

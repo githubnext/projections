@@ -44,11 +44,12 @@ test("the summary bar's facts say what changed about units in both revisions; ad
     for (const fact of diFacts(model)) {
       assert.equal(fact.icon, 'changed')
       // Each fact filters to the entities its units fold in, which the comparison presents.
-      for (const id of fact.ids)
+      for (const id of fact.ids) {
         assert.ok(
           model.entities.some(row => row.id === id),
           `${scenario}: ${id}`,
         )
+      }
     }
   }
   // An unchanged comparison has nothing to say.
@@ -147,9 +148,11 @@ test('the diff is the transition’s union layout: every unit once, nothing over
       top: unit.y - diMetrics.height / 2,
       bottom: unit.y - diMetrics.height / 2 + unit.height,
     }))
-    for (const [index, a] of boxes.entries())
-      for (const b of boxes.slice(index + 1))
+    for (const [index, a] of boxes.entries()) {
+      for (const b of boxes.slice(index + 1)) {
         assert.ok(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top, `${scenario}: ${a.id} overlaps ${b.id}`)
+      }
+    }
     // Every link starts at its card's bottom, below any change lines, and ends at the top of the card it points at.
     const byId = new Map(diff.units.map(unit => [unit.id, unit]))
     for (const link of diff.links) {
@@ -258,7 +261,7 @@ test('a diff card shows long names and values whole, wrapping them and growing t
   for (const [tone, value] of [
     ['was', longNames.before],
     ['now', longNames.after],
-  ])
+  ]) {
     assert.equal(
       names
         .filter(span => span.tone === tone)
@@ -266,6 +269,7 @@ test('a diff card shows long names and values whole, wrapping them and growing t
         .join(''),
       value,
     )
+  }
   // The card grows to hold its text, above its footer, and the layer below moves down so nothing overlaps.
   assert.ok(repository.height > diMetrics.height)
   assert.equal(repository.height, Math.max(...repository.text.lines.map(line => line.y)) + 15 + diMetrics.footer)
@@ -276,9 +280,11 @@ test('a diff card shows long names and values whole, wrapping them and growing t
     top: unit.y - diMetrics.height / 2,
     bottom: unit.y - diMetrics.height / 2 + unit.height,
   }))
-  for (const [index, a] of boxes.entries())
-    for (const b of boxes.slice(index + 1))
+  for (const [index, a] of boxes.entries()) {
+    for (const b of boxes.slice(index + 1)) {
       assert.ok(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top, `${a.id} overlaps ${b.id}`)
+    }
+  }
   // The keyed card shows its whole key.
   const keyed = diff.units.find(unit => unit.unit.key === longNames.key)
   assert.equal(
@@ -394,7 +400,7 @@ test('change lines flow whole: a facet keeps its name and both values, and depen
   for (const [part, value] of [
     ['was', longNames.before],
     ['now', longNames.after],
-  ])
+  ]) {
     assert.equal(
       pieces
         .filter(piece => piece.part === part)
@@ -402,10 +408,11 @@ test('change lines flow whole: a facet keeps its name and both values, and depen
         .join(''),
       value,
     )
+  }
   const names = ['IPriceCalculator', 'IInventoryReservations', 'IShippingQuotes', 'ITaxRules', longNames.contract]
   const lines = dependencyLines(names.map(name => ({name})))
   assert.ok(lines.length > 1)
-  for (const [index, name] of names.entries())
+  for (const [index, name] of names.entries()) {
     assert.equal(
       lines
         .flat()
@@ -414,4 +421,5 @@ test('change lines flow whole: a facet keeps its name and both values, and depen
         .join(''),
       name,
     )
+  }
 })

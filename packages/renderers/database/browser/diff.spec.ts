@@ -36,7 +36,7 @@ for (const name of comparisons) {
       const shown = await drawn()
       expect(shown.summary, "no summary line: the host's summary bar counts the comparison").toBe(0)
       for (const [index, card] of shown.cards.entries()) {
-        for (const other of shown.cards.slice(index + 1))
+        for (const other of shown.cards.slice(index + 1)) {
           expect(
             card.x < other.x + other.width - 0.5 &&
               other.x < card.x + card.width - 0.5 &&
@@ -44,8 +44,10 @@ for (const name of comparisons) {
               other.y < card.y + card.height - 0.5,
             `${card.id} overlaps ${other.id}`,
           ).toBe(false)
-        for (const row of card.rows)
+        }
+        for (const row of card.rows) {
           expect(row.y + row.height, `a row of ${card.id} ends inside it`).toBeLessThanOrEqual(card.y + card.height + 0.5)
+        }
       }
       // Highlighting off paints plainly in the same boxes.
       await stage.seek(1, {highlighting: 'off'})

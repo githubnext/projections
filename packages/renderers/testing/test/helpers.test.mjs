@@ -75,8 +75,9 @@ function fakeDriver(
       state: () => ({selections: []}),
       async measure(call) {
         const unchanged = loads.at(-1).subject.comparison?.changes.length === 0
-        if (call === 'samples')
+        if (call === 'samples') {
           return mode === 'diff' ? [sample('a', unchanged ? 'plain' : 'tinted'), sample('b', 'plain')] : [sample('b', 'plain')]
+        }
         if (call === 'clipping') return clipped
         if (call === 'entities') return drawn
         if (call === 'overflow') return {scrollWidth: 300, clientWidth: 300, offenders: []}

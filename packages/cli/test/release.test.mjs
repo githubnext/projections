@@ -65,8 +65,9 @@ test('dist releases every target natively with attestations, no source tarball a
   const targets = [...setting(toml, 'targets').matchAll(/"([^"]+)"/g)].map(match => match[1])
   assert.deepEqual(targets.sort(), Object.keys(assets).sort())
   const runners = toml.split('[dist.github-custom-runners]')[1].split(/^\[/m)[0]
-  for (const target of [...targets, 'global'])
+  for (const target of [...targets, 'global']) {
     assert.match(runners, new RegExp(`^${target} = "[\\w.-]+"$`, 'm'), `${target} needs a runner`)
+  }
   const commits = toml.split('[dist.github-action-commits]')[1].split(/^\[/m)[0]
   for (const line of commits.trim().split('\n')) assert.match(line, /^"[\w/-]+" = "v\d+\.\d+\.\d+"$/, line)
   assert.equal(setting(toml, 'plan-jobs'), '["./release-inputs"]')
@@ -80,12 +81,13 @@ test('dist releases every target natively with attestations, no source tarball a
 test('the generated workflow pins every action and announces only after every proof passes', async () => {
   const release = await workflow('release.yml')
   for (const [name, job] of Object.entries(release.jobs)) {
-    if (job.uses)
+    if (job.uses) {
       assert.match(
         job.uses,
         /^\$\/\.github\/workflows\/(release-inputs|release-proof|release-approval|publish-schemas|publish-npm|move-major-tag)\.yml$/,
         name,
       )
+    }
     for (const step of job.steps ?? []) if (step.uses) assertLocked('release.yml', step.uses, `${name}: ${step.uses}`)
   }
   assert.ok(release.jobs.host.needs.includes('custom-release-proof'))
@@ -132,8 +134,9 @@ test('custom release jobs pin actions, use least privilege and name each executa
   }
   const steps = (await workflow('release-proof.yml')).jobs.prove.steps
   const naming = steps.find(step => step.name === 'Extract the executable under its gh name').run
-  for (const [target, id] of Object.entries(assets))
+  for (const [target, id] of Object.entries(assets)) {
     assert.match(naming, new RegExp(`${target}\\) id=${id} vsce=${vsceTargets[target]} ;;`))
+  }
   assert.match(naming, /"gh-projections-\$id"/)
   assert.match(
     steps.find(step => step.name === 'Prove the installed binary').run,

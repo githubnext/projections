@@ -75,11 +75,12 @@ export function runningIndicator(
         if (shown) {
           cancel()
           shown = running
-        } else if (!pending)
+        } else if (!pending) {
           schedule(delayMs, () => {
             shown = latest
             since = timers.now()
           })
+        }
         return
       }
       if (!shown) return cancel()

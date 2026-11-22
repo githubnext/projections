@@ -36,8 +36,9 @@ export async function loadScenarios() {
     files.push(file)
     const directory = dirname(file)
     const document = JSON.parse(await readFile(file, 'utf8'))
-    if (document.format !== 'projections.scenarios' || document.version !== 0)
+    if (document.format !== 'projections.scenarios' || document.version !== 0) {
       throw new Error(`${file} is not a projections.scenarios v0 document`)
+    }
     const extraction = async value => {
       if (typeof value !== 'string') return value
       const path = resolve(directory, value)

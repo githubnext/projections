@@ -15,7 +15,7 @@ import type {Memos} from './memo.js'
 import type {PaneKey, ProjectionOptions} from './types.js'
 import {playbackDuration} from './timing.js'
 
-export type PlaybackPositionInput = {
+export interface PlaybackPositionInput {
   options: ProjectionOptions
   comparing: boolean
   mode: ComparisonMode

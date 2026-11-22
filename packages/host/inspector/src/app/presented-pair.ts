@@ -35,8 +35,9 @@ export function historyRows({
   ]
   const listed = (ref: string) => list.some(row => row.ref === ref)
   for (const ref of [marked.a, marked.b]) if (ref && !listed(ref)) list.push({ref, label: ref, detail: 'Chosen ref'})
-  for (const ref of held?.projection === projection ? [held.before, held.after] : [])
+  for (const ref of held?.projection === projection ? [held.before, held.after] : []) {
     if (ref && !listed(ref)) list.push({ref, label: ref, detail: 'Shown ref'})
+  }
   for (const ref of added) if (!listed(ref)) list.push({ref, label: ref, detail: 'Added ref'})
   for (const item of revisions) {
     if (item.ref === workingTree || listed(item.commit)) continue
@@ -52,7 +53,7 @@ export function historyRows({
 /** The renderer and comparator a document is presented and compared with: its definition's, or the session's overrides. */
 export function overriddenDocument(
   document: ExtractionDocument,
-  overrides: {[projection: string]: PartOverrides},
+  overrides: Record<string, PartOverrides>,
   definitions: InspectorDefinitionList | null,
 ): ExtractionDocument {
   const parts = overrides[document.projection.id]

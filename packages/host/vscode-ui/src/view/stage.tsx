@@ -25,7 +25,7 @@ interface PaneStatusProps {
 /** A pane's loading spinner, or its renderer's failure or last reported problem. */
 function PaneStatus({pane, renderer, reducedMotion, term, recoverView, setView}: PaneStatusProps) {
   if (pane.status === 'loading') return <LoadingStatus label={`Loading ${renderer.title}…`} reducedMotion={reducedMotion} />
-  if (pane.status === 'failed')
+  if (pane.status === 'failed') {
     return (
       <div role="alert" className="phv-pane-status">
         <Notice
@@ -37,6 +37,7 @@ function PaneStatus({pane, renderer, reducedMotion, term, recoverView, setView}:
         </Notice>
       </div>
     )
+  }
   return pane.rendererErrors.length ? (
     <div role="alert" className="phv-pane-status">
       <Notice severity="warning" title="The renderer reported a problem">

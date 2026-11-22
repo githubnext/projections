@@ -12,7 +12,7 @@ import {UsageError} from './work/change-set.ts'
 export const SHADCN_SCRIPT = 'packages/host/core/scripts/shadcn/update.mjs'
 const COMPONENTS = 'packages/host/core/src/ui/components'
 
-export type ShadcnOptions = {
+export interface ShadcnOptions {
   components?: readonly string[] | undefined
   check?: boolean | undefined
   dryRun?: boolean | undefined
@@ -20,7 +20,12 @@ export type ShadcnOptions = {
   unreleased?: boolean | undefined
 }
 
-type ComponentResult = {name: string; status: string; conflicts?: number; line?: number}
+interface ComponentResult {
+  name: string
+  status: string
+  conflicts?: number
+  line?: number
+}
 
 type ScriptResult =
   | {
@@ -78,9 +83,10 @@ export function shadcnSummary(result: Exclude<ScriptResult, {error: unknown}>, o
   const file = (name: string) => `${COMPONENTS}/${name}.tsx`
   const problems: Problem[] = []
   for (const component of result.components) {
-    if (component.status === 'changed')
+    if (component.status === 'changed') {
       problems.push({file: file(component.name), line: undefined, message: `changed upstream since ${result.ours}`})
-    if (component.status === 'conflict')
+    }
+    if (component.status === 'conflict') {
       problems.push({
         file: file(component.name),
         line: result.written ? component.line : undefined,
@@ -88,6 +94,7 @@ export function shadcnSummary(result: Exclude<ScriptResult, {error: unknown}>, o
           result.written ? 'resolve the diff3 markers (ours, base, upstream)' : 'an update would leave diff3 markers'
         }`,
       })
+    }
   }
   const changed = result.components.some(component => component.status !== 'unchanged')
   const next =

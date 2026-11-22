@@ -20,13 +20,13 @@ export function assignSources({units, addUnit, roots, files, read}) {
   // Shell scripts at a root, or each in a directory named after it outside every other unit (`tools/gh-projections/
   // gh-projections`), are units of their own, named by the root and their name, so moving one keeps its ID.
   const insideUnit = file => [...units.values()].some(unit => file.startsWith(`${unit.directory}/`))
-  for (const root of roots)
+  for (const root of roots) {
     for (const file of files) {
       const directory = path.posix.dirname(file)
       const own =
         directory === (root.path || '.') ||
         (file.startsWith(prefixOf(root.path)) && path.posix.basename(directory) === path.posix.basename(file))
-      if (own && !insideUnit(file) && languageOf(file, read) === 'shell')
+      if (own && !insideUnit(file) && languageOf(file, read) === 'shell') {
         addUnit({
           id: `script:${join(root.path, path.posix.basename(file))}`,
           kind: 'script',
@@ -38,7 +38,9 @@ export function assignSources({units, addUnit, roots, files, read}) {
           scan: root.capabilities !== false,
           data: {area: root.area ?? (root.path || '.'), path: file},
         })
+      }
     }
+  }
 
   const unitsByDirectory = new Map()
   for (const unit of units.values()) {
@@ -104,8 +106,9 @@ export function assignSources({units, addUnit, roots, files, read}) {
 
 export function stripComments(text, language) {
   let result = text
-  if (['rust', 'javascript', 'go', 'java', 'csharp', 'css'].includes(language))
+  if (['rust', 'javascript', 'go', 'java', 'csharp', 'css'].includes(language)) {
     result = result.replace(/\/\*[\s\S]*?\*\//g, block => block.replace(/[^\n]/g, ' '))
+  }
   if (language === 'css') return result.split('\n')
   const comment = language === 'python' || language === 'shell' ? /^\s*#(?!!).*$/ : /(^|[\s;,{}()])\/\/.*$/
   return result.split('\n').map(line => line.replace(comment, (_, lead = '') => lead))

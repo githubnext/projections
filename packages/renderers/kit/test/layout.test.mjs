@@ -97,8 +97,9 @@ function layoutIssues(layout, edges, orientation) {
           point =>
             point.x > card.left + inset && point.x < card.right - inset && point.y > card.top + inset && point.y < card.bottom - inset,
         )
-      )
+      ) {
         issues.push(`${edge.id} crosses ${id}`)
+      }
     }
   }
   return issues
@@ -163,12 +164,13 @@ test('every layer has one baseline: cards side by side in a layer share their to
     const layout = await layoutOf(graph)
     const orientation = graph.options.orientation ?? 'vertical'
     const cards = [...layout.points.keys()]
-    for (let i = 0; i < cards.length; i++)
+    for (let i = 0; i < cards.length; i++) {
       for (let j = i + 1; j < cards.length; j++) {
         const [a, b] = [flowSpan(layout, cards[i], orientation), flowSpan(layout, cards[j], orientation)]
         if (Math.min(a[1], b[1]) - Math.max(a[0], b[0]) <= 0) continue
         assert.ok(Math.abs(a[0] - b[0]) < 0.5, `${graph.name}: ${cards[i]} at ${a[0]}, ${cards[j]} at ${b[0]}`)
       }
+    }
   }
 })
 
@@ -330,8 +332,9 @@ test('while scrubbing, no visible relationship passes through a visible card, in
               card.y - card.height / 2 + 2,
               card.y + card.height / 2 - 2,
             ]
-            if (points.some(point => point.x > left && point.x < right && point.y > top && point.y < bottom))
+            if (points.some(point => point.x > left && point.x < right && point.y > top && point.y < bottom)) {
               failures.add(`${edge.key} through ${card.id} at ${index / 400}`)
+            }
           }
         }
       }
@@ -468,7 +471,7 @@ test('a card that loses or gains its last relationship moves nothing else, and k
     const transition = await createGraphTransition(model, scheduleSteps(model), {orientation})
     return Array.from({length: 101}, (_, index) => new Map(transition(index / 100).nodes.map(node => [node.id, node])))
   }
-  for (const orientation of ['horizontal', 'vertical'])
+  for (const orientation of ['horizontal', 'vertical']) {
     for (const unlinking of [true, false]) {
       const name = `${orientation}, ${unlinking ? 'unlinking' : 'linking'}`
       const ends = (other, then) => (unlinking ? [linked, other] : [other, linked])
@@ -492,6 +495,7 @@ test('a card that loses or gains its last relationship moves nothing else, and k
       )
       assert.equal(offsets.size, 1, `${name}: x keeps beside c (${[...offsets]})`)
     }
+  }
 })
 
 test('a card with no relationships a little off a column in another layer moves onto it where it fits', async () => {
@@ -662,9 +666,11 @@ test("in a content-sized frame, the host's insets place its cover, wherever the 
   const foot = y => ({x: 458, y, width: 429, height: 30})
   // The foot 12px above the bottom of a 320, 448 or 646px frame (its `stage-inset-bottom` 56px), placed in a stage of
   // 448 or 646px: each is the frame's foot, even one above the stage's middle, and each pads the bottom alike.
-  for (const height of [448, 646])
-    for (const y of [277, 405, 603])
+  for (const height of [448, 646]) {
+    for (const y of [277, 405, 603]) {
       assert.deepEqual(coveredPadding({cover: [foot(y)], view: {width: 1344, height}, size, padding, insets}), {top: 16, y: 56})
+    }
+  }
   // A chip within the top inset stays at the top, and the drawing opens below it.
   const view = {width: 1344, height: 448}
   const chip = {x: 458, y: 12, width: 200, height: 28}

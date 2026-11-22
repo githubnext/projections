@@ -19,8 +19,9 @@ function requested(input: ToolInput, model: FolderModel): {chosen?: {id: string}
   const chosen = typeof input.choice === 'string' ? {id: input.choice} : undefined
   if (chosen && (before || after)) throw new Error('Give a choice or revisions, not both')
   if (chosen) {
-    if (!isChoice(chosen))
+    if (!isChoice(chosen)) {
       throw new Error(`${chosen.id} isn't a choice: use branch, uncommitted, last-commit, now, release or bookmark:<id>`)
+    }
     const reason = unavailableReason(chosen, model.facts())
     if (reason) throw new Error(`${model.describe(chosen, undefined).name} doesn't apply here: ${reason}`)
   }
@@ -85,13 +86,15 @@ export function openProjectionTool(
 ) {
   return async (input: ToolInput): Promise<string> => {
     const folder = toolFolder(input.folder)
-    if (typeof input.projection !== 'string')
+    if (typeof input.projection !== 'string') {
       throw new Error('Name a projection: no projection tab is open to take it from (list_projections lists them)')
+    }
     const id = input.projection
     const model = sidebar.model(folder)
     await model.load()
-    if (!model.definition(id) && !model.invalidFor(id))
+    if (!model.definition(id) && !model.invalidFor(id)) {
       throw new Error(`${folder.name} defines no projection ${id}; list_projections lists them`)
+    }
     const {chosen, pair} = requested(input, model)
     const pin = input.pin === true
     if (chosen && !pin) model.choose(chosen)

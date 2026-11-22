@@ -218,8 +218,9 @@ export function TextView({subject, rows, progress, selectedId, onSelect, annotat
   if (subject.mode === 'extraction') {
     const {extraction} = subject
     const relationships = new Map<string, Row[]>()
-    for (const row of rows)
+    for (const row of rows) {
       if (row.collection === 'relationships' && row.from) relationships.set(row.from, [...(relationships.get(row.from) ?? []), row])
+    }
     const labels = new Map(extraction.entities.map(entity => [entity.id, entity.label]))
     return (
       <div className="ph-text-view pj:flex pj:min-w-0 pj:max-w-[80ch] pj:flex-col pj:gap-3 pj:text-sm pj:leading-relaxed" data-view="text">

@@ -136,8 +136,9 @@ export function scanCapabilities({units, unitFiles, linesOf}) {
         const index = lines.findIndex(line => pattern.test(line))
         if (index < 0) continue
         ;(unit.capabilityFiles[capability] ??= []).push(moduleOf(entry.relative))
-        if (unit.evidence.length < MAX_EVIDENCE)
+        if (unit.evidence.length < MAX_EVIDENCE) {
           unit.evidence.push({kind: `capability:${capability}`, source: entry.file, location: {line: index + 1}})
+        }
       }
     }
   }

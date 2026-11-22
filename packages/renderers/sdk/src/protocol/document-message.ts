@@ -9,7 +9,8 @@ export function document(message: Record<string, unknown>): HostMessage | undefi
   const {renderer, html, error} = message
   if (typeof renderer !== 'string' || !rendererNamePattern.test(renderer)) return undefined
   if (typeof html === 'string' && error === undefined) return {type: 'document', renderer, html}
-  if (typeof error === 'string' && error.length <= rendererLimits.textLength && html === undefined)
+  if (typeof error === 'string' && error.length <= rendererLimits.textLength && html === undefined) {
     return {type: 'document', renderer, error}
+  }
   return undefined
 }

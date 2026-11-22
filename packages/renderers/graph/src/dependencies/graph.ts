@@ -20,11 +20,12 @@ export function dependencyGraph(model: ComparisonModel) {
   }
   const out = new Map<string, Set<string>>(ids.map(id => [id, new Set()]))
   const incoming = new Set<string>()
-  for (const row of edges)
+  for (const row of edges) {
     for (const {from, to} of endpoints(row)) {
       out.get(from)?.add(to)
       incoming.add(to)
     }
+  }
   const children = (id: string) => [...(out.get(id) ?? [])].sort(compareIds)
 
   let roots = ids.filter(id => {
@@ -41,12 +42,13 @@ export function dependencyGraph(model: ComparisonModel) {
   const parent = new Map<string, string>()
   for (let queue = [...roots], index = 0; index < queue.length; index += 1) {
     const id = queue[index]!
-    for (const child of children(id))
+    for (const child of children(id)) {
       if (!depth.has(child)) {
         depth.set(child, depth.get(id)! + 1)
         parent.set(child, id)
         queue.push(child)
       }
+    }
   }
   return {rows, ids, edges, endpoints, children, roots, rootSet, direct, depth, parent}
 }

@@ -314,9 +314,9 @@ export function diCardText(input: DiCardTextInput): DiCardText {
     : undefined
   names.forEach((spans, index) => push('implementation', spans, 'start', next(index === 0 ? diffCardMetrics.labelGap : 0)))
   const firstName = lines.find(line => line.role === 'implementation')!
-  if (note && names.length === 1 && spansWidth(firstName.spans) + textGap + spansWidth(note) <= lineRoom)
+  if (note && names.length === 1 && spansWidth(firstName.spans) + textGap + spansWidth(note) <= lineRoom) {
     push('note', note, 'end', firstName.y)
-  else if (note) {
+  } else if (note) {
     // Under the name, wrapped: the prefix stays in words on the first line.
     const prefix = note[1] ? note[0]! : undefined
     const value = note.at(-1)!

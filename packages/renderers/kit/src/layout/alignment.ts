@@ -62,8 +62,9 @@ export function identifyAlignment(
       to = real.get(edge.to)
     if (!from || !to || from.layer >= to.layer) continue
     const chain = [from]
-    for (let layer = from.layer + 1; layer < to.layer; layer++)
+    for (let layer = from.layer + 1; layer < to.layer; layer++) {
       chain.push(vertex(layer, edge.through[layer - from.layer - 1] ?? (from.across + to.across) / 2, true))
+    }
     chain.push(to)
     for (let position = 1; position < chain.length; position++) {
       chain[position]!.upper.push(chain[position - 1]!)

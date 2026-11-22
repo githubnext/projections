@@ -167,21 +167,24 @@ function settled(state: ProjectionState, options: ProjectionOptions, basics: Ret
   }
   const {renderer, paneKeys} = basics.read(next, options)
   const seeding = seedControls(next.seeded, next.panes[paneKeys[0]!].controls, options.presentation, renderer)
-  if (seeding)
+  if (seeding) {
     next = {
       ...next,
       seeded: seeding.seeded,
       settings: {...next.settings, controlValues: {...seeding.values, ...next.settings.controlValues}},
     }
+  }
   return next
 }
 
 /** The controller with each of its functions run as one change (see `ProjectionPrimitives.batched`). */
 function batchActions(controller: ProjectionController, batched: ProjectionPrimitives['batched']): ProjectionController {
   const fields: Record<string, unknown> = {...controller}
-  for (const [key, field] of Object.entries(fields))
-    if (typeof field === 'function')
+  for (const [key, field] of Object.entries(fields)) {
+    if (typeof field === 'function') {
       fields[key] = (...args: unknown[]) => batched(() => (field as (...args: unknown[]) => unknown)(...args))
+    }
+  }
   return fields as unknown as ProjectionController
 }
 
@@ -361,8 +364,9 @@ export function createDerive(primitives: ProjectionPrimitives) {
         const control = controls.find(item => item.id === id)
         if (!control || !isControlValue(control, next)) return
         const options = latest()
-        if (options.controlValues === undefined)
+        if (options.controlValues === undefined) {
           primitives.setSettings(previous => ({...previous, controlValues: {...previous.controlValues, [id]: next}}))
+        }
         options.onControlChange?.(id, next)
       },
       runAction: id => {

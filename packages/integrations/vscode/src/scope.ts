@@ -10,7 +10,7 @@ import {promisify} from 'node:util'
 const run = promisify(execFile)
 
 /** `sha256:<hex>` of `path=object\0` for each scope path, in order; a path the tree lacks is `absent`. */
-export function scopeDigest(entries: ReadonlyArray<readonly [path: string, object: string | undefined]>): string {
+export function scopeDigest(entries: readonly (readonly [path: string, object: string | undefined])[]): string {
   const hash = createHash('sha256')
   for (const [path, object] of entries) hash.update(`${path}=${object ?? 'absent'}\0`)
   return `sha256:${hash.digest('hex')}`

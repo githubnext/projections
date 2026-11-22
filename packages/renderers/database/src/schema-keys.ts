@@ -8,12 +8,15 @@ import type {Cards} from './schema-model.js'
 export function keysOf(state: SchemaState, {nodes, tables, tableSet, tableOf, columnNamed}: Cards) {
   const isKey = (entity: Entity | undefined) => entity !== undefined && !isCard(entity) && !isColumn(entity)
   const owners = new Map<string, string>()
-  for (const edge of state.relationships)
-    if (tableSet.has(edge.from) && isTable(nodes.get(edge.from)) && isKey(nodes.get(edge.to)) && !owners.has(edge.to))
+  for (const edge of state.relationships) {
+    if (tableSet.has(edge.from) && isTable(nodes.get(edge.from)) && isKey(nodes.get(edge.to)) && !owners.has(edge.to)) {
       owners.set(edge.to, edge.from)
+    }
+  }
   const keyEdges = new Map<string, string[]>()
-  for (const edge of state.relationships)
+  for (const edge of state.relationships) {
     if (isKey(nodes.get(edge.from)) && tableOf.has(edge.to)) keyEdges.set(edge.from, [...(keyEdges.get(edge.from) ?? []), edge.to])
+  }
   const keyColumns = new Map<string, string[]>()
   for (const [id, node] of nodes) {
     if (!isKey(node)) continue

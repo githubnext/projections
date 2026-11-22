@@ -206,12 +206,13 @@ export function stageLinkShapes(models: readonly SchemaModel[], layouts: readonl
         signature: `${layout.mode}:${sides.join('/')}:${route.map(point => Math.round(point.x)).join(',')}`,
       }
       shapes.set(link.key, list)
-      if (layout.mode === 'columns' && !self)
+      if (layout.mode === 'columns' && !self) {
         curved.push({
           key: link.key,
           points: [{x: start.x, y: start.y + offsets.from}, ...route, {x: sideX(target, sides[1]), y: toY + offsets.to}],
           axis: {x: sides[0] === 'left' ? -1 : 1, y: 0},
         })
+      }
     }
     for (const [key, tracks] of linkTracks(curved)) shapes.get(key)![stage]!.tracks = tracks
   }

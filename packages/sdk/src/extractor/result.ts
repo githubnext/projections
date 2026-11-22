@@ -29,27 +29,30 @@ const singular = {entities: 'entity', relationships: 'relationship'} as const
 function listed(items: unknown, field: 'entities' | 'relationships'): Record<string, unknown>[] {
   const keyed = (key: string, item: unknown) => {
     if (!isObject(item)) throw new TypeError(`${field}[${quoted(key)}] is ${described(item)}, not an object`)
-    if (item.id !== undefined && item.id !== key)
+    if (item.id !== undefined && item.id !== key) {
       throw new RangeError(`${field}[${quoted(key)}] has the id ${quoted(item.id)}; give it its key's, or none`)
+    }
     const {id: _id, ...fields} = item
     return {id: key, ...fields}
   }
   let list: Record<string, unknown>[]
   if (items instanceof Map) list = [...items].map(([key, item]) => keyed(key as string, item))
-  else if (typeof items === 'string' || typeof items !== 'object' || items === null)
+  else if (typeof items === 'string' || typeof items !== 'object' || items === null) {
     throw new TypeError(`${field} must be an array of objects, or an object of them keyed by ID, not ${described(items)}`)
-  else if (Symbol.iterator in items)
+  } else if (Symbol.iterator in items) {
     list = [...(items as Iterable<unknown>)].map((item, index) => {
       if (!isObject(item)) throw new TypeError(`${field}[${index}] is ${described(item)}, not an object`)
       if (!('id' in item)) throw new RangeError(`${field}[${index}] has no id`)
       return {...item}
     })
-  else list = Object.entries(items).map(([key, item]) => keyed(key, item))
+  } else list = Object.entries(items).map(([key, item]) => keyed(key, item))
   for (const item of list) {
-    if (typeof item.id !== 'string' || !item.id)
+    if (typeof item.id !== 'string' || !item.id) {
       throw new RangeError(`${article(singular[field]).replace(/^a/, 'A')}'s id must be a nonempty string, not ${quoted(item.id)}`)
-    for (const name of requiredFields[field])
+    }
+    for (const name of requiredFields[field]) {
       if (typeof item[name] !== 'string') throw new RangeError(`The ${singular[field]} ${quoted(item.id)} needs ${name}, a string`)
+    }
   }
   // The Engine's order: UTF-16 code units, JavaScript's own string order.
   const id = (item: Record<string, unknown>) => item.id as string
@@ -64,8 +67,9 @@ function listed(items: unknown, field: 'entities' | 'relationships'): Record<str
  */
 export function extraction(fields: ExtractionFields = {}): Extraction {
   const {schema = DEFAULT_SCHEMA, entities = [], relationships = [], ...optional} = fields
-  if (typeof schema !== 'string' || !schema.includes('/'))
+  if (typeof schema !== 'string' || !schema.includes('/')) {
     throw new RangeError(`schema must name a domain schema, such as ${quoted(DEFAULT_SCHEMA)}, not ${quoted(schema)}`)
+  }
   const document: Record<string, unknown> = {
     protocolVersion: PROTOCOL_VERSION,
     schema,
@@ -78,10 +82,11 @@ export function extraction(fields: ExtractionFields = {}): Extraction {
     seen.add(item.id)
   }
   for (const [name, value] of Object.entries(optional)) {
-    if (!optionalFields.has(name))
+    if (!optionalFields.has(name)) {
       throw new TypeError(
         `An extraction has no field ${quoted(name)}; besides its entities and relationships it may have ${[...optionalFields].join(', ')}`,
       )
+    }
     if (value !== undefined && value !== null) document[name] = value
   }
   return document as unknown as Extraction
@@ -101,10 +106,11 @@ export function result(fields: ExtractionFields = {}): Extraction {
   const text = JSON.stringify(document, function (this: unknown, _key: string, value: unknown) {
     if (this === document) item = undefined
     else if (lists.includes(this)) item = (value as {id: unknown}).id
-    if ((typeof value === 'number' && !Number.isFinite(value)) || typeof value === 'bigint' || typeof value === 'function')
+    if ((typeof value === 'number' && !Number.isFinite(value)) || typeof value === 'bigint' || typeof value === 'function') {
       throw new TypeError(
         `${item === undefined ? 'The extraction' : `The item ${quoted(item)}`} holds a value JSON can't represent (${String(value)}); use objects, arrays, strings, finite numbers, booleans and null`,
       )
+    }
     return value
   })
   process.stdout.write(text)

@@ -17,7 +17,7 @@ for (const [theme, fallback] of [
   ['dark-modern', false],
   ['light-modern', false],
   ['dark-modern', true],
-] as const)
+] as const) {
   test(`${theme}${fallback ? ', without text-box' : ''}: a capital E sits optically centred in the summary bar and in a hovered figure's pill`, async ({
     page,
   }) => {
@@ -31,6 +31,7 @@ for (const [theme, fallback] of [
     await total.hover()
     expectCentred(await capGaps(page, total, total), 'pill')
   })
+}
 
 test("a capital E sits optically centred in the toolbar's text buttons", async ({page}) => {
   // The "Showing table" chip, after its icon.

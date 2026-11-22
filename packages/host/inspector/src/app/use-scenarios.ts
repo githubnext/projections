@@ -50,8 +50,8 @@ export function useScenarios({
   setSource: Dispatch<SetStateAction<'live' | 'artifact'>>
 }) {
   // The renderer package scenarios of each projection, and a version that refetches them when they change.
-  const [scenarioLists, setScenarioLists] = useState<{[projection: string]: InspectorScenarioList}>({})
-  const [scenarioVersions, setScenarioVersions] = useState<{[projection: string]: number}>({})
+  const [scenarioLists, setScenarioLists] = useState<Record<string, InspectorScenarioList>>({})
+  const [scenarioVersions, setScenarioVersions] = useState<Record<string, number>>({})
   const [requested, setRequested] = useState<ScenarioRequest>()
   // A custom renderer package's scenarios, offered beside the live working tree.
   const scenarioFile = live ? policy.scenarios : undefined

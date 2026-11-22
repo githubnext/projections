@@ -11,7 +11,12 @@ import {TOOLS} from '../../lib/gates.ts'
 import {posix} from 'node:path'
 import {git, relativeTo} from '../../lib/repo.ts'
 
-export type ExplainOptions = {files: string[]; base: string; event: string; labels: string[]}
+export interface ExplainOptions {
+  files: string[]
+  base: string
+  event: string
+  labels: string[]
+}
 
 export function ciExplainReport(root: string, {files, base, event, labels}: ExplainOptions) {
   const facts = repoFacts(root)
@@ -31,7 +36,11 @@ export function ciExplainReport(root: string, {files, base, event, labels}: Expl
   }
 }
 
-export type ReplayOptions = {base: string; commits: number; files: boolean}
+export interface ReplayOptions {
+  base: string
+  commits: number
+  files: boolean
+}
 
 /** `ci replay`: the plans under the rules and planner at `base` and in the working tree, compared. */
 export async function ciReplayReport(root: string, {base, commits, files}: ReplayOptions) {

@@ -49,7 +49,7 @@ export interface ProjectionViewProps {
   afterLabel?: string
   colorMode?: ColorMode | 'auto'
   /** Theme token overrides, keyed by token name. */
-  themeTokens?: {[name: string]: string}
+  themeTokens?: Record<string, string>
   /** Playback duration from before to after at 1× speed, in milliseconds; default scales with step count. */
   durationMs?: number
   initialView?: ViewKind
@@ -131,7 +131,7 @@ export interface ProjectionViewProps {
   search?: string
   onSearchChange?: (search: string) => void
   /** Controlled values of the renderer's declared controls, keyed by control ID. */
-  controlValues?: {[id: string]: ControlValue}
+  controlValues?: Record<string, ControlValue>
   /** Called with each requested control value, in both modes. Values are validated against the declaration first. */
   onControlChange?: (id: string, value: ControlValue) => void
   /** Called when an action control is activated, after it is sent to the renderer. */

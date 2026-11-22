@@ -47,7 +47,7 @@ export function elkRun(input: ElkInput, gap: number): ElkRun {
     const elkNodes = new Map<string, ElkNode>(
       laid.map(node => {
         const id = elkId.get(node.id)!
-        if (groups.has(node.id))
+        if (groups.has(node.id)) {
           return [
             node.id,
             {
@@ -58,6 +58,7 @@ export function elkRun(input: ElkInput, gap: number): ElkRun {
               layoutOptions: {...settings, ...hint(node.id), 'elk.padding': boundaryPadding},
             },
           ]
+        }
         const width = node.width ?? cardWidth,
           height = node.height ?? cardHeight(node.kind)
         return [

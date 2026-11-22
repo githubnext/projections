@@ -28,7 +28,10 @@ export interface ArrowContact {
  * heads. Self-contained, like `measureFrame`.
  */
 export function arrowContacts(root: Element): ArrowContact[] {
-  type P = {x: number; y: number}
+  interface P {
+    x: number
+    y: number
+  }
   const contacts: ArrowContact[] = []
   const points = (d: string): P[] => [...d.matchAll(/(-?[\d.]+)[ ,](-?[\d.]+)/g)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
   const scaleOf = (element: SVGGraphicsElement) => {
@@ -41,8 +44,9 @@ export function arrowContacts(root: Element): ArrowContact[] {
   }
   const opacity = (element: Element) => {
     let value = 1
-    for (let node: Element | null = element; node && node !== root; node = node.parentElement)
+    for (let node: Element | null = element; node && node !== root; node = node.parentElement) {
       value *= Number(node.getAttribute('opacity') ?? getComputedStyle(node).opacity)
+    }
     return value
   }
   /** The head's painted reach along its axis, and the axis (from the middle of its base to its tip), in screen space. */
@@ -118,7 +122,7 @@ export function arrowContacts(root: Element): ArrowContact[] {
     // An outer ring (an inset-free box shadow's spread) paints outside the box; an outline drawn inset does not.
     const rings = style.boxShadow
       .split(/,(?![^(]*\))/)
-      .filter(shadow => shadow.trim() !== 'none' && !/inset/.test(shadow))
+      .filter(shadow => shadow.trim() !== 'none' && !shadow.includes('inset'))
       // A shadow's lengths are its x and y offsets, blur and spread, in px; its color may hold other numbers.
       .map(shadow => Number.parseFloat([...shadow.matchAll(/(-?[\d.]+)px/g)][3]?.[1] ?? '0') || 0)
     const outline =

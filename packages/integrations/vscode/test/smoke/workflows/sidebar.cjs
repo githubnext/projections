@@ -32,8 +32,9 @@ module.exports = async function sidebar({folder, api}) {
       ['Viewing', 'Projections', 'Definition', 'Suggested'],
     )
     const commands = await vscode.commands.getCommands(true)
-    for (const removed of ['projections.runChecks', 'projections.addPair', 'projections.showPair', 'projections.pairs.bookmark'])
+    for (const removed of ['projections.runChecks', 'projections.addPair', 'projections.showPair', 'projections.pairs.bookmark']) {
       assert.ok(!commands.includes(removed), removed)
+    }
     // No "pair" in a command's title.
     assert.deepEqual(
       contributed.commands.filter(command => /\bpairs?\b/i.test(command.title)).map(command => command.title),

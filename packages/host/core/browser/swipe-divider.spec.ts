@@ -19,7 +19,7 @@ const colors = async (page: Page) => ({
 
 test.use({viewport: {width: 1280, height: 800}})
 
-for (const theme of ['light', 'dark'] as const)
+for (const theme of ['light', 'dark'] as const) {
   test(`${theme}: the swipe line is the thumb's outline color, 1px, at rest, on hover, while dragged and under focus`, async ({page}) => {
     await page.goto(story('default-ui-comparison-explorer--swipe', `globals=theme:${theme}`))
     await expect(view(page)).toHaveAttribute('data-renderer-status', 'ready', {timeout: 30_000})
@@ -47,3 +47,4 @@ for (const theme of ['light', 'dark'] as const)
     expect(focus.line).toBe(focus.outline)
     expect((await colors(page)).width).toBe(1)
   })
+}

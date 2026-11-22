@@ -9,7 +9,10 @@ export interface Link {
   alias: boolean
 }
 
-export type Registrations = {byWrapper: Map<Wrapper, Registration>; byId: Map<string, Registration>}
+export interface Registrations {
+  byWrapper: Map<Wrapper, Registration>
+  byId: Map<string, Registration>
+}
 
 /** Every provider and controller of every module, by its wrapper and by the wrapper's id. */
 export function registrationsOf(
@@ -54,8 +57,9 @@ export function linksOf(graph: Graph, registrations: Registrations): Link[] {
     if (
       edge.metadata.type !== 'class-to-class' ||
       (edge.metadata.injectionType !== 'constructor' && edge.metadata.injectionType !== 'property')
-    )
+    ) {
       continue
+    }
     const from = registrations.byId.get(edge.source),
       to = registrations.byId.get(edge.target)
     if (!from || !to) continue

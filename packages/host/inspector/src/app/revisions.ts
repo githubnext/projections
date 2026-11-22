@@ -103,10 +103,10 @@ export const symbolic = (ref: string) => ref !== workingTree && !/^[0-9a-f]{40}$
 
 /** The shown pair's extractions as a host reads them: each side's job and the result's identity. */
 export function resultsOf(
-  rows: {[ref: string]: RowState} | undefined,
+  rows: Record<string, RowState> | undefined,
   marked: {a?: string | undefined; b?: string | undefined},
-): {[ref: string]: InspectorResultIdentity} {
-  const results: {[ref: string]: InspectorResultIdentity} = {}
+): Record<string, InspectorResultIdentity> {
+  const results: Record<string, InspectorResultIdentity> = {}
   for (const ref of [marked.a, marked.b]) {
     const row = ref ? rows?.[ref] : undefined
     if (!ref || !row || row.status !== 'done') continue

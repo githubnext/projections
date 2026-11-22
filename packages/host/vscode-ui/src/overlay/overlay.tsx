@@ -2,7 +2,7 @@
 // hover and quick input widgets), its context menu with menu roles, and a quick pick. `vscode-context-menu` has no menu
 // roles, item icons or checked items and keeps focus on its wrapper, so assistive technology can't follow it.
 
-import {createContext, useContext, useLayoutEffect, useRef, useState} from 'react'
+import {createContext, use, useLayoutEffect, useRef, useState} from 'react'
 import type {CSSProperties, KeyboardEvent, ReactNode, RefObject} from 'react'
 import {createPortal} from 'react-dom'
 import {deepActiveElement, focusControl} from '../elements.js'
@@ -97,14 +97,16 @@ export function Overlay({
   returnFocus = true,
   onPlaced,
 }: OverlayProps) {
-  const layer = useContext(LayerContext)
+  const layer = use(LayerContext)
   const element = useRef<HTMLDivElement>(null)
   // Placed after it renders, but focusable from the start (a hidden element can't take focus).
   const [style, setStyle] = useState<CSSProperties>({opacity: 0})
   const close = useRef(onClose)
-  close.current = onClose
   const placed = useRef(onPlaced)
-  placed.current = onPlaced
+  useLayoutEffect(() => {
+    close.current = onClose
+    placed.current = onPlaced
+  })
 
   useLayoutEffect(() => {
     if (!open) return
@@ -139,6 +141,7 @@ export function Overlay({
 
   if (!open) return null
   const content = (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- a dialog or menu (`role`, which the rule can't read from an expression), or with `none` the container that takes Escape and Tab from its content.
     <div
       ref={element}
       role={role === 'none' ? undefined : role}

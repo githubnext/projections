@@ -75,7 +75,7 @@ export function ViewToolbar(toolbarProps: ViewToolbarProps) {
         style={toolbarGrid(layout, {start: Boolean(start), mode: modeRegion, playback: showPlayback})}
         onKeyDown={event => handlePlaybackKey(event, p, showPlayback)}
       >
-        {start && <div className="phv-toolbar-start">{start}</div>}
+        {start ? <div className="phv-toolbar-start">{start}</div> : null}
         {modeRegion && (
           <div className="phv-toolbar-mode">
             {showModeSwitch && <ModeSwitch projection={p} modes={modes} variant={layout.modes} />}
@@ -118,7 +118,7 @@ export function ViewToolbar(toolbarProps: ViewToolbarProps) {
               diagnostics={props.diagnostics}
             />
           )}
-          {props.actions && <div className="phv-actions">{props.actions}</div>}
+          {props.actions ? <div className="phv-actions">{props.actions}</div> : null}
         </div>
       </Toolbar>
     </div>

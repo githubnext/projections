@@ -14,6 +14,9 @@ import type {PopoverControl} from './toolbar-popover.js'
 import {viewIcons} from './view-controls.js'
 import type {ShowAsProps} from './view-controls.js'
 
+/** The default for an optional list prop: one array, so a default never changes between renders. */
+const none: readonly never[] = []
+
 /** Settings' features: the renderer's declared controls only while they apply. */
 const modelFeatures = (features: VscodeProjectionFeatures | undefined) => ({
   changesOnly: on(features, 'changesOnly'),
@@ -106,7 +109,7 @@ export function SettingsMenu({
   features,
   control,
   view,
-  views = [],
+  views = none,
   onViewChange,
   rendererTitle,
 }: {

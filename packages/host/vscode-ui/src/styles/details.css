@@ -27,7 +27,11 @@
 .phv-details-title:focus {
   outline: none;
 }
-.phv-details > :not(.phv-details-header) {
+/* What Escape closes the details from: laid out as the details' own children. */
+.phv-details-content {
+  display: contents;
+}
+.phv-details-content > :not(.phv-details-header) {
   margin-inline: 12px;
 }
 .phv-details p {

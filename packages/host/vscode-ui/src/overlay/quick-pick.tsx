@@ -1,4 +1,4 @@
-import {useEffect, useId, useMemo, useRef, useState} from 'react'
+import {useId, useMemo, useRef, useState} from 'react'
 import type {KeyboardEvent, RefObject} from 'react'
 import {VscBadge, VscIcon, VscTextfield, focusControl} from '../elements.js'
 import {Overlay} from './overlay.js'
@@ -47,7 +47,18 @@ const optionMoves = new Map<string, (index: number, length: number) => number>([
   ['End', (_, length) => length - 1],
 ])
 
-function QuickPickOption({item, selected, onChoose}: {item: QuickPickItem; selected: boolean; onChoose: (id: string) => void}) {
+function QuickPickOption({
+  item,
+  selected,
+  onChoose,
+  onKeys,
+}: {
+  item: QuickPickItem
+  selected: boolean
+  onChoose: (id: string) => void
+  /** The list's keys, after the option's own (Enter and Space): moving between the options and back to the field. */
+  onKeys: (event: KeyboardEvent<HTMLDivElement>) => void
+}) {
   const choose = () => onChoose(item.id)
   return (
     <div
@@ -57,7 +68,10 @@ function QuickPickOption({item, selected, onChoose}: {item: QuickPickItem; selec
       className="phv-quick-pick-item"
       data-option={item.id}
       onClick={choose}
-      onKeyDown={activateOnKey(choose)}
+      onKeyDown={event => {
+        activateOnKey(choose)(event)
+        onKeys(event)
+      }}
     >
       {item.icon && <VscIcon name={item.icon} className="phv-quick-pick-icon" aria-hidden="true" />}
       <span className="phv-quick-pick-text">
@@ -85,14 +99,20 @@ export function QuickPick({items, value, onSelect, label, placeholder, open, onC
   const [query, setQuery] = useState('')
   const field = useRef<HTMLElement>(null)
   const list = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!open) setQuery('')
-  }, [open])
+  if (!open && query) setQuery('')
   const shown = useMemo(() => filterItems(items, query), [items, query])
   const options = () => [...(list.current?.querySelectorAll<HTMLElement>('[role=option]') ?? [])]
   const choose = (choice: string) => {
     onClose()
     onSelect(choice)
+  }
+  const move = (event: KeyboardEvent<HTMLDivElement>) => {
+    const all = options()
+    const next = optionMoves.get(event.key)?.(all.indexOf(event.currentTarget), all.length)
+    if (next === undefined) return
+    event.preventDefault()
+    if (next < 0) focusControl(field.current)
+    else all[next]?.focus()
   }
   return (
     <Overlay {...overlay} open={open} onClose={onClose} role="dialog" label={label} initialFocus={field} className="phv-quick-pick">
@@ -116,23 +136,9 @@ export function QuickPick({items, value, onSelect, label, placeholder, open, onC
           }
         }}
       />
-      <div
-        ref={list}
-        role="listbox"
-        id={`${id}-list`}
-        aria-label={label}
-        className="phv-quick-pick-list"
-        onKeyDown={event => {
-          const all = options()
-          const next = optionMoves.get(event.key)?.(all.indexOf(event.target as HTMLElement), all.length)
-          if (next === undefined) return
-          event.preventDefault()
-          if (next < 0) focusControl(field.current)
-          else all[next]?.focus()
-        }}
-      >
+      <div ref={list} role="listbox" id={`${id}-list`} aria-label={label} className="phv-quick-pick-list">
         {shown.map(item => (
-          <QuickPickOption key={item.id} item={item} selected={item.id === value} onChoose={choose} />
+          <QuickPickOption key={item.id} item={item} selected={item.id === value} onChoose={choose} onKeys={move} />
         ))}
         {!shown.length && <div className="phv-quick-pick-empty">No matching results</div>}
       </div>

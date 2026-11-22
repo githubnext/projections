@@ -1,5 +1,7 @@
+import type {KeyboardEvent} from 'react'
 import {VscIcon} from '../elements.js'
 import {activateOnKey} from './keys.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** A VS Code menu item. Items with the same `group` are drawn together, separated from other groups. */
 export interface MenuItem {
@@ -30,6 +32,7 @@ export function MenuEntry({
   register,
   onChoose,
   onHover,
+  onKeys,
 }: {
   item: MenuItem
   /** The menu has choices: every item keeps a check column. */
@@ -40,10 +43,13 @@ export function MenuEntry({
   onChoose: (item: MenuItem) => void
   /** The mouse moved onto it (VS Code focuses the item under the mouse and opens a submenu on hover). */
   onHover: (item: MenuItem) => void
+  /** The menu's keys, after an item's own (Enter and Space): moving, opening a submenu and closing. */
+  onKeys: (event: KeyboardEvent<HTMLDivElement>) => void
 }) {
   const {id, label: text, icon, checked, checkbox: _checkbox, disabled, detail, group: _group, onSelect: _onSelect, submenu, ...data} = item
   const choose = () => onChoose(item)
   return (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- its role is a menu item's (`itemRole`), which the rule can't read from an expression.
     <div
       ref={element => {
         register(id, element)
@@ -64,7 +70,10 @@ export function MenuEntry({
         event.currentTarget.focus({preventScroll: true})
         onHover(item)
       }}
-      onKeyDown={activateOnKey(choose)}
+      onKeyDown={event => {
+        activateOnKey(choose)(event)
+        onKeys(event)
+      }}
     >
       {choices && (
         <span className="phv-menu-check" aria-hidden="true">
@@ -79,7 +88,17 @@ export function MenuEntry({
 }
 
 /** A submenu's first row where it covers its menu: it goes back to the menu. */
-export function MenuBack({label, choices, onClose}: {label: string; choices: boolean; onClose: () => void}) {
+export function MenuBack({
+  label,
+  choices,
+  onClose,
+  onKeys,
+}: {
+  label: string
+  choices: boolean
+  onClose: () => void
+  onKeys: (event: KeyboardEvent<HTMLDivElement>) => void
+}) {
   return (
     <div
       role="menuitem"
@@ -88,7 +107,10 @@ export function MenuBack({label, choices, onClose}: {label: string; choices: boo
       data-back=""
       aria-label={`Back from ${label}`}
       onClick={onClose}
-      onKeyDown={activateOnKey(onClose)}
+      onKeyDown={event => {
+        activateOnKey(onClose)(event)
+        onKeys(event)
+      }}
     >
       {choices && <span className="phv-menu-check" aria-hidden="true" />}
       <VscIcon name="chevron-left" className="phv-menu-icon" aria-hidden="true" />
@@ -123,10 +145,10 @@ export function MenuGroups({
   /** The item whose submenu is open. */
   expanded: string | null
 }) {
-  return groupItems(items).map((group, index) => {
+  return keyed(groupItems(items), group => group.key).map(([key, group], index) => {
     const name = groupLabels[group.key]
     return (
-      <div key={`${group.key}-${index}`} role={name ? 'group' : 'none'} aria-label={name} className="phv-menu-group">
+      <div key={key} role={name ? 'group' : 'none'} aria-label={name} className="phv-menu-group">
         {(index > 0 || separated) && <div role="separator" className="phv-menu-separator" />}
         {name && (
           <div aria-hidden="true" className="phv-menu-heading">

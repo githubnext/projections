@@ -4,6 +4,7 @@ import {Prose} from '../prose.js'
 import {VscBadge} from '../elements.js'
 import type {VscodeBuiltInViewProps} from './props.js'
 import {ChangeLabel, Marker, SelectButton, changeHue} from './row-parts.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** The host's built-in text view: a plain-language outline in reading order, in VS Code's type. */
 export function VscodeTextView({
@@ -93,10 +94,10 @@ export function VscodeTextView({
       </p>
       {summarized}
       <ol className="phv-steps">
-        {comparison.steps.map((step, index) =>
+        {keyed(comparison.steps, step => step.changes[0] ?? '').map(([key, step], index) =>
           !step.changes.some(change => listed.has(change)) ? null : (
             <li
-              key={index}
+              key={key}
               value={index + 1}
               data-step={index}
               aria-current={progress > 0 && progress < 1 && index === current ? 'step' : undefined}

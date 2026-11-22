@@ -1,6 +1,5 @@
-import {useId, useRef, useState} from 'react'
-import {flushSync} from 'react-dom'
-import type {RefObject} from 'react'
+import {useId, useLayoutEffect, useRef, useState} from 'react'
+import type {KeyboardEvent, RefObject} from 'react'
 import {comparisonModes, rovingIndex, zoomControlGroup} from '@githubnext/projections-host'
 import type {ComparisonMode, ProjectionController} from '@githubnext/projections-host'
 import type {VscodeToolbarButton} from '@vscode-elements/elements/dist/vscode-toolbar-button/vscode-toolbar-button.js'
@@ -34,6 +33,14 @@ export function ModeSwitch({
   const [open, setOpen] = useState(false)
   const button = useRef<VscodeToolbarButton>(null)
   const group = useRef<HTMLDivElement>(null)
+  // The mode chosen with the keyboard, focused once it is drawn checked (and in the tab order).
+  const focusing = useRef<ComparisonMode | undefined>(undefined)
+  useLayoutEffect(() => {
+    const mode = focusing.current
+    if (mode === undefined) return
+    focusing.current = undefined
+    focusControl(group.current?.querySelector(`[data-mode="${mode}"]`))
+  })
   // In the renderer's order: its first mode is its default.
   const options = p.availableModes
     .filter(value => modes.includes(value))
@@ -79,23 +86,17 @@ export function ModeSwitch({
   )
   const choose = (next: number) => {
     const option = options[(next + options.length) % options.length]!
-    // Commit the choice first, so focus lands on the radio that is now checked (and in the tab order).
-    flushSync(() => p.setMode(option.value))
-    focusControl(group.current?.querySelector(`[data-mode="${option.value}"]`))
+    focusing.current = option.value
+    p.setMode(option.value)
+  }
+  const keys = (event: KeyboardEvent) => {
+    const next = rovingIndex(event.key, index, options.length)
+    if (next === undefined) return
+    event.preventDefault()
+    choose(next)
   }
   return (
-    <div
-      ref={group}
-      role="radiogroup"
-      aria-label="Comparison mode"
-      className="phv-mode-switch"
-      onKeyDown={event => {
-        const next = rovingIndex(event.key, index, options.length)
-        if (next === undefined) return
-        event.preventDefault()
-        choose(next)
-      }}
-    >
+    <div ref={group} role="radiogroup" aria-label="Comparison mode" className="phv-mode-switch">
       {options.map((option, position) => (
         <ActionButton
           key={option.value}
@@ -104,6 +105,7 @@ export function ModeSwitch({
           checked={p.mode === option.value}
           tabIndex={position === index ? 0 : -1}
           onClick={() => p.setMode(option.value)}
+          onKeyDown={keys}
           data-mode={option.value}
           data-icon={modeCodicons[option.value]}
           {...(position === index ? {'data-focus-id': 'mode'} : {})}

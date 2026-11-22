@@ -1,5 +1,5 @@
-import {useRef} from 'react'
-import {flushSync} from 'react-dom'
+import {useLayoutEffect, useRef} from 'react'
+import type {KeyboardEvent} from 'react'
 import {rovingIndex, scopeChoice, scopeHiddenText} from '@githubnext/projections-host'
 import type {ProjectionController} from '@githubnext/projections-host'
 
@@ -10,6 +10,14 @@ import type {ProjectionController} from '@githubnext/projections-host'
  */
 export function ScopeSwitch({projection: p}: {projection: ProjectionController}) {
   const group = useRef<HTMLDivElement>(null)
+  // The scope chosen with the keyboard, focused once it is drawn checked (and in the tab order).
+  const focusing = useRef<string | undefined>(undefined)
+  useLayoutEffect(() => {
+    const scope = focusing.current
+    if (scope === undefined) return
+    focusing.current = undefined
+    group.current?.querySelector<HTMLButtonElement>(`[data-scope="${scope}"]`)?.focus()
+  })
   if (!p.comparing) return null
   // Every item is a change or gives one context: Changes and All show the same, so there is nothing to switch.
   const {nothingHidden, noteTitle, options} = scopeChoice(p)
@@ -17,8 +25,14 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
   const index = Math.max(0, scopes.indexOf(p.scope))
   const choose = (next: number) => {
     const scope = scopes[(next + scopes.length) % scopes.length]!
-    flushSync(() => p.setScope(scope))
-    group.current?.querySelector<HTMLButtonElement>(`[data-scope="${scope}"]`)?.focus()
+    focusing.current = scope
+    p.setScope(scope)
+  }
+  const keys = (event: KeyboardEvent) => {
+    const next = rovingIndex(event.key, index, scopes.length)
+    if (next === undefined) return
+    event.preventDefault()
+    choose(next)
   }
   // Both forms share one cell, the other one invisible, so the slot keeps its width when the form changes.
   return (
@@ -41,12 +55,6 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
         data-inactive={nothingHidden || undefined}
         aria-hidden={nothingHidden || undefined}
         className="phv-scope-switch"
-        onKeyDown={event => {
-          const next = rovingIndex(event.key, index, scopes.length)
-          if (next === undefined) return
-          event.preventDefault()
-          choose(next)
-        }}
       >
         {options.map(({scope, label, title}, position) => (
           <button
@@ -59,6 +67,7 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
             className="phv-scope"
             data-scope={scope}
             onClick={() => p.setScope(scope)}
+            onKeyDown={keys}
           >
             {label}
           </button>

@@ -4,6 +4,7 @@ import {Notice} from '../notice.js'
 import {ComparatorLine, rendererLabel} from '../blocks.js'
 import type {ViewKind} from '../blocks.js'
 import type {VscodeProjectionViewProps} from './props.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * What the view says above the stage: the host's banner, which view is showing (for assistive technology), the
@@ -22,7 +23,7 @@ export function ViewNotices({
   const otherNotices = p.notices.slice(props.rendererNotice ? 1 : 0)
   return (
     <>
-      {props.banner && <div className="phv-banner">{props.banner}</div>}
+      {props.banner ? <div className="phv-banner">{props.banner}</div> : null}
       <p className="phv-visually-hidden" aria-live="polite">
         Showing: <strong data-active-view={view}>{active}</strong>
       </p>
@@ -40,8 +41,8 @@ export function ViewNotices({
       )}
       {otherNotices.length > 0 && (
         <ul className="phv-notices" aria-label="Notices">
-          {otherNotices.map((notice, index) => (
-            <li key={index}>
+          {keyed(otherNotices, notice => notice).map(([key, notice]) => (
+            <li key={key}>
               <Notice title="Notice" hideTitle>
                 <Prose>{notice}</Prose>
               </Notice>

@@ -8,6 +8,9 @@ import {ActionButton, VscBadge} from '../elements.js'
 import {uiCodicons} from '../codicons.js'
 import {AnnotationMarker, ChangeLabel, annotationText} from './row-parts.js'
 
+/** The default for an optional list prop: one array, so a default never changes between renders. */
+const none: readonly never[] = []
+
 /** The props of `VscodeDetails`: the row to describe in its subject, and how to close it, open evidence and select. */
 export interface VscodeDetailsProps {
   subject: ViewSubject
@@ -107,7 +110,7 @@ export function VscodeDetails({
   selection,
   onSelectTarget,
   mark,
-  annotations = [],
+  annotations = none,
   onAnnotationActivate,
   children,
 }: VscodeDetailsProps) {
@@ -127,76 +130,79 @@ export function VscodeDetails({
     </li>
   )
   return (
-    <aside
-      className="ph-details phv-details"
-      aria-labelledby={`phv-details-${row.id}`}
-      onKeyDown={event => {
-        if (event.key === 'Escape') {
-          event.stopPropagation()
-          close()
-        }
-      }}
-    >
-      <header className="ph-details-header phv-details-header">
-        <h3 tabIndex={-1} id={`phv-details-${row.id}`} className="phv-details-title">
-          {row.label}
-        </h3>
-        {mark && onAnnotationActivate && <AnnotationMarker mark={mark} row={row} onActivate={onAnnotationActivate} />}
-        <ActionButton icon={uiCodicons.close} label="Close details" onClick={close} />
-      </header>
-      <dl className="phv-facts">
-        <dt>Identity</dt>
-        <dd>
-          <code className="phv-code">{row.id}</code>
-        </dd>
-        <dt>Kind</dt>
-        <dd>{row.kind || '—'}</dd>
-        {row.status && (
-          <>
-            <dt>Change</dt>
-            <dd>
-              <ChangeLabel row={row} />
-              {row.summary ? (
-                <span className="phv-muted">
-                  {' '}
-                  <Prose>{row.summary}</Prose>
-                </span>
-              ) : null}
-            </dd>
-          </>
+    <aside className="ph-details phv-details" aria-labelledby={`phv-details-${row.id}`}>
+      {/* Escape closes the details from any control in them. */}
+      <div
+        role="presentation"
+        className="phv-details-content"
+        onKeyDown={event => {
+          if (event.key === 'Escape') {
+            event.stopPropagation()
+            close()
+          }
+        }}
+      >
+        <header className="ph-details-header phv-details-header">
+          <h3 tabIndex={-1} id={`phv-details-${row.id}`} className="phv-details-title">
+            {row.label}
+          </h3>
+          {mark && onAnnotationActivate && <AnnotationMarker mark={mark} row={row} onActivate={onAnnotationActivate} />}
+          <ActionButton icon={uiCodicons.close} label="Close details" onClick={close} />
+        </header>
+        <dl className="phv-facts">
+          <dt>Identity</dt>
+          <dd>
+            <code className="phv-code">{row.id}</code>
+          </dd>
+          <dt>Kind</dt>
+          <dd>{row.kind || '—'}</dd>
+          {row.status && (
+            <>
+              <dt>Change</dt>
+              <dd>
+                <ChangeLabel row={row} />
+                {row.summary ? (
+                  <span className="phv-muted">
+                    {' '}
+                    <Prose>{row.summary}</Prose>
+                  </span>
+                ) : null}
+              </dd>
+            </>
+          )}
+        </dl>
+        {row.varied?.length ? <VariedList varied={rowDetails(subject, row, [row]).varied} /> : null}
+        {(['before', 'after'] as const).map(side =>
+          items[side].map(item => (
+            <section key={`${side}-${item.id}`} className="phv-details-item">
+              <h4 className="phv-section-title">
+                {subject.mode === 'comparison' ? `${side === 'before' ? beforeLabel : afterLabel}: ${item.id}` : item.id}
+              </h4>
+              {'from' in item && (
+                <p>
+                  <code className="phv-code">{item.from}</code> → <code className="phv-code">{item.to}</code>
+                </p>
+              )}
+              {item.confidence && <p className="phv-muted">Confidence: {item.confidence}</p>}
+              <Properties
+                item={item}
+                target={{kind: row.collection === 'entities' ? 'entity' : 'relationship', id: item.id, side}}
+                selection={selection}
+                onSelectTarget={onSelectTarget}
+                annotations={annotations}
+              />
+              {item.evidence?.length ? (
+                <ul className="phv-evidence" aria-label="Source evidence">
+                  {item.evidence.map(evidence)}
+                </ul>
+              ) : (
+                <p className="phv-muted">No source evidence.</p>
+              )}
+            </section>
+          )),
         )}
-      </dl>
-      {row.varied?.length ? <VariedList varied={rowDetails(subject, row, [row]).varied} /> : null}
-      {(['before', 'after'] as const).map(side =>
-        items[side].map(item => (
-          <section key={`${side}-${item.id}`} className="phv-details-item">
-            <h4 className="phv-section-title">
-              {subject.mode === 'comparison' ? `${side === 'before' ? beforeLabel : afterLabel}: ${item.id}` : item.id}
-            </h4>
-            {'from' in item && (
-              <p>
-                <code className="phv-code">{item.from}</code> → <code className="phv-code">{item.to}</code>
-              </p>
-            )}
-            {item.confidence && <p className="phv-muted">Confidence: {item.confidence}</p>}
-            <Properties
-              item={item}
-              target={{kind: row.collection === 'entities' ? 'entity' : 'relationship', id: item.id, side}}
-              selection={selection}
-              onSelectTarget={onSelectTarget}
-              annotations={annotations}
-            />
-            {item.evidence?.length ? (
-              <ul className="phv-evidence" aria-label="Source evidence">
-                {item.evidence.map(evidence)}
-              </ul>
-            ) : (
-              <p className="phv-muted">No source evidence.</p>
-            )}
-          </section>
-        )),
-      )}
-      {children != null && children !== false && <div className="ph-details-slot phv-details-consumer">{children}</div>}
+        {children != null && children !== false && <div className="ph-details-slot phv-details-consumer">{children}</div>}
+      </div>
     </aside>
   )
 }

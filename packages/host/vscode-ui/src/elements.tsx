@@ -72,7 +72,9 @@ export type ElementProps<T extends HTMLElement, P extends object, E extends Reco
 /** Attaches `events` (event name → handler) to the element, always calling the latest handler. */
 function useEvents(ref: RefObject<HTMLElement | null>, events: Record<string, Handler<Event> | undefined>) {
   const latest = useRef(events)
-  latest.current = events
+  useLayoutEffect(() => {
+    latest.current = events
+  })
   const names = Object.keys(events)
     .filter(name => events[name])
     .join(' ')
@@ -91,12 +93,16 @@ function useEvents(ref: RefObject<HTMLElement | null>, events: Record<string, Ha
 function useMergedRef<T>(own: RefObject<T | null>, other: Ref<T> | undefined) {
   return useCallback(
     (element: T | null) => {
-      own.current = element
-      if (typeof other === 'function') other(element)
-      else if (other) (other as RefObject<T | null>).current = element
+      setRef(own, element)
+      setRef(other, element)
     },
     [own, other],
   )
+}
+
+function setRef<T>(ref: Ref<T> | undefined, value: T | null): void {
+  if (typeof ref === 'function') ref(value)
+  else if (ref) ref.current = value
 }
 
 /**
@@ -108,17 +114,17 @@ export function createWrapper<T extends HTMLElement, P extends object, E extends
   events: {[K in keyof E]: string},
 ) {
   const eventProps = new Map(Object.entries(events) as [string, string][])
-  function Wrapper(props: ElementProps<T, P, E>) {
+  function Wrapper({ref: outer, ...props}: ElementProps<T, P, E>) {
     const own = useRef<T>(null)
     const handlers: Record<string, Handler<Event> | undefined> = {}
     const rest: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(props)) {
       const event = eventProps.get(key)
       if (event) handlers[event] = value as Handler<Event> | undefined
-      else if (key !== 'ref') rest[key] = value
+      else rest[key] = value
     }
     useEvents(own, handlers)
-    const ref = useMergedRef(own, props.ref)
+    const ref = useMergedRef(own, outer)
     return createElement(tag, {...rest, ref})
   }
   Wrapper.displayName = tag
@@ -238,6 +244,11 @@ export const VscTableRow = createWrapper<VscodeTableRow, object>('vscode-table-r
 /** `vscode-table-cell`, one cell of a `VscTableRow`; `columnLabel` labels it in the table's compact responsive view. */
 export const VscTableCell = createWrapper<VscodeTableCell, {columnLabel?: string}>('vscode-table-cell', {})
 
+const CollapsibleElement = createWrapper<
+  VscodeCollapsible,
+  {heading: string; description?: string | undefined; open?: boolean | undefined}
+>('vscode-collapsible', {})
+
 /**
  * `vscode-collapsible`, a sidebar view section with VS Code's header type and chevron, whose shadow header is also
  * exposed as a button with `aria-expanded` (the element draws a focusable header with no role).
@@ -264,7 +275,9 @@ export function VscCollapsible({
 }) {
   const ref = useRef<VscodeCollapsible>(null)
   const latest = useRef(onOpenChange)
-  latest.current = onOpenChange
+  useLayoutEffect(() => {
+    latest.current = onOpenChange
+  })
   useLayoutEffect(() => {
     const element = ref.current
     if (!element) return
@@ -282,11 +295,15 @@ export function VscCollapsible({
     element.addEventListener('vsc-collapsible-toggle', toggle)
     return () => element.removeEventListener('vsc-collapsible-toggle', toggle)
   }, [open])
-  return createElement(
-    'vscode-collapsible',
-    {ref, heading, description, open, class: className, ...rest},
-    actions ? createElement('div', {slot: 'actions', className: 'phv-collapsible-actions'}, actions) : null,
-    children,
+  return (
+    <CollapsibleElement ref={ref} heading={heading} description={description} open={open} className={className} {...rest}>
+      {actions ? (
+        <div slot="actions" className="phv-collapsible-actions">
+          {actions}
+        </div>
+      ) : null}
+      {children}
+    </CollapsibleElement>
   )
 }
 
@@ -314,8 +331,8 @@ export function useShadowPatch<T extends HTMLElement & {updateComplete?: Promise
   patch: (root: ShadowRoot, element: T) => void,
 ) {
   const latest = useRef(patch)
-  latest.current = patch
   useLayoutEffect(() => {
+    latest.current = patch
     const element = ref.current
     if (!element) return
     const apply = () => element.shadowRoot && latest.current(element.shadowRoot, element)
@@ -422,15 +439,12 @@ export function ActionButton({
  * `vscode-radio`, whose shadow input (a checkbox underneath) is exposed as the radio it draws: `role="radio"`, so
  * assistive technology announces a choice, not a checkbox.
  */
-export function Radio(
-  props: ElementProps<
-    VscodeRadio,
-    {checked?: boolean; label?: string; name?: string; value?: string; disabled?: boolean},
-    {onChange: Event}
-  >,
-) {
+export function Radio({
+  ref: outer,
+  ...props
+}: ElementProps<VscodeRadio, {checked?: boolean; label?: string; name?: string; value?: string; disabled?: boolean}, {onChange: Event}>) {
   const own = useRef<VscodeRadio>(null)
-  const ref = useMergedRef(own, props.ref)
+  const ref = useMergedRef(own, outer)
   useShadowPatch(own, root => {
     const input = root.querySelector('input')
     if (input && input.getAttribute('role') !== 'radio') input.setAttribute('role', 'radio')

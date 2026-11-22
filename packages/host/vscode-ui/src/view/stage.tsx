@@ -76,7 +76,7 @@ export function RendererBox({
   const {comparing, mode} = p
   const term = comparing ? 'comparison' : 'extraction'
   return (
-    <div className="phv-box" hidden={view !== 'renderer'} onKeyDown={event => handlePlaybackKey(event, p)}>
+    <div role="presentation" className="phv-box" hidden={view !== 'renderer'} onKeyDown={event => handlePlaybackKey(event, p)}>
       <div className="phv-box-body" data-comparison-mode={comparing ? mode : undefined}>
         <ProjectionStage
           projection={p}

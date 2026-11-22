@@ -5,6 +5,10 @@ import {uiCodicons} from './codicons.js'
 import {rendererLabel} from './features.js'
 import {ToolbarPopover} from './toolbar-popover.js'
 import type {PopoverControl} from './toolbar-popover.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
+
+/** The default for an optional list prop: one array, so a default never changes between renders. */
+const none: readonly never[] = []
 
 /** The sentence for the comparator that produced a comparison, with VS Code's workspace trust codicon. */
 export function ComparatorLine({comparator, className}: {comparator: {id: string; digest: string}; className?: string}) {
@@ -45,7 +49,7 @@ export function subjectLimitations(p: Pick<ProjectionController, 'subject'>): st
 export function InfoButton({
   projection: p,
   comparator,
-  diagnostics = [],
+  diagnostics = none,
   control,
 }: {
   projection: ProjectionController
@@ -86,8 +90,8 @@ export function InfoButton({
         <div className="phv-widget-section">
           <h4 className="phv-section-title">Diagnostics and limitations</h4>
           <ul className="phv-info-list">
-            {diagnostics.map((diagnostic, index) => (
-              <li key={index} data-severity={diagnostic.severity}>
+            {keyed(diagnostics, diagnostic => `${diagnostic.code}:${diagnostic.path}:${diagnostic.message}`).map(([key, diagnostic]) => (
+              <li key={key} data-severity={diagnostic.severity}>
                 <span
                   className={`codicon codicon-${diagnostic.severity === 'error' ? 'error' : diagnostic.severity === 'warning' ? 'warning' : 'info'}`}
                   aria-hidden="true"
@@ -100,8 +104,8 @@ export function InfoButton({
                 </span>
               </li>
             ))}
-            {limitations.map((limitation, index) => (
-              <li key={`limitation-${index}`} data-severity="limitation">
+            {keyed(limitations, limitation => limitation).map(([key, limitation]) => (
+              <li key={`limitation-${key}`} data-severity="limitation">
                 <span className="codicon codicon-info" aria-hidden="true" />
                 <span>{limitation}</span>
               </li>

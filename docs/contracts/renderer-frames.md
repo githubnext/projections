@@ -70,9 +70,11 @@ handshake by sending `ready`.
 - `control` reports that someone changed a declared control from inside the
   renderer (`id`, `value`), which the host applies as a settings change.
 - `rendered` confirms the frame painted a given `progress`. When the host
-  numbered its `init` messages (`generation`), `rendered` carries the latest
-  generation the renderer had received, and the host drops an acknowledgement of
-  an earlier document. The SDK's client adds it.
+  numbered its `init` messages (`generation`), `rendered` carries the generation
+  of the document it painted, and the host drops an acknowledgement of an
+  earlier one. The SDK's client adds it: `rendered(progress, init)` echoes the
+  generation of the `init` payload it painted (the SDK's React hooks pass it),
+  or without one the latest it received.
 - `select` reports a selection change (`id` or `null`, plus optional `path` for
   renderers declaring `properties`).
 - `annotation` * fires when someone activates an item's annotation marker (`id`)

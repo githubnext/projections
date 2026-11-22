@@ -181,8 +181,8 @@ outputs from a cache populated on pushes to `main`.
   natively (including Job Object supervision of extractor process trees),
   `windows-node` runs every Node suite, the installed-package proof, and
   file-system checks, and `windows-integration` runs the CLI browser suite, a
-  renderer smoke test, the VS Code extension in VS Code, and the GitHub Action
-  end to end.
+  renderer smoke test and the GitHub Action end to end in one job and the VS
+  Code extension in VS Code in another.
 - **macOS** splits its composite action into two parallel jobs (Rust suites and
   everything else) and also runs the renderers in WebKit.
 

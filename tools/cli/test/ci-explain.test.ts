@@ -36,7 +36,7 @@ test("explain names each file's rule, the chain that reached each unit, and why 
   )
   assert.ok(why(explanation, 'packages/renderers/harness')?.some(line => line.startsWith('narrowed to database')))
   assert.deepEqual(explanation.checks, executions(plan, rules))
-  assert.equal(explanation.jobs.length, 13)
+  assert.equal(explanation.jobs.length, 16)
 })
 
 test('explain says a full run runs everything, and why', () => {

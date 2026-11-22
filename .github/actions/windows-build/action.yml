@@ -1,0 +1,29 @@
+name: Projections Windows build
+description: Node, the pinned Rust toolchain and its build cache, the install and the build, for the native Windows jobs
+inputs:
+  cache-key:
+    description: >-
+      The Rust build cache's shared key: jobs that compile the same profiles share one (the release build alone, or the
+      build and the test suites)
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v6.5.0
+      with:
+        node-version-file: .node-version
+        cache: npm
+        cache-dependency-path: package-lock.json
+    - shell: bash
+      run: rustup toolchain install
+    # The dependencies' build output, as in .github/actions/check: keyed on the toolchain, Cargo.lock and what the job
+    # compiles. Only pushes to main save it; pull requests restore main's.
+    - uses: Swatinem/rust-cache@v2.9.3
+      with:
+        shared-key: ${{ inputs.cache-key }}
+        save-if: ${{ github.ref == 'refs/heads/main' }}
+    # The suites read the built comparators, Engine and browser client, and the smoke tests run the built CLI.
+    - shell: bash
+      run: |
+        npm ci --no-audit --no-fund
+        npm run build

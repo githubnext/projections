@@ -19,13 +19,17 @@ import {git} from './repo.ts'
 export const PRICES = {
   checks: {
     docs: 0.6,
-    'public-product (ubuntu-latest)': 36.8,
+    // Estimates until measured: the parts of the 36.8-minute serial job they split.
+    'public-product (ubuntu-latest, checks)': 18,
+    'public-product (ubuntu-latest, Node)': 16,
+    'public-product (ubuntu-latest, Rust)': 16.5,
     'public-product (macos-latest, Rust)': 29.5,
     'public-product (macos-latest, Node)': 22.6,
     verus: 2,
     windows: 33.8,
     'windows-node': 24.8,
-    'windows-integration': 32.8,
+    'windows-integration (browser)': 22,
+    'windows-integration (VS Code)': 16,
     package: 12.7,
     'release-config': 0.4,
     coverage: 1.3,

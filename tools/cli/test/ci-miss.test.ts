@@ -5,7 +5,7 @@ import {misses} from '../src/lib/ci-miss.ts'
 
 const plan = {
   gated: ['public-product', 'windows', 'mutants-diff', 'browser', 'browser-macos'],
-  checks: ['public-product (ubuntu-latest)', 'mutants-diff', 'browser (packages/renderers/harness, chromium-desktop (database))'],
+  checks: ['public-product (ubuntu-latest, Rust)', 'mutants-diff', 'browser (packages/renderers/harness, chromium-desktop (database))'],
 }
 
 test('a job the plan skipped is a likely miss when it passed on the parent commit', () => {
@@ -16,7 +16,7 @@ test('a job the plan skipped is a likely miss when it passed on the parent commi
         'windows',
         'browser (packages/host/core, 1/3)',
         'browser (packages/renderers/harness, webkit-desktop, 1/4)',
-        'public-product (ubuntu-latest)',
+        'public-product (ubuntu-latest, Rust)',
         'mutants-diff (3)',
         'dollarlint',
       ],
@@ -27,7 +27,7 @@ test('a job the plan skipped is a likely miss when it passed on the parent commi
       {job: 'windows', verdict: 'likely miss'},
       {job: 'browser (packages/host/core, 1/3)', verdict: 'failing before'},
       {job: 'browser (packages/renderers/harness, webkit-desktop, 1/4)', verdict: 'skipped, no baseline'},
-      {job: 'public-product (ubuntu-latest)', verdict: 'ran on the pull request'},
+      {job: 'public-product (ubuntu-latest, Rust)', verdict: 'ran on the pull request'},
       {job: 'mutants-diff (3)', verdict: 'ran on the pull request'},
       {job: 'dollarlint', verdict: 'not gated'},
     ],

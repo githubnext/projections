@@ -112,15 +112,19 @@ test('the workflow gates each job on the rules decision of the same name', () =>
 test("public-product's output is the workflow's matrix.include: each chosen entry's name, runner and part", () => {
   const include = (paths: string[], event = 'pull_request') =>
     JSON.parse(planOutputs(ciPlan(facts, rules, {paths, event}))['public-product']!) as unknown
-  const linux = {name: 'ubuntu-latest', os: 'ubuntu-latest', part: 'all'}
+  const linux = [
+    {name: 'ubuntu-latest, checks', os: 'ubuntu-latest', part: 'checks'},
+    {name: 'ubuntu-latest, Node', os: 'ubuntu-latest', part: 'node'},
+    {name: 'ubuntu-latest, Rust', os: 'ubuntu-latest', part: 'rust'},
+  ]
   const macos = [
     {name: 'macos-latest, Rust', os: 'macos-latest', part: 'rust'},
-    {name: 'macos-latest, Node', os: 'macos-latest', part: 'node'},
+    {name: 'macos-latest, Node', os: 'macos-latest', part: 'checks node'},
   ]
   assert.deepEqual(include(['README.md']), [])
-  assert.deepEqual(include(['packages/renderers/database/src/styles.css']), [linux])
-  assert.deepEqual(include(['packages/engine/src/lib.rs']), [linux, ...macos])
-  assert.deepEqual(include([], 'schedule'), [linux, ...macos])
+  assert.deepEqual(include(['packages/renderers/database/src/styles.css']), linux)
+  assert.deepEqual(include(['packages/engine/src/lib.rs']), [...linux, ...macos])
+  assert.deepEqual(include([], 'schedule'), [...linux, ...macos])
   // A job's decision is a string GitHub Actions compares with 'true'.
   assert.equal(planOutputs(ciPlan(facts, rules, {paths: ['README.md']})).docs, 'true')
 })
@@ -207,7 +211,11 @@ test('the execution plan names each check with the suites, projects, shards and 
   assert.ok(harness.length > 0 && harness.every(item => item.grepInvert && item.project))
   assert.deepEqual(
     run.filter(item => item.job === 'public-product').map(item => item.with),
-    [{os: 'ubuntu-latest', part: 'all'}],
+    [
+      {os: 'ubuntu-latest', part: 'checks'},
+      {os: 'ubuntu-latest', part: 'node'},
+      {os: 'ubuntu-latest', part: 'rust'},
+    ],
   )
   assert.equal(run.filter(item => item.job === 'browser').length, plan.browser.length)
 })

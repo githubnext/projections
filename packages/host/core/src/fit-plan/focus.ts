@@ -48,11 +48,11 @@ export function useFocusRetention(
     const document = element.ownerDocument
     const active = document.activeElement
     if (active && active !== document.body && document.contains(active)) return
-    const {fallbacks, focusControl} = latest.current
-    for (const id of [last.id, ...(fallbacks[last.id] ?? [])]) {
+    const current = latest.current
+    for (const id of [last.id, ...(current.fallbacks[last.id] ?? [])]) {
       const target = element.querySelector<HTMLElement>(`[data-focus-id="${CSS.escape(id)}"]`)
       if (target) {
-        focusControl(target)
+        current.focusControl(target)
         return
       }
     }

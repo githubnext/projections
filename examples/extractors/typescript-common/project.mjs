@@ -122,7 +122,7 @@ function failOnErrors(ts, root, configured, programs, mode) {
 /** The packages, deepest first: the nearest package.json owns each source, and package names are identities. */
 function packagesOf(root, listed) {
   const packages = []
-  for (const file of listed.filter(file => path.basename(file) === 'package.json')) {
+  for (const file of listed.filter(entry => path.basename(entry) === 'package.json')) {
     const manifest = JSON.parse(readFileSync(path.join(root, file), 'utf8'))
     const directory = path.posix.dirname(file) === '.' ? '' : path.posix.dirname(file)
     const name = typeof manifest.name === 'string' && manifest.name.trim() ? manifest.name : directory || '(root)'

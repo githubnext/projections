@@ -58,12 +58,13 @@ function languageDigest() {
 function customSection(name, payload) {
   const leb = value => {
     const out = []
+    let rest = value
     do {
-      let byte = value & 0x7f
-      value >>>= 7
-      if (value) byte |= 0x80
+      let byte = rest & 0x7f
+      rest >>>= 7
+      if (rest) byte |= 0x80
       out.push(byte)
-    } while (value)
+    } while (rest)
     return out
   }
   const nameBytes = Buffer.from(name)

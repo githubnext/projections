@@ -30,10 +30,10 @@ async function capGaps(page: Page, container: Locator, label: Locator, afterIcon
     }
   })
   const box = await container.evaluate(
-    (element, label) => {
+    (element, labelElement) => {
       const rect = element.getBoundingClientRect()
       const range = document.createRange()
-      range.selectNodeContents(label as Element)
+      range.selectNodeContents(labelElement as Element)
       const text = range.getBoundingClientRect()
       const style = getComputedStyle(element)
       const border = (side: string) => parseFloat(style.getPropertyValue(`border-${side}-width`)) || 0
@@ -68,7 +68,7 @@ async function capGaps(page: Page, container: Locator, label: Locator, afterIcon
     caret: 'hide',
   })
   return page.evaluate(
-    async ([url, clip, box, afterIcon]) => {
+    async ([url, shotClip, measured, pastIcon]) => {
       const image = new Image()
       image.src = url
       await image.decode()
@@ -78,16 +78,19 @@ async function capGaps(page: Page, container: Locator, label: Locator, afterIcon
       const context = canvas.getContext('2d', {willReadFrequently: true})!
       context.drawImage(image, 0, 0)
       const {data, width} = context.getImageData(0, 0, canvas.width, canvas.height)
-      const scale = canvas.width / clip.width
-      const px = (x: number) => Math.round((x - clip.x) * scale)
-      const py = (y: number) => Math.round((y - clip.y) * scale)
-      const [y0, y1] = [py(box.top), py(box.bottom)]
+      const scale = canvas.width / shotClip.width
+      const px = (x: number) => Math.round((x - shotClip.x) * scale)
+      const py = (y: number) => Math.round((y - shotClip.y) * scale)
+      const [y0, y1] = [py(measured.top), py(measured.bottom)]
       // Inside any drawn border, which is the container's edge, not ink.
-      const [from, to] = [px(afterIcon ? box.textLeft - 0.5 : box.left + box.borders.left), Math.min(canvas.width, px(box.textRight + 1))]
-      const [above, below] = [py(box.top + box.borders.top), py(box.bottom - box.borders.bottom)]
+      const [from, to] = [
+        px(pastIcon ? measured.textLeft - 0.5 : measured.left + measured.borders.left),
+        Math.min(canvas.width, px(measured.textRight + 1)),
+      ]
+      const [above, below] = [py(measured.top + measured.borders.top), py(measured.bottom - measured.borders.bottom)]
       const at = (x: number, y: number) => (y * width + x) * 4
       // The background: the container's own color just inside its left edge, halfway down.
-      const ground = at(px(box.left + box.borders.left) + 1, Math.round((y0 + y1) / 2))
+      const ground = at(px(measured.left + measured.borders.left) + 1, Math.round((y0 + y1) / 2))
       const contrast = (x: number, y: number) =>
         [0, 1, 2].reduce((sum, channel) => sum + Math.abs(data[at(x, y) + channel]! - data[ground + channel]!), 0)
       let peak = 0
@@ -106,7 +109,7 @@ async function capGaps(page: Page, container: Locator, label: Locator, afterIcon
       return {
         top: (top - above) / scale,
         bottom: (below - bottom) / scale,
-        left: (left - px(box.left + box.borders.left)) / scale,
+        left: (left - px(measured.left + measured.borders.left)) / scale,
       }
     },
     [`data:image/png;base64,${shot.toString('base64')}`, clip, box, afterIcon] as const,

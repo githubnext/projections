@@ -14,7 +14,7 @@ function page(t) {
   const actor = createActor(pageLifecycle, {
     state: {kind: 'loading', page: 1, waiting: []},
     effects: {
-      post: ({control}) => log.push(`post ${control.id}`),
+      post: effect => log.push(`post ${effect.control.id}`),
       resolve: ({id, result}) => log.push(`resolve ${id} ${result}`),
       reject: ({id, reason}) => log.push(`reject ${id} ${reason}`),
     },
@@ -75,8 +75,8 @@ test('a control posted to a page that reloads before answering fails at once', t
   assert.deepEqual(actor.getState(), {kind: 'loading', page: 1, waiting: []})
 })
 
-test('every control is posted once and settled once, whatever the page does', t => {
-  const ids = state => (state.kind === 'loading' ? state.waiting : state.kind === 'ready' ? state.sent : []).map(control => control.id)
+test('every control is posted once and settled once, whatever the page does', () => {
+  const ids = state => (state.kind === 'loading' ? state.waiting : state.kind === 'ready' ? state.sent : []).map(queued => queued.id)
   const posted = (effects, id) => effects.filter(effect => effect.type === 'post' && effect.control.id === id).length
   const settled = (effects, id) =>
     effects.filter(effect => (effect.type === 'resolve' || effect.type === 'reject') && effect.id === id).length

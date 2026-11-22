@@ -20,7 +20,12 @@ export function markOccludedEdges(results: RingLineResult[]): void {
  */
 export function dropFarRings(results: RingLineResult[], geometry: RingGeometry): void {
   const farthest = 8 - (geometry.outward ?? 0) - 1.5 - Math.max(0, ...(geometry.inward ?? [0]))
-  for (const result of results) if (result.ring !== null && result.ring < farthest) result.ring = result.ringEnd = null
+  for (const result of results) {
+    if (result.ring !== null && result.ring < farthest) {
+      result.ring = null
+      result.ringEnd = null
+    }
+  }
 }
 
 /** Each side's and corner's lines: the ring is painted, starts at the item's edge, and leaves no second edge inside it. */

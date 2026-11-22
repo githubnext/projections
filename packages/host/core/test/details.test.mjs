@@ -71,7 +71,7 @@ test('a modified item lists the fields that changed, old and new, without unset 
   assert.deepEqual(details.parts, [{hue: 'modified', label: 'Modified'}])
   assert.equal(details.summary, 'Owner moved')
   assert.deepEqual(
-    details.fields.map(({name, before, after, path, side}) => ({name, before, after, path, side})),
+    details.fields.map(field => ({name: field.name, before: field.before, after: field.after, path: field.path, side: field.side})),
     [
       {name: 'owner', before: 'web', after: 'platform', path: '/owner', side: 'after'},
       {name: 'ports', before: '[80,443]', after: '[443]', path: '/ports', side: 'after'},

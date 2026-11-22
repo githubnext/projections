@@ -50,12 +50,12 @@ export async function cornerBox(
     const room = 24
     if (placed && view) {
       const by = align === 'start' ? placed.y - room : placed.y + placed.height + room - view.height
-      await locator.page().evaluate(by => window.scrollBy(0, by), by)
+      await locator.page().evaluate(delta => window.scrollBy(0, delta), by)
     }
   } else await locator.scrollIntoViewIfNeeded()
   const box = await locator.boundingBox()
   if (!box) return null
-  const drawn = await locator.evaluate((element, frame) => {
+  const drawn = await locator.evaluate((element, frameWidth) => {
     const style = getComputedStyle(element)
     const rect = element.getBoundingClientRect()
     if (element instanceof SVGRectElement) {
@@ -85,7 +85,9 @@ export async function cornerBox(
     const borders = (['top', 'right', 'bottom', 'left'] as const).map(side =>
       style.getPropertyValue(`border-${side}-style`) === 'solid' ? parseFloat(style.getPropertyValue(`border-${side}-width`)) : 0,
     )
-    if (frame !== undefined) return {svg: false, width: laid, height: rect.height, radii, borders: [frame, frame, frame, frame], outset: 0}
+    if (frameWidth !== undefined) {
+      return {svg: false, width: laid, height: rect.height, radii, borders: [frameWidth, frameWidth, frameWidth, frameWidth], outset: 0}
+    }
     const outline = style.outlineStyle === 'solid' ? parseFloat(style.outlineWidth) : 0
     if (borders.some(width => width > 0) || !outline) return {svg: false, width: laid, height: rect.height, radii, borders, outset: 0}
     // An outline's outer edge lies its offset plus its width outside the box, and its corners follow the radii there.

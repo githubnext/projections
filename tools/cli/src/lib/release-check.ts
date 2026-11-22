@@ -142,7 +142,6 @@ function workspaceDependencies(manifest: Record<string, unknown>): [string, stri
 }
 
 /** What a lockfile entry must agree with its manifest on: the version and the ranges of every dependency. */
-const lockEntry = (manifest: Record<string, unknown>) => ({
-  version: manifest.version,
-  ...Object.fromEntries(dependencyFields.map(field => [field, manifest[field] ?? {}])),
-})
+function lockEntry(manifest: Record<string, unknown>) {
+  return {version: manifest.version, ...Object.fromEntries(dependencyFields.map(field => [field, manifest[field] ?? {}]))}
+}

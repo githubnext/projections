@@ -49,7 +49,7 @@ export function settings(options: RunComparatorOptions = {}): Settings {
  * exports before any of its code runs. Hosts run only the rules interpreter;
  * tests use this to exercise the sandbox with modules of their own.
  */
-export async function prepare(moduleBytes: Uint8Array, input: unknown, settings: Settings): Promise<ExecuteRequest> {
+export async function prepare(moduleBytes: Uint8Array, input: unknown, bounds: Settings): Promise<ExecuteRequest> {
   if (!(moduleBytes instanceof Uint8Array)) throw new TypeError('moduleBytes must be a Uint8Array')
   let module: WebAssembly.Module
   try {
@@ -62,13 +62,13 @@ export async function prepare(moduleBytes: Uint8Array, input: unknown, settings:
   if (WebAssembly.Module.imports(module).length > 0) {
     throw new ComparatorRuntimeError('forbidden-import', 'comparator modules must have zero imports')
   }
-  const encoded = encodeInput(input, settings.maxInputBytes)
-  if (memory.minimumPages > settings.maxMemoryPages) errors.memoryLimit(settings.maxMemoryPages * PAGE_BYTES)
+  const encoded = encodeInput(input, bounds.maxInputBytes)
+  if (memory.minimumPages > bounds.maxMemoryPages) errors.memoryLimit(bounds.maxMemoryPages * PAGE_BYTES)
   return {
     module,
     input: encoded,
-    maxMemoryPages: settings.maxMemoryPages,
-    maxOutputBytes: settings.maxOutputBytes,
+    maxMemoryPages: bounds.maxMemoryPages,
+    maxOutputBytes: bounds.maxOutputBytes,
   }
 }
 
@@ -95,7 +95,11 @@ export function runInWorker(
     let settled = false
     let worker: WorkerHandle | undefined
     const abort = () => finish(cancelled(signal!))
-    const finish = (error: ComparatorRuntimeError | undefined, value?: unknown) => {
+    const timer = setTimeout(
+      () => finish(new ComparatorRuntimeError('deadline', `comparator exceeded its ${deadlineMs} ms deadline`)),
+      deadlineMs,
+    )
+    function finish(error: ComparatorRuntimeError | undefined, value?: unknown) {
       if (settled) return
       settled = true
       clearTimeout(timer)
@@ -104,10 +108,6 @@ export function runInWorker(
       if (error) reject(error)
       else resolve(value)
     }
-    const timer = setTimeout(
-      () => finish(new ComparatorRuntimeError('deadline', `comparator exceeded its ${deadlineMs} ms deadline`)),
-      deadlineMs,
-    )
     signal?.addEventListener('abort', abort, {once: true})
     try {
       worker = spawn({

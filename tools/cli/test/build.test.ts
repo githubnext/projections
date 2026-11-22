@@ -227,11 +227,11 @@ function configured(root: string, path: string, times: {src: number; dist?: numb
 }
 
 /** A successful `tools build` of `unit`: its inputs' signature first, then the outputs `write` leaves. */
-function built(root: string, unit: Unit, write: () => void, started = Date.now()): boolean {
-  const inputs = inputSignature(root, buildInputs(root, unit))
-  const before = snapshot(root, unit)
+function built(root: string, target: Unit, write: () => void, started = Date.now()): boolean {
+  const inputs = inputSignature(root, buildInputs(root, target))
+  const before = snapshot(root, target)
   write()
-  return recordSuccess(root, unit, inputs, before, started)
+  return recordSuccess(root, target, inputs, before, started)
 }
 
 test('build: an edit to a build script or configuration outside src makes a built workspace stale', () => {

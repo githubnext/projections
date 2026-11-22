@@ -186,8 +186,8 @@ test('a custom comparator order changes the visual order', async () => {
 
 test('nothing moves inside the holds between steps', async () => {
   for (const scenario of scenarios) {
-    const {before, after} = loadPair(scenario)
-    const {model} = await compared(before, after)
+    const {before: scenarioBefore, after: scenarioAfter} = loadPair(scenario)
+    const {model} = await compared(scenarioBefore, scenarioAfter)
     const {transition, schedule} = staged(model)
     const holds = stepHolds(schedule)
     assert.equal(holds.length, schedule.length + 1)
@@ -227,10 +227,10 @@ test('an explicit reverse order plays backward in its own order', async () => {
 
 test('every frame is coherent, positions never move, and scrubbing is deterministic in both directions', async () => {
   const pairs = scenarios.flatMap(scenario => {
-    const {before, after} = loadPair(scenario)
+    const {before: scenarioBefore, after: scenarioAfter} = loadPair(scenario)
     return [
-      [before, after],
-      [after, before],
+      [scenarioBefore, scenarioAfter],
+      [scenarioAfter, scenarioBefore],
     ]
   })
   for (const [from, to] of pairs) {
@@ -372,8 +372,8 @@ test('endpoints render with no change emphasis, and the midpoint marks what chan
 })
 
 test('a unit inserted into a constructor chain arrives in its own step, and the chain rewires in its own', async () => {
-  const {before, after} = loadPair('scoring')
-  const {model} = await compared(before, after)
+  const {before: scoringBefore, after: scoringAfter} = loadPair('scoring')
+  const {model} = await compared(scoringBefore, scoringAfter)
   const {transition, ends} = staged(model)
   const id = name => `service:Scoring:${name}:unkeyed`
   const keys = frame => new Set(frame.links.map(link => `${link.fromId}>${link.toId}`))
@@ -440,8 +440,8 @@ test('three containers fold into one model: Nest modules and aliases, Spring sco
 
 test('the dependency-injection card shows container scope names, and an alias is in the legend', async () => {
   const render = async scenario => {
-    const {before, after} = loadPair(scenario)
-    const {model} = await compared(before, after)
+    const pair = loadPair(scenario)
+    const {model} = await compared(pair.before, pair.after)
     return renderToStaticMarkup(
       createElement(DependencyInjectionRenderer, {
         init: {},
@@ -471,8 +471,8 @@ test('the dependency-injection card shows container scope names, and an alias is
   // The container's own scope name, exactly as the data has it.
   assert.match(nest, /data-projections-identifier="">REQUEST</)
   // The key is the host's; the renderer's legend gains the alias line when an alias is drawn.
-  const {before, after} = loadPair('nestjs-orders')
-  const {model} = await compared(before, after)
+  const {before: nestBefore, after: nestAfter} = loadPair('nestjs-orders')
+  const {model} = await compared(nestBefore, nestAfter)
   assert.ok(createDiTransition(model, []).aliases)
   assert.deepEqual(
     [diLegend(false, true).items.at(-1).label, diLegend(false, true).items.at(-1).shape],
@@ -487,12 +487,12 @@ test('the dependency-injection card shows container scope names, and an alias is
 test('a name shown only to tell lookalike cards apart never marks the card changed', async () => {
   const {before: full} = loadPair('spring-orders')
   const gone = id => !id.startsWith('service:utcClock') && !id.startsWith('implementation:utcClock')
-  const before = {
+  const trimmed = {
     ...full,
     entities: full.entities.filter(item => gone(item.id)),
     relationships: full.relationships.filter(item => gone(item.id) && gone(item.from) && gone(item.to)),
   }
-  const {model} = await compared(before, full)
+  const {model} = await compared(trimmed, full)
   const clock = createDiTransition(model, scheduleSteps(model))(1).units.find(unit => unit.id === 'service:systemClock')
   assert.equal(clock.unit.note, 'systemClock', 'the second Clock bean makes the name worth showing')
   assert.equal(clock.status, 'unchanged')

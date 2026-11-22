@@ -88,7 +88,7 @@ export async function publication() {
   const emitted = new Set(emit(schemaDocuments).map(({path}) => path))
   for (const path of emitted) if (!paths.includes(path)) problems.push(`${path} is missing; run npm run generate`)
   for (const path of paths) if (!emitted.has(path)) problems.push(`${path} isn't generated from the TypeBox sources`)
-  for (const name of [...domainSchemas, ...vocabularyNames.map(name => `vocabularies/${name}`)]) {
+  for (const name of [...domainSchemas, ...vocabularyNames.map(vocabulary => `vocabularies/${vocabulary}`)]) {
     if (!paths.includes(`${name}.json`)) problems.push(`${name}.json, a domain schema or vocabulary, is missing`)
   }
 

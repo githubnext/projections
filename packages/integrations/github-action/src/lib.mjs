@@ -6,7 +6,7 @@ export const commentMarker = '<!-- projections:sticky-comment -->'
 export const maxProjections = 60
 export const maxDocumentBytes = 8 * 1024 * 1024
 const projectionId = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$/
-const commit = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/
+const commitSha = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/
 const documentStatuses = new Set(['changed', 'unchanged', 'extracted', 'head-only', 'base-only'])
 
 export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex')
@@ -21,14 +21,14 @@ export function eventSubject(eventName, event, ref) {
     const pull = event?.pull_request
     const base = pull?.base?.sha
     const head = pull?.head?.sha
-    if (!Number.isSafeInteger(pull?.number) || pull.number < 1 || !commit.test(base ?? '') || !commit.test(head ?? '')) {
+    if (!Number.isSafeInteger(pull?.number) || pull.number < 1 || !commitSha.test(base ?? '') || !commitSha.test(head ?? '')) {
       throw new Error('The pull_request event has no pull request number, base or head commit')
     }
     return {kind: 'pull-request', number: pull.number, base, head}
   }
   if (eventName === 'push') {
     const revision = event?.after
-    if (!commit.test(revision ?? '') || /^0+$/.test(revision)) throw new Error('The push event has no commit (was a branch deleted?)')
+    if (!commitSha.test(revision ?? '') || /^0+$/.test(revision)) throw new Error('The push event has no commit (was a branch deleted?)')
     // eslint-disable-next-line no-control-regex -- Refs never contain control characters.
     if (!/^refs\/(?:heads|tags)\/[^\u0000-\u001f\u007f]{1,250}$/.test(ref ?? '')) throw new Error(`Unsupported push ref ${ref}`)
     return {kind: 'push', ref, revision}
@@ -239,11 +239,11 @@ function projectionDetails(entry, document) {
     const lines = (entry.diagnostics ?? []).map(item => `- ${code(item.code)}: ${plain(item.message)}`)
     return {result: 'failed', lines}
   }
-  const notices = (entry.notices ?? []).map(notice => `> ${plain(notice)}`)
+  const noticeLines = (entry.notices ?? []).map(notice => `> ${plain(notice)}`)
   if (entry.status === 'changed' || entry.status === 'unchanged') {
     const {before, after, comparison} = document ?? {}
     const byId = new Map((comparison?.changes ?? []).map(change => [change.id, change]))
-    const lines = [...notices, ...(notices.length ? [''] : [])]
+    const lines = [...noticeLines, ...(noticeLines.length ? [''] : [])]
     const steps = comparison?.steps ?? []
     for (const [index, step] of steps.entries()) {
       const title = [`**Step ${index + 1} of ${steps.length}**`, step.kind && `(${step.kind})`].filter(Boolean).join(' ')
@@ -261,7 +261,7 @@ function projectionDetails(entry, document) {
   const size = extraction
     ? `${count(extraction.entities?.length ?? 0, 'entity', 'entities')}, ${count(extraction.relationships?.length ?? 0, 'relationship', 'relationships')}`
     : 'extracted'
-  return {result: size, lines: notices}
+  return {result: size, lines: noticeLines}
 }
 
 const statusText = {

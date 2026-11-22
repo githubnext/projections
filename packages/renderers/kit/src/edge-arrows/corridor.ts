@@ -80,11 +80,11 @@ export function corridorRoute(
   const next = Math.min(...cards.map(box => box.y).filter(y => y > start.y + 1))
   const above = Math.max(...cards.map(box => box.y + box.height).filter(y => y < end.y - 1))
   if (!Number.isFinite(next) || !Number.isFinite(above)) return undefined
-  const firstBand = [Math.min(routeTail, span / 4), next - outset - arrowHeadReach - start.y] as const
-  const lastBand = [above - start.y, span] as const
-  const first = start.y + (firstBand[0] + firstBand[1]) / 2 + fitTrack(firstBand, tracks[0]),
-    last = start.y + (lastBand[0] + lastBand[1]) / 2 + fitTrack(lastBand, tracks[1])
-  if (last - first < 2 * routeRadius || firstBand[1] - firstBand[0] < 2 * routeRadius || lastBand[1] - lastBand[0] < 2 * routeRadius) {
+  const upperBand = [Math.min(routeTail, span / 4), next - outset - arrowHeadReach - start.y] as const
+  const lowerBand = [above - start.y, span] as const
+  const first = start.y + (upperBand[0] + upperBand[1]) / 2 + fitTrack(upperBand, tracks[0]),
+    last = start.y + (lowerBand[0] + lowerBand[1]) / 2 + fitTrack(lowerBand, tracks[1])
+  if (last - first < 2 * routeRadius || upperBand[1] - upperBand[0] < 2 * routeRadius || lowerBand[1] - lowerBand[0] < 2 * routeRadius) {
     return undefined
   }
   // Cards the corridor runs beside: those between the two turns.
@@ -94,15 +94,15 @@ export function corridorRoute(
   const candidates = edges.length ? [edges[0]! - routeRadius, edges.at(-1)! + routeRadius] : []
   for (let index = 0; index + 1 < edges.length; index++) candidates.push((edges[index]! + edges[index + 1]!) / 2)
   const cost = (x: number) => Math.abs(x - start.x) + Math.abs(x - end.x)
-  for (const x of candidates.filter(x => !blocked(x)).sort((a, b) => cost(a) - cost(b))) {
+  for (const x of candidates.filter(candidate => !blocked(candidate)).sort((a, b) => cost(a) - cost(b))) {
     const course = [start, {x: start.x, y: first}, {x, y: first}, {x, y: last}, {x: end.x, y: last}, end]
     const route = smoothRoute(course, axis)
     if (!route) continue
     if (obstacles.some(box => sampleSpline(route, 4).some(point => contains(box, point, 1)))) continue
     const base = {x: end.x, y: end.y - headLength}
     const turns: EdgeTurn[] = [
-      {start, end: {x, y: start.y + firstBand[1]}, axis, lead: false, band: firstBand},
-      {start: {x, y: start.y}, end, axis, lead: true, band: lastBand},
+      {start, end: {x, y: start.y + upperBand[1]}, axis, lead: false, band: upperBand},
+      {start: {x, y: start.y}, end, axis, lead: true, band: lowerBand},
     ]
     return {d: splinePath(route.slice(0, -3).concat(lineSpline(route.at(-4)!, base).slice(1))), start, base, end, turns}
   }

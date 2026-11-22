@@ -54,14 +54,17 @@ export const applySwitch = (generation: number) => {
 /** Asks the extension what the tab showed (`TabRestore`); nothing after a moment, as for a new tab. */
 export function restore(): Promise<TabRestore | undefined> {
   return new Promise(resolve => {
-    const timer = setTimeout(() => (stop(), resolve(undefined)), 5000)
     const stop = fromExtension(data => {
       const message = data as Partial<TabRestore>
       if (message?.tag !== restoreTag) return
+      finish(message as TabRestore)
+    })
+    const timer = setTimeout(() => finish(undefined), 5000)
+    function finish(restored: TabRestore | undefined) {
       clearTimeout(timer)
       stop()
-      resolve(message as TabRestore)
-    })
+      resolve(restored)
+    }
     post({tag: hostTag, op: 'restore'})
   })
 }

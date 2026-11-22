@@ -25,7 +25,9 @@ function nodeItem(state: TestState, watched: Watched, node: TestNode, existing: 
       ? new vscode.Range(0, 0, 0, 0)
       : undefined
   const file = node.kind === 'file' ? watched.files.find(listed => listed.path === node.path) : undefined
-  const problems = file?.diagnostics.map(item => (item.location ? `${item.message} (line ${item.location.line})` : item.message)).join('\n')
+  const problems = file?.diagnostics
+    .map(diagnostic => (diagnostic.location ? `${diagnostic.message} (line ${diagnostic.location.line})` : diagnostic.message))
+    .join('\n')
   item.error = problems ? new vscode.MarkdownString().appendText(problems) : undefined
   state.data.set(item, {folder, node})
   item.children.replace(node.children.map((child, at) => nodeItem(state, watched, child, item.children.get(child.id), child.id, at)))

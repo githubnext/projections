@@ -833,7 +833,7 @@ test('annotation badge tones never use change colors, and every tone is styled',
   )
   assert.ok(style.includes('--projections-color-accent-emphasis'))
   assert.doesNotMatch(style, /--projections-color-(added|removed|modified|moved)/)
-  for (const tone of annotationTones.filter(tone => tone !== 'neutral')) assert.match(style, new RegExp(`data-tone="${tone}"`))
+  for (const tone of annotationTones.filter(candidate => candidate !== 'neutral')) assert.match(style, new RegExp(`data-tone="${tone}"`))
 })
 
 test('legends are validated strictly: theme tokens or plain CSS colors, bounded labels and counts', () => {

@@ -84,7 +84,8 @@ export function connectInteractions(client: RendererClient, root: HTMLElement, o
   let disposed = false
   const marks = new Map<string, AnnotationMark>()
 
-  const entities: Entities = {root, attribute, excluded: node => badges.contains(node)}
+  // Excludes the badges once their overlay exists: it needs the entities' lookups first.
+  const entities: Entities = {root, attribute, excluded: () => false}
   const entityOf = (target: EventTarget | null) => entityAt(entities, target)
   const elementsOf = (id: string) => entityElements(entities, id)
   const isVisible = (id: string) => visible === null || visible.has(id) || visible.has(options.partOf?.(id) ?? id)
@@ -116,6 +117,7 @@ export function connectInteractions(client: RendererClient, root: HTMLElement, o
       schedule()
     },
   })
+  entities.excluded = node => badges.contains(node)
   const pulse = createPulse(view, root, elementsOf)
   const anchors = createAnchorReporter(view, client, () => schedule())
 

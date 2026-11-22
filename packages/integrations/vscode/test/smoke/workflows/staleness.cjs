@@ -149,8 +149,8 @@ module.exports = async function staleness({folder, api, mergeBase, projectionTab
   // Once the change is seen the file is as the result read it. With the backend's identity (the working tree's tree
   // hash) the result is current again; under the changes rule alone it stays out of date with no files changed.
   await until('the restore seen', async () => {
-    const stale = api.tabs('packages')[0]?.stale
-    return stale === undefined || stale === null || stale === false || stale.files === 0
+    const restored = api.tabs('packages')[0]?.stale
+    return restored === undefined || restored === null || restored === false || restored.files === 0
   })
   await vscode.commands.executeCommand('projections.refreshProjection', {
     model: {folder: vscode.workspace.workspaceFolders[0]},

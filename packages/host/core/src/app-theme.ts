@@ -33,6 +33,15 @@ export interface AppThemeColors {
  */
 export type AppThemeRules = 'contrast' | 'app'
 
+const black: Rgba = {r: 0, g: 0, b: 0, a: 1}
+const white: Rgba = {r: 255, g: 255, b: 255, a: 1}
+const opaque = (color: Rgba): Rgba => ({...color, a: 1})
+
+/** The contrast steps between stacked surfaces, as the token set's defaults have them. */
+const raisedStep = 1.1
+const headerStep = 1.12
+const insetStep = 1.03
+
 /**
  * Renderer theme token overrides from an app's colors, so a renderer's stage, cards, text, rules, accent, focus ring
  * and type are the app's own: `color-bg` and the stage (`color-surface-canvas`) are the background, cards and header
@@ -198,22 +207,14 @@ export function srgb(doc: Document, value: string): string | undefined {
   if (typeof CSS === 'undefined' || !CSS.supports('color', value)) return undefined
   const context = doc.createElement('canvas').getContext('2d', {willReadFrequently: true})
   if (!context) return undefined
-  context.canvas.width = context.canvas.height = 1
+  context.canvas.width = 1
+  context.canvas.height = 1
   context.clearRect(0, 0, 1, 1)
   context.fillStyle = value
   context.fillRect(0, 0, 1, 1)
   const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data
   return formatColor({r: r!, g: g!, b: b!, a: a! / 255})
 }
-
-const black: Rgba = {r: 0, g: 0, b: 0, a: 1}
-const white: Rgba = {r: 255, g: 255, b: 255, a: 1}
-const opaque = (color: Rgba): Rgba => ({...color, a: 1})
-
-/** The contrast steps between stacked surfaces, as the token set's defaults have them. */
-const raisedStep = 1.1
-const headerStep = 1.12
-const insetStep = 1.03
 
 /** `from` moved toward `toward` just far enough to differ by `ratio`, or as far as a quarter of the way. */
 function step(from: Rgba, toward: Rgba, ratio: number): Rgba {

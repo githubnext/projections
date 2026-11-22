@@ -100,7 +100,8 @@ export function pointAtTarball(manifest: Manifest, spec: string, directory = '.'
   const same = (value: unknown) => value === spec || file(value) === file(spec)
   const field =
     next.devDependencies?.[PACKAGE] !== undefined && next.dependencies?.[PACKAGE] === undefined ? 'devDependencies' : 'dependencies'
-  const table = (next[field] ??= {})
+  const table = next[field] ?? {}
+  next[field] = table
   if (!same(table[PACKAGE])) {
     changes.push(`${field}["${PACKAGE}"]: ${table[PACKAGE] ?? '(none)'} → ${spec}`)
     table[PACKAGE] = spec

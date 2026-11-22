@@ -4,7 +4,7 @@ import type {Locator, Page} from '@playwright/test'
  * The pages this suite drives are the Storybook "VS Code UI" stories, served from the static build by
  * tools/storybook/scripts/serve.mjs with a production-like page policy and the renderer policy on renderer bundles.
  */
-const base = () => process.env.PROJECTIONS_STORYBOOK_URL!
+const storybookUrl = () => process.env.PROJECTIONS_STORYBOOK_URL!
 
 /** The captured VS Code themes (packages/host/vscode-ui/fixtures/themes), in the Storybook theme switcher's order. */
 export const themes = ['dark-modern', 'light-modern', 'dark-high-contrast', 'light-high-contrast', 'solarized-dark', 'dark-2026'] as const
@@ -12,7 +12,7 @@ export type ThemeId = (typeof themes)[number]
 
 /** A VS Code UI story (`vs-code-ui-<group>--<story>`) in a VS Code theme, with Storybook args (`key:value;…`). */
 export const story = (id: string, theme: ThemeId = 'dark-modern', args = '') =>
-  new URL(`iframe.html?id=vs-code-ui-${id}&viewMode=story&globals=vscodeTheme:${theme}${args ? `&args=${args}` : ''}`, base()).href
+  new URL(`iframe.html?id=vs-code-ui-${id}&viewMode=story&globals=vscodeTheme:${theme}${args ? `&args=${args}` : ''}`, storybookUrl()).href
 
 /** Waits until the view's renderer is ready and the toolbar keeps one layout step for a moment. */
 export async function ready(page: Page) {

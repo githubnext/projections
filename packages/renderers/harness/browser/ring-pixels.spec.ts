@@ -56,12 +56,12 @@ for (const directory of [...new Set(scenarios.map(item => item.directory))]) {
           // focus outline doesn't stand in for the ring).
           const rings = (on: boolean) =>
             element.evaluate(
-              (item, [on, focus]) => {
-                for (const sheet of document.querySelectorAll<HTMLStyleElement>('style[data-projections-rings]')) sheet.disabled = !on
+              (item, [enabled, focus]) => {
+                for (const sheet of document.querySelectorAll<HTMLStyleElement>('style[data-projections-rings]')) sheet.disabled = !enabled
                 const focusable = '[tabindex]:not([tabindex="-1"]), button:not([disabled]), a[href], input, select, textarea, summary'
                 const target = (item.matches(focusable) ? item : item.querySelector(focusable)) as HTMLElement | null
-                if (focus && on) target?.focus({preventScroll: true, focusVisible: true} as FocusOptions)
-                if (focus && !on) target?.blur()
+                if (focus && enabled) target?.focus({preventScroll: true, focusVisible: true} as FocusOptions)
+                if (focus && !enabled) target?.blur()
                 return new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
               },
               [on, state === 'focus'] as const,
@@ -103,8 +103,8 @@ for (const {scenario, diff} of [
     const ids = await stage.measure<string[]>('entities')
     // Cards (not lines) far along the diagram, so the stage has to scroll to them.
     const cards = await stage.frame.locator('body').evaluate(
-      (_, ids) =>
-        ids.filter(id => {
+      (_, entityIds) =>
+        entityIds.filter(id => {
           const element = [...document.querySelectorAll('[data-entity-id]')].find(
             candidate => candidate.getAttribute('data-entity-id') === id,
           )
@@ -116,8 +116,8 @@ for (const {scenario, diff} of [
     const failures: string[] = []
     const measuredAt: string[] = []
     const rings = (on: boolean) =>
-      frame.evaluate(on => {
-        for (const sheet of document.querySelectorAll<HTMLStyleElement>('style[data-projections-rings]')) sheet.disabled = !on
+      frame.evaluate(enabled => {
+        for (const sheet of document.querySelectorAll<HTMLStyleElement>('style[data-projections-rings]')) sheet.disabled = !enabled
         return new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
       }, on)
     const measure = async (id: string, where: string) => {

@@ -92,7 +92,7 @@ export async function sha256(bytes: Uint8Array): Promise<string> {
   return `sha256:${[...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('')}`
 }
 
-function message(error: unknown): string {
+function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
@@ -187,7 +187,7 @@ export async function compareExtractions({
     try {
       return {comparison: await engine.compare(before, after, comparator.options ?? {}), comparator: await engine.defaultComparator()}
     } catch (error) {
-      throw new ComparisonError('comparator-failed', `The default comparator failed: ${message(error)}`)
+      throw new ComparisonError('comparator-failed', `The default comparator failed: ${errorMessage(error)}`)
     }
   }
   if (!rules) throw new ComparisonError('comparator-unavailable', 'This host cannot run custom comparators.')
@@ -195,7 +195,7 @@ export async function compareExtractions({
   try {
     ;({digest} = await rules.check(comparator.bytes))
   } catch (error) {
-    throw new ComparisonError('comparator-failed', `The comparator file ${comparator.id} is invalid: ${message(error)}`)
+    throw new ComparisonError('comparator-failed', `The comparator file ${comparator.id} is invalid: ${errorMessage(error)}`)
   }
   if (comparator.digest !== undefined && digest !== comparator.digest) {
     throw new ComparisonError(
@@ -214,7 +214,7 @@ export async function compareExtractions({
       options: comparator.options ?? {},
     })
   } catch (error) {
-    throw new ComparisonError('comparator-failed', `The custom comparator ${comparator.id} failed: ${message(error)}`)
+    throw new ComparisonError('comparator-failed', `The custom comparator ${comparator.id} failed: ${errorMessage(error)}`)
   }
   return validated(engine, before, after, output, {id: comparator.id, digest}, `The custom comparator ${comparator.id}`)
 }
@@ -233,7 +233,7 @@ async function validated(
     const diagnostics = (error as {diagnostics?: {path: string; message: string}[]}).diagnostics
     throw new ComparisonError(
       'invalid-comparison',
-      `${name} produced an invalid comparison: ${message(error)}`,
+      `${name} produced an invalid comparison: ${errorMessage(error)}`,
       diagnostics?.map(item => `${item.path}: ${item.message}`) ?? [],
     )
   }

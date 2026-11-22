@@ -12,7 +12,7 @@ export function run(request: ExecuteRequest, deadlineMs: number, signal?: AbortS
       worker.on('error', error => events.error(error.message))
       worker.on('exit', code => events.error(`worker exited with code ${code}`))
       return {
-        post: request => worker.postMessage(request, [request.input.buffer as ArrayBuffer]),
+        post: message => worker.postMessage(message, [message.input.buffer as ArrayBuffer]),
         terminate: () => void worker.terminate(),
       }
     },

@@ -13,7 +13,7 @@ function leaves(state: TestState, request: vscode.TestRunRequest): vscode.TestIt
     }
     item.children.forEach(visit)
   }
-  for (const item of request.include ?? state.items().map(([, item]) => item)) visit(item)
+  for (const item of request.include ?? state.items().map(([, root]) => root)) visit(item)
   return found
 }
 

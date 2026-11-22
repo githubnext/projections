@@ -197,8 +197,8 @@ try {
             const {data: pixels} = context.getImageData(x, y, Math.round(image.width * 0.65), Math.round(image.height * 0.6))
             let inked = 0
             const [r0, g0, b0] = [pixels[0], pixels[1], pixels[2]]
-            for (let at = 0; at < pixels.length; at += 4) {
-              if (Math.abs(pixels[at] - r0) + Math.abs(pixels[at + 1] - g0) + Math.abs(pixels[at + 2] - b0) > 40) inked++
+            for (let offset = 0; offset < pixels.length; offset += 4) {
+              if (Math.abs(pixels[offset] - r0) + Math.abs(pixels[offset + 1] - g0) + Math.abs(pixels[offset + 2] - b0) > 40) inked++
             }
             return Math.round((inked / (pixels.length / 4)) * 10000) / 100
           }, shot.data),

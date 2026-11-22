@@ -102,11 +102,11 @@ const server = createServer((request, response) => {
 server.listen(0, '127.0.0.1')
 await once(server, 'listening')
 try {
-  for (const [name, engine] of [
+  for (const [name, browserType] of [
     ['Chromium', chromium],
     ['WebKit', webkit],
   ]) {
-    const browser = await engine.launch({headless: true})
+    const browser = await browserType.launch({headless: true})
     try {
       const page = await browser.newPage()
       const errors = []

@@ -86,10 +86,10 @@ test('findNode: this Node when it is the pinned one, else a version manager’s,
 })
 
 test('launcherText and readLauncher: what a launcher records survives quoting, on POSIX and Windows', () => {
-  const launcher = {checkout: "/home/o'neil/projections", node: "/home/o'neil/.nvm/versions/node/v26.12.1/bin/node"}
-  const posix = launcherText("/home/o'neil/.local/bin/projections-tools", launcher, 'linux')
+  const recorded = {checkout: "/home/o'neil/projections", node: "/home/o'neil/.nvm/versions/node/v26.12.1/bin/node"}
+  const posix = launcherText("/home/o'neil/.local/bin/projections-tools", recorded, 'linux')
   assert.ok(posix.startsWith('#!/bin/sh\n'))
-  assert.deepEqual(readLauncher(posix), {kind: 'launcher', ...launcher})
+  assert.deepEqual(readLauncher(posix), {kind: 'launcher', ...recorded})
   const windows = {checkout: 'C:\\src\\projections', node: 'C:\\nvm\\v26.12.1\\node.exe'}
   const cmd = launcherText('C:\\Users\\me\\.local\\bin\\projections-tools.cmd', windows, 'win32')
   assert.ok(cmd.includes('\r\n') && cmd.includes('%*'))

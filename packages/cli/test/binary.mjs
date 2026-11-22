@@ -87,6 +87,7 @@ try {
     TMP: temporary,
     ...(process.env.SystemRoot ? {SystemRoot: process.env.SystemRoot} : {}),
   })
+  const repo = path.join(root, 'repo')
   const run = (args, {cwd = repo, extra, status = 0} = {}) => {
     const result = spawnSync(binary, args, {cwd, env: environment(extra), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 600_000})
     if (result.error) throw result.error
@@ -108,7 +109,6 @@ try {
   assert.match(licenses, /Distributed under EPL-2\.0\. Source: https:\/\/github\.com\/kieler\/elkjs\/tree\//)
 
   // A repository with a built-in projection and one compared by a custom comparator.
-  const repo = path.join(root, 'repo')
   await mkdir(repo)
   const git = (...args) => {
     const result = spawnSync('git', ['-c', `core.hooksPath=${windows ? 'NUL' : '/dev/null'}`, '-c', 'commit.gpgsign=false', ...args], {
@@ -361,14 +361,14 @@ try {
     })
     if (result.status !== 0) {
       // The extractor's raw tool output, which the Inspector's jobs report.
-      const backend = await startBackend(binary, ['-C', repo, '--trust'], {cwd: repo, env: dotnetEnvironment})
+      const jobBackend = await startBackend(binary, ['-C', repo, '--trust'], {cwd: repo, env: dotnetEnvironment})
       let outputs
       try {
-        const created = await backend.request('POST', '/api/jobs', {projectionId: 'dotnet', before: 'working-tree'})
-        const job = await finishedJob(backend, created.body, {intervalMs: 100})
+        const created = await jobBackend.request('POST', '/api/jobs', {projectionId: 'dotnet', before: 'working-tree'})
+        const job = await finishedJob(jobBackend, created.body, {intervalMs: 100})
         outputs = JSON.stringify({status: job.status, diagnostics: job.diagnostics, outputs: job.outputs}, null, 1)
       } finally {
-        await backend.close()
+        await jobBackend.close()
       }
       assert.fail(`${result.stderr}\n--- extractor outputs ---\n${outputs.slice(0, 16000)}`)
     }

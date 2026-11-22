@@ -15,13 +15,13 @@ export function demonstration(schema: DomainSchema, presentation?: string) {
   if (model === 'treemap') {
     a.kind = 'directory'
     a.label = 'Application'
-    b.kind = c.kind = d.kind = 'file'
+    for (const entity of [b, c, d]) entity.kind = 'file'
     b.data = {value: 35}
     c.data = {value: 60}
     d.data = {value: 40}
   }
   if (model === 'metrics') {
-    a.kind = b.kind = c.kind = d.kind = 'metric'
+    for (const entity of [a, b, c, d]) entity.kind = 'metric'
     a.label = 'Checkout latency'
     a.data = {value: 240, unit: 'ms'}
     b.label = 'Legacy requests'
@@ -32,7 +32,7 @@ export function demonstration(schema: DomainSchema, presentation?: string) {
     d.data = {value: -4, unit: '%'}
   }
   if (model === 'api') {
-    a.kind = b.kind = c.kind = d.kind = 'function'
+    for (const entity of [a, b, c, d]) entity.kind = 'function'
     a.label = 'checkout'
     a.data = {signature: 'checkout(cart: Cart): Receipt'}
     b.label = 'reserveLegacy'
@@ -45,7 +45,7 @@ export function demonstration(schema: DomainSchema, presentation?: string) {
   if (model === 'schema') {
     a.kind = 'table'
     a.label = 'orders'
-    b.kind = c.kind = d.kind = 'column'
+    for (const entity of [b, c, d]) entity.kind = 'column'
     b.label = 'legacy_ref'
     b.data = {type: 'text', nullable: true}
     c.label = 'inventory_id'
@@ -60,14 +60,14 @@ export function demonstration(schema: DomainSchema, presentation?: string) {
     d.data = {layer: 'Application', technology: 'Payments API'}
   }
   if (presentation === 'dependencies') {
-    a.kind = b.kind = c.kind = d.kind = 'package'
+    for (const entity of [a, b, c, d]) entity.kind = 'package'
     a.data = {version: '1.0.0', scope: 'runtime'}
     b.data = {version: '0.2.0', scope: 'runtime'}
     c.data = {version: '2.0.0', scope: 'runtime'}
     d.data = {version: '1.4.0', scope: 'development'}
   }
   if (presentation === 'text') {
-    a.kind = b.kind = c.kind = d.kind = 'document'
+    for (const entity of [a, b, c, d]) entity.kind = 'document'
     a.data = {text: 'Checkout reserves inventory before payment.'}
     b.data = {text: 'The legacy reservation path is synchronous.'}
     c.data = {text: 'The new worker records a durable reservation.'}

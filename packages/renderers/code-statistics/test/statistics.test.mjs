@@ -17,11 +17,11 @@ const before = loadFixture('before')
 const after = loadFixture('after')
 
 /** The total the host's summary bar states for a comparison (`codeStatisticsFacts`): its count, change and noun. */
-async function total(controls = {}, model) {
+async function total(controls, model) {
   const [fact] = codeStatisticsFacts({
     init: {mode: 'comparison'},
     model: model ?? (await compared(before, after)).model,
-    controls,
+    controls: controls ?? {},
     rendererName: 'code-statistics',
   })
   return {count: fact.count, change: (fact.added ?? 0) - (fact.removed ?? 0), noun: fact.noun.plural}
@@ -241,12 +241,13 @@ async function render(progress, highlighting, overrides = {}) {
     }),
   )
 }
-const slots = html =>
-  [
+function slots(html) {
+  return [
     ...html.matchAll(
       /<div class="stat-slot[^"]*" data-statistics-id="([^"]+)" style="grid-template-rows:([\d.e-]+)fr;opacity:([\d.e-]+)"[^>]*>.*?class="stat-bar[^"]*" data-projections-category="[^"]+" style="width:([\d.e-]+)%;background:([^"]+)"/g,
     ),
   ].map(([, id, rows, opacity, width, colour]) => ({id, rows: Number(rows), opacity: Number(opacity), width: Number(width), colour}))
+}
 
 test('endpoints are neutral and the midpoint interpolates every count', async () => {
   for (const progress of [0, 1]) {
@@ -318,8 +319,8 @@ test('composition, share and host-controlled options render; a single revision i
 })
 
 test('a dozen-language migration keeps every row through the transition and ends neutral', async () => {
-  const {before, after} = loadPair('gateway')
-  const {model} = await compared(before, after)
+  const gateway = loadPair('gateway')
+  const {model} = await compared(gateway.before, gateway.after)
   const frames = []
   for (let step = 0; step <= 40; step++) frames.push(slots(await render(step / 40, step % 40 ? 1 : 0, {model})))
   assert.equal(new Set(frames.map(frame => frame.map(slot => slot.id).join('|'))).size, 1)
@@ -327,8 +328,12 @@ test('a dozen-language migration keeps every row through the transition and ends
   for (const slot of frames[0]) assert.equal(frames.at(-1).find(other => other.id === slot.id).colour, slot.colour)
   const html = await render(1, 0, {model})
   assert.doesNotMatch(html, /stat-gain|stat-loss|stat-delta-label|class="badge/)
-  const sum = extraction => extraction.entities.reduce((total, entity) => total + entity.data.code, 0)
-  assert.deepEqual(await total({}, model), {count: sum(after), change: sum(after) - sum(before), noun: 'lines of code'})
+  const sum = extraction => extraction.entities.reduce((lines, entity) => lines + entity.data.code, 0)
+  assert.deepEqual(await total({}, model), {
+    count: sum(gateway.after),
+    change: sum(gateway.after) - sum(gateway.before),
+    noun: 'lines of code',
+  })
 })
 
 test('generic measurements draw each entity’s data.value in its unit, with only the chart control', async () => {

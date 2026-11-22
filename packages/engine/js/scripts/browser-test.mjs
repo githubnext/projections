@@ -7,8 +7,8 @@ import {comparatorCases, engineCases} from '../test/vectors.mjs'
 const native = createNativeEngine()
 const corpus = JSON.parse(await readFile(new URL('../../../schemas/fixtures/conformance.json', import.meta.url), 'utf8'))
 corpus.cases.push(...engineCases)
-for (const engine of ['chromium', 'webkit']) {
-  const harness = await browserHarness(engine)
+for (const browserName of ['chromium', 'webkit']) {
+  const harness = await browserHarness(browserName)
   try {
     for (const test of corpus.cases) {
       const {operation, extraction, before, after, comparison, json} = test.request
@@ -31,16 +31,16 @@ for (const engine of ['chromium', 'webkit']) {
         assert.ok(expected.diagnostics, error)
       }
       const actual = await harness.page.evaluate(
-        async ({method, args}) => {
+        async request => {
           try {
-            return {ok: true, result: await globalThis.engine[method](...args)}
+            return {ok: true, result: await globalThis.engine[request.method](...request.args)}
           } catch (error) {
             return {ok: false, diagnostics: error.diagnostics}
           }
         },
         {method, args},
       )
-      assert.deepEqual(actual, expected, `${engine}: ${test.id}`)
+      assert.deepEqual(actual, expected, `${browserName}: ${test.id}`)
       assert.equal(actual.ok, !test.expectError, test.id)
       const code = typeof test.expectError === 'string' ? test.expectError : test.expectedErrorCode
       if (code) assert.equal(actual.diagnostics[0].code, code, test.id)
@@ -48,7 +48,7 @@ for (const engine of ['chromium', 'webkit']) {
       if (test.expectedCanonical) assert.equal(actual.result.canonical, test.expectedCanonical)
       if (test.expectedResult) assert.deepEqual(actual.result, test.expectedResult, test.id)
     }
-    console.log(`${engine}: ${corpus.cases.length} native/browser ABI cases agree`)
+    console.log(`${browserName}: ${corpus.cases.length} native/browser ABI cases agree`)
     const comparisons = [
       ...corpus.comparisons.map(item => ({...item, expectedErrorCode: item.expectError ? 'comparator-error' : undefined})),
       ...comparatorCases,
@@ -68,11 +68,11 @@ for (const engine of ['chromium', 'webkit']) {
           return {ok: false, diagnostics: error.diagnostics}
         }
       }, test)
-      assert.deepEqual(actual, expected, `${engine}: ${test.id}`)
+      assert.deepEqual(actual, expected, `${browserName}: ${test.id}`)
       assert.equal(actual.ok, !test.expectedErrorCode, test.id)
       if (test.expected) assert.deepEqual(actual.result, test.expected, test.id)
     }
-    console.log(`${engine}: ${comparisons.length} native/browser default comparator cases agree`)
+    console.log(`${browserName}: ${comparisons.length} native/browser default comparator cases agree`)
     const workerResult = await harness.page.evaluate(async () => {
       const {createWorkerEngine} = await import('/dist/worker.js')
       const state = {protocolVersion: 0, schema: 'graph/v0', entities: [], relationships: []}
@@ -81,8 +81,8 @@ for (const engine of ['chromium', 'webkit']) {
         try {
           await promise
           return 'unexpected success'
-        } catch (error) {
-          return `${error.name}: ${error.message}`
+        } catch (caught) {
+          return `${caught.name}: ${caught.message}`
         }
       }
       const engine = await createWorkerEngine()
@@ -126,7 +126,7 @@ for (const engine of ['chromium', 'webkit']) {
     assert.deepEqual(workerResult.envelope, {format: 'projections.extraction', provenance: {ref: 'one'}})
     assert.match(workerResult.envelopeError, /^EngineError: duplicate-key/)
     for (const error of workerResult.errors) assert.match(error, /^EngineTransportError:/)
-    console.log(`${engine}: Worker disposal, pending rejection, crash, timeout and initialization failures pass`)
+    console.log(`${browserName}: Worker disposal, pending rejection, crash, timeout and initialization failures pass`)
     const large = graph(10000, 50000)
     const expected = await native.compare(large, large)
     const responsive = await harness.page.evaluate(async state => {
@@ -143,8 +143,8 @@ for (const engine of ['chromium', 'webkit']) {
       }
     }, large)
     assert.deepEqual(responsive.comparison, expected)
-    assert.ok(responsive.heartbeats >= 5, `${engine}: main-thread heartbeat during limit-sized comparison`)
-    console.log(`${engine}: Worker 10k/50k comparison agrees; ${responsive.heartbeats} UI heartbeats while pending`)
+    assert.ok(responsive.heartbeats >= 5, `${browserName}: main-thread heartbeat during limit-sized comparison`)
+    console.log(`${browserName}: Worker 10k/50k comparison agrees; ${responsive.heartbeats} UI heartbeats while pending`)
     const document = JSON.stringify({
       format: 'projections.comparison',
       version: 0,
@@ -158,17 +158,17 @@ for (const engine of ['chromium', 'webkit']) {
     assert.ok(Buffer.byteLength(document) < 32 * 1024 * 1024)
     assert.ok(requestBytes > 32 * 1024 * 1024)
     const parsedNative = await native.parseJson(document)
-    const parsedBrowser = await harness.page.evaluate(async document => {
+    const parsedBrowser = await harness.page.evaluate(async json => {
       const {createWorkerEngine} = await import('/dist/worker.js')
       const engine = await createWorkerEngine()
       try {
-        return await engine.parseJson(document)
+        return await engine.parseJson(json)
       } finally {
         engine.dispose()
       }
     }, document)
     assert.deepEqual(parsedBrowser, parsedNative)
-    console.log(`${engine}: ${Buffer.byteLength(document)}-byte artifact parses strictly despite ${requestBytes}-byte transport`)
+    console.log(`${browserName}: ${Buffer.byteLength(document)}-byte artifact parses strictly despite ${requestBytes}-byte transport`)
   } finally {
     await harness.close()
   }

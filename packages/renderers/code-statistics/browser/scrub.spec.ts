@@ -56,7 +56,7 @@ test('dense scrubbing in the real host frame keeps every bar frame exact, stable
   expect((await renderer.state()).bundle).toBe('code-statistics')
   // One hold point per comparison step: Ruby leaves, TypeScript and CSS resize, Python arrives.
   await expect.poll(async () => (await renderer.state()).steps.length).toBe(3)
-  const {total, typescript: typescriptAt} = oracle(renderer.subject.mode === 'comparison' ? renderer.subject.comparison : undefined!)
+  const {typescript: typescriptAt} = oracle(renderer.subject.mode === 'comparison' ? renderer.subject.comparison : undefined!)
   const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
   const first = await measure()
   const rowHeight = first.slots.find(slot => slot.id === 'language:Ruby')!.height
@@ -282,8 +282,8 @@ test('a single revision fits the frame with no steps and no change decoration', 
 
 test('the gateway migration scrubs a dozen languages without jumps, remounts or recolouring', async ({page}, testInfo) => {
   test.setTimeout(60_000)
-  const {before, after} = loadPair('gateway') as {before: Extraction; after: Extraction}
-  const renderer = await openRenderer(page, {renderer: 'code-statistics', before, after, progress: 0, locale: 'en-US'})
+  const gateway = loadPair('gateway') as {before: Extraction; after: Extraction}
+  const renderer = await openRenderer(page, {renderer: 'code-statistics', ...gateway, progress: 0, locale: 'en-US'})
   const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
   const rowHeight = Math.max(...(await measure()).slots.map(slot => slot.height))
   const forward: Measured[] = []

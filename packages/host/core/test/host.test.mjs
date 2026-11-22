@@ -158,13 +158,13 @@ test('a renderer that declares what it accepts is not given other extractions: t
   assert.equal(resolveRenderer('database', catalog).renderer?.name, 'database')
   assert.equal(resolveRenderer('dependency-injection', catalog, undefined, 'architecture/v0').renderer?.name, 'dependency-injection')
   // Choices leave out renderers that don't accept the extraction and add those that declare they do.
-  const document = (renderer, extraction) => ({projection: {id: 'p', title: 'P', renderer}, extraction})
+  const documentOf = (renderer, payload) => ({projection: {id: 'p', title: 'P', renderer}, extraction: payload})
   assert.deepEqual(
-    compatibleRenderers(document('graph', {...di, entities: [], relationships: []}), catalog).map(item => item.name),
+    compatibleRenderers(documentOf('graph', {...di, entities: [], relationships: []}), catalog).map(item => item.name),
     ['graph', 'dependency-injection'],
   )
   assert.deepEqual(
-    compatibleRenderers(document('dependency-injection', {schema: 'architecture/v0', entities: [], relationships: []}), catalog).map(
+    compatibleRenderers(documentOf('dependency-injection', {schema: 'architecture/v0', entities: [], relationships: []}), catalog).map(
       item => item.name,
     ),
     ['graph'],

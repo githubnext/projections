@@ -212,10 +212,10 @@ test('highlights come first and tags last, each in its own tone', () => {
 test("a modified card names the data changes it doesn't mark itself in plain words, and counts bulky ones", async () => {
   const unit = data => ({id: 'u', kind: 'crate', label: 'u', data})
   const objects = {capabilityModules: {fs: ['src/a']}, more: {x: 1}, other: {y: 1}}
-  const before = extraction([unit({tokens: 4000, runs: ['cli'], testTokens: 12000, ...objects})], [])
+  const unitBefore = extraction([unit({tokens: 4000, runs: ['cli'], testTokens: 12000, ...objects})], [])
   const changed = {capabilityModules: {fs: ['src/b']}, more: {x: 2}, other: {y: 2}}
-  const after = extraction([unit({tokens: 5000, runs: ['cli', 'wasm'], testTokens: 14000, ...changed})], [])
-  const row = comparisonModel(before, after, await engine.compare(before, after)).entities[0]
+  const unitAfter = extraction([unit({tokens: 5000, runs: ['cli', 'wasm'], testTokens: 14000, ...changed})], [])
+  const row = comparisonModel(unitBefore, unitAfter, await engine.compare(unitBefore, unitAfter)).entities[0]
   // The size and the tags are drawn on the card (`4K → 5K`, a gained tag); a number reads compactly; of three objects,
   // one is named and the others counted.
   assert.deepEqual(cardChanges(row, ['tokens', 'runs'], 'en'), [
@@ -224,8 +224,8 @@ test("a modified card names the data changes it doesn't mark itself in plain wor
     {key: '2 more fields changed', before: '', after: '', summary: true},
   ])
   // One or two objects are named.
-  const one = extraction([unit({tokens: 5000, runs: ['cli'], testTokens: 12000, ...objects, ...{more: {x: 2}, other: {y: 2}}})], [])
-  const named = comparisonModel(one, after, await engine.compare(one, after)).entities[0]
+  const twoObjects = extraction([unit({tokens: 5000, runs: ['cli'], testTokens: 12000, ...objects, ...{more: {x: 2}, other: {y: 2}}})], [])
+  const named = comparisonModel(twoObjects, unitAfter, await engine.compare(twoObjects, unitAfter)).entities[0]
   assert.deepEqual(cardChanges(named, ['tokens', 'runs', 'testTokens'], 'en'), [
     {key: 'capability modules changed', before: '', after: '', summary: true},
   ])
@@ -253,9 +253,9 @@ test("a field naming icons picks each card's icon; an unknown name draws none an
     ['none', '/data/icon'],
   )
   // Revisions that predate their icons still offer the conventional field, so a definition's preset of it stands.
-  const before = factControls(factFields(model), []).find(item => item.id === 'icon')
+  const predating = factControls(factFields(model), []).find(item => item.id === 'icon')
   assert.deepEqual(
-    before.choices.map(choice => choice.value),
+    predating.choices.map(choice => choice.value),
     ['none', '/data/icon'],
   )
   const facts = cardFacts(icons, {badges: 'none', colorBy: 'none', icon: '/data/icon', kinds: [], colorMode: 'light'})

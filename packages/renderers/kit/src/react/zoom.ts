@@ -13,6 +13,10 @@ import type {RendererProps} from './shell/props.js'
 
 const topLeft: ScrollStart = {x: 0, y: 0}
 
+/** Input by which a person scrolls a view themselves. */
+const inputEvents = ['wheel', 'pointerdown', 'touchstart', 'keydown'] as const
+const scrollKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', ' '])
+
 /**
  * Keeps the point at the middle of a scroll container in the middle when the
  * content's scale changes (fit, zoom, resize). While `opening` (the person has
@@ -44,18 +48,18 @@ export function useScrollAnchor(
   current.current = {scale, opening, start, onMove, clear}
   // Places the view: at its start while it opens, else around the middle it had.
   const place = useRef((element: HTMLElement, recentre: boolean) => {
-    const {scale, opening, start, clear} = current.current
-    if (!scale) return
-    if (opening && !moved.current) {
+    const latest = current.current
+    if (!latest.scale) return
+    if (latest.opening && !moved.current) {
       const width = element.scrollWidth - element.clientWidth,
         height = element.scrollHeight - element.clientHeight
-      if (typeof start === 'function') {
-        const {left, top} = start({scale, width: element.clientWidth, height: element.clientHeight})
+      if (typeof latest.start === 'function') {
+        const {left, top} = latest.start({scale: latest.scale, width: element.clientWidth, height: element.clientHeight})
         element.scrollLeft = Math.max(0, Math.min(width, left))
-        element.scrollTop = Math.max(0, Math.min(height, top - clear))
+        element.scrollTop = Math.max(0, Math.min(height, top - latest.clear))
       } else {
-        element.scrollLeft = start.x * width
-        element.scrollTop = start.y * height
+        element.scrollLeft = latest.start.x * width
+        element.scrollTop = latest.start.y * height
       }
     } else if (recentre) {
       const {x, y} = center.current
@@ -102,10 +106,6 @@ export function useScrollAnchor(
     if (element) center.current = middle(element)
   }).current
 }
-
-/** Input by which a person scrolls a view themselves. */
-const inputEvents = ['wheel', 'pointerdown', 'touchstart', 'keydown'] as const
-const scrollKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', ' '])
 
 function middle(element: HTMLElement): {x: number; y: number} {
   const fraction = (offset: number, client: number, extent: number) => (extent > client ? (offset + client / 2) / extent : 0.5)

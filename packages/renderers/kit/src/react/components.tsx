@@ -7,7 +7,7 @@ import {identifier, variedBeyond, variedBeyondLabel} from '@githubnext/projectio
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {arrowHead, arrowHeadLength, arrowHeadStyle} from '../arrowhead.js'
 import {LegendContext} from './legend-context.js'
-import {classifyChange, statusLabels, statusParts} from '../emphasis.js'
+import {statusLabels, statusParts} from '../emphasis.js'
 import type {StatusPart} from '../emphasis.js'
 import {Icon, SvgIcon} from './icons.js'
 import {svgIcon, svgIconGap, svgPartGap, svgWordAdvance} from '../svg-status.js'

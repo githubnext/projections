@@ -118,7 +118,7 @@ export function analyze([neutralUrl, ringedUrl, origin, scale, lines, mode]: [
       }
       // Plain surroundings: outside the item, up to near the ring, the picture is one color. Where content crosses the
       // item's edge (a neighbor's label on its halo), the line can't tell the edge from the content.
-      const clean = n.slice(0, from).every(color => distance(color, n[0]!) < 30)
+      const clean = n.slice(0, from).every(outside => distance(outside, n[0]!) < 30)
       // Each line starts 8 px outside the item's box (see `ringLines`); its own edge (a centred border up to 2 px wide)
       // starts at most a pixel outside it.
       const box = 8,
@@ -129,7 +129,11 @@ export function analyze([neutralUrl, ringedUrl, origin, scale, lines, mode]: [
         edge === null || edge < box - spill - 1 || edge > box + 1 || !n.slice(0, before).every(other => distance(other, n[0]!) < 30)
       // What departs further out is a neighbor (another item's outline or label), and past a pixel inside the item's box
       // it is its inside: neither is its edge.
-      if (edge !== null && (edge < box - spill - 1 || edge > box + 1)) edge = edgeEnd = color = null
+      if (edge !== null && (edge < box - spill - 1 || edge > box + 1)) {
+        edge = null
+        edgeEnd = null
+        color = null
+      }
       return {line: line.name, hidden, edge, edgeEnd, edgeColor: color, ring, ringEnd, clean}
     })
     if (mode === 'halo') return results

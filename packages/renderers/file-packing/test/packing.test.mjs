@@ -243,7 +243,7 @@ test('the diff packs both revisions at the after scale, so unchanged files keep 
   const {circles, after} = diffPacking(model, settings, area)
   const ids = new Set(circles.map(circle => circle.id))
   assert.ok(ids.has('file:src/vendor/moment.js') && ids.has('file:src/search/rank.ts'), 'removed and added files are both drawn')
-  for (const circle of circles.filter(circle => circle.row.status === 'unchanged' && circle.filled)) {
+  for (const circle of circles.filter(candidate => candidate.row.status === 'unchanged' && candidate.filled)) {
     assert.ok(Math.abs(circle.r - after.placements.get(circle.id).r) < 1e-9, `${circle.id} keeps its size`)
   }
   assert.deepEqual(overlaps(circles), [])

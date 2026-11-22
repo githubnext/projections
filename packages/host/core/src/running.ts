@@ -93,7 +93,8 @@ export function runningIndicator(
     /** Shows nothing and forgets the job, as for another tab's. */
     reset() {
       cancel()
-      shown = latest = undefined
+      shown = undefined
+      latest = undefined
     },
     dispose() {
       cancel()

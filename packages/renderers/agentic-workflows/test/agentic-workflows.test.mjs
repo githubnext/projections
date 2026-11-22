@@ -92,7 +92,7 @@ test('one revision groups workflows, reads their sections and lists the matrix c
     ],
   )
   const bot = view.groups[0].workflows[0]
-  const section = id => bot.sections.find(section => section.spec.id === id)
+  const section = id => bot.sections.find(candidate => candidate.spec.id === id)
   assert.deepEqual(
     section('repos').entries.map(entry => entry.text),
     ['`${{ github.repository }}`', '`octo-org/docs-site`'],

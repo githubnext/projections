@@ -125,7 +125,7 @@ const rows = names.map(name => {
       // The most common languages keep clearly apart from each other and from "other"; the rest a little less.
       const gap = rank(name) < separation.commonCount ? separation.wide : separation.narrow
       color = separate(color, placed[mode], backgrounds[mode], profile[mode], gap)
-      if (rank(name) < separation.commonCount && placed[mode].some(other => distance(color, other) < gap)) {
+      if (rank(name) < separation.commonCount && placed[mode].some(neighbor => distance(color, neighbor) < gap)) {
         // Comparison profiles may not separate everything; the shipped one must.
         const message = `${name} ${mode} ${color} is too close to a more common language`
         if (profileName === 'default') throw new Error(message)

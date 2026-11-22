@@ -47,14 +47,15 @@ export function useFitScale(
     const element = stage.current
     if (!element) return
     let observedFill: Element | undefined
-    const measure = () => {
+    // Measures, and has `watcher` (the stage's observer) watch the frame's fill once there is one.
+    const measure = (watcher: ResizeObserver) => {
       const width = element.clientWidth,
         height = element.clientHeight
       // Everything in the frame that is not the stage: captions, footers, scrollbars. Known once the renderer fills
       // its frame (`useFrameFill`); before that the stage is only as tall as its content, which hasn't been drawn at
       // a measured scale yet, and a height reported from it would be far too tall.
       const fill = element.closest<HTMLElement>('[data-fill]')
-      if (fill && fill !== observedFill) observer.observe((observedFill = fill))
+      if (fill && fill !== observedFill) watcher.observe((observedFill = fill))
       const chrome = fill ? chromeAround(element, fill) : undefined
       const previous = latest.current
       if (previous && previous.width === width && previous.height === height && previous.chrome === chrome) return
@@ -63,11 +64,11 @@ export function useFitScale(
       latest.current = {width, height, chrome}
       setMeasured(latest.current)
     }
-    const observer = new ResizeObserver(measure)
+    const observer = new ResizeObserver((_entries, self) => measure(self))
     observer.observe(element)
     observer.observe(element.ownerDocument.documentElement)
-    measure()
-    remeasure.current = measure
+    measure(observer)
+    remeasure.current = () => measure(observer)
     return () => {
       observer.disconnect()
       remeasure.current = undefined

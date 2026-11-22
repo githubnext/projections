@@ -1,6 +1,5 @@
 import {arrowHead, arrowHeadReach, joinSplines, lineSpline, routeTail, sBend, splinePath} from '@githubnext/projections-renderer-kit'
 import type {Spline} from '@githubnext/projections-renderer-kit'
-import {schemaMetrics} from './schema.js'
 import type {FrameLink} from './frame.js'
 
 /**

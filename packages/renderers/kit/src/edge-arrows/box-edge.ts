@@ -110,9 +110,10 @@ export function routeBoxEdge(
     }
   }
   const to = {x: target.x - outset, y: target.y - outset, width: target.width + 2 * outset, height: target.height + 2 * outset}
-  if (ports.end) {
-    const [nx, ny] = outward(target, ports.end.x, ports.end.y)
-    ports = {...ports, end: {x: ports.end.x + nx * outset, y: ports.end.y + ny * outset}}
+  let endPort = ports.end
+  if (endPort) {
+    const [nx, ny] = outward(target, endPort.x, endPort.y)
+    endPort = {x: endPort.x + nx * outset, y: endPort.y + ny * outset}
   }
   const [sx, sy, , , ex, ey] = getBoxToBoxArrow(from.x, from.y, from.width, from.height, to.x, to.y, to.width, to.height, {
     bow: 0,
@@ -133,10 +134,9 @@ export function routeBoxEdge(
     (downward
       ? {x: Math.max(from.x + 20, Math.min(from.x + from.width - 20, centerFrom + spread)), y: from.y + from.height}
       : {x: sx, y: sy})
-  const end =
-    ports.end ?? (downward ? {x: Math.max(to.x + 20, Math.min(to.x + to.width - 20, centerTo - spread)), y: to.y} : {x: ex, y: ey})
+  const end = endPort ?? (downward ? {x: Math.max(to.x + 20, Math.min(to.x + to.width - 20, centerTo - spread)), y: to.y} : {x: ex, y: ey})
   const [fromX, fromY] = ports.start ? outward(from, start.x, start.y) : downward ? [0, 1] : [sourceX, sourceY]
-  const [toX, toY] = ports.end ? outward(to, end.x, end.y) : downward ? [0, -1] : [targetX, targetY]
+  const [toX, toY] = endPort ? outward(to, end.x, end.y) : downward ? [0, -1] : [targetX, targetY]
   const handle = Math.min(64, Math.max(18, Math.hypot(end.x - start.x, end.y - start.y) * 0.35))
   const control1 = {x: start.x + fromX * handle, y: start.y + fromY * handle}
   const control2 = {x: end.x + toX * handle, y: end.y + toY * handle}
@@ -174,13 +174,13 @@ export function routeBoxEdge(
     if (box.x > right || box.x + box.width < left || box.y > bottom || box.y + box.height < top) return false
     for (let step = 0, count = Math.max(1, Math.ceil(length / 4)); step <= count; step++) {
       const t = step / count,
-        s = 1 - t
+        rest = 1 - t
       if (
         contains(
           box,
           {
-            x: s ** 3 * start.x + 3 * s ** 2 * t * control1.x + 3 * s * t ** 2 * control2.x + t ** 3 * end.x,
-            y: s ** 3 * start.y + 3 * s ** 2 * t * control1.y + 3 * s * t ** 2 * control2.y + t ** 3 * end.y,
+            x: rest ** 3 * start.x + 3 * rest ** 2 * t * control1.x + 3 * rest * t ** 2 * control2.x + t ** 3 * end.x,
+            y: rest ** 3 * start.y + 3 * rest ** 2 * t * control1.y + 3 * rest * t ** 2 * control2.y + t ** 3 * end.y,
           },
           1,
         )

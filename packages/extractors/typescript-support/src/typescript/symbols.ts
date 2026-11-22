@@ -2,11 +2,12 @@ import ts from 'typescript'
 
 export function resolve(checker: ts.TypeChecker, symbol: ts.Symbol | undefined): ts.Symbol | undefined {
   const visited = new Set<ts.Symbol>()
-  while (symbol && symbol.flags & ts.SymbolFlags.Alias && !visited.has(symbol)) {
-    visited.add(symbol)
-    symbol = checker.getAliasedSymbol(symbol)
+  let target = symbol
+  while (target && target.flags & ts.SymbolFlags.Alias && !visited.has(target)) {
+    visited.add(target)
+    target = checker.getAliasedSymbol(target)
   }
-  return symbol
+  return target
 }
 
 /** Whether a declaration (or modifier-bearing node) carries a modifier of `kind`. */

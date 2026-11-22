@@ -193,8 +193,9 @@ export function FilterButton({projection: p, control}: {projection: ProjectionCo
 export const zoomGroup = zoomControlGroup
 
 /** A view's name: the renderer's title ("Renderer" without one), "Table" or "Text". */
-export const viewName = (kind: ViewKind, rendererTitle: string | undefined) =>
-  kind === 'renderer' ? (rendererTitle ?? 'Renderer') : kind === 'table' ? 'Table' : 'Text'
+export function viewName(kind: ViewKind, rendererTitle: string | undefined) {
+  return kind === 'renderer' ? (rendererTitle ?? 'Renderer') : kind === 'table' ? 'Table' : 'Text'
+}
 
 /** How a view is shown: the renderer, or one of the built-in table and text views ("escape hatches"). */
 export interface ShowAsProps {

@@ -73,7 +73,11 @@ export async function createWorkerEngine(options: WorkerEngineOptions = {}): Pro
     readyResolve = resolve
     readyReject = reject
   })
-  const stop = (error: EngineTransportError): void => {
+  const startup = setTimeout(
+    () => stop(new EngineTransportError(`Engine worker initialization timed out after ${timeoutMs} ms`)),
+    timeoutMs,
+  )
+  function stop(error: EngineTransportError): void {
     if (failure) return
     failure = error
     clearTimeout(startup)
@@ -88,10 +92,6 @@ export async function createWorkerEngine(options: WorkerEngineOptions = {}): Pro
     }
     pending.clear()
   }
-  const startup = setTimeout(
-    () => stop(new EngineTransportError(`Engine worker initialization timed out after ${timeoutMs} ms`)),
-    timeoutMs,
-  )
   worker.onerror = event => {
     event.preventDefault()
     stop(new EngineTransportError(`Engine worker failed: ${event.message}`))

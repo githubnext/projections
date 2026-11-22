@@ -77,9 +77,9 @@ export async function lightShares(page: Page, analyzer: Page): Promise<LightSamp
   const image = buffer.toString('base64')
   const scale = await page.evaluate(() => devicePixelRatio)
   const shares = await analyzer.evaluate(
-    async ({image, boxes, scale}) => {
+    async ({image: jpeg, boxes: frames, scale: ratio}) => {
       const element = new Image()
-      element.src = `data:image/jpeg;base64,${image}`
+      element.src = `data:image/jpeg;base64,${jpeg}`
       await element.decode()
       const canvas = document.createElement('canvas')
       canvas.width = element.naturalWidth
@@ -88,16 +88,16 @@ export async function lightShares(page: Page, analyzer: Page): Promise<LightSamp
       context.drawImage(element, 0, 0)
       const luminance = (data: Uint8ClampedArray, index: number) =>
         (0.2126 * data[index]! + 0.7152 * data[index + 1]! + 0.0722 * data[index + 2]!) / 255
-      return boxes.map(box => {
-        const left = Math.round(box.x * scale),
-          top = Math.round(box.y * scale)
-        const width = Math.max(1, Math.round(box.width * scale)),
-          height = Math.max(1, Math.round(box.height * scale))
+      return frames.map(box => {
+        const left = Math.round(box.x * ratio),
+          top = Math.round(box.y * ratio)
+        const width = Math.max(1, Math.round(box.width * ratio)),
+          height = Math.max(1, Math.round(box.height * ratio))
         const data = context.getImageData(left, top, width, height).data
         // A strip of the host page beside the frame. Rows where it is light too weren't painted yet when the screenshot
         // was taken (slow software compositing leaves whole bands blank); a flash is confined to the frame.
-        const stripLeft = left >= 8 * scale ? left - Math.round(6 * scale) : left + width + Math.round(2 * scale)
-        const stripWidth = Math.round(4 * scale)
+        const stripLeft = left >= 8 * ratio ? left - Math.round(6 * ratio) : left + width + Math.round(2 * ratio)
+        const stripWidth = Math.round(4 * ratio)
         const strip =
           stripLeft >= 0 && stripLeft + stripWidth <= canvas.width
             ? context.getImageData(stripLeft, top, stripWidth, height).data
@@ -136,10 +136,10 @@ export async function expectNoFlash(page: Page, steps: () => Promise<void>): Pro
   try {
     // Frames must be on screen to be sampled (and painted).
     await page.locator('.ph-stage').first().scrollIntoViewIfNeeded()
-    let running = true
+    const done = new AbortController()
     const shares: LightSample[] = []
     const sampling = (async () => {
-      while (running) {
+      while (!done.signal.aborted) {
         const phase = await page.evaluate(() => document.querySelector('.ph')?.getAttribute('data-comparison-mode') ?? '').catch(() => '')
         shares.push(...(await lightShares(page, analyzer).catch(() => [])).map(sample => ({...sample, phase})))
         // Let the page render between screenshots, so slow engines still reach the stable frames actions wait for.
@@ -149,7 +149,7 @@ export async function expectNoFlash(page: Page, steps: () => Promise<void>): Pro
     try {
       await steps()
     } finally {
-      running = false
+      done.abort()
       await sampling
     }
     await page.locator('.ph-stage').first().scrollIntoViewIfNeeded()

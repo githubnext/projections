@@ -76,8 +76,8 @@ export class SourceFiles {
     return new Error(`Missing TypeScript input: ${code(slash(path.relative(this.root, file)))}`, cause === undefined ? undefined : {cause})
   }
 
-  async load(file: string, required = false): Promise<boolean> {
-    file = path.resolve(file)
+  async load(name: string, required = false): Promise<boolean> {
+    const file = path.resolve(name)
     if (this.texts.has(file) || this.missing.has(file)) {
       if (required && this.missing.has(file)) throw this.missingInput(file)
       return false

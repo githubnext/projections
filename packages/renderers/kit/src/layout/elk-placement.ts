@@ -85,7 +85,7 @@ export function placeCards(
     return place({order, alignment: options.alignment ?? 'NONE'})
   }
   /** One placement run with a plan's order and alignment, and the alignment it used. */
-  const place = async (plan: Plan): Promise<Placement> => {
+  async function place(plan: Plan): Promise<Placement> {
     const result = await run(plan.order, plan.alignment !== 'BALANCED', plan.alignment)
     if (plan.alignment !== 'NONE') return {result, plan, alignment: plan.alignment}
     const {nodes: layered, edges: lines} = layering(result)
@@ -99,7 +99,7 @@ export function placeCards(
     return {result, plan, alignment: identifyAlignment(layered, lines, straight)}
   }
   /** Card and boundary centres of an ELK result, by card ID. */
-  const centres = (result: ElkNode) => {
+  function centres(result: ElkNode) {
     const found = new Map<string, Point>()
     const visit = (node: ElkNode) => {
       for (const child of node.children ?? []) {

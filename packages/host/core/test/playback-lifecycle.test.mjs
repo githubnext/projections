@@ -19,7 +19,8 @@ const paused = (position = 0.5, extra = {}) => ({
 })
 
 /** Sends events in order, collecting the effects. */
-function run(state, ...events) {
+function run(start, ...events) {
+  let state = start
   const effects = []
   for (const event of events) {
     const step = playbackLifecycle.transition(state, event)

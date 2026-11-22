@@ -132,7 +132,7 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
   /** The fired keys `to` still lists: a key it stops listing can fire again once listed anew. */
   const firedIn = (to: S, fired: ReadonlySet<string>, timer: string | undefined) => {
     const listed = new Set(machine.activities(to).map(activity => activity.key))
-    return new Set([...fired, ...(timer === undefined ? [] : [timer])].filter(key => listed.has(key)))
+    return new Set([...fired, ...(timer === undefined ? [] : [timer])].filter(firedKey => listed.has(firedKey)))
   }
   const fail = (check: string, what: string, path: ExplorePath<S, E, F>): never => {
     throw new ExplorationError(check, `${check} fails ${what}: ${describe(path)}`, path as ExplorePath<unknown, unknown, unknown>)

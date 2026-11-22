@@ -11,7 +11,7 @@ import type {RingGeometry} from '../rings.js'
  */
 export async function ringGeometry(frame: Frame, id: string, {focused = false}: {focused?: boolean} = {}): Promise<RingGeometry[]> {
   return frame.evaluate(
-    ([id, focused]) => {
+    ([itemId, keyboard]) => {
       const px = (value: string) => parseFloat(value) || 0
       const unitOf = (element: Element): Element => {
         let unit = element
@@ -24,9 +24,11 @@ export async function ringGeometry(frame: Frame, id: string, {focused = false}: 
       // Keyboard focus rings only the unit around the focused element.
       const units = [
         ...new Set(
-          [...document.querySelectorAll('[data-entity-id]')].filter(element => element.getAttribute('data-entity-id') === id).map(unitOf),
+          [...document.querySelectorAll('[data-entity-id]')]
+            .filter(element => element.getAttribute('data-entity-id') === itemId)
+            .map(unitOf),
         ),
-      ].filter(unit => !focused || unit.matches(':focus-visible, :has(:focus-visible)'))
+      ].filter(unit => !keyboard || unit.matches(':focus-visible, :has(:focus-visible)'))
       const corner = (value: string, width: number, height: number): [number, number] => {
         const [h = '0', v = h] = value.split(/\s+/)
         const length = (part: string, reference: number) => (part.endsWith('%') ? (px(part) / 100) * reference : px(part))

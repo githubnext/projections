@@ -212,10 +212,10 @@ test('a containment relationship one revision brings has its endpoints in both',
   // `r` moves from q → other to p → leaf; a rule gives `x` the context `leaf`.
   const old = graph([{id: 'r', kind: 'contains', from: 'q', to: 'other'}])
   const current = graph([{id: 'r', kind: 'contains', from: 'p', to: 'leaf'}])
-  const rows = scopeRows(
+  const contextRows = scopeRows(
     presentComparison(
       old,
-      {...current, entities: current.entities.map(entity => (entity.id === 'x' ? {...entity, label: 'X'} : entity))},
+      {...current, entities: current.entities.map(item => (item.id === 'x' ? {...item, label: 'X'} : item))},
       {
         protocolVersion: 0,
         changes: [
@@ -234,6 +234,6 @@ test('a containment relationship one revision brings has its endpoints in both',
       },
     ),
   )
-  const scope = changeContext(rows, {before: old, after: current}, ['x'])
+  const scope = changeContext(contextRows, {before: old, after: current}, ['x'])
   assert.deepEqual([...scope.context].sort(), ['leaf', 'other', 'p', 'q', 'r'])
 })

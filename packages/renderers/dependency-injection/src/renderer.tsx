@@ -6,7 +6,6 @@ import type {ScrollStart} from '@githubnext/projections-renderer-kit'
 import {
   CardChangeMarks,
   cardCornerRadius,
-  EdgeArrowMarker,
   EmptyDomain,
   useBorderWidths,
   useCoveredPadding,

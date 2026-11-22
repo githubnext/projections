@@ -221,24 +221,31 @@ function focusOpening({
   // takes the content's height at the floor, it stays there.
   const scale = Math.max(fit, request?.fit ? fitted : request || !sized ? Math.max(fitted, floor) : floor)
   const fits = fitted >= scale * (1 - 1e-6)
-  const centred: ScrollStart = ({scale, width, height}) => ({
-    left: (box.x + box.width / 2 - content.x) * scale + drawn.x - width / 2,
+  const centred: ScrollStart = ({scale: viewScale, width, height}) => ({
+    left: (box.x + box.width / 2 - content.x) * viewScale + drawn.x - width / 2,
     // Centred in the room the bands leave, not the whole view.
-    top: (box.y + box.height / 2 - content.y) * scale + drawn.top - (height + bands.top - bands.bottom) / 2,
+    top: (box.y + box.height / 2 - content.y) * viewScale + drawn.top - (height + bands.top - bands.bottom) / 2,
   })
   // Asked for: centred where the area fits, else its reading start, as the whole graph opens.
   if (request) return {zoom: scale / fit, start: fits ? centred : contentStart(area.cards, content, drawn), centred: fits}
   // Diff mode's own focus: centred on its changes where they fit; else on the part of the view's size that holds the
   // most of them, the first such along the layers (the top of a graph laid out top to bottom).
-  const reading: ScrollStart = view => {
-    const corner = busiestWindow(area.cards, {width: view.width / view.scale, height: view.height / view.scale}, orientation)
+  const reading: ScrollStart = viewport => {
+    const corner = busiestWindow(
+      area.cards,
+      {width: viewport.width / viewport.scale, height: viewport.height / viewport.scale},
+      orientation,
+    )
     return {
-      left: (corner.x - content.x) * view.scale + drawn.x,
-      top: (corner.y - content.y) * view.scale + drawn.top,
+      left: (corner.x - content.x) * viewport.scale + drawn.x,
+      top: (corner.y - content.y) * viewport.scale + drawn.top,
     }
   }
   return {zoom: scale / fit, start: uncutStart(fits ? centred : reading, area, content, fits, drawn), centred: fits}
 }
+
+/** Room left between a view's edge and a card it no longer cuts, content units. */
+const edgeMargin = 8
 
 /**
  * The top left corner, content units, of a window of `size` that holds the most of `cards` whole: each card's corner
@@ -265,19 +272,16 @@ function busiestWindow(
   return best
 }
 
-/** Room left between a view's edge and a card it no longer cuts, content units. */
-const edgeMargin = 8
-
 /**
- * A start moved from `start` so that no card in `area.drawn` straddles an edge of the view, where it can: on each axis,
+ * A start moved from `opening` so that no card in `area.drawn` straddles an edge of the view, where it can: on each axis,
  * the offset nearest the given one at which the cards the view reaches on the other axis are cut least, within the
  * scroll range. Where some must be cut (a layout too dense for the view), a changed card (`area.cards`) is cut last,
  * then one at the edge reading starts from (the left or top). Where the area fits (`fits`) it stays wholly in view;
  * otherwise it moves at most a quarter of the view.
  */
-function uncutStart(start: ScrollStart, area: FocusArea, content: ContentBox, fits: boolean, padding: GraphPadding): ScrollStart {
+function uncutStart(opening: ScrollStart, area: FocusArea, content: ContentBox, fits: boolean, padding: GraphPadding): ScrollStart {
   return view => {
-    const at = typeof start === 'function' ? start(view) : {left: 0, top: 0}
+    const at = typeof opening === 'function' ? opening(view) : {left: 0, top: 0}
     const {scale} = view
     if (!scale) return at
     // An axis's padding before the content and its padding before and after it together.

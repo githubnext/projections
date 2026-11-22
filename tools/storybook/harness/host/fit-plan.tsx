@@ -16,7 +16,7 @@ export function FitPlanHarness() {
   const [clicks, setClicks] = useState(0)
   const {plan} = useFitPlan(bar, plans, {
     key: '',
-    signature: plan => plan,
+    signature: candidate => candidate,
     lock: (element, current) =>
       locking && element.contains(element.ownerDocument.activeElement) ? candidate => candidate === current : undefined,
     focusFallbacks: {zoom: ['more']},

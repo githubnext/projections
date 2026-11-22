@@ -65,7 +65,7 @@ export async function containedIn(root: string, relative: string): Promise<strin
     return offset === '' || (offset !== '..' && !offset.startsWith(`..${path.sep}`) && !path.isAbsolute(offset))
   }
   let cursor = root
-  for (const segment of relative.split(/[\\/]/).filter(segment => segment && segment !== '.')) {
+  for (const segment of relative.split(/[\\/]/).filter(part => part && part !== '.')) {
     cursor = path.join(cursor, segment)
     if ((await lstat(cursor)).isSymbolicLink()) {
       cursor = await realpath(cursor)

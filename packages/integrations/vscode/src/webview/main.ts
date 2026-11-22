@@ -99,7 +99,7 @@ async function main() {
       running: 'Checking recent commits…',
       empty: 'This branch has no commits to check yet.',
     },
-    onHandle: handle => (current = handle),
+    onHandle: shown => (current = shown),
     // A projection tab presents its projection alone on its pinned pair or the folder's; the editor's tab, title
     // actions and side bar are its shell.
     ...(config.projection

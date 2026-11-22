@@ -53,8 +53,8 @@ const examples = [
   },
 ]
 
-const {values: options} = parseArgs({options: {only: {type: 'string'}}})
-const only = options.only?.split(',')
+const {values: flags} = parseArgs({options: {only: {type: 'string'}}})
+const only = flags.only?.split(',')
 const drawn = examples.filter(example => !only || only.includes(example.name))
 
 function run(command, args, options = {}) {

@@ -2,14 +2,15 @@
 import assert from 'node:assert/strict'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
+import type {docsRead, docsSearch} from '../src/commands/docs.ts'
+import type {feedbackReport} from '../src/commands/feedback.ts'
+import type {contextReport, explainReport, mapReport} from '../src/commands/info.ts'
+import type {checkReport} from '../src/commands/work/check.ts'
+import type {generatedList} from '../src/commands/work/generated.ts'
 
+// The CLI reads the root when it loads, so it is imported after setting it.
 process.env.TOOLS_ROOT = fileURLToPath(new URL('fixtures/repo/', import.meta.url))
 const {default: cli, exitCodes} = await import('../src/cli.ts')
-const {docsRead, docsSearch} = await import('../src/commands/docs.ts')
-const {feedbackReport} = await import('../src/commands/feedback.ts')
-const {contextReport, explainReport, mapReport} = await import('../src/commands/info.ts')
-const {checkReport} = await import('../src/commands/work/check.ts')
-const {generatedList} = await import('../src/commands/work/generated.ts')
 
 async function run(argv: string[]): Promise<{output: string; exit: number}> {
   let output = ''

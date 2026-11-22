@@ -115,31 +115,31 @@ const schemaModel = comparisonModel(schemaBefore, schemaAfter, {
 test('a scoped model holds only what the scope shows, and never a relationship to an item it leaves out', () => {
   // The audit link is a change, but narrowed away (as a find would): its ends aren't shown, so it isn't kept.
   const shown = new Set(['orders.customer', 'orders>orders.customer', 'fk', 'orders', 'customers'])
-  const {model} = scopedModel(schemaModel, shown)
-  assert.deepEqual(model.entities.map(row => row.id).sort(), ['customers', 'orders', 'orders.customer'])
-  const ids = new Set(model.entities.map(row => row.id))
-  for (const row of model.relationships) {
+  const {model: scoped} = scopedModel(schemaModel, shown)
+  assert.deepEqual(scoped.entities.map(row => row.id).sort(), ['customers', 'orders', 'orders.customer'])
+  const shownIds = new Set(scoped.entities.map(row => row.id))
+  for (const row of scoped.relationships) {
     const item = row.after ?? row.before
-    assert.ok(ids.has(item.from) && ids.has(item.to), `${row.id} has both ends shown`)
+    assert.ok(shownIds.has(item.from) && shownIds.has(item.to), `${row.id} has both ends shown`)
   }
-  assert.deepEqual(model.relationships.map(row => row.id).sort(), ['fk', 'orders>orders.customer'])
-  assert.deepEqual(model.after.entities.map(item => item.id).sort(), ['customers', 'orders', 'orders.customer'])
+  assert.deepEqual(scoped.relationships.map(row => row.id).sort(), ['fk', 'orders>orders.customer'])
+  assert.deepEqual(scoped.after.entities.map(item => item.id).sort(), ['customers', 'orders', 'orders.customer'])
   // Steps keep their kept rows; one left with none is dropped.
   assert.deepEqual(
-    model.steps.map(step => step.entities.length + step.relationships.length),
+    scoped.steps.map(step => step.entities.length + step.relationships.length),
     [3],
   )
 })
 
 test('folded parts stand as one unchanged part of their entity, and opening a fold lists the parts it holds', () => {
   const shown = new Set(['orders.customer', 'orders>orders.customer', 'fk', 'orders', 'customers'])
-  const {model, folds} = scopedModel(schemaModel, shown, 'fold')
-  const fold = model.entities.find(row => row.id === 'pk-fold:orders')
+  const {model: folded, folds} = scopedModel(schemaModel, shown, 'fold')
+  const fold = folded.entities.find(row => row.id === 'pk-fold:orders')
   assert.ok(fold && isFold(fold.id))
   assert.equal(fold.after.label, '2 unchanged columns')
   assert.equal(fold.after.kind, 'column')
   assert.deepEqual([...folds.get('pk-fold:orders')].sort(), ['orders.id', 'orders.total'])
-  assert.ok(model.after.relationships.some(item => item.from === 'orders' && item.to === 'pk-fold:orders'))
+  assert.ok(folded.after.relationships.some(item => item.from === 'orders' && item.to === 'pk-fold:orders'))
   // An open fold shows its parts and stays, as the way to fold them again.
   const open = scopedModel(schemaModel, shown, 'fold', new Set(['pk-fold:orders'])).model
   const hide = open.entities.find(row => row.id === 'pk-fold:orders')
@@ -170,15 +170,20 @@ test("a renderer's context follows the relationships it names: a changed package
       {id: 'workspace>other', kind: 'depends-on', from: 'workspace', to: 'other'},
     ],
   })
-  const model = comparisonModel(graph('1'), graph('2'), {
+  const workspaceModel = comparisonModel(graph('1'), graph('2'), {
     protocolVersion: 0,
     changes: [{id: 'b', collection: 'entities', before: ['b'], after: ['b'], status: 'modified', correspondence: 'exact'}],
     steps: [{changes: ['b']}],
   })
-  assert.deepEqual([...followContext(model, new Set(['b']), {incoming: () => true})].sort(), ['a', 'a>b', 'workspace', 'workspace>a'])
+  assert.deepEqual([...followContext(workspaceModel, new Set(['b']), {incoming: () => true})].sort(), [
+    'a',
+    'a>b',
+    'workspace',
+    'workspace>a',
+  ])
   // Only the kinds named, and in the direction named.
-  assert.deepEqual([...followContext(model, new Set(['b']), {outgoing: () => true})], [])
-  assert.deepEqual([...followContext(model, new Set(['b']), {incoming: kind => kind === 'contains'})], [])
+  assert.deepEqual([...followContext(workspaceModel, new Set(['b']), {outgoing: () => true})], [])
+  assert.deepEqual([...followContext(workspaceModel, new Set(['b']), {incoming: kind => kind === 'contains'})], [])
 })
 
 test('a summary figure or find lays nothing out again: the layout filter stays while the scope does', () => {

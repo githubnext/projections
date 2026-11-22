@@ -99,15 +99,13 @@ export function findings(path, text) {
   const applicable = rules.filter(rule => rule.files(path))
   if (!applicable.length) return []
   // A Rust file's unit tests are its trailing #[cfg(test)] module; they aren't shipped.
-  if (rust.test(path)) {
-    const tests = text.search(/^#\[cfg\(test\)\]\s*\n\s*mod tests\b/m)
-    if (tests >= 0) text = text.slice(0, tests)
-  }
-  const lines = text.split(/\r?\n/)
+  const tests = rust.test(path) ? text.search(/^#\[cfg\(test\)\]\s*\n\s*mod tests\b/m) : -1
+  const source = tests >= 0 ? text.slice(0, tests) : text
+  const lines = source.split(/\r?\n/)
   if (/(^|\/)package\.json$/.test(path)) {
-    const scripts = JSON.parse(text).scripts ?? {}
+    const scripts = JSON.parse(source).scripts ?? {}
     return Object.entries(scripts).flatMap(([name, command]) => {
-      const number = lines.findIndex(text => text.trim().startsWith(`${JSON.stringify(name)}:`)) + 1
+      const number = lines.findIndex(scriptLine => scriptLine.trim().startsWith(`${JSON.stringify(name)}:`)) + 1
       return applicable
         .filter(rule => rule.pattern.test(command))
         .map(rule => ({rule: rule.name, line: number, text: `${JSON.stringify(name)}: ${JSON.stringify(command)}`}))
@@ -133,7 +131,7 @@ export function check(files, allowed) {
   const violations = []
   for (const [path, text] of files) {
     for (const finding of findings(path, text)) {
-      const entry = allowed.find(entry => entry.path === path && entry.rule === finding.rule)
+      const entry = allowed.find(candidate => candidate.path === path && candidate.rule === finding.rule)
       if (entry) used.add(entry)
       else violations.push({path, ...finding})
     }

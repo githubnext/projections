@@ -24,7 +24,7 @@ interface Failure {
 
 const depth = (failure: Failure) => (failure.instancePath ? failure.instancePath.split('/').length : 0)
 
-function reason(failure: Failure): string {
+function failureReason(failure: Failure): string {
   if (failure.keyword === 'enum') {
     return `must be one of ${(failure.params.allowedValues as unknown[]).map(item => JSON.stringify(item)).join(', ')}`
   }
@@ -39,7 +39,7 @@ function explain(failures: Failure[]): {pointer: string; reason: string} {
   const types = here.filter(failure => failure.keyword === 'type').map(failure => String(failure.params.type))
   return {
     pointer: deepest.instancePath,
-    reason: here.length && types.length === here.length ? `must be ${[...new Set(types)].join(' or ')}` : reason(here[0] ?? deepest),
+    reason: here.length && types.length === here.length ? `must be ${[...new Set(types)].join(' or ')}` : failureReason(here[0] ?? deepest),
   }
 }
 

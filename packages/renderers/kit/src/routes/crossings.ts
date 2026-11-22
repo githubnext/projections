@@ -140,7 +140,10 @@ function crossingsBetween(pa: readonly Point[], pb: readonly Point[], ignore: re
   const [headA, headB] = same(pa[0], pb[0]) ? [together(pa, pb, false), together(pb, pa, false)] : [0, 0]
   const [tailA, tailB] = same(pa.at(-1), pb.at(-1)) ? [together(pa, pb, true), together(pb, pa, true)] : [0, 0]
   const shared = (list: readonly Point[], index: number, head: number, tail: number) => index < head || index + 1 >= list.length - tail
-  const near = (point: Point) => (crossingWork.proximity++, ignore.some(at => Math.hypot(point.x - at.x, point.y - at.y) < radius))
+  const near = (point: Point) => {
+    crossingWork.proximity++
+    return ignore.some(at => Math.hypot(point.x - at.x, point.y - at.y) < radius)
+  }
   const cross = (o: Point, p: Point, q: Point) => (p.x - o.x) * (q.y - o.y) - (p.y - o.y) * (q.x - o.x)
   // A group of `pa`'s runs is tested only against the groups of `pb` its bounds reach, a run only against their runs
   // its bounds reach, and each segment only against those its own bounds reach: the same pairs, in the same order, as

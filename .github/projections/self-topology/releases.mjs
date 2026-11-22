@@ -60,7 +60,7 @@ export function workflowJobs(text) {
     else if (/^\S/.test(line)) break
     else if (jobs.length && !/^\s*#/.test(line)) jobs.at(-1).lines.push({text: line, line: index + 1})
   }
-  for (const job of jobs) job.condition = job.lines.map(({text}) => /^ {4}if:\s*(.*)$/.exec(text)?.[1]).find(Boolean) ?? ''
+  for (const job of jobs) job.condition = job.lines.map(entry => /^ {4}if:\s*(.*)$/.exec(entry.text)?.[1]).find(Boolean) ?? ''
   return jobs
 }
 

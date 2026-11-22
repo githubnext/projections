@@ -128,13 +128,16 @@ export function usePairSelection({
       setSource('live')
       setMarks(current => {
         const pair = current[projection] ?? {}
-        const after = pair.b ?? workingTree
+        const shownAfter = pair.b ?? workingTree
         if (one) {
           lastBefore.current[projection] = pair.a
-          return {...current, [projection]: {b: after}}
+          return {...current, [projection]: {b: shownAfter}}
         }
         const restored = lastBefore.current[projection] ?? projectionDefault.a ?? 'HEAD'
-        return {...current, [projection]: {a: restored === after ? (after === 'HEAD' ? 'HEAD~1' : 'HEAD') : restored, b: after}}
+        return {
+          ...current,
+          [projection]: {a: restored === shownAfter ? (shownAfter === 'HEAD' ? 'HEAD~1' : 'HEAD') : restored, b: shownAfter},
+        }
       })
     },
     [projection, projectionDefault, setSource, setMarks],

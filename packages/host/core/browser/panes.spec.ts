@@ -18,13 +18,13 @@ async function open(page: Page, query: string) {
 
 /** Records, inside a pane, whether any element of `id` gets `data-projections-pulse`, and for how long. */
 async function watchPulse(frame: FrameLocator, id: string) {
-  await frame.locator('body').evaluate((body, entity) => {
+  await frame.locator('body').evaluate((body, watchedId) => {
     const record = {seen: false, start: 0, end: 0}
     ;(window as unknown as {pulse: typeof record}).pulse = record
     new MutationObserver(records => {
       for (const change of records) {
         const element = change.target as Element
-        if (element.getAttribute('data-entity-id') !== entity) continue
+        if (element.getAttribute('data-entity-id') !== watchedId) continue
         if (element.hasAttribute('data-projections-pulse')) {
           record.seen = true
           record.start ||= performance.now()

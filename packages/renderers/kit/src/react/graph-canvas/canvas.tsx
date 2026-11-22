@@ -63,7 +63,7 @@ interface Laid {
  * host-driven change emphasis.
  */
 export function GraphCanvas(props: GraphCanvasProps) {
-  const {model, schedule, progress, selectedId, onSelect, comparing, visibleIds} = props
+  const {model, schedule, comparing, visibleIds} = props
   // Under the Changes scope the model is a view of the whole one, which a renderer's own `source` (its input model) is
   // in All: Changes and All are views of one document, so the drawing stays while the other is laid out, and moves to it.
   const source = props.scope?.all ?? props.source

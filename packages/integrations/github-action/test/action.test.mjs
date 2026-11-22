@@ -37,7 +37,7 @@ const cli = path.join(root, `packages/cli/dist/projections${process.platform ===
 const {version: cliVersion} = JSON.parse(readFileSync(path.join(root, 'packages/cli/package.json'), 'utf8'))
 const schema = JSON.parse(readFileSync(path.join(root, 'packages/schemas/schemas/artifact/v0.json'), 'utf8'))
 const validateManifest = new Ajv2020({strict: true, strictTuples: false}).compile(schema)
-const sha = character => character.repeat(40)
+const repeatedSha = character => character.repeat(40)
 
 test('release assets follow GitHub CLI precompiled extension names; tags come from input or the action ref', () => {
   assert.equal(releaseAsset('Linux', 'X64'), 'gh-projections-linux-amd64')
@@ -55,7 +55,7 @@ test('release assets follow GitHub CLI precompiled extension names; tags come fr
   assert.equal(releaseTag('', 'latest'), undefined)
   assert.equal(releaseTag('', ''), undefined)
   assert.equal(releaseTag(undefined, undefined), undefined)
-  assert.equal(releaseTag('', sha('a')), undefined)
+  assert.equal(releaseTag('', repeatedSha('a')), undefined)
   assert.equal(releaseTag('v0', 'v1.0.0'), 'v0')
   assert.equal(releaseTag('1', ''), 'v1')
   const sums = `${'a'.repeat(64)}  gh-projections-linux-amd64\n${'b'.repeat(64)} *gh-projections-darwin-arm64\n`
@@ -81,25 +81,28 @@ test('a major tag installs its newest stable release, never a prerelease, draft 
 })
 
 test('events: pull_request compares merge base to head with the base definition; push shows one commit; others are refused', () => {
-  const subject = eventSubject('pull_request', {pull_request: {number: 7, base: {sha: sha('a')}, head: {sha: sha('b')}}})
-  assert.deepEqual(subject, {kind: 'pull-request', number: 7, base: sha('a'), head: sha('b')})
-  assert.deepEqual(cliArguments({...subject, mergeBase: sha('c')}, {trust: false, output: '/tmp/x.json', artifacts: ['/tmp/base']}), [
-    'compare',
-    `${sha('c')}..${sha('b')}`,
-    '--all',
-    '--definition',
-    'base',
-    '--json',
-    '--output',
-    '/tmp/x.json',
-    '--in-place',
-    '--artifact',
-    '/tmp/base',
-  ])
-  assert.deepEqual(cliArguments({kind: 'push', ref: 'refs/heads/main', revision: sha('d')}, {trust: true, output: 'o'}), [
+  const subject = eventSubject('pull_request', {pull_request: {number: 7, base: {sha: repeatedSha('a')}, head: {sha: repeatedSha('b')}}})
+  assert.deepEqual(subject, {kind: 'pull-request', number: 7, base: repeatedSha('a'), head: repeatedSha('b')})
+  assert.deepEqual(
+    cliArguments({...subject, mergeBase: repeatedSha('c')}, {trust: false, output: '/tmp/x.json', artifacts: ['/tmp/base']}),
+    [
+      'compare',
+      `${repeatedSha('c')}..${repeatedSha('b')}`,
+      '--all',
+      '--definition',
+      'base',
+      '--json',
+      '--output',
+      '/tmp/x.json',
+      '--in-place',
+      '--artifact',
+      '/tmp/base',
+    ],
+  )
+  assert.deepEqual(cliArguments({kind: 'push', ref: 'refs/heads/main', revision: repeatedSha('d')}, {trust: true, output: 'o'}), [
     'show',
     '--all',
-    sha('d'),
+    repeatedSha('d'),
     '--json',
     '--output',
     'o',
@@ -135,14 +138,21 @@ test('events: pull_request compares merge base to head with the base definition;
     '.github/workflows/ci.yml',
   )
   assert.equal(workflowPath('mallory/delivery/.github/workflows/ci.yml@refs/heads/main', 'octo-org/delivery'), undefined)
-  assert.deepEqual(eventSubject('push', {after: sha('d')}, 'refs/heads/main'), {kind: 'push', ref: 'refs/heads/main', revision: sha('d')})
+  assert.deepEqual(eventSubject('push', {after: repeatedSha('d')}, 'refs/heads/main'), {
+    kind: 'push',
+    ref: 'refs/heads/main',
+    revision: repeatedSha('d'),
+  })
   assert.throws(() => eventSubject('push', {after: '0'.repeat(40)}, 'refs/heads/main'), /deleted/)
   assert.throws(() => eventSubject('pull_request_target', {}), /secrets/)
-  assert.throws(() => eventSubject('pull_request', {pull_request: {number: 7, base: {sha: 'main'}, head: {sha: sha('b')}}}), /base or head/)
+  assert.throws(
+    () => eventSubject('pull_request', {pull_request: {number: 7, base: {sha: 'main'}, head: {sha: repeatedSha('b')}}}),
+    /base or head/,
+  )
 })
 
 test('a batch splits into one verified document per projection, error items keep bounded diagnostics, and the comment summarizes them', () => {
-  const subject = {kind: 'pull-request', number: 7, base: sha('a'), head: sha('b'), mergeBase: sha('c')}
+  const subject = {kind: 'pull-request', number: 7, base: repeatedSha('a'), head: repeatedSha('b'), mergeBase: repeatedSha('c')}
   const comparison = {format: 'projections.comparison', version: 0}
   const batch = {
     format: 'projections.batch',
@@ -250,7 +260,7 @@ test('the summary tells each comparison in steps and changes, escapes repository
   }
   const manifest = {
     repository: {owner: 'octo-org', name: 'delivery'},
-    subject: {kind: 'pull-request', number: 7, mergeBase: sha('c'), head: sha('b')},
+    subject: {kind: 'pull-request', number: 7, mergeBase: repeatedSha('c'), head: repeatedSha('b')},
     run: {id: 10},
     trust: true,
     projections: [
@@ -310,7 +320,7 @@ test('the summary tells each comparison in steps and changes, escapes repository
   const push = summaryMarkdown(
     {
       ...manifest,
-      subject: {kind: 'push', ref: 'refs/heads/main', revision: sha('d')},
+      subject: {kind: 'push', ref: 'refs/heads/main', revision: repeatedSha('d')},
       projections: [{id: 'services', status: 'extracted', path: 'x'}],
     },
     new Map([['services', after]]),
@@ -528,7 +538,7 @@ esac
 })
 
 test('without a base artifact, the base side runs in a workspace the environment prepares (trusted)', () => {
-  const {directory, repo, base, head} = repository()
+  const {directory, repo, base} = repository()
   // An extractor that needs installed dependencies, and the steps that install them.
   git(repo, 'checkout', '-q', 'main')
   writeFileSync(path.join(repo, '.gitignore'), 'deps/\n')
@@ -668,9 +678,9 @@ test('action.yml passes inputs through the environment, pins its actions and kee
   // A composite action's run steps see its ref and repository only through these expressions, not GITHUB_ACTION_*.
   const install = action.runs.steps.find(step => step.id === 'install')
   assert.equal(install.env.ACTION_REF, '${{ github.action_ref }}')
-  const collect = action.runs.steps.find(step => step.id === 'collect')
-  assert.equal(collect.env.ACTION_REPOSITORY, '${{ github.action_repository }}')
-  assert.equal(collect.env.ACTION_REF, '${{ github.action_ref }}')
+  const collectStep = action.runs.steps.find(step => step.id === 'collect')
+  assert.equal(collectStep.env.ACTION_REPOSITORY, '${{ github.action_repository }}')
+  assert.equal(collectStep.env.ACTION_REF, '${{ github.action_ref }}')
   // The base step downloads with the token and runs nothing; the artifact reaches extraction as a directory.
   const base = action.runs.steps.find(step => step.id === 'base')
   assert.equal(base.env.GH_TOKEN, '${{ inputs.token }}')
@@ -678,7 +688,7 @@ test('action.yml passes inputs through the environment, pins its actions and kee
   assert.equal(action.runs.steps.find(step => step.id === 'collect').env.PROJECTIONS_BASE_ARTIFACT, '${{ steps.base.outputs.directory }}')
   // Neither extraction nor rendering (which runs renderer code in a browser) sees a token.
   for (const id of ['collect', 'snapshots']) {
-    const step = action.runs.steps.find(step => step.id === id)
+    const step = action.runs.steps.find(candidate => candidate.id === id)
     assert.equal(
       Object.keys(step.env).some(name => /TOKEN/.test(name)),
       false,
@@ -744,18 +754,18 @@ test('snapshots: listed IDs, file names, what each projection renders, and where
   assert.equal(repositoryDirectory('/docs/images/'), 'docs/images')
   for (const bad of ['', '../x', 'a/../b', '.git/hooks', 'a b']) assert.throws(() => repositoryDirectory(bad), /snapshots-path/)
 
-  const push = {kind: 'push', ref: 'refs/heads/main', revision: sha('d')}
+  const push = {kind: 'push', ref: 'refs/heads/main', revision: repeatedSha('d')}
   const inputs = {commit: true, path: '.github/projections/snapshots', branch: '', message: ''}
   const event = {repository: {default_branch: 'main'}}
   assert.deepEqual(snapshotTarget(push, event, inputs, 'octo-org/delivery'), {
     branch: 'main',
     directory: '.github/projections/snapshots',
-    expected: sha('d'),
+    expected: repeatedSha('d'),
     message: 'Update Projections snapshots',
   })
   assert.match(snapshotTarget({...push, ref: 'refs/heads/feature'}, event, inputs, 'o/r').reason, /default branch \(main\)/)
   assert.match(snapshotTarget(push, event, {...inputs, commit: false}, 'o/r').reason, /snapshots-commit/)
-  const pull = {kind: 'pull-request', number: 7, base: sha('a'), head: sha('b'), mergeBase: sha('c')}
+  const pull = {kind: 'pull-request', number: 7, base: repeatedSha('a'), head: repeatedSha('b'), mergeBase: repeatedSha('c')}
   const pullEvent = {
     repository: {default_branch: 'main'},
     pull_request: {base: {ref: 'main'}, head: {ref: 'feature', repo: {full_name: 'octo-org/delivery'}}},
@@ -783,7 +793,7 @@ test('snapshots: listed IDs, file names, what each projection renders, and where
 test('the pull request comment shows before and after snapshots, theme-aware, or links the snapshots artifact', () => {
   const manifest = {
     repository: {owner: 'octo-org', name: 'delivery'},
-    subject: {kind: 'pull-request', number: 7, mergeBase: sha('c'), head: sha('b')},
+    subject: {kind: 'pull-request', number: 7, mergeBase: repeatedSha('c'), head: repeatedSha('b')},
     run: {id: 10},
     trust: false,
     projections: [
@@ -797,7 +807,7 @@ test('the pull request comment shows before and after snapshots, theme-aware, or
   ].map(file => ({...file, path: snapshotName(file.id, file.side, file.theme)}))
   const index = {snapshots}
   const images = Object.fromEntries(
-    snapshots.map(file => [file.path, `https://github.com/octo-org/delivery/raw/${sha('e')}/pull/7/${file.path}`]),
+    snapshots.map(file => [file.path, `https://github.com/octo-org/delivery/raw/${repeatedSha('e')}/pull/7/${file.path}`]),
   )
   const body = commentBody(manifest, new Map(), {snapshots: {index, images, artifactUrl: 'https://example.invalid/artifact'}})
   assert.match(body, /#### Snapshots/)
@@ -1016,7 +1026,7 @@ function snapshotDirectory(subject, files) {
 }
 
 test('publish commits snapshots to the default branch only when they changed and the branch has not moved', async () => {
-  const revision = sha('d')
+  const revision = repeatedSha('d')
   const api = await fakeGitHub({branches: {main: revision}})
   try {
     const subject = {kind: 'push', ref: 'refs/heads/main', revision}
@@ -1072,7 +1082,7 @@ test('publish commits snapshots to the default branch only when they changed and
 test('publish puts pull request snapshots on a dedicated branch for the comment, never from forks, and a read-only token only warns', async () => {
   const api = await fakeGitHub()
   try {
-    const subject = {kind: 'pull-request', number: 7, base: sha('a'), head: sha('b'), mergeBase: sha('c')}
+    const subject = {kind: 'pull-request', number: 7, base: repeatedSha('a'), head: repeatedSha('b'), mergeBase: repeatedSha('c')}
     const directory = snapshotDirectory(subject, [
       ['files.before.light.png', 'before'],
       ['files.after.light.png', 'after'],
@@ -1102,7 +1112,7 @@ test('publish puts pull request snapshots on a dedicated branch for the comment,
   }
   const denied = await fakeGitHub({fail: 403})
   try {
-    const directory = snapshotDirectory({kind: 'push', ref: 'refs/heads/main', revision: sha('d')}, [['files.light.png', 'x']])
+    const directory = snapshotDirectory({kind: 'push', ref: 'refs/heads/main', revision: repeatedSha('d')}, [['files.light.png', 'x']])
     const result = await publish(denied, directory, {repository: {default_branch: 'main'}}, {INPUT_SNAPSHOTS_COMMIT: 'true'})
     assert.equal(result.status, 0, result.stderr)
     assert.match(result.stdout, /::warning title=Projections snapshots::Could not commit the snapshots .*contents: write/)

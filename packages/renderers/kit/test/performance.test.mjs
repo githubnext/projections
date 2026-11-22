@@ -15,7 +15,7 @@ import {compare, entity, extraction, relationship, sizedNodes} from './engine.mj
  * run per growth. These budgets keep that from creeping back up.
  */
 const renderers = new URL('../../', import.meta.url)
-const options = {
+const rendererOptions = {
   graph: {},
   'graph-horizontal': {orientation: 'horizontal'},
   dag: {},
@@ -33,15 +33,15 @@ const runsOf = async work => {
 
 async function scenarios() {
   const directory = new URL('graph/', renderers)
-  const {scenarios} = JSON.parse(await readFile(new URL('scenarios.json', directory), 'utf8'))
+  const {scenarios: listed} = JSON.parse(await readFile(new URL('scenarios.json', directory), 'utf8'))
   const load = async value => (typeof value === 'string' ? JSON.parse(await readFile(new URL(value, directory), 'utf8')) : value)
   const result = []
-  for (const scenario of scenarios) {
+  for (const scenario of listed) {
     const renderer = scenario.renderer ?? 'graph'
     if (renderer === 'dependencies') continue
     result.push({
       scenario,
-      options: options[renderer],
+      options: rendererOptions[renderer],
       before: scenario.before && (await load(scenario.before)),
       after: scenario.after && (await load(scenario.after)),
       extraction: scenario.extraction && (await load(scenario.extraction)),
@@ -72,10 +72,10 @@ function denseGraph(seed) {
 }
 
 test('a layout without a reference takes two ELK runs, and one more for each time its gap grows', async () => {
-  for (const {scenario, options, extraction} of await scenarios()) {
-    if (!extraction) continue
+  for (const {scenario, options, extraction: revision} of await scenarios()) {
+    if (!revision) continue
     const {result: layout, runs} = await runsOf(async () =>
-      layoutGraph(await sizedNodes(extraction.entities), extraction.relationships, options),
+      layoutGraph(await sizedNodes(revision.entities), revision.relationships, options),
     )
     const budget = options.compound ? 1 : 2
     assert.ok(runs <= budget + (layout.layerGap > layerGap ? growths : 0), `${scenario.id}: ${runs} ELK runs`)
@@ -94,7 +94,7 @@ test('crossing tests stay within their budget while a hub many routes converge o
   const hub = JSON.parse(await readFile(new URL('graph/fixtures/module-graph-hub-heavy.json', renderers), 'utf8'))
   // Renamed, so the layout runs here rather than coming from the recent layouts other tests left (see `layoutGraph`).
   const renamed = id => `budget:${id}`
-  const entities = hub.entities.map(entity => ({...entity, id: renamed(entity.id)}))
+  const entities = hub.entities.map(node => ({...node, id: renamed(node.id)}))
   const relationships = hub.relationships.map(row => ({...row, id: renamed(row.id), from: renamed(row.from), to: renamed(row.to)}))
   const before = {...crossingWork}
   await layoutGraph(await sizedNodes(entities), relationships, {})
@@ -140,7 +140,7 @@ test("a transition's steps take their union's order, alignment and gap: one ELK 
 test('a first try that must grow to the widest gap stops routing, and the layout comes from the wider try', async () => {
   const hub = JSON.parse(await readFile(new URL('graph/fixtures/module-graph-hub-heavy.json', renderers), 'utf8'))
   const renamed = id => `widest:${id}`
-  const entities = hub.entities.map(entity => ({...entity, id: renamed(entity.id)}))
+  const entities = hub.entities.map(node => ({...node, id: renamed(node.id)}))
   const relationships = hub.relationships.map(row => ({...row, id: renamed(row.id), from: renamed(row.from), to: renamed(row.to)}))
   const before = {...routingWork}
   const layout = await layoutGraph(await sizedNodes(entities), relationships, {})

@@ -14,7 +14,10 @@ function host() {
   let next = 1
   const view = {
     crypto: {getRandomValues: bytes => bytes.fill(7)},
-    setTimeout: (callback, ms) => (timers.set(next, {callback, ms}), next++),
+    setTimeout: (callback, ms) => {
+      timers.set(next, {callback, ms})
+      return next++
+    },
     clearTimeout: id => timers.delete(id),
     addEventListener: (type, listener) => listeners.add(listener),
     removeEventListener: (type, listener) => listeners.delete(listener),

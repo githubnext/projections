@@ -21,11 +21,11 @@ module.exports = async function framing({folder, api, shownSummary, tabShows}) {
     const found = await api.control('packages', {op: 'anchors'})
     return found.frame && found.anchors.length ? found : undefined
   }
-  const framing = found => JSON.stringify(found.anchors.map(item => item.anchor && [item.anchor.x, item.anchor.y, item.anchor.width]))
+  const anchorsOf = found => JSON.stringify(found.anchors.map(item => item.anchor && [item.anchor.x, item.anchor.y, item.anchor.width]))
   let previous
   const opening = await until('the opening framing settled', async () => {
     const found = await changedAnchors()
-    const settled = found && previous && framing(found) === framing(previous) && found.anchors.some(item => item.anchor)
+    const settled = found && previous && anchorsOf(found) === anchorsOf(previous) && found.anchors.some(item => item.anchor)
     previous = found
     return settled ? found : undefined
   })

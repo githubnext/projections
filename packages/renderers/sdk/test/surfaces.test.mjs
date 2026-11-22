@@ -5,9 +5,9 @@ import {defaultThemeTokens} from '../dist/protocol.js'
 /** WCAG contrast ratio of two opaque #rrggbb colors. */
 function contrast(a, b) {
   const luminance = hex => {
-    const [r, g, b] = [1, 3, 5].map(index => parseInt(hex.slice(index, index + 2), 16) / 255)
+    const [red, green, blue] = [1, 3, 5].map(index => parseInt(hex.slice(index, index + 2), 16) / 255)
     const linear = value => (value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
-    return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+    return 0.2126 * linear(red) + 0.7152 * linear(green) + 0.0722 * linear(blue)
   }
   const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x)
   return (high + 0.05) / (low + 0.05)

@@ -120,14 +120,15 @@ function distance(a: string, b: string): number {
 /** How far (OKLab ΔE) a palette slot keeps from the language colors in use. */
 const clearance = 0.06
 
+/** The hue each meaning takes: danger red, warning amber, success green, info blue. */
+const toneHues: Record<Exclude<KindTone, 'neutral'>, KindHue> = {danger: 'red', warning: 'amber', success: 'green', info: 'blue'}
+
 /** The theme token a definition's kind color paints with (`presentation.kinds.<kind>.color`). */
 export function kindColorToken(color: KindColor): ThemeTokenName {
   if (color === 'neutral') return otherToken
   const slot = (kindHues as readonly string[]).indexOf(toneHues[color as Exclude<KindTone, 'neutral'>] ?? color) + 1
   return `chart-${slot || 1}` as ThemeTokenName
 }
-/** The hue each meaning takes: danger red, warning amber, success green, info blue. */
-const toneHues: Record<Exclude<KindTone, 'neutral'>, KindHue> = {danger: 'red', warning: 'amber', success: 'green', info: 'blue'}
 
 /** How `categoryPalette` assigns colors beyond its defaults. */
 export interface PaletteOptions {
@@ -218,9 +219,9 @@ export function categoryPalette(
     let slot = 0
     // The preferred slot, else the first free one in palette order (the first eight avoid the change hues), each clear
     // of the language colors in use; failing that, any free slot.
-    const order = [preferred, ...Array.from({length: slots}, (_, index) => index + 1).filter(index => index !== preferred)]
+    const slotOrder = [preferred, ...Array.from({length: slots}, (_, index) => index + 1).filter(index => index !== preferred)]
     for (const strict of [true, false]) {
-      for (const candidate of order) {
+      for (const candidate of slotOrder) {
         if (slot) break
         if (taken.has(candidate)) continue
         const near = modes.some(({tokens, languages}) => {
@@ -245,6 +246,9 @@ export function categoryPalette(
   }
 }
 
+/** How far (OKLab ΔE) a calm slot must stand from the colors in use before the change-hued slots are considered. */
+const distinctClearance = 0.09
+
 /**
  * The free slot farthest from every color in use (the smallest OKLab distance over both themes, largest first). The
  * first eight slots avoid the change hues, so they come first while one of them is clearly apart from what is used;
@@ -258,8 +262,8 @@ function farthestSlot(
   const colors = modes.map(mode => ({tokens: mode.tokens, used: used(mode)}))
   const score = (slot: number) =>
     Math.min(
-      ...colors.map(({tokens, used}) =>
-        Math.min(Infinity, ...used.map(color => distance(tokens[`chart-${slot}` as ThemeTokenName], color))),
+      ...colors.map(({tokens, used: inUse}) =>
+        Math.min(Infinity, ...inUse.map(color => distance(tokens[`chart-${slot}` as ThemeTokenName], color))),
       ),
     )
   const best = (candidates: number[]) =>
@@ -277,8 +281,6 @@ function farthestSlot(
   const any = best(Array.from({length: slots}, (_, index) => index + 1))
   return any.slot
 }
-/** How far (OKLab ΔE) a calm slot must stand from the colors in use before the change-hued slots are considered. */
-const distinctClearance = 0.09
 
 /**
  * The host legend for a palette: the heaviest categories with their swatches,

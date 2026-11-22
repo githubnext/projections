@@ -93,11 +93,11 @@ export function useInspectorHandle({
         return true
       },
       summary() {
-        const state = handleState.current
+        const current = handleState.current
         return inspectorSummary(
-          state,
+          current,
           controllers.get(),
-          state.projection ? handleActions.current.switcherStatus(state.projection) : undefined,
+          current.projection ? handleActions.current.switcherStatus(current.projection) : undefined,
         )
       },
     }

@@ -49,15 +49,18 @@ const existing = (function walk(directory) {
 
 // The engine's rule table, without the descriptions it doesn't need: a primitive type is its name; an enum
 // `{enum: values}`; an array `{array: type}`; a record `{record: name, fields}`.
-const shape = field =>
-  field.type === 'enum'
+function shape(field) {
+  return field.type === 'enum'
     ? {enum: [...field.values]}
     : field.type === 'array'
       ? {array: shape(field.items)}
       : field.type === 'record'
         ? {record: field.name, fields: fieldsOf(field.fields)}
         : field.type
-const fieldsOf = fields => Object.entries(fields).map(([name, field]) => ({name, type: shape(field), required: field.required === true}))
+}
+function fieldsOf(fields) {
+  return Object.entries(fields).map(([name, field]) => ({name, type: shape(field), required: field.required === true}))
+}
 const rules = dataRules.map(({schema, vocabulary, collection, kinds, fields}) => ({
   schema,
   vocabulary: vocabulary ?? null,
@@ -96,7 +99,7 @@ const changed = [...expected].filter(([path, text]) => {
 })
 if (check) {
   if (stale.length || changed.length || filesChanged.length || staleInternal.length) {
-    for (const path of [...stale, ...changed.map(([path]) => path)]) console.error(`schemas/${path} is out of date`)
+    for (const path of [...stale, ...changed.map(([changedPath]) => changedPath)]) console.error(`schemas/${path} is out of date`)
     for (const path of staleInternal) console.error(`${path} is out of date`)
     for (const [path] of filesChanged) console.error(`${path} is out of date`)
     console.error('Run `npm run generate --workspace @githubnext/projections-schemas`.')

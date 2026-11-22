@@ -130,7 +130,7 @@ export function useLiveChanges({
       const pairRefs =
         current.live || current.manual ? [current.marked.a, current.marked.b].filter((ref): ref is string => Boolean(ref)) : []
       forgetExtracted(set.stale)
-      setRows(rows => withoutStale(rows, set, current.projection, pairRefs))
+      setRows(previous => withoutStale(previous, set, current.projection, pairRefs))
       if (current.live && current.runnable && current.projection && !current.manual) {
         const refs = await staleRefs(api!, current, set, pairRefs, abort.signal, setRevisions)
         if (refs.length) {

@@ -1,5 +1,5 @@
 // Change and accent colors drawn inside one another (probe call `accents`).
-import type {AccentFamily, AccentPaint, NestedAccent} from '../types.js'
+import type {AccentPaint, NestedAccent} from '../types.js'
 import {describe, visible, visuallyHidden} from './paint.js'
 import {familyHues, paintsOf} from './accents/hues.js'
 import type {Paint} from './accents/hues.js'
@@ -39,17 +39,17 @@ function paintOf(painted: Painted, paint: Paint): AccentPaint {
  * Whether `inner` lies inside `outer`'s shape: its box, or for a circle or ellipse, the ellipse in its box (a round
  * `inner` by its own circle, so one packed against the edge still counts).
  */
-function inside(inner: DOMRect, outer: DOMRect, round: boolean, innerRound: boolean): boolean {
+function inside(inner: DOMRect, outer: DOMRect, outerRound: boolean, innerRound: boolean): boolean {
   // A horizontal or vertical line has a box of no height or width.
   if (!(inner.width > 0 || inner.height > 0)) return false
-  if (round && innerRound) {
+  if (outerRound && innerRound) {
     const distance = Math.hypot(
       inner.left + inner.width / 2 - (outer.left + outer.width / 2),
       inner.top + inner.height / 2 - (outer.top + outer.height / 2),
     )
     return distance + Math.max(inner.width, inner.height) / 2 <= Math.min(outer.width, outer.height) / 2 + 0.5
   }
-  if (!round) {
+  if (!outerRound) {
     return (
       inner.left >= outer.left - 0.5 &&
       inner.top >= outer.top - 0.5 &&

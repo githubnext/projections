@@ -56,7 +56,7 @@ for (const color of ['light', 'dark'] as const) {
     const failures: string[] = []
     for (const state of states) {
       for (const id of wellFormed) {
-        await page.evaluate(([id, state]) => window.ring(id, state), [id, state] as const)
+        await page.evaluate(([itemId, ringState]) => window.ring(itemId, ringState), [id, state] as const)
         const [geometry] = await ringGeometry(page.mainFrame(), id)
         if (!geometry) {
           failures.push(`${id} (${state}): no unit`)
@@ -64,7 +64,7 @@ for (const color of ['light', 'dark'] as const) {
         }
         const report = await ringPixelReport(page, page.mainFrame(), geometry, {
           label: `${id} (${state})`,
-          ring: () => page.evaluate(([id, state]) => window.ring(id, state), [id, state] as const),
+          ring: () => page.evaluate(([itemId, ringState]) => window.ring(itemId, ringState), [id, state] as const),
           clear: () => page.evaluate(() => window.ring(null)),
         })
         failures.push(...report.failures)
@@ -77,9 +77,9 @@ for (const color of ['light', 'dark'] as const) {
 /** The `rings` check's failures for `id`, selected. */
 async function check(page: Page, id: string): Promise<string[]> {
   await page.evaluate(() => window.ring(null))
-  await page.evaluate(id => window.probe('ringNeutral', id), id)
-  await page.evaluate(id => window.ring(id, 'selected'), id)
-  return page.evaluate(id => window.probe<string[]>('rings', {id, state: 'selected'}), id)
+  await page.evaluate(itemId => window.probe('ringNeutral', itemId), id)
+  await page.evaluate(itemId => window.ring(itemId, 'selected'), id)
+  return page.evaluate(itemId => window.probe<string[]>('rings', {id: itemId, state: 'selected'}), id)
 }
 
 test('the rings check passes well-formed items and names the fix for ill-formed ones', async ({page}) => {
@@ -146,10 +146,10 @@ test('the pixel check names a ring inside or outside its item', async ({page}) =
   for (const [name, offset] of Object.entries(cases)) {
     const set = (on: boolean) =>
       page.evaluate(
-        ([on, offset]) => {
+        ([drawn, outlineOffset]) => {
           const card = document.querySelector<HTMLElement>('.card')!
-          card.style.outline = on ? '3px solid #0969da' : ''
-          card.style.outlineOffset = on ? offset : ''
+          card.style.outline = drawn ? '3px solid #0969da' : ''
+          card.style.outlineOffset = drawn ? outlineOffset : ''
           return new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
         },
         [on, offset] as const,

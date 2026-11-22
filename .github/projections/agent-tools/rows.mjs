@@ -108,7 +108,7 @@ export function surfaceRow(surface, {tools, app, vscode, canvas, paths}) {
 /** One tool's row: the surfaces that expose it, and what calling it does (writes, needs trust). */
 export function toolRow(tool, {app, canvas}) {
   const surfaces = ordered([...tool.on.keys()])
-  const facts = tool.facts ?? {}
+  const toolFacts = tool.facts ?? {}
   const linked = Boolean(app?.linked.includes(tool.name))
   const openInput = canvas?.openInput === tool.name
   const where = surfaces
@@ -120,12 +120,13 @@ export function toolRow(tool, {app, canvas}) {
           : surface,
     )
     .join(', ')
-  const effect = facts.readOnly === undefined ? [] : [facts.readOnly ? 'read-only' : facts.destructive ? 'destructive' : 'writes']
+  const effect =
+    toolFacts.readOnly === undefined ? [] : [toolFacts.readOnly ? 'read-only' : toolFacts.destructive ? 'destructive' : 'writes']
   const flags = [
     ...effect,
-    ...(facts.trust && facts.trust !== 'none' ? [`trust: ${facts.trust}`] : []),
-    ...(facts.view ? ['view'] : []),
-    ...(facts.appOnly ? ['app only'] : []),
+    ...(toolFacts.trust && toolFacts.trust !== 'none' ? [`trust: ${toolFacts.trust}`] : []),
+    ...(toolFacts.view ? ['view'] : []),
+    ...(toolFacts.appOnly ? ['app only'] : []),
   ]
   return {
     id: `tool:${tool.name}`,
@@ -134,10 +135,10 @@ export function toolRow(tool, {app, canvas}) {
     data: {
       signature: `${tool.name} on ${where}${flags.map(flag => ` · ${flag}`).join('')}`,
       surfaces,
-      ...(facts.readOnly === undefined ? {} : {readOnly: facts.readOnly, destructive: facts.destructive}),
-      ...(facts.trust ? {trust: facts.trust} : {}),
-      ...(facts.view ? {view: true} : {}),
-      ...(facts.appOnly ? {appOnly: true} : {}),
+      ...(toolFacts.readOnly === undefined ? {} : {readOnly: toolFacts.readOnly, destructive: toolFacts.destructive}),
+      ...(toolFacts.trust ? {trust: toolFacts.trust} : {}),
+      ...(toolFacts.view ? {view: true} : {}),
+      ...(toolFacts.appOnly ? {appOnly: true} : {}),
       ...(linked ? {showsView: true} : {}),
       ...(openInput ? {canvasOpenInput: true} : {}),
     },

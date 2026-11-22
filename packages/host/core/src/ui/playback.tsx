@@ -76,6 +76,8 @@ export function PlayButton({
   )
 }
 
+const motionNote = 'Reduced motion: playback shows an endpoint immediately. The slider still supports manual inspection.'
+
 /**
  * The "Comparison playback" group: the one round `PlayButton`, the step buttons, and the exact "Transition" slider
  * (Home and End show either revision, Page Up and Page Down move by step) with its percent at a fixed width. The
@@ -241,5 +243,3 @@ export function PlaybackExtras({
     </>
   )
 }
-
-const motionNote = 'Reduced motion: playback shows an endpoint immediately. The slider still supports manual inspection.'

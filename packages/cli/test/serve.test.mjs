@@ -54,7 +54,10 @@ function serve(t, root, args = []) {
       id,
       reply: new Promise((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error(`No reply to ${method} ${JSON.stringify(params)}\n${stderr}`)), 60_000)
-        pending.set(id, message => (clearTimeout(timer), resolve(message)))
+        pending.set(id, message => {
+          clearTimeout(timer)
+          resolve(message)
+        })
         send({id, method, ...(params === undefined ? {} : {params})})
       }),
     }
@@ -67,17 +70,17 @@ function serve(t, root, args = []) {
   }
   const notification = (predicate, timeoutMs = 20_000) =>
     new Promise((resolve, reject) => {
-      const check = () => {
+      const timer = setTimeout(() => {
+        waiters.delete(check)
+        reject(new Error(`No notification after ${timeoutMs} ms: ${JSON.stringify(notifications)}`))
+      }, timeoutMs)
+      function check() {
         const found = notifications.find(predicate)
         if (!found) return
         waiters.delete(check)
         clearTimeout(timer)
         resolve(found)
       }
-      const timer = setTimeout(() => {
-        waiters.delete(check)
-        reject(new Error(`No notification after ${timeoutMs} ms: ${JSON.stringify(notifications)}`))
-      }, timeoutMs)
       waiters.add(check)
       check()
     })
@@ -145,7 +148,7 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
   assert.equal(started.status, 202)
   const job = await poll(
     () => backend.request('GET', `/api/jobs/${started.body.id}`),
-    job => job.body.status !== 'running',
+    latest => latest.body.status !== 'running',
   )
   assert.equal(job.body.status, 'completed', JSON.stringify(job.body.diagnostics))
   assert.equal(job.body.extraction.format, 'projections.extraction')
@@ -163,7 +166,7 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
     result => result.body.sweep.status !== 'running',
   )
   assert.equal(swept.body.sweep.status, 'completed', swept.body.sweep.error)
-  const cell = swept.body.sweep.cells.find(cell => cell.projection === 'repository-map' && cell.before === before)
+  const cell = swept.body.sweep.cells.find(candidate => candidate.projection === 'repository-map' && candidate.before === before)
   assert.ok(cell, JSON.stringify(swept.body.sweep.cells))
   const query = new URLSearchParams({projection: 'repository-map', before: cell.before, after: cell.after})
   const thumbnail = await backend.request('GET', `/api/sweep/thumbnail?${query}`)
@@ -253,7 +256,7 @@ test('serve --stdio stops on shutdown and exit, honors --trust, and requires --s
   const job = await backend.request('POST', '/api/jobs', {projectionId: 'services-node', before: 'HEAD'})
   const extracted = await poll(
     () => backend.request('GET', `/api/jobs/${job.body.id}`),
-    job => job.body.status !== 'running',
+    latest => latest.body.status !== 'running',
   )
   assert.equal(extracted.body.status, 'completed', JSON.stringify(extracted.body.diagnostics))
   assert.equal((await backend.call('shutdown').reply).result, null)
@@ -283,7 +286,7 @@ test(
     const job = await backend.request('POST', '/api/jobs', {projectionId: 'services-node', before: 'HEAD'})
     const refused = await poll(
       () => backend.request('GET', `/api/jobs/${job.body.id}`),
-      job => job.body.status !== 'running',
+      latest => latest.body.status !== 'running',
     )
     assert.equal(refused.body.diagnostics[0].code, 'TRUST_REQUIRED')
     backend.child.kill('SIGTERM')

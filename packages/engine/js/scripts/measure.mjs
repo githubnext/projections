@@ -44,14 +44,14 @@ try {
       let nativeResult
       let wasmResult
       for (let i = 0; i < repetitions; i++) {
-        let start = performance.now()
+        const start = performance.now()
         nativeResult = await native[operation](...args)
         nativeTimes.push(performance.now() - start)
         const browser = await harness.page.evaluate(
-          async ({operation, args}) => {
-            const start = performance.now()
-            const result = await globalThis.engine[operation](...args)
-            return {result, ms: performance.now() - start}
+          async request => {
+            const browserStart = performance.now()
+            const result = await globalThis.engine[request.operation](...request.args)
+            return {result, ms: performance.now() - browserStart}
           },
           {operation, args},
         )

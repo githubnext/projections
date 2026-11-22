@@ -55,7 +55,7 @@ test('code statistics keys the share chart with the colours its slices paint, an
   expect(await stage.measure('legends')).toEqual([])
   // Each item's swatch (a language's own colour, or a theme token) is exactly the colour of the slice with that label.
   const swatches = legend!.items.map(item => item.color ?? `var(--projections-${item.token})`)
-  const painted = await stage.frame.locator('body').evaluate((body, swatches) => {
+  const painted = await stage.frame.locator('body').evaluate((body, colors) => {
     const resolve = (value: string) => {
       const probe = document.createElement('span')
       probe.style.color = value
@@ -74,7 +74,7 @@ test('code statistics keys the share chart with the colours its slices paint, an
     })
     return {
       slices,
-      resolve: swatches.map(resolve),
+      resolve: colors.map(resolve),
     }
   }, swatches)
   for (const [index, item] of legend!.items.entries()) {

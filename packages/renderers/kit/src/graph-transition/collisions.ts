@@ -28,8 +28,8 @@ export function moveCollides(a: GraphLayout, b: GraphLayout): boolean {
     return false
   }
   const ids = [...a.points.keys()].filter(id => b.points.has(id))
-  const box = (layout: GraphLayout, id: string) => ({...layout.points.get(id)!, ...layout.sizes.get(id)!})
-  const boxes = ids.map(id => ({id, from: box(a, id), to: box(b, id)}))
+  const boxOf = (layout: GraphLayout, id: string) => ({...layout.points.get(id)!, ...layout.sizes.get(id)!})
+  const boxes = ids.map(id => ({id, from: boxOf(a, id), to: boxOf(b, id)}))
   for (let i = 0; i < boxes.length; i++) {
     for (let j = i + 1; j < boxes.length; j++) {
       const p = boxes[i]!,

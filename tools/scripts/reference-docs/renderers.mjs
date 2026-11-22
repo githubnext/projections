@@ -26,11 +26,11 @@ custom renderer is. Comparison modes are the ways it presents a comparison, in t
 
 ${table(
   ['Renderer', 'Handles', 'Comparison modes'],
-  found.map(({directory, manifest}) => [`[${manifest.title}](#${manifest.name})`, manifest.handles.map(code).join(', '), modes(manifest)]),
+  found.map(({manifest}) => [`[${manifest.title}](#${manifest.name})`, manifest.handles.map(code).join(', '), modes(manifest)]),
 )}
 
 ${found
-  .map(({directory, pkg, manifest, scenarios, scenariosPath}) => {
+  .map(({pkg, manifest, scenarios, scenariosPath}) => {
     return `## ${code(manifest.name)}
 
 ${sentence(pkg.description)} See [its page](${to(`docs/builtins/renderers/${manifest.name}.md`)}).

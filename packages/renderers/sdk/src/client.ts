@@ -188,6 +188,7 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
   const {messages, replay} = resumeSession(view, channel)
   const rings = options.rings === false ? null : documentRings(view)
   const documents = documentRequests(view, post, message => new RendererConnectionError(message))
+  const subscribers = new Set<(message: HostMessage) => void>()
   const deliver = (message: HostMessage) => {
     if (message.type === 'document') return documents.answer(message)
     if (message.type === 'select') rings?.controller.set({selected: message.id})
@@ -208,7 +209,6 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
   }
   view.addEventListener('message', listener)
   const observers = new Set<ResizeObserver>()
-  const subscribers = new Set<(message: HostMessage) => void>()
   const round = (value: number) => Math.round(value * 100) / 100
   const clamp = (value: number) => Math.min(rendererLimits.maxHeight, Math.max(0, Math.ceil(value)))
   const client: RendererClient = {
@@ -283,10 +283,10 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
       if (!parseRendererMessage(message, channel)) throw new RendererConnectionError('Invalid control value; see ControlValue')
       post({type: 'control', id, value})
     },
-    subscribe(listener) {
-      subscribers.add(listener)
+    subscribe(subscriber) {
+      subscribers.add(subscriber)
       return () => {
-        subscribers.delete(listener)
+        subscribers.delete(subscriber)
       }
     },
     observeHeight(element) {
@@ -362,16 +362,16 @@ export function applyEnvironment(environment: RendererEnvironment, element: HTML
 export function afterPaint(callback: () => void, view: Window = window, fallbackMs = 200): () => void {
   let second = 0
   let done = false
-  const finish = () => {
+  const first = view.requestAnimationFrame(() => {
+    second = view.requestAnimationFrame(finish)
+  })
+  const timer = view.setTimeout(finish, fallbackMs)
+  function finish() {
     if (done) return
     done = true
     view.clearTimeout(timer)
     callback()
   }
-  const first = view.requestAnimationFrame(() => {
-    second = view.requestAnimationFrame(finish)
-  })
-  const timer = view.setTimeout(finish, fallbackMs)
   return () => {
     done = true
     view.cancelAnimationFrame(first)

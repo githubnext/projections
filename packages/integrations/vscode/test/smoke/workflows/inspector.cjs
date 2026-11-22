@@ -74,7 +74,7 @@ module.exports = async function inspector({folder}) {
   await control({op: 'click', selector: evidence})
   const editor = await until('the evidence file', async () =>
     vscode.window.visibleTextEditors.find(
-      editor => editor.document.uri.fsPath.startsWith(folder.fsPath) && editor.document.uri.fsPath.endsWith('package.json'),
+      visible => visible.document.uri.fsPath.startsWith(folder.fsPath) && visible.document.uri.fsPath.endsWith('package.json'),
     ),
   )
   assert.ok(editor)

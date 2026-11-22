@@ -202,6 +202,8 @@ export function createTextSizer(
   const wrapped = (role: TextRole, text: string, room: number) => wrapText(text, room, piece => width(role, piece) + slack)
   const lines = (role: TextRole, text: string, room: number) => wrapped(role, text, room).length
   const rowChrome = chrome.rowPadLeft + chrome.marker + chrome.rowGap + chrome.rowGap + chrome.glyph + chrome.rowPadRight
+  const pill = (text: string) => width('type', text) + chrome.pillPad
+  const arrow = () => width('kind', '→') + 2 * chrome.valueGap
   /** One line's width for a row's text (the columns and the name of a key, a column's name and type). */
   const rowText = (row: RowText): number =>
     row.kind === 'column'
@@ -221,8 +223,6 @@ export function createTextSizer(
     (text.status ?? []).reduce((sum, word, index) => sum + (index ? chrome.statusGap : 0) + chrome.statusIcon + width('status', word), 0)
   const status = (card: string) =>
     Math.ceil(Math.max(0, ...cards(card).map(statusOf)) + (cards(card).some(text => text.status?.length) ? textMetrics.slack : 0))
-  const pill = (text: string) => width('type', text) + chrome.pillPad
-  const arrow = () => width('kind', '→') + 2 * chrome.valueGap
   const headerText = (card: CardText, cell: number) =>
     (card.rename ? pill(card.rename) + arrow() + pill(card.label) : width('name', card.label)) +
     (card.kind ? chrome.headerGap + width('kind', card.kind) : 0) +

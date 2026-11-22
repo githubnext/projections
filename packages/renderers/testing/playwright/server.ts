@@ -120,7 +120,7 @@ function backend(command: string, args: string[], cwd: string, env: NodeJS.Proce
     if (message.error) call.fail(new Error(message.error.message))
     else call.done(message.result)
   })
-  const send = (message: object) => {
+  const write = (message: object) => {
     if (!ended) child.stdin.write(`${JSON.stringify({jsonrpc: '2.0', ...message})}\n`)
   }
   return {
@@ -129,10 +129,10 @@ function backend(command: string, args: string[], cwd: string, env: NodeJS.Proce
       const id = ++next
       return new Promise<T>((done, fail) => {
         pending.set(id, {done: value => done(value as T), fail})
-        send({id, method, ...(params === undefined ? {} : {params})})
+        write({id, method, ...(params === undefined ? {} : {params})})
         signal?.addEventListener('abort', () => {
           if (pending.delete(id)) {
-            send({method: '$/cancelRequest', params: {id}})
+            write({method: '$/cancelRequest', params: {id}})
             fail(new Error('Cancelled'))
           }
         })

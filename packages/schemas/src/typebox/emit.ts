@@ -38,9 +38,10 @@ export function emit(documents: {name: string; title: string; schema: TSchema}[]
       return home.name === undefined ? base || '#' : `${base}#/$defs/${home.name}`
     }
     // Maps of names to schemas keep their order; only schema keywords are ordered.
-    const names = (value: Record<string, unknown>) =>
-      Object.fromEntries(Object.entries(value).map(([key, item]) => [key, serialize(item, false)]))
-    const serialize = (value: unknown, top: boolean): unknown => {
+    function names(value: Record<string, unknown>) {
+      return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, serialize(item, false)]))
+    }
+    function serialize(value: unknown, top: boolean): unknown {
       if (Array.isArray(value)) return value.map(item => serialize(item, false))
       if (!value || typeof value !== 'object') return value
       const home = top ? undefined : homeOf(value)

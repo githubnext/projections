@@ -187,7 +187,7 @@ const render = (model, diff, highlighting = 1) =>
       schedule: [],
       progress: 1,
       highlighting,
-      emphasis: row => (highlighting && row.status !== 'unchanged' ? highlighting : 0),
+      emphasis: item => (highlighting && item.status !== 'unchanged' ? highlighting : 0),
       comparing: true,
       diff,
       selectedId: null,
@@ -246,8 +246,8 @@ test("a single-column foreign key's change is said under its column, never as th
   key.data = {...key.data, onDelete: 'Cascade'}
   const model = comparisonModel(before, after, await engine.compare(before, after))
   const {union, lines} = analyse(model)
-  const [column] = [...union.markers].find(([, marker]) => marker.key === row(model, key.id).id)
-  assert.deepEqual(lines.get(column), [{key: 'on-delete', word: 'On delete changed', before: 'default', after: 'Cascade'}])
+  const [markerColumn] = [...union.markers].find(([, marker]) => marker.key === row(model, key.id).id)
+  assert.deepEqual(lines.get(markerColumn), [{key: 'on-delete', word: 'On delete changed', before: 'default', after: 'Cascade'}])
   const {frame} = createDatabaseDiff(model, {available: 1300})
   assert.ok(JSON.stringify(frame).includes('On delete changed'), 'the diff draws the line under the column')
   assert.deepEqual(
@@ -271,10 +271,10 @@ test("a marker key's changes are named for that key, though its column has other
   key.data = {...key.data, databaseName: 'OrderLine_order_fkey'}
   const model = comparisonModel(before, after, await engine.compare(before, after))
   const {union, lines} = analyse(model)
-  const [column, marker] = [...union.markers].find(([, item]) => item.key === row(model, key.id).id)
+  const [markerColumn, marker] = [...union.markers].find(([, item]) => item.key === row(model, key.id).id)
   assert.notEqual(marker.title, 'Foreign key', 'the marker stands for more than the key')
   assert.deepEqual(
-    lines.get(column).map(line => line.word),
+    lines.get(markerColumn).map(line => line.word),
     ['Foreign key renamed'],
   )
 })
@@ -292,8 +292,8 @@ for (const [what, edit] of [
   [
     'a changed foreign-key column',
     after => {
-      const column = after.entities.find(entity => entity.kind === 'column' && entity.label === 'customerId')
-      column.data = {...column.data, nullable: !column.data?.nullable}
+      const foreignKeyColumn = after.entities.find(entity => entity.kind === 'column' && entity.label === 'customerId')
+      foreignKeyColumn.data = {...foreignKeyColumn.data, nullable: !foreignKeyColumn.data?.nullable}
     },
   ],
 ]) {
@@ -308,7 +308,9 @@ for (const [what, edit] of [
     const scope = changesScope(model, {query: '', changesOnly: true, ids: null})
     const shown = new Set([...scope.shown, ...databaseContext(model, scope.changes)])
     const narrowed = scopedModel(model, shown, 'fold').model
-    const tables = narrowed.entities.filter(row => (row.after ?? row.before).kind === 'table').map(row => (row.after ?? row.before).label)
+    const tables = narrowed.entities
+      .filter(entry => (entry.after ?? entry.before).kind === 'table')
+      .map(entry => (entry.after ?? entry.before).label)
     assert.deepEqual(tables.sort(), ['Customer', 'Order'])
     const {frame} = createDatabaseDiff(narrowed, {available: 1300})
     const label = id => (row(narrowed, id)?.after ?? row(narrowed, id)?.before)?.label

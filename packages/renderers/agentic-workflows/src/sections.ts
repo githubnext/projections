@@ -110,7 +110,7 @@ function permissions(data: Data): Value[] {
 }
 
 /** A safe output handler's limits in words: `max 3`, `to `o/r``, `staged`. */
-function limits(handler: Data): string {
+function handlerLimits(handler: Data): string {
   const parts: string[] = []
   if (handler.max !== undefined) parts.push(`max ${code(handler.max)}${handler.maxDeclared === false ? ' (default)' : ''}`)
   if (handler.targetRepo !== undefined) parts.push(`to ${code(handler.targetRepo)}`)
@@ -123,21 +123,21 @@ function limits(handler: Data): string {
 }
 
 function outputs(data: Data): Value[] {
-  const outputs = record(data.safeOutputs)
-  const handlers = list(outputs.handlers).map(record)
+  const safeOutputs = record(data.safeOutputs)
+  const handlers = list(safeOutputs.handlers).map(record)
   return [
     ...handlers.map(handler => {
       const kind = text(handler.kind)
-      const words = limits(handler)
-      return {key: `output:${kind}`, text: codeSpan(kind) + (words ? ` ${words}` : '') + importedOutput(outputs, kind)}
+      const words = handlerLimits(handler)
+      return {key: `output:${kind}`, text: codeSpan(kind) + (words ? ` ${words}` : '') + importedOutput(safeOutputs, kind)}
     }),
-    ...strings(outputs.jobs).map(job => ({key: `job:${job}`, text: `job ${codeSpan(job)}`})),
-    ...(outputs.staged === true ? [{key: 'staged', text: 'every output staged'}] : []),
+    ...strings(safeOutputs.jobs).map(job => ({key: `job:${job}`, text: `job ${codeSpan(job)}`})),
+    ...(safeOutputs.staged === true ? [{key: 'staged', text: 'every output staged'}] : []),
   ]
 }
 
-const importedOutput = (outputs: Data, kind: string) => {
-  const sources = strings(record(outputs.sources)[kind])
+function importedOutput(safeOutputs: Data, kind: string) {
+  const sources = strings(record(safeOutputs.sources)[kind])
   return sources.length ? ` via ${sources.map(codeSpan).join(', ')}` : ''
 }
 

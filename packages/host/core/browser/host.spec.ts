@@ -62,7 +62,7 @@ test('forged, foreign and malformed messages are ignored; only the channel selec
   const src = await page.locator('iframe.ph-frame').getAttribute('src')
   const channel = new URLSearchParams(new URL(src!).hash.slice(1)).get('channel')
   // The host page itself (not the frame) cannot speak for the renderer even with the right channel.
-  await page.evaluate(channel => window.postMessage({projections: 0, channel, type: 'select', id: 'checkout'}, '*'), channel)
+  await page.evaluate(sent => window.postMessage({projections: 0, channel: sent, type: 'select', id: 'checkout'}, '*'), channel)
   await page.waitForTimeout(200)
   await expect(page.getByLabel('Host selection', {exact: true})).toHaveText('payments')
   await expect(view(page)).toHaveAttribute('data-renderer-status', 'ready')

@@ -128,14 +128,14 @@ let modules = 0
 let files = 0
 
 const posix = path => relative(root, path).split(sep).join('/')
-const pattern = glob =>
+const globPattern = glob =>
   new RegExp(
     `^${glob
       .split('*')
       .map(part => part.replace(/[.+?^${}()|[\]\\/]/g, '\\$&'))
       .join('[^/]+')}${glob.endsWith('/') ? '' : '$'}`,
   )
-const matches = (path, globs) => globs.some(glob => pattern(glob).test(path))
+const matches = (path, globs) => globs.some(glob => globPattern(glob).test(path))
 function escapes(target) {
   const path = relative(root, target)
   return path === '..' || path.startsWith(`..${sep}`) || isAbsolute(path)

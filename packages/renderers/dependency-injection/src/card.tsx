@@ -167,7 +167,7 @@ export function routeLinks(
   }
   // Every S the arrows turn on, then again with the runs that share a gap on separate tracks (see the kit's `routeTracks`).
   const first = links.map(link => ({link, turns: route(link).turns ?? []}))
-  const turns = first.flatMap(({link, turns}) => turns.map((turn, index) => ({...turn, key: link.key, index})))
+  const turns = first.flatMap(({link, turns: linkTurns}) => linkTurns.map((turn, index) => ({...turn, key: link.key, index})))
   const tracks = new Map<string, number[]>()
   routeTracks(turns).forEach((track, index) => {
     const turn = turns[index]!

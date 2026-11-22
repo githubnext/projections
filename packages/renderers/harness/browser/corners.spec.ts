@@ -62,8 +62,8 @@ for (const colorMode of ['light', 'dark'] as const) {
       await stage.measure('settle')
       const target = stage.frame.locator(selector).first()
       const options = {label: selector, ...('frame' in rest ? {frame: rest.frame} : {})}
-      const ids = await target.evaluate((element, rows) => {
-        const all = [...element.querySelectorAll(rows)].filter(row => row.getAttribute('data-entity-id'))
+      const ids = await target.evaluate((element, rowSelector) => {
+        const all = [...element.querySelectorAll(rowSelector)].filter(row => row.getAttribute('data-entity-id'))
         const bottom = [...all].sort((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom)
         return [...new Set([all[0], bottom[0]].filter(row => row !== undefined).map(row => row.getAttribute('data-entity-id')!))]
       }, rows as string)
@@ -72,7 +72,13 @@ for (const colorMode of ['light', 'dark'] as const) {
         ['at rest', async () => {}],
         ...ids.flatMap((id): [string, () => Promise<void>][] => [
           [`${id} selected`, () => stage.select(id)],
-          [`${id} hovered`, async () => (await stage.select(null), await stage.hover(id))],
+          [
+            `${id} hovered`,
+            async () => {
+              await stage.select(null)
+              await stage.hover(id)
+            },
+          ],
         ]),
       ]
       for (const [state, enter] of states) {

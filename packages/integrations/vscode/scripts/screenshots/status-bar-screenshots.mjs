@@ -63,9 +63,9 @@ const choices = [
   },
 ]
 const keybindings = choices.map(choice => ({key: choice.key, command: 'projections.setChoice', args: choice.args}))
+const {app, window} = await launch({repository, keybindings})
 /** Presses a choice's keybinding, as Playwright names the keys. */
 const press = choice => window.keyboard.press(`Control+Alt+Shift+Digit${choice.key.at(-1)}`)
-const {app, window} = await launch({repository, keybindings})
 try {
   await command(window, 'View: Show Projections')
   const sidebar = window.locator('.part.sidebar')

@@ -101,7 +101,7 @@ function writeCompiled(binary) {
     locks[side] = compile(binary, side)
     for (const [name, from] of Object.entries(stale)) locks[side][name] = locks[from][name]
     const workflows = join(fixtures, side, '.github/workflows')
-    for (const name of readdirSync(workflows).filter(name => name.endsWith('.lock.yml'))) rmSync(join(workflows, name))
+    for (const name of readdirSync(workflows).filter(file => file.endsWith('.lock.yml'))) rmSync(join(workflows, name))
     for (const [name, text] of Object.entries(locks[side])) writeFileSync(join(workflows, `${name}.lock.yml`), text)
   }
 }

@@ -276,8 +276,8 @@ function basis(parts, {verbatim = ['model']} = {}) {
   return result
 }
 /** A basis's digest: `sha256:` over its canonical JSON. With a declared path, the generation store's key. */
-function basisDigest(basis) {
-  return sha256(canonicalJson(basis))
+function basisDigest(of) {
+  return sha256(canonicalJson(of))
 }
 const key = (path, digest) => `${path}\u0000${digest}`
 /**
@@ -301,9 +301,9 @@ async function generations(request) {
   }
   return {
     size: values.size,
-    get: (path, basis) => values.get(key(path, basisDigest(basis))),
-    async generate(path, basis, produce) {
-      const stored = values.get(key(path, basisDigest(basis)))
+    get: (path, from) => values.get(key(path, basisDigest(from))),
+    async generate(path, from, produce) {
+      const stored = values.get(key(path, basisDigest(from)))
       return stored !== void 0 ? stored : await produce()
     },
   }

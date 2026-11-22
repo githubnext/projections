@@ -135,7 +135,7 @@ export async function schemas() {
         const rules = (items.allOf ?? [items]).map(rule =>
           rule.if ? {kinds: rule.if.properties.kind.enum, item: rule.then} : {kinds: undefined, item: rule},
         )
-        const rows = rules.flatMap(({kinds, item}) => {
+        const fieldRows = rules.flatMap(({kinds, item}) => {
           const data = item.properties?.data ?? {}
           const required = new Set(data.required ?? [])
           return Object.entries(data.properties ?? {}).map(([field, definition]) => [
@@ -147,7 +147,7 @@ export async function schemas() {
           ])
         })
         return [
-          `### ${collection === 'entities' ? 'Entities' : 'Relationships'}\n\n${table(['Kind', 'Field', 'Type', 'Required', 'Description'], rows)}`,
+          `### ${collection === 'entities' ? 'Entities' : 'Relationships'}\n\n${table(['Kind', 'Field', 'Type', 'Required', 'Description'], fieldRows)}`,
         ]
       })
       return sections.length

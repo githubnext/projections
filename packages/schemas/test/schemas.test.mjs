@@ -374,7 +374,7 @@ test('scenarios schema accepts inline, path, single-extraction, custom-comparato
 
 test('scenarios schema rejects unknown fields, mixed forms, misplaced comparators and invalid identifiers or paths', () => {
   const base = {id: 'a', title: 'A', extraction}
-  const document = scenario => ({format: 'projections.scenarios', version: 0, renderer: 'graph', scenarios: [scenario]})
+  const documentOf = scenario => ({format: 'projections.scenarios', version: 0, renderer: 'graph', scenarios: [scenario]})
   for (const invalid of [
     {...base, extra: true},
     {...base, before: extraction},
@@ -406,13 +406,13 @@ test('scenarios schema rejects unknown fields, mixed forms, misplaced comparator
     {...base, group: ''},
     {...base, description: 'x'.repeat(4097)},
   ]) {
-    assert.equal(validate('scenarios', document(invalid)), false, JSON.stringify(invalid))
+    assert.equal(validate('scenarios', documentOf(invalid)), false, JSON.stringify(invalid))
   }
   assert.equal(validate('scenarios', {format: 'projections.scenarios', version: 0, scenarios: [base]}), false, 'no renderer')
-  assert.equal(validate('scenarios', {...document(base), version: 1}), false)
-  assert.equal(validate('scenarios', {...document(base), extra: true}), false)
+  assert.equal(validate('scenarios', {...documentOf(base), version: 1}), false)
+  assert.equal(validate('scenarios', {...documentOf(base), extra: true}), false)
   assert.equal(
-    validate('scenarios', {...document(base), scenarios: Array.from({length: 1001}, (_, index) => ({...base, id: `s${index}`}))}),
+    validate('scenarios', {...documentOf(base), scenarios: Array.from({length: 1001}, (_, index) => ({...base, id: `s${index}`}))}),
     false,
   )
 })
@@ -427,10 +427,10 @@ test('every renderer package scenarios file has unique scenario IDs and referenc
   assert.ok(packages.length >= 7, packages.join())
   for (const name of packages) {
     const file = new URL(`${name}/scenarios.json`, renderers)
-    const document = JSON.parse(readFileSync(file, 'utf8'))
-    const ids = document.scenarios.map(scenario => scenario.id)
+    const scenariosDocument = JSON.parse(readFileSync(file, 'utf8'))
+    const ids = scenariosDocument.scenarios.map(scenario => scenario.id)
     assert.equal(new Set(ids).size, ids.length, `${name}: duplicate scenario IDs`)
-    for (const scenario of document.scenarios) {
+    for (const scenario of scenariosDocument.scenarios) {
       for (const side of ['before', 'after', 'extraction']) {
         if (typeof scenario[side] === 'string') {
           assert.ok(existsSync(new URL(scenario[side], file)), `${name}/${scenario.id}: ${scenario[side]}`)

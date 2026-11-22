@@ -49,7 +49,7 @@ export function typeFacts(checker: ts.TypeChecker, text: TypeText) {
       .sort((a, b) => (a.text < b.text ? -1 : a.text > b.text ? 1 : 0))
     return {text: type(value, new Set(), expand), union}
   }
-  const textFact = (text: string): Json => ({text, union: [{text}]})
+  const textFact = (written: string): Json => ({text: written, union: [{text: written}]})
   /** Generic parameters as api/v0 contract facts: each name, its constraint and its default. */
   const typeParameterFacts = (parameters: readonly ts.TypeParameterDeclaration[] | undefined): Json[] =>
     (parameters ?? []).map(parameter => ({

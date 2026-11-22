@@ -79,24 +79,22 @@ export function createBridge(
       if (abort.signal.aborted) return
     }
     if (latest !== since) return answer()
-    const waiter = {
-      since,
-      settle: (changes: WorkspaceChanges | undefined) => {
-        clearTimeout(timer)
-        abort.signal.removeEventListener('abort', cancel)
-        if (changes) settle(id, abort, {type: 'response', status: 200, body: changes})
-        else answer()
-      },
-    }
-    const cancel = () => {
-      waiting.delete(waiter)
-      clearTimeout(timer)
-    }
+    const waiter = {since, settle: finish}
     const timer = setTimeout(() => {
       waiting.delete(waiter)
       abort.signal.removeEventListener('abort', cancel)
       settle(id, abort, {type: 'response', status: 200, body: {generation: since, changes: [], complete: true}})
     }, waitMs)
+    function finish(changes: WorkspaceChanges | undefined) {
+      clearTimeout(timer)
+      abort.signal.removeEventListener('abort', cancel)
+      if (changes) settle(id, abort, {type: 'response', status: 200, body: changes})
+      else answer()
+    }
+    function cancel() {
+      waiting.delete(waiter)
+      clearTimeout(timer)
+    }
     abort.signal.addEventListener('abort', cancel, {once: true})
     waiting.add(waiter)
   }

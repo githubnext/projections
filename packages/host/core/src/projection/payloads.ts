@@ -99,9 +99,9 @@ export function createRendererPayloads(): Selector<[RendererPayloadsInput], Rend
         progressPayload: ProgressPayload,
         diffProgress: ProgressPayload | undefined,
         endpoints: Record<Side, ProgressPayload>,
-        environment: RendererEnvironment,
+        rendererEnvironment: RendererEnvironment,
         init: InitPayload,
-      ): RendererPayloads => ({progressPayload, diffProgress, endpoints, environment, init}),
+      ): RendererPayloads => ({progressPayload, diffProgress, endpoints, environment: rendererEnvironment, init}),
     )
     // A static diff gets no scrubbing progress. Turning highlighting off reaches it as one progress at 1 with no emphasis;
     // once that was sent, turning it back on sends full emphasis again.

@@ -110,9 +110,9 @@ test('mode icons never look like playback: Animated is a clapperboard, distinct 
   const icons = (selector: string) =>
     page.locator(selector).evaluateAll(elements => elements.map(element => element.getAttribute('data-icon')).filter(Boolean))
   const modes = await icons('.ph-toolbar [role="radiogroup"][aria-label="Comparison mode"] svg[data-icon]')
-  const playback = await icons('.ph-toolbar [role="group"][aria-label="Comparison playback"] svg[data-icon]')
+  const playbackIcons = await icons('.ph-toolbar [role="group"][aria-label="Comparison playback"] svg[data-icon]')
   expect(modes).toEqual(['diff', 'columns-2', 'clapperboard', 'square-split-horizontal'])
-  expect(playback).toEqual(expect.arrayContaining(['play', 'step-back', 'step-forward']))
+  expect(playbackIcons).toEqual(expect.arrayContaining(['play', 'step-back', 'step-forward']))
   for (const icon of modes) expect(['play', 'pause', 'step-back', 'step-forward']).not.toContain(icon)
   // Every mode icon has a label or a tooltip.
   for (const radio of await page.getByRole('radiogroup', {name: 'Comparison mode'}).getByRole('radio').all()) {

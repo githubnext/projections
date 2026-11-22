@@ -62,12 +62,12 @@ interface Run {
 /** Resolves after `ms`, or as soon as `signal` aborts, leaving no timer behind. */
 function sleep(ms: number, signal: AbortSignal) {
   return new Promise<void>(resolve => {
-    const done = () => {
+    const timer = setTimeout(done, ms)
+    function done() {
       clearTimeout(timer)
       signal.removeEventListener('abort', done)
       resolve()
     }
-    const timer = setTimeout(done, ms)
     signal.addEventListener('abort', done, {once: true})
   })
 }
@@ -301,7 +301,6 @@ export class ExtractionCoordinator {
   }
 }
 
-const withRow = (rows: Rows, projection: string, ref: string, row: RowState): Rows => ({
-  ...rows,
-  [projection]: {...rows[projection], [ref]: row},
-})
+function withRow(rows: Rows, projection: string, ref: string, row: RowState): Rows {
+  return {...rows, [projection]: {...rows[projection], [ref]: row}}
+}

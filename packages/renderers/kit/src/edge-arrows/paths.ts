@@ -2,12 +2,12 @@
 import {arrowHeadLength as edgeArrowHeadLength, arrowHeadReach} from '../arrowhead.js'
 import type {Point} from '../edge-arrows.js'
 
-export function roundedRoute(points: Point[], end: Point, maxRadius = 36): string {
-  points = points.filter((point, index) => !index || point.x !== points[index - 1]!.x || point.y !== points[index - 1]!.y)
-  points = points.filter((point, index) => {
-    if (!index || index === points.length - 1) return true
-    const before = points[index - 1]!,
-      after = points[index + 1]!
+export function roundedRoute(course: Point[], end: Point, maxRadius = 36): string {
+  const distinct = course.filter((point, index) => !index || point.x !== course[index - 1]!.x || point.y !== course[index - 1]!.y)
+  const points = distinct.filter((point, index) => {
+    if (!index || index === distinct.length - 1) return true
+    const before = distinct[index - 1]!,
+      after = distinct[index + 1]!
     return (point.x - before.x) * (after.y - point.y) !== (point.y - before.y) * (after.x - point.x)
   })
   const path = [`M${points[0]!.x},${points[0]!.y}`]

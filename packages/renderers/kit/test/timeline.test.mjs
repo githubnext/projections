@@ -228,7 +228,6 @@ test('endpoints show exactly one side and steps without a declared kind still an
 })
 
 test('list rows collapse after fading out and open before fading in', async () => {
-  const {comparisonModel, createStagedTimeline} = await import('../dist/index.js')
   const {before, after} = build(star)(1, 1)
   const model = comparisonModel(before, after, await compare(before, after))
   const timeline = createStagedTimeline(model, scheduleSteps(model))

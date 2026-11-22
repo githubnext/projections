@@ -52,7 +52,10 @@ function applyMode(applied: Applied, state: ViewerState, view: View, echo: boole
 function applySelection(applied: Applied, state: ViewerState, handle: InspectorHandle, view: View, echo: boolean) {
   const selection = state.selection ?? null
   if (echo) applied.selection = true
-  else if ((view.selectedRow?.id ?? null) === selection || handle.selectEntity(selection)) applied.selection = applied.found = true
+  else if ((view.selectedRow?.id ?? null) === selection || handle.selectEntity(selection)) {
+    applied.selection = true
+    applied.found = true
+  }
   // An entity the view doesn't present yet is selected once it does; one it never presents stays unselected.
   else if (view.rows.length) applied.selection = true
 }
@@ -66,7 +69,8 @@ export function apply(page: ViewerPage) {
   const applied = page.applied
   const summary = handle.summary()
   if (summary.status === 'failed' || summary.status === 'trust') {
-    applied.mode = applied.selection = true
+    applied.mode = true
+    applied.selection = true
     return
   }
   const view = handle.view()

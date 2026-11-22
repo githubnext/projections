@@ -22,7 +22,7 @@ const engine = createNativeEngine()
 const root = fileURLToPath(new URL('../../../../', import.meta.url))
 const published = join(root, 'packages/schemas/schemas')
 const ajv = new Ajv2020({allErrors: false, strictTuples: false})
-for (const file of readdirSync(published, {recursive: true}).filter(file => /v\d+\.json$/.test(file))) {
+for (const file of readdirSync(published, {recursive: true}).filter(entry => /v\d+\.json$/.test(entry))) {
   ajv.addSchema(JSON.parse(readFileSync(join(published, file), 'utf8')))
 }
 const extractionSchema = ajv.getSchema(schemaUrl('extraction'))
@@ -190,7 +190,7 @@ function data(schema, vocabulary, collection, kind) {
 }
 
 /** An extraction in `rule`'s schema, declaring its vocabulary, whose item under test is index 0 of the collection. */
-function extraction({schema, vocabulary}, collection, kind, itemData) {
+function extractionWith({schema, vocabulary}, collection, kind, itemData) {
   const endpoint = id => ({id, kind: 'endpoint', label: id, data: data(schema, vocabulary, 'entities', 'endpoint')})
   return {
     protocolVersion: 0,
@@ -208,15 +208,15 @@ test('every typed data field: valid values pass the engine and the schema; wrong
     for (const kind of rule.kinds ?? ['anything']) {
       const base = data(rule.schema, rule.vocabulary, rule.collection, kind)
       const label = `${rule.schema} ${rule.vocabulary ?? ''} ${rule.collection} ${kind}`
-      assert.equal((await engineVerdict(extraction(rule, rule.collection, kind, base))).ok, true, label)
-      assert.equal(schemaVerdict(extraction(rule, rule.collection, kind, base)).ok, true, label)
+      assert.equal((await engineVerdict(extractionWith(rule, rule.collection, kind, base))).ok, true, label)
+      assert.equal(schemaVerdict(extractionWith(rule, rule.collection, kind, base)).ok, true, label)
       for (const [name, field] of Object.entries(rule.fields)) {
         const path = `/extraction/${rule.collection}/0/data/${name}`
-        const accepted = extraction(rule, rule.collection, kind, {...base, [name]: validOf(field)})
+        const accepted = extractionWith(rule, rule.collection, kind, {...base, [name]: validOf(field)})
         assert.equal((await engineVerdict(accepted)).ok, true, `${label} ${name}`)
         assert.equal(schemaVerdict(accepted).ok, true, `${label} ${name}`)
         for (const {value, below} of invalidOf(field)) {
-          const rejected = extraction(rule, rule.collection, kind, {...base, [name]: value})
+          const rejected = extractionWith(rule, rule.collection, kind, {...base, [name]: value})
           const verdict = await engineVerdict(rejected)
           assert.equal(verdict.ok, false, `${label} ${name} = ${JSON.stringify(value)}: the engine accepts it`)
           assert.ok(verdict.path.startsWith(`${path}${below}`), `${label} ${name}${below}: ${verdict.path}`)
@@ -224,7 +224,7 @@ test('every typed data field: valid values pass the engine and the schema; wrong
           checked++
         }
         const {[name]: _, ...without} = base
-        const missing = extraction(rule, rule.collection, kind, without)
+        const missing = extractionWith(rule, rule.collection, kind, without)
         const engineRejects = !(await engineVerdict(missing)).ok
         const leaf = rule.schema === 'treemap/v0'
         assert.equal(engineRejects, Boolean(field.required) || leaf, `${label} without ${name}`)
@@ -237,7 +237,7 @@ test('every typed data field: valid values pass the engine and the schema; wrong
 
 test('vocabularies: unknown, inapplicable and repeated declarations fail both; a declared vocabulary adds its rules', async () => {
   const base = {protocolVersion: 0, schema: 'architecture/v0', entities: [], relationships: []}
-  for (const [value, valid] of [
+  for (const [value, accepted] of [
     [{...base, vocabularies: ['dependency-injection/v0', 'runtime-policy/v0']}, true],
     [{...base, vocabularies: []}, true],
     [{...base, vocabularies: ['unknown/v0']}, false],
@@ -245,8 +245,8 @@ test('vocabularies: unknown, inapplicable and repeated declarations fail both; a
     [{...base, vocabularies: 'infrastructure/v0'}, false],
     [{...base, schema: 'graph/v0', vocabularies: ['infrastructure/v0']}, false],
   ]) {
-    assert.equal((await engineVerdict(value)).ok, valid, JSON.stringify(value))
-    assert.equal(schemaVerdict(value).ok, valid, JSON.stringify(value))
+    assert.equal((await engineVerdict(value)).ok, accepted, JSON.stringify(value))
+    assert.equal(schemaVerdict(value).ok, accepted, JSON.stringify(value))
   }
   const service = {id: 's', kind: 'service', label: 's', data: {key: 1}}
   for (const vocabularies of [undefined, ['dependency-injection/v0']]) {

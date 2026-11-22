@@ -104,6 +104,9 @@ function segmentEnds(points: Spline): number[] {
   })
 }
 
+/** Fractions of a route's length closer than this are the same breakpoint. */
+const cutTolerance = 1e-6
+
 /** Splits a chain at the given fractions of its length (de Casteljau); the drawn curve is unchanged. */
 function splitAt(points: Spline, ends: readonly number[], at: readonly number[]): Spline {
   const result: Spline = [points[0]!]
@@ -133,9 +136,6 @@ function splitAt(points: Spline, ends: readonly number[], at: readonly number[])
   }
   return result
 }
-
-/** Fractions of a route's length closer than this are the same breakpoint. */
-const cutTolerance = 1e-6
 
 const aligned = new WeakMap<Spline, WeakMap<Spline, [Spline, Spline]>>()
 
@@ -278,9 +278,9 @@ export function arrowEnding(
   const start = points[from]!
   if (from < 0 || past(start) > -1) return {shaft: lineSpline(start, base), tip, direction, base, head: head.path}
   // Leave `start` along the route's own tangent there, so the curve continues the course it was on.
-  const unit = (from: Point, to: Point) => {
-    const length = Math.hypot(to.x - from.x, to.y - from.y)
-    return length > 1e-6 ? {x: (to.x - from.x) / length, y: (to.y - from.y) / length} : undefined
+  const unit = (origin: Point, toward: Point) => {
+    const length = Math.hypot(toward.x - origin.x, toward.y - origin.y)
+    return length > 1e-6 ? {x: (toward.x - origin.x) / length, y: (toward.y - origin.y) / length} : undefined
   }
   const tangent =
     (from > 0 ? (unit(points[from - 1]!, start) ?? unit(points[from - 3]!, start)) : unit(start, points[1]!)) ?? unit(start, lead)!

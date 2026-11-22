@@ -101,7 +101,9 @@ export function skeletonHtml({
 </html>`
 }
 
-const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
+function escape(text: string) {
+  return text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
+}
 
 export function webviewHtml({
   cspSource,

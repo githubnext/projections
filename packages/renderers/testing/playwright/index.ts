@@ -122,7 +122,7 @@ function handle(page: Page, subject: StageSubject, record: StageRecord): StageHa
   const call = <T>(what: string, run: () => Promise<T>) => ask(record, what, run)
   const seek = (progress: number, options: StageSeek = {}) =>
     call(`seek(${progress})`, () =>
-      page.evaluate(([progress, options]) => window.projectionsStage.seek(progress, options), [progress, options] as const),
+      page.evaluate(([to, seekOptions]) => window.projectionsStage.seek(to, seekOptions), [progress, options] as const),
     )
   return {
     page,
@@ -140,18 +140,25 @@ function handle(page: Page, subject: StageSubject, record: StageRecord): StageHa
         await check(progress)
       }
     },
-    select: id => call('select', () => page.evaluate(id => window.projectionsStage.select(id), id)),
-    setOptions: options => call('setOptions', () => page.evaluate(options => window.projectionsStage.setOptions(options), options)),
-    action: id => call(`action(${id})`, () => page.evaluate(id => window.projectionsStage.action(id), id)),
-    hover: id => call('hover', () => page.evaluate(id => window.projectionsStage.hover(id), id)),
-    filter: payload => call('filter', () => page.evaluate(payload => window.projectionsStage.filter(payload), payload)),
+    select: id => call('select', () => page.evaluate(selectedId => window.projectionsStage.select(selectedId), id)),
+    setOptions: options =>
+      call('setOptions', () => page.evaluate(stageOptions => window.projectionsStage.setOptions(stageOptions), options)),
+    action: id => call(`action(${id})`, () => page.evaluate(actionId => window.projectionsStage.action(actionId), id)),
+    hover: id => call('hover', () => page.evaluate(hoveredId => window.projectionsStage.hover(hoveredId), id)),
+    filter: payload => call('filter', () => page.evaluate(filterPayload => window.projectionsStage.filter(filterPayload), payload)),
     setEnvironment: environment =>
-      call('setEnvironment', () => page.evaluate(environment => window.projectionsStage.setEnvironment(environment), environment)),
-    setWidth: width => call(`setWidth(${width})`, () => page.evaluate(width => window.projectionsStage.setWidth(width), width)),
+      call('setEnvironment', () =>
+        page.evaluate(stageEnvironment => window.projectionsStage.setEnvironment(stageEnvironment), environment),
+      ),
+    setWidth: width => call(`setWidth(${width})`, () => page.evaluate(frameWidth => window.projectionsStage.setWidth(frameWidth), width)),
     measure: <T>(probe: ProbeCall, args?: unknown) =>
       call(
         `measure(${probe})`,
-        () => page.evaluate(([probe, args]) => window.projectionsStage.measure(probe, args), [probe, args] as const) as Promise<T>,
+        () =>
+          page.evaluate(([probeName, probeArgs]) => window.projectionsStage.measure(probeName, probeArgs), [
+            probe,
+            args,
+          ] as const) as Promise<T>,
       ),
     state: () => call('state', () => page.evaluate(() => window.projectionsStage.state())),
   }
@@ -174,7 +181,10 @@ export async function openStage(
     const {scenario, ...overrides} = request
     record.scenario = scenario
     await ask(record, 'loadScenario', () =>
-      page.evaluate(([scenario, overrides]) => window.projectionsStage.loadScenario(scenario, overrides), [scenario, overrides] as const),
+      page.evaluate(([key, scenarioOverrides]) => window.projectionsStage.loadScenario(key, scenarioOverrides), [
+        scenario,
+        overrides,
+      ] as const),
     )
     const subject = await ask(record, 'subject', () => page.evaluate(() => window.projectionsStage.subject()))
     return handle(page, subject, record)
@@ -195,8 +205,8 @@ export async function openStage(
       comparison ??
       (await page.evaluate(
         json => {
-          const {before, after, options} = JSON.parse(json) as {before: Extraction; after: Extraction; options?: DefaultComparatorOptions}
-          return window.projectionsStage.compare(before, after, options)
+          const pair = JSON.parse(json) as {before: Extraction; after: Extraction; options?: DefaultComparatorOptions}
+          return window.projectionsStage.compare(pair.before, pair.after, pair.options)
         },
         JSON.stringify({before, after, options: comparatorOptions}),
       ))
@@ -230,7 +240,7 @@ export async function checkScenario(
     await stagePage(page, inspector, 1)
     const checks = ids.slice(start, start + batch)
     results.push(
-      ...(await page.evaluate(([scenario, options]) => window.projectionsStage.runChecks(scenario, options), [
+      ...(await page.evaluate(([key, checkOptions]) => window.projectionsStage.runChecks(key, checkOptions), [
         scenario,
         {...options, checks},
       ] as const)),

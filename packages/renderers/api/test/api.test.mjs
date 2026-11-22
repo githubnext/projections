@@ -199,17 +199,19 @@ test('names, IDs and signatures are marked as code identifiers; status sits in t
   assert.match(nested, /<code class="semantic-id" data-projections-identifier="">/)
 })
 
-const member = name => ({
-  protocolVersion: 0,
-  schema: 'api/v0',
-  entities: [
-    {...declaration('ts-api:(root):.:Response', 'interface Response', 'interface'), label: 'Response'},
-    {...declaration(`ts-api%3A(root)%3A.%3AResponse:instance:${name}`, `"${name}": string`, 'member'), label: name},
-  ],
-  relationships: [
-    {id: `contains:${name}`, kind: 'contains', from: 'ts-api:(root):.:Response', to: `ts-api%3A(root)%3A.%3AResponse:instance:${name}`},
-  ],
-})
+function member(name) {
+  return {
+    protocolVersion: 0,
+    schema: 'api/v0',
+    entities: [
+      {...declaration('ts-api:(root):.:Response', 'interface Response', 'interface'), label: 'Response'},
+      {...declaration(`ts-api%3A(root)%3A.%3AResponse:instance:${name}`, `"${name}": string`, 'member'), label: name},
+    ],
+    relationships: [
+      {id: `contains:${name}`, kind: 'contains', from: 'ts-api:(root):.:Response', to: `ts-api%3A(root)%3A.%3AResponse:instance:${name}`},
+    ],
+  }
+}
 
 test('a nested declaration is named as code spells it, not by its encoded ID', async () => {
   const model = await comparison(member('headers'), member('headers'))
@@ -253,11 +255,11 @@ test('without highlighting the diff keeps its content and footers and drops only
 
 test('side-by-side panes list each revision; with highlighting each marks its side of the changes', async () => {
   const model = await comparison()
-  const plain = extraction => render(props(extractionModel(extraction), {comparing: false, highlighting: 0}))
+  const alone = extraction => render(props(extractionModel(extraction), {comparing: false, highlighting: 0}))
   const pane = (progress, highlighting) => render(props(model, {progress, highlighting}))
   // Without highlighting, each pane is its revision alone (selection IDs aside), its rows reserving empty footers.
-  assert.equal(pane(0, 0).replaceAll(footer, ''), plain(before))
-  assert.equal(pane(1, 0).replaceAll(footer, ''), plain(after))
+  assert.equal(pane(0, 0).replaceAll(footer, ''), alone(before))
+  assert.equal(pane(1, 0).replaceAll(footer, ''), alone(after))
   assert.equal(pane(0, 0).split(footer).length - 1, before.entities.length)
   const start = rowsOf(pane(0, 1)),
     end = rowsOf(pane(1, 1))

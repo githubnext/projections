@@ -51,8 +51,8 @@ export function FactGraph(
   )
   // Diff mode: a modified card's changed data fields, except those the card itself marks as changed.
   const changedFields = useMemo(() => {
-    const shown = [sizeBy, badges, labels, highlights, tags].map(pointerField).filter((field): field is string => field !== undefined)
-    return (row: EntityChange<Entity>) => cardChanges(row, shown, locale)
+    const pointers = [sizeBy, badges, labels, highlights, tags].map(pointerField).filter((field): field is string => field !== undefined)
+    return (row: EntityChange<Entity>) => cardChanges(row, pointers, locale)
   }, [sizeBy, badges, labels, highlights, tags, locale])
   // Only the chosen kind of relationship is drawn; a presentation that derives its model (architecture) limits it first.
   const graph = useMemo(() => withRelationships(canvas.model, shown), [canvas.model, shown])

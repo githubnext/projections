@@ -110,7 +110,7 @@ export function explain(plan: CiPlan, rules: CiRules, facts: RepoFacts): Explana
     }
     if (!reachedBy.length) why.push('✗ the change reaches neither it nor a workspace it builds or tests')
     const when = rules.browser.suites[path]?.when
-    if (when) why.push(...traceLines(trace(when, context, plan)))
+    if (when !== undefined) why.push(...traceLines(trace(when, context, plan)))
     if (runs && rules.browser.suites[path]?.narrow && plan.renderers.length) {
       why.push(`narrowed to ${plan.renderers.join(', ')}: the other renderers' tests are left out with --grep-invert`)
     }

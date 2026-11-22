@@ -51,7 +51,7 @@ function Chip({reducedMotion}: {reducedMotion: boolean}) {
       let bottom = own.bottom
       const covers = [...parent.querySelectorAll<HTMLElement>('[data-stage-cover]')]
         .map(cover => cover.getBoundingClientRect())
-        .filter(cover => cover.width && cover.right > own.left && cover.left < own.right)
+        .filter(cover => cover.width !== 0 && cover.right > own.left && cover.left < own.right)
         .sort((a, b) => a.top - b.top)
       let top = own.top
       for (const cover of covers) {
@@ -114,7 +114,7 @@ function Chip({reducedMotion}: {reducedMotion: boolean}) {
         className={reducedMotion ? undefined : 'pj:animate-spin pj:motion-reduce:animate-none'}
         style={{width: 12, height: 12, flex: 'none'}}
       />
-      <span style={{display: 'block', textBox: 'trim-both cap alphabetic'} as CSSProperties}>Updating…</span>
+      <span style={{display: 'block', textBox: 'trim-both cap alphabetic'}}>Updating…</span>
     </div>
   )
 }

@@ -206,7 +206,7 @@ export function SwitcherPopup({
     requestAnimationFrame(() => input.current?.focus())
     return () => {
       // Back to where focus was: the trigger, or wherever ⌘P was pressed.
-      ;(returnFocus && returnFocus !== document.body ? returnFocus : button)?.focus?.()
+      ;(returnFocus && returnFocus !== document.body ? returnFocus : button)?.focus()
     }
   }, [trigger])
   // Escape closes it wherever focus is (focus moves into the search a frame after it opens; a tap may leave it outside).

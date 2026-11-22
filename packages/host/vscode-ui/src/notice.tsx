@@ -27,7 +27,7 @@ export function Notice({
       <span className={`codicon codicon-${severity} phv-notice-icon`} aria-hidden="true" />
       <div className="phv-notice-body">
         <p className={hideTitle ? 'phv-visually-hidden' : 'phv-notice-title'}>{title}</p>
-        {children != null && <div className="phv-notice-description">{children}</div>}
+        {children !== undefined && children !== null && <div className="phv-notice-description">{children}</div>}
         {actions && actions.length > 0 && (
           <div className="phv-notice-actions">
             {actions.map(action => (

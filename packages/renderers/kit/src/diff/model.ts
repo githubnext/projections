@@ -101,7 +101,7 @@ export function diffModel(model: ComparisonModel): DiffModel {
       ends?.from !== undefined && ends.to !== undefined && relationship ? {from: ends.from, to: ends.to, relationship} : undefined
     const a = part(old, row.before),
       b = part(next, row.after)
-    if (a && b && a.from === b.from && a.to === b.to) {
+    if (a && a.from === b?.from && a.to === b.to) {
       relationships.push({key: row.id, id: row.id, row, change: classifyChange(row), ...b, side: 'both'})
       continue
     }

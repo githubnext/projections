@@ -69,7 +69,7 @@ export function useScenarios({
       })
     return () => abort.abort()
   }, [api, projection, scenarioFile, scenarioVersion, setError])
-  const scenarios = (scenarioFile && scenarioLists[projection]?.scenarios) || noScenarios
+  const scenarios = (scenarioFile ? scenarioLists[projection]?.scenarios : undefined) ?? noScenarios
   const shownScenario = showing === 'artifact' ? artifact?.scenario : undefined
   const showScenario = useCallback(
     (id: string) => {

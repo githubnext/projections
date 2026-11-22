@@ -51,7 +51,7 @@ function suppliedFile(document: ExtractionDocument): string | undefined {
   const limitation = document.provenance.limitations.find(text => text.startsWith(suppliedPrefix))
   if (!limitation) return 'Supplied extraction'
   const path = limitation.slice(suppliedPrefix.length).split('; ')[0] ?? ''
-  return path.split(/[\\/]/u).pop() || 'Supplied extraction'
+  return (path.split(/[\\/]/u).pop() ?? '') || 'Supplied extraction'
 }
 
 /** The label of an extraction, for example `HEAD~1 · 1a2b3c4d`, `Working tree` or the file it was supplied in. */
@@ -109,7 +109,7 @@ export function resultsOf(
   const results: Record<string, InspectorResultIdentity> = {}
   for (const ref of [marked.a, marked.b]) {
     const row = ref ? rows?.[ref] : undefined
-    if (!ref || !row || row.status !== 'done') continue
+    if (!ref || row?.status !== 'done') continue
     const provenance = (row.document as {provenance?: {definitionDigest?: unknown; execution?: unknown}} | undefined)?.provenance
     const execution = provenance?.execution as InspectorResultIdentity['execution'] | undefined
     results[ref] = {

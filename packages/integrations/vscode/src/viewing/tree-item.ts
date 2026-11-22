@@ -14,7 +14,7 @@ export function treeItem(node: Node, shown: ViewingItem): vscode.TreeItem {
   item.id = `${node.model.folder.uri.toString()}#viewing:${shown.key}`
   if (shown.description !== undefined) item.description = shown.description
   if (shown.icon) item.iconPath = new vscode.ThemeIcon(shown.icon)
-  if (shown.tooltip) item.tooltip = shown.tooltip
+  if (shown.tooltip !== undefined && shown.tooltip !== '') item.tooltip = shown.tooltip
   if (shown.command) item.command = shown.command
   if (shown.context) item.contextValue = shown.context.join(' ')
   if (node.kind !== 'group') item.accessibilityInformation = {label: shown.accessibility}

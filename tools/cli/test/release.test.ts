@@ -31,7 +31,12 @@ function repository(): string {
     Object.entries(files)
       .filter(([file]) => file !== 'package.json' && file.endsWith('package.json'))
       .map(([file, text]) => {
-        const {name, version, dependencies, devDependencies} = JSON.parse(text)
+        const {name, version, dependencies, devDependencies} = JSON.parse(text) as {
+          name: string
+          version: string
+          dependencies?: Record<string, string>
+          devDependencies?: Record<string, string>
+        }
         return [dirname(file), {name, version, ...(dependencies && {dependencies}), ...(devDependencies && {devDependencies})}]
       }),
   )

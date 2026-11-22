@@ -41,7 +41,10 @@ export function Kernel({kernel, frame, run}: {kernel: Item; frame: Frame; run?: 
   const options = (entity: Entity): string => {
     const config = (entity.data?.config ?? {}) as Record<string, unknown>
     return Object.entries(config)
-      .map(([option, enabled]) => codeSpan(`${option}=${enabled ? 'y' : 'n'}`))
+      .map(([option, enabled]) => {
+        const on = Boolean(enabled)
+        return codeSpan(`${option}=${on ? 'y' : 'n'}`)
+      })
       .join(' ')
   }
   const version = (entity: Entity): string =>

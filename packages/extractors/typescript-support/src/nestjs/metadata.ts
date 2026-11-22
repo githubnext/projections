@@ -2,7 +2,7 @@ import {parameterNames} from './parameters.js'
 import {getMetadata, type Dependency, type NestModule, type Token, type Wrapper} from './model.js'
 
 export function tokenOf(value: unknown): Token {
-  if (value && typeof value === 'object' && 'forwardRef' in value && typeof (value as {forwardRef: unknown}).forwardRef === 'function') {
+  if (typeof value === 'object' && value !== null && 'forwardRef' in value && typeof value.forwardRef === 'function') {
     return (value as {forwardRef: () => unknown}).forwardRef()
   }
   return value
@@ -12,7 +12,7 @@ export function tokenOf(value: unknown): Token {
 function factoryDependencies(target: unknown, inject: unknown[]): Dependency[] {
   const names = parameterNames(target, false)
   return inject.map((item, index) => {
-    const optional = !!item && typeof item === 'object' && 'token' in item && 'optional' in item && !('prototype' in item)
+    const optional = typeof item === 'object' && item !== null && 'token' in item && 'optional' in item && !('prototype' in item)
     const token = optional ? (item as {token: unknown}).token : item
     return {
       injection: 'factory' as const,
@@ -87,6 +87,6 @@ export function declaredImportsOf(module: NestModule): Set<unknown> {
   return new Set(
     ((getMetadata('imports', module.metatype) as unknown[] | undefined) ?? [])
       .map(item => tokenOf(item))
-      .map(item => (item && typeof item === 'object' && 'module' in item ? (item as {module: unknown}).module : item)),
+      .map(item => (typeof item === 'object' && item !== null && 'module' in item ? item.module : item)),
   )
 }

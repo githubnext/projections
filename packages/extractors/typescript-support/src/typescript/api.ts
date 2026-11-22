@@ -45,7 +45,7 @@ export function publicApi(project: Project): Extraction {
     const module = checker.getSymbolAtLocation(source)!
     for (const alias of checker.getExportsOfModule(module)) {
       const symbol = resolve(checker, alias)
-      if (!symbol || !symbol.declarations?.length) {
+      if (symbol?.declarations === undefined || symbol.declarations.length === 0) {
         throw new Error(`Cannot resolve public export ${code(`${entry.pkg.name}:${alias.name}`)}; fix module diagnostics`)
       }
       const declaration = symbol.valueDeclaration ?? symbol.declarations[0]!

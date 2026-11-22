@@ -115,7 +115,7 @@ export function useFrameCovers(
       for (const cover of element.querySelectorAll<HTMLElement>(coverSelector)) {
         if (cover.dataset.stageCoverShown !== undefined) continue
         cover.dataset.stageCoverShown = ''
-        cover.animate?.([{opacity: 0}, {opacity: 1}], {duration: 120, easing: 'ease-out'})
+        if ('animate' in cover) cover.animate([{opacity: 0}, {opacity: 1}], {duration: 120, easing: 'ease-out'})
       }
     }
     return () => {

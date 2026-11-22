@@ -85,7 +85,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
     const lines = new Map<string, readonly FieldLine[]>()
     for (const row of model.entities) {
       const found = row.status === 'modified' ? changedFields(row) : undefined
-      if (found?.length) lines.set(row.id, found)
+      if (found !== undefined && found.length > 0) lines.set(row.id, found)
     }
     return lines
   }, [diff, changedFields, model])
@@ -200,7 +200,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
   const shown: Drawn | undefined =
     transition && (ready || last?.document === document)
       ? {
-          key: last && last.document === document ? last.key : (last?.key ?? 0) + 1,
+          key: last?.document === document ? last.key : (last?.key ?? 0) + 1,
           document,
           props,
           transition,

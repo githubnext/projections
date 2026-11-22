@@ -26,7 +26,7 @@ export function menuTarget(key: string, items: readonly HTMLElement[], index: nu
   if (move) return move(index, items.length)
   if (key.length !== 1 || !/\S/u.test(key)) return undefined
   const from = items.slice(index + 1).concat(items.slice(0, index + 1))
-  const found = from.find(item => item.textContent?.trim().toLowerCase().startsWith(key.toLowerCase()))
+  const found = from.find(item => item.textContent.trim().toLowerCase().startsWith(key.toLowerCase()))
   return found ? items.indexOf(found) : undefined
 }
 

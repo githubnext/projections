@@ -23,19 +23,19 @@ export interface StatusEntry {
 export function declaredFiles(definition: ProjectionDefinition, prefix = ''): string[] {
   const files: unknown[] = []
   const extractor = definition.extractor as unknown
-  if (extractor && typeof extractor === 'object') {
+  if (typeof extractor === 'object' && extractor !== null) {
     const command = (extractor as {command?: unknown}).command
     if (Array.isArray(command) && typeof command[1] === 'string' && !command[1].startsWith('-')) files.push(command[1])
     files.push(...(((extractor as {sources?: unknown}).sources as unknown[] | undefined) ?? []))
   }
   const comparator = definition.comparator as unknown
   if (typeof comparator === 'string') files.push(comparator)
-  else if (comparator && typeof comparator === 'object') {
+  else if (typeof comparator === 'object' && comparator !== null) {
     files.push((comparator as {file?: unknown}).file)
     files.push(...(((comparator as {sources?: unknown}).sources as unknown[] | undefined) ?? []))
   }
   const renderer = definition.renderer as unknown
-  if (renderer && typeof renderer === 'object') {
+  if (typeof renderer === 'object' && renderer !== null) {
     files.push((renderer as {bundle?: unknown}).bundle)
     files.push(...(((renderer as {sources?: unknown}).sources as unknown[] | undefined) ?? []))
   }
@@ -53,12 +53,12 @@ export function presentationFiles(definition: ProjectionDefinition, prefix = '')
   const add = (path: unknown) => files.push(inRepository(prefix, path))
   const comparator = definition.comparator as unknown
   if (typeof comparator === 'string') add(comparator)
-  else if (comparator && typeof comparator === 'object') {
+  else if (typeof comparator === 'object' && comparator !== null) {
     add((comparator as {file?: unknown}).file)
     for (const source of ((comparator as {sources?: unknown}).sources as unknown[] | undefined) ?? []) add(source)
   }
   const renderer = definition.renderer as unknown
-  if (renderer && typeof renderer === 'object') {
+  if (typeof renderer === 'object' && renderer !== null) {
     const bundle = inRepository(prefix, (renderer as {bundle?: unknown}).bundle)
     files.push(bundle)
     if (bundle?.split('/').at(-1) === 'dist' && bundle.includes('/')) files.push(bundle.split('/').slice(0, -1).join('/'))

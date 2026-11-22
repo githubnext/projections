@@ -158,7 +158,7 @@ export function embedRenderer(
     iframe.dataset.revealed = 'true'
   }
   const timer = view.setTimeout(
-    () => capabilities || fail(`The ${options.renderer} renderer did not become ready`),
+    () => capabilities ?? fail(`The ${options.renderer} renderer did not become ready`),
     rendererLimits.readyTimeoutMs + rendererLimits.documentTimeoutMs,
   )
   function fail(message: string) {

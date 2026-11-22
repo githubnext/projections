@@ -38,7 +38,7 @@ for (const scenario of ['gateway', 'languages']) {
           .toBe(true)
         const summary = (await stage.state()).summary ?? []
         const total = summary.find(item => item.type === 'fact' && item.id === 'total')
-        expect(total && total.type === 'fact' && (total.added ?? 0) + (total.removed ?? 0)).toBeGreaterThan(0)
+        expect(total?.type === 'fact' && (total.added ?? 0) + (total.removed ?? 0)).toBeGreaterThan(0)
         if (form !== 'composition') {
           const languages = summary.find(item => item.type !== 'fact' && item.kind === 'language')
           expect(languages && languages.type !== 'fact' && [languages.added, languages.removed]).toEqual([
@@ -95,7 +95,7 @@ test('the share chart fills a frame the host sizes, and keeps its size in a cont
       scenario: 'code-statistics/languages',
       comparisonMode: 'diff',
       options: {chart: 'share'},
-      ...(height ? {height} : {}),
+      ...(height !== undefined && height !== 0 ? {height} : {}),
     })
     await stage.measure('settle')
     const result = await stage.frame.locator('.statistics-view').evaluate(view => {
@@ -113,7 +113,9 @@ test('the share chart fills a frame the host sizes, and keeps its size in a cont
     })
     if (shots && info.project.name.startsWith('chromium')) {
       mkdirSync(shots, {recursive: true})
-      await stage.frame.locator('body').screenshot({path: `${shots}/code-statistics-share-${height ? 'fill' : 'content'}.png`})
+      await stage.frame
+        .locator('body')
+        .screenshot({path: `${shots}/code-statistics-share-${height !== undefined && height !== 0 ? 'fill' : 'content'}.png`})
     }
     return result
   }

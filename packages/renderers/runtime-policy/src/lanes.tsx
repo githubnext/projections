@@ -150,6 +150,7 @@ function Rule({rule, frame, region, run}: {rule: SelectorItem; frame: Frame; reg
   const conditionsOf = (entity: Entity) => conditionLines(entity).join('\n')
   const effectOf = (entity: Entity) => effectProse(entity)
   const labelled = rule.entity.data?.implicit !== true
+  const coded = Boolean(rule.entity.data?.label)
   return (
     <Row
       item={rule}
@@ -161,7 +162,7 @@ function Rule({rule, frame, region, run}: {rule: SelectorItem; frame: Frame; reg
       main={
         <>
           {labelled && (
-            <span className={`rp-name${rule.entity.data?.label ? ' rp-code' : ''}`} {...(rule.entity.data?.label ? identifier : {})}>
+            <span className={`rp-name${coded ? ' rp-code' : ''}`} {...(coded ? identifier : {})}>
               {rule.entity.label}
             </span>
           )}

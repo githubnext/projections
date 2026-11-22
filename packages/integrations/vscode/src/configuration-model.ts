@@ -32,7 +32,7 @@ export function extractionMessages(documents: readonly {side: string; document: 
     const value = document as {diagnostics?: unknown; extraction?: {diagnostics?: unknown}} | null
     for (const list of [value?.diagnostics, value?.extraction?.diagnostics]) {
       for (const item of Array.isArray(list) ? list : []) {
-        const message = String((item as {message?: unknown})?.message ?? JSON.stringify(item))
+        const message = String((item as {message?: unknown} | null)?.message ?? JSON.stringify(item))
         if (seen.has(message)) continue
         seen.add(message)
         messages.push(`${side}: ${message}`)

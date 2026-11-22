@@ -67,7 +67,8 @@ export class ArchitectureItems {
         },
         ...this.evidence(module.metatype),
       })
-      for (const imported of module.imports) {
+      // An import Nest couldn't resolve (a circular one without forwardRef) is undefined.
+      for (const imported of module.imports as Set<NestModule | undefined>) {
         if (!imported || !keptModules.has(imported) || imported === module) continue
         // Nest adds every global module to every module's imports; only declared imports are boundaries.
         if (imported.isGlobal && !declaredImportsOf(module).has(imported.metatype)) continue

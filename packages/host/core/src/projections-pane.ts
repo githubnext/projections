@@ -13,7 +13,8 @@ const paneHysteresis = 32
 export function usePinnedPane(key: string): [boolean, (pinned: boolean) => void] {
   const [pinned, setPinned] = useState(() => {
     try {
-      return globalThis.localStorage?.getItem(key) === 'true'
+      const storage = globalThis.localStorage as Storage | undefined
+      return storage?.getItem(key) === 'true'
     } catch {
       return false
     }
@@ -22,8 +23,9 @@ export function usePinnedPane(key: string): [boolean, (pinned: boolean) => void]
     (value: boolean) => {
       setPinned(value)
       try {
-        if (value) globalThis.localStorage?.setItem(key, 'true')
-        else globalThis.localStorage?.removeItem(key)
+        const storage = globalThis.localStorage as Storage | undefined
+        if (value) storage?.setItem(key, 'true')
+        else storage?.removeItem(key)
       } catch {
         // Kept for this page only.
       }

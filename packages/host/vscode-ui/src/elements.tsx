@@ -93,7 +93,7 @@ function useMergedRef<T>(own: RefObject<T | null>, other: Ref<T> | undefined) {
     (element: T | null) => {
       own.current = element
       if (typeof other === 'function') other(element)
-      else if (other) (other as RefObject<T | null>).current = element
+      else if (other) other.current = element
     },
     [own, other],
   )
@@ -107,7 +107,7 @@ export function createWrapper<T extends HTMLElement, P extends object, E extends
   tag: string,
   events: {[K in keyof E]: string},
 ) {
-  const eventProps = new Map(Object.entries(events) as [string, string][])
+  const eventProps = new Map<string, string>(Object.entries(events))
   function Wrapper(props: ElementProps<T, P, E>) {
     const own = useRef<T>(null)
     const handlers: Record<string, Handler<Event> | undefined> = {}
@@ -282,10 +282,11 @@ export function VscCollapsible({
     element.addEventListener('vsc-collapsible-toggle', toggle)
     return () => element.removeEventListener('vsc-collapsible-toggle', toggle)
   }, [open])
+  const hasActions = Boolean(actions)
   return createElement(
     'vscode-collapsible',
     {ref, heading, description, open, class: className, ...rest},
-    actions ? createElement('div', {slot: 'actions', className: 'phv-collapsible-actions'}, actions) : null,
+    hasActions ? createElement('div', {slot: 'actions', className: 'phv-collapsible-actions'}, actions) : null,
     children,
   )
 }

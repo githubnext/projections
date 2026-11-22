@@ -64,7 +64,7 @@ export function readCopilotCanvasTheme(doc: Document, prefersDark = false): Copi
   const root = doc.documentElement
   const style = getComputedStyle(root)
   if (!style.getPropertyValue('--background-color-default').trim()) return undefined
-  const marked = root.getAttribute('data-color-mode') ?? doc.body?.getAttribute('data-color-mode')
+  const marked = root.getAttribute('data-color-mode') ?? (doc.body as HTMLElement | null)?.getAttribute('data-color-mode')
   const colorMode: ColorMode = marked === 'dark' || marked === 'light' ? marked : prefersDark ? 'dark' : 'light'
   const variables: Record<string, string> = {}
   for (const name of copilotCanvasVariableNames) {

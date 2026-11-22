@@ -51,7 +51,7 @@ export async function runCases(state: TestState, run: vscode.TestRun, entry: Cas
   if (!watched) return
   const listed = watched.files.find(file => file.path === entry.path)
   const chosen = entry.items.map(item => state.data.get(item)?.node.case ?? '')
-  const whole = listed && chosen.length === listed.cases.length
+  const whole = chosen.length === listed?.cases.length
   const body = {
     path: entry.path,
     ...(whole ? {} : {cases: chosen}),

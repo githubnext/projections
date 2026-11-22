@@ -29,7 +29,7 @@ function rows(root: Locator) {
       id: row.dataset.entityId!,
       status: [...row.querySelectorAll('.api-declaration-footer .pk-status-part')].map(part => part.textContent),
       lines: [...row.querySelectorAll<HTMLElement>('pre')].map(
-        pre => `${pre.className.replace('api-signature', '').trim() || 'plain'}:${pre.textContent!.replace(/^[−+]/u, '')}`,
+        pre => `${pre.className.replace('api-signature', '').trim() || 'plain'}:${pre.textContent.replace(/^[−+]/u, '')}`,
       ),
       runs: [...row.querySelectorAll('del, ins, mark')].map(run => `${run.localName}:${run.textContent}`),
     })),

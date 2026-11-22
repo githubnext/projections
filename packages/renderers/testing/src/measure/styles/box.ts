@@ -19,9 +19,8 @@ export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOM
   const spacing: Record<string, number> = {}
   // Auto margins and percentages are layout, not spacing: computed values (CSS Typed OM) keep them as written,
   // where getComputedStyle reports the used length.
-  const computed = (
-    element as Element & {computedStyleMap?: () => {get: (property: string) => {toString: () => string} | undefined}}
-  ).computedStyleMap?.()
+  const computed = // Firefox has no CSS Typed OM.
+    (element as {computedStyleMap?: () => {get: (property: string) => {toString: () => string} | undefined}}).computedStyleMap?.()
   const layout = (property: string) => {
     const value = computed?.get(property)?.toString() ?? ''
     return value === 'auto' || value.endsWith('%')
@@ -34,7 +33,7 @@ export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOM
     !computed &&
     left! > 0 &&
     Math.abs(left! - right!) < 1 &&
-    element.parentElement &&
+    element.parentElement !== null &&
     box.width < element.parentElement.getBoundingClientRect().width
   sides.forEach((side, at) => {
     if (layout(`margin-${side}`) || (centred && (side === 'left' || side === 'right'))) return

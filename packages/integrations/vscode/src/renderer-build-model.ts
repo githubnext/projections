@@ -18,7 +18,7 @@ const relative = (path: unknown): string | undefined =>
  */
 export function rendererPackage(definition: ProjectionDefinition): string | undefined {
   const renderer = definition.renderer as unknown
-  if (!renderer || typeof renderer !== 'object') return undefined
+  if (typeof renderer !== 'object' || renderer === null) return undefined
   const bundle = relative((renderer as {bundle?: unknown}).bundle)
   if (!bundle) return undefined
   const parts = bundle.split('/')
@@ -29,7 +29,7 @@ export function rendererPackage(definition: ProjectionDefinition): string | unde
 /** The renderer's sources, repository-relative: its declared `sources`, else its package's `src`. */
 export function rendererSources(definition: ProjectionDefinition): string[] {
   const renderer = definition.renderer as unknown
-  if (!renderer || typeof renderer !== 'object') return []
+  if (typeof renderer !== 'object' || renderer === null) return []
   const declared = (renderer as {sources?: unknown}).sources
   const sources = Array.isArray(declared) ? declared.map(relative).filter((path): path is string => Boolean(path)) : []
   if (sources.length) return sources

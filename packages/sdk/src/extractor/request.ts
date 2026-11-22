@@ -35,6 +35,11 @@ export class Request {
     return (this.#value ??= this.#read())
   }
 
+  /** The request as it may come: one built by hand can leave out any field, which the accessors answer for. */
+  #given(): Partial<ExtractorRequest> {
+    return this.toJSON()
+  }
+
   /** `protocolVersion`: the extractor protocol's version. */
   get protocolVersion(): ExtractorRequest['protocolVersion'] {
     return this.toJSON().protocolVersion
@@ -47,7 +52,7 @@ export class Request {
 
   /** `repository`: where the examined revision is and what it is. */
   get repository(): ExtractorRequest['repository'] {
-    return this.toJSON().repository ?? ({} as ExtractorRequest['repository'])
+    return this.#given().repository ?? ({} as ExtractorRequest['repository'])
   }
 
   /** `capabilities`: whether the run is trusted and may use the network. */
@@ -62,7 +67,7 @@ export class Request {
 
   /** The definition's project, relative to the repository's root and `/`-separated; `""` for the root. */
   get project(): string {
-    return this.repository.project || ''
+    return this.repository.project ?? ''
   }
 
   /** The examined revision's root directory (`repository.root`). */
@@ -87,12 +92,13 @@ export class Request {
 
   /** The projection's ID. */
   get id(): string {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- undefined without a projection, as Python's None
     return this.projection?.id
   }
 
   /** The projection's definition. */
   get definition(): Definition {
-    return this.projection?.definition ?? ({} as Definition)
+    return this.#given().projection?.definition ?? ({} as Definition)
   }
 
   /** The definition's `inputs`, or `{}`. */

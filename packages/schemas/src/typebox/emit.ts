@@ -43,7 +43,7 @@ export function emit(documents: {name: string; title: string; schema: TSchema}[]
     }
     function serialize(value: unknown, top: boolean): unknown {
       if (Array.isArray(value)) return value.map(item => serialize(item, false))
-      if (!value || typeof value !== 'object') return value
+      if (typeof value !== 'object' || value === null) return value
       const home = top ? undefined : homeOf(value)
       if (home) {
         // A use of a shared definition: a `$ref`, with any annotations the use adds (such as a description).

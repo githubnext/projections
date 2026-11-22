@@ -42,7 +42,7 @@ export function identifierFonts(root: Element = document.body): IdentifierMeasur
   const proportional: string[] = []
   let count = 0
   for (const element of root.querySelectorAll('[data-projections-identifier]')) {
-    if (!visible(element) || !element.textContent?.trim()) continue
+    if (!visible(element) || !element.textContent.trim()) continue
     count++
     const style = getComputedStyle(element)
     if (!context) continue

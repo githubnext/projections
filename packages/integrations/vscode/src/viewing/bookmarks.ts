@@ -32,7 +32,7 @@ export async function bookmark(node: Node, host: ViewingHost, sidebar: Sidebar) 
   const [before, after] = await host.resolveCommits(model.folder.uri.fsPath, [pair.before, pair.after])
   const active = sidebar.active
   const projection =
-    (active && active.folder === model.folder && (!changes.length || changes.some(item => item.id === active.projection))
+    (active?.folder === model.folder && (!changes.length || changes.some(item => item.id === active.projection))
       ? active.projection
       : undefined) ??
     changes[0]?.id ??

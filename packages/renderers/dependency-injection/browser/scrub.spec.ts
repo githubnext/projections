@@ -18,7 +18,7 @@ test('dense scrubbing in the real host frame keeps every frame coherent, still a
   // One hold point per comparison step: remove, restructure, add.
   await expect.poll(async () => (await renderer.state()).steps.length).toBe(3)
   const body = renderer.frame.locator('body')
-  const measure = () => body.evaluate(measureRenderedFrame) as Promise<Measured>
+  const measure = (): Promise<Measured> => body.evaluate(measureRenderedFrame)
   const first = await measure()
   expect(first.viewBox).not.toBeNull()
   const positions = new Map<string, {x: number; y: number; width: number; height: number}>()
@@ -56,7 +56,7 @@ test('dense scrubbing in the real host frame keeps every frame coherent, still a
 
 test('painted frames follow the comparison steps and settle at every step end', async ({page}) => {
   const renderer = await openRenderer(page, {renderer: 'dependency-injection', before, after, progress: 0})
-  const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
+  const measure = (): Promise<Measured> => renderer.frame.locator('body').evaluate(measureRenderedFrame)
   const card = (frame: Measured, id: string) => frame.cards.find(item => item.id === id)
   const link = (frame: Measured, to: string) => frame.links.find(item => item.to === to)
   const [removed, restructured, added] = (await renderer.state()).steps as [number, number, number]
@@ -86,7 +86,7 @@ test('painted frames follow the comparison steps and settle at every step end', 
 test('a custom comparator order changes the painted order', async ({page}) => {
   const comparison = await compareWithComparator(before, after, priorityOrderRules, {priority: [unit('IPriceCalculator')]})
   const renderer = await openRenderer(page, {renderer: 'dependency-injection', before, after, comparison, progress: 0})
-  const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
+  const measure = (): Promise<Measured> => renderer.frame.locator('body').evaluate(measureRenderedFrame)
   const card = (frame: Measured, id: string) => frame.cards.find(item => item.id === id)
   const [first, second] = (await renderer.state()).steps as [number, number]
   await renderer.seek(first)
@@ -164,7 +164,7 @@ test('the composition opens fitted to the frame (or at the 8 px text floor), nev
         zoom: Number(scroll.getAttribute('data-zoom')),
         smallestText: Math.min(
           ...[...document.querySelectorAll('svg text, svg tspan')]
-            .filter(text => text.textContent?.trim() && text.getClientRects().length)
+            .filter(text => text.textContent.trim() !== '' && text.getClientRects().length > 0)
             .map(
               text =>
                 parseFloat(getComputedStyle(text).fontSize) *
@@ -222,9 +222,9 @@ test('a single revision presents the composition with no steps and no emphasis',
 
 test('the scoring pair rewires through an inserted unit with every frame coherent', async ({page}, testInfo) => {
   test.setTimeout(60_000)
-  const scoring = loadPair('scoring') as {before: Extraction; after: Extraction}
+  const scoring = loadPair('scoring')
   const renderer = await openRenderer(page, {renderer: 'dependency-injection', ...scoring, progress: 0})
-  const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
+  const measure = (): Promise<Measured> => renderer.frame.locator('body').evaluate(measureRenderedFrame)
   const viewBox = (await measure()).viewBox
   const painted = new Map<number, string>()
   await renderer.scrub(samples(60, {roundTrip: true}), async progress => {
@@ -286,10 +286,10 @@ for (const [scenario, units] of [
 ] as const) {
   test(`the real ${scenario} composition scrubs coherently in either color mode`, async ({page}, testInfo) => {
     test.setTimeout(90_000)
-    const pair = loadPair(scenario) as {before: Extraction; after: Extraction}
+    const pair = loadPair(scenario)
     for (const colorMode of ['light', 'dark'] as const) {
       const renderer = await openRenderer(page, {renderer: 'dependency-injection', ...pair, progress: 0, colorMode})
-      const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
+      const measure = (): Promise<Measured> => renderer.frame.locator('body').evaluate(measureRenderedFrame)
       const viewBox = (await measure()).viewBox
       const ids = new Set<string>()
       await renderer.scrub(samples(40, {roundTrip: true}), async progress => {

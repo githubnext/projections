@@ -8,7 +8,7 @@ export const loadingStageHeight = 480
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false)
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return
+    if (typeof window === 'undefined' || !('matchMedia' in window)) return
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => setReduced(media.matches)
     update()
@@ -116,7 +116,7 @@ export function LoadingStatus({label, description, reducedMotion = false, fill =
           {still ? <Hourglass /> : <Spinner />}
         </svg>
         <span className="ph-loading-label">{label}</span>
-        {description && (
+        {Boolean(description) && (
           <span className="ph-loading-description" style={{fontSize: '0.875em'}}>
             {description}
           </span>

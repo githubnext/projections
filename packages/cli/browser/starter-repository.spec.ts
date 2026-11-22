@@ -67,7 +67,7 @@ test('the viewer opens on a renderer package scenario', async ({page}) => {
   try {
     const url = await new Promise<string>((resolve, reject) => {
       viewer.once('exit', code => reject(new Error(`projections view exited with ${code}`)))
-      createInterface({input: viewer.stdout!}).once('line', resolve)
+      createInterface({input: viewer.stdout}).once('line', resolve)
     })
     const shown = async () => {
       const response = await fetch(new URL('control/state', url))

@@ -122,7 +122,7 @@ export function useFirstDefinition({
 }) {
   const hadSetup = useRef(false)
   useEffect(() => {
-    if (!definitions || definitions.ref !== workingTree) return
+    if (definitions?.ref !== workingTree) return
     if (hadSetup.current && !definitions.setup && definitions.definitions[0]) {
       setProjection(definitions.definitions[0].id)
       setSource('live')

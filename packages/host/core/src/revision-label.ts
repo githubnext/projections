@@ -23,7 +23,7 @@ export const formatRevisionLabel = ({name, detail, when}: RevisionLabelParts): s
  */
 export function parseRevisionLabel(label: string): RevisionLabelParts & {subject?: string | undefined} {
   const parts = label.split(separator)
-  const name = parts.shift()?.trim() || label
+  const name = (parts.shift()?.trim() ?? '') || label
   const when = parts.length && agePattern.test(parts.at(-1)!) ? parts.pop() : undefined
   const detail = parts.length ? parts.join(separator) : undefined
   const subject = detail && /^".*"$/u.test(detail) ? detail.slice(1, -1) : undefined

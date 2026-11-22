@@ -19,11 +19,12 @@ function nodeItem(state: TestState, watched: Watched, node: TestNode, existing: 
   ]
     .filter(Boolean)
     .join(' · ')
-  item.range = node.line
-    ? range({path: node.path ?? '', line: node.line, column: node.column ?? 1})
-    : node.kind === 'file'
-      ? new vscode.Range(0, 0, 0, 0)
-      : undefined
+  item.range =
+    node.line !== undefined && node.line !== 0
+      ? range({path: node.path ?? '', line: node.line, column: node.column ?? 1})
+      : node.kind === 'file'
+        ? new vscode.Range(0, 0, 0, 0)
+        : undefined
   const file = node.kind === 'file' ? watched.files.find(listed => listed.path === node.path) : undefined
   const problems = file?.diagnostics
     .map(diagnostic => (diagnostic.location ? `${diagnostic.message} (line ${diagnostic.location.line})` : diagnostic.message))

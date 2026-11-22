@@ -9,7 +9,7 @@ import {readJson} from './repo.ts'
 export function availableMemory(): {available: number; total: number} {
   const total = totalmem()
   if (process.platform === 'darwin') {
-    const vm = spawnSync('vm_stat', {encoding: 'utf8'}).stdout ?? ''
+    const vm = (spawnSync('vm_stat', {encoding: 'utf8'}).stdout as string | null) ?? ''
     const page = Number(/page size of (\d+) bytes/u.exec(vm)?.[1] ?? 16384)
     const pages = (label: string) => Number(new RegExp(`${label}:\\s+(\\d+)`).exec(vm)?.[1] ?? 0)
     const available = (pages('Pages free') + pages('Pages inactive') + pages('Pages speculative') + pages('Pages purgeable')) * page

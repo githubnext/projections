@@ -61,7 +61,7 @@ export function wordDiff(before: string, after: string): [Word[], Word[]] | unde
     right: Word[] = []
   const push = (words: Word[], text: string, changed: boolean) => {
     const last = words.at(-1)
-    if (last && last.changed === changed) last.text += text
+    if (last?.changed === changed) last.text += text
     else words.push({text, changed})
   }
   for (const op of diff.ops) {

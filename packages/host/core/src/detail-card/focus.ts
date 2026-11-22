@@ -92,7 +92,7 @@ export function useCardFocus({projection, container, view, card, row, key, setDi
       if (event.key !== 'Escape' || event.defaultPrevented || !row) return
       const active = document.activeElement
       const unfocused = !active || active === document.body || active === document.documentElement
-      if (!unfocused && !(card && active && card.contains(active))) return
+      if (!unfocused && !card?.contains(active)) return
       if (box && active && box.contains(active)) return
       event.preventDefault()
       close()

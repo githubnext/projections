@@ -110,13 +110,17 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
   // A host that gives the frame the height it reports will make room for the schema's height: fit the width from the
   // first paint, not the height the frame has before the host answers.
   const room = stage && {width: stage.width, height: sizing === 'content' ? rendererLimits.maxHeight - stage.padding : stage.height}
-  const fit = room && natural && room.width > 0 && room.height > 0 ? fitScale({width, height: natural}, room, {padding: 0}).scale : 1
+  const fit =
+    room && natural !== undefined && natural !== 0 && room.width > 0 && room.height > 0
+      ? fitScale({width, height: natural}, room, {padding: 0}).scale
+      : 1
   // Unless fitting would draw its smallest text below the kit's opening floor: then it opens at that, at its top left
   // (a diff on its first change), and scrolls.
   const floor = useOpeningFloor(content, tagSource)
   // A diff opens on its first change: a schema whose changes are far down (a new tag below the tables) still shows one.
   // Another comparison in the same frame is a new start, so the view opens on its changes, not where the last one was.
-  const start = useMemo(() => (diff && tagSource ? changesStart(view, content) : undefined), [diff, tagSource])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- each comparison (tagSource) starts afresh
+  const start = useMemo(() => (diff ? changesStart(view, content) : undefined), [diff, tagSource])
   const {zoom, scale} = useStageZoom(view, props.onAction, fit, {floor, ...(start ? {start} : {})})
   // A content-sized host gets the schema's own height; zoomed in, the height it is drawn at, up to the room the host
   // allows (its stage-max-height, else the protocol's maximum), so the stage grows into the page before it pans.
@@ -126,12 +130,10 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
       ? undefined
       : Math.ceil(Math.max(natural, Math.min(natural * scale, (cap ?? rendererLimits.maxHeight) - stage.padding)) + stage.padding),
   )
-  useContentAspect(natural ? width / natural : undefined)
+  useContentAspect(natural !== undefined && natural !== 0 ? width / natural : undefined)
   useEffect(() => {
     if (props.selectedId === null) return
-    view.current
-      ?.querySelector(`[data-entity-id="${CSS.escape(props.selectedId)}"]`)
-      ?.scrollIntoView?.({block: 'nearest', inline: 'nearest'})
+    view.current?.querySelector(`[data-entity-id="${CSS.escape(props.selectedId)}"]`)?.scrollIntoView({block: 'nearest', inline: 'nearest'})
   }, [props.selectedId])
   const empty = !model.entities.length
   const linkName = linkNamer(frame)

@@ -156,7 +156,7 @@ export function connectRings(view: Window, options: RingOptions = {}): RingContr
   stylesheet.setAttribute('data-projections-rings', '')
   const install = () => {
     stylesheet.textContent = ringStylesheet(attribute)
-    if (!stylesheet.isConnected) (document.head ?? document.documentElement).append(stylesheet)
+    if (!stylesheet.isConnected) ((document.head as HTMLHeadElement | null) ?? document.documentElement).append(stylesheet)
   }
   install()
 
@@ -259,7 +259,12 @@ const shared = new WeakMap<Window, {controller: RingController; users: number}>(
  * there is no DOM.
  */
 export function documentRings(view: Window): {controller: RingController; release: () => void} | null {
-  if (!view.document?.documentElement || typeof (view as Window & typeof globalThis).MutationObserver !== 'function') return null
+  if (
+    !(view.document as Document | undefined)?.documentElement ||
+    typeof (view as Window & typeof globalThis).MutationObserver !== 'function'
+  ) {
+    return null
+  }
   let entry = shared.get(view)
   if (!entry) {
     entry = {controller: connectRings(view), users: 0}

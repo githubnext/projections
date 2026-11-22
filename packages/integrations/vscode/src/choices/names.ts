@@ -35,8 +35,15 @@ export function choiceName(choice: Choice, facts: RepositoryFacts): string {
 
 /** What `HEAD` adds on a branch: `3 commits + 1 uncommitted`, `1 commit`, `2 uncommitted`, or `no changes`. */
 export function branchDetail(facts: RepositoryFacts): string {
-  const uncommitted = facts.dirty ? (facts.changes ? `${facts.changes} uncommitted` : 'uncommitted') : undefined
-  const parts = [...(facts.ahead ? [plural(facts.ahead, 'commit')] : []), ...(uncommitted ? [uncommitted] : [])]
+  const uncommitted = facts.dirty
+    ? facts.changes !== undefined && facts.changes !== 0
+      ? `${facts.changes} uncommitted`
+      : 'uncommitted'
+    : undefined
+  const parts = [
+    ...(facts.ahead !== undefined && facts.ahead !== 0 ? [plural(facts.ahead, 'commit')] : []),
+    ...(uncommitted ? [uncommitted] : []),
+  ]
   return parts.length ? parts.join(' + ') : 'no changes'
 }
 
@@ -64,7 +71,7 @@ export function choiceDetail(
   const id = choice.id
   if (id === 'now') return `${yourFiles} as they are now`
   if (id === 'uncommitted') {
-    return `last commit → ${yourFiles} · ${facts.changes ? plural(facts.changes, 'file') : facts.dirty ? 'uncommitted' : 'no edits'}`
+    return `last commit → ${yourFiles} · ${facts.changes !== undefined && facts.changes !== 0 ? plural(facts.changes, 'file') : facts.dirty ? 'uncommitted' : 'no edits'}`
   }
   if (id === 'branch') return `${facts.defaultBranch ?? 'the default branch'} → ${yourFiles} · ${branchDetail(facts)}`
   if (id === 'last-commit') return 'previous commit → last commit'

@@ -36,7 +36,9 @@ export function stampTree(stamp: ResultStamp): string | undefined {
  * changed: the definition did). The detail truncates first on a narrow stage.
  */
 export function staleNotice(files: number | undefined): {label: string; detail?: string} {
-  return files ? {label: 'Out of date', detail: `${files} file${files === 1 ? '' : 's'} changed`} : {label: 'Out of date'}
+  return files !== undefined && files !== 0
+    ? {label: 'Out of date', detail: `${files} file${files === 1 ? '' : 's'} changed`}
+    : {label: 'Out of date'}
 }
 
 /** `Out of date · 3 files changed`, or `Out of date` alone (`staleNotice`). */

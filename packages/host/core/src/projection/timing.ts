@@ -15,7 +15,10 @@ export const minimumDurationMs = 4500
  * pace. A definition's `presentation.durationMs` overrides it.
  */
 export function defaultDuration(steps: number, stepMs?: number): number {
-  return Math.min(stepMs ? 60_000 : 20_000, Math.max(minimumDurationMs, Math.max(0, steps) * (stepMs ?? stepDurationMs)))
+  return Math.min(
+    stepMs !== undefined && stepMs !== 0 ? 60_000 : 20_000,
+    Math.max(minimumDurationMs, Math.max(0, steps) * (stepMs ?? stepDurationMs)),
+  )
 }
 
 /**

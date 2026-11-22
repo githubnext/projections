@@ -96,7 +96,7 @@ export function optionalToolchains(root: string, skipDotnet = false): Toolchain[
     ['terraform', pin('terraform_version'), ['terraform', 'version']],
   ]
   return tools
-    .filter(([name, required]) => required && !(skipDotnet && name === 'dotnet'))
+    .filter(([name, required]) => !!required && !(skipDotnet && name === 'dotnet'))
     .map(([name, required, argv]) => {
       const installed = versionIn(probe(root, argv))
       const wanted = required!.replace(/\.x$/u, '')

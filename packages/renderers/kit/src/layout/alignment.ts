@@ -72,7 +72,8 @@ export function identifyAlignment(
     }
     chains.push({index, chain})
   }
-  const layers: Vertex[][] = []
+  // Sparse: a layer no vertex is in is a hole.
+  const layers: (Vertex[] | undefined)[] = []
   for (const item of vertices) (layers[item.layer] ??= []).push(item)
   for (const layer of layers) {
     if (!layer) continue

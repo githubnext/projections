@@ -4,7 +4,8 @@ import type {LayoutEdge, LayoutNode} from './model.js'
 
 /** The entity kinds a `compound` option lets become boundaries. */
 export function boundaryKinds(compound: boolean | readonly string[] | undefined): readonly string[] {
-  return compound === true ? ['module'] : compound || []
+  if (compound === true) return ['module']
+  return compound === false ? [] : (compound ?? [])
 }
 
 /**

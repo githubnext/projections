@@ -56,7 +56,8 @@ export function relationshipLabel(
 ): string {
   if (relationship.label) return relationship.label
   const endpoint = (id: string) => entityLabel?.(id) ?? id
-  const kind = relationship.kind?.trim() ?? ''
+  // Callers outside an extraction the engine checked may leave out the kind or a label.
+  const kind = (relationship as {kind?: string}).kind?.trim() ?? ''
   return `${endpoint(relationship.from)} → ${endpoint(relationship.to)}${genericKinds.has(kind.toLowerCase()) ? '' : ` (${kind})`}`
 }
 
@@ -64,7 +65,7 @@ export function relationshipLabel(
 export function entityLabels(...extractions: readonly (Pick<Extraction, 'entities'> | undefined)[]): (id: string) => string | undefined {
   const labels = new Map<string, string>()
   for (const extraction of [...extractions].reverse()) {
-    for (const entity of extraction?.entities ?? []) labels.set(entity.id, entity.label ?? entity.id)
+    for (const entity of extraction?.entities ?? []) labels.set(entity.id, (entity as {label?: string}).label ?? entity.id)
   }
   return id => labels.get(id)
 }

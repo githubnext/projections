@@ -80,7 +80,7 @@ export function presentComparison(before: Extraction, after: Extraction, compari
     const currentById = new Map(current.map(item => [item.id, item]))
     const lookup = <V>(map: Map<string, V>, id: string): V => {
       const item = map.get(id)
-      if (!item) throw new Error(`Comparison references unknown ${collection} item ${id}`)
+      if (item === undefined) throw new Error(`Comparison references unknown ${collection} item ${id}`)
       return item
     }
     const rows: EntityChange<T>[] = []
@@ -108,7 +108,7 @@ export function presentComparison(before: Extraction, after: Extraction, compari
         ...(first === undefined ? {} : {after: lookup(currentById, first)}),
         ...(renamed ? {renamed: true} : {}),
         ...(renamed && prior !== undefined ? {previousId: prior} : {}),
-        ...(change.varied?.length ? {varied: change.varied} : {}),
+        ...(change.varied?.length !== undefined && change.varied.length > 0 ? {varied: change.varied} : {}),
         ...(change.context ? {context: change.context} : {}),
       })
       // Further split parts arrive, and further merged parts leave, on their own, with the change's context.

@@ -18,6 +18,7 @@ async function run(argv: string[]): Promise<{output: string; exit: number}> {
   const before = process.exitCode
   process.exitCode = undefined
   await cli.serve(argv, {stdout: text => (output += text), exit: code => (exit = code)})
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-unnecessary-type-conversion -- serve sets it during the await
   exit ||= Number(process.exitCode ?? 0)
   process.exitCode = before
   return {output, exit}
@@ -58,7 +59,7 @@ test('explain: owner, nearby tests, generated files and checks', async () => {
   assert.ok(source.run.includes('npm run tools -- test app'))
   const generated = (await runJson<Report<typeof explainReport>>(['explain', 'gen/out.ts', '--json'])).json
   assert.equal(generated.owner.kind, 'repository')
-  assert.ok(generated.generated)
+  assert.ok(generated.generated !== false)
   assert.equal(generated.generated.note, "Don't edit by hand.")
 })
 
@@ -104,7 +105,7 @@ test('check: a failing gate reports {file, line, message} and next, and exits 1'
       ['libs/b/README.md', 1],
     ],
   )
-  assert.ok(json.next.includes('npm run tools -- explain app/README.md'))
+  assert.equal(json.next.includes('npm run tools -- explain app/README.md'), true)
 })
 
 test('context reads purpose and invariants from the documents', async () => {

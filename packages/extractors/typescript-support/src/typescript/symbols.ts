@@ -18,7 +18,7 @@ export function declares(declaration: ts.Node, kind: ts.SyntaxKind): boolean {
 export function privateMember(symbol: ts.Symbol): boolean {
   return (symbol.declarations ?? []).some(declaration => {
     const name = (declaration as ts.NamedDeclaration).name
-    return (name && ts.isPrivateIdentifier(name)) || declares(declaration, ts.SyntaxKind.PrivateKeyword)
+    return (name !== undefined && ts.isPrivateIdentifier(name)) || declares(declaration, ts.SyntaxKind.PrivateKeyword)
   })
 }
 
@@ -47,7 +47,7 @@ export function modifiers(symbol: ts.Symbol): string {
 }
 
 export function memberName(symbol: ts.Symbol): string {
-  const name = (symbol.declarations?.[0] as ts.NamedDeclaration | undefined)?.name
+  const name = ts.getNameOfDeclaration(symbol.declarations?.[0])
   if (!name || !ts.isComputedPropertyName(name) || !symbol.name.startsWith('__@')) return symbol.name
   const printed = ts.createPrinter({removeComments: true}).printNode(ts.EmitHint.Unspecified, name, name.getSourceFile())
   const scanner = ts.createScanner(ts.ScriptTarget.Latest, true, ts.LanguageVariant.Standard, printed)

@@ -55,7 +55,7 @@ export function corridorRoute(ctx: RoutingContext, segment: Segment, own: readon
     if (best && !best.crossings && !best.close) break
   }
   // Turns beside another route's run move a track or two either way, where they keep the full radius.
-  if (best && best.close) best = shiftTurns(ctx, segment, attempt, best, first, last, finish)
+  if (best?.close !== undefined && best.close !== 0) best = shiftTurns(ctx, segment, attempt, best, first, last, finish)
   return best?.route
 }
 
@@ -64,7 +64,7 @@ function corridorAttempt(ctx: RoutingContext, segment: Segment, own: readonly st
   const {across, at, axis, clear, crossRuns, quickCross} = ctx
   const start = segment.start,
     end = segment.end!
-  const others = ctx.sharingAnEnd(segment).filter(other => other !== segment && other.route)
+  const others = ctx.sharingAnEnd(segment).filter(other => other !== segment && !!other.route)
   // Other routes' runs across the layers, which this one's runs keep a track away from.
   const runs = ctx.all().flatMap(other => (other !== segment && other.route ? crossRuns(other.route) : []))
   const crowded = (position: number, from: number, to: number) =>
@@ -144,7 +144,7 @@ function shiftTurns(
     .flatMap(jog =>
       lasts.map(turn => ({jog, turn, close: attempt.crowded(jog, across(start), value) + attempt.crowded(turn, value, across(end))})),
     )
-    .filter(pair => best.crossings || pair.close < best.close)
+    .filter(pair => best.crossings !== 0 || pair.close < best.close)
     .sort(
       (a, b) => a.close - b.close || Math.abs(a.jog - first) + Math.abs(a.turn - last) - Math.abs(b.jog - first) - Math.abs(b.turn - last),
     )

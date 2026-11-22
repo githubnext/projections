@@ -74,7 +74,7 @@ export function effectiveChoice(remembered: Choice | undefined, facts: Repositor
 /** The choice a pair is, when one names it (from Swap or an agent tool), else two revisions (`custom`). */
 export function identifyPair(pair: Pair, facts: RepositoryFacts): Choice {
   for (const id of ['now', 'uncommitted', 'branch', 'last-commit', 'release']) if (samePair(resolveChoice({id}, facts), pair)) return {id}
-  const bookmark = facts.bookmarks.find(item => item.id && samePair(item, pair))
+  const bookmark = facts.bookmarks.find(item => !!item.id && samePair(item, pair))
   if (bookmark) return {id: `bookmark:${bookmark.id}`}
   return {id: 'custom', pair: {...(pair.before ? {before: pair.before} : {}), after: pair.after}}
 }

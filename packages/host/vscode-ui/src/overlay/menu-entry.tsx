@@ -51,7 +51,7 @@ export function MenuEntry({
       role={itemRole(item)}
       tabIndex={-1}
       aria-checked={checked}
-      aria-disabled={disabled || undefined}
+      aria-disabled={disabled === true || undefined}
       aria-haspopup={submenu ? 'menu' : undefined}
       aria-expanded={submenu ? expanded : undefined}
       className="phv-menu-item"
@@ -102,7 +102,7 @@ function groupItems(items: readonly MenuItem[]): {key: string; items: MenuItem[]
   const groups: {key: string; items: MenuItem[]}[] = []
   for (const item of items) {
     const last = groups.at(-1)
-    if (last && last.key === (item.group ?? '')) last.items.push(item)
+    if (last?.key === (item.group ?? '')) last.items.push(item)
     else groups.push({key: item.group ?? '', items: [item]})
   }
   return groups

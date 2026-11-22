@@ -39,7 +39,7 @@ const inlineSteps = (layout: ToolbarLayout) => layout.rows === 2 && !layout.play
  */
 export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content: ToolbarContent): ToolbarLayout & {step: number} {
   const {pickers = false, modes = false, playback = false, centre = false} = content
-  const actions = (content.actions === true ? actionCollapseOrder : content.actions || []).join(' ')
+  const actions = (content.actions === true ? actionCollapseOrder : content.actions === false ? [] : (content.actions ?? [])).join(' ')
   const steps = useMemo(
     () => toolbarSteps({pickers, modes, playback, centre, actions: actions ? (actions.split(' ') as ToolbarAction[]) : []}),
     [pickers, modes, playback, centre, actions],

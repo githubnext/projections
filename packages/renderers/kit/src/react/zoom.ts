@@ -43,7 +43,7 @@ export function useScrollAnchor(
   const cover = useStageCover()
   const insetTop = useStageInsetTop()
   // Not for an opening centred on a focus (`clearCover` false), which the placement already centres in the view.
-  const clear = clearCover && cover?.length ? (insetTop ?? 0) : 0
+  const clear = clearCover && cover?.length !== undefined && cover.length > 0 ? (insetTop ?? 0) : 0
   const current = useRef({scale, opening, start, onMove, clear})
   current.current = {scale, opening, start, onMove, clear}
   // Places the view: at its start while it opens, else around the middle it had.

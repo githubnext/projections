@@ -29,7 +29,7 @@ export function bundledDocsUri(page: string): vscode.Uri | undefined {
 
 /** The bundled page a URI is, or undefined when it isn't one of the bundle's files. */
 export function bundledDocsPage(uri: vscode.Uri): string | undefined {
-  if (!bundleRoot || uri.scheme !== bundleRoot.scheme || uri.authority !== bundleRoot.authority) return undefined
+  if (uri.scheme !== bundleRoot?.scheme || uri.authority !== bundleRoot.authority) return undefined
   const prefix = `${bundleRoot.path.replace(/\/+$/u, '')}/`
   return uri.path.startsWith(prefix) ? docsPage(uri.path.slice(prefix.length)) : undefined
 }

@@ -18,7 +18,7 @@ const {values} = parseArgs({
     help: {type: 'boolean', short: 'h'},
   },
 })
-if (values.help || !values.fixtures?.length) {
+if (values.help || !values.fixtures || values.fixtures.length === 0) {
   console.log(
     'Usage: projections-renderer-workbench --fixtures <scenarios.json or directory>... [--renderer <bundle or package>...] [--port N] [--cli path]',
   )

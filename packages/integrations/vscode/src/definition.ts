@@ -152,9 +152,7 @@ export class DefinitionView implements vscode.TreeDataProvider<Node>, vscode.Dis
       files: this.ownFiles().map(uri => uri.toString()),
     })
     this.shown = chosen
-      ? [pinned, tab, this.shown].find(
-          item => item && item.folder.uri.toString() === chosen.folder && item.projection === chosen.projection,
-        )
+      ? [pinned, tab, this.shown].find(item => item?.folder.uri.toString() === chosen.folder && item.projection === chosen.projection)
       : undefined
     const shown = this.shown
     // The pin is the one state the tab doesn't show: name what it holds.
@@ -252,7 +250,7 @@ export class DefinitionView implements vscode.TreeDataProvider<Node>, vscode.Dis
       projection: this.shown?.projection ?? null,
       pinned: Boolean(this.pinned),
       title: this.view.title ?? null,
-      message: this.view.message || null,
+      message: (this.view.message ?? '') || null,
       rows: this.getChildren().map(describe),
     }
   }

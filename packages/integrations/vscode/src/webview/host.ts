@@ -6,7 +6,7 @@ declare function acquireVsCodeApi(): {postMessage: (message: unknown) => void; g
 
 export const vscode = acquireVsCodeApi()
 
-export const config = JSON.parse(document.getElementById('projections-config')!.textContent!) as WebviewConfig
+export const config = JSON.parse(document.getElementById('projections-config')!.textContent) as WebviewConfig
 
 export const post = (message: HostMessage) => vscode.postMessage(message)
 

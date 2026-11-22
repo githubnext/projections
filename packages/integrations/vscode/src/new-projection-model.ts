@@ -246,9 +246,12 @@ export function initArguments(plan: Plan): string[] {
 
 /** The definition schema's ID pattern (`properties.id`, through its `$ref`), the one `projections init` validates. */
 export function identifierPattern(schema: unknown): RegExp {
-  const document = schema as {properties?: {id?: {$ref?: string; pattern?: string}}; $defs?: Record<string, {pattern?: string}>}
+  const document = schema as
+    | {properties?: {id?: {$ref?: string; pattern?: string}}; $defs?: Record<string, {pattern?: string}>}
+    | null
+    | undefined
   const id = document?.properties?.id
-  const pattern = id?.$ref?.startsWith('#/$defs/') ? document.$defs?.[id.$ref.slice('#/$defs/'.length)]?.pattern : id?.pattern
+  const pattern = id?.$ref?.startsWith('#/$defs/') ? document?.$defs?.[id.$ref.slice('#/$defs/'.length)]?.pattern : id?.pattern
   if (typeof pattern !== 'string') throw new Error('The definition schema has no projection ID pattern')
   return new RegExp(pattern, 'u')
 }
@@ -300,7 +303,7 @@ export function agentPrompt(output: string, description: string, id: string): st
   const printed = heading >= 0 ? lines[heading + 1]?.trim() : undefined
   const what = description.trim().replace(/[.\s]+$/u, '')
   const prompt =
-    printed ||
+    (printed ?? '') ||
     `Build the "${id}" projection in this repository so it shows <what this projection should show>. Follow the projections skill, and verify it with \`projections check -p ${id} --trust\` before you finish.`
   return prompt.replace(/<what this projection should show>/u, what)
 }

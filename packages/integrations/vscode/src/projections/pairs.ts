@@ -41,7 +41,7 @@ export function pairLabel(pair: Pair): string {
 
 /** Whether two pairs are the same. */
 export function samePair(a: Pair | undefined, b: Pair | undefined): boolean {
-  return Boolean(a && b && a.after === b.after && (a.before ?? '') === (b.before ?? ''))
+  return a !== undefined && a.after === b?.after && (a.before ?? '') === (b.before ?? '')
 }
 
 /** The pair swapped; one revision stays as it is. */

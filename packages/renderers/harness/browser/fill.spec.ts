@@ -36,13 +36,13 @@ for (const {key, content, stage: stageSelector, fit} of cases) {
             const rect = element!.getBoundingClientRect()
             return {left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height}
           }
-          const area = root.querySelector(areaSelector!)!
+          const area = root.querySelector(areaSelector)!
           const footer = root.querySelector('.graph-footer, .di-legend')
-          const scale = Number(root.querySelector(contentSelector!)!.getAttribute('data-scale') ?? NaN)
+          const scale = Number(root.querySelector(contentSelector)!.getAttribute('data-scale') ?? NaN)
           // The smallest drawn text in the scaled content, SVG or HTML: its font size times the scale it is drawn at
           // (an SVG's screen transform, or the CSS transforms above it). Visually hidden text (a 1 px box) doesn't count.
           let smallestText = Infinity
-          const walker = document.createTreeWalker(root.querySelector(contentSelector!)!, NodeFilter.SHOW_TEXT)
+          const walker = document.createTreeWalker(root.querySelector(contentSelector)!, NodeFilter.SHOW_TEXT)
           for (let node = walker.nextNode(); node; node = walker.nextNode()) {
             const element = node.parentElement
             if (!element || !node.textContent?.trim() || !element.getClientRects().length) continue
@@ -69,7 +69,7 @@ for (const {key, content, stage: stageSelector, fit} of cases) {
             frame: innerHeight,
             root: box(root),
             stage: box(area),
-            content: box(root.querySelector(contentSelector!)),
+            content: box(root.querySelector(contentSelector)),
             footer: footer ? box(footer) : null,
             scale,
             overflows: area.scrollHeight > area.clientHeight + 1 || area.scrollWidth > area.clientWidth + 1,

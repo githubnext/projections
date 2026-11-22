@@ -62,7 +62,7 @@ test('the revision is read from the extraction root while the compiler comes fro
   const revision = await checkout(t, source)
   const result = await runHelper('typescript-public-api', request('typescript-public-api', revision), await toolchain())
   assert.equal(result.status, 0, result.stderr)
-  assert.ok(JSON.parse(result.stdout).entities.some((entity: {label: string}) => entity.label === 'greet'))
+  assert.ok((JSON.parse(result.stdout) as {entities: {label: string}[]}).entities.some(entity => entity.label === 'greet'))
 })
 
 test('every field the definition schema allows is accepted, not only the ones the helper reads', async t => {
@@ -98,7 +98,7 @@ test('a tsconfig beside the definition includes sources elsewhere in the reposit
     await toolchain(),
   )
   assert.equal(result.status, 0, result.stderr)
-  assert.ok(JSON.parse(result.stdout).entities.some((entity: {label: string}) => entity.label === 'greet'))
+  assert.ok((JSON.parse(result.stdout) as {entities: {label: string}[]}).entities.some(entity => entity.label === 'greet'))
 })
 
 test('entry points limit the program to what they reach, leaving out tests whose dependencies are not installed', async t => {

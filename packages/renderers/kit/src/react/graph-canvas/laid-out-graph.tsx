@@ -232,7 +232,7 @@ function useViewChange(
     rescoped.current = false
     if (!reducedMotion) setMorph({from: previous.frame, to: transition, mix: 0})
   }
-  const moving = morph !== undefined && morph.to === transition && morph.mix < 1
+  const moving = morph?.to === transition && morph.mix < 1
   const frame = moving ? morphFrames(morph.from, target, morph.mix) : target
   const moved = morph?.from
   useEffect(() => {
@@ -243,14 +243,14 @@ function useViewChange(
     const tick = (time: number) => {
       started ??= time
       const mix = Math.max(1e-6, Math.min(1, (time - started) / viewChangeMs))
-      setMorph(current => (current && current.from === moved ? {...current, mix} : current))
+      setMorph(current => (current?.from === moved ? {...current, mix} : current))
       if (mix < 1) request = view.requestAnimationFrame(tick)
     }
     request = view.requestAnimationFrame(tick)
     return () => view.cancelAnimationFrame(request)
   }, [moved, scroller])
   useLayoutEffect(() => {
-    shown.current = {transition, frame, bounds, scale: scale.current ?? 0}
+    shown.current = {transition, frame, bounds, scale: scale.current}
   })
   return {frame, hold: held.current, overflow: moving, change}
 }

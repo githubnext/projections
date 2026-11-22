@@ -29,8 +29,14 @@ export function choiceMeaning(choice: Choice, facts: RepositoryFacts): string {
 export function choiceFact(choice: Choice, facts: RepositoryFacts, pair: Pair | undefined = resolveChoice(choice, facts)): string {
   if (unavailableReason(choice, facts)) return 'unavailable'
   const id = choice.id
-  if (id === 'uncommitted') return facts.changes ? plural(facts.changes, 'file') : ''
-  if (id === 'branch') return facts.ahead ? plural(facts.ahead, 'commit') : facts.changes ? plural(facts.changes, 'file') : ''
+  if (id === 'uncommitted') return facts.changes !== undefined && facts.changes !== 0 ? plural(facts.changes, 'file') : ''
+  if (id === 'branch') {
+    return facts.ahead !== undefined && facts.ahead !== 0
+      ? plural(facts.ahead, 'commit')
+      : facts.changes !== undefined && facts.changes !== 0
+        ? plural(facts.changes, 'file')
+        : ''
+  }
   if (id === 'last-commit') return facts.head ? shortCommit(facts.head) : ''
   if (id.startsWith('bookmark:') && pair) return shortCommit(pair.after === 'working-tree' && pair.before ? pair.before : pair.after)
   if ((id === 'custom' || id.startsWith('pair:')) && pair) return pairFact(pair)

@@ -222,7 +222,9 @@ export function createTextSizer(
   const statusOf = (text: CardText) =>
     (text.status ?? []).reduce((sum, word, index) => sum + (index ? chrome.statusGap : 0) + chrome.statusIcon + width('status', word), 0)
   const status = (card: string) =>
-    Math.ceil(Math.max(0, ...cards(card).map(statusOf)) + (cards(card).some(text => text.status?.length) ? textMetrics.slack : 0))
+    Math.ceil(
+      Math.max(0, ...cards(card).map(statusOf)) + (cards(card).some(text => (text.status?.length ?? 0) > 0) ? textMetrics.slack : 0),
+    )
   const headerText = (card: CardText, cell: number) =>
     (card.rename ? pill(card.rename) + arrow() + pill(card.label) : width('name', card.label)) +
     (card.kind ? chrome.headerGap + width('kind', card.kind) : 0) +

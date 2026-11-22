@@ -29,7 +29,14 @@ watchPage()
 /** VS Code's host capabilities for the Inspector: opening files, Source Control, the clipboard, links, its agent, and its theme. */
 function inspectorHost(): InspectorHost {
   return {
-    openFile: (path, line, column) => post({tag: hostTag, op: 'openFile', path, ...(line ? {line} : {}), ...(column ? {column} : {})}),
+    openFile: (path, line, column) =>
+      post({
+        tag: hostTag,
+        op: 'openFile',
+        path,
+        ...(line !== undefined && line !== 0 ? {line} : {}),
+        ...(column !== undefined && column !== 0 ? {column} : {}),
+      }),
     revealInScm: ref => post({tag: hostTag, op: 'revealInScm', ref}),
     copyText: async text => post({tag: hostTag, op: 'copyText', text}),
     openExternal: url => post({tag: hostTag, op: 'openExternal', url}),

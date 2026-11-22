@@ -68,8 +68,9 @@ export function useTextMeasure(): {probe: ReactNode; measure?: MeasureText; chro
       setState({measure, chrome})
     }
     read()
-    document.fonts?.addEventListener('loadingdone', read)
-    return () => document.fonts?.removeEventListener('loadingdone', read)
+    const fonts = document.fonts as FontFaceSet | undefined
+    fonts?.addEventListener('loadingdone', read)
+    return () => fonts?.removeEventListener('loadingdone', read)
   }, [])
   const probe = (
     <div ref={root} className="database-measure" aria-hidden="true" inert>

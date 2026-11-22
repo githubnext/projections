@@ -43,7 +43,7 @@ export function normalizeColors(value: string): string {
     context.fillStyle = '#000'
     context.fillStyle = input
     // Alpha to two decimals: 0.7 and 0.701961 (179/255) are one color.
-    return String(context.fillStyle).replace(
+    return context.fillStyle.replace(
       /rgba\(([^)]*), ([\d.]+)\)/u,
       (_, rgb: string, alpha: string) => `rgba(${rgb}, ${Number(alpha).toFixed(2)})`,
     )

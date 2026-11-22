@@ -21,7 +21,7 @@ export type {ChangesScope} from '@githubnext/projections-renderer-sdk/presentati
  * (`changeContext`).
  */
 export function changesScope(model: ComparisonModel | undefined, filter: FilterPayload | undefined): ChangesScope | undefined {
-  if (!model || model.mode !== 'comparison' || !filter?.changesOnly) return undefined
+  if (model?.mode !== 'comparison' || !filter?.changesOnly) return undefined
   const ids = filter.scope === undefined ? filter.ids : filter.scope
   if (ids === null) return changeContext(scopeRows(model), model)
   // A split's or merge's further parts are rows of their own: the host's change ID names them all.

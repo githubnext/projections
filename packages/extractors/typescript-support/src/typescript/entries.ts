@@ -18,7 +18,7 @@ type Add = (pkg: Package, subpath: string, relative: string) => void
 function targets(value: unknown): string[] {
   if (typeof value === 'string') return [value]
   if (Array.isArray(value)) return value.flatMap(targets)
-  if (!value || typeof value !== 'object') return []
+  if (typeof value !== 'object' || value === null) return []
   const conditions = value as Record<string, unknown>
   if (conditions.types !== undefined) return targets(conditions.types)
   return Object.values(conditions).flatMap(targets)

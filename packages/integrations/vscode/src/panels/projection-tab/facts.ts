@@ -43,7 +43,9 @@ function reportedPage(last: TabSummary): PageView {
   return {
     ...(last.status ? {status: last.status} : {}),
     ...(last.comparison ? {compared: last.comparison.compared, rows: last.comparison.rows, changes: last.comparison.changes} : {}),
-    ...(last.view?.mode && last.view.modes?.length ? {mode: last.view.mode, modes: last.view.modes} : {}),
+    ...(last.view?.mode && last.view.modes?.length !== undefined && last.view.modes.length > 0
+      ? {mode: last.view.mode, modes: last.view.modes}
+      : {}),
   }
 }
 
@@ -70,7 +72,7 @@ function definitionFacts(tab: FactsTab, file: vscode.Uri | undefined): Partial<T
           parts: {
             extractor: definition.extractor,
             renderer: definition.renderer,
-            ...(definition.comparator ? {comparator: definition.comparator} : {}),
+            ...(definition.comparator !== undefined && definition.comparator !== '' ? {comparator: definition.comparator} : {}),
           },
         }
       : {}),
@@ -103,7 +105,9 @@ export async function tabFacts(tab: FactsTab, inFront: boolean, ask: boolean, ot
     ...sides,
     ...(last?.definitionRevision ? {definitionRevision: last.definitionRevision} : {}),
     ...(edits ? {edits} : {}),
-    ...(stale ? {stale: {why: stale.why, tier: stale.tier, ...(stale.files ? {files: stale.files} : {})}} : {}),
+    ...(stale
+      ? {stale: {why: stale.why, tier: stale.tier, ...(stale.files !== undefined && stale.files !== 0 ? {files: stale.files} : {})}}
+      : {}),
     ...(shownPage ? {page: shownPage} : {}),
     ...(titles.length ? {others: titles} : {}),
   }

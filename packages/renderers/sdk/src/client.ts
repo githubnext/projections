@@ -345,7 +345,8 @@ export function applyEnvironment(environment: RendererEnvironment, element: HTML
   for (const name of optionalThemeTokenNames) if (!(name in tokens)) element.style.removeProperty(`--projections-${name}`)
   // The document root keeps `color-scheme: light dark`, like the host's frame element, so browsers never paint an
   // opaque backdrop for a scheme mismatch; the body and everything in it use the host's mode.
-  const scheme = element === element.ownerDocument.documentElement ? (element.ownerDocument.body ?? element) : element
+  const scheme =
+    element === element.ownerDocument.documentElement ? ((element.ownerDocument.body as HTMLElement | null) ?? element) : element
   scheme.style.colorScheme = environment.theme.colorMode
   element.dataset.colorMode = environment.theme.colorMode
   element.dataset.reducedMotion = String(environment.reducedMotion)

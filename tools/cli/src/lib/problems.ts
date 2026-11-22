@@ -10,9 +10,9 @@ function stylishError(line: string): {line: number; message: string; rule: strin
   const row = /^\s+(\d+):\d+\s+error\s(.*)$/u.exec(line)
   if (!row) return undefined
   const rest = (row[2] ?? '').trimStart()
-  const tail = /\s{2,}([\w@/-]+)$/u.exec(rest)
-  if (!tail || tail.index === 0) return undefined
-  return {line: Number(row[1]), message: rest.slice(0, tail.index), rule: tail[1] ?? ''}
+  const rule = /\s{2,}([\w@/-]+)$/u.exec(rest)
+  if (!rule || rule.index === 0) return undefined
+  return {line: Number(row[1]), message: rest.slice(0, rule.index), rule: rule[1] ?? ''}
 }
 
 export interface Problem {
@@ -69,7 +69,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
     match = /^(error|warning)(\[[^\]]+\])?: (.+)$/u.exec(line)
     if (match && !/^(?:error|warning): (?:could not compile|aborting|build failed|\d+ warnings? emitted|unused manifest key)/u.test(line)) {
       const location = lines.slice(index + 1, index + 4).find(next => /^\s+--> /u.test(next))
-      const at = location && /--> (.+?):(\d+):\d+/u.exec(location)
+      const at = location ? /--> (.+?):(\d+):\d+/u.exec(location) : null
       if (at) {
         push(problems, seen, {
           file: normalizePath(at[1]!, root),
@@ -100,7 +100,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
     if (match) {
       const message = lines
         .slice(index + 1, index + 4)
-        .filter(next => next && !next.startsWith('note:') && !next.startsWith('stack backtrace'))
+        .filter(next => next !== '' && !next.startsWith('note:') && !next.startsWith('stack backtrace'))
         .join(' ')
       push(problems, seen, {file: normalizePath(match[2]!, root), line: Number(match[3]), message: `${match[1]}: ${message}`})
       continue
@@ -114,8 +114,8 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       const location = body.map(next => /location: '(.+?):(\d+):\d+'/u.exec(next)).find(Boolean)
       const error = body.map(next => /^\s+error: [|>]?-?(.*)$/u.exec(next)?.[1]).find(text => text !== undefined)
       const errorText =
-        (error === undefined ? undefined : unquoted(error.trimStart())) ||
-        body.find((next, at) => at > 0 && /^\s+error:/u.test(body[at - 1] ?? ''))?.trim() ||
+        (error === undefined ? '' : unquoted(error.trimStart())) ||
+        (body.find((next, at) => at > 0 && /^\s+error:/u.test(body[at - 1] ?? ''))?.trim() ?? '') ||
         'failed'
       if (location && !/^\s*#/u.test(match[1]!)) {
         push(problems, seen, {
@@ -136,7 +136,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       const body = end >= 0 ? block.slice(0, end) : block
       const error =
         body
-          .find(next => next.trim() && !/^\s+at /u.test(next))
+          .find(next => next.trim() !== '' && !/^\s+at /u.test(next))
           ?.trim()
           .replace(/^\w*Error \[\w+\]: /u, '') ?? 'failed'
       const frame = body.map(next => (/^\s+at /u.test(next) ? /(?:file:\/\/)?(\/[^():]+):(\d+):\d+\)?$/u.exec(next) : null)).find(Boolean)
@@ -152,8 +152,8 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       eslintFile = normalizePath(line, root, directory)
       continue
     }
-    const stylish = eslintFile && stylishError(line)
-    if (stylish) {
+    const stylish = eslintFile === undefined ? undefined : stylishError(line)
+    if (eslintFile !== undefined && stylish) {
       push(problems, seen, {file: eslintFile, line: stylish.line, message: `${stylish.message} (${stylish.rule})`})
       continue
     }

@@ -109,7 +109,7 @@ export function HostHarness() {
     return builtinRendererDocuments([...(catalog ?? []), ...(hostile ? [hostile] : [])])
   }, [catalog, custom])
   return (
-    <div className="demo" style={toolbarWidth ? {maxWidth: 'none'} : undefined}>
+    <div className="demo" style={toolbarWidth !== undefined && toolbarWidth !== 0 ? {maxWidth: 'none'} : undefined}>
       <header className="demo-header" id="top">
         <div>
           <h1>Projections host</h1>
@@ -178,7 +178,7 @@ export function HostHarness() {
       ) : (
         <div
           className={params.get('fill') === 'false' ? 'demo-sized' : 'demo-view demo-sized'}
-          style={toolbarWidth ? {width: toolbarWidth + 2 * explorerPadding} : undefined}
+          style={toolbarWidth !== undefined && toolbarWidth !== 0 ? {width: toolbarWidth + 2 * explorerPadding} : undefined}
         >
           <ComparisonExplorer
             key={`${schema}-${comparator}-${rendererChoice}`}
@@ -194,7 +194,7 @@ export function HostHarness() {
             colorMode={colorMode}
             {...explorerOptions()}
             {...(params.has('caption') ? {utility: caption} : {})}
-            onOpen={(path, line) => setOpened(`${path}${line ? `:${line}` : ''}`)}
+            onOpen={(path, line) => setOpened(`${path}${line !== undefined && line !== 0 ? `:${line}` : ''}`)}
             {...(params.get('details') === 'none' ? {details: 'none' as const} : {})}
             {...(params.has('evidenceLinks') ? {evidenceLink} : {})}
             onSelectionChange={changeSelection}

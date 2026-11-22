@@ -124,7 +124,7 @@ function summaryItems(controller: ProjectionController): NonNullable<InspectorSu
   // A rename, split or merge is `unchanged` but is a change; its correspondence says so.
   const identity = (row: (typeof controller.rows)[number]) =>
     row.correspondence && row.correspondence !== 'exact' && row.correspondence !== 'none' ? row.correspondence : undefined
-  const changed = (row: (typeof controller.rows)[number]) => Boolean((row.status && row.status !== 'unchanged') || identity(row))
+  const changed = (row: (typeof controller.rows)[number]) => (!!row.status && row.status !== 'unchanged') || identity(row) !== undefined
   return [...controller.rows]
     .sort((a, b) => Number(!changed(a)) - Number(!changed(b)))
     .slice(0, 100)

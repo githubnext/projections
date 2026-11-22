@@ -51,7 +51,7 @@ export function routeTracks(runs: readonly TrackRun[], spacing = trackSpacing): 
     for (let j = i + 1; j < runs.length; j++) {
       const p = info[i],
         q = info[j]
-      if (!p || !q || p.axis !== q.axis) continue
+      if (!p || p.axis !== q?.axis) continue
       const a = runs[i]!,
         b = runs[j]!
       // Routes leaving one port the same way are one trunk: always together, on one track.

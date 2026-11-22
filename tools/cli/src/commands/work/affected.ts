@@ -10,7 +10,7 @@ export function affectedReport(root: string, since?: string) {
     return {path, kind: unit.kinds.join('+'), name: unit.names.join(', ')}
   }
   const tests = [...change.changed, ...change.dependants].filter(
-    path => byPath.get(path)?.scripts.includes('test') || byPath.get(path)?.kinds.includes('crate'),
+    path => byPath.get(path)?.scripts.includes('test') === true || byPath.get(path)?.kinds.includes('crate') === true,
   )
   return {
     base: base

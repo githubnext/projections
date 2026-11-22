@@ -115,7 +115,7 @@ export function diUnion(model: ComparisonModel<DependencyInjectionExtraction>, h
   const links = [...new Set([...beforeLinks.keys(), ...afterLinks.keys()])].sort(compareIds).flatMap((row): UnionLink[] => {
     const a = beforeLinks.get(row),
       b = afterLinks.get(row)
-    if (a && b && a.from === b.from && a.to === b.to) return [{key: row, link: b, side: 'both'}]
+    if (a && a.from === b?.from && a.to === b.to) return [{key: row, link: b, side: 'both'}]
     return [
       ...(a ? [{key: b ? `${row}:before` : row, link: a, side: 'before'} satisfies UnionLink] : []),
       ...(b ? [{key: a ? `${row}:after` : row, link: b, side: 'after'} satisfies UnionLink] : []),

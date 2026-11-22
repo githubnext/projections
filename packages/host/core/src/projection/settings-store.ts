@@ -38,11 +38,11 @@ export function initialSettings(options: ProjectionOptions) {
         : 1,
     playing: options.initialPlaying ?? false,
     loop: options.initialLoop ?? true,
-    holds: options.initialHolds ?? ('timeline' as Holds),
+    holds: options.initialHolds ?? 'timeline',
     speed: speedRange(options.initialSpeed ?? 1),
-    mode: options.initialMode ?? (presentation?.mode as ComparisonMode | undefined),
+    mode: options.initialMode ?? presentation?.mode,
     swipePosition: unit(options.initialSwipePosition ?? 0.5),
-    highlighting: options.initialHighlighting ?? presentation?.highlighting ?? ('animated' as Highlighting),
+    highlighting: options.initialHighlighting ?? presentation?.highlighting ?? 'animated',
     // A comparison opens on its changes and their context unless the definition opts out.
     changesOnly: options.initialChangesOnly ?? presentation?.changesOnly ?? true,
     variedOnly: options.initialVariedOnly ?? false,
@@ -64,7 +64,7 @@ export type SettingKey = keyof Settings & keyof ProjectionOptions
 
 /** A setting's value: the embedder's when it controls it, else the core's own. */
 export const settingValue = <K extends SettingKey>(settings: Settings, options: ProjectionOptions, key: K): Settings[K] =>
-  (options[key] !== undefined ? options[key] : settings[key]) as Settings[K]
+  (options[key] ?? settings[key]) as Settings[K]
 
 /**
  * The core's settings after a requested change: changed only while the embedder doesn't control the setting (and the

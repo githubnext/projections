@@ -69,7 +69,7 @@ export interface Priced {
 /** JSON with object keys sorted, so two executions that differ only in key order compare equal. */
 function canonical(value: unknown): string {
   return JSON.stringify(value, (_, item: unknown) =>
-    item && typeof item === 'object' && !Array.isArray(item)
+    typeof item === 'object' && item !== null && !Array.isArray(item)
       ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
       : item,
   )

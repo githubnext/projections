@@ -175,8 +175,11 @@ export function EvidenceSection({
       </h4>
       <ul className="ph-evidence pj:flex pj:min-w-0 pj:flex-col pj:gap-1">
         {details.evidence.map(location => {
-          const text = `${location.path}${location.line ? `:${location.line}` : ''}`
-          const href = evidenceLink?.({path: location.path, ...(location.line ? {line: location.line} : {})}, location.side)
+          const text = `${location.path}${location.line !== undefined && location.line !== 0 ? `:${location.line}` : ''}`
+          const href = evidenceLink?.(
+            {path: location.path, ...(location.line !== undefined && location.line !== 0 ? {line: location.line} : {})},
+            location.side,
+          )
           const link =
             'ph-link pj:min-w-0 pj:break-all pj:rounded-xs pj:text-left pj:font-mono pj:text-xs pj:underline pj:underline-offset-4 pj:focus-visible:outline-hidden pj:focus-visible:ring-1 pj:focus-visible:ring-ring'
           return (

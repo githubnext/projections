@@ -55,7 +55,7 @@ export async function cornerBox(
   } else await locator.scrollIntoViewIfNeeded()
   const box = await locator.boundingBox()
   if (!box) return null
-  const drawn = await locator.evaluate((element, frameWidth) => {
+  const drawn = await locator.evaluate((element, frameWidth: number | undefined) => {
     const style = getComputedStyle(element)
     const rect = element.getBoundingClientRect()
     if (element instanceof SVGRectElement) {

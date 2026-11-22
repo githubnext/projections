@@ -16,7 +16,7 @@ export function currentView(inspector: InspectorHandle): PageView {
   return {
     status: summary.status,
     ...(summary.error ? {error: summary.error} : {}),
-    ...(summary.notices?.length ? {notices: summary.notices} : {}),
+    ...(summary.notices?.length !== undefined && summary.notices.length > 0 ? {notices: summary.notices} : {}),
     ...(summary.comparison
       ? {compared: summary.comparison.compared, rows: summary.comparison.rows, changes: summary.comparison.changes}
       : {}),

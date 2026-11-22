@@ -90,14 +90,14 @@ export function sweepProgress(
 
 /** A `projections.scenarios` document's title, renderer and scenarios, or undefined when the text isn't one. */
 export function parseScenarios(text: string): {title?: string; renderer?: string; scenarios: {id: string; title: string}[]} | undefined {
-  let document: {format?: unknown; title?: unknown; renderer?: unknown; scenarios?: unknown}
+  let document: {format?: unknown; title?: unknown; renderer?: unknown; scenarios?: unknown} | null
   try {
     document = JSON.parse(text)
   } catch {
     return undefined
   }
   if (document?.format !== 'projections.scenarios' || !Array.isArray(document.scenarios)) return undefined
-  const scenarios = (document.scenarios as {id?: unknown; title?: unknown}[]).flatMap(item =>
+  const scenarios = (document.scenarios as ({id?: unknown; title?: unknown} | null)[]).flatMap(item =>
     typeof item?.id === 'string' ? [{id: item.id, title: typeof item.title === 'string' ? item.title : item.id}] : [],
   )
   return {

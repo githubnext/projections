@@ -18,8 +18,8 @@ export function tabDefaults(facts: TabFacts): TabDefaults {
             ...(facts.page.mode ? {mode: facts.page.mode} : {}),
             ...(facts.page.progress !== undefined ? {progress: facts.page.progress} : {}),
             ...(facts.page.colorMode ? {theme: facts.page.colorMode} : {}),
-            ...(facts.page.width ? {width: facts.page.width} : {}),
-            ...(facts.page.height ? {height: facts.page.height} : {}),
+            ...(facts.page.width !== undefined && facts.page.width !== 0 ? {width: facts.page.width} : {}),
+            ...(facts.page.height !== undefined && facts.page.height !== 0 ? {height: facts.page.height} : {}),
           },
         }
       : {}),
@@ -33,6 +33,6 @@ export function presentAsShown(args: Record<string, unknown>, view: NonNullable<
   if (args.mode === undefined && mode && mode !== 'swipe') args.mode = mode
   if (args.progress === undefined && progress !== undefined) args.progress = progress
   if (args.theme === undefined && theme) args.theme = theme
-  if (args.width === undefined && width) args.width = clamp(width, 320, 2560)
-  if (args.height === undefined && height) args.height = clamp(height, 240, 1600)
+  if (args.width === undefined && width !== undefined && width !== 0) args.width = clamp(width, 320, 2560)
+  if (args.height === undefined && height !== undefined && height !== 0) args.height = clamp(height, 240, 1600)
 }

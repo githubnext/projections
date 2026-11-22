@@ -18,7 +18,7 @@ export function columnType(entity: Entity): string {
 /** A column's shown type without its nullability: `databaseType`, otherwise `type`. */
 export function baseType(entity: Entity): string {
   const data = columnData(entity)
-  return data ? data.databaseType || data.type : ''
+  return data ? (data.databaseType ?? '') || data.type : ''
 }
 
 /** The declared type behind a shown native type (`CharField` behind `varchar(200)`), when they differ. */

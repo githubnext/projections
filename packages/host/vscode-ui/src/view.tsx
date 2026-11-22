@@ -80,7 +80,7 @@ function VscodeView({
     <div
       ref={root}
       className={`ph phv-root ${props.className ?? ''}`}
-      style={p.themeStyle as CSSProperties}
+      style={p.themeStyle}
       data-vscode-theme-kind={kind}
       data-host-ui="vscode"
       data-mode={subject.mode}
@@ -132,7 +132,7 @@ function VscodeView({
             {view === 'text' && <VscodeTextView {...rows} summary={on('summary') ? p.summary : undefined} />}
           </div>
           {/* Over the stage, not in its scrolling content: the workspace doesn't scroll, the view inside it does. */}
-          {props.stageNotice && <StageNoticeSlot>{props.stageNotice}</StageNoticeSlot>}
+          {Boolean(props.stageNotice) && <StageNoticeSlot>{props.stageNotice}</StageNoticeSlot>}
           {/* Without the summary bar, which says what the scope hides, a pill over the stage says it. */}
           {on('changesOnly') && !on('summary') && <ScopeNotice projection={p} />}
           {props.details !== 'none' && (

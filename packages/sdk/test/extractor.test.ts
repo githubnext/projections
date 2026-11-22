@@ -18,7 +18,7 @@ test('a basis hashes its parts and keeps the model verbatim', () => {
   })
   assert.equal(basisDigest(cart), CART_DIGEST)
   // Key order doesn't matter; non-strings hash as canonical JSON.
-  assert.equal(basisDigest({model: cart.model!, prompt: cart.prompt!, input: cart.input!}), CART_DIGEST)
+  assert.equal(basisDigest({model: cart.model, prompt: cart.prompt, input: cart.input}), CART_DIGEST)
   assert.equal(basis({context: {files: ['a', 'b']}}).context, 'sha256:91ebe95a33b44a953051c279ae1082f32291926c51001f2d3d8db846ef56ba97')
   assert.deepEqual(basis({model: 'm@2'}, {verbatim: []}), {
     model: 'sha256:3af2c7166bce4d6b5bda3829309bfb57442fe71514c2305ea005b8e9d141a379',

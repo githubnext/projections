@@ -69,7 +69,7 @@ export function styleSystem(root: Element = document.body): StyleMeasurement {
     }
     if (element.hasAttribute('data-projections-off-system')) {
       if (visible(element)) {
-        exemptions.push(`${describe(element)}: ${element.getAttribute('data-projections-off-system') || '(no reason given)'}`)
+        exemptions.push(`${describe(element)}: ${(element.getAttribute('data-projections-off-system') ?? '') || '(no reason given)'}`)
       }
       return
     }

@@ -39,20 +39,20 @@ export function useDragPan(scroller: RefObject<HTMLElement | null>): void {
       drag = {id: event.pointerId, x: event.clientX, y: event.clientY, left: element.scrollLeft, top: element.scrollTop, moved: false}
     }
     const move = (event: PointerEvent) => {
-      if (!drag || event.pointerId !== drag.id) return
+      if (event.pointerId !== drag?.id) return
       const dx = event.clientX - drag.x,
         dy = event.clientY - drag.y
       if (!drag.moved) {
         if (Math.hypot(dx, dy) < dragPanThreshold) return
         drag.moved = true
-        element.setPointerCapture?.(event.pointerId)
+        if ('setPointerCapture' in element) element.setPointerCapture(event.pointerId)
         element.dataset.panning = ''
       }
       element.scrollLeft = drag.left - dx
       element.scrollTop = drag.top - dy
     }
     const up = (event: PointerEvent) => {
-      if (!drag || event.pointerId !== drag.id) return
+      if (event.pointerId !== drag?.id) return
       const moved = drag.moved
       drag = undefined
       delete element.dataset.panning

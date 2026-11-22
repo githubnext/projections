@@ -14,7 +14,7 @@ import type {ViewingView} from '../viewing.js'
 export function pairCommands(services: Services, viewingView: ViewingView): vscode.Disposable[] {
   const {sidebar, picks} = services
   return [
-    vscode.commands.registerCommand('projections.setPair', async (folderUri: vscode.Uri | string, pair: Pair) => {
+    vscode.commands.registerCommand('projections.setPair', async (folderUri: vscode.Uri | string, pair: Pair | undefined) => {
       const folder = vscode.workspace.getWorkspaceFolder(typeof folderUri === 'string' ? vscode.Uri.parse(folderUri) : folderUri)
       if (!folder || typeof pair?.after !== 'string') return
       const model = sidebar.model(folder)

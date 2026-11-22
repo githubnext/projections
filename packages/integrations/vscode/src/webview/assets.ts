@@ -59,7 +59,7 @@ export function customRenderers(): (url: URL) => Promise<string> {
   const pending = new Map<number, {resolve: (url: string) => void; reject: (error: Error) => void}>()
   const documents = new Map<string, Promise<string>>()
   fromExtension(data => {
-    const reply = data as Partial<RendererReply>
+    const reply = data as Partial<RendererReply> | null | undefined
     if (reply?.tag !== rendererTag || typeof reply.id !== 'number') return
     const request = pending.get(reply.id)
     if (!request) return
@@ -67,7 +67,7 @@ export function customRenderers(): (url: URL) => Promise<string> {
     if ('base64' in reply && typeof reply.base64 === 'string') {
       const bytes = Uint8Array.from(atob(reply.base64), character => character.charCodeAt(0))
       request.resolve(rendererDocument(new TextDecoder().decode(bytes)))
-    } else request.reject(new Error('error' in reply ? String(reply.error) : 'The custom renderer is unavailable'))
+    } else request.reject(new Error('error' in reply ? reply.error : 'The custom renderer is unavailable'))
   })
   return url => {
     const path = `${url.pathname}${url.search}`

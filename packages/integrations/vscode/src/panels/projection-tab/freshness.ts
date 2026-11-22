@@ -115,7 +115,7 @@ export class Freshness {
     if (!result) return
     const {refs, results} = result
     const jobs = refs.map(ref => `${ref}:${results[ref]!.job ?? ''}`).join()
-    if (this.stamp && this.stamp.sides.map(side => `${side.ref}:${side.job ?? ''}`).join() === jobs) return
+    if (this.stamp?.sides.map(side => `${side.ref}:${side.job ?? ''}`).join() === jobs) return
     const start = this.started(refs.map(ref => results[ref]!.job))
     const pair = summary.pair!
     const stamp: ResultStamp = {

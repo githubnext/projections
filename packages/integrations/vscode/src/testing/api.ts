@@ -23,7 +23,7 @@ function describe(state: TestState, item: vscode.TestItem): DescribedItem {
     ...(node ? {kind: node.kind} : {}),
     ...(node?.path ? {path: node.path} : {}),
     ...(item.range ? {line: item.range.start.line + 1} : {}),
-    ...(item.error ? {error: item.error.toString()} : {}),
+    ...(item.error !== undefined && item.error !== '' ? {error: item.error.toString()} : {}),
     children: children.map(child => describe(state, child)),
   }
 }

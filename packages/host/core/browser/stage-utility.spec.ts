@@ -27,7 +27,7 @@ async function nodeBoxes(page: Page): Promise<Box[]> {
   for (const iframe of await page.locator('iframe.ph-frame').all()) {
     const offset = (await iframe.boundingBox())!
     const inner = await iframe
-      .contentFrame()!
+      .contentFrame()
       .locator('.node-surface')
       .evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().toJSON() as DOMRect))
     for (const box of inner) {
@@ -48,7 +48,7 @@ async function ready(page: Page, query: string) {
   await page.goto(explorer(query))
   const view = page.locator('.ph')
   await expect(view).toHaveAttribute('data-renderer-status', 'ready')
-  await expect(page.locator('iframe.ph-frame').first().contentFrame()!.locator('.node-surface').first()).toBeVisible()
+  await expect(page.locator('iframe.ph-frame').first().contentFrame().locator('.node-surface').first()).toBeVisible()
 }
 
 for (const mode of ['diff', 'animated'] as const) {
@@ -59,7 +59,7 @@ for (const mode of ['diff', 'animated'] as const) {
     await expect(bar).toHaveAttribute('data-stage-cover', '')
     await expect(bar.locator('.demo-caption')).toBeVisible()
     // The frame is told how far the bar reaches into it.
-    const inset = page.locator('iframe.ph-frame').first().contentFrame()!.locator('html')
+    const inset = page.locator('iframe.ph-frame').first().contentFrame().locator('html')
     await expect
       .poll(() => inset.evaluate(html => parseFloat(getComputedStyle(html).getPropertyValue('--projections-stage-inset-top')) || 0))
       .toBeGreaterThan(0)

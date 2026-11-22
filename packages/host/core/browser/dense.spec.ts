@@ -336,7 +336,7 @@ test('Filter expands into the find field; Escape clears the query, then collapse
   await expect(field).toBeFocused()
   await field.fill('pay')
   await expect(page.locator('.ph-table-view tbody tr[data-row-id]')).not.toHaveCount(0)
-  for (const id of await page.locator('.ph-table-view tbody tr[data-row-id]').evaluateAll(rows => rows.map(row => row.textContent ?? ''))) {
+  for (const id of await page.locator('.ph-table-view tbody tr[data-row-id]').evaluateAll(rows => rows.map(row => row.textContent))) {
     expect(id.toLowerCase()).toContain('pay')
   }
   // While a query applies, the field stays expanded.

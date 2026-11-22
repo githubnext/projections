@@ -12,7 +12,7 @@ export const RULES = '.github/ci-rules.json'
 
 export function loadCiRules(root: string): CiRules {
   const rules = readJson<CiRules>(root, RULES)
-  if (!rules?.files?.length || !rules.jobs || !rules.browser?.suites) {
+  if (!rules || !complete(rules)) {
     throw new Error(`${RULES} is missing or has no files, jobs or browser`)
   }
   return rules
@@ -125,4 +125,15 @@ export function reasons(when: When, context: Context): string[] {
     return condition ? [condition.description] : []
   }
   return []
+}
+
+/** Whether parsed rules have the files, jobs and browser suites everything else relies on: the file is only JSON. */
+function complete(rules: {files?: readonly unknown[]; jobs?: unknown; browser?: {suites?: unknown}}): boolean {
+  return (
+    (rules.files?.length ?? 0) > 0 &&
+    rules.jobs !== undefined &&
+    rules.jobs !== null &&
+    rules.browser?.suites !== undefined &&
+    rules.browser.suites !== null
+  )
 }

@@ -68,9 +68,9 @@ function parseBase(item: Fields, ids: ReadonlySet<string>): ControlBase | undefi
   return {
     id: item.id,
     label: item.label,
-    ...(item.description === undefined ? {} : {description: item.description as string}),
-    ...(item.group === undefined ? {} : {group: item.group as string}),
-    ...(item.groupLabel === undefined ? {} : {groupLabel: item.groupLabel as string}),
+    ...(item.description === undefined ? {} : {description: item.description}),
+    ...(item.group === undefined ? {} : {group: item.group}),
+    ...(item.groupLabel === undefined ? {} : {groupLabel: item.groupLabel}),
   }
 }
 
@@ -129,7 +129,7 @@ const parsers: Record<string, (item: Fields, base: ControlBase) => RendererContr
     }
     if (!(min < max) || !(step > 0) || item.default < min || item.default > max) return undefined
     if (item.unit !== undefined && !label(item.unit, 16)) return undefined
-    return {...base, type: 'range', min, max, step, default: item.default, ...(item.unit === undefined ? {} : {unit: item.unit as string})}
+    return {...base, type: 'range', min, max, step, default: item.default, ...(item.unit === undefined ? {} : {unit: item.unit})}
   },
   action(item, base) {
     if (!keys(item, [...common, 'icon']) || (item.icon !== undefined && !controlIcons.includes(item.icon as ControlIcon))) return undefined

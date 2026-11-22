@@ -94,7 +94,7 @@ const lockWords: Record<string, string> = {
 }
 
 const record = (value: unknown): Record<string, unknown> =>
-  value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+  typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
 
 /** A workflow's engine and model (text with inline code), whether strict mode is off, and its lock file's state. */
 function facts(entity: WorkflowItem['entity'] | undefined) {
@@ -153,7 +153,7 @@ function Meta({item, diff}: {item: WorkflowItem; diff: boolean}) {
 function Notes({item}: {item: WorkflowItem}) {
   const findings = dataOf(item.entity).findings
   const messages = (Array.isArray(findings) ? findings : [])
-    .map(finding => (finding && typeof finding === 'object' ? (finding as Record<string, unknown>).message : undefined))
+    .map(finding => (typeof finding === 'object' && finding !== null ? (finding as Record<string, unknown>).message : undefined))
     .filter((message): message is string => typeof message === 'string')
   if (!messages.length) return null
   return (

@@ -201,7 +201,8 @@ export function RendererPane(props: RendererPaneProps) {
     })
     if (latest.current.hoveredId !== null) created.hover(latest.current.hoveredId)
     if (latest.current.selectedPath !== undefined) created.select(latest.current.selectedId, latest.current.selectedPath)
-    if (latest.current.annotations?.length) created.annotations(latest.current.annotations)
+    const annotations = latest.current.annotations
+    if (annotations !== undefined && annotations.length > 0) created.annotations(annotations)
     frame.current = created
     callbacks.current.frameRef?.(created)
     return () => {

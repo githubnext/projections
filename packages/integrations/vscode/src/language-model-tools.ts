@@ -43,7 +43,7 @@ export function agentTools(
     return [{name: tool.name, prepare, invoke}]
   })
   const disposables =
-    typeof vscode.lm?.registerTool === 'function'
+    'lm' in vscode && typeof vscode.lm.registerTool === 'function'
       ? tools.map(tool =>
           vscode.lm.registerTool<ToolInput>(tool.name, {
             prepareInvocation: async (options, token) => {

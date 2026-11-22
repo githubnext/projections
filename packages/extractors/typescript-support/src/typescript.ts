@@ -11,7 +11,7 @@ import {publicApi} from './typescript/api.js'
 export async function collectTypeScript(context: ExtractorContext): Promise<Extraction> {
   const collector = context.extractor
   if (collector !== 'typescript-public-api') {
-    throw new Error(`Unsupported TypeScript extractor: ${code(String(collector))}`)
+    throw new Error(`Unsupported TypeScript extractor: ${code(collector)}`)
   }
   // The compiler comes from the directory owning the selected configuration, as the project's own build resolves it.
   const configured =

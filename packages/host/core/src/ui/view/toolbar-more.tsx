@@ -52,7 +52,7 @@ export function ToolbarMore({
           <FilterButton projection={p} inline />
         </MoreSection>
       )}
-      {(info || fullscreen) && (
+      {(Boolean(info) || Boolean(fullscreen)) && (
         <div className={cn('pj:flex pj:items-center pj:gap-0.5', (varied || zoom || filter || playback) && 'pj:border-t pj:pt-2')}>
           {info}
           {fullscreen}

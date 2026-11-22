@@ -500,11 +500,12 @@ test('every name, type, key and value shows whole in every scenario and mode (an
   {
     for (const width of [1440, 1000, 390]) {
       await page.setViewportSize({width: width + 80, height: 1000})
-      const subject = scenario.extraction
-        ? {extraction: await load(scenario.extraction)}
-        : {before: await load(scenario.before), after: await load(scenario.after)}
+      const subject =
+        scenario.extraction !== undefined
+          ? {extraction: await load(scenario.extraction)}
+          : {before: await load(scenario.before), after: await load(scenario.after)}
       // Animated (Before, every step, After) and, for a comparison, the diff: one static union with every change marked.
-      for (const comparisonMode of scenario.extraction ? [undefined] : [undefined, 'diff' as const]) {
+      for (const comparisonMode of scenario.extraction !== undefined ? [undefined] : [undefined, 'diff' as const]) {
         const renderer = await openRenderer(page, {
           renderer: 'database',
           ...subject,
@@ -527,9 +528,9 @@ test('every name, type, key and value shows whole in every scenario and mode (an
               return true
             }
             const describe = (element: Element) =>
-              `${element.tagName.toLowerCase()}.${element.className} "${element.textContent?.slice(0, 40)}"`
+              `${element.tagName.toLowerCase()}.${element.className} "${element.textContent.slice(0, 40)}"`
             for (const element of content.querySelectorAll<HTMLElement>('*')) {
-              if (element.closest('svg, .sr-only') || !shown(element) || !element.textContent?.trim()) continue
+              if (element.closest('svg, .sr-only') || !shown(element) || !element.textContent.trim()) continue
               const style = getComputedStyle(element)
               // Data (identifiers and everything in them) never ellipsizes; status words are labels, not data.
               if (element.closest('[data-projections-identifier]') && style.textOverflow === 'ellipsis' && style.overflow !== 'visible') {
@@ -539,7 +540,7 @@ test('every name, type, key and value shows whole in every scenario and mode (an
                 problems.push(`${describe(element)} overflows: ${element.scrollWidth} > ${element.clientWidth}`)
               }
               // Text a card or row holds stays inside it.
-              if (![...element.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())) continue
+              if (![...element.childNodes].some(node => node.nodeType === Node.TEXT_NODE && !!node.textContent?.trim())) continue
               const box = element.getBoundingClientRect()
               // A tag's status tab hangs off its pill, in the room its slot reserves below it.
               const tab = element.closest('.pk-status-tab-room')

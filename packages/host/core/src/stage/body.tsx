@@ -79,7 +79,9 @@ export function StageBody({
     band: paneLabels === 'visible' ? paneGeometry.band : 0,
   })
   // Kept only once it was chosen from the content's shape, so the first real choice isn't held back by a default.
-  if (mode === 'side-by-side' && fill && aspect && height > 0 && Number.isFinite(width)) arranged.current.arrangement = arrangement
+  if (mode === 'side-by-side' && fill && aspect !== undefined && aspect !== 0 && height > 0 && Number.isFinite(width)) {
+    arranged.current.arrangement = arrangement
+  }
   const stacked = mode === 'side-by-side' && arrangement === 'stacked'
   const [layout, setLayout] = useState(0)
   const [connector, setConnector] = useState<Connector>()

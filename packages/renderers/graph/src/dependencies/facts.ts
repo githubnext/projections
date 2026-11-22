@@ -108,7 +108,9 @@ export function dependencyNouns(model: ComparisonModel): Record<string, {singula
   if (kinds.has('target-framework')) nouns['target-framework'] = noun('target framework', 'target frameworks')
   if (kinds.has('target')) nouns.target = noun('target', 'targets')
   if (kinds.has('product')) nouns.product = noun('product', 'products')
-  for (const kind of ['package', 'external-package']) if (kinds.has(kind) && !nouns[kind]) nouns[kind] = noun('package', 'packages')
+  for (const kind of ['package', 'external-package']) {
+    if (kinds.has(kind) && (nouns[kind] === undefined || nouns[kind] === false)) nouns[kind] = noun('package', 'packages')
+  }
   const dependencyKinds: Record<string, string> = {
     dependencies: 'dependency',
     'depends-on': 'dependency',

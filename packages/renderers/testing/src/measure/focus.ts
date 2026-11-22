@@ -48,7 +48,7 @@ export async function focusFailures(id: string): Promise<string[]> {
       .flatMap(node => [getComputedStyle(node), getComputedStyle(node, '::after')])
       .map(style => properties.map(name => style.getPropertyValue(name)).join(';'))
       .join('|')
-  ;(document.activeElement as HTMLElement | null)?.blur?.()
+  ;(document.activeElement as HTMLElement | null)?.blur()
   await settle()
   const before = signature()
   target.focus({preventScroll: true, focusVisible: true} as FocusOptions)

@@ -93,8 +93,9 @@ function evaluate(rules: CiRules, facts: RepoFacts, files: readonly ClassifiedFi
 function suiteRuns(facts: RepoFacts, rules: CiRules, path: string, context: Context): boolean {
   const suite = facts.browserSuites.find(item => item.path === path)
   const when: When | undefined = rules.browser.suites[path]?.when
-  return Boolean(
-    suite && (context.reached.has(path) || suite.uses.some(unit => context.reached.has(unit)) || (when && holds(when, context))),
+  return (
+    suite !== undefined &&
+    (context.reached.has(path) || suite.uses.some(unit => context.reached.has(unit)) || (when !== undefined && holds(when, context)))
   )
 }
 
@@ -206,7 +207,7 @@ export function executions(plan: CiPlan, rules: CiRules): Execution[] {
 function shardsOf(rules: CiRules, job: string): (string | undefined)[] {
   const definition = rules.jobs[job]
   const count = definition && 'shards' in definition ? definition.shards : undefined
-  return count ? Array.from({length: count}, (_, index) => String(index)) : [undefined]
+  return count !== undefined && count !== 0 ? Array.from({length: count}, (_, index) => String(index)) : [undefined]
 }
 
 /** The `changes` job's step outputs: each job's decision by ID (a matrix job's as its `matrix.include`), and the rest. */

@@ -84,7 +84,7 @@ export function explainDefinitionMismatch(pairing: Exclude<DefinitionPairing, {p
   if (pairing.pairing === 'components') {
     return ['The definitions are identical, so the content of their declared component sources differs.']
   }
-  return pairing.differing.map(key => `The ${definitionParts[key as keyof Definition] ?? key} differs.`)
+  return pairing.differing.map(key => `The ${(definitionParts as Partial<Record<string, string>>)[key] ?? key} differs.`)
 }
 
 /** Lowercase hex SHA-256 of bytes, as `sha256:<hex>`. */
@@ -157,7 +157,7 @@ export async function computeComparison({
     engine,
     before: before.extraction,
     after: after.extraction,
-    comparator: {kind: 'default', options: (typeof declared === 'object' && !('file' in declared) && declared.options) || {}},
+    comparator: {kind: 'default', options: typeof declared === 'object' && !('file' in declared) ? (declared.options ?? {}) : {}},
   })
 }
 

@@ -152,13 +152,8 @@ function handle(page: Page, subject: StageSubject, record: StageRecord): StageHa
       ),
     setWidth: width => call(`setWidth(${width})`, () => page.evaluate(frameWidth => window.projectionsStage.setWidth(frameWidth), width)),
     measure: <T>(probe: ProbeCall, args?: unknown) =>
-      call(
-        `measure(${probe})`,
-        () =>
-          page.evaluate(([probeName, probeArgs]) => window.projectionsStage.measure(probeName, probeArgs), [
-            probe,
-            args,
-          ] as const) as Promise<T>,
+      call(`measure(${probe})`, () =>
+        page.evaluate(([probeName, probeArgs]) => window.projectionsStage.measure<T>(probeName, probeArgs), [probe, args] as const),
       ),
     state: () => call('state', () => page.evaluate(() => window.projectionsStage.state())),
   }

@@ -78,6 +78,7 @@ export function registerRulesLanguage(context: vscode.ExtensionContext, output: 
     if (!kind || document.isClosed) return
     const version = document.version
     const found = await attempt(() => service.diagnostics(document.getText(), kind))
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the document can close during the await
     if (!found || document.isClosed || document.version !== version) return
     diagnostics.set(
       document.uri,

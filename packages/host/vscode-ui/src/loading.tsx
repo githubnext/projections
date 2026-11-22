@@ -56,15 +56,13 @@ function update() {
     return
   }
   if (!bar) {
-    if (timer === undefined) {
-      timer = setTimeout(() => {
-        timer = undefined
-        if (!loads.length) return
-        bar = drawBar()
-        document.body.append(bar)
-        update()
-      }, wait())
-    }
+    timer ??= setTimeout(() => {
+      timer = undefined
+      if (!loads.length) return
+      bar = drawBar()
+      document.body.append(bar)
+      update()
+    }, wait())
     return
   }
   bar.setAttribute('aria-label', current.label)
@@ -72,11 +70,11 @@ function update() {
   const still = loads.some(load => load.still)
   if (bit.dataset.still === String(still)) return
   bit.dataset.still = String(still)
-  bit.getAnimations?.().forEach(animation => animation.cancel())
+  if ('getAnimations' in bit) bit.getAnimations().forEach(animation => animation.cancel())
   if (still) Object.assign(bit.style, {left: '0', width: '100%', opacity: '0.5'})
   else {
     Object.assign(bit.style, {width: '30%', opacity: '1'})
-    bit.animate?.([{left: '-30%'}, {left: '100%'}], {duration: 1500, iterations: Infinity, easing: 'ease-in-out'})
+    if ('animate' in bit) bit.animate([{left: '-30%'}, {left: '100%'}], {duration: 1500, iterations: Infinity, easing: 'ease-in-out'})
   }
 }
 

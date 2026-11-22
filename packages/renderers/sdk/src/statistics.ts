@@ -140,7 +140,7 @@ export function statisticsRows(frame: PresentationFrame, options: CodeStatistics
     const unit = codeStatisticsMeasures.find(measure => measure.id === options.measure)!.unit
     return frame.nodes.map(node => ({
       id: node.id,
-      label: node.entity.label ?? node.id,
+      label: node.entity.label,
       unit,
       value: countAt(node, options.measure, options.scope),
       opacity: node.opacity,

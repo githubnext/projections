@@ -32,7 +32,7 @@ export function boundariesHoldingChanges(
   const drawn: {row: TransitionNode | TransitionEdge; box: Box}[] = [
     ...nodes.filter(changed).map(node => ({row: node, box: boxOf(node)})),
     ...edges
-      .filter(edge => edge.points.length && changed(edge))
+      .filter(edge => edge.points.length > 0 && changed(edge))
       .map(edge => ({
         row: edge,
         box: {

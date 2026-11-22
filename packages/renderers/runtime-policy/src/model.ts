@@ -167,7 +167,7 @@ export const isEnforcing = (entity: Entity | undefined) => entity?.data?.effect 
 export function interpretationsOf(metadata: unknown): Map<string, string[]> | undefined {
   const runtime = (metadata as {runtimePolicy?: {interpretations?: unknown}} | undefined)?.runtimePolicy
   const found = runtime?.interpretations
-  if (!found || typeof found !== 'object') return undefined
+  if (typeof found !== 'object' || found === null) return undefined
   return new Map(
     Object.entries(found as Record<string, unknown>).map(([id, names]) => [
       id,

@@ -102,8 +102,14 @@ test('the table is a labelled table whose sorted heading says its direction', ()
 test('the diff draws a changed cell as was and now, and marks only the innermost changes', () => {
   const markup = table({diff: true, emphasis: () => 1})
   const modified = markup.slice(markup.indexOf('data-entity-id="m"'), markup.indexOf('data-entity-id="n"'))
-  assert.match(modified, /<del class="pk-change-pill" data-change="removed"><span class="sr-only">was <\/span>5<\/del>/u)
-  assert.match(modified, /<ins class="pk-change-pill" data-change="added"><span class="sr-only">, now <\/span>40<\/ins>/u)
+  assert.match(
+    modified,
+    /<del class="pk-change-pill" data-change="removed"><span class="sr-only">was <\/span><span class="pk-label">5<\/span><\/del>/u,
+  )
+  assert.match(
+    modified,
+    /<ins class="pk-change-pill" data-change="added"><span class="sr-only">, now <\/span><span class="pk-label">40<\/span><\/ins>/u,
+  )
   const removed = markup.slice(markup.indexOf('data-entity-id="r"'), markup.indexOf('data-entity-id="a"'))
   assert.match(removed, /pk-region/u)
   assert.doesNotMatch(removed, /pk-change-pill/u)
@@ -140,7 +146,10 @@ test('a value only one version has is one pill, and a changed cell reserves both
     createElement(DataTable, {label: 'Files', columns, rows: [grown], comparing: true, diff: true, emphasis: () => 1}),
   )
   assert.doesNotMatch(diff, /<del/u)
-  assert.match(diff, /<ins class="pk-change-pill" data-change="added"><span class="sr-only">now <\/span>1,000,000<\/ins>/u)
+  assert.match(
+    diff,
+    /<ins class="pk-change-pill" data-change="added"><span class="sr-only">now <\/span><span class="pk-label">1,000,000<\/span><\/ins>/u,
+  )
   const shrunk = {...grown, before: grown.after, after: {name: 'g', lines: 1, owner: 'x'}}
   const moving = renderToStaticMarkup(
     createElement(DataTable, {label: 'Files', columns, rows: [shrunk], comparing: true, progress: 0.8, emphasis: () => 0}),

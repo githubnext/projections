@@ -113,6 +113,8 @@
   position: relative;
   margin: 0;
   padding: calc(var(--projections-space-1) / 2) var(--projections-space-2) calc(var(--projections-space-1) / 2) var(--projections-space-5);
+  /* Its text is a label (`pk-label`), centred on its capitals inside this inset. */
+  --pk-label-inset: calc(var(--projections-space-1) / 2);
   font-size: var(--projections-font-size-xs);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -127,6 +129,12 @@
   font-weight: var(--projections-font-weight-bold);
   color: var(--muted);
   user-select: none;
+}
+/* On the first line, wherever a browser trims text: a label (`pk-label`) at the top, padded as the signature's text is. */
+@supports (text-box: trim-both cap alphabetic) {
+  .api-line-mark {
+    top: 0;
+  }
 }
 .api-signature :is(mark, del, ins) {
   color: inherit;

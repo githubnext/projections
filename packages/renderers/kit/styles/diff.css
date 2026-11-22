@@ -102,6 +102,11 @@
   border-color: transparent;
   background: transparent;
 }
+/* A label holding a value change holds its two pills, each centring its own text. */
+.pk .pk-pill-label.pk-label:has(> .pk-value-change) {
+  text-box: none;
+  padding-block: 0;
+}
 .pk button.pk-change-pill {
   cursor: pointer;
 }

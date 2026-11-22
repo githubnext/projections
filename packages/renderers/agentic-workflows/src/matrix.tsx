@@ -49,7 +49,9 @@ function Row({item, view, frame}: {item: WorkflowItem; view: AgenticModel; frame
           const value = cell(item, category, column, frame)
           return (
             <td key={`${category.section}:${column.key}`} className="aw-matrix-cell" data-cell={value}>
-              <span aria-hidden="true">{glyphs[value]}</span>
+              <span className="aw-matrix-glyph" aria-hidden="true">
+                <span className="pk-label">{glyphs[value]}</span>
+              </span>
               <span className="sr-only">{words[value]}</span>
             </td>
           )

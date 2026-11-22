@@ -154,17 +154,17 @@ test('the diff shows every output with both line sets, marked and spoken, and te
     assert.match(markup, new RegExp(`data-layout="${layout}"`))
     for (const id of ['report', 'help', 'gone', 'new']) assert.match(markup, new RegExp(`data-entity-id="${id}"`))
     assert.ok(markup.includes('Total: ') && markup.includes('>3<') && markup.includes('>4<'))
-    assert.match(markup, /Removed: <\/span><span class="td-text">Total: <span class="td-word">3<\/span>/u)
-    assert.match(markup, /Added: <\/span><span class="td-text">Total: <span class="td-word">4<\/span>/u)
-    assert.match(markup, /Removed: <\/span><span class="td-text">bye/u)
-    assert.match(markup, /Added: <\/span><span class="td-text">hi/u)
-    assert.match(markup, /class="td-mark"[^>]*>−</u)
+    assert.match(markup, /Removed: <\/span><span class="td-text pk-label">Total: <span class="td-word">3<\/span>/u)
+    assert.match(markup, /Added: <\/span><span class="td-text pk-label">Total: <span class="td-word">4<\/span>/u)
+    assert.match(markup, /Removed: <\/span><span class="td-text pk-label">bye/u)
+    assert.match(markup, /Added: <\/span><span class="td-text pk-label">hi/u)
+    assert.match(markup, /class="td-mark pk-label"[^>]*>−</u)
     assert.ok(markup.includes('&lt;script&gt;x&lt;/script&gt;') && !markup.includes('<script>'))
     assert.ok(!markup.includes('aria-label="Text diff layout"'), 'the layout control is host-drawn')
   }
   const split = render(props(model, 1))
   assert.match(split, /data-layout="split"/u)
-  assert.match(split, /td-caption td-side-before">Before</u)
+  assert.match(split, /td-caption td-side-before pk-label">Before</u)
   // A line on one side faces a blank filler, so unchanged lines stay aligned.
   assert.match(split, /td-cell td-filler td-side-before/u)
 })
@@ -203,7 +203,7 @@ test("a formatted output's command label is a code identifier heading before its
     markup.match(new RegExp(`<section[^>]*data-entity-id="${id}"[^>]*><header class="pk-group-header">(.*?)</header>`))[1]
   assert.match(
     header('report'),
-    /^<h2 class="pk-group-title" id="[^"]+"><button type="button" class="pk-group-label pk-truncate pk-diff-text" data-projections-identifier="" title="report" aria-pressed="false">report<\/button><\/h2><span class="pk-change-status pk-group-status" data-change-footer=""><span class="pk-status-text"[^>]*><span class="pk-status-part modified"/u,
+    /^<h2 class="pk-group-title" id="[^"]+"><button type="button" class="pk-group-label pk-label pk-truncate pk-diff-text" data-projections-identifier="" title="report" aria-pressed="false">report<\/button><\/h2><span class="pk-change-status pk-group-status" data-change-footer=""><span class="pk-status-text"[^>]*><span class="pk-status-part modified"/u,
   )
   assert.match(header('new'), /title="new"/u)
   assert.doesNotMatch(header('new'), /data-projections-identifier/u)

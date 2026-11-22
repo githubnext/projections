@@ -18,14 +18,14 @@ export function Head({frame, cells, status, as: Tag = 'li'}: {frame: Frame; cell
   return (
     <Tag className="rp-row rp-head" aria-hidden="true">
       {frame.side === 'diff' && <span className="rp-cell rp-sign" />}
-      <span className="rp-cell rp-main">{main}</span>
+      <span className="rp-cell rp-main pk-label">{main}</span>
       {rest.map((cell, index) => (
-        <span key={cell} className={`rp-cell rp-${columns[index]}`}>
+        <span key={cell} className={`rp-cell rp-${columns[index]} pk-label`}>
           {cell}
         </span>
       ))}
       {frame.comparing && (
-        <span className="rp-cell rp-status">
+        <span className="rp-cell rp-status pk-label">
           <span style={status > 0.01 ? {opacity: Math.min(1, status)} : {opacity: 0, visibility: 'hidden'}}>Change</span>
         </span>
       )}
@@ -97,9 +97,9 @@ export function Warnings({entity}: {entity: Entity}) {
         <span key={note} className="rp-warning">
           <span className="rp-warning-label">
             <Icon name="warning" className="rp-icon" />
-            Warning
+            <span className="pk-label">Warning</span>
           </span>
-          <span>
+          <span className="pk-label">
             <Prose>{note}</Prose>
           </span>
         </span>

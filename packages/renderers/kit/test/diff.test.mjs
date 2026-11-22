@@ -131,8 +131,14 @@ test('kinds are pluralized as English forms them', () => {
 test('a value change is the old value struck through in a removed pill, then the new one in an added pill', () => {
   const markup = html(createElement(ValueChange, {before: 'enforce', after: 'monitor'}))
   assert.match(markup, /data-layout="stacked"/u)
-  assert.match(markup, /<del class="pk-change-pill" data-change="removed"><span class="sr-only">was <\/span>enforce<\/del>/u)
-  assert.match(markup, /<ins class="pk-change-pill" data-change="added"><span class="sr-only">, now <\/span>monitor<\/ins>/u)
+  assert.match(
+    markup,
+    /<del class="pk-change-pill" data-change="removed"><span class="sr-only">was <\/span><span class="pk-label">enforce<\/span><\/del>/u,
+  )
+  assert.match(
+    markup,
+    /<ins class="pk-change-pill" data-change="added"><span class="sr-only">, now <\/span><span class="pk-label">monitor<\/span><\/ins>/u,
+  )
   const inline = html(createElement(ValueChange, {before: 'a', after: 'b', layout: 'inline'}))
   assert.match(inline, /<span class="pk-value-arrow" aria-hidden="true">→<\/span>/u)
   assert.equal(plain(html(createElement(ValueChange, {after: 'only'}))), 'now only')
@@ -157,8 +163,15 @@ test('change pills carry their sign, their change in words and, when selectable,
     markup,
     /<button type="button" class="pk-change-pill pk-part selected" data-entity-id="service:IClock" aria-pressed="true" data-change="added">/u,
   )
-  assert.match(markup, /<span class="pk-change-pill" data-change="removed"><span class="pk-pill-sign" aria-hidden="true">−<\/span>/u)
-  assert.match(markup, /<span class="pk-change-pill"><span class="pk-pill-label">ILogger<\/span><\/span>/u, 'unchanged pills are plain')
+  assert.match(
+    markup,
+    /<span class="pk-change-pill" data-change="removed"><span class="pk-pill-sign pk-label" aria-hidden="true">−<\/span>/u,
+  )
+  assert.match(
+    markup,
+    /<span class="pk-change-pill"><span class="pk-pill-label pk-label">ILogger<\/span><\/span>/u,
+    'unchanged pills are plain',
+  )
 })
 
 test('an SVG value change strikes the old value and arrows to the new one', () => {

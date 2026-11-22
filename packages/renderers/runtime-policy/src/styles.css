@@ -161,8 +161,13 @@
   line-height: var(--projections-line-height-relaxed);
 }
 .rp-row.rp-head > .rp-cell {
-  padding-block: 0;
   color: var(--muted);
+}
+/* A heading is its line: its cells are labels (`pk-label`), centred on their capitals where browsers can trim text. */
+@supports not (text-box: trim-both cap alphabetic) {
+  .rp-row.rp-head > .rp-cell {
+    padding-block: 0;
+  }
 }
 
 /* The selection button covers its whole row; chips stay above it. */
@@ -391,7 +396,8 @@
   appearance: none;
   position: relative;
   display: inline-flex;
-  align-items: baseline;
+  /* Its sign, prefix and label are labels (`pk-label`) in one font: centred, their capitals line up, in a taller chip too. */
+  align-items: center;
   gap: 0.35em;
   max-width: 100%;
   padding: 0 var(--projections-label-padding-x);

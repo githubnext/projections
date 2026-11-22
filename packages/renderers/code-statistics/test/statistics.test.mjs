@@ -273,7 +273,10 @@ test('endpoints are neutral and the midpoint interpolates every count', async ()
   // Every row reserves its status cell; changed languages state their status as icon and word.
   const rows = [...mid.matchAll(/class="stat-row/gu)].length
   assert.equal([...mid.matchAll(/class="pk-change-status stat-status"/gu)].length, rows)
-  assert.match(mid, /data-change-status="modified"><span class="pk-icon" data-icon="modified" aria-hidden="true"><\/span>Modified/u)
+  assert.match(
+    mid,
+    /data-change-status="modified"><span class="pk-icon" data-icon="modified" aria-hidden="true"><\/span><span class="pk-label">Modified<\/span>/u,
+  )
   assert.match(mid, /aria-label="Inspect TypeScript, 1,200 lines of code, \+400, Modified"/u)
   const legend = await render('mid', 1, {controls: {chart: 'share'}})
   assert.equal(

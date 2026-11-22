@@ -75,13 +75,13 @@ export function Chips({
             }}
           >
             {frame.side === 'diff' && change !== 'unchanged' && (
-              <span className="rp-chip-sign" aria-hidden="true">
+              <span className="rp-chip-sign pk-label" aria-hidden="true">
                 {change === 'added' ? '+' : '−'}
               </span>
             )}
             {word && <span className="sr-only">{word}: </span>}
-            {prefix && <span className="rp-chip-prefix">{prefix} </span>}
-            <span className="rp-chip-label">
+            {prefix && <span className="rp-chip-prefix pk-label">{prefix} </span>}
+            <span className="rp-chip-label pk-label">
               <Prose>{subjectProse(chip)}</Prose>
               {follow && <span className="rp-chip-prefix"> and children</span>}
               {chip.kind === 'covers' && (

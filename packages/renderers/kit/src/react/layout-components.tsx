@@ -110,7 +110,7 @@ export function Group({
   const marks = mark !== undefined ? changeMark(mark) : {}
   // A text title shows whole as the tooltip of a title that truncates.
   const text = typeof title === 'string' ? title : undefined
-  const label = join('pk-group-label', 'pk-truncate', marks['data-change'] !== undefined && 'pk-diff-text')
+  const label = join('pk-group-label', 'pk-label', 'pk-truncate', marks['data-change'] !== undefined && 'pk-diff-text')
   return (
     <section
       className={join('pk-group', holdsChanges && 'pk-holds-changes', className)}
@@ -136,7 +136,7 @@ export function Group({
               {title}
             </span>
           )}
-          {meta !== undefined && <span className="pk-group-meta">{meta}</span>}
+          {meta !== undefined && <span className="pk-group-meta pk-label">{meta}</span>}
         </Heading>
         {actions !== undefined && <div className="pk-group-actions">{actions}</div>}
         {change && <ChangeStatus className="pk-group-status" change={change} emphasis={emphasis} />}
@@ -270,7 +270,7 @@ export function RelationshipItem({
       style={style}
     >
       <button type="button" aria-pressed={selected} onClick={() => onSelect(id)}>
-        <span className={mark !== undefined ? 'pk-diff-text' : undefined}>{children}</span>
+        <span className={mark !== undefined ? 'pk-label pk-diff-text' : 'pk-label'}>{children}</span>
         {changeText && <span className="sr-only">, {changeText}</span>}
       </button>
     </li>

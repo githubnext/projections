@@ -252,7 +252,7 @@ function RevisionChoice({
     <div className="gl-revisions" role="group" aria-label={`Revision of ${title}`}>
       {(['before', 'after'] as const).map(side => (
         <button key={side} type="button" className="gl-revision" aria-pressed={chosen === side} onClick={() => onChoose(side)}>
-          {side === 'before' ? 'Before' : 'After'}
+          <span className="pk-label">{side === 'before' ? 'Before' : 'After'}</span>
         </button>
       ))}
     </div>

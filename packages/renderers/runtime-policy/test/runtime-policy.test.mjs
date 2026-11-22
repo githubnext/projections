@@ -201,7 +201,7 @@ test('markup: identifiers are marked, effects are words, and status footers are 
   assert.doesNotMatch(diff, /[▲⇱⚠]/u, 'status is words, not glyphs')
   assert.match(
     diff,
-    /class="rp-chip pk-part removed filled"[^>]*><span class="rp-chip-sign" aria-hidden="true">−<\/span><span class="sr-only">Removed: <\/span>/u,
+    /class="rp-chip pk-part removed filled"[^>]*><span class="rp-chip-sign pk-label" aria-hidden="true">−<\/span><span class="sr-only">Removed: <\/span>/u,
   )
 
   const quiet = renderToStaticMarkup(
@@ -269,7 +269,7 @@ test('each section is a titled panel: a heading in the UI font, then one table, 
   // Each title follows its subject's icon, decorative since the title names it.
   const titles = [
     ...markup.matchAll(
-      /<h2 class="pk-group-title" id="[^"]+"><span class="pk-group-icon"><span class="pk-icon" data-icon="([a-z]+)" aria-hidden="true"><\/span><\/span><span class="pk-group-label pk-truncate" title="([^"]+)">/gu,
+      /<h2 class="pk-group-title" id="[^"]+"><span class="pk-group-icon"><span class="pk-icon" data-icon="([a-z]+)" aria-hidden="true"><\/span><\/span><span class="pk-group-label pk-label pk-truncate" title="([^"]+)">/gu,
     ),
   ]
   assert.deepEqual(

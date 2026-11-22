@@ -341,7 +341,10 @@ test('endpoints carry no change decoration; the middle states each change as tex
     )
   }
   const middle = renderToStaticMarkup(createElement(DatabaseRenderer, props(model, 0.75, 1)))
-  assert.match(middle, /data-change-status="added"><span class="pk-icon" data-icon="added" aria-hidden="true"><\/span>Added/u)
+  assert.match(
+    middle,
+    /data-change-status="added"><span class="pk-icon" data-icon="added" aria-hidden="true"><\/span><span class="pk-label">Added<\/span>/u,
+  )
   // Keys and indexes are rows of their tables, never free-floating tags; every header and row reserves its status cell.
   assert.ok(!middle.includes('class="database-tags"'), 'no free-floating tags')
   assert.match(middle, /class="database-column database-row database-keyrow pk-part first"/u)
@@ -389,12 +392,12 @@ test('views are cards of their columns, labeled as views', () => {
   )
   const markup = renderToStaticMarkup(createElement(DatabaseRenderer, props(extractionModel(extraction), 1, 0)))
   assert.match(markup, /aria-label="View summary"/u)
-  assert.match(markup, /class="database-kind">view</u)
+  assert.match(markup, /class="database-kind pk-label">view</u)
   assert.match(markup, /aria-label="Table accounts"/u)
   // Table, column and type names are identifiers (monospace); the "view" kind stays sans.
-  assert.match(markup, /data-projections-identifier=""><span class="database-line">summary<\/span>/u)
-  assert.match(markup, /data-projections-identifier=""><span class="database-line">id<\/span>/u)
-  assert.match(markup, /<code data-projections-identifier=""><span class="database-line">Int<\/span><\/code>/u)
+  assert.match(markup, /data-projections-identifier=""><span class="database-name pk-label"><span class="database-line">summary<\/span>/u)
+  assert.match(markup, /data-projections-identifier=""><span class="pk-label"><span class="database-line">id<\/span>/u)
+  assert.match(markup, /<code class="pk-label" data-projections-identifier=""><span class="database-line">Int<\/span><\/code>/u)
   assert.doesNotMatch(markup, /class="database-kind"[^>]*data-projections-identifier/u)
 })
 

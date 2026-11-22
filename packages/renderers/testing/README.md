@@ -170,6 +170,15 @@ Build the bundle before the tests. The checks:
   meets the edge's, whichever is painted last dilutes the other's antialiased
   pixels, so an edge painted first is thinner around the curve than along its
   sides. Checked in the primary view, in light and dark.
+- `label-centring`: A chip, bar or button centres its one line of text on its
+  capitals, within half a pixel: a capital E has as much room above it, inside
+  the box's edge, as below its baseline. Measured from the engine's own font
+  metrics (each font's ascent and cap height laid out on a hidden line) on every
+  HTML element up to 48 px tall that paints a background or edges above and
+  below; text in SVG, and a box stretched by its row past its own line (a line
+  number beside a wrapped line), aren't labels. The kit's `pk-label` passes it.
+  A box with text in several sizes is centred on its main text, its largest
+  capitals. Checked at full width in the diff (or the extraction).
 - `link-routes`: Every link a renderer routes between cards (marked
   `data-projections-route`) goes around the cards in its way. When none can, the
   renderer draws the route that overlaps them least, marks it

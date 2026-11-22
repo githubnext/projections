@@ -9,9 +9,9 @@ const toneMarks: Record<Tone, string> = {added: '+', removed: '−'}
 /** One signature line; a toned line carries a `+` or `−` marker in its gutter. */
 function Line({tone, children}: {tone?: Tone | undefined; children: ReactNode}) {
   return (
-    <pre className={`api-signature${tone ? ` ${tone}` : ''}`} {...identifier}>
+    <pre className={`api-signature pk-label${tone ? ` ${tone}` : ''}`} {...identifier}>
       {tone && (
-        <span className="api-line-mark" aria-hidden="true">
+        <span className="api-line-mark pk-label" aria-hidden="true">
           {toneMarks[tone]}
         </span>
       )}

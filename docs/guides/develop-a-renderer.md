@@ -232,6 +232,14 @@ what broke and where), or skipped:
   reserved: a rule may recolor it (its border color and opacity), but anything
   drawn there instead loses to the kit's or moves the edge, and the check fails
   it. Draw a badge or label in an element of its own.
+- **Labels centred on their capitals** — A chip, bar or button's text has as
+  much room above its capitals as below its baseline. Centring a line box leaves
+  it a little high or low, by how the font's ascent, descent and cap height
+  compare, and differently in each engine. Put the text in an element of its own
+  with the kit's `pk-label` class: a block or flex item, in the text's own font.
+  It trims the text's box to its capitals and baseline and pads it back to its
+  line height, so whatever centres it centres the capitals. Extra room goes in
+  `--pk-label-inset`.
 - **Legend shown once** — Render at most one legend, and omit it altogether when
   the host already draws one.
 - **No horizontal overflow at phone width** — The page must never scroll

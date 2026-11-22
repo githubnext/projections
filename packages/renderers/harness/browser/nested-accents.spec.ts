@@ -153,7 +153,8 @@ test("an entity's text and categories include its pseudo-elements: generated tex
   const style = await stage.frame.locator('head').evaluateHandle((head, entity) => {
     const element = document.createElement('style')
     const selector = `[data-entity-id="${CSS.escape(entity)}"]`
-    element.textContent = `${selector}::after { content: 'Added'; }`
+    // Important: the entity may draw an `::after` of its own (a kit frame's edge), whose rule is more specific.
+    element.textContent = `${selector}::after { content: 'Added' !important; }`
     head.append(element)
     document.querySelector(selector)?.setAttribute('data-projections-category', 'probe')
     return element
@@ -161,7 +162,10 @@ test("an entity's text and categories include its pseudo-elements: generated tex
   const added = (await shown()).get(id)
   expect(added?.text).toContain('Added')
   await style.evaluate((element: HTMLStyleElement) => {
-    element.textContent = element.textContent.replace("'Added'", "'Removed'; background: var(--projections-chart-2)")
+    element.textContent = element.textContent.replace(
+      "'Added' !important",
+      "'Removed' !important; background: var(--projections-chart-2) !important",
+    )
   })
   const removed = (await shown()).get(id)
   expect(removed?.text).not.toBe(added?.text)

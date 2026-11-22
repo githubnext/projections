@@ -49,7 +49,7 @@ export const anchor = (geometry: Geometry, box: SchemaBox, table: string, column
 export function keepOrder(list: string[], later: ReadonlyMap<string, number> | undefined): string[] {
   if (!later) return list
   const slots = list.flatMap((id, index) => (later.has(id) ? [index] : []))
-  const kept = slots.map(index => list[index]!).sort((a, b) => later.get(a)! - later.get(b)!)
+  const kept = slots.map(index => list[index]!).toSorted((a, b) => later.get(a)! - later.get(b)!)
   const result = [...list]
   slots.forEach((slot, index) => {
     result[slot] = kept[index]!

@@ -142,7 +142,7 @@ test("the mark and the part icons are glyphs of the packaged icon font, and the 
     const cmap = table('cmap')
     const subtable = cmap.subarray(cmap.readUInt32BE(8))
     const segments = subtable.readUInt16BE(6) / 2
-    const code = parseInt(icon.fontCharacter.slice(1), 16)
+    const code = Number.parseInt(icon.fontCharacter.slice(1), 16)
     let glyph = 0
     for (let i = 0; i < segments; i++) {
       const [end, start] = [subtable.readUInt16BE(14 + 2 * i), subtable.readUInt16BE(16 + 2 * segments + 2 * i)]

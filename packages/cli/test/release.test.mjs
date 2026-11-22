@@ -122,7 +122,7 @@ test('custom release jobs pin actions, use least privilege and name each executa
       const write = Object.entries(job.permissions)
         .filter(([, value]) => value === 'write')
         .map(([key]) => key)
-        .sort()
+        .toSorted()
       assert.deepEqual(write, [], `${file} ${name}`)
       for (const step of job.steps) {
         if (step.uses) assertLocked(file, step.uses, `${file}: ${step.uses}`)

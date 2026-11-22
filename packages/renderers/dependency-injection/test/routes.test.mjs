@@ -76,7 +76,7 @@ test("diff mode, as drafted: every arrow is axis-aligned lines and quarter circl
     }
     for (const [id, list] of into) {
       const box = boxes.get(id)
-      const ordered = [...list].sort((a, b) => a.link.from.x - b.link.from.x || (a.link.key < b.link.key ? -1 : 1))
+      const ordered = [...list].toSorted((a, b) => a.link.from.x - b.link.from.x || (a.link.key < b.link.key ? -1 : 1))
       for (const issue of portIssues(
         ordered.map(({route}) => route.end.x),
         box.x + box.width / 2,

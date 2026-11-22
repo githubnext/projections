@@ -54,7 +54,7 @@ module.exports = async function rulesLanguage({folder}) {
   )
   assert.ok(
     completions.items.some(item => (item.label.label ?? item.label) === 'priority'),
-    completions.items.map(item => item.label.label ?? item.label).join(),
+    completions.items.map(item => item.label.label ?? item.label).join(','),
   )
   await rulesEditor.edit(edit =>
     edit.replace(new vscode.Range(rankLine, columnOf('lists.range'), rankLine, columnOf('lists.range') + 11), 'lists.rnge'),

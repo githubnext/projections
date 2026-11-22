@@ -33,7 +33,7 @@ const patternValues = pattern => {
 /** Fills a page's regions from `regions` (name → Markdown); a region the page lacks, or one it has that isn't known, fails. */
 function fillRegions(file, text, regions) {
   const seen = new Set()
-  const filled = text.replace(regionPattern, (whole, name) => {
+  const filled = text.replaceAll(regionPattern, (whole, name) => {
     if (!(name in regions)) fail(`${file}: unknown generated region "${name}"; it may have ${Object.keys(regions).join(', ')}`)
     seen.add(name)
     return `<!-- generated: ${name} -->\n${regions[name].trim()}\n<!-- end generated: ${name} -->`

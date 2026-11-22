@@ -19,8 +19,8 @@ function locate(plans: readonly ToolbarPlan[], plan: ToolbarPlan): number {
   const matches = [
     (item: ToolbarPlan) => signature(item) === signature(plan),
     (item: ToolbarPlan) =>
-      item.cluster === plan.cluster && item.pair === plan.pair && item.mode === plan.mode && item.more.join() === plan.more.join(),
-    (item: ToolbarPlan) => item.pair === plan.pair && item.mode === plan.mode && item.more.join() === plan.more.join(),
+      item.cluster === plan.cluster && item.pair === plan.pair && item.mode === plan.mode && item.more.join(',') === plan.more.join(','),
+    (item: ToolbarPlan) => item.pair === plan.pair && item.mode === plan.mode && item.more.join(',') === plan.more.join(','),
     (item: ToolbarPlan) => item.pair === plan.pair && item.mode === plan.mode,
   ]
   for (const match of matches) {
@@ -73,7 +73,7 @@ export function useToolbarLayout(
   key: string,
 ): {plan: ToolbarPlan; sliderMin: number; sliderFitMin: number} {
   const {pair, modes, playback} = content
-  const actions = content.actions.join()
+  const actions = content.actions.join(',')
   const sides = Boolean(content.sides)
   const plans = useMemo(
     () =>

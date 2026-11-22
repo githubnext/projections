@@ -56,7 +56,9 @@ export function factFields(model: ComparisonModel): FactFields {
       }
     }
   }
-  const fields = [...seen].filter(([field]) => fieldPointer(field).length <= choiceLength).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+  const fields = [...seen]
+    .filter(([field]) => fieldPointer(field).length <= choiceLength)
+    .toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
   return {
     badges: fields.filter(([, use]) => use.badge).map(([field]) => field),
     colors: fields.filter(([, use]) => use.color).map(([field]) => field),

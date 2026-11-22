@@ -89,7 +89,7 @@ export function corridorRoute(
   }
   // Cards the corridor runs beside: those between the two turns.
   const beside = obstacles.filter(box => box.y + box.height > first && box.y < last)
-  const edges = [...new Set(beside.flatMap(box => [box.x - clearance, box.x + box.width + clearance]))].sort((a, b) => a - b)
+  const edges = [...new Set(beside.flatMap(box => [box.x - clearance, box.x + box.width + clearance]))].toSorted((a, b) => a - b)
   const blocked = (x: number) => beside.some(box => x > box.x - clearance && x < box.x + box.width + clearance)
   const candidates = edges.length ? [edges[0]! - routeRadius, edges.at(-1)! + routeRadius] : []
   for (let index = 0; index + 1 < edges.length; index++) candidates.push((edges[index]! + edges[index + 1]!) / 2)

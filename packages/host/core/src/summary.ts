@@ -123,9 +123,9 @@ export function sameSummaryFilter(a: SummaryFilter | null | undefined, b: Summar
   const kinds = (filter: SummaryFilter) =>
     filter.kinds
       .map(kind => `${kind.collection ?? '*'}:${kind.kind}`)
-      .sort()
+      .toSorted()
       .join('\n')
-  const ids = (filter: SummaryFilter) => (filter.ids ? [...filter.ids].sort().join('\n') : undefined)
+  const ids = (filter: SummaryFilter) => (filter.ids ? filter.ids.toSorted().join('\n') : undefined)
   return a.status === b.status && kinds(a) === kinds(b) && ids(a) === ids(b)
 }
 
@@ -204,8 +204,8 @@ export function useSummaryFit(
       const figures = row ? [...row.querySelectorAll<HTMLElement>('[data-summary-figure]')] : []
       const more = row?.querySelector<HTMLElement>('[data-summary-more]')?.getBoundingClientRect().width ?? 24
       const style = element.ownerDocument.defaultView?.getComputedStyle(element)
-      const padding = style ? parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) : 0
-      const gap = style ? parseFloat(style.columnGap) || 0 : 0
+      const padding = style ? Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight) : 0
+      const gap = style ? Number.parseFloat(style.columnGap) || 0 : 0
       // The fixed content at its full width: measured with the bar out of its tight form (below).
       element.removeAttribute('data-tight')
       const fixed = [...element.querySelectorAll<HTMLElement>('[data-summary-fixed]')].reduce(
@@ -217,14 +217,14 @@ export function useSummaryFit(
       // keeps no room at its start: it grows to fit its figures, so they are centred anyway.
       const holder = element.parentElement
       // The bar's own width unrounded (`clientWidth` rounds): a bar as wide as its content fits it exactly.
-      const borders = style ? parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth) : 0
+      const borders = style ? Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.borderRightWidth) : 0
       const width = room?.current
         ? room.current.clientWidth - (holder ? holder.offsetWidth - holder.clientWidth : 0)
         : element.getBoundingClientRect().width - borders
       const view = element.ownerDocument.defaultView
       const trail = element.querySelector<HTMLElement>('[data-summary-trail]')
       const trailStyle = trail && view?.getComputedStyle(trail)
-      const trailPadding = trailStyle ? parseFloat(trailStyle.paddingLeft) + parseFloat(trailStyle.paddingRight) : 0
+      const trailPadding = trailStyle ? Number.parseFloat(trailStyle.paddingLeft) + Number.parseFloat(trailStyle.paddingRight) : 0
       // The gaps between the bar's items in its row: not the measuring row (out of it), the fixed content or the "…"
       // (`data-summary-overflow`), whose gaps are counted with them.
       const items = [...element.children].filter(

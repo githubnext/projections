@@ -25,7 +25,7 @@ export function styleTokens(): StyleTokens {
     probe.style.fontFamily = value
     return getComputedStyle(probe).fontFamily
   }
-  const lengths = (names: readonly string[]) => [...new Set(names.map(name => parseFloat(tokenValue(name))).filter(Number.isFinite))]
+  const lengths = (names: readonly string[]) => [...new Set(names.map(name => Number.parseFloat(tokenValue(name))).filter(Number.isFinite))]
   const names = themeTokenNames as readonly string[]
   const colors: Record<string, string> = {}
   // Theme colors, and the categorical palette (`chart-*`).

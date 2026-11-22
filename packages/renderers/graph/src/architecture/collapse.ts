@@ -91,7 +91,7 @@ export function architectureView(
   const quiet = (id: string) => !changed.has(id) && !pinned.has(id)
   const closes = (id: string) => quiet(id) && descendants(id).every(quiet)
   // The outermost boundaries that can close: those the person didn't open collapse, the rest get a collapse card.
-  const outermost = [...boundaries].sort(compareIds).filter(id => {
+  const outermost = [...boundaries].toSorted(compareIds).filter(id => {
     if (!closes(id)) return false
     for (let up = parent.get(id); up !== undefined; up = parent.get(up)) if (boundaries.has(up) && closes(up)) return false
     return true
@@ -103,9 +103,9 @@ export function architectureView(
   const hiddenIn = new Set(outermost.flatMap(id => [id, ...descendants(id)]))
   const rests = new Map(
     [...boundaries]
-      .sort(compareIds)
+      .toSorted(compareIds)
       .filter(id => !hiddenIn.has(id))
-      .map(id => [id, (children.get(id) ?? []).filter(child => !boundaries.has(child) && quiet(child)).sort(compareIds)] as const)
+      .map(id => [id, (children.get(id) ?? []).filter(child => !boundaries.has(child) && quiet(child)).toSorted(compareIds)] as const)
       .filter(([, members]) => members.length >= 2),
   )
   const partial = [...rests.keys()].filter(id => !expansion.has(id))
@@ -165,11 +165,11 @@ export function architectureView(
     joined.set(key, entry)
   }
   const links = new Map<string, readonly string[]>()
-  for (const [key, entry] of [...joined].sort(([a], [b]) => compareIds(a, b))) {
+  for (const [key, entry] of [...joined].toSorted(([a], [b]) => compareIds(a, b))) {
     const id = `${linkPrefix}${key}`
-    const kind = entry.kinds.includes('contains') ? 'contains' : [...entry.kinds].sort(compareIds)[0]!
+    const kind = entry.kinds.includes('contains') ? 'contains' : entry.kinds.toSorted(compareIds)[0]!
     relationships.push(unchanged({id, kind, from: entry.from, to: entry.to, data: {count: entry.kinds.length}}))
-    if (kind !== 'contains') links.set(id, [...entry.boundaries].sort(compareIds))
+    if (kind !== 'contains') links.set(id, [...entry.boundaries].toSorted(compareIds))
   }
   for (const id of [...opened, ...reopened]) {
     relationships.push(

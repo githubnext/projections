@@ -188,7 +188,7 @@ export function categoryPalette(
     if (known) known.weight += weight
     else merged.set(category.key, {category, weight})
   }
-  const order = [...merged.values()].sort(
+  const order = [...merged.values()].toSorted(
     (a, b) => b.weight - a.weight || (a.category.key < b.category.key ? -1 : a.category.key > b.category.key ? 1 : 0),
   )
   // Slots are chosen against both themes' defaults, so a category takes the same slot in light and dark.

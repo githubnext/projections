@@ -44,14 +44,14 @@ export function elkInput(nodes: readonly LayoutNode[], edges: readonly LayoutEdg
   const placed = edges
     .filter(edge => present.has(edge.from) && present.has(edge.to) && !(edge.kind === 'contains' && groups.has(edge.from)))
     // Independent of edge IDs, which differ between a comparison and its mirror.
-    .sort((a, b) => byOrder(a.from, b.from) || byOrder(a.to, b.to) || compareIds(a.kind, b.kind) || compareIds(a.id, b.id))
+    .toSorted((a, b) => byOrder(a.from, b.from) || byOrder(a.to, b.to) || compareIds(a.kind, b.kind) || compareIds(a.id, b.id))
   const stages = options.junctions ? sharedStages(placed) : []
   const viaJunction = new Map(stages.flatMap((stage, index) => stage.edges.map(edge => [edge.id, index])))
 
   // ELK IDs are positions, so geometry never depends on identifier text.
   const member = new Map<string, string>()
   for (const [group, children] of groups) for (const child of children) member.set(child, group)
-  const ordered = [...nodes].sort((a, b) => byOrder(a.id, b.id))
+  const ordered = nodes.toSorted((a, b) => byOrder(a.id, b.id))
   // Cards with no relationships take places on the rest's layers after ELK lays it out, or a grid of their own when
   // there is no rest (see `placeUnlinked`).
   const linked = new Set(placed.flatMap(edge => [edge.from, edge.to]))

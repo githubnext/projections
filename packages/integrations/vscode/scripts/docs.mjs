@@ -95,7 +95,7 @@ export function rewriteLinks(text, file, bundled) {
 export function slug(text) {
   return text
     .toLowerCase()
-    .replace(/[^\p{L}\p{M}\p{N}\p{Pc} -]/gu, '')
+    .replaceAll(/[^\p{L}\p{M}\p{N}\p{Pc} -]/gu, '')
     .replaceAll(' ', '-')
 }
 
@@ -208,7 +208,7 @@ export async function planDocs(root) {
       if (linked.startsWith('docs/') && (await exists(path.join(root, linked)))) files.add(linked)
     }
   }
-  const bundled = new Map([...files].sort().map(file => [file, bundledName(file)]))
+  const bundled = new Map([...files].toSorted().map(file => [file, bundledName(file)]))
   const names = new Map()
   for (const [file, name] of bundled) {
     if (names.has(name)) throw new Error(`${file} and ${names.get(name)} would both be ${name} in the bundle`)

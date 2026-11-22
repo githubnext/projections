@@ -6,7 +6,7 @@ import {measureFrame, type FrameMeasurement} from './invariants/frame.js'
 import {scrubFailures} from './invariants/scrub.js'
 
 const ids = (frame: FrameMeasurement) =>
-  [...new Set([...frame.cards.filter(card => card.opacity > 0.999).map(card => card.id), ...frame.groups])].sort()
+  [...new Set([...frame.cards.filter(card => card.opacity > 0.999).map(card => card.id), ...frame.groups])].toSorted()
 
 /**
  * Dense-scrub suite for staged graph-family renderers in the real host frame:
@@ -27,7 +27,7 @@ export function scrubSuite(pairs: readonly FixturePair[]) {
         ['graph-horizontal', 'dag', 'architecture', 'infrastructure'].includes(pair.renderer) ? 'graph' : pair.renderer,
       )
       expect(state.steps.length, 'the renderer reports where a host may hold').toBeGreaterThan(0)
-      expect(state.steps).toEqual([...state.steps].sort((a, b) => a - b))
+      expect(state.steps).toEqual(state.steps.toSorted((a, b) => a - b))
 
       const frames: FrameMeasurement[] = []
       await renderer.scrub(samples(100, {roundTrip: true}), async () => {
@@ -39,7 +39,7 @@ export function scrubSuite(pairs: readonly FixturePair[]) {
       const fine = Array.from({length: 41}, (_, index) => Math.round((Math.max(0, first - 0.2) + index * 0.005) * 1e6) / 1e6).filter(
         value => value <= 1,
       )
-      await renderer.scrub([...fine, ...[...fine].reverse()], async () => {
+      await renderer.scrub([...fine, ...fine.toReversed()], async () => {
         const frame = await root.evaluate(measureFrame)
         frame.issues.push(...contactIssues(await root.evaluate(arrowContacts)))
         frames.push(frame)
@@ -50,7 +50,7 @@ export function scrubSuite(pairs: readonly FixturePair[]) {
       // Rows are identified by their after ID when a declared rename (previousIds) carries a before entity on.
       const renamed = new Map(pair.after.entities.flatMap(entity => (entity.previousIds ?? []).map(previous => [previous, entity.id])))
       const changedIds = (side: 'before' | 'after') =>
-        pair[side].entities.map(entity => (side === 'before' ? (renamed.get(entity.id) ?? entity.id) : entity.id)).sort()
+        pair[side].entities.map(entity => (side === 'before' ? (renamed.get(entity.id) ?? entity.id) : entity.id)).toSorted()
       expect(ids(at(0))).toEqual(changedIds('before'))
       expect(ids(at(1))).toEqual(changedIds('after'))
       expect(

@@ -77,17 +77,21 @@ test('semantic tokens are encoded relative to each other, in UTF-16', () => {
     ],
     index => lines[index],
   )
-  assert.deepEqual(data, [
-    ...[0, 3, 4, tokenTypes.indexOf('string'), 0],
-    ...[
-      0,
-      7,
-      1,
-      tokenTypes.indexOf('parameter'),
-      (1 << tokenModifiers.indexOf('readonly')) | (1 << tokenModifiers.indexOf('defaultLibrary')),
-    ],
-    ...[1, 3, 1, tokenTypes.indexOf('variable'), 0],
-  ])
+  // Five numbers a token.
+  assert.deepEqual(
+    data,
+    [
+      [0, 3, 4, tokenTypes.indexOf('string'), 0],
+      [
+        0,
+        7,
+        1,
+        tokenTypes.indexOf('parameter'),
+        (1 << tokenModifiers.indexOf('readonly')) | (1 << tokenModifiers.indexOf('defaultLibrary')),
+      ],
+      [1, 3, 1, tokenTypes.indexOf('variable'), 0],
+    ].flat(),
+  )
 })
 
 test('the shipped language service answers editor requests', () => {

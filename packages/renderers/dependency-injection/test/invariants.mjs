@@ -94,7 +94,7 @@ export function measureRenderedFrame(root = document) {
       [...element.attributes]
         .filter(({name}) => name !== 'id' && !name.startsWith('marker'))
         .map(({name, value}) => [name, value])
-        .sort((a, b) => (a[0] < b[0] ? -1 : 1)),
+        .toSorted((a, b) => (a[0] < b[0] ? -1 : 1)),
       element.childElementCount ? null : element.textContent,
     ]),
   )

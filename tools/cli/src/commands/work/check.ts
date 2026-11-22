@@ -48,16 +48,14 @@ export async function checkReport(root: string, options: CheckOptions, progress?
   }
   const failed = results.filter(result => result.status === 'fail')
   const next = failed.length
-    ? [
-        ...failed.flatMap(result => {
-          const first = result.problems?.find(problem => problem.file)
-          return [
-            ...(result.fix ? [result.fix] : []),
-            ...(first?.file ? [`${TOOLS} explain ${first.file}`] : []),
-            `${TOOLS} check --only ${result.gate}${fast ? ' --fast' : scoped ? ' --affected' : ''}`,
-          ]
-        }),
-      ]
+    ? failed.flatMap(result => {
+        const first = result.problems?.find(problem => problem.file)
+        return [
+          ...(result.fix ? [result.fix] : []),
+          ...(first?.file ? [`${TOOLS} explain ${first.file}`] : []),
+          `${TOOLS} check --only ${result.gate}${fast ? ' --fast' : scoped ? ' --affected' : ''}`,
+        ]
+      })
     : fast
       ? // The narrowest tests next, then the whole check of what the change touches.
         [...set.affected.changed.slice(0, 3).map(path => `${TOOLS} test ${path}`), `${TOOLS} check --affected`]

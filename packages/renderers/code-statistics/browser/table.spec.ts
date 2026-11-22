@@ -31,11 +31,11 @@ test('headings sort the table through the host, both ways', async ({page}) => {
   await expect(frame.getByRole('columnheader', {name: 'Files'})).toHaveAttribute('aria-sort', 'descending')
   await expect(frame.getByRole('columnheader', {name: 'Code'})).not.toHaveAttribute('aria-sort')
   const descending = await counts(frame, 1)
-  expect(descending).toEqual([...descending].sort((a, b) => b - a))
+  expect(descending).toEqual(descending.toSorted((a, b) => b - a))
   await frame.getByRole('button', {name: 'Files'}).press('Enter')
   await expect(frame.getByRole('columnheader', {name: 'Files'})).toHaveAttribute('aria-sort', 'ascending')
   const ascending = await counts(frame, 1)
-  expect(ascending).toEqual([...ascending].sort((a, b) => a - b))
+  expect(ascending).toEqual(ascending.toSorted((a, b) => a - b))
 })
 
 test('the rows keep one order for the whole transition', async ({page}) => {
@@ -100,7 +100,7 @@ function tableLineProbes(): LineProbe[] {
     context.clearRect(0, 0, 1, 1)
     context.fillStyle = color
     context.fillRect(0, 0, 1, 1)
-    return [...context.getImageData(0, 0, 1, 1).data.slice(0, 3)]
+    return Array.from(context.getImageData(0, 0, 1, 1).data.slice(0, 3))
   }
   const scroll = document.querySelector('.pk-table-scroll')!.getBoundingClientRect()
   const rows = [...document.querySelectorAll('.pk-table > .pk-table-row')]
@@ -173,7 +173,7 @@ async function pixelsAt({png, width, points}: {png: string; width: number; point
     for (let device = Math.floor((at - 1) * scale); device <= Math.ceil((at + 1) * scale); device++) {
       const [px, py] = across === 'y' ? [Math.floor(x * scale), device] : [device, Math.floor(y * scale)]
       if (px >= 0 && py >= 0 && px < bitmap.width && py < bitmap.height) {
-        pixels.push([...context.getImageData(px, py, 1, 1).data.slice(0, 3)])
+        pixels.push(Array.from(context.getImageData(px, py, 1, 1).data.slice(0, 3)))
       }
     }
     return pixels

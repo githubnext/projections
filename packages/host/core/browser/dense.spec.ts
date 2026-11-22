@@ -102,7 +102,7 @@ test('on desktop row 1 holds, in order, the picker, mode, scope, zoom actions, f
   ]
   const positions = []
   for (const locator of order) positions.push(await left(locator))
-  expect(positions).toEqual([...positions].sort((a, b) => a - b))
+  expect(positions).toEqual(positions.toSorted((a, b) => a - b))
   await expect(row.getByRole('button', {name: 'More', exact: true})).toHaveCount(0)
   // Table and text are in Settings ("Show as"), not the row; playback has one play button and small step buttons.
   await expect(row.getByRole('tablist')).toHaveCount(0)

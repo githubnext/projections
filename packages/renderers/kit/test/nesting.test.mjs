@@ -11,7 +11,7 @@ test('a boundary with an emphasized changed card, boundary or link drawn inside 
   const elsewhere = node('away', 400, 0, 100, 60, 'removed')
   const quiet = node('quiet', 300, 300, 200, 200, 'modified', true)
   const emphasis = () => 1
-  assert.deepEqual([...boundariesHoldingChanges([outer, inner, changed, elsewhere, quiet], [], emphasis)].sort(), ['inner', 'outer'])
+  assert.deepEqual([...boundariesHoldingChanges([outer, inner, changed, elsewhere, quiet], [], emphasis)].toSorted(), ['inner', 'outer'])
   // A changed card that isn't emphasized yet (before its step) is drawn plain.
   assert.deepEqual([...boundariesHoldingChanges([outer, changed], [], row => (row.id === 'card' ? 0 : 1))], [])
   // A changed relationship routed inside the boundary counts too; an unchanged one doesn't.

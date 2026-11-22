@@ -118,11 +118,11 @@ test('the diff lays out both revisions once, without overlap', async () => {
     for (const available of [1300, 360]) {
       const model = await modelOf(id)
       const {frame} = createDatabaseDiff(model, {available})
-      const cards = frame.tables.map(table => table.change.id)
+      const cards = new Set(frame.tables.map(table => table.change.id))
       // Every card of either revision is drawn.
       for (const entity of model.entities) {
         if (['table', 'view', 'enum'].includes((entity.after ?? entity.before).kind)) {
-          assert.ok(cards.includes(entity.id), `${id}: ${entity.id}`)
+          assert.ok(cards.has(entity.id), `${id}: ${entity.id}`)
         }
       }
       for (const [index, table] of frame.tables.entries()) {
@@ -131,7 +131,7 @@ test('the diff lays out both revisions once, without overlap', async () => {
         }
         // Rows, with their change lines, stay inside their card and never share a slot.
         let bottom = schemaMetrics.header
-        for (const item of [...table.columns].sort((a, b) => a.top - b.top)) {
+        for (const item of [...table.columns].toSorted((a, b) => a.top - b.top)) {
           assert.ok(item.top >= bottom, `${id}: ${item.change.id} overlaps the row above`)
           bottom = item.top + (1 + (item.lines?.length ?? 0)) * schemaMetrics.row
         }

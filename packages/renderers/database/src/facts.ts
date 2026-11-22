@@ -95,7 +95,7 @@ export function databaseFacts(model: ComparisonModel): SummaryFactItem[] {
       id => survives(owner.get(id)),
     )
     const rank = (kind: string) => (keyOrder.includes(kind) ? keyOrder.indexOf(kind) : keyOrder.length)
-    const kinds = [...new Set(keyIds.map(id => keyType(state.entities.get(id)!)))].sort((a, b) => rank(a) - rank(b) || compareIds(a, b))
+    const kinds = [...new Set(keyIds.map(id => keyType(state.entities.get(id)!)))].toSorted((a, b) => rank(a) - rank(b) || compareIds(a, b))
     for (const kind of kinds) {
       const [singular, plural] = keyNouns[kind] ?? [kind, pluralKind(kind)]
       fact(
@@ -106,7 +106,7 @@ export function databaseFacts(model: ComparisonModel): SummaryFactItem[] {
       )
     }
     // Everything else the schema draws as tags, by its own kind.
-    for (const kind of [...new Set(union.others.map(id => state.entities.get(id)!.kind))].sort()) {
+    for (const kind of [...new Set(union.others.map(id => state.entities.get(id)!.kind))].toSorted()) {
       fact(
         `${kind}-renamed`,
         union.others.filter(id => {

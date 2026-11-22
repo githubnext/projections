@@ -137,17 +137,17 @@ function verticalAlignment(layers: readonly (Vertex[] | undefined)[], marked: Re
   const count = layers.reduce((sum, layer) => sum + (layer?.length ?? 0), 0)
   const root = Array.from({length: count}, (_, index) => index)
   const align = Array.from({length: count}, (_, index) => index)
-  const order = up ? [...layers.keys()] : [...layers.keys()].reverse()
+  const order = up ? [...layers.keys()] : [...layers.keys()].toReversed()
   for (const index of order.slice(1)) {
     const layer = layers[index]
     if (!layer) continue
     let r = left ? -1 : Infinity
-    for (const v of left ? layer : [...layer].reverse()) {
+    for (const v of left ? layer : layer.toReversed()) {
       const neighbours = up ? v.upper : v.lower
       if (!neighbours.length) continue
       const d = neighbours.length
       const medians = [...new Set([Math.floor((d - 1) / 2), Math.ceil((d - 1) / 2)])]
-      for (const m of left ? medians : medians.reverse()) {
+      for (const m of left ? medians : medians.toReversed()) {
         if (align[v.id] !== v.id) continue
         const u = neighbours[m]!
         const conflict = up ? marked.has(`${u.id},${v.id}`) : marked.has(`${v.id},${u.id}`)

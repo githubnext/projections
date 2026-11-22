@@ -16,7 +16,7 @@ export function inspectorArguments() {
     unbuilt = []
   for (const entry of readdirSync(renderers, {withFileTypes: true})
     .filter(item => item.isDirectory())
-    .sort((a, b) => (a.name < b.name ? -1 : 1))) {
+    .toSorted((a, b) => (a.name < b.name ? -1 : 1))) {
     const directory = join(renderers, entry.name)
     if (existsSync(join(directory, 'scenarios.json'))) fixtures.push(join(directory, 'scenarios.json'))
     if (!existsSync(join(directory, 'package.json'))) continue

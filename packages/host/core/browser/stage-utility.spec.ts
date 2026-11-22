@@ -60,7 +60,7 @@ for (const mode of ['diff', 'animated'] as const) {
     // The frame is told how far the bar reaches into it.
     const inset = page.locator('iframe.ph-frame').first().contentFrame().locator('html')
     await expect
-      .poll(() => inset.evaluate(html => parseFloat(getComputedStyle(html).getPropertyValue('--projections-stage-inset-top')) || 0))
+      .poll(() => inset.evaluate(html => Number.parseFloat(getComputedStyle(html).getPropertyValue('--projections-stage-inset-top')) || 0))
       .toBeGreaterThan(0)
     const covered = await pageBox(bar)
     await expect.poll(async () => (await nodeBoxes(page)).filter(node => intersects(node, covered)).length).toBe(0)

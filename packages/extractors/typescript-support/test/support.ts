@@ -73,7 +73,7 @@ const collect = async (context: HelperContext): Promise<Extraction> => {
   const checkout = context.checkout ?? (await toolchain())
   const input = context.input
   const {definition} = input.projection
-  if (typeof definition.extractor !== 'string') throw new Error('The helper runs a built-in extractor, by id')
+  if (typeof definition.extractor !== 'string') throw new TypeError('The helper runs a built-in extractor, by id')
   const result = await runHelper(definition.extractor, input, checkout)
   if (result.status !== 0) throw new Error(result.stderr.trim() || `Helper exited with ${result.status}`)
   const extraction = JSON.parse(result.stdout) as Extraction

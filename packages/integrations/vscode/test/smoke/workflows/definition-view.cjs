@@ -106,7 +106,7 @@ module.exports = async function definitionView({folder, api, manifest}) {
     ),
   )
   const github = itemMenus.filter(item => item.command === 'projections.openDocumentationOnGitHub')
-  assert.deepEqual(github.map(item => item.group).sort(), ['inline@9', 'navigation@3'])
+  assert.deepEqual(github.map(item => item.group).toSorted(), ['inline@9', 'navigation@3'])
   assert.equal(manifest.commands.find(item => item.command === 'projections.openDocumentationOnGitHub').icon, '$(link-external)')
   const previews = () =>
     vscode.window.tabGroups.all.flatMap(group =>

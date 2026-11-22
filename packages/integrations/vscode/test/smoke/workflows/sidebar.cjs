@@ -53,7 +53,7 @@ module.exports = async function sidebar({folder, api}) {
     const rowMenu = contributed.menus['view/item/context']
       .filter(item => /viewItem == projection\b/u.test(item.when ?? ''))
       .map(item => item.command)
-    assert.ok(rowMenu.includes('projections.openDefinition') && !rowMenu.includes('projections.develop'), rowMenu.join())
+    assert.ok(rowMenu.includes('projections.openDefinition') && !rowMenu.includes('projections.develop'), rowMenu.join(','))
     // One tab type: no Develop tab, editor or command (developing is the side bar's collapsed sections).
     assert.ok(!(contributed.customEditors ?? []).some(editor => editor.viewType === 'projections.develop'))
     assert.ok(!(await vscode.commands.getCommands(true)).includes('projections.develop'))

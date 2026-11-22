@@ -118,13 +118,13 @@ export class RendererBuilds implements vscode.Disposable {
     // again, and one saved while the workspace wasn't trusted builds now.
     const stopListening = lease.onDidChange(runner => {
       subscribe(runner)
-      const waiting = [...entry.builds].filter(([, build]) => build.state.phase === 'untrusted').map(([projection]) => projection)
+      const waiting = new Set([...entry.builds].filter(([, build]) => build.state.phase === 'untrusted').map(([projection]) => projection))
       for (const build of entry.builds.values()) build.terminal?.end(null)
       entry.builds.clear()
       this.changed.fire()
       for (const definition of this.host.projections(folder)) {
         if (this.host.hasTab(folder, definition.id) && rendererPackage(definition)) {
-          void this.send(folder, definition.id, waiting.includes(definition.id) ? 'saved' : 'opened')
+          void this.send(folder, definition.id, waiting.has(definition.id) ? 'saved' : 'opened')
         }
       }
     })
@@ -244,7 +244,7 @@ export class RendererBuilds implements vscode.Disposable {
   /** A watcher stops once no tab of its projection is open. */
   private tabsChanged() {
     for (const entry of this.folders.values()) {
-      for (const projection of [...entry.builds.keys()]) {
+      for (const projection of entry.builds.keys()) {
         if (!this.host.hasTab(entry.folder, projection)) void this.send(entry.folder, projection, 'closed')
       }
     }

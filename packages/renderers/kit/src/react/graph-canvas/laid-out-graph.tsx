@@ -256,8 +256,18 @@ function drawingOrigin(element: HTMLElement, svg: SVGSVGElement): Point {
     drawn = svg.getBoundingClientRect()
   const style = getComputedStyle(svg)
   return {
-    x: drawn.left - frame.left - element.clientLeft + parseFloat(style.paddingLeft || '0') + parseFloat(style.borderLeftWidth || '0'),
-    y: drawn.top - frame.top - element.clientTop + parseFloat(style.paddingTop || '0') + parseFloat(style.borderTopWidth || '0'),
+    x:
+      drawn.left -
+      frame.left -
+      element.clientLeft +
+      Number.parseFloat(style.paddingLeft || '0') +
+      Number.parseFloat(style.borderLeftWidth || '0'),
+    y:
+      drawn.top -
+      frame.top -
+      element.clientTop +
+      Number.parseFloat(style.paddingTop || '0') +
+      Number.parseFloat(style.borderTopWidth || '0'),
   }
 }
 
@@ -303,8 +313,8 @@ function useAnchoredScroll(
       const origin = drawingOrigin(element, svg)
       const style = getComputedStyle(svg)
       const axis = (offset: number, max: number, before: 'paddingLeft' | 'paddingTop', after: 'paddingRight' | 'paddingBottom') => {
-        if (offset < 0) svg.style[before] = `${parseFloat(style[before]) - offset}px`
-        else if (offset > max) svg.style[after] = `${parseFloat(style[after]) + offset - max}px`
+        if (offset < 0) svg.style[before] = `${Number.parseFloat(style[before]) - offset}px`
+        else if (offset > max) svg.style[after] = `${Number.parseFloat(style[after]) + offset - max}px`
         return Math.max(0, offset)
       }
       const left = axis(

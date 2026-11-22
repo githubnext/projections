@@ -52,7 +52,7 @@ function decoration(frame: FrameLocator) {
     ).length,
     boxes: [...root.querySelectorAll<HTMLElement>('[data-entity-id], header > *')].map(item => {
       const box = item.getBoundingClientRect()
-      return [box.x, box.y, box.width, box.height].join()
+      return [box.x, box.y, box.width, box.height].join(',')
     }),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   }))
@@ -283,7 +283,7 @@ test('the line-number gutter runs unbroken from the strip or header to the card 
       if (!nums.length) return []
       const above = card.querySelector('.td-caption') ?? card.querySelector(':scope > header')!
       // The card's inner bottom edge: the body reaches over the card's border, padded by its width.
-      const bottom = card.getBoundingClientRect().bottom - parseFloat(getComputedStyle(card).borderBottomWidth)
+      const bottom = card.getBoundingClientRect().bottom - Number.parseFloat(getComputedStyle(card).borderBottomWidth)
       const first = Math.min(...nums.map(num => num.getBoundingClientRect().top))
       const last = Math.max(...nums.map(num => num.getBoundingClientRect().bottom))
       return [{id: card.getAttribute('data-entity-id'), top: first - above.getBoundingClientRect().bottom, bottom: bottom - last}]
@@ -340,7 +340,7 @@ test('at 1280 px a long line wraps, in one column, in two and in one revision, i
         .at(-1)!
       const text = line.querySelector<HTMLElement>('.td-text')!
       const top = (selector: string) => [...line.querySelectorAll<HTMLElement>(selector)].map(item => item.getBoundingClientRect().top)
-      const height = parseFloat(getComputedStyle(text).lineHeight)
+      const height = Number.parseFloat(getComputedStyle(text).lineHeight)
       return {
         overflow: element.scrollWidth - element.clientWidth,
         lines: Math.round(text.getBoundingClientRect().height / height),

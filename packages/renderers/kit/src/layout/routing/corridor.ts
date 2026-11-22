@@ -35,7 +35,7 @@ export function corridorRoute(ctx: RoutingContext, segment: Segment, own: readon
     ...new Set(
       beside.flatMap(id => [across(box(id)) - breadth(id) / 2 - routeClearance, across(box(id)) + breadth(id) / 2 + routeClearance]),
     ),
-  ].sort((a, b) => a - b)
+  ].toSorted((a, b) => a - b)
   if (!edges.length) return undefined
   const blocked = (value: number) => near.some(id => Math.abs(value - across(box(id))) < breadth(id) / 2 + routeClearance)
   const candidates = [edges[0]! - routeRadius, edges.at(-1)! + routeRadius]
@@ -45,7 +45,7 @@ export function corridorRoute(ctx: RoutingContext, segment: Segment, own: readon
   // The four shortest clear corridors.
   const nearest = candidates
     .filter(value => !blocked(value))
-    .sort((a, b) => Math.abs(a - across(start)) + Math.abs(a - across(end)) - Math.abs(b - across(start)) - Math.abs(b - across(end)))
+    .toSorted((a, b) => Math.abs(a - across(start)) + Math.abs(a - across(end)) - Math.abs(b - across(start)) - Math.abs(b - across(end)))
     .slice(0, 4)
   // Shortest first: the first with no crossings and nothing beside it is the best there is.
   for (const value of nearest) {

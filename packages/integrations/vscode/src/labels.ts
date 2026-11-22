@@ -93,7 +93,7 @@ export function sideLabel(facts: RefFacts, names: RefNames, now: number = Date.n
     const branch =
       at.find(item => item.current) ??
       at.find(item => item.name === names.defaultBranch) ??
-      at.sort((a, b) => a.name.localeCompare(b.name))[0]
+      at.toSorted((a, b) => a.name.localeCompare(b.name))[0]
     if (branch) return {...dated, kind: 'branch', name: branch.name}
     const tag = tags.find(item => item.commit === commit)
     if (tag) return {...dated, kind: 'tag', name: tag.name}

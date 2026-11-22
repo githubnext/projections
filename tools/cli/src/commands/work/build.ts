@@ -74,7 +74,9 @@ export function restoreIfUnchanged(before: Snapshot, after: Snapshot): boolean {
   for (const path of after.directories.keys()) if (!before.directories.has(path)) return false
   for (const [path, file] of before.files) utimesSync(path, file.atime, file.mtime)
   // Deepest first: setting a directory's times doesn't touch its parent's, but keep the order obvious.
-  for (const [path, times] of [...before.directories].sort((a, b) => b[0].length - a[0].length)) utimesSync(path, times.atime, times.mtime)
+  for (const [path, times] of [...before.directories].toSorted((a, b) => b[0].length - a[0].length)) {
+    utimesSync(path, times.atime, times.mtime)
+  }
   return true
 }
 
@@ -85,7 +87,7 @@ export function restoreIfUnchanged(before: Snapshot, after: Snapshot): boolean {
 export function recordSuccess(root: string, unit: Unit, inputs: string, before: Snapshot, started: number): boolean {
   const after = snapshot(root, unit)
   const unchanged = restoreIfUnchanged(before, after)
-  const outputs = [...after.files.keys()].map(path => relative(join(root, unit.path), path).split(sep).join('/')).sort()
+  const outputs = [...after.files.keys()].map(path => relative(join(root, unit.path), path).split(sep).join('/')).toSorted()
   recordBuild(root, unit.path, {...(unchanged ? {checked: started} : {}), inputs, outputs, recorded: Date.now()})
   return unchanged
 }

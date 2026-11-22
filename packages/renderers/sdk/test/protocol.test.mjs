@@ -464,7 +464,7 @@ function fakeWindow(hash = rendererFragment(channel, hostOrigin)) {
     for (const listener of listeners) listener({data, source, origin})
   }
   const expire = () => {
-    for (const [id, callback] of [...timers]) {
+    for (const [id, callback] of Array.from(timers)) {
       timers.delete(id)
       callback()
     }

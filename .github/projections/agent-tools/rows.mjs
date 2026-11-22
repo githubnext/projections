@@ -12,7 +12,7 @@ export function canonical(value) {
   return Object.fromEntries(
     Object.keys(value)
       .filter(key => key !== 'description')
-      .sort()
+      .toSorted()
       .map(key => [key, canonical(value[key])]),
   )
 }
@@ -64,7 +64,7 @@ const listed = (names, sign) => names.map(name => `, ${sign} ${name}`).join('')
 export function parameterDifferences(tools, surface) {
   const shared = [...tools.values()].filter(tool => tool.on.has('mcp') && tool.on.has(surface))
   const keys = (tool, side) => Object.keys(tool.on.get(side).schema.properties ?? {})
-  const always = (names, holds) => [...new Set(names)].filter(holds).sort()
+  const always = (names, holds) => [...new Set(names)].filter(holds).toSorted()
   return {
     added: always(
       shared.flatMap(tool => keys(tool, surface)),

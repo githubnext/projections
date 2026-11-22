@@ -217,7 +217,7 @@ export function loadNested(
     settled: (state: {status: 'ready'} | {status: 'failed'; message: string}) => void
   },
 ): () => void {
-  const view = container.ownerDocument.defaultView ?? window
+  const view = container.ownerDocument.defaultView ?? globalThis.window
   let frame: EmbeddedRenderer | undefined
   let cancelled = false
   let failed = false

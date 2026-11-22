@@ -99,7 +99,7 @@ export function languageSeries({tracked, motions, measure, scope, diff, palette,
         swatch: {token: compositionTokens[0]},
       }
     })
-    .sort(
+    .toSorted(
       (left, right) =>
         // Ranking on the larger of the two states is independent of progress, so
         // rows keep both their order and their colour for the whole transition.

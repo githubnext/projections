@@ -108,7 +108,7 @@ export function FilePackingRenderer(props: RendererProps<typeof accepts>) {
   const root = differ ? (differ.packing.root === undefined ? undefined : {id: differ.packing.root, opacity: () => 1}) : transition!.root
   const rootRow = root ? model.entities.find(row => row.id === root.id) : undefined
   const rootValue = useMemo(() => all.reduce((sum, circle) => sum + (circle.depth === 1 ? circle.value : 0), 0), [all])
-  const circles = useMemo(() => (all.length > circleLimit ? [...all].sort((a, b) => b.r - a.r).slice(0, circleLimit) : all), [all])
+  const circles = useMemo(() => (all.length > circleLimit ? all.toSorted((a, b) => b.r - a.r).slice(0, circleLimit) : all), [all])
   const byId = useMemo(() => new Map(all.map(circle => [circle.id, circle])), [all])
   const [focused, setFocused] = useState<string | null>(null)
   const [pointed, setPointed] = useState<string | null>(null)

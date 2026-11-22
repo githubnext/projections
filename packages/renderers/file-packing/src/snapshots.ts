@@ -66,13 +66,13 @@ export function stageSnapshot(model: ComparisonModel, timeline: StagedTimeline, 
 export function rowPaths(model: ComparisonModel): {paths: Map<string, string>; root?: string; tops: string[]} {
   const union = unionSnapshot(model)
   const parent = new Map<string, string>()
-  for (const {from, to} of [...union.links].sort((a, b) => compareIds(a.to, b.to) || compareIds(a.from, b.from))) {
+  for (const {from, to} of union.links.toSorted((a, b) => compareIds(a.to, b.to) || compareIds(a.from, b.from))) {
     if (from === to || parent.has(to)) continue
     let cursor: string | undefined = from
     while (cursor !== undefined && cursor !== to) cursor = parent.get(cursor)
     if (cursor !== to) parent.set(to, from)
   }
-  const roots = [...union.active].filter(id => !parent.has(id)).sort(compareIds)
+  const roots = [...union.active].filter(id => !parent.has(id)).toSorted(compareIds)
   const hasChildren = new Set(parent.values())
   const root = roots.length === 1 && hasChildren.has(roots[0]!) ? roots[0] : undefined
   const paths = new Map<string, string>()
@@ -89,5 +89,5 @@ export function rowPaths(model: ComparisonModel): {paths: Map<string, string>; r
   }
   for (const id of union.active) resolve(id)
   const tops = root ? [...union.active].filter(id => parent.get(id) === root) : roots
-  return {paths, ...(root === undefined ? {} : {root}), tops: tops.filter(id => hasChildren.has(id)).sort(compareIds)}
+  return {paths, ...(root === undefined ? {} : {root}), tops: tops.filter(id => hasChildren.has(id)).toSorted(compareIds)}
 }

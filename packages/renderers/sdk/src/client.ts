@@ -171,7 +171,7 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
   if (options.capabilities.controls !== undefined && !parseControls(options.capabilities.controls)) {
     throw new RendererConnectionError('Invalid control declarations in capabilities')
   }
-  const view = options.window ?? window
+  const view = options.window ?? globalThis.window
   const fragment = readRendererFragment(view.location.hash)
   if (!fragment) throw new RendererConnectionError('This renderer must be loaded by a Projections host; the frame URL has no channel')
   const {channel, hostOrigin} = fragment
@@ -324,7 +324,7 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
   if (replay.length) {
     const order = (type: HostMessage['type']) => (replayed as readonly string[]).indexOf(type)
     queueMicrotask(() => {
-      for (const [, message] of replay.sort(([a], [b]) => order(a) - order(b))) if (!disposed) deliver(message)
+      for (const [, message] of replay.toSorted(([a], [b]) => order(a) - order(b))) if (!disposed) deliver(message)
     })
   }
   return client
@@ -361,7 +361,7 @@ export function applyEnvironment(environment: RendererEnvironment, element: HTML
  * Browsers pause animation frames in hidden or offscreen cross-origin frames,
  * where nothing is painted; a short timer then acknowledges instead.
  */
-export function afterPaint(callback: () => void, view: Window = window, fallbackMs = 200): () => void {
+export function afterPaint(callback: () => void, view: Window = globalThis.window, fallbackMs = 200): () => void {
   let second = 0
   let done = false
   const first = view.requestAnimationFrame(() => {

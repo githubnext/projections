@@ -43,7 +43,7 @@ const existing = (function walk(directory) {
     return []
   }
   return entries.flatMap(entry =>
-    entry.isDirectory() ? walk(join(directory, entry.name)) : [relative(output, join(directory, entry.name)).split('\\').join('/')],
+    entry.isDirectory() ? walk(join(directory, entry.name)) : [relative(output, join(directory, entry.name)).replaceAll('\\', '/')],
   )
 })(output)
 

@@ -48,7 +48,7 @@ function run(name) {
   if (visiting.has(name)) throw new Error(`Workspace dependency cycle at ${name}`)
   visiting.add(name)
   const manifest = packages.get(name)
-  for (const dependency of Object.keys({...manifest.dependencies, ...manifest.devDependencies}).sort()) {
+  for (const dependency of Object.keys({...manifest.dependencies, ...manifest.devDependencies}).toSorted()) {
     if (packages.has(dependency)) run(dependency)
   }
   if (manifest.scripts?.[task] && !except.has(manifest.directory)) {
@@ -62,5 +62,5 @@ function run(name) {
   visiting.delete(name)
   done.add(name)
 }
-for (const name of [...packages.keys()].sort()) run(name)
+for (const name of [...packages.keys()].toSorted()) run(name)
 if (failed.length) throw new Error(`${task} failed in ${failed.join(', ')}`)

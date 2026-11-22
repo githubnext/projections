@@ -17,7 +17,7 @@ export function luminance(hex) {
 
 /** WCAG contrast ratio of two `#rrggbb` colors. */
 export function contrast(a, b) {
-  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p)
+  const [x, y] = [luminance(a), luminance(b)].toSorted((p, q) => q - p)
   return (x + 0.05) / (y + 0.05)
 }
 

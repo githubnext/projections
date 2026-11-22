@@ -83,7 +83,7 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
     // Property order is irrelevant, but overload order controls resolution and inference.
     const calls = value.getCallSignatures().map(call => signature(call, next))
     const constructs = value.getConstructSignatures().map(call => `new ${signature(call, next)}`)
-    return `{ ${[...parts.sort(), ...calls, ...constructs].join('; ')} }`
+    return `{ ${[...parts.toSorted(), ...calls, ...constructs].join('; ')} }`
   }
   // The compiler printer handles conditional/mapped/template-literal and primitive types.
   // It is tokenized to erase formatting; quoted import paths are normalized separately.
@@ -101,7 +101,7 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
     if (value.isUnion()) {
       return value.types
         .map(item => type(item, next))
-        .sort()
+        .toSorted()
         .join(' | ')
     }
     if (value.isIntersection()) return value.types.map(item => type(item, next)).join(' & ')

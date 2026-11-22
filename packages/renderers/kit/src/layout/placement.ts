@@ -33,7 +33,7 @@ export const rootPadding = 32
 /** The middle value (the mean of the middle two of an even count; 0 for none). */
 export function median(values: readonly number[]): number {
   if (!values.length) return 0
-  const sorted = [...values].sort((a, b) => a - b)
+  const sorted = values.toSorted((a, b) => a - b)
   const middle = Math.floor(sorted.length / 2)
   return sorted.length % 2 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2
 }

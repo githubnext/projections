@@ -216,7 +216,7 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
           // An effect may have stopped the actor; `start` starts them then.
           if (wanted && stillRunning()) startListed(wanted)
         }
-        if (state !== before) for (const listener of [...listeners]) listener(state)
+        if (state !== before) for (const listener of Array.from(listeners)) listener(state)
       }
     } finally {
       draining = false

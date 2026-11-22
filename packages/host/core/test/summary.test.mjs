@@ -79,7 +79,7 @@ test('a figure filters to its items, or to one change status of them', () => {
     rows
       .filter(row => rowInSummary(row, filter))
       .map(row => row.id)
-      .sort()
+      .toSorted()
   assert.deepEqual(ids(summaryFilterOf(workspaces)), ['a', 'c-new', 'c-old'])
   assert.deepEqual(ids(summaryFilterOf(workspaces, 'added')), ['c-new'])
   assert.deepEqual(ids(summaryFilterOf(workspaces, 'removed')), ['c-old'])

@@ -2,9 +2,8 @@
 // card states, and the cards and links finished once every unit is known.
 import type {DependencyInjectionExtraction, Entity} from '@githubnext/projections-schemas'
 import type {DiLink, DiUnit, Lifetime} from './model.js'
-import {shortTypeName} from './type-name.js'
 
-export const shortName = shortTypeName
+export {shortTypeName as shortName} from './type-name.js'
 
 export function lifetimeOf(value: unknown): Lifetime {
   const text = typeof value === 'string' ? value.toLowerCase() : ''

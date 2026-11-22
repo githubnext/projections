@@ -377,7 +377,7 @@ try {
     assert.match(signatures, /Binary\.Greeter\.Greet\(System\.String\? name = null\)/u)
     assert.doesNotMatch(signatures, /Hidden/u)
     const helper = path.join(await cached(), 'dotnet')
-    assert.deepEqual((await readdir(helper)).sort(), [
+    assert.deepEqual((await readdir(helper)).toSorted(), [
       'Projections.Dotnet.deps.json',
       'Projections.Dotnet.dll',
       'Projections.Dotnet.runtimeconfig.json',

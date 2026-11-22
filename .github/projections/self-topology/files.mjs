@@ -5,7 +5,7 @@ import path from 'node:path'
 
 export const posix = value => value.split(path.sep).join('/')
 export const byText = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
-export const sortedUnique = values => [...new Set(values)].sort(byText)
+export const sortedUnique = values => [...new Set(values)].toSorted(byText)
 
 // Files, listed the way Git does (tracked and untracked nonignored), or walked outside a work tree.
 export function listFiles(repo) {
@@ -28,7 +28,7 @@ export function listFiles(repo) {
       }
     }
     walk('')
-    return found.sort(byText)
+    return found.toSorted(byText)
   }
 }
 

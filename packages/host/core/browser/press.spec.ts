@@ -40,19 +40,19 @@ const nextPress = (page: Page) =>
               ...(control.classList.contains('pj-lens') ? [getComputedStyle(control, '::before').translate] : []),
             ]
           }
-          ;(window as unknown as {press?: Press}).press = press
+          ;(globalThis as unknown as {press?: Press}).press = press
         }
-        delete (window as unknown as {press?: Press}).press
-        window.addEventListener('pointerdown', record, {capture: true, once: true})
+        delete (globalThis as unknown as {press?: Press}).press
+        globalThis.addEventListener('pointerdown', record, {capture: true, once: true})
         resolve()
       }),
     pressable,
   )
 /** The press `nextPress` recorded, once the mouse press has reached the page, and whether it pressed `control`. */
 async function recorded(page: Page, control: Locator) {
-  await expect.poll(() => page.evaluate(() => 'press' in window)).toBe(true)
+  await expect.poll(() => page.evaluate(() => 'press' in globalThis)).toBe(true)
   return control.evaluate(element => {
-    const press = (window as unknown as {press: Press}).press
+    const press = (globalThis as unknown as {press: Press}).press
     return {pressed: press.control === element, active: press.active, offsets: press.offsets}
   })
 }

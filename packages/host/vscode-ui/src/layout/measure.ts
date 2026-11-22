@@ -14,7 +14,7 @@ export function requiredWidth(element: HTMLElement, row: boolean): {need: number
   if (start) start.style.maxWidth = 'none'
   const style = getComputedStyle(element)
   const frame = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'].reduce(
-    (sum, name) => sum + (parseFloat(style[name as 'paddingLeft']) || 0),
+    (sum, name) => sum + (Number.parseFloat(style[name as 'paddingLeft']) || 0),
     0,
   )
   const width = element.getBoundingClientRect().width
@@ -35,6 +35,6 @@ export function requiredWidth(element: HTMLElement, row: boolean): {need: number
 function centredNeed(element: HTMLElement, frame: number): number {
   if (element.getAttribute('data-cluster') !== 'centre') return 0
   const width = (selector: string) => element.querySelector(`:scope > ${selector}`)?.getBoundingClientRect().width ?? 0
-  const gap = parseFloat(getComputedStyle(element).columnGap) || 0
+  const gap = Number.parseFloat(getComputedStyle(element).columnGap) || 0
   return frame + width('.phv-toolbar-mode') + 2 * gap + 2 * Math.max(width('.phv-toolbar-start'), width('.phv-toolbar-end'))
 }

@@ -71,7 +71,7 @@ const tableIds = (extraction: typeof before) =>
   extraction.entities
     .filter(entity => entity.kind === 'table')
     .map(entity => entity.id)
-    .sort()
+    .toSorted()
 
 test('in a frame sized to its content, the schema paints at one scale from its first paint while the host grows the frame', async ({
   page,
@@ -89,8 +89,8 @@ test('scrubbing a new table forward and back keeps cards apart, links attached a
   const renderer = await openRenderer(page, {renderer: 'database', before, after, progress: 0})
   const first = await geometry(renderer.frame)
   // Dense around the middle, where the default order makes room and brings the table in.
-  const progresses = [...new Set([...samples(40), ...samples(100).filter(value => value > 0.3 && value < 0.8)])].sort((a, b) => a - b)
-  for (const sequence of [progresses, [...progresses].reverse()]) {
+  const progresses = [...new Set([...samples(40), ...samples(100).filter(value => value > 0.3 && value < 0.8)])].toSorted((a, b) => a - b)
+  for (const sequence of [progresses, progresses.toReversed()]) {
     await renderer.scrub(sequence, async progress => {
       const frame = await geometry(renderer.frame)
       expect(frame.width, 'framing is stable').toBeCloseTo(first.width, 0)
@@ -116,7 +116,7 @@ test('scrubbing a new table forward and back keeps cards apart, links attached a
       if (progress === 0 || progress === 1) {
         expect(frame.badges, `no status text at ${progress}`).toBe(0)
         expect(frame.tinted, `no tag tints at ${progress}`).toBe(0)
-        expect(visible.map(table => table.id).sort()).toEqual(tableIds(progress === 0 ? before : after))
+        expect(visible.map(table => table.id).toSorted()).toEqual(tableIds(progress === 0 ? before : after))
         expect(frame.tables.every(table => table.opacity === 1)).toBe(true)
       }
     })
@@ -185,8 +185,8 @@ test('tags make room, rename and arrive without overlapping', async ({page}) => 
         expect(overlaps(x, y), `${x.id} overlaps ${y.id} at ${progress}`).toBe(false)
       }
     }
-    if (progress === 0) expect(visible.map(tag => tag.id).sort()).toEqual(['index:IX_B', 'index:IX_New'])
-    if (progress === 1) expect(visible.map(tag => tag.id).sort()).toEqual(['index:IX_B', 'index:IX_C', 'index:IX_New'])
+    if (progress === 0) expect(visible.map(tag => tag.id).toSorted()).toEqual(['index:IX_B', 'index:IX_New'])
+    if (progress === 1) expect(visible.map(tag => tag.id).toSorted()).toEqual(['index:IX_B', 'index:IX_C', 'index:IX_New'])
   })
   await renderer.seek(1)
   await expect(renderer.frame.getByRole('button', {name: 'IX_NewLongerName'})).toBeVisible()
@@ -266,7 +266,7 @@ test('keys of no table wrap centered and balanced, with no holes', async ({page}
   for (const progress of samples(20, {roundTrip: true})) {
     await renderer.seek(progress)
     const lines = await renderer.frame.locator('.database-tags').evaluate(room => {
-      const gap = parseFloat(getComputedStyle(room).columnGap)
+      const gap = Number.parseFloat(getComputedStyle(room).columnGap)
       const origin = room.getBoundingClientRect()
       const slots = [...room.querySelectorAll<HTMLElement>(':scope > .database-tag-slot')]
         .filter(slot => getComputedStyle(slot).visibility !== 'hidden')
@@ -274,14 +274,14 @@ test('keys of no table wrap centered and balanced, with no holes', async ({page}
           const box = slot.getBoundingClientRect()
           return {x: box.x - origin.x, y: Math.round(box.y - origin.y), width: box.width}
         })
-      const rows = [...new Set(slots.map(slot => slot.y))].sort((a, b) => a - b)
+      const rows = [...new Set(slots.map(slot => slot.y))].toSorted((a, b) => a - b)
       return {
         width: origin.width,
         gap,
         lines: rows.map(y =>
           slots
             .filter(slot => slot.y === y)
-            .sort((a, b) => a.x - b.x)
+            .toSorted((a, b) => a.x - b.x)
             .map(slot => [slot.x, slot.width]),
         ),
       }
@@ -371,7 +371,7 @@ test('table, column, type and key names are monospace; status stays whole in its
     const shape = await name.evaluate(element => ({
       fits: element.scrollWidth <= element.clientWidth + 1,
       ellipsis: getComputedStyle(element).textOverflow === 'ellipsis',
-      lines: Math.round(element.getBoundingClientRect().height / parseFloat(getComputedStyle(element).lineHeight)),
+      lines: Math.round(element.getBoundingClientRect().height / Number.parseFloat(getComputedStyle(element).lineHeight)),
     }))
     expect(shape.fits && !shape.ellipsis, `${text} is whole`).toBe(true)
     expect(shape.lines, `${text} wraps`).toBeGreaterThan(1)
@@ -456,7 +456,7 @@ test("a column row's status is a two-character icon cell, so names and types kee
       })()
       return {
         id: row.dataset.entityId!,
-        room: cell.getBoundingClientRect().width + parseFloat(getComputedStyle(row).columnGap),
+        room: cell.getBoundingClientRect().width + Number.parseFloat(getComputedStyle(row).columnGap),
         ch,
         glyph: [...cell.querySelectorAll('[data-change-status] [data-icon]')].map(icon => icon.getAttribute('data-icon')).join(' '),
         title: cell.title,

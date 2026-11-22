@@ -17,7 +17,7 @@ export async function scenarioFiles() {
       if (entry.isDirectory() && existsSync(path)) files.push(path)
     }
   }
-  return files.sort((a, b) => basename(dirname(a)).localeCompare(basename(dirname(b))))
+  return files.toSorted((a, b) => basename(dirname(a)).localeCompare(basename(dirname(b))))
 }
 
 /** The served path of a comparator module named by a scenario. */

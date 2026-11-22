@@ -325,7 +325,7 @@ test('tsconfig programs honor JSONC, extends, excludes and checker path aliases'
     {entrypoints: {'.': 'src/index.ts'}},
   )
   const state = await collectTypeScript(context)
-  assert(state.entities.some(node => node.label === 'PublicValue'))
+  assert.ok(state.entities.some(node => node.label === 'PublicValue'))
 })
 test('untracked installed declarations are read through guarded module resolution', async t => {
   const context = await fixture(
@@ -432,7 +432,7 @@ test('a materialized revision reads installed dependencies from the checkout, an
   const price = state.entities.find(node => node.label === 'price')
   // `Shape` is the revision's (with `height`), `Money` the installed package's declaration.
   assert.equal(price?.data?.signature, 'price(shape: { "height": number; "width": number }, rate: Money): Money')
-  assert(state.entities.every(node => !node.evidence?.some(item => item.source.includes('node_modules'))))
+  assert.ok(state.entities.every(node => !node.evidence?.some(item => item.source.includes('node_modules'))))
   // Links in the checkout may not leave it.
   const outside = path.join(fixtureDirectory, `.outside-${randomUUID()}`)
   t.after(() => rm(outside, {recursive: true, force: true}))
@@ -504,8 +504,8 @@ test('a monorepo: workspace symlinks are followed and only the selected packages
   // `Shape` resolved through the link (not `any`); a dependency's source type is expanded structurally.
   assert.equal(area.data.signature, 'area(shape: { "height": number; "width": number }): number')
   // The dependency isn't exported itself, and nothing is attributed to node_modules.
-  assert(!state.entities.some(node => node.data?.package === '@acme/shapes' || node.data?.package === 'example'))
-  assert(state.entities.every(node => !node.evidence?.some(item => item.source.includes('node_modules'))))
+  assert.ok(!state.entities.some(node => node.data?.package === '@acme/shapes' || node.data?.package === 'example'))
+  assert.ok(state.entities.every(node => !node.evidence?.some(item => item.source.includes('node_modules'))))
   // Selecting the duplicates themselves still fails.
   const both = structuredClone(context)
   both.input.projection.definition.inputs = {entrypoints: {'.': 'examples/one/index.ts', './two': 'examples/two/index.ts'}}

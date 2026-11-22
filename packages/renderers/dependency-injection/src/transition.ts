@@ -87,7 +87,7 @@ export function createDiTransition(
     ids.map(id => {
       const parts = [...new Set([id, ...(beforeUnits.get(id)?.parts ?? []), ...(afterUnits.get(id)?.parts ?? [])])]
         .filter(part => stepOf.has(part))
-        .sort((a, b) => stepOf.get(a)!.time - stepOf.get(b)!.time)
+        .toSorted((a, b) => stepOf.get(a)!.time - stepOf.get(b)!.time)
       return [id, (beforeUnits.has(id) ? parts.at(-1) : parts[0]) ?? id] as const
     }),
   )
@@ -101,7 +101,7 @@ export function createDiTransition(
       const ends = [item.link.from, item.link.to]
         .filter(id => (item.side === 'before' ? !afterUnits.has(id) : !beforeUnits.has(id)))
         .map(id => unitPart.get(id) ?? id)
-      const rows = [item.link.id, ...ends].filter(id => stepOf.has(id)).sort((a, b) => stepOf.get(a)!.time - stepOf.get(b)!.time)
+      const rows = [item.link.id, ...ends].filter(id => stepOf.has(id)).toSorted((a, b) => stepOf.get(a)!.time - stepOf.get(b)!.time)
       return [item.key, (item.side === 'before' ? rows[0] : rows.at(-1)) ?? item.link.id] as const
     }),
   )

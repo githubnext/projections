@@ -1183,8 +1183,8 @@ test('every title-bar control moves its content, never its box, while pressed; r
       const hold = (event: Event) => {
         if ((event.target as Element | null)?.closest('[aria-haspopup]')) event.stopImmediatePropagation()
       }
-      ;(window as unknown as {__hold?: typeof hold}).__hold = hold
-      window.addEventListener('pointerdown', hold, true)
+      ;(globalThis as unknown as {__hold?: typeof hold}).__hold = hold
+      globalThis.addEventListener('pointerdown', hold, true)
     })
     const seen: string[] = []
     for (const control of await toolbar.locator('button, [role="combobox"], input[type="file"]').filter({visible: true}).all()) {
@@ -1216,8 +1216,8 @@ test('every title-bar control moves its content, never its box, while pressed; r
       }
     }
     await page.evaluate(() => {
-      const hold = (window as unknown as {__hold?: (event: Event) => void}).__hold
-      if (hold) window.removeEventListener('pointerdown', hold, true)
+      const hold = (globalThis as unknown as {__hold?: (event: Event) => void}).__hold
+      if (hold) globalThis.removeEventListener('pointerdown', hold, true)
     })
     return seen
   }

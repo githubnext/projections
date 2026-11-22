@@ -71,7 +71,7 @@ export function fastTypecheck(context: GateContext): Plan {
 const workspaceOf = (context: GateContext, path: string) =>
   context.units
     .filter(unit => unit.kinds.includes('npm') && path.startsWith(`${unit.path}/`))
-    .sort((left, right) => right.path.length - left.path.length)[0]
+    .toSorted((left, right) => right.path.length - left.path.length)[0]
 
 /** Files every lint result depends on: the configuration, what it imports, and the compiler options. */
 const lintConfiguration =

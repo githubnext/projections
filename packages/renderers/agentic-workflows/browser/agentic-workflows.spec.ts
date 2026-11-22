@@ -61,14 +61,14 @@ test('the diff draws each workflow once in its group, with each section’s dire
   expect(state.bundle).toBe('agentic-workflows')
   expect(state.capabilities?.comparisonModes).toEqual(['side-by-side', 'diff'])
   const view = await layout(renderer)
-  expect(view.cards.map(card => card.id).sort()).toEqual(
+  expect(view.cards.map(card => card.id).toSorted()).toEqual(
     [
       triage,
       bot,
       'workflow:.github/workflows/docs-bot-links.md',
       'workflow:.github/workflows/docs-bot-examples.md',
       'workflow:.github/workflows/docs-bot-digest.md',
-    ].sort(),
+    ].toSorted(),
   )
   await expect
     .poll(() => facts(renderer))

@@ -25,7 +25,7 @@ const ownerOf = summary => summary.id.slice('transitive:'.length)
 test('one revision shows the roots and their direct dependencies, with transitive packages summarized', () => {
   const extraction = fixture('npm-workspace-v2')
   const view = dependencyView(extractionModel(extraction), [], new Set())
-  assert.deepEqual([...view.roots].sort(), ['workspace:@shop/api', 'workspace:@shop/web', 'workspace:shop'])
+  assert.deepEqual([...view.roots].toSorted(), ['workspace:@shop/api', 'workspace:@shop/web', 'workspace:shop'])
   for (const id of ['package:express', 'package:zod', 'package:react', 'package:react-dom']) assert.ok(view.direct.has(id), id)
   assert.ok(!view.direct.has('workspace:@shop/web'), 'a workspace member stays a root')
   assert.ok(!ids(view).includes('package:body-parser'))
@@ -125,13 +125,13 @@ test('NuGet projects and target frameworks are roots; membership relationships a
   const view = dependencyView(extractionModel(fixture('nuget-after')), [], 'all')
   assert.ok(
     [...view.roots].every(id => id.startsWith('nuget-project') || id.startsWith('nuget-target')),
-    [...view.roots].join(),
+    [...view.roots].join(','),
   )
   assert.ok(!view.model.relationships.some(edge => edge.after.kind === 'resolved'))
   assert.ok(view.direct.size > 0)
   assert.ok(
     [...view.direct].every(id => id.startsWith('nuget-library')),
-    [...view.direct].join(),
+    [...view.direct].join(','),
   )
 })
 
@@ -155,7 +155,7 @@ test('Swift package targets and products are roots; the packages they use are di
     ],
   }
   const view = dependencyView(extractionModel(extraction), [], new Set())
-  assert.deepEqual([...view.roots].sort(), ['product:Harbor', 'target:Harbor', 'target:HarborCore'])
+  assert.deepEqual([...view.roots].toSorted(), ['product:Harbor', 'target:Harbor', 'target:HarborCore'])
   assert.ok(view.direct.has('package:swift-log'))
 })
 

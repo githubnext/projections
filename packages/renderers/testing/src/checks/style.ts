@@ -7,7 +7,7 @@ import {Passed, progressModes, limit, type Checks} from './support.js'
 /** Theme tokens a smaller text may never go below; `font-size-xs` and labels are 12px, and existing kit text uses 11px. */
 const textFloor = 11
 const hairlines = [1, 2]
-const listed = (values: readonly number[]) => [...new Set(values)].sort((a, b) => a - b).join(', ')
+const listed = (values: readonly number[]) => [...new Set(values)].toSorted((a, b) => a - b).join(', ')
 const near = (value: number, allowed: readonly number[], tolerance: number) => allowed.some(item => Math.abs(item - value) <= tolerance)
 const nearest = (value: number, allowed: readonly number[]) =>
   allowed.reduce((best, item) => (Math.abs(item - value) < Math.abs(best - value) ? item : best), allowed[0] ?? 0)
@@ -224,7 +224,7 @@ function spacingFailures(measured: StyleMeasurement, where: string, findings: Fi
     }
     for (const [value, properties] of off) {
       findings.add(
-        `${element.element}|${properties.join()}|${value}`,
+        `${element.element}|${properties.join(',')}|${value}`,
         `${where}, ${element.element} ${properties.join(', ')} ${properties.length > 1 ? 'are' : 'is'} ${value}px, off the space scale (${listed(spaces)} px); use --projections-space tokens, such as the nearest, ${nearest(Math.abs(value), spaces)}px.`,
       )
     }

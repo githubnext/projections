@@ -47,5 +47,5 @@ export function myers(a: Int32Array, b: Int32Array, maxDistance: number): DiffOp
     else ops.push({kind: 'delete', old: --x})
   }
   while (x > 0 && y > 0) ops.push({kind: 'equal', old: --x, new: --y})
-  return ops.reverse()
+  return ops.toReversed()
 }

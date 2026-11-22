@@ -44,15 +44,15 @@ const model = comparisonModel(before, after, comparison)
 
 test("the Changes scope is the host's shown IDs, split into changes and context", () => {
   const scope = changesScope(model, {query: '', changesOnly: true, ids: ['tool', 'tool/viewer', 'c']})
-  assert.deepEqual([...scope.changes].sort(), ['c', 'tool/viewer'])
+  assert.deepEqual([...scope.changes].toSorted(), ['c', 'tool/viewer'])
   assert.deepEqual([...scope.context], ['tool'])
 })
 
 test("the summary filter and find narrow only what is at full strength: the host's `scope` is what is laid out", () => {
   const scope = changesScope(model, {query: '', changesOnly: true, ids: ['c'], scope: ['tool', 'tool/viewer', 'c']})
-  assert.deepEqual([...scope.shown].sort(), ['c', 'tool', 'tool/viewer'])
+  assert.deepEqual([...scope.shown].toSorted(), ['c', 'tool', 'tool/viewer'])
   // Past the limit, the scope is derived again, whatever the matches.
-  assert.deepEqual([...changesScope(model, {query: 'c', changesOnly: true, ids: ['c'], scope: null}).shown].sort(), [
+  assert.deepEqual([...changesScope(model, {query: 'c', changesOnly: true, ids: ['c'], scope: null}).shown].toSorted(), [
     'c',
     'tool',
     'tool/viewer',
@@ -61,7 +61,7 @@ test("the summary filter and find narrow only what is at full strength: the host
 
 test('past the filter ID limit the kit derives the same scope, and there is none while every item shows', () => {
   const scope = changesScope(model, {query: '', changesOnly: true, ids: null})
-  assert.deepEqual([...scope.shown].sort(), ['c', 'tool', 'tool/viewer'])
+  assert.deepEqual([...scope.shown].toSorted(), ['c', 'tool', 'tool/viewer'])
   assert.equal(changesScope(model, {query: '', changesOnly: false, ids: null}), undefined)
   assert.equal(changesScope(extractionModel(after), {query: '', changesOnly: true, ids: null}), undefined)
 })
@@ -76,8 +76,8 @@ test("a split's further parts are in the scope with the change the host names", 
   })
   assert.equal(split.entities.length, 2)
   const scope = changesScope(split, {query: '', changesOnly: true, ids: ['handler']})
-  assert.deepEqual([...scope.shown].sort(), split.entities.map(row => row.id).sort())
-  assert.deepEqual([...scope.changes].sort(), split.entities.map(row => row.id).sort())
+  assert.deepEqual([...scope.shown].toSorted(), split.entities.map(row => row.id).toSorted())
+  assert.deepEqual([...scope.changes].toSorted(), split.entities.map(row => row.id).toSorted())
 })
 
 // A schema: two tables with columns; `orders` gains a column and a key to `customers`; `audit` is unrelated.

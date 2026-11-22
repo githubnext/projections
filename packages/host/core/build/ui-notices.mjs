@@ -41,7 +41,7 @@ export async function runtimeDependencies(manifestPath) {
     }
   }
   await visit(manifestPath)
-  return [...seen].sort(([a], [b]) => (a < b ? -1 : 1))
+  return [...seen].toSorted(([a], [b]) => (a < b ? -1 : 1))
 }
 
 /**

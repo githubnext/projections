@@ -13,10 +13,10 @@ export function routeAroundCards(
   const departure = {x: start.x + startDirection.x * 14, y: start.y + startDirection.y * 14}
   // Far enough out that the last corner's curve ends before the arrowhead's straight lead-in begins.
   const arrival = {x: end.x + endDirection.x * arrowHeadReach * 2, y: end.y + endDirection.y * arrowHeadReach * 2}
-  const xs = [...new Set([departure.x, arrival.x, ...boxes.flatMap(box => [box.x - clearance, box.x + box.width + clearance])])].sort(
+  const xs = [...new Set([departure.x, arrival.x, ...boxes.flatMap(box => [box.x - clearance, box.x + box.width + clearance])])].toSorted(
     (a, b) => a - b,
   )
-  const ys = [...new Set([departure.y, arrival.y, ...boxes.flatMap(box => [box.y - clearance, box.y + box.height + clearance])])].sort(
+  const ys = [...new Set([departure.y, arrival.y, ...boxes.flatMap(box => [box.y - clearance, box.y + box.height + clearance])])].toSorted(
     (a, b) => a - b,
   )
   const point = (x: number, y: number): Point => ({x: xs[x]!, y: ys[y]!})

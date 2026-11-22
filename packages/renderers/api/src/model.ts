@@ -7,12 +7,12 @@ export const declarationLimit = 500
 
 /** Declarations one revision exports, in its own ID order, so each side lists exactly what its extraction alone would. */
 export function revisionRows(model: ComparisonModel, side: Side): EntityChange<Entity>[] {
-  return model.entities.filter(row => row[side]).sort((a, b) => compareIds(a[side]!.id, b[side]!.id))
+  return model.entities.filter(row => row[side]).toSorted((a, b) => compareIds(a[side]!.id, b[side]!.id))
 }
 
 /** Every declaration of a comparison, removed ones included, in ID order. */
 export function comparisonRows(model: ComparisonModel): EntityChange<Entity>[] {
-  return [...model.entities].sort((a, b) => compareIds(a.id, b.id))
+  return model.entities.toSorted((a, b) => compareIds(a.id, b.id))
 }
 
 /**

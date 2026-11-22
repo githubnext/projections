@@ -51,7 +51,7 @@ const secrets: [RegExp, string][] = [
 export function redactPaths(text: string, root: string, home: string): string {
   let redacted = text
   const variants = (path: string) => [path, path.replaceAll('\\', '/'), `file://${path.replaceAll('\\', '/')}`]
-  for (const prefix of variants(root).sort((a, b) => b.length - a.length)) {
+  for (const prefix of variants(root).toSorted((a, b) => b.length - a.length)) {
     if (!prefix) continue
     redacted = redacted.split(`${prefix}/`).join('').split(`${prefix}\\`).join('').split(prefix).join('.')
   }

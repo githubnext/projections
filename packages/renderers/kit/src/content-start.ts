@@ -77,7 +77,7 @@ export function contentStart(
     const cuts = (edge: number) => reached.some(box => box.x < edge - 0.5 && edge + 0.5 < box.x + box.width)
     const edges = [start, ...reached.flatMap(box => [box.x - across, box.x + box.width + across]).map(within)].filter(edge => !cuts(edge))
     const nearest = (from: number, to: number) =>
-      edges.filter(edge => edge >= from && edge <= to).sort((a, b) => Math.abs(a - start) - Math.abs(b - start))[0]
+      edges.filter(edge => edge >= from && edge <= to).toSorted((a, b) => Math.abs(a - start) - Math.abs(b - start))[0]
     // The nearest edge that cuts no box and keeps the row's leftmost box whole, else at least its left side in view,
     // else the drawing's own left side.
     const span = width ? width / scale : Infinity,

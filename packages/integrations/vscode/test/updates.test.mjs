@@ -17,7 +17,7 @@ function manual() {
       clear: timer => pending.delete(timer),
     },
     tick() {
-      for (const timer of [...pending]) {
+      for (const timer of Array.from(pending)) {
         pending.delete(timer)
         timer.run()
       }

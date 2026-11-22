@@ -9,7 +9,7 @@ import {isRootEntity, membershipKinds, sideOf} from './kinds.js'
  */
 export function dependencyGraph(model: ComparisonModel) {
   const rows = new Map(model.entities.map(row => [row.id, row]))
-  const ids = [...rows.keys()].sort(compareIds)
+  const ids = [...rows.keys()].toSorted(compareIds)
   const edges = model.relationships.filter(row => !membershipKinds.has(sideOf(row).kind))
   const endpoints = (row: EntityChange<Relationship>) => {
     const pairs: {from: string | undefined; to: string | undefined}[] = []
@@ -25,7 +25,7 @@ export function dependencyGraph(model: ComparisonModel) {
       incoming.add(to)
     }
   }
-  const children = (id: string) => [...(out.get(id) ?? [])].sort(compareIds)
+  const children = (id: string) => [...(out.get(id) ?? [])].toSorted(compareIds)
 
   let roots = ids.filter(id => {
     const row = rows.get(id)!

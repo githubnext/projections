@@ -294,7 +294,7 @@ function cmapTable(codepoints) {
  * `codepoint` (Private Use Area). Glyph 0 is an empty `.notdef`.
  */
 export function iconFont({family, version = '1.0', glyphs}) {
-  const sorted = [...glyphs].sort((a, b) => a.codepoint - b.codepoint)
+  const sorted = [...glyphs].toSorted((a, b) => a.codepoint - b.codepoint)
   const records = [glyphRecord([]), ...sorted.map(glyph => glyphRecord(pathContours(glyph.path)))]
   const boxes = records.flatMap(record => (record.box ? [record.box] : []))
   const bounds = [0, 1, 2, 3].map(i => (i < 2 ? Math.min : Math.max)(...boxes.map(box => box[i])))
@@ -370,7 +370,7 @@ export function iconFont({family, version = '1.0', glyphs}) {
     name: nameTable(family, version),
     post,
   }
-  const tags = Object.keys(tables).sort()
+  const tags = Object.keys(tables).toSorted()
   // Table checksums, head's with its checksumAdjustment zero, as the sfnt and WOFF directories record them.
   const sums = Object.fromEntries(tags.map(name => [name, checksum(tables[name])]))
 

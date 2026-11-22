@@ -83,7 +83,7 @@ export function createDiDiff(model: ComparisonModel<DependencyInjectionExtractio
               to: item.link.to,
               name: shownName(item.link.to),
             }))
-            .sort((x, y) =>
+            .toSorted((x, y) =>
               x.change === y.change ? compareIds(x.name, y.name) || compareIds(x.key, y.key) : x.change === 'removed' ? -1 : 1,
             )
         : []

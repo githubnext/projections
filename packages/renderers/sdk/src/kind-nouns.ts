@@ -87,7 +87,7 @@ export function kindWords(kind: string): string[] {
  * `pre-releases`).
  */
 export function humanizeKind(kind: string): SummaryNoun {
-  const words = kindWords(kind.replace(prefixHyphen, '$1$2\u2011')).map(word => word.replaceAll('\u2011', '-'))
+  const words = kindWords(kind.replaceAll(prefixHyphen, '$1$2\u2011')).map(word => word.replaceAll('\u2011', '-'))
   if (!words.length) return {singular: kind, plural: kind}
   const phrase = words.join(' ')
   const known = phrases[phrase.toLowerCase()]

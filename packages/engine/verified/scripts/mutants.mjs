@@ -74,7 +74,7 @@ export async function mutationCheck(executable, log = noop) {
   const started = Date.now()
   const list = await mutants()
   const jobs = Math.max(1, Number(process.env.VERUS_JOBS) || Math.min(4, availableParallelism()))
-  const results = new Array(list.length)
+  const results = Array.from({length: list.length})
   let next = 0
   const worker = async () => {
     while (next < list.length) {

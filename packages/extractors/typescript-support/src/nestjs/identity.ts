@@ -8,7 +8,7 @@ import {slash, within, type NestModule, type Token} from './model.js'
 export function applicationClasses(root: string): Map<unknown, string> {
   const classes = new Map<unknown, string>()
   const cache = createRequire(import.meta.url).cache
-  for (const [file, module] of Object.entries(cache).sort(([a], [b]) => compareIds(a, b))) {
+  for (const [file, module] of Object.entries(cache).toSorted(([a], [b]) => compareIds(a, b))) {
     if (!module || !within(root, file) || file.split(path.sep).includes('node_modules')) continue
     const exports = module.exports as unknown
     const values = typeof exports === 'function' ? [exports] : typeof exports === 'object' && exports !== null ? Object.values(exports) : []
@@ -74,13 +74,13 @@ export function moduleKeys(modules: NestModule[], coreProviders: Set<unknown>, t
           .map(other => other.name),
       ),
     ]
-      .sort(compareIds)
+      .toSorted(compareIds)
       .join('+')
   const provided = (module: NestModule): string =>
     [...module.providers.values()]
       .filter(wrapper => wrapper.token !== module.metatype && !coreProviders.has(wrapper.token))
       .map(wrapper => tokenLabel(wrapper.token))
-      .sort(compareIds)
+      .toSorted(compareIds)
       .join(',')
   for (const [name, group] of byModuleName) {
     if (group.length === 1) {

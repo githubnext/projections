@@ -287,7 +287,7 @@ export class RootModule {}
     return state.entities
       .filter(item => item.id.includes('FeatureModule'))
       .map(item => item.id)
-      .sort()
+      .toSorted()
   }
   const forward = await ids('AModule, BModule')
   assert.ok(forward.includes('service:FeatureModule@AModule:string:A_REPOSITORY'), forward.join(', '))

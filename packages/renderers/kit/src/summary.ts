@@ -118,7 +118,7 @@ export function boundaryNouns(model: ComparisonModel, compound: boolean | readon
 function unionGraph(model: ComparisonModel): {nodes: LayoutNode[]; edges: LayoutEdge[]} {
   const nodes = model.entities.map(row => ({
     id: row.id,
-    kind: [row.before?.kind, row.after?.kind].filter((kind): kind is string => kind !== undefined).sort(compareIds)[0]!,
+    kind: [row.before?.kind, row.after?.kind].filter((kind): kind is string => kind !== undefined).toSorted(compareIds)[0]!,
   }))
   const edges: LayoutEdge[] = []
   for (const change of model.relationships) {

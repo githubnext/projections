@@ -76,7 +76,7 @@ export function search(docs: readonly Doc[], query: string, limit = 8): Hit[] {
       const lineScore = wanted.filter(term => lineLower.includes(term)).length + (lineLower.includes(phrase) ? wanted.length : 0)
       if (lineScore > best.score) best = {line: index + 1, score: lineScore}
     })
-    const section = [...sections].reverse().find(heading => heading.line <= best.line)
+    const section = sections.toReversed().find(heading => heading.line <= best.line)
     hits.push({
       path: doc.path,
       title: doc.title,
@@ -86,7 +86,7 @@ export function search(docs: readonly Doc[], query: string, limit = 8): Hit[] {
       score: Math.round(score * 10) / 10,
     })
   }
-  return hits.sort((a, b) => b.score - a.score || a.path.localeCompare(b.path)).slice(0, limit)
+  return hits.toSorted((a, b) => b.score - a.score || a.path.localeCompare(b.path)).slice(0, limit)
 }
 
 function snippet(line: string, wanted: string[], width = 160): string {

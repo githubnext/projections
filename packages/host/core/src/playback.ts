@@ -44,7 +44,7 @@ export interface PlaybackStep extends PlaybackState {
 }
 
 const interior = (stops: readonly number[]) =>
-  [...new Set(stops.filter(stop => stop > epsilon && stop < 1 - epsilon))].sort((a, b) => a - b)
+  [...new Set(stops.filter(stop => stop > epsilon && stop < 1 - epsilon))].toSorted((a, b) => a - b)
 
 /** The next stop strictly beyond `progress` in `direction`: a step end, else the endpoint. */
 function nextStop(progress: number, direction: 1 | -1, stops: readonly number[]): number {

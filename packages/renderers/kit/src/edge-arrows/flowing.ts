@@ -30,11 +30,11 @@ export function flowingRoute(
       direction: {x: (to.x - from.x) / length, y: (to.y - from.y) / length},
     }
   })
-    .sort((a, b) => b.length - a.length)
+    .toSorted((a, b) => b.length - a.length)
     .slice(0, 4)
 
   const curveThrough = (chosen: typeof lanes): string | undefined => {
-    const ordered = [...chosen].sort((a, b) => a.index - b.index)
+    const ordered = chosen.toSorted((a, b) => a.index - b.index)
     // The curve ends where the arrowhead's lead-in begins; the lead-in runs straight on to the base.
     const lead = {
       x: base.x + endDirection.x * (arrowHeadReach - arrowHeadLength),

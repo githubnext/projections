@@ -73,7 +73,7 @@ export function snapToGrid(
     across = direction === 'DOWN' ? 'x' : 'y'
   const depth = direction === 'DOWN' ? 'height' : 'width',
     breadth = direction === 'DOWN' ? 'width' : 'height'
-  const cards = laid.map(node => boxes.get(elkId.get(node.id)!)!).sort((a, b) => a[flow] - b[flow] || a[across] - b[across])
+  const cards = laid.map(node => boxes.get(elkId.get(node.id)!)!).toSorted((a, b) => a[flow] - b[flow] || a[across] - b[across])
   const layers: Box[][] = []
   for (const box of cards) {
     const layer = layers.at(-1)

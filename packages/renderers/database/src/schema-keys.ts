@@ -71,7 +71,7 @@ export function keyRowsOf(
 ) {
   const keyRows = new Map<string, SchemaKeyRow>()
   const rowsOf = new Map<string, string[]>()
-  for (const id of [...keyColumns.keys()].sort(compareIds)) {
+  for (const id of [...keyColumns.keys()].toSorted(compareIds)) {
     const node = nodes.get(id)!
     const type = keyType(node)
     const columns = keyColumns.get(id)!

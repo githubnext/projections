@@ -50,7 +50,7 @@ export async function fromBuiltins(wizard: Wizard, {folder, directory}: Target) 
         choice => choice.title,
         choice => choice.name,
       )
-        .sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
+        .toSorted((a, b) => Number(b.isDefault) - Number(a.isDefault))
         .map(choice => ({
           label: choice.title,
           description: choice.name,

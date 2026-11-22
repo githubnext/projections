@@ -127,7 +127,7 @@ export function observation(stamp: ResultStamp): {at?: string} | undefined {
   const at = observed
     .map(side => side.execution?.at)
     .filter((value): value is string => typeof value === 'string' && Number.isFinite(Date.parse(value)))
-    .sort((a, b) => Date.parse(a) - Date.parse(b))[0]
+    .toSorted((a, b) => Date.parse(a) - Date.parse(b))[0]
   return at ? {at} : {}
 }
 

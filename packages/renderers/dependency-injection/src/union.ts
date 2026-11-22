@@ -79,7 +79,7 @@ export function diUnion(model: ComparisonModel<DependencyInjectionExtraction>, h
   const afterModel = canonical('after', buildDiModel(model.after))
   const beforeUnits = new Map(beforeModel.units.map(unit => [unit.id, unit]))
   const afterUnits = new Map(afterModel.units.map(unit => [unit.id, unit]))
-  const ids = [...new Set([...beforeUnits.keys(), ...afterUnits.keys()])].sort(compareIds)
+  const ids = [...new Set([...beforeUnits.keys(), ...afterUnits.keys()])].toSorted(compareIds)
   const positions = layoutDiModel(
     {
       units: ids.map(id => (afterUnits.get(id) ?? beforeUnits.get(id))!),
@@ -104,12 +104,12 @@ export function diUnion(model: ComparisonModel<DependencyInjectionExtraction>, h
     `${link.from}→${link.to}:${link.parameter ?? ''}:${link.alias ? 'alias' : link.resolution ? 'runtime' : 'constructor'}`
   const sideLinks = (links: DiLink[]) => {
     const kept = new Map<string, DiLink>()
-    for (const link of [...links].sort((a, b) => compareIds(a.id, b.id))) if (!kept.has(visual(link))) kept.set(visual(link), link)
+    for (const link of links.toSorted((a, b) => compareIds(a.id, b.id))) if (!kept.has(visual(link))) kept.set(visual(link), link)
     return new Map([...kept.values()].map(link => [link.id, link]))
   }
   const beforeLinks = sideLinks(beforeModel.links),
     afterLinks = sideLinks(afterModel.links)
-  const links = [...new Set([...beforeLinks.keys(), ...afterLinks.keys()])].sort(compareIds).flatMap((row): UnionLink[] => {
+  const links = [...new Set([...beforeLinks.keys(), ...afterLinks.keys()])].toSorted(compareIds).flatMap((row): UnionLink[] => {
     const a = beforeLinks.get(row),
       b = afterLinks.get(row)
     if (a && a.from === b?.from && a.to === b.to) return [{key: row, link: b, side: 'both'}]

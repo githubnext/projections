@@ -53,7 +53,7 @@ export function stageInsets(): StageInsetsMeasurement {
   const root = [...document.body.children].find(child => child.contains(cards[0]!)) ?? document.body
   const end = root.getBoundingClientRect().bottom
   const round = (value: number) => Math.round(value * 10) / 10
-  const overlaid = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-stage-inset-top'))
+  const overlaid = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-stage-inset-top'))
   return {
     cards: cards.length,
     first: describe(cards[0]!),

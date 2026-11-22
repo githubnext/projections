@@ -58,14 +58,8 @@ export function declaredModesWith(
 
 /** Whether the shown panes' renderer is loading, ready or failed (`none` without a renderer), and its errors. */
 export function rendererState(renderer: RendererEntry | undefined, panes: Record<PaneKey, PaneState>, paneKeys: PaneKey[]) {
-  const statuses = paneKeys.map(key => panes[key].status)
-  const status: RendererStatus = !renderer
-    ? 'none'
-    : statuses.includes('failed')
-      ? 'failed'
-      : statuses.includes('loading')
-        ? 'loading'
-        : 'ready'
+  const statuses = new Set(paneKeys.map(key => panes[key].status))
+  const status: RendererStatus = !renderer ? 'none' : statuses.has('failed') ? 'failed' : statuses.has('loading') ? 'loading' : 'ready'
   const errors = paneKeys.flatMap(key => [
     ...panes[key].rendererErrors,
     ...(panes[key].status === 'failed' && panes[key].message ? [panes[key].message] : []),

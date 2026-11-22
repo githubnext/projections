@@ -56,7 +56,7 @@ async function bundleDirectory(name, require) {
   const manifestPath = require.resolve(`${name}/package.json`)
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
   const relative = manifest.projections?.renderer
-  if (typeof relative !== 'string') throw new Error(`${name} does not declare projections.renderer`)
+  if (typeof relative !== 'string') throw new TypeError(`${name} does not declare projections.renderer`)
   return resolve(dirname(manifestPath), relative)
 }
 

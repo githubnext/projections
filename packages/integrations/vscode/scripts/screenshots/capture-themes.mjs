@@ -36,7 +36,7 @@ for (const theme of themes.filter(item => !only || only.includes(item.id))) {
         variables,
       }
     })
-    const sorted = Object.fromEntries(Object.entries(captured.variables).sort(([a], [b]) => a.localeCompare(b)))
+    const sorted = Object.fromEntries(Object.entries(captured.variables).toSorted(([a], [b]) => a.localeCompare(b)))
     await writeFile(
       join(output, `${theme.id}.json`),
       `${JSON.stringify({id: theme.id, name: captured.themeName, setting: theme.name, kind: theme.kind, source: `VS Code ${await app.evaluate(({app: electronApp}) => electronApp.getVersion())}, webview-injected CSS`, bodyClasses: captured.bodyClasses, themeKind: captured.themeKind, variables: sorted}, null, 2)}\n`,

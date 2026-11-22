@@ -105,7 +105,7 @@ for (const [name, engine] of Object.entries(engines)) {
     assert.equal(canonical.digest, createHash('sha256').update(canonical.canonical).digest('hex'))
     const reordered = structuredClone(before)
     reordered.entities.reverse()
-    reordered.entities[1].data = Object.fromEntries(Object.entries(data).reverse())
+    reordered.entities[1].data = Object.fromEntries(Object.entries(data).toReversed())
     reordered.entities[1].previousIds = ['historic']
     reordered.entities[1].evidence = [{kind: 'source', source: 'src/thing.ts', location: {line: 1, column: 2}}]
     reordered.metadata = {time: 'different'}
@@ -158,10 +158,10 @@ for (const [name, engine] of Object.entries(engines)) {
       },
       {
         get value() {
-          throw Error('do not invoke')
+          throw new Error('do not invoke')
         },
       },
-      Array(2),
+      Object.assign([], {length: 2}),
       Object.assign([1], {extra: 1}),
     ]) {
       await assert.rejects(engine.normalize(state([{...node('a'), data: {value}}])), EngineError)
@@ -271,7 +271,7 @@ test('native/Wasm parity on seeded reorderings and numeric encodings', async () 
       ...node(`${String.fromCodePoint(i % 2 ? 0x1f600 : 0xe000)}-${i}`),
       data: {value: random() * 1e12, tiny: random() * 1e-20},
     }))
-    const input = state(entities.sort(() => random() - 0.5))
+    const input = state(entities.toSorted(() => random() - 0.5))
     const native = await engines.native.canonicalize(input)
     const wasm = await engines.wasm.canonicalize(input)
     assert.deepEqual(native, wasm)
@@ -281,14 +281,16 @@ test('native/Wasm parity on seeded reorderings and numeric encodings', async () 
         : value !== null && typeof value === 'object'
           ? Object.fromEntries(
               Object.keys(value)
-                .sort()
+                .toSorted()
                 .map(key => [key, reference(value[key])]),
             )
           : value
     const expected = JSON.stringify(
       reference({
         ...input,
-        entities: input.entities.map(entity => ({...entity, data: entity.data})).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
+        entities: input.entities
+          .map(entity => ({...entity, data: entity.data}))
+          .toSorted((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
       }),
     )
     assert.equal(native.canonical, expected)

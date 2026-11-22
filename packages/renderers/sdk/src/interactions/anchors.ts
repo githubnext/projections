@@ -50,7 +50,7 @@ export function createAnchorReporter(view: Window, client: RendererClient, sched
   /** Forgets the items no longer tracked; returns whether the rate deferred any. */
   function forget(tracked: Set<string>): boolean {
     let deferred = false
-    for (const id of [...anchors.keys()]) {
+    for (const id of anchors.keys()) {
       if (tracked.has(id)) continue
       // An annotated item that scrolled out of view or lost its annotation gets an explicit `null`.
       if (annotatedAnchors.has(id) && anchors.get(id)) {

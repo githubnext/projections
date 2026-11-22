@@ -71,7 +71,7 @@ export function bundledPackages(moduleIds) {
     }
     if (existsSync(file) && !entry.files.includes(file)) entry.files.push(file)
   }
-  return [...found.values()].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.version < b.version ? -1 : 1))
+  return [...found.values()].toSorted((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.version < b.version ? -1 : 1))
 }
 
 /** @param {readonly string[]} files */
@@ -82,7 +82,7 @@ function copyrights(files) {
       lines.add(match[0].replace(/[\s*/]+$/u, '').trim())
     }
   }
-  return [...lines].sort()
+  return [...lines].toSorted()
 }
 
 /** @param {string} directory @returns {string[]} */
@@ -117,7 +117,7 @@ function repository(directory) {
 export function packageNotice(entry) {
   const licenses = readdirSync(entry.directory)
     .filter(name => licenseFile.test(name) && statSync(join(entry.directory, name)).isFile())
-    .sort()
+    .toSorted()
   if (!licenses.length && !entry.license) {
     throw new Error(`Bundled package ${entry.name}@${entry.version} has no license file or license field`)
   }
@@ -177,7 +177,7 @@ export function mergeNotices(title, texts, exclude = new Set()) {
     }
   }
   return `${title}\n\n${[...sections]
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([, section]) => section)
     .join('\n\n')}\n`
 }

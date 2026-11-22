@@ -104,8 +104,8 @@ test('the workflow gates each job on the rules decision of the same name', () =>
     [...workflow.matchAll(/^ {6}([\w-]+): \$\{\{ steps\.plan\.outputs\.([\w-]+) \}\}$/gmu)].filter(m => m[1] === m[2]).map(m => m[1] ?? ''),
   )
   const outputs = [...Object.keys(rules.jobs), 'browser', 'browser-macos']
-  assert.deepEqual([...gated].sort(), [...outputs].sort())
-  assert.deepEqual([...mapped].sort(), [...outputs].sort())
+  assert.deepEqual([...gated].toSorted(), outputs.toSorted())
+  assert.deepEqual([...mapped].toSorted(), outputs.toSorted())
   for (const job of Object.keys(rules.jobs)) assert.match(workflow, new RegExp(`^  ${job}:$`, 'm'), job)
 })
 

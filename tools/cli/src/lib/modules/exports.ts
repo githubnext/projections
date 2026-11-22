@@ -76,7 +76,7 @@ export function unusedExports(root: string, units: readonly Unit[], also: readon
       const taken = used.get(specifier)
       if (taken === '*') continue
       const names = exportedNames(root, source).filter(exported => !taken?.has(exported))
-      if (names.length) entries.push({entry: specifier, names: names.sort()})
+      if (names.length) entries.push({entry: specifier, names: names.toSorted()})
     }
     if (entries.length) report.set(unit.path, entries)
   }

@@ -62,7 +62,7 @@ export function contrast(foreground: string, background: string, base = 'rgb(255
       .map(channel => channel / 255)
       .map(value => (value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4))
       .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index]!, 0)
-  const [high, low] = [luminance(front), luminance(back)].sort((a, b) => b - a) as [number, number]
+  const [high, low] = [luminance(front), luminance(back)].toSorted((a, b) => b - a) as [number, number]
   return (high + 0.05) / (low + 0.05)
 }
 
@@ -80,7 +80,7 @@ export const colors = (locator: Locator) =>
       if (layer.a >= 1) break
     }
     let base = {r: 255, g: 255, b: 255}
-    for (const layer of layers.reverse()) {
+    for (const layer of layers.toReversed()) {
       base = {
         r: layer.r * layer.a + base.r * (1 - layer.a),
         g: layer.g * layer.a + base.g * (1 - layer.a),

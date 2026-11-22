@@ -30,9 +30,7 @@ import type {
 export type * from '../src/types.js'
 
 declare global {
-  interface Window {
-    projectionsStage: StageApi
-  }
+  var projectionsStage: StageApi
 }
 
 export {connectInspector, startInspector} from './server.js'

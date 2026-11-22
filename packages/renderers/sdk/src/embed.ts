@@ -118,7 +118,7 @@ export function embedRenderer(
   container: HTMLElement,
   options: EmbedOptions,
 ): EmbeddedRenderer {
-  const view = container.ownerDocument.defaultView ?? globalThis
+  const view = container.ownerDocument.defaultView ?? globalThis.window
   const channel = nonce(view)
   const iframe = container.ownerDocument.createElement('iframe')
   iframe.setAttribute('sandbox', rendererSandbox)

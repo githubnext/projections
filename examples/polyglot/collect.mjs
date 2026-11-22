@@ -9,8 +9,9 @@ const {services} = JSON.parse(readFileSync(path.join(request.repository.root, 's
 if (!Array.isArray(services)) throw new TypeError('services must be an array')
 const evidence = [{kind: 'declared-service-catalog', source: 'services.json'}]
 const entities = services.map(service => {
-  if (typeof service.name !== 'string' || typeof service.language !== 'string')
+  if (typeof service.name !== 'string' || typeof service.language !== 'string') {
     throw new TypeError('Each service needs a name and language')
+  }
   return {
     id: `service:${service.name}`,
     kind: 'service',

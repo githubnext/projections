@@ -74,8 +74,9 @@ export function restoreIfUnchanged(before: Snapshot, after: Snapshot): boolean {
   for (const path of after.directories.keys()) if (!before.directories.has(path)) return false
   for (const [path, file] of before.files) utimesSync(path, file.atime, file.mtime)
   // Deepest first: setting a directory's times doesn't touch its parent's, but keep the order obvious.
-  for (const [path, times] of [...before.directories].toSorted((a, b) => b[0].length - a[0].length))
+  for (const [path, times] of [...before.directories].toSorted((a, b) => b[0].length - a[0].length)) {
     utimesSync(path, times.atime, times.mtime)
+  }
   return true
 }
 

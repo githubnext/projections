@@ -15,13 +15,14 @@ const hueTolerance = 30
 
 function rgba(color: string): Rgba | undefined {
   const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?$/i.exec(color.trim())
-  if (hex)
+  if (hex) {
     return [
       Number.parseInt(hex[1]!, 16),
       Number.parseInt(hex[2]!, 16),
       Number.parseInt(hex[3]!, 16),
       hex[4] ? Number.parseInt(hex[4], 16) / 255 : 1,
     ]
+  }
   const match = /rgba?\(([^)]*)\)/.exec(color)
   if (!match) return undefined
   const [r = 0, g = 0, b = 0, a = 1] = match[1]!

@@ -150,7 +150,7 @@ export function NestedStage({
   useEffect(() => {
     const frame = nested.current
     if (!frame || !playing || !animated.current || state.status !== 'ready' || environment.reducedMotion) return
-    const view = host.current?.ownerDocument.defaultView ?? globalThis
+    const view = host.current?.ownerDocument.defaultView ?? globalThis.window
     const start = view.performance.now()
     let handle = 0
     const tick = (now: number) => {
@@ -215,7 +215,7 @@ export function loadNested(
     settled: (state: {status: 'ready'} | {status: 'failed'; message: string}) => void
   },
 ): () => void {
-  const view = container.ownerDocument.defaultView ?? globalThis
+  const view = container.ownerDocument.defaultView ?? globalThis.window
   let frame: EmbeddedRenderer | undefined
   let cancelled = false
   let failed = false

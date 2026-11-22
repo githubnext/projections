@@ -101,7 +101,7 @@ let written = false
 export function result(fields: ExtractionFields = {}): Extraction {
   if (written) throw new Error("result() already wrote this extractor's extraction; call it once, with everything")
   const document = extraction(fields)
-  const lists: Set<unknown> = new Set([document.entities, document.relationships])
+  const lists = new Set<unknown>([document.entities, document.relationships])
   let item: unknown
   const text = JSON.stringify(document, function (this: unknown, _key: string, value: unknown) {
     if (this === document) item = undefined

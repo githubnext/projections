@@ -5,16 +5,14 @@ import type {StageSubject} from '@githubnext/projections-renderer-testing'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 
 declare global {
-  interface Window {
-    /** Every view a graph frame committed: its zoom over the fit, its drawing's width and its stage's. */
-    graphViews?: {zoom: number; drawn: number; stage: number; left: number; top: number; label: string | null}[]
-  }
+  /** Every view a graph frame committed: its zoom over the fit, its drawing's width and its stage's. */
+  var graphViews: {zoom: number; drawn: number; stage: number; left: number; top: number; label: string | null}[] | undefined
 }
 
 /** Records, in every renderer frame, each view its graph commits, however briefly it's shown. */
 async function recordGraphViews(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    if (globalThis === window.top) return
+    if (globalThis.window === globalThis.top) return
     globalThis.graphViews = []
     const record = () => {
       const scroller = document.querySelector<HTMLElement>('.graph-scroll')

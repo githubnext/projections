@@ -93,10 +93,14 @@ function colorsIn(value: string): string[] {
  * Each hued paint of an element, or of its `::before` or `::after` (`pseudo`): an HTML background (its color and a
  * gradient's stops), border, box shadow (an inset one draws an edge inside the box, as `pk-region` does; an outset one
  * round it) and own text, or a pseudo-element's generated text; an SVG fill and stroke. Outlines are rings, not paint.
+ * A categorical part's fill and background (`data-projections-category`), its pseudo-elements' included, are the
+ * category palette's, not accents; its borders, shadows and text still count.
  */
 export function paintsOf(element: Element, style: CSSStyleDeclaration, hues: Map<AccentFamily, number>, pseudo = false): Paint[] {
   const paints: Paint[] = []
+  const categorical = element.hasAttribute('data-projections-category')
   const add = (property: string, color: string) => {
+    if (categorical && ['fill', 'background-color', 'background-image'].includes(property)) return
     const family = familyOf(color, hues)
     if (family && !paints.some(paint => paint.family === family && paint.property === property)) paints.push({family, property})
   }

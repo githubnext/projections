@@ -112,3 +112,58 @@ test("an entity's paint includes what it draws in its pseudo-elements, so a hue 
   }, id)
   expect((await paints())[id]).not.toBe(before[id])
 })
+
+test('the probe reads every hue of a gradient, and exempts a categorical background however it is drawn', async ({page}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium-desktop', 'The probe reads computed styles, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'graph/npm-react-update', progress: 1, comparisonMode: 'diff'})
+  await stage.frame.locator('.pk').evaluate(root => {
+    const probe = document.createElement('div')
+    probe.innerHTML = `
+      <style>
+        .nesting-probe-swatch { position: relative; }
+        .nesting-probe-swatch::after { content: ''; position: absolute; inset: 0; background: var(--projections-color-modified-muted); }
+      </style>
+      <div class="nesting-probe-forward" style="background-image: linear-gradient(var(--projections-color-added-muted), var(--projections-color-removed-muted))">
+        <span class="nesting-probe-d" style="background: var(--projections-color-added-muted)">+</span>
+      </div>
+      <div class="nesting-probe-backward" style="background-image: linear-gradient(var(--projections-color-removed-muted), var(--projections-color-added-muted))">
+        <span class="nesting-probe-e" style="background: var(--projections-color-added-muted)">+</span>
+      </div>
+      <div class="nesting-probe-swatch" data-projections-category="probe-swatch" style="background-image: linear-gradient(var(--projections-color-modified-muted), var(--projections-color-modified-muted))">
+        <span class="nesting-probe-f" style="background: var(--projections-color-added-muted)">+</span>
+      </div>`
+    root.prepend(probe)
+  })
+  const found = crossing(await stage.measure<NestedAccent[]>('accents')).map(({outer, inner}) => `${inner.element} in ${outer.element}`)
+  expect(found).toEqual(
+    expect.arrayContaining(['span.nesting-probe-d in div.nesting-probe-forward', 'span.nesting-probe-e in div.nesting-probe-backward']),
+  )
+  expect(found.filter(line => line.includes('nesting-probe-swatch'))).toEqual([])
+})
+
+test("an entity's text and categories include its pseudo-elements: generated text, and a categorical colour drawn there", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium-desktop', 'The probe reads computed styles, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'agentic-workflows/docs-bot', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  const shown = async () => new Map((await stage.measure<EntitySample[]>('samples')).map(sample => [sample.key, sample]))
+  const before = await shown()
+  const id = [...before].find(([, sample]) => /^[A-Z]/u.test(sample.paint))?.[0] ?? ''
+  const style = await stage.frame.locator('head').evaluateHandle((head, entity) => {
+    const element = document.createElement('style')
+    const selector = `[data-entity-id="${CSS.escape(entity)}"]`
+    element.textContent = `${selector}::after { content: 'Added'; }`
+    head.append(element)
+    document.querySelector(selector)?.setAttribute('data-projections-category', 'probe')
+    return element
+  }, id)
+  const added = (await shown()).get(id)
+  expect(added?.text).toContain('Added')
+  await style.evaluate((element: HTMLStyleElement) => {
+    element.textContent = element.textContent.replace("'Added'", "'Removed'; background: var(--projections-chart-2)")
+  })
+  const removed = (await shown()).get(id)
+  expect(removed?.text).not.toBe(added?.text)
+  expect(removed?.categories['probe::after']).not.toBe(added?.categories['probe::after'])
+})

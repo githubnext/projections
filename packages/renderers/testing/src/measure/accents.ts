@@ -8,8 +8,11 @@ interface Painted {
   /** Its `::before` or `::after`, drawn in its box. */
   pseudo?: '::before' | '::after'
   order: number
-  /** A surface encloses what is drawn on it: an HTML background or border, an SVG shape's fill or outline. */
-  surface: Paint | undefined
+  /**
+   * What encloses what is drawn on it, one paint per family: an HTML background, gradient or border, an SVG shape's fill
+   * or outline. A gradient from added to removed is both.
+   */
+  surfaces: Paint[]
   /** Every hued paint, including text and lines. */
   paints: Paint[]
   box: DOMRect
@@ -26,6 +29,9 @@ function svgSurface(element: Element, style: CSSStyleDeclaration): boolean {
   }
   return true
 }
+
+/** The first surface paint of each family. */
+const surfacesOf = (paints: Paint[]) => paints.filter((paint, index) => paints.findIndex(other => other.family === paint.family) === index)
 
 const round = (element: Element) => element instanceof SVGCircleElement || element instanceof SVGEllipseElement
 
@@ -76,8 +82,9 @@ function inside(inner: DOMRect, outer: DOMRect, outerRound: boolean, innerRound:
  * Every change or accent color drawn inside another: an HTML element whose background, gradient, border or shadow,
  * its own or its `::before`'s or `::after`'s, is a change hue (added, removed, modified, moved) or the accent, with a
  * descendant painting one; or an SVG shape filled or outlined
- * in one, with an element painted over it, inside its shape, that paints one. A categorical part's fill or background
- * (`data-projections-category`), focus and selection rings (outlines) and host chrome aren't accents here.
+ * in one, with an element painted over it, inside its shape, that paints one. Every hue a surface paints counts (a
+ * gradient's stops each). A categorical part's fill or background (`data-projections-category`), focus and selection
+ * rings (outlines) and host chrome aren't accents here.
  */
 export function nestedAccents(root: Element = document.body): NestedAccent[] {
   const hues = familyHues()
@@ -95,17 +102,15 @@ export function nestedAccents(root: Element = document.body): NestedAccent[] {
     const style = getComputedStyle(element)
     if (style.display === 'none') return
     if (visible(element) && !visuallyHidden(element, style)) {
-      // A categorical part's fill or background is the category palette's, not an accent; the rest of it still counts.
-      const paints = paintsOf(element, style, hues).filter(
-        paint =>
-          !(element.hasAttribute('data-projections-category') && (paint.property === 'fill' || paint.property === 'background-color')),
-      )
+      const paints = paintsOf(element, style, hues)
       if (paints.length) {
         const svg = element instanceof SVGElement
-        const surface = paints.find(paint =>
-          svg ? svgSurface(element, style) && (paint.property === 'fill' || paint.property === 'stroke') : paint.property !== 'color',
+        const surfaces = surfacesOf(
+          paints.filter(paint =>
+            svg ? svgSurface(element, style) && (paint.property === 'fill' || paint.property === 'stroke') : paint.property !== 'color',
+          ),
         )
-        painted.push({element, order: order++, surface, paints, box: element.getBoundingClientRect()})
+        painted.push({element, order: order++, surfaces, paints, box: element.getBoundingClientRect()})
       }
       // What an HTML element draws in its `::before` and `::after`: an overlaid edge, a stripe, a marker.
       if (!(element instanceof SVGElement)) {
@@ -115,8 +120,8 @@ export function nestedAccents(root: Element = document.body): NestedAccent[] {
           if (pseudoStyle.visibility === 'hidden' || Number(pseudoStyle.opacity) <= 0.01) continue
           const pseudoPaints = paintsOf(element, pseudoStyle, hues, true)
           if (pseudoPaints.length) {
-            const surface = pseudoPaints.find(paint => paint.property !== 'color')
-            painted.push({element, pseudo, order: order++, surface, paints: pseudoPaints, box: element.getBoundingClientRect()})
+            const surfaces = surfacesOf(pseudoPaints.filter(paint => paint.property !== 'color'))
+            painted.push({element, pseudo, order: order++, surfaces, paints: pseudoPaints, box: element.getBoundingClientRect()})
           }
         }
       }
@@ -126,7 +131,7 @@ export function nestedAccents(root: Element = document.body): NestedAccent[] {
   for (const child of root.children) walk(child)
   const nested: NestedAccent[] = []
   for (const outer of painted) {
-    if (!outer.surface) continue
+    if (!outer.surfaces.length) continue
     const svgRoot = outer.element instanceof SVGElement ? outer.element.ownerSVGElement : null
     for (const inner of painted) {
       // An element and what it draws in its own pseudo-elements are one paint: its edge drawn twice isn't nested.
@@ -137,7 +142,9 @@ export function nestedAccents(root: Element = document.body): NestedAccent[] {
           inside(inner.box, outer.box, round(outer.element), round(inner.element))
         : outer.element.contains(inner.element)
       if (!contained) continue
-      for (const paint of inner.paints) nested.push({outer: paintOf(outer, outer.surface), inner: paintOf(inner, paint)})
+      for (const surface of outer.surfaces) {
+        for (const paint of inner.paints) nested.push({outer: paintOf(outer, surface), inner: paintOf(inner, paint)})
+      }
     }
   }
   return nested

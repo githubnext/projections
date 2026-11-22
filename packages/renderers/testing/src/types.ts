@@ -145,6 +145,7 @@ export type ProbeCall =
   | 'stageSurface'
   | 'stageInsets'
   | 'accents'
+  | 'frames'
   | 'routes'
   | 'viewport'
 
@@ -295,6 +296,14 @@ export interface AccentPaint {
   entity?: string
 }
 
+/** A box whose painted contents reach its rounded corner while its edge is drawn under them (probe call `frames`). */
+export interface CoveredFrame {
+  /** The box, described. */
+  element: string
+  /** What fills its corner over its edge, described. */
+  fill: string
+}
+
 /** A change or accent color drawn inside another's surface (probe call `accents`). */
 export interface NestedAccent {
   outer: AccentPaint
@@ -367,6 +376,7 @@ export type CheckId =
   | 'type-scale'
   | 'spacing'
   | 'nested-accents'
+  | 'frame-edges'
   | 'link-routes'
 
 /**

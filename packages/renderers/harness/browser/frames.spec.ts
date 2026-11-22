@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test'
-import {type CornerReport, cornerReport, openStage} from '@githubnext/projections-renderer-testing/playwright'
+import {type CornerReport, type CoveredFrame, cornerReport, openStage} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 import {scenarios} from './scenarios.js'
 
@@ -119,3 +119,25 @@ for (const {what, scenario, selector, options, css} of [
     ).toBe(true)
   })
 }
+
+// The `frame-edges` check's probe, on the gallery's scenario stage: a rounded, bordered box its note and nested drawing
+// fill to its edge. As a kit frame its border is drawn over them; as it was before (its own border, clipping them
+// itself), they are painted over it, and the probe finds it.
+test("the frame-edges probe finds a stage filled over its rounded edge, and none once it is the kit's frame", async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'The probe reads computed styles, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'gallery/fixture-change', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  const stages = async () => (await stage.measure<CoveredFrame[]>('frames')).filter(found => found.element.startsWith('div.gl-stage'))
+  expect(await stages()).toEqual([])
+  await stage.frame.locator('.gl-stage').evaluateAll(all => {
+    for (const element of all) {
+      element.classList.remove('pk-frame')
+      if (element instanceof HTMLElement) {
+        element.style.position = 'relative'
+        element.style.overflow = 'hidden'
+        element.style.borderRadius = 'var(--projections-radius-sm)'
+      }
+    }
+  })
+  expect((await stages()).length).toBeGreaterThan(0)
+})

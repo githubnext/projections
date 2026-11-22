@@ -225,6 +225,9 @@ what broke and where), or skipped:
   their card or row. Nested parts should be tinted rather than outlined.
 - **No change colors inside change colors** — Color only the innermost changed
   elements. A container that displays changes inside it stays neutral.
+- **Rounded edges drawn over their contents** — A rounded, bordered box whose
+  fills reach its corners draws its border again over them (the kit's
+  `pk-frame`, or a `Group`), so its corners are never thinner than its sides.
 - **Legend shown once** — Render at most one legend, and omit it altogether when
   the host already draws one.
 - **No horizontal overflow at phone width** — The page must never scroll

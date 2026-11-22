@@ -82,6 +82,7 @@ export const checkTitles: Record<CheckId, string> = {
   'type-scale': 'Text on the type scale',
   spacing: 'Spacing, radii and borders on the scale',
   'nested-accents': 'No change colors inside change colors',
+  'frame-edges': 'Rounded edges drawn over what fills their corners',
   'link-routes': 'Links routed around cards',
 }
 
@@ -135,6 +136,8 @@ export const checkDescriptions: Record<CheckId, string> = {
     'Padding, margins and gaps are on the space scale (or a 1–2px hairline); corner radii are radius tokens (or a token less a 1–2px border, or fully rounded); border widths are border-width tokens.',
   'nested-accents':
     "Change and accent colors never nest: an element that contains changed elements stays neutral, and only the innermost changed elements are drawn in a change color (added, removed, modified, moved) or the accent. No element whose background (its color or a gradient's), border or box shadow, its own or its ::before's or ::after's (an SVG shape's fill or outline), is one of those hues contains, or has drawn over it inside its box, another element painted in one, including text and lines. Checked in the diff and after the animation's steps, with the host's highlighting on.",
+  'frame-edges':
+    "A box with rounded corners and an edge (a border, or an outline inside it) whose painted contents reach a corner draws its edge over them: as the kit's frame (`pk-frame`, or a `Group`, which draws its border again above its contents), or as an outline its contents sit under. Where a fill's curve meets the edge's, whichever is painted last dilutes the other's antialiased pixels, so an edge painted first comes out thinner around the curve than along its sides, even where the fill follows the inner radius.",
   'link-routes':
     'Every link a renderer routes between cards (marked data-projections-route) goes around the cards in its way. When no route around them exists, the renderer draws the one that overlaps them least and marks it data-projections-route="crossing", naming the cards in data-projections-route-crosses, and this check reports it. Checked at full width in the diff and at the end of the animation; skipped for a renderer that routes no links.',
 }

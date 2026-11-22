@@ -3,7 +3,7 @@ import {smoothstep, stepProgress, unscheduledWindow, type ComparisonModel, type 
 import {diMetrics} from './geometry.js'
 import {lifetimeDash, markSpan} from './lifetime-mark.js'
 import type {DiUnit, Lifetime} from './model.js'
-import {diUnion, type Window} from './union.js'
+import {diUnion} from './union.js'
 
 export interface DiUnitFrame {
   id: string

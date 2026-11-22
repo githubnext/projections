@@ -7,6 +7,7 @@ import {iconButton} from '../shell/controls.js'
 import type {InspectorInvalidDefinition, InspectorJob} from '../types.js'
 import {failureMessage} from '../notices.js'
 import {refName} from './revisions.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {noop} from '../noop.js'
 
 /**
@@ -238,7 +239,7 @@ export function FailureCard({
       </div>
       {shown.length > 0 && (
         <ul className="pi-failure-diagnostics pj:flex pj:flex-col pj:gap-1">
-          {keyed(shown.slice(0, 8), diagnostic => `${diagnostic.code}:${diagnostic.path ?? ''}:${diagnostic.message}`).map(
+          {keyed(shown.slice(0, 8), diagnostic => `${diagnostic.code}:${diagnostic.path}:${diagnostic.message}`).map(
             ([key, diagnostic]) => (
               <li key={key} className="pj:flex pj:min-w-0 pj:flex-col">
                 <span className="pj:flex pj:flex-wrap pj:items-baseline pj:gap-x-2">

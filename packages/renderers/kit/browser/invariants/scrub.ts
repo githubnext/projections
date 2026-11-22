@@ -18,7 +18,7 @@ export function scrubFailures(frames: readonly FrameMeasurement[]): string[] {
     const geometry = JSON.stringify(
       frame.cards
         .map(card => JSON.stringify([card.id, card.opacity.toFixed(3), ...Object.values(card.box).map(value => value.toFixed(1))]))
-        .sort(),
+        .toSorted(),
     )
     const previous = seen.get(frame.progress)
     if (previous !== undefined && previous !== geometry) failures.push(`${frame.progress}: frame differs between directions`)

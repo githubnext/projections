@@ -64,7 +64,7 @@ export interface RendererBuildOptions {
   outDir?: string
 }
 
-const escape = (value: string) => value.replace(/[&<>"']/gu, character => `&#${character.charCodeAt(0)};`)
+const escape = (value: string) => value.replaceAll(/[&<>"']/gu, character => `&#${character.charCodeAt(0)};`)
 
 /**
  * Before `init`, a renderer document is transparent and draws nothing, so the
@@ -405,13 +405,13 @@ export function rendererStyleLintPlugin(): Plugin {
     apply: 'build',
     enforce: 'pre',
     configResolved(config) {
-      root = config.root.replace(/\\/gu, '/').replace(/\/?$/u, '/')
+      root = config.root.replaceAll('\\', '/').replace(/\/?$/u, '/')
     },
     buildStart() {
       warnings.length = 0
     },
     transform(code, id) {
-      const file = id.split('?')[0]!.replace(/\\/gu, '/')
+      const file = id.split('?')[0]!.replaceAll('\\', '/')
       if (!file.endsWith('.css') || /\/node_modules\/|\/renderers\/(?:kit|sdk)\//u.test(file)) return null
       const name = file.startsWith(root) ? file.slice(root.length) : file
       const lint = lintRendererStyles(code, name)

@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react'
 import type {InspectorApi} from '../client/api.js'
-import type {Marks} from './pairs.js'
+import {isMarksList, type Marks} from './pairs.js'
 import {pairKey, readJson, recentKey, withRecent, writeJson} from './persistence.js'
 
 /**
@@ -18,7 +18,7 @@ export function useRecentPairs(
   const [remembered, setRemembered] = useState<{repoKey: string; projection: string; pair: Marks}>()
   let recent = recentIn.repoKey === repoKey ? recentIn.lists : {}
   if (repoKey && projection && !(projection in recent)) {
-    recent = {...recent, [projection]: readJson<Marks[]>(recentKey(repoKey, projection)) ?? []}
+    recent = {...recent, [projection]: readJson(recentKey(repoKey, projection), isMarksList) ?? []}
   }
   const known =
     remembered !== undefined && remembered.pair === shownPair && remembered.repoKey === repoKey && remembered.projection === projection

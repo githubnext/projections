@@ -32,7 +32,7 @@ export function tokenize(text, firstLine = 1) {
     } else if (char === "'") at = quote(text, at, line, push)
     else if (/\d/u.test(char)) {
       const number = /^\d[0-9_]*(?:\.\d[0-9_]*)?(?:[a-z][a-z0-9]*)?/u.exec(text.slice(at))[0]
-      push('number', Number(number.replace(/_/gu, '').replace(/[a-z][a-z0-9]*$/u, '')), line)
+      push('number', Number(number.replaceAll('_', '').replace(/[a-z][a-z0-9]*$/u, '')), line)
       at += number.length
     } else if (/[A-Za-z_]/u.test(char)) {
       const name = /^[A-Za-z_]\w*/u.exec(text.slice(at))[0]
@@ -330,7 +330,7 @@ function format([template, ...args], scope) {
   const named = new Map(args.filter(arg => arg.key).map(arg => [arg.key, arg.value]))
   const positional = args.filter(arg => !arg.key).map(arg => arg.value)
   let next = 0
-  return template.value.replace(/\{\{|\}\}|\{(\w*)\}/gu, (all, name) => {
+  return template.value.replaceAll(/\{\{|\}\}|\{(\w*)\}/gu, (all, name) => {
     if (all === '{{') return '{'
     if (all === '}}') return '}'
     if (!name) return String(positional[next++])

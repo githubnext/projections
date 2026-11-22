@@ -65,7 +65,7 @@ addEventListener('message', event => {
   const data = event.data as {projectionsProbe?: unknown; type?: unknown} | null
   if (event.source !== parent || data?.projectionsProbe !== 0 || data.type !== 'connect' || !event.ports[0]) return
   const port = event.ports[0]
-  port.onmessage = async ({data: request}: MessageEvent<{id: number; call: unknown; args?: unknown}>) => {
+  const answer = async (request: {id: number; call: unknown; args?: unknown}) => {
     try {
       const call =
         typeof request.call === 'string' ? (calls as Partial<Record<string, (args: unknown) => unknown>>)[request.call] : undefined
@@ -74,6 +74,9 @@ addEventListener('message', event => {
     } catch (error) {
       port.postMessage({id: request.id, error: error instanceof Error ? error.message : String(error)})
     }
+  }
+  port.addEventListener('message', ({data: request}: MessageEvent<{id: number; call: unknown; args?: unknown}>) => {
+    void answer(request)
   })
   // Listening with addEventListener, unlike onmessage, needs the port started.
   port.start()

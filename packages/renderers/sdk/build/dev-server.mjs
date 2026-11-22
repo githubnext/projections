@@ -26,5 +26,5 @@ export function readText(path) {
 export function resolveFile(root, file) {
   const path = resolve(root, file)
   const exists = existsSync(path)
-  return {path: (exists ? realpathSync(path) : path).replace(/\\/gu, '/'), exists}
+  return {path: (exists ? realpathSync(path) : path).replaceAll('\\', '/'), exists}
 }

@@ -142,12 +142,12 @@ test('table and text views present the same changes and entities', async ({page}
   // Both list the Changes scope's rows: the changes and the items that give them context.
   const tableIds = await page
     .locator('.ph-table-view tbody tr[data-row-id]')
-    .evaluateAll(rows => rows.map(row => row.getAttribute('data-row-id') ?? '').sort())
+    .evaluateAll(rows => rows.map(row => row.getAttribute('data-row-id') ?? '').toSorted())
   await showAs(page, 'Text')
   await expect(page.locator('[data-active-view]')).toHaveText('Built-in text view')
   const textIds = await page
     .locator('.ph-text-view [data-item-id]')
-    .evaluateAll(items => items.map(item => item.getAttribute('data-item-id') ?? '').sort())
+    .evaluateAll(items => items.map(item => item.getAttribute('data-item-id') ?? '').toSorted())
   expect(textIds.length).toBeGreaterThan(0)
   expect(textIds).toEqual(tableIds)
   await expect(page.locator('.ph-text-view')).toContainText('Removed entity Legacy inventory [legacy].')
@@ -156,11 +156,11 @@ test('table and text views present the same changes and entities', async ({page}
   await expect(page.getByRole('group', {name: 'Comparison playback'})).toHaveCount(0)
   const entities = await page
     .locator('table[data-collection="entities"] tbody tr[data-row-id]')
-    .evaluateAll(rows => rows.map(row => row.getAttribute('data-row-id') ?? '').sort())
+    .evaluateAll(rows => rows.map(row => row.getAttribute('data-row-id') ?? '').toSorted())
   await showAs(page, 'Text')
   const outline = await page
     .locator('.ph-outline > li[data-item-id]')
-    .evaluateAll(items => items.map(item => item.getAttribute('data-item-id') ?? '').sort())
+    .evaluateAll(items => items.map(item => item.getAttribute('data-item-id') ?? '').toSorted())
   expect(outline).toEqual(entities)
   expect(entities).toEqual(['checkout', 'inventory', 'payments'])
 })

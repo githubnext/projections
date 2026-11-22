@@ -1,6 +1,6 @@
 import {useMemo, type ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
-import {identifier, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {signatureLayout, signatureOf, signatureSegments, signatureTokens, type Segment, type Side, type Token} from './signature.js'
 
 type Tone = 'added' | 'removed'

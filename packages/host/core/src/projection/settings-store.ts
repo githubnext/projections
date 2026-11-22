@@ -1,10 +1,9 @@
 // The settings an embedder may control, outside React: their initial values, how a value is read and how a change is
 // requested. `useControllable` runs it in a component; `createSettingsStore` runs it anywhere.
 import type {ControlValue} from '@githubnext/projections-renderer-sdk/protocol'
-import type {ComparisonMode} from '../modes.js'
-import {endpointHoldMs, stepHoldMs, timelinePosition, type Holds, type PlaybackTimeline} from '../playback.js'
+import {endpointHoldMs, stepHoldMs, timelinePosition, type PlaybackTimeline} from '../playback.js'
 import type {SummaryFilter} from '../summary.js'
-import type {Highlighting, ProjectionOptions} from './types.js'
+import type {ProjectionOptions} from './types.js'
 import {defaultDuration} from './timing.js'
 
 export const speedRange = (speed: number) => (Number.isFinite(speed) ? Math.min(10, Math.max(0.1, speed)) : 1)

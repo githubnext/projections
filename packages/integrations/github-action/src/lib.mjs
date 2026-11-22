@@ -148,16 +148,16 @@ export const commentLimit = 60000
 
 // Repository text (titles, labels, summaries, diagnostics) is untrusted: it is escaped so it can't add markup,
 // links or images, and a word joiner after each @ keeps it from mentioning anyone.
-const unmention = value => String(value ?? '').replace(/@/gu, '@\u2060')
-const oneLine = value => unmention(value).replace(/\s+/gu, ' ').trim()
+const unmention = value => String(value ?? '').replaceAll('@', '@\u2060')
+const oneLine = value => unmention(value).replaceAll(/\s+/gu, ' ').trim()
 /** Inline Markdown text. */
 const plain = value =>
   oneLine(value)
-    .replace(/[\\\x60*_{}[\]<>()#+!|~]/gu, '\\$&')
-    .replace(/&/gu, '&amp;')
+    .replaceAll(/[\\\x60*_{}[\]<>()#+!|~]/gu, '\\$&')
+    .replaceAll('&', '&amp;')
 /** HTML text, for <summary>. */
 const html = value =>
-  oneLine(value).replace(/[&<>"']/gu, character => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[character])
+  oneLine(value).replaceAll(/[&<>"']/gu, character => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[character])
 /** A code span holding any text. */
 function code(value) {
   const text = oneLine(value) || ' '
@@ -407,7 +407,7 @@ export function snapshotPlan(manifest, ids) {
 export function repositoryDirectory(text) {
   const value = String(text ?? '')
     .trim()
-    .replace(/^\/+|\/+$/gu, '')
+    .replaceAll(/^\/+|\/+$/gu, '')
   const parts = value.split('/')
   if (!value || value.length > 200 || parts.some(part => !/^[\w.-]+$/u.test(part) || part === '.' || part === '..' || part === '.git')) {
     throw new Error(`snapshots-path must be a relative directory such as .github/projections/snapshots, not ${JSON.stringify(text)}`)
@@ -452,7 +452,7 @@ export function gitBlobSha(bytes) {
   return createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex')
 }
 
-const attribute = value => String(value).replace(/&/gu, '&amp;').replace(/"/gu, '&quot;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;')
+const attribute = value => String(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
 /** A light snapshot that switches to its dark one with the viewer's theme. */
 function picture(light, dark, alt) {

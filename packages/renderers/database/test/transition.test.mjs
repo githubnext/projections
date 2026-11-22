@@ -48,7 +48,7 @@ const content = frame => ({
 test('orders columns primary key, then foreign keys, then by name', async () => {
   const {transition} = await transitionOf(before, after)
   const invoices = tableCard(transition(1), 'Invoices')
-  const rows = [...invoices.columns].sort((a, b) => a.top - b.top)
+  const rows = [...invoices.columns].toSorted((a, b) => a.top - b.top)
   const order = rows.filter(row => row.kind === 'column').map(column => `${column.role ?? '-'}:${column.entity.label}`)
   assert.deepEqual(order.slice(0, 3), ['pk:Id', 'fk:CustomerId', 'fk:OrganizationId'])
   const rest = order.slice(3)
@@ -84,7 +84,7 @@ test('places principals left of their dependents', async () => {
 test('connects foreign-key columns to the principal key column', async () => {
   const {transition} = await transitionOf(before, after)
   const frame = transition(1)
-  const keys = frame.links.map(link => `${link.dependentColumn.replace(/^column:/u, '')}->${tableName(link.principal)}`).sort()
+  const keys = frame.links.map(link => `${link.dependentColumn.replace(/^column:/u, '')}->${tableName(link.principal)}`).toSorted()
   assert.deepEqual(keys, [
     'Customers.OrganizationId->Organizations',
     'InvoiceLines.InvoiceId->Invoices',
@@ -725,6 +725,6 @@ test('where a cycle is broken depends on the graph alone, not on the order its t
     {from: 'c', to: 'a'},
   ]
   const forward = layerDepths(['b', 'c', 'a'], [...cycleLinks, ...brokenLinks])
-  const reverse = layerDepths(['a', 'c', 'b'], [...brokenLinks, ...cycleLinks].reverse())
-  assert.deepEqual(new Map([...reverse].sort()), new Map([...forward].sort()))
+  const reverse = layerDepths(['a', 'c', 'b'], [...brokenLinks, ...cycleLinks].toReversed())
+  assert.deepEqual(new Map([...reverse].toSorted()), new Map([...forward].toSorted()))
 })

@@ -1,6 +1,6 @@
 // The icon stories' gallery: each icon drawn by the renderer kit (`Icon`, and `SvgIcon` in an SVG card's status line) and
 // by the host's summary bar, at text sizes and large, in panels that each carry one host theme's real tokens.
-import {Fragment, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode} from 'react'
+import {Fragment, useInsertionEffect, useMemo, type CSSProperties, type ReactNode} from 'react'
 import {
   themeStyle,
   type ProjectionController,

@@ -105,9 +105,8 @@ function useEvents(ref: RefObject<HTMLElement | null>, events: Record<string, Ha
 function useMergedRef<T>(own: RefObject<T | null>, other: Ref<T> | undefined) {
   return useCallback(
     (element: T | null) => {
-      own.current = element
-      if (typeof other === 'function') other(element)
-      else if (other) other.current = element
+      setRef(own, element)
+      setRef(other, element)
     },
     [own, other],
   )
@@ -128,7 +127,7 @@ export function createWrapper<T extends HTMLElement, P extends object, E extends
   events: {[K in keyof E]: string},
 ) {
   const eventProps = new Map<string, string>(Object.entries(events))
-  function Wrapper(props: ElementProps<T, P, E>) {
+  function Wrapper({ref: outer, ...props}: ElementProps<T, P, E>) {
     const own = useRef<T>(null)
     const handlers: Record<string, Handler<Event> | undefined> = {}
     const rest: Record<string, unknown> = {}
@@ -309,12 +308,15 @@ export function VscCollapsible({
     element.addEventListener('vsc-collapsible-toggle', toggle)
     return () => element.removeEventListener('vsc-collapsible-toggle', toggle)
   }, [open])
-  const hasActions = Boolean(actions)
-  return createElement(
-    'vscode-collapsible',
-    {ref, heading, description, open, class: className, ...rest},
-    hasActions ? createElement('div', {slot: 'actions', className: 'phv-collapsible-actions'}, actions) : null,
-    children,
+  return (
+    <CollapsibleElement ref={ref} heading={heading} description={description} open={open} className={className} {...rest}>
+      {Boolean(actions) && (
+        <div slot="actions" className="phv-collapsible-actions">
+          {actions}
+        </div>
+      )}
+      {children}
+    </CollapsibleElement>
   )
 }
 

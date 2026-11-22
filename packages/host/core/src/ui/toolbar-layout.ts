@@ -54,7 +54,7 @@ function lockOf(toolbar: HTMLElement, plan: ToolbarPlan): ((candidate: ToolbarPl
     case 'playback':
       return candidate => candidate.rows === plan.rows && candidate.playback === plan.playback
     case 'end':
-      return candidate => candidate.more.join() === plan.more.join()
+      return candidate => candidate.more.join(',') === plan.more.join(',')
     case null:
     case undefined:
     default:

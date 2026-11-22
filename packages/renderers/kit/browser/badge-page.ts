@@ -15,9 +15,7 @@ export interface BadgeCell {
 }
 
 declare global {
-  interface Window {
-    showBadges: (cells: BadgeCell[]) => void
-  }
+  var showBadges: (cells: BadgeCell[]) => void
 }
 
 const root = createRoot(document.getElementById('root')!)

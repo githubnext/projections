@@ -4,8 +4,8 @@ import type {Definition} from '@githubnext/projections-schemas'
 import {Copy, RotateCcw, Save} from 'lucide-react'
 import {copyText, useInspectorHost} from '../host.js'
 import {lineDiff} from './line-diff.js'
-import {changedParts} from './model.js'
-import type {DefinitionWriter} from './model.js'
+import {changedParts, type DefinitionWriter} from './model.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {noop} from '../noop.js'
 
 /**

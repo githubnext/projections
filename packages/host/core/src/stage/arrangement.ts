@@ -72,3 +72,7 @@ export function paneArrangement({
   if (current === 'columns') return stacked > columns * arrangementHysteresis ? 'stacked' : 'columns'
   return stacked > columns ? 'stacked' : 'columns'
 }
+
+/** Whether a stage's arrangement was chosen from its content's shape: filled side by side, with an aspect and a size. */
+export const shapedArrangement = (filledSideBySide: boolean, aspect: number | undefined, width: number, height: number) =>
+  filledSideBySide && aspect !== undefined && aspect !== 0 && height > 0 && Number.isFinite(width)

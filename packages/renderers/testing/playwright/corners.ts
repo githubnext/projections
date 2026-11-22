@@ -87,7 +87,7 @@ export async function cornerBox(
     if (frameWidth !== undefined) {
       return {svg: false, width: laid, height: rect.height, radii, borders: [frameWidth, frameWidth, frameWidth, frameWidth], outset: 0}
     }
-    const outline = style.outlineStyle === 'solid' ? parseFloat(style.outlineWidth) : 0
+    const outline = style.outlineStyle === 'solid' ? Number.parseFloat(style.outlineWidth) : 0
     if (borders.some(width => width > 0) || !outline) return {svg: false, width: laid, height: rect.height, radii, borders, outset: 0}
     // An outline's outer edge lies its offset plus its width outside the box, and its corners follow the radii there.
     const outset = Number.parseFloat(style.outlineOffset) + outline

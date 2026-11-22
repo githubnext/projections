@@ -1,11 +1,10 @@
 // Validating what a host sends its renderers.
 import {parseAnnotations} from './annotation-marks.js'
-import {comparisonModes} from './comparison-modes.js'
-import type {ComparisonMode} from './comparison-modes.js'
+import {comparisonModes, type ComparisonMode} from './comparison-modes.js'
 import type {RendererTheme} from './frame.js'
 import {focus, parseKinds} from './init-fields.js'
 import {environment} from './environment.js'
-import type {HostMessage, RendererOptions} from './messages.js'
+import type {HostMessage} from './messages.js'
 import {scrollPosition} from './positions.js'
 import {controlIdPattern, envelopeKeys, finite, isEnvelope, isPropertyPath, record, isGeneration} from './validation.js'
 import {document} from './document-message.js'

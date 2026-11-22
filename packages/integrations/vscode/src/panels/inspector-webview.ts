@@ -124,7 +124,7 @@ export class InspectorWebview {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       this.output.error(message)
-      webview.html = `<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'"><body><p>${message.replace(/[<&]/gu, c => (c === '<' ? '&lt;' : '&amp;'))}</p></body>`
+      webview.html = `<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'"><body><p>${message.replaceAll(/[<&]/gu, c => (c === '<' ? '&lt;' : '&amp;'))}</p></body>`
       void vscode.window.showErrorMessage(`Projections: ${message}`)
     }
   }

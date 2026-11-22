@@ -49,7 +49,7 @@ function checkExports({types, importedFunctions, importedMemories, functions, me
   ] as const) {
     const exported = exports.get(name) ?? fail('missing-export', `comparator module does not export \`${name}\``)
     const type = exported.kind === 'function' ? functionType(exported.index) : undefined
-    if (type?.params.join() !== params.join() || type.results.join() !== results.join()) {
+    if (type?.params.join(',') !== params.join(',') || type.results.join(',') !== results.join(',')) {
       fail(
         'invalid-export',
         `comparator export \`${name}\` must be a function (${params.join(', ')}) -> (${results.join(', ')}), but is ${describe(exported)}`,

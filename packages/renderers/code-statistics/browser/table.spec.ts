@@ -12,7 +12,7 @@ const counts = (frame: FrameLocator, column: number) =>
     .evaluateAll(
       (rows: Element[], index: number) =>
         rows.map(row =>
-          Number((row.children[index]?.querySelector('ins, .pk-table-text, .pk-table-value')?.textContent ?? '').replace(/\D/gu, '')),
+          Number((row.children[index]?.querySelector('ins, .pk-table-text, .pk-table-value')?.textContent ?? '').replaceAll(/\D/gu, '')),
         ),
       column,
     )
@@ -223,7 +223,7 @@ for (const comparisonMode of ['diff', 'animated'] as const) {
               const color = painted[index]!.reduce((best, pixel) => (near(pixel) < near(best) ? pixel : best))
               if (distance(color, probe.rgb) >= distance(color, probe.gray)) {
                 failures.push(
-                  `${sort}${sortChangesFirst ? ', changes first' : ''} at ${progress}: ${probe.what} is rgb(${color.join()}), not rgb(${probe.rgb.join()})`,
+                  `${sort}${sortChangesFirst ? ', changes first' : ''} at ${progress}: ${probe.what} is rgb(${color.join(',')}), not rgb(${probe.rgb.join(',')})`,
                 )
               }
             })

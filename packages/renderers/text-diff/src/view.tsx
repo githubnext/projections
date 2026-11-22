@@ -1,6 +1,6 @@
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode} from 'react'
+import {Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {type EntityChange, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {statusParts, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 import {EmptyDomain, Fold, Group, useFolds, type RendererProps} from '@githubnext/projections-renderer-kit/react'
 import type {RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
@@ -9,7 +9,6 @@ import {digits, segments, type Segment} from './folding.js'
 import {outputDiff, type Cell, type LineKind, type OutputDiff, type Word} from './rows.js'
 import {splitLines} from './diff.js'
 import type {accepts} from './accepts.js'
-import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 type Style = CSSProperties & Record<`--${string}`, string | number>
 

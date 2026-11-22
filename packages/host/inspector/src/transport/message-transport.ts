@@ -43,7 +43,9 @@ export function createMessageTransport({
           } else request.resolve(new Blob([Uint8Array.from(atob(base64), character => character.charCodeAt(0))], {type}))
         }
       } else request.reject(new InspectorRequestError(requestErrorMessage(reply.status, reply.body), reply.status))
-    } else if (reply.type === 'failure') request.reject(new Error(String((reply.message as unknown) ?? 'The Inspector bridge failed')))
+    } else if (reply.type === 'failure') {
+      request.reject(new Error(typeof reply.message === 'string' ? reply.message : 'The Inspector bridge failed'))
+    }
   })
   /** Posts `message` (with a fresh id) and settles with its reply, or rejects when `signal` aborts. */
   function send(message: (id: number) => TransportMessage, blob: boolean, signal?: AbortSignal): Promise<unknown> {

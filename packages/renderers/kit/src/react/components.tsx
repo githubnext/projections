@@ -1,7 +1,7 @@
 import {
   Component,
   Fragment,
-  useContext,
+  use,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -12,11 +12,10 @@ import {
 } from 'react'
 import {type ChangeStatus, proseSpans} from '@githubnext/projections-schemas'
 import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import {identifier, variedBeyond, variedBeyondLabel, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed, variedBeyond, variedBeyondLabel, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {arrowHead, arrowHeadLength, arrowHeadStyle} from '../arrowhead.js'
 import {LegendContext} from './legend-context.js'
-import {statusLabels, statusParts} from '../emphasis.js'
-import type {StatusPart} from '../emphasis.js'
+import {statusLabels, statusParts, type StatusPart} from '../emphasis.js'
 import {Icon, SvgIcon} from './icons.js'
 import {svgIcon, svgIconGap, svgPartGap, svgWordAdvance, type StatusChange} from '../svg-status.js'
 

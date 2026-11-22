@@ -123,8 +123,8 @@ function summaryItems(controller: ProjectionController): NonNullable<InspectorSu
   const identity = (row: (typeof controller.rows)[number]) =>
     row.correspondence && row.correspondence !== 'exact' && row.correspondence !== 'none' ? row.correspondence : undefined
   const changed = (row: (typeof controller.rows)[number]) => (!!row.status && row.status !== 'unchanged') || identity(row) !== undefined
-  return [...controller.rows]
-    .sort((a, b) => Number(!changed(a)) - Number(!changed(b)))
+  return controller.rows
+    .toSorted((a, b) => Number(!changed(a)) - Number(!changed(b)))
     .slice(0, 100)
     .map(row => {
       const context = contextOf(row)

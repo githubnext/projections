@@ -1,6 +1,6 @@
 // The VS Code UI's story frame: a VS Code theme captured from VS Code itself (packages/host/vscode-ui/fixtures/themes), applied as a
 // webview receives it (its `--vscode-*` variables and theme kind classes), with the VS Code UI's stylesheet and codicons.
-import type {CSSProperties, ReactNode} from 'react'
+import type {ReactNode} from 'react'
 import type {Decorator} from '@storybook/react-vite'
 import {ensureCodiconStylesheet, type VscodeThemeFixture} from '@githubnext/projections-host-vscode'
 import '@githubnext/projections-host-vscode/styles.css'

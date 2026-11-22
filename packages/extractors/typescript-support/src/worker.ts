@@ -98,9 +98,7 @@ async function main(): Promise<void> {
     typeof capabilities.trusted !== 'boolean' ||
     typeof capabilities.network !== 'boolean' ||
     (repository.project !== undefined &&
-      (typeof repository.project !== 'string' ||
-        path.isAbsolute(repository.project) ||
-        repository.project.split(/[\\/]/u).some(part => part === '..')))
+      (typeof repository.project !== 'string' || path.isAbsolute(repository.project) || repository.project.split(/[\\/]/u).includes('..')))
   ) {
     throw new Error('Invalid extractor worker request')
   }

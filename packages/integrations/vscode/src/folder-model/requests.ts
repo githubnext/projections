@@ -1,8 +1,6 @@
 import type {Lease} from '../backends.js'
-import {jobChangeCount} from '../projections/pairs.js'
-import {parseDefinitions} from '../projections/definitions.js'
-import type {DefinitionList} from '../projections/definitions.js'
-import type {Pair} from '../projections/pairs.js'
+import {jobChangeCount, type Pair} from '../projections/pairs.js'
+import {parseDefinitions, type DefinitionList} from '../projections/definitions.js'
 import {noop} from '../noop.ts'
 
 type Runner = Awaited<ReturnType<Lease['current']>>

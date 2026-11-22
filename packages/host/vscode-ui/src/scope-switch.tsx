@@ -1,5 +1,4 @@
-import {useRef} from 'react'
-import {flushSync} from 'react-dom'
+import {useLayoutEffect, useRef, useState, type KeyboardEvent} from 'react'
 import {rovingIndex, scopeChoice, scopeHiddenText, type ProjectionController} from '@githubnext/projections-host'
 
 /**

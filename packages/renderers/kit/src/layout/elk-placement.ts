@@ -1,5 +1,5 @@
 // Where ELK places the cards: in a reference layout's order, or ordered to cross least and then aligned.
-import type {ElkExtendedEdge, ElkNode} from 'elkjs/lib/elk-api.js'
+import type {ElkNode} from 'elkjs/lib/elk-api.js'
 import type {Point} from '../edge-arrows.js'
 import type {GraphLayoutOptions} from './model.js'
 import {identifyAlignment, type Alignment, type LayeredEdge, type LayeredNode} from './alignment.js'

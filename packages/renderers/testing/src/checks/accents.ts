@@ -56,7 +56,7 @@ export const accentChecks: Pick<Checks, 'nested-accents'> = {
       await driver.measure('settle')
       for (const {outer, inner} of (await driver.measure<NestedAccent[]>('accents')).filter(nests)) {
         const line = `${where}: ${named(inner)} is drawn inside ${named(outer)}`
-        const key = `${where}|${line.replace(/\[data-entity-id="[^"]*"\]/gu, '')}`
+        const key = `${where}|${line.replaceAll(/\[data-entity-id="[^"]*"\]/gu, '')}`
         const found = failures.get(key)
         if (found) found.count += 1
         else failures.set(key, {line, count: 1})

@@ -123,29 +123,11 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
       markSnapshot('failed', failure)
       return undefined
     }
-    const readiness = snapshotReadiness({
-      projection,
-      settings,
-      comparing,
-      requested,
-      custom: Boolean(custom),
-      notice: resolution.notice,
-      panes,
-    })
-    if (typeof readiness === 'object') {
-      setFailure(readiness.failure)
-      return undefined
-    }
-    if (readiness === 'waiting') return undefined
-    let cancelled = false
+    if (readiness !== 'painted') return undefined
+    const abort = new AbortController()
     // A quiet moment first: anything the renderer still sends (such as its legend) changes `signature` and starts over.
     void document.fonts.ready
-      .then(
-        () =>
-          new Promise(resolve => {
-            setTimeout(resolve, quiet)
-          }),
-      )
+      .then(() => sleep(quiet, abort.signal))
       .then(() => frames(2))
       .then(() => {
         if (abort.signal.aborted) return

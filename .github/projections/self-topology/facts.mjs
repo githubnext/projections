@@ -78,9 +78,9 @@ export function firstSentence(text) {
     .find(block => block && !/^(?:[#<|>]|!\[|\x60\x60\x60|- |\* |\d+\. )/u.test(block))
   if (!paragraph) return undefined
   const plain = paragraph
-    .replace(/\s+/gu, ' ')
-    .replace(/!?\[([^\]]*)\]\([^)]*\)/gu, '$1')
-    .replace(/[\x60*_]/gu, '')
+    .replaceAll(/\s+/gu, ' ')
+    .replaceAll(/!?\[([^\]]*)\]\([^)]*\)/gu, '$1')
+    .replaceAll(/[\x60*_]/gu, '')
   const sentence = /^(.*?[.!?])(?:\s|$)/u.exec(plain)?.[1] ?? plain
   return sentence.trim() || undefined
 }

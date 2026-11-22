@@ -66,8 +66,8 @@ export function directoryProblems(manifest, directory = notices) {
       problems.push(`notices/notices.json lists notices/${entry.directory}/, which doesn't exist`)
       continue
     }
-    const present = readdirSync(join(directory, entry.directory)).sort()
-    const listed = Object.keys(entry.files).sort()
+    const present = readdirSync(join(directory, entry.directory)).toSorted()
+    const listed = Object.keys(entry.files).toSorted()
     for (const file of present.filter(candidate => !listed.includes(candidate))) {
       problems.push(`notices/${entry.directory}/${file} isn't in its notices/notices.json entry's files`)
     }

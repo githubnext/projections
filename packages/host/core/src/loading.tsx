@@ -7,8 +7,8 @@ export const loadingStageHeight = 480
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false)
   useEffect(() => {
-    if (typeof window === 'undefined' || !('matchMedia' in window)) return undefined
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (typeof window === 'undefined' || !('matchMedia' in globalThis.window)) return undefined
+    const media = globalThis.window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => setReduced(media.matches)
     update()
     media.addEventListener('change', update)
@@ -119,7 +119,7 @@ export function LoadingStatus({label, description, reducedMotion = false, fill =
           <span className="ph-loading-description" style={{fontSize: '0.875em'}}>
             {description}
           </span>
-        ) : null}
+        )}
       </span>
     </div>
   )

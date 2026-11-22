@@ -1,6 +1,6 @@
 // One row of a `DataTable`: a selectable unit, its cells in the version the frame shows (both in the diff), its
 // changed cells as value changes and, in a comparison, its change in words.
-import type {CSSProperties, ReactNode} from 'react'
+import type {ReactNode} from 'react'
 import {identifier as identifierAttributes} from '@githubnext/projections-renderer-sdk/presentation'
 import {changeMark} from '../diff/model.js'
 import {isChanged} from '../emphasis.js'

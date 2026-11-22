@@ -61,7 +61,7 @@ for (const {key, content, stage: stageSelector, fit} of cases) {
                 }
               }
             } else continue
-            smallestText = Math.min(smallestText, parseFloat(getComputedStyle(element).fontSize) * textScale)
+            smallestText = Math.min(smallestText, Number.parseFloat(getComputedStyle(element).fontSize) * textScale)
           }
           return {
             smallestText,

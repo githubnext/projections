@@ -1,5 +1,4 @@
-import {useId, useRef, useState, type RefObject} from 'react'
-import {flushSync} from 'react-dom'
+import {useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject} from 'react'
 import {comparisonModes, rovingIndex, zoomControlGroup, type ComparisonMode, type ProjectionController} from '@githubnext/projections-host'
 import type {VscodeToolbarButton} from '@vscode-elements/elements/dist/vscode-toolbar-button/vscode-toolbar-button.js'
 import {VscodeRendererControl} from './controls.js'

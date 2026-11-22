@@ -94,7 +94,7 @@ export function corridorRoute(
   const candidates = edges.length ? [edges[0]! - routeRadius, edges.at(-1)! + routeRadius] : []
   for (let index = 0; index + 1 < edges.length; index++) candidates.push((edges[index]! + edges[index + 1]!) / 2)
   const cost = (x: number) => Math.abs(x - start.x) + Math.abs(x - end.x)
-  for (const x of candidates.filter(candidate => !blocked(candidate)).sort((a, b) => cost(a) - cost(b))) {
+  for (const x of candidates.filter(candidate => !blocked(candidate)).toSorted((a, b) => cost(a) - cost(b))) {
     const course = [start, {x: start.x, y: first}, {x, y: first}, {x, y: last}, {x: end.x, y: last}, end]
     const route = smoothRoute(course, axis)
     if (!route) continue

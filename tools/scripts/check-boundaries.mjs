@@ -121,7 +121,7 @@ const firstParty = specifier => {
 /** Paths inside a workspace that it ships: other workspaces' files are reached through their packages, never by path. */
 const shipped = /^(?:src|build)\//u
 
-const scripts = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']
+const scripts = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts'])
 const builtins = new Set(builtinModules.map(name => name.replace(/^node:/u, '')))
 const failures = []
 let modules = 0
@@ -386,7 +386,7 @@ function crateDependencies(text) {
     if (header) {
       const name = header[1].trim()
       const table = /(?:^|\.)((?:dev-|build-)?dependencies)(?:\.(.+))?$/u.exec(name)
-      section = table ? {development: table[1] === 'dev-dependencies', crate: table[2]?.replace(/["']/gu, '')} : undefined
+      section = table ? {development: table[1] === 'dev-dependencies', crate: table[2]?.replaceAll(/["']/gu, '')} : undefined
       if (section?.crate) dependencies.push([section.crate, section.development])
       continue
     }

@@ -1,6 +1,6 @@
 import {useState, type ReactNode} from 'react'
 import {type ViewSubject, type Row, describeChange, rowStatusCounts, statusLabel} from '../model.js'
-import {variedWithin} from '@githubnext/projections-renderer-sdk/presentation'
+import {keyed, variedWithin} from '@githubnext/projections-renderer-sdk/presentation'
 import {figuresSentence, type SummaryFigure} from '../summary.js'
 import type {AnnotationMark} from '@githubnext/projections-renderer-sdk/protocol'
 import {AnnotationMarker} from './annotations.js'

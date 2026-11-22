@@ -26,7 +26,7 @@ export async function mutants() {
   const all = []
   for (const file of readdirSync(directory)
     .filter(name => name.endsWith('.mjs'))
-    .sort()) {
+    .toSorted()) {
     const module = file.replace(/\.mjs$/u, '.rs')
     if (!existsSync(join(sources, module))) throw new Error(`mutants/${file} has no src/${module}`)
     const {default: list} = await import(pathToFileURL(join(directory, file)).href)

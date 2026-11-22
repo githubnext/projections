@@ -21,10 +21,10 @@ test('resolves configured APIs, static keys and package ownership, and warns on 
     state.entities.filter(node => node.kind === 'flag').map(node => node.label),
     ['checkout'],
   )
-  assert(state.entities.some(node => node.kind === 'package' && node.label === 'shop'))
-  assert(state.relationships.some(edge => edge.kind === 'checks'))
+  assert.ok(state.entities.some(node => node.kind === 'package' && node.label === 'shop'))
+  assert.ok(state.relationships.some(edge => edge.kind === 'checks'))
   assert.match(JSON.stringify(state.metadata), /dynamic flag key/u)
-  assert(state.entities.every(node => node.evidence?.every(item => !path.isAbsolute(item.source))))
+  assert.ok(state.entities.every(node => node.evidence?.every(item => !path.isAbsolute(item.source))))
 })
 
 test('repeated occurrences keep a bounded evidence sample', async () => {

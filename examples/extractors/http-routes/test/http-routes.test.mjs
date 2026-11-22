@@ -23,7 +23,7 @@ test('Express and Fastify factories, chains and method arrays become inferred ro
     ['GET /health', 'GET /items', 'GET /orders', 'GET /users', 'POST /orders', 'PUT /items'],
   )
   assert.match(JSON.stringify(state.metadata), /mounting/u)
-  assert(state.entities.filter(node => node.kind === 'route').every(node => node.confidence === 'inferred'))
+  assert.ok(state.entities.filter(node => node.kind === 'route').every(node => node.confidence === 'inferred'))
 })
 
 test('CommonJS export-equals factories resolve as default imports', async () => {

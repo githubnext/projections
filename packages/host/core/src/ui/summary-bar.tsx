@@ -1,4 +1,4 @@
-import {type CSSProperties, type ReactNode, type RefObject, useRef} from 'react'
+import {type CSSProperties, type ReactNode, type RefObject, useId, useRef} from 'react'
 import {Activity, Ellipsis, Sparkle} from 'lucide-react'
 import {
   summaryCountText,

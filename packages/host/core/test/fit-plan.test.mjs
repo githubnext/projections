@@ -212,15 +212,19 @@ test('focus that moves into a control’s own popup is still the control’s: ch
 
 test('a control kept for its open popup is forgotten when the popup closes with focus elsewhere, not when it remounts', async () => {
   const {untilPopupCloses} = await import('../dist/fit-plan/focus.js')
-  const settle = () => new Promise(resolve => setTimeout(resolve, 0))
+  const settle = () =>
+    new Promise(resolve => {
+      setTimeout(resolve, 0)
+    })
   let notify
-  class Observer {
-    constructor(callback) {
-      notify = callback
-    }
-    observe() {}
-    disconnect() {
-      notify = undefined
+  // A stand-in MutationObserver that hands its callback to the test.
+  function Observer(callback) {
+    notify = callback
+    return {
+      observe: () => undefined,
+      disconnect: () => {
+        notify = undefined
+      },
     }
   }
   const document = {activeElement: {}}

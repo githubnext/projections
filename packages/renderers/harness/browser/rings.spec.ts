@@ -28,10 +28,8 @@ async function open(page: Page, query: string) {
 }
 
 declare global {
-  interface Window {
-    ring: (id: string | null, state?: 'hover' | 'selected' | 'focus') => Promise<void>
-    probe: <T = unknown>(call: string, args?: unknown) => Promise<T>
-  }
+  var ring: (id: string | null, state?: 'hover' | 'selected' | 'focus') => Promise<void>
+  var probe: <T = unknown>(call: string, args?: unknown) => Promise<T>
 }
 
 const wellFormed = [
@@ -55,7 +53,7 @@ for (const color of ['light', 'dark'] as const) {
     const failures: string[] = []
     for (const state of states) {
       for (const id of wellFormed) {
-        await page.evaluate(([itemId, ringState]) => window.ring(itemId, ringState), [id, state] as const)
+        await page.evaluate(([itemId, ringState]) => globalThis.ring(itemId, ringState), [id, state] as const)
         const [geometry] = await ringGeometry(page.mainFrame(), id)
         if (!geometry) {
           failures.push(`${id} (${state}): no unit`)
@@ -63,8 +61,8 @@ for (const color of ['light', 'dark'] as const) {
         }
         const report = await ringPixelReport(page, page.mainFrame(), geometry, {
           label: `${id} (${state})`,
-          ring: () => page.evaluate(([itemId, ringState]) => window.ring(itemId, ringState), [id, state] as const),
-          clear: () => page.evaluate(() => window.ring(null)),
+          ring: () => page.evaluate(([itemId, ringState]) => globalThis.ring(itemId, ringState), [id, state] as const),
+          clear: () => page.evaluate(() => globalThis.ring(null)),
         })
         failures.push(...report.failures)
       }
@@ -75,10 +73,10 @@ for (const color of ['light', 'dark'] as const) {
 
 /** The `rings` check's failures for `id`, selected. */
 async function check(page: Page, id: string): Promise<string[]> {
-  await page.evaluate(() => window.ring(null))
-  await page.evaluate(itemId => window.probe('ringNeutral', itemId), id)
-  await page.evaluate(itemId => window.ring(itemId, 'selected'), id)
-  return page.evaluate(itemId => window.probe<string[]>('rings', {id: itemId, state: 'selected'}), id)
+  await page.evaluate(() => globalThis.ring(null))
+  await page.evaluate(itemId => globalThis.probe('ringNeutral', itemId), id)
+  await page.evaluate(itemId => globalThis.ring(itemId, 'selected'), id)
+  return page.evaluate(itemId => globalThis.probe<string[]>('rings', {id: itemId, state: 'selected'}), id)
 }
 
 test('the rings check passes well-formed items and names the fix for ill-formed ones', async ({page}) => {

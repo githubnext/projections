@@ -89,7 +89,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
       ),
     Object.values(tokens).filter(value => value.startsWith('url(')),
   )
-  await target.evaluate(shown => window.showBadges(shown), cells)
+  await target.evaluate(shown => globalThis.showBadges(shown), cells)
   await expect(target.locator('.pk-svg-icon rect')).toHaveCount(cells.filter(cell => cell.kind === 'svg-icon').length)
   await target.evaluate(
     () =>

@@ -1,4 +1,4 @@
-import type {RendererLegend, ThemeTokenName} from '@githubnext/projections-host'
+import type {RendererLegend} from '@githubnext/projections-host'
 import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** The props of `VscodeLegend`: the renderer's legend and the tokens its swatches resolve against. */
@@ -22,7 +22,7 @@ export function VscodeLegend({legend, tokens, className}: VscodeLegendProps) {
     <div className={`ph-legend phv-legend ${className ?? ''}`} role="group" aria-label={legend.title ?? 'Legend'}>
       {legend.title && <span className="ph-legend-title phv-legend-title">{legend.title}</span>}
       <ul className="phv-legend-items">
-        {legend.items.map((item, index) => {
+        {keyed(legend.items, item => item.label).map(([key, item]) => {
           const color = item.token ? tokens?.[item.token] : item.color
           if (!color) {
             return (

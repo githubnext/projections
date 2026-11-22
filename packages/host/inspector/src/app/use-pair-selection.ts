@@ -1,8 +1,7 @@
 import {useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction} from 'react'
 import type {InspectorApi} from '../client/api.js'
 import type {InspectorPairs, InspectorRevision} from '../types.js'
-import {defaultPair, isMarks, isMarksList, marking, suggestedMarks} from './pairs.js'
-import type {Marks} from './pairs.js'
+import {defaultPair, isMarks, marking, suggestedMarks, type Marks} from './pairs.js'
 import {currentKey, openedOn, pairKey, readJson, writeJson} from './persistence.js'
 import {useRecentPairs} from './recent-pairs.js'
 import type {InspectorOpenedOn} from './props.js'
@@ -85,7 +84,6 @@ export function usePairSelection({
     const opened = openedOn(openedInitially)
     const saved = opened.projection === projection && opened.pair ? opened.pair : readJson(pairKey(repoKey, projection), isMarks)
     setMarks(current => ({...current, [projection]: saved?.b ? {a: saved.a, b: saved.b} : projectionDefault}))
-    setRecent(current => ({...current, [projection]: readJson(recentKey(repoKey, projection), isMarksList) ?? []}))
   }, [api, projection, repoKey, revisions, marks, setMarks, pairsHere, projectionDefault, openedInitially])
   /** Shows a Before → After pair (or one revision, without `a`) of the selected projection. */
   const choosePair = useCallback(

@@ -61,9 +61,9 @@ for (const delay of [1500, 10_000]) {
  */
 async function delayResizeObservations(page: Page, delay: number): Promise<void> {
   await page.addInitScript(lateMs => {
-    if (window === window.top) return
-    const Observer = window.ResizeObserver
-    window.ResizeObserver = class extends Observer {
+    if (globalThis.window === globalThis.top) return
+    const Observer = globalThis.ResizeObserver
+    globalThis.ResizeObserver = class extends Observer {
       constructor(callback: ResizeObserverCallback) {
         super((entries, observer) => {
           setTimeout(() => callback(entries, observer), lateMs)

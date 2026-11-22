@@ -39,8 +39,9 @@ export function pairDetail(pair: InspectorPair): string {
     case 'working-tree':
       return 'Your uncommitted changes'
     case 'head':
-      return 'One revision'
+      break
   }
+  return 'One revision'
 }
 /** How a pair reads: "HEAD~1 → HEAD", or one revision's name. */
 export const pairLabel = (pair: Marks) =>

@@ -21,7 +21,7 @@ export function useDragPan(scrollerRef: RefObject<HTMLElement | null>): void {
   const cap = useStageHeightCap()
   const active = sizing === 'content' && cap !== undefined
   useEffect(() => {
-    const element = scroller.current
+    const element = scrollerRef.current
     if (!element || !active) return undefined
     element.dataset.pan = 'drag'
     const pannable = () => element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1

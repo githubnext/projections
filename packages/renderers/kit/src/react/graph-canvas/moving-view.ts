@@ -1,6 +1,5 @@
 // How a new view of the same document moves from the old one: the frames between them, and where the activated card was.
-import {useEffect, useState} from 'react'
-import type {RefObject} from 'react'
+import {useEffect, useState, type RefObject} from 'react'
 import type {GraphFrame, GraphTransition} from '../../graph-transition.js'
 import type {Point} from '../../edge-arrows.js'
 import {morphFrames, shiftFrame, viewChangeMs} from '../../graph-canvas/view-change.js'
@@ -80,18 +79,18 @@ export function useViewChange(
     if (!reducedMotion) setMorph({from: previous, to: transition, mix: 0})
   }
   if (scoped !== scope) setScope(scoped)
-  const moving = morph !== undefined && morph.to === transition && morph.mix < 1
+  const moving = morph?.to === transition && morph.mix < 1
   const frame = moving ? morphFrames(morph.from, target, morph.mix) : target
   const moved = morph?.from
   useEffect(() => {
     const view = scrollerRef.current?.ownerDocument.defaultView
-    if (!moved || !view) return
+    if (!moved || !view) return undefined
     let started: number | undefined
     let request = 0
     const tick = (time: number) => {
       started ??= time
       const mix = Math.max(1e-6, Math.min(1, (time - started) / viewChangeMs))
-      setMorph(current => (current && current.from === moved ? {...current, mix} : current))
+      setMorph(current => (current?.from === moved ? {...current, mix} : current))
       if (mix < 1) request = view.requestAnimationFrame(tick)
     }
     request = view.requestAnimationFrame(tick)

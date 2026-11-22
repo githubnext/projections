@@ -1,4 +1,15 @@
-import {createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode, type RefObject} from 'react'
+import {
+  createContext,
+  use,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import {
   Button,
   DropdownMenu,
@@ -103,13 +114,7 @@ export function TitleActivity({
   reason?: ReactNode
 } & Record<`data-${string}`, string | boolean | undefined>) {
   const {level, place} = useTitleBar()
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    if (at === undefined) return undefined
-    setNow(Date.now())
-    const timer = setInterval(() => setNow(Date.now()), 5000)
-    return () => clearInterval(timer)
-  }, [at])
+  const now = useClock(at !== undefined)
   if (place !== 'bar') return null
   return (
     <span

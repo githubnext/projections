@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState, type RefObject} from 'react'
+import {useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject} from 'react'
 import type {Extraction} from '@githubnext/projections-schemas'
 import {connectInteractions, type InteractionController, type InteractionOptions} from './interactions.js'
 import {afterPaint, applyEnvironment, connectRenderer, type RendererClient} from './client.js'
@@ -192,14 +192,9 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
           filter: filter => setState(previous => ({...previous, filter})),
         },
         {capabilities},
-      )
-    } catch (error) {
-      setFailure(error instanceof Error ? error.message : String(error))
-      return undefined
-    }
-    setClient(connected)
-    return () => connected.dispose()
-  }, [capabilities, accepts, applyTheme])
+      ),
+    )
+  }, [connection, capabilities, accepts, applyTheme])
   const acknowledge = options.acknowledge !== false
   const {init, progress} = state
   useEffect(() => {

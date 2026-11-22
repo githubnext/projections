@@ -5,7 +5,7 @@ import {useLayoutEffect, useRef, type RefObject} from 'react'
  * element, whose focus is retargeted to its host).
  */
 export function popupOpen(control: Element): boolean {
-  return control.getAttribute('aria-expanded') === 'true' || control.shadowRoot?.querySelector('[aria-expanded="true"]') != null
+  return control.getAttribute('aria-expanded') === 'true' || (control.shadowRoot?.querySelector('[aria-expanded="true"]') ?? null) !== null
 }
 
 /**
@@ -19,8 +19,8 @@ export function leftOnPurpose(control: Element, bar: Element): boolean {
 
 /** What `untilPopupCloses` observes with: a `MutationObserver`, or a stand-in. */
 export type PopupObserver = new (callback: () => void) => {
-  observe(target: Node, options: MutationObserverInit): void
-  disconnect(): void
+  observe: (target: Node, options: MutationObserverInit) => void
+  disconnect: () => void
 }
 
 /**
@@ -79,7 +79,7 @@ export function useFocusRetention(
     // Focus that leaves while its control stays mounted, with no popup of its own open, was moved on purpose: forget the
     // control. A remount's loss is told apart once the render that removed the control (and restored focus) is done.
     // A control kept for its open popup is forgotten once the popup closes with focus elsewhere.
-    let watching = () => {}
+    let watching = (): void => undefined
     const leave = () => {
       const left = focus.current
       queueMicrotask(() => {

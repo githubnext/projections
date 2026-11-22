@@ -1,4 +1,4 @@
-import {useContext, type RefObject} from 'react'
+import {use, type RefObject} from 'react'
 import {Maximize2, Minimize2} from 'lucide-react'
 import {useFullscreen, type FullscreenState} from '../fullscreen.js'
 import {Button} from './components/button.js'

@@ -91,7 +91,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
           meta: {description: pkg.description ?? undefined},
         })
         unitByPackage.set(pkg.name, id)
-        unitByCrateIdent.set(pkg.name.replace(/-/gu, '_'), id)
+        unitByCrateIdent.set(pkg.name.replaceAll('-', '_'), id)
         for (const dependency of pkg.dependencies) {
           if (!dependency.path) continue
           manifestDependencies.push({
@@ -122,7 +122,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
       if (isExcluded(directory) || /(?:^|\/)(?:node_modules|fixtures|test|tests)(?:\/|$)/u.test(directory)) return false
       if (workspacePatterns === null) return directory.split('/').length === 1
       return workspacePatterns.some(pattern =>
-        new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/gu, '\\$&').replace(/\*/gu, '[^/]+')}$`).test(directory),
+        new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/gu, '\\$&').replaceAll('*', '[^/]+')}$`).test(directory),
       )
     })
     for (const manifest of manifests) {
@@ -161,7 +161,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
     // Components without a manifest, named by the `components` input's directory patterns; a matching directory with a
     // manifest is already a unit.
     const componentPatterns = (root.components ?? (root === roots[0] ? ['integrations/*'] : [])).map(
-      pattern => new RegExp(`(^|/)${pattern.replace(/[.+?^${}()|[\]\\]/gu, '\\$&').replace(/\*/gu, '[^/]+')}$`),
+      pattern => new RegExp(`(^|/)${pattern.replace(/[.+?^${}()|[\]\\]/gu, '\\$&').replaceAll('*', '[^/]+')}$`),
     )
     const componentDirectories = sortedUnique(
       files

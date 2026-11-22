@@ -1,11 +1,8 @@
-import {useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {ReactNode} from 'react'
-import {connectorBetween, connectorPath, twoPaneMode} from '../modes.js'
-import type {Connector, Side} from '../modes.js'
-import {RendererPane} from '../pane.js'
-import type {PaneState} from '../pane.js'
+import {useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode} from 'react'
+import {connectorBetween, connectorPath, twoPaneMode, type Connector, type Side} from '../modes.js'
+import {RendererPane, type PaneState} from '../pane.js'
 import type {ProjectionController} from '../projection.js'
-import {paneArrangement, paneGeometry, useSize, type PaneArrangement} from './arrangement.js'
+import {paneArrangement, paneGeometry, shapedArrangement, useSize, type PaneArrangement} from './arrangement.js'
 import {PaneBand, PaneChip} from './labels.js'
 import {accent, columnGapOf, stackedGapsOf, paneBleed, stageLayout, type PaneEdge, type PaneLabels} from './layout.js'
 import {bothPanesLoading, DefaultStatus, StageStatus} from './status.js'
@@ -79,9 +76,8 @@ export function StageBody({
     band: paneLabels === 'visible' ? paneGeometry.band : 0,
   })
   // Kept only once it was chosen from the content's shape, so the first real choice isn't held back by a default.
-  if (mode === 'side-by-side' && fill && aspect !== undefined && aspect !== 0 && height > 0 && Number.isFinite(width)) {
-    arranged.current.arrangement = arrangement
-  }
+  const chosen = shapedArrangement(mode === 'side-by-side' && fill, aspect, width, height) ? {...kept, arrangement} : kept
+  if (chosen.subject !== arranged.subject || chosen.arrangement !== arranged.arrangement) setArranged(chosen)
   const stacked = mode === 'side-by-side' && arrangement === 'stacked'
   const [layout, setLayout] = useState(0)
   const [connector, setConnector] = useState<Connector>()

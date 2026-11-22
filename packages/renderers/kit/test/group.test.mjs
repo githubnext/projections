@@ -67,7 +67,9 @@ test('in a comparison the status states the change in proportion to emphasis, an
   assert.doesNotMatch(html({title: 'help', change: {status: 'unchanged'}, mark: {status: 'unchanged'}}), /data-change=|pk-diff-text/u)
   // The kit's React styles with the base styles and their partials (`styles/*.css`) inlined where they're imported.
   const inline = path =>
-    readFileSync(new URL(`../${path}`, import.meta.url), 'utf8').replace(/^@import '\.\/([a-z/-]+\.css)';$/gmu, (_, file) => inline(file))
+    readFileSync(new URL(`../${path}`, import.meta.url), 'utf8').replaceAll(/^@import '\.\/([a-z/-]+\.css)';$/gmu, (_, file) =>
+      inline(file),
+    )
   const css = inline('react.css')
   assert.match(css, /\.pk \[data-change='removed'\] \.pk-diff-text \{[^}]*text-decoration: line-through/u)
 })

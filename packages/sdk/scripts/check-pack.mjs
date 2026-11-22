@@ -73,7 +73,7 @@ try {
     files = listed
       .filter(file => !file.endsWith('/'))
       .map(file => file.replace(/^package\//u, ''))
-      .sort()
+      .toSorted()
     console.log(`${basename(tarball)}: ${files.length} files, ${(statSync(tarball).size / 1024).toFixed(1)} kB packed`)
   } else {
     step('npm pack')
@@ -118,7 +118,7 @@ try {
     const text = readFileSync(join(unpacked, 'package', file), 'utf8')
     const name = internal.exec(text)
     if (name) {
-      fail(`${file} names an internal workspace: ${text.slice(Math.max(0, name.index - 60), name.index + 60).replace(/\s+/gu, ' ')}`)
+      fail(`${file} names an internal workspace: ${text.slice(Math.max(0, name.index - 60), name.index + 60).replaceAll(/\s+/gu, ' ')}`)
     }
     for (const path of machine) if (text.includes(path)) fail(`${file} includes a path on this machine (${path})`)
     if (/sourceMappingURL=/u.test(text)) fail(`${file} references a source map`)

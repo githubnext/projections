@@ -28,7 +28,7 @@ for (const [name, path] of await runtimeDependencies(manifest)) {
   const directory = dirname(path)
   const files = readdirSync(directory)
     .filter(file => /^licen[cs]e(?:-code)?(?:\.(?:md|txt))?$/iu.test(file))
-    .sort()
+    .toSorted()
   sections.push('', `## ${name} ${json.version} (${json.license})`, '')
   if (!files.length) {
     const author = typeof json.author === 'string' ? json.author : json.author?.name
@@ -42,7 +42,7 @@ for (const [name, path] of await runtimeDependencies(manifest)) {
       '```text',
       (await readFile(join(directory, file), 'utf8'))
         .replace(/^\uFEFF/u, '')
-        .replace(/\r\n?/gu, '\n')
+        .replaceAll(/\r\n?/gu, '\n')
         .trimEnd(),
       '```',
     )

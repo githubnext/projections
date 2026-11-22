@@ -48,7 +48,7 @@ export function styleTokens(): StyleTokens {
 function ownText(element: Element): string {
   let text = ''
   for (const node of element.childNodes) if (node.nodeType === Node.TEXT_NODE) text += node.textContent ?? ''
-  return text.replace(/\s+/gu, ' ').trim()
+  return text.replaceAll(/\s+/gu, ' ').trim()
 }
 
 /**

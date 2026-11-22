@@ -32,7 +32,7 @@ const compatibilityWords: Record<string, string> = {
 }
 /** `scope-broadened` as "Scope broadened". */
 const humanize = (name: string) => {
-  const words = name.replace(/[-_]+/gu, ' ').trim()
+  const words = name.replaceAll(/[-_]+/gu, ' ').trim()
   return words ? `${words[0]!.toUpperCase()}${words.slice(1)}` : ''
 }
 

@@ -1,5 +1,5 @@
 import {LoaderCircle} from 'lucide-react'
-import {useLayoutEffect, useRef, type CSSProperties} from 'react'
+import {useLayoutEffect, useRef} from 'react'
 import type {ProjectionController} from '../projection.js'
 import {utilityInset, utilitySide} from '../stage/utility.js'
 import {useWholePixels} from '../stage/whole-pixels.js'
@@ -51,7 +51,7 @@ function Chip({reducedMotion}: {reducedMotion: boolean}) {
       const covers = [...parent.querySelectorAll<HTMLElement>('[data-stage-cover]')]
         .map(cover => cover.getBoundingClientRect())
         .filter(cover => cover.width !== 0 && cover.right > own.left && cover.left < own.right)
-        .sort((a, b) => a.top - b.top)
+        .toSorted((a, b) => a.top - b.top)
       let top = own.top
       for (const cover of covers) {
         if (cover.top < bottom && cover.bottom > top) {

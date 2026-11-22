@@ -251,7 +251,7 @@ test('without highlighting the diff keeps its content and footers and drops only
     off,
     on
       .replace('data-highlighting="on"', 'data-highlighting="off"')
-      .replace(/<span class="pk-status-text".*?<\/span><\/span><\/div>/gu, '</div>'),
+      .replaceAll(/<span class="pk-status-text".*?<\/span><\/span><\/div>/gu, '</div>'),
   )
 })
 

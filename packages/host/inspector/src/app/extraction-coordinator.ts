@@ -60,19 +60,6 @@ interface Run {
   cancel: boolean
 }
 
-/** Resolves after `ms`, or as soon as `signal` aborts, leaving no timer behind. */
-function sleep(ms: number, signal: AbortSignal) {
-  return new Promise<void>(resolve => {
-    const timer = setTimeout(done, ms)
-    function done() {
-      clearTimeout(timer)
-      signal.removeEventListener('abort', done)
-      resolve()
-    }
-    signal.addEventListener('abort', done, {once: true})
-  })
-}
-
 /**
  * Extractions per projection and revision, without React: queued, run one at a time on the runner (it allows one
  * active job) and polled to completion, with the jobs' raw output and a cache of recent ones to present again under

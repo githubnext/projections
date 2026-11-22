@@ -2,6 +2,7 @@
 import {useCallback, useState, createElement, type ElementType} from 'react'
 import {ChevronsDownUp, ChevronsUpDown} from 'lucide'
 import {foldList, type ChangesScope, type Folded} from '../scope.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * Folds a list for the Changes scope (`foldList`) and keeps which folds the person expanded, until the scope's shown

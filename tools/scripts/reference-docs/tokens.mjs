@@ -70,7 +70,7 @@ ${table(
     code(`--projections-${name}`),
     light[name] === 'none'
       ? code('none')
-      : `<span class="docs-icon" role="img" aria-label="${name.slice('icon-'.length)}" style="--docs-icon: ${light[name].replace(/&/gu, '&amp;').replace(/"/gu, '&quot;')}"></span>`,
+      : `<span class="docs-icon" role="img" aria-label="${name.slice('icon-'.length)}" style="--docs-icon: ${light[name].replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"></span>`,
   ]),
 )}
 `

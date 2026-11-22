@@ -75,7 +75,7 @@ export function choiceDetail(
   if (id === 'branch') return `${facts.defaultBranch ?? 'the default branch'} → ${yourFiles} · ${branchDetail(facts)}`
   if (id === 'last-commit') return 'previous commit → last commit'
   if (id.startsWith('pr:')) {
-    return [choice.title ?? `#${id.slice(3)}`, ...(pair ? [pairNames(pair, labels).replace(/working tree/gu, yourFiles)] : [])].join(' · ')
+    return [choice.title ?? `#${id.slice(3)}`, ...(pair ? [pairNames(pair, labels).replaceAll('working tree', yourFiles)] : [])].join(' · ')
   }
   // A pair named by its revisions needs no detail; a titled one (a commit subject) shows them.
   if (id.startsWith('pair:') && !choice.title) return ''

@@ -25,28 +25,6 @@ export function useSummaryReport(
   const summarized = useRef<{model?: ComparisonModel | Error; controls: Record<string, ControlValue>}>({controls: {}})
   const sentSummary = useRef('')
   const sendSummary = useRef<() => void>(noop)
-  sendSummary.current = () => {
-    if (!client || !init) return
-    const {model: current, controls: values} = summarized.current
-    if (options.facts && !current) return
-    let facts: readonly SummaryFactItem[] = []
-    if (options.facts && current && !(current instanceof Error)) {
-      try {
-        facts = options.facts({init, model: current, controls: values, rendererName: init.projection.renderer})
-      } catch (error) {
-        onError(`The renderer's summary facts failed: ${error instanceof Error ? error.message : String(error)}`)
-      }
-    }
-    try {
-      const summary = rendererSummary(init, nouns.current, facts)
-      const key = JSON.stringify(summary)
-      if (key === sentSummary.current) return
-      sentSummary.current = key
-      client.summary(summary)
-    } catch {
-      // A summary the protocol refuses leaves the host's own words.
-    }
-  }
   const declareNouns = useCallback(
     (next: SummaryNouns | undefined) => {
       nouns.current = next ?? options.nouns

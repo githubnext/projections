@@ -41,7 +41,7 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
   // Each hidden package belongs to the first shown package that pulls it in, nearest the roots first.
   const ownership = (shown: ReadonlySet<string>) => {
     const owner = new Map<string, string>()
-    const queue = [...shown].sort((a, b) => (depth.get(a) ?? Infinity) - (depth.get(b) ?? Infinity) || compareIds(a, b))
+    const queue = [...shown].toSorted((a, b) => (depth.get(a) ?? Infinity) - (depth.get(b) ?? Infinity) || compareIds(a, b))
     // The queue grows as it is read: an array's iterator reaches the items pushed during the loop.
     for (const id of queue) {
       const by = shown.has(id) ? id : owner.get(id)!

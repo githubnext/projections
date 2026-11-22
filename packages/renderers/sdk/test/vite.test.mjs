@@ -102,7 +102,7 @@ test('the development server serves an edit written straight after another, as a
   const root = stubRenderer({'src/view.js': 'export const label = "Payments"\n'})
   const view = join(root, 'src/view.js')
   const server = await createServer({
-    ...rendererConfig({name: 'flags', title: 'Flags', view: 'src/view.js', kit: join(root, 'kit').replace(/\\/gu, '/')}),
+    ...rendererConfig({name: 'flags', title: 'Flags', view: 'src/view.js', kit: join(root, 'kit').replaceAll('\\', '/')}),
     root,
     configFile: false,
     logLevel: 'silent',
@@ -146,7 +146,7 @@ test('a view builds into the bundle with renderer.json from the same config', as
       name: 'flags',
       title: 'Flags',
       comparisonModes: ['diff', 'side-by-side'],
-      kit: join(root, 'kit').replace(/\\/gu, '/'),
+      kit: join(root, 'kit').replaceAll('\\', '/'),
     })
     await build({...config, root, configFile: false, logLevel: 'silent'})
     const html = readFileSync(join(root, 'dist/index.html'), 'utf8')
@@ -199,7 +199,7 @@ test('the development server serves the generated entry, and makes a mounting en
     return {server, text}
   }
   try {
-    const generated = await serve({view: 'src/view.js', kit: join(root, 'kit').replace(/\\/gu, '/')})
+    const generated = await serve({view: 'src/view.js', kit: join(root, 'kit').replaceAll('\\', '/')})
     try {
       const page = await generated.text('/')
       assert.match(page, /<script type="module" src="\/@id\/__x00__virtual:projections-renderer-entry"><\/script>/u)

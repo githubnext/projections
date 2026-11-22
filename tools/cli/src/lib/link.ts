@@ -119,7 +119,7 @@ export function findNode(root: string, host: Host = currentHost(), exists: (path
 
 /** A shell word: single-quoted, with embedded single quotes closed, escaped and reopened. */
 function shellQuote(value: string): string {
-  return `'${value.replace(/'/gu, `'\\''`)}'`
+  return `'${value.replaceAll("'", `'\\''`)}'`
 }
 
 export interface Launcher {
@@ -142,7 +142,7 @@ export function launcherText(path: string, launcher: Launcher, platform: Platfor
       `set "checkout=${launcher.checkout}"`,
       `set "node=${launcher.node}"`,
       'if exist "%checkout%\\tools\\cli\\src\\launch.ts" goto run',
-      `echo ${message.replace(/\x60/gu, '')}: "%checkout%" 1>&2`,
+      `echo ${message.replaceAll('\x60', '')}: "%checkout%" 1>&2`,
       'exit /b 3',
       ':run',
       'if not exist "%node%" set "node=node"',
@@ -172,7 +172,7 @@ export function readLauncher(text: string | undefined): {kind: 'absent'} | {kind
   if (!text.includes(MARKER)) return {kind: 'foreign'}
   const value = (name: string) => {
     const posix = new RegExp(`^${name}=('(?:[^']|'\\\\'')*')$`, 'm').exec(text)?.[1]
-    if (posix) return posix.slice(1, -1).replace(/'\\''/gu, "'")
+    if (posix) return posix.slice(1, -1).replaceAll("'\\''", "'")
     return new RegExp(`^set "${name}=(.*)"\\r?$`, 'm').exec(text)?.[1] ?? ''
   }
   return {kind: 'launcher', checkout: value('checkout'), node: value('node')}

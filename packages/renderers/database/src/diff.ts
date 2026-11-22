@@ -7,8 +7,7 @@ import {selfLoopRoom} from './links.js'
 import type {MeasureText, TextChrome, TextRole, TextArea} from './text.js'
 import type {FrameColumn, FrameTable, FrameTag, SchemaFrame} from './frame.js'
 import {baseType} from './types.js'
-import {analyse} from './diff-states.js'
-import type {Analysis} from './diff-states.js'
+import {analyse, type Analysis} from './diff-states.js'
 import {diffLinks} from './diff-links.js'
 
 /**

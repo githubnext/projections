@@ -42,11 +42,7 @@ export function useCoveredPadding<P extends FitPadding>(
         below: Math.max(0, Math.round(element.ownerDocument.documentElement.clientHeight - rect.bottom)),
       }
       setBox(last =>
-        last?.x === next.x &&
-        last.y === next.y &&
-        last.width === next.width &&
-        last.height === next.height &&
-        last.below === next.below
+        last?.x === next.x && last.y === next.y && last.width === next.width && last.height === next.height && last.below === next.below
           ? last
           : next,
       )

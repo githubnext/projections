@@ -31,7 +31,7 @@ export function anchors(markdown: string): Set<string> {
 
 /** Fenced blocks and code spans replaced by spaces, keeping offsets and line numbers. */
 function blankCode(markdown: string): string {
-  const blank = (text: string) => text.replace(/[^\n]/gu, ' ')
+  const blank = (text: string) => text.replaceAll(/[^\n]/gu, ' ')
   let fence: string | undefined
   const lines = markdown.replaceAll('\r\n', '\n').split('\n')
   const kept = lines.map(line => {
@@ -46,7 +46,7 @@ function blankCode(markdown: string): string {
     }
     return line
   })
-  return kept.join('\n').replace(/(\x60+)(?!\x60)[\s\S]+?(?<!\x60)\1(?!\x60)/gu, blank)
+  return kept.join('\n').replaceAll(/(\x60+)(?!\x60)[\s\S]+?(?<!\x60)\1(?!\x60)/gu, blank)
 }
 
 export interface Link {

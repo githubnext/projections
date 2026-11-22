@@ -107,7 +107,7 @@ export function assignSources({units, addUnit, roots, files, read}) {
 export function stripComments(text, language) {
   let result = text
   if (['rust', 'javascript', 'go', 'java', 'csharp', 'css'].includes(language)) {
-    result = result.replace(/\/\*[\s\S]*?\*\//gu, block => block.replace(/[^\n]/gu, ' '))
+    result = result.replaceAll(/\/\*[\s\S]*?\*\//gu, block => block.replaceAll(/[^\n]/gu, ' '))
   }
   if (language === 'css') return result.split('\n')
   const comment = language === 'python' || language === 'shell' ? /^\s*#(?!!).*$/u : /(^|[\s;,{}()])\/\/.*$/u
@@ -124,7 +124,7 @@ export function withoutRustTests(lines) {
     let depth = 0
     let end = cursor
     for (; end < kept.length; end += 1) {
-      for (const character of kept[end].replace(/"(\\.|[^"\\])*"|'(\\.|[^'\\])'/gu, '')) {
+      for (const character of kept[end].replaceAll(/"(\\.|[^"\\])*"|'(\\.|[^'\\])'/gu, '')) {
         if (character === '{') depth += 1
         else if (character === '}') depth -= 1
       }

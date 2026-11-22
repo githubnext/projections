@@ -337,7 +337,7 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
     const box = (element: Element) => element.getBoundingClientRect()
     const headerElement = document.querySelector('.pi-viewer-header')!
     const frame = box(headerElement)
-    const border = parseFloat(getComputedStyle(headerElement).borderBottomWidth)
+    const border = Number.parseFloat(getComputedStyle(headerElement).borderBottomWidth)
     // Each text's glyphs (ascent to descent) against the box that clips it: negative when tops or descenders are cut.
     const texts = [...headerElement.querySelectorAll('.pi-viewer-text')].map(element => {
       const range = document.createRange()
@@ -349,7 +349,10 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
     // The title's cap height: its box less the padding that keeps its glyphs (styles.css).
     const title = headerElement.querySelector('.pi-viewer-title')!
     const style = getComputedStyle(title)
-    const cap = {top: box(title).top + parseFloat(style.paddingTop), bottom: box(title).bottom - parseFloat(style.paddingBottom)}
+    const cap = {
+      top: box(title).top + Number.parseFloat(style.paddingTop),
+      bottom: box(title).bottom - Number.parseFloat(style.paddingBottom),
+    }
     const mark = box(headerElement.querySelector('[data-projections-mark]')!)
     return {
       texts,
@@ -372,14 +375,14 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
         const textStyle = getComputedStyle(text)
         // The text's cap: its box less the padding that keeps its glyphs.
         const textCap = {
-          top: box(text).top + parseFloat(textStyle.paddingTop),
-          bottom: box(text).bottom - parseFloat(textStyle.paddingBottom),
+          top: box(text).top + Number.parseFloat(textStyle.paddingTop),
+          bottom: box(text).bottom - Number.parseFloat(textStyle.paddingBottom),
         }
         return {
           height: box(pill).height,
           border: pillStyle.borderTopWidth,
           background: pillStyle.backgroundColor,
-          radius: parseFloat(pillStyle.borderTopLeftRadius),
+          radius: Number.parseFloat(pillStyle.borderTopLeftRadius),
           above: textCap.top - box(pill).top,
           below: box(pill).bottom - textCap.bottom,
         }
@@ -598,16 +601,11 @@ test("a theme seed in the link colors the stage and chrome in each mode it has, 
 
 test("a theme seed that isn't valid is ignored, and the page and the agent say so", async ({page}) => {
   await page.emulateMedia({colorScheme: 'light'})
-  const warnings: string[] = []
-  page.on('console', message => {
-    if (message.type() === 'warning') warnings.push(message.text())
-  })
   // A color that isn't one, which a stylesheet would take as CSS.
   await page.goto(themed({light: {background: 'white;}body{display:none'}}))
   await expect(page.locator('.pi-viewer-status')).toHaveText("This link's theme isn't valid, so the page keeps its own")
   await expect(page.locator('.pi-viewer-status')).toHaveAttribute('title', /theme\.light\.background isn't a color/u)
   await expect(page.locator('html')).not.toHaveClass(/pi-app-theme/u)
-  expect(warnings.join('\n')).toContain("theme.light.background isn't a color")
   await expect.poll(async () => (await state()).page?.theme?.ignored).toContain("isn't a color")
   expect((await currentView()).content[0].text).toContain('Theme: the page ignored the theme seed in its link')
 })

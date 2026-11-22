@@ -7,7 +7,7 @@ export function nonce(view: Window): string {
   view.crypto.getRandomValues(bytes)
   let binary = ''
   for (const byte of bytes) binary += String.fromCharCode(byte)
-  return view.btoa(binary).replace(/\+/gu, '-').replace(/\//gu, '_').replace(/=+$/u, '')
+  return view.btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '')
 }
 
 /** The size styles of a frame that fills its container's height, or follows the renderer's requested `height`. */

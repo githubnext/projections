@@ -70,7 +70,7 @@ export interface Priced {
 function canonical(value: unknown): string {
   return JSON.stringify(value, (_, item: unknown) =>
     typeof item === 'object' && item !== null && !Array.isArray(item)
-      ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
+      ? Object.fromEntries(Object.entries(item).toSorted(([a], [b]) => a.localeCompare(b)))
       : item,
   )
 }

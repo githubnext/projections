@@ -194,22 +194,26 @@ export function GraphCanvas(props: GraphCanvasProps) {
   const document = source ?? model
   const drawn = useRef<Drawn>(undefined)
   const last = drawn.current
-  const shown: Drawn | undefined = transition
-    ? {
-        key: last && last.document === document ? last.key : (last?.key ?? 0) + 1,
-        document,
-        props,
-        transition,
-        orientation,
-        count,
-        fields,
-        cards,
-        textScale,
-        badgeGrowth: badgeRows,
-        subtitleGrowth: subtitleRows,
-        stale: !ready,
-      }
-    : last
+  // A layout the props have moved past is drawn only in place of a view of the same document already shown. As the
+  // first view it would open on what the host no longer shows (every item, while the scope it sent with its documents
+  // is laid out), then jump to the layout it asked for.
+  const shown: Drawn | undefined =
+    transition && (ready || last?.document === document)
+      ? {
+          key: last && last.document === document ? last.key : (last?.key ?? 0) + 1,
+          document,
+          props,
+          transition,
+          orientation,
+          count,
+          fields,
+          cards,
+          textScale,
+          badgeGrowth: badgeRows,
+          subtitleGrowth: subtitleRows,
+          stale: !ready,
+        }
+      : last
   drawn.current = shown
   return shown ? (
     <LaidOutGraph

@@ -50,7 +50,7 @@
       }
     },
     {
-      "name": "One renderer's change runs that renderer's harness tests, and the suites that bundle every renderer, on Linux",
+      "name": "One renderer's change runs that renderer's harness tests, the suites that bundle every renderer and the package check, on Linux",
       "files": ["packages/renderers/database/src/styles.css"],
       "expect": {
         "renderers": ["database"],
@@ -60,7 +60,7 @@
           "windows-node": false,
           "verus": false,
           "mutants-diff": false,
-          "package": false
+          "package": true
         },
         "browser": [
           "packages/host/core, 1/3",
@@ -115,7 +115,7 @@
       }
     },
     {
-      "name": "An extractor's change runs the Inspector, which extracts, but not the suites that serve fixtures",
+      "name": "An extractor's change runs the Inspector, which extracts, and the CLI's other suites, but not the renderer harness",
       "files": ["packages/extractors/django-schema/src/lib.rs"],
       "expect": {
         "jobs": {
@@ -125,12 +125,12 @@
           "coverage": false
         },
         "browser": ["packages/host/inspector, 1/2", "packages/host/inspector, 2/2", "rest"],
-        "suitesInclude": ["packages/cli"],
-        "suitesExclude": ["examples/renderers/minimal", "packages/renderers/harness"]
+        "suitesInclude": ["packages/cli", "examples/renderers/minimal"],
+        "suitesExclude": ["packages/renderers/harness"]
       }
     },
     {
-      "name": "CI, toolchain, lockfile, tooling and rules changes, and unrecognised files, run everything",
+      "name": "CI, toolchain, lockfile, tooling and rules changes, and unrecognised files, run every job",
       "each": true,
       "files": [
         ".github/workflows/ci.yml",
@@ -148,7 +148,7 @@
           "actions-lock": true,
           "release-config": true,
           "mutants-diff": true,
-          "docs": false
+          "docs": true
         }
       }
     },
@@ -341,6 +341,76 @@
       "expect": {
         "suitesInclude": ["packages/renderers/harness"],
         "renderers": []
+      }
+    },
+    {
+      "name": "Documentation a crate or generator reads is checks, including files that don't exist yet",
+      "each": true,
+      "files": [
+        "packages/extractors/django-schema/NOTES.md",
+        "docs/reference/new-page.md",
+        "docs/agents/new-prompt.md",
+        "packages/cli/src/commands/help/new.after-help.md"
+      ],
+      "expect": {
+        "classes": ["checks"],
+        "docsOnly": false,
+        "jobs": {
+          "docs": false,
+          "public-product": ["ubuntu-latest"],
+          "windows": false,
+          "package": false
+        },
+        "browser": []
+      }
+    },
+    {
+      "name": "A file outside every workspace that only a generator reads or writes is code that touches nothing: the Linux checks",
+      "each": true,
+      "files": ["brand/projections-mark.svg", "notices/notices.json"],
+      "expect": {
+        "classes": ["code"],
+        "full": false,
+        "jobs": {
+          "public-product": ["ubuntu-latest"],
+          "windows": false,
+          "package": false
+        },
+        "browser": []
+      }
+    },
+    {
+      "name": "LICENSE, which the CLI embeds, is the CLI's change",
+      "files": ["LICENSE"],
+      "expect": {
+        "classes": ["code"],
+        "changedInclude": ["packages/cli"],
+        "jobs": {
+          "windows": true,
+          "package": true
+        },
+        "suitesInclude": ["packages/host/inspector"]
+      }
+    },
+    {
+      "name": "A file only the CLI's tests read runs the CLI's suites, but reaches nothing through it",
+      "files": ["examples/comparators/priority-order/fixtures/after.json"],
+      "expect": {
+        "classes": ["code"],
+        "changedInclude": ["packages/cli"],
+        "dependantsExclude": ["packages/integrations/github-action"],
+        "suitesInclude": ["packages/cli"]
+      }
+    },
+    {
+      "name": "Mutation testing leaves out the files .cargo/mutants.toml excludes",
+      "files": ["packages/engine/src/wasm.rs"],
+      "expect": {
+        "jobs": {
+          "mutants-diff": false,
+          "verus": true,
+          "coverage": true
+        }
       }
     }
   ]

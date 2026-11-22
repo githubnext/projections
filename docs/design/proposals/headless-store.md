@@ -31,20 +31,23 @@ Even React hosts pay for it:
 ```ts
 // @githubnext/projections-host: no React
 const projection = createProjection(options) // ProjectionOptions, as today
-projection.getSnapshot() // ProjectionState: today's ProjectionController without `stage` and the methods
-projection.subscribe(listener) // () => unsubscribe; one notification per batch of changes
+projection.getSnapshot() // the ProjectionController, actions included; the same object until something changes
+projection.getSnapshot().seek(0.5) // every action, unchanged
+projection.subscribe(listener) // () => unsubscribe; one notification per settled change
 projection.update(options) // new props: controlled values and callbacks, the subject
-projection.seek(0.5) // every ProjectionController action, unchanged
-projection.start() // activate: timers, frames, subscriptions; restartable after stop()
+projection.start() // activate: frames, the person's preferences, reports; restartable after stop()
 projection.stop()
 
-const stage = mountStage(element, projection, {labels, paneLabels, fill, renderStatus}) // vanilla DOM
+const stage = mountStage(element, projection, {labels, paneLabels, fill, renderStatus}) // vanilla DOM (step 6)
 stage.update({labels}) // and stage.destroy()
 
-// React: today's API, now an adapter
-const controller = useProjection(options) // createProjection once, update in a layout effect,
-// useSyncExternalStore for the snapshot
+// React: today's API, now an adapter over the same phases
+const controller = useProjection(options) // read during render, commit in a layout effect,
+// report in an effect, useSyncExternalStore for the version
 ```
+
+The snapshot is the whole controller, actions included, so a framework adapter
+passes one object to its views as React's does.
 
 Vue wraps `subscribe` in a `shallowRef`, Svelte in a `readable`, and Lit in a
 reactive controller. Each adapter is about twenty lines. `ProjectionStage`
@@ -76,9 +79,20 @@ Two parts of today's behaviour depend on React's timing, and the store keeps
 them:
 
 - **Before paint.** Playback's `*Shown` events and the fit plan's measurements
-  run in layout effects, so a change never paints a stale frame. The React
-  adapter calls `update` in a layout effect. A vanilla host calls it
-  synchronously, before it draws.
+  run in layout effects, so a change never paints a stale frame. The store runs
+  in three phases: `read` derives the controller from the state and the options
+  without side effects, so a render may read and discard it; `commit` keeps what
+  a shown read used and reconciles playback with it; `report` records what the
+  renderers declared and tells the embedder what changed. The React adapter
+  reads during render, commits in a layout effect and reports in an effect, as
+  the hooks did. `createProjection` runs all three after every change, before
+  its listeners hear of it.
+- **What a render implies.** A new subject restarted the settings during render
+  (the `shownSubject` pattern), and a renderer's declared controls took the
+  definition's defaults the same way. `read` derives both from the state it is
+  given (`settle`), so the first render of a new subject already shows it
+  restarted, and `commit` keeps them. Memos compare first with what the last
+  commit used, so a discarded render evicts nothing.
 - **Strict Mode.** React replays an effect's setup, cleanup and setup while
   keeping the state it committed, so a store destroyed in cleanup would be
   reused dead by the second setup. Construction is therefore side-effect free:
@@ -134,8 +148,15 @@ them:
    one selector instance per component and the effects that report. The store
    composes these in step 5, where the status events become its effects, with
    the same names.
-5. **The adapter.** `createProjection` is exported, `useProjection` becomes
-   `useSyncExternalStore` over it, and `controllerRef` hosts can `subscribe`.
+5. **The adapter.** `createProjection` (`projection/store.ts`) is exported, with
+   `ProjectionStore`. It composes the parts of steps 1 to 4: the settings
+   reducer, the playback controller run by its actor, the panes, the interaction
+   reducer, the declared modes and seeded controls, and the person's preferences
+   (`watchMedia`). `derive.ts` reads the controller from them. `useProjection`
+   is about twenty lines over the same phases, with `useSyncExternalStore`; the
+   per-concern hooks are gone. Node tests drive the store without React. A
+   `controllerRef` host that needs to hear of changes uses `createProjection`
+   itself; `ProjectionView` keeps its ref.
 6. **`mountStage` and a vanilla host.** The stage without React, a Storybook
    story of a plain-DOM host as its conformance check, and `ProjectionStage` on
    top of it.

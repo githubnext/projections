@@ -42,6 +42,11 @@ export interface StageLoad {
   selection?: string | null
   /** The host's focus for the opening view, sent in `init` (`RendererFocus`). */
   focus?: RendererFocus
+  /**
+   * The host's scope, summary filter and find, sent with `init` as a host that has chosen them before the frame is
+   * ready does (see `StageApi.filter` for one sent later).
+   */
+  filter?: FilterPayload
   options?: RendererOptions
   colorMode?: ColorMode
   reducedMotion?: boolean

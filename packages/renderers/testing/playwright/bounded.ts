@@ -7,7 +7,8 @@ import type {StageState} from '../src/types.js'
  * runner, so a request still unanswered after this is stuck: a renderer that never acknowledged a paint (`seek` waits
  * for it with no bound of its own), or a page that no longer runs. The bound is in the test process because the page's
  * own timers can't fire in the second case: WebKit runs the sandboxed renderer frame in the host page's process,
- * so a renderer stuck in its document stops the host's event loop with it.
+ * so a renderer stuck in its document, or a web process exhausted by the frames WebKit keeps (`framesPerStagePage`),
+ * stops the host's event loop with it.
  */
 export const stageRequestTimeoutMs = 90_000
 

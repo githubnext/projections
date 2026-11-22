@@ -1,4 +1,4 @@
-// The headless core: `useProjection` and its options, controller and timing, one module each.
+// The headless core: `useProjection` (and `createProjection` without React) and its options, controller and timing, one module each.
 export {highlightingModes} from './projection/types.js'
 export type {
   AnnotationActivation,
@@ -14,3 +14,5 @@ export type {
 export type {ScopeCounts, ScopeHidden} from './projection/filtering.js'
 export {defaultDuration, minimumDurationMs, playbackDuration, progressForKey, stepDurationMs} from './projection/timing.js'
 export {useProjection} from './projection/use-projection.js'
+export {createProjection} from './projection/create-projection.js'
+export type {ProjectionStore} from './projection/create-projection.js'

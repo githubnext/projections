@@ -286,6 +286,35 @@ host). `useRunningIndicator(running)` is the hook every UI's indicator uses (the
 default UI's "Updating…", the VS Code UI's summary bar spinner), and
 `runningText` its words ("Extracting…", "Comparing…").
 
+## Without React
+
+`createProjection(options)` is the same controller as a store, for a host in
+another framework or none. It takes the same `ProjectionOptions`;
+`getSnapshot()` returns the `ProjectionController`, actions included, and it is
+the same object until something changes. `subscribe(listener)` tells you after
+each change, once the change has settled: the core has applied it and told your
+`on…Change` handlers. `update(options)` passes new options, such as a controlled
+value, a handler or a new subject. Construction starts nothing: call `start()`
+before acting on the controller, and `stop()` when you're done. `stop()` keeps
+the state, so `start()` resumes it.
+
+```ts
+import {createProjection} from '@githubnext/projections-host'
+
+const projection = createProjection({subject, projection: {id: 'deps', title: 'Dependencies'}})
+const render = () => draw(projection.getSnapshot())
+projection.subscribe(render)
+projection.start()
+render()
+projection.getSnapshot().setScope('all')
+```
+
+In Vue, a `shallowRef` that `subscribe` updates holds the snapshot; in Svelte, a
+`readable`. `useProjection` is this store with React's timing. It reads the
+controller during render, keeps what was shown in a layout effect, and tells
+your handlers in an effect. The renderer frames still need `ProjectionStage`,
+which is React; a stage without React is planned.
+
 ## The view model
 
 A host UI decides which views it offers and which controls show. The core makes

@@ -1,4 +1,3 @@
-import {useEffect, useState} from 'react'
 import type {InitPayload} from '@githubnext/projections-renderer-sdk/protocol'
 import {twoPaneMode} from '../modes.js'
 import type {ComparisonMode} from '../modes.js'
@@ -69,13 +68,4 @@ export function createStatusEvents(): (view: StatusView, events: StatusEvents) =
     if (before?.status !== status) events.onRendererStatusChange?.(status)
     if (settled !== undefined && (before === undefined || before.settled !== settled)) events.onPainted?.({mode, progress})
   }
-}
-
-/** `createStatusEvents` for a component's lifetime, told after each commit. */
-export function useStatusEvents({latest, ...view}: StatusView & {latest: {current: StatusEvents}}) {
-  const [tell] = useState(createStatusEvents)
-  const {status, paint, playing, mode, progress} = view
-  useEffect(() => {
-    tell({status, paint, playing, mode, progress}, latest.current)
-  }, [tell, latest, status, paint, playing, mode, progress])
 }

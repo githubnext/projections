@@ -1,5 +1,6 @@
 // Whether a workspace's build output (its dist) is there, complete and current with its inputs: TypeScript in the
 // workspaces that depend on it reads that dist, so a fast typecheck, `build` and `doctor` need to know.
+import {spawnSync} from 'node:child_process'
 import {createHash} from 'node:crypto'
 import {existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync} from 'node:fs'
 import {dirname, join, relative, sep} from 'node:path'
@@ -66,9 +67,47 @@ const isFile = (path: string) => existsSync(path) && statSync(path).isFile()
 const configFile = /^(?:package\.json|tsconfig.*\.json|.+\.config\.[cm]?[jt]s)$/u
 
 /**
- * A workspace's build inputs besides its src, as paths from the root, sorted: its manifest, tsconfigs and the
- * shared ones they extend, its tool configs (vite, vitest, tsdown…), its scripts directory, and the files its build
- * scripts (and the npm scripts they run) name.
+ * Test scaffolding at a workspace's top level, which tests and the harness read at run time and no build does; its
+ * src (whose times decide on their own) and what a build writes.
+ */
+const notInput = /^(?:src|test|tests|browser|fixtures|scenarios\.json|dist|artifacts|target|node_modules)(?:\/|$)/u
+
+/** A workspace's files as git sees them (tracked and present, or untracked and not ignored), else a walk. */
+function workspaceFiles(root: string, directory: string): string[] {
+  const listed = spawnSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', directory], {
+    cwd: root,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
+  if (listed.status === 0) return listed.stdout.split('\0').filter(path => path !== '' && isFile(join(root, path)))
+  const files: string[] = []
+  const visit = (path: string) => {
+    for (const entry of readdirSync(path, {withFileTypes: true})) {
+      if (entry.isDirectory() && !/^(?:\.git|node_modules|dist|artifacts|target)$/u.test(entry.name)) visit(join(path, entry.name))
+      else if (entry.isFile()) files.push(posix(relative(root, join(path, entry.name))))
+    }
+  }
+  visit(join(root, directory))
+  return files
+}
+
+/**
+ * Every file in the workspace its build may read besides its src: stylesheets, assets, templates, vendored code,
+ * configuration. Not test scaffolding (`notInput`), Markdown, or a package nested in it (a directory of its own with a
+ * package.json or Cargo.toml).
+ */
+function workspaceInputs(root: string, unit: Unit): string[] {
+  const files = workspaceFiles(root, unit.path).map(path => posix(relative(unit.path, path)))
+  const nested = files.filter(path => /\/(?:package\.json|Cargo\.toml)$/u.test(path)).map(path => `${dirname(path)}/`)
+  return files
+    .filter(path => !notInput.test(path) && !path.endsWith('.md') && !nested.some(prefix => path.startsWith(prefix)))
+    .map(path => posix(join(unit.path, path)))
+}
+
+/**
+ * A workspace's build inputs besides its src, as paths from the root, sorted: every file in it a build may read
+ * (`workspaceInputs`: its manifest, tsconfigs and tool configs, scripts, stylesheets, assets), the shared tsconfigs
+ * its own extend, and the files its build scripts (and the npm scripts they run) name.
  */
 export function buildInputs(root: string, unit: Unit): string[] {
   const directory = join(root, unit.path)
@@ -81,6 +120,7 @@ export function buildInputs(root: string, unit: Unit): string[] {
       if (entry.name.startsWith('tsconfig')) tsconfigs.push(join(directory, entry.name))
     }
   }
+  for (const path of workspaceInputs(root, unit)) add(join(root, path))
   // Relative `extends` only: a package's tsconfig is a dependency, which the lockfile versions.
   while (tsconfigs.length) {
     const tsconfig = tsconfigs.pop()!
@@ -93,13 +133,6 @@ export function buildInputs(root: string, unit: Unit): string[] {
       }
     }
   }
-  const visit = (path: string) => {
-    for (const entry of readdirSync(path, {withFileTypes: true})) {
-      if (entry.isDirectory() && entry.name !== 'node_modules') visit(join(path, entry.name))
-      else if (entry.isFile()) add(join(path, entry.name))
-    }
-  }
-  if (existsSync(join(directory, 'scripts'))) visit(join(directory, 'scripts'))
   const manifest = join(directory, 'package.json')
   const scripts = isFile(manifest) ? ((JSON.parse(readFileSync(manifest, 'utf8')) as {scripts?: Record<string, string>}).scripts ?? {}) : {}
   const queue = ['prebuild', 'build', 'postbuild']

@@ -1,8 +1,7 @@
 import type {Entity, Relationship} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ComparisonModel} from './model.js'
-import type {ScheduledStep} from './timeline.js'
-import {motionWindow, stepProgress} from './timeline.js'
+import {type ScheduledStep, motionWindow, stepProgress} from './timeline.js'
 import {fadeIn, fadeOut, smootherstep, unitProgress} from './motion.js'
 
 /** A span of progress, centred on `time` and reaching `radius` either side: `[time - radius, time + radius]`. */

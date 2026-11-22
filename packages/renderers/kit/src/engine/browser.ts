@@ -1,5 +1,4 @@
-import elk from 'elkjs/lib/elk-api.js'
-import type {ELK as ElkEngine} from 'elkjs/lib/elk-api.js'
+import elk, {type ELK as ElkEngine} from 'elkjs/lib/elk-api.js'
 import workerSource from 'elkjs/lib/elk-worker.min.js?raw'
 
 interface WorkerLike {

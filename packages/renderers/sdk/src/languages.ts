@@ -1,5 +1,4 @@
-import {aliases, extensions, filenames, languages as table, release} from '../vendor/linguist/languages.js'
-import type {LinguistType} from '../vendor/linguist/languages.js'
+import {aliases, extensions, filenames, languages as table, release, type LinguistType} from '../vendor/linguist/languages.js'
 import type {ColorMode} from './protocol.js'
 
 /**

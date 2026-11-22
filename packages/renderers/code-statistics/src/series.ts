@@ -1,8 +1,11 @@
 import type {ChangeStatus as Status, Entity} from '@githubnext/projections-schemas'
-import type {CodeStatisticsScope, EntityChange, StatisticsKey} from '@githubnext/projections-renderer-sdk/presentation'
-import {statisticsCount} from '@githubnext/projections-renderer-sdk/presentation'
-import {classifyChange} from '@githubnext/projections-renderer-kit'
-import type {Category, ChangeClassification, Palette} from '@githubnext/projections-renderer-kit'
+import {
+  type CodeStatisticsScope,
+  type EntityChange,
+  type StatisticsKey,
+  statisticsCount,
+} from '@githubnext/projections-renderer-sdk/presentation'
+import {classifyChange, type Category, type ChangeClassification, type Palette} from '@githubnext/projections-renderer-kit'
 import type {ThemeTokenName} from '@githubnext/projections-renderer-sdk/protocol'
 import type {CodeStatisticsMeasure, StatisticsMotion} from './timeline.js'
 

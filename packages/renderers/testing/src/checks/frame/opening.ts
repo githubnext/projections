@@ -2,8 +2,7 @@
 import {openingFloorPx} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
 import type {OpeningCanvas, OpeningMeasurement} from '../../types.js'
-import {Skip, Passed, limit, label} from '../support.js'
-import type {Checks} from '../support.js'
+import {Skip, Passed, limit, label, type Checks} from '../support.js'
 
 /** The frame a zoomable renderer must open fitted in: about a VS Code tab at full width, and a phone. */
 const openingFrame = {height: 650, phoneHeight: 700}

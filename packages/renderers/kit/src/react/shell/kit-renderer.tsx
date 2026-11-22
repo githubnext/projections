@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef} from 'react'
-import type {ComponentType, KeyboardEvent} from 'react'
+import {useCallback, useEffect, useMemo, useRef, type ComponentType, type KeyboardEvent} from 'react'
 import {interactionCapabilities} from '@githubnext/projections-renderer-sdk/interactions'
 import {useRenderer} from '@githubnext/projections-renderer-sdk/react'
 import {RendererBoundary} from '../components.js'
@@ -15,9 +14,10 @@ import {
   StageInset,
   StageMaxHeight,
   stageInsetOf,
+  StageInsetBottom,
+  StageInsetTop,
 } from './frame.js'
 import {useStageCoverOf} from './cover.js'
-import {StageInsetBottom, StageInsetTop} from './frame.js'
 import type {MountOptions, RendererProps} from './props.js'
 import {
   useAspectReport,

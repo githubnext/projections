@@ -1,14 +1,18 @@
 // Running a built-in renderer in a frame nested in this renderer's document, as its host.
-import {parseRendererMessage, rendererFragment, rendererLimits, rendererProtocolVersion, rendererSandbox} from './protocol.js'
-import type {
-  ColorMode,
-  HostMessage,
-  InitPayload,
-  ProgressPayload,
-  RendererCapabilities,
-  RendererEnvironment,
-  RendererMessage,
-  RendererOptions,
+import {
+  parseRendererMessage,
+  rendererFragment,
+  rendererLimits,
+  rendererProtocolVersion,
+  rendererSandbox,
+  type ColorMode,
+  type HostMessage,
+  type InitPayload,
+  type ProgressPayload,
+  type RendererCapabilities,
+  type RendererEnvironment,
+  type RendererMessage,
+  type RendererOptions,
 } from './protocol.js'
 import type {RendererClient} from './client.js'
 

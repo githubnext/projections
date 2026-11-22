@@ -1,5 +1,4 @@
-import {diffLines} from './diff.js'
-import type {Line, LineDiff} from './diff.js'
+import {diffLines, type Line, type LineDiff} from './diff.js'
 
 export type LineKind = 'equal' | 'delete' | 'insert'
 

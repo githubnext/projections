@@ -1,5 +1,4 @@
-import {codeSpan, escapeProse} from '@githubnext/projections-schemas'
-import type {Entity} from '@githubnext/projections-schemas'
+import {codeSpan, escapeProse, type Entity} from '@githubnext/projections-schemas'
 import type {IconName} from '@githubnext/projections-renderer-kit'
 
 /**

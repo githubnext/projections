@@ -1,5 +1,4 @@
-import {expect, test} from '@playwright/test'
-import type {Page} from '@playwright/test'
+import {expect, test, type Page} from '@playwright/test'
 import {openRenderer} from '@githubnext/projections-renderer-harness/playwright'
 import {before as invoicing} from '../test/fixtures.mjs'
 

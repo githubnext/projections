@@ -1,11 +1,20 @@
 import {test} from 'node:test'
-import {categoryPalette, ease, languageCategory, motionWindow, smootherstep, stepEmphasis} from '@githubnext/projections-renderer-kit'
+import {
+  categoryPalette,
+  ease,
+  languageCategory,
+  motionWindow,
+  smootherstep,
+  stepEmphasis,
+  codeStatisticsControls,
+  codeStatisticsControlsFor,
+  codeStatisticsOptions,
+} from '@githubnext/projections-renderer-kit'
 import assert from 'node:assert/strict'
 import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 // `npm test` compiles src/ (without the browser entry) to this cache directory first.
 import {donutSlice, signed, statisticsMotion} from '../node_modules/.cache/test/timeline.js'
-import {codeStatisticsControls, codeStatisticsControlsFor, codeStatisticsOptions} from '@githubnext/projections-renderer-kit'
 import {controlValues, parseControls} from '@githubnext/projections-renderer-sdk/protocol'
 import {languageColor, languageNamed} from '@githubnext/projections-renderer-sdk/languages'
 import {CodeStatisticsRenderer} from '../node_modules/.cache/test/renderer.js'

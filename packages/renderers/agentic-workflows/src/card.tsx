@@ -1,6 +1,5 @@
 import {classifyChange, isChanged} from '@githubnext/projections-renderer-kit'
-import {ChangePills, EntityCard, Icon, Prose, ValueChange} from '@githubnext/projections-renderer-kit/react'
-import type {PillItem} from '@githubnext/projections-renderer-kit/react'
+import {ChangePills, EntityCard, Icon, Prose, ValueChange, type PillItem} from '@githubnext/projections-renderer-kit/react'
 import {codeSpan} from '@githubnext/projections-schemas'
 import type {ReactNode} from 'react'
 import {dataOf} from './sections.js'

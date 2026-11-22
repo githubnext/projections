@@ -6,21 +6,17 @@ import {
   humanizeKind,
   languageCategory,
   plainCategory,
+  type RendererLegend,
 } from '@githubnext/projections-renderer-kit'
-import {EmptyDomain, useFrameFill, useFrameSizing, useLegend} from '@githubnext/projections-renderer-kit/react'
-import type {RendererLegend} from '@githubnext/projections-renderer-kit'
-import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
-import {genericMetrics, sentenceCase, sharedUnit} from '@githubnext/projections-renderer-sdk/presentation'
-import type {StatisticsKey} from '@githubnext/projections-renderer-sdk/presentation'
+import {EmptyDomain, useFrameFill, useFrameSizing, useLegend, type RendererProps} from '@githubnext/projections-renderer-kit/react'
+import {genericMetrics, sentenceCase, sharedUnit, type StatisticsKey} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Entity} from '@githubnext/projections-schemas'
-import {codeStatisticsMeasures, statisticsMotion} from './timeline.js'
-import type {StatisticsMotion} from './timeline.js'
+import {codeStatisticsMeasures, statisticsMotion, type StatisticsMotion} from './timeline.js'
 import type {accepts} from './accepts.js'
 import {BarsChart} from './bars.js'
 import {statisticsColumns} from './columns.js'
 import {rowPresentation} from './presentation.js'
-import {amount, composition, compositionSeries, languageSeries} from './series.js'
-import type {Series} from './series.js'
+import {amount, composition, compositionSeries, languageSeries, type Series} from './series.js'
 import {ShareChart} from './share.js'
 import {StatisticsTable, statisticsTableControls} from './table.js'
 import {DiffShareChart} from './share-diff.js'

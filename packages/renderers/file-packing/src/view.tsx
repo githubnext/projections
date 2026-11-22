@@ -1,19 +1,23 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import type {FocusEvent, PointerEvent} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState, type FocusEvent, type PointerEvent} from 'react'
 import {paletteLegend} from '@githubnext/projections-renderer-kit'
-import {EmptyDomain, Notice, useLegend, usePaintGate} from '@githubnext/projections-renderer-kit/react'
-import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
+import {EmptyDomain, Notice, useLegend, usePaintGate, type RendererProps} from '@githubnext/projections-renderer-kit/react'
 import type {RendererProjection} from '@githubnext/projections-renderer-sdk/protocol'
-import {formatSize, legendTitle, categoryOf, weightOf} from './files.js'
-import type {SizeMeasure} from './files.js'
-import {createPackingTransition, diffPacking} from './transition.js'
-import type {Circle} from './transition.js'
+import {formatSize, legendTitle, categoryOf, weightOf, type SizeMeasure} from './files.js'
+import {createPackingTransition, diffPacking, type Circle} from './transition.js'
 import type {PackSettings} from './pack/hierarchy.js'
 import type {accepts} from './accepts.js'
 import {depthControl, exclusionControls, folderControls, measureControl} from './controls.js'
 import {Circles, layoutMark, labelsMark, RootSurface} from './circles.js'
-import {diffViewBox, drawCircle, withHolders, includedRows, packingDocument, packingPalette, sizeWords} from './document.js'
-import type {Exclusions} from './document.js'
+import {
+  diffViewBox,
+  drawCircle,
+  withHolders,
+  includedRows,
+  packingDocument,
+  packingPalette,
+  sizeWords,
+  type Exclusions,
+} from './document.js'
 import {nameOf, placeLabels} from './labels.js'
 import {useLabelSize, useStageSize} from './stage.js'
 import {Tooltip} from './tooltip.js'

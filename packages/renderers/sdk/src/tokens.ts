@@ -1,6 +1,5 @@
 import type {ColorMode} from './protocol/frame.js'
-import {defaultIconTokens, iconNames, iconToken} from './icons.js'
-import type {IconTokenName} from './icons.js'
+import {defaultIconTokens, iconNames, iconToken, type IconTokenName} from './icons.js'
 
 /**
  * Version of the theme token set. Hosts send `theme.version`; renderers can

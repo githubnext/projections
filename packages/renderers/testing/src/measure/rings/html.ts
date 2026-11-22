@@ -1,7 +1,6 @@
 // An HTML unit's ring: the SDK's outline inside its box, nothing positioned over it, and an edge the unit owns.
 import {describe, px, colorAlpha} from '../paint.js'
-import {edgeOf} from './edges.js'
-import type {EdgeInfo} from './edges.js'
+import {edgeOf, type EdgeInfo} from './edges.js'
 import {ownershipFailures} from './ownership.js'
 import type {RingState} from './units.js'
 

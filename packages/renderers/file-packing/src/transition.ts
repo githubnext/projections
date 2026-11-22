@@ -1,6 +1,5 @@
 import type {Entity} from '@githubnext/projections-schemas'
-import {compareIds, createStagedTimeline} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, ScheduledStep} from '@githubnext/projections-renderer-kit'
+import {compareIds, createStagedTimeline, type ComparisonModel, type ScheduledStep} from '@githubnext/projections-renderer-kit'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {separate} from './pack/arrange.js'
 import type {PackSettings} from './pack/hierarchy.js'

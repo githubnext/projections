@@ -1,7 +1,6 @@
 // Where routes cross.
 import type {Point} from '../edge-arrows.js'
-import {sampleSpline} from '../splines.js'
-import type {Spline} from '../splines.js'
+import {sampleSpline, type Spline} from '../splines.js'
 import {crossingWork} from './crossing-work.js'
 
 /**

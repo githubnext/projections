@@ -2,8 +2,7 @@
 // relationships joined to it.
 import type {Entity, Relationship} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {compareIds, isChanged} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {compareIds, isChanged, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 import {collapseLimit} from './limits.js'
 
 export {collapseAbove, oneRevisionCollapseAbove} from './limits.js'

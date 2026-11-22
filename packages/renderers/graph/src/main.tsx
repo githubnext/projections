@@ -1,10 +1,14 @@
 import '@githubnext/projections-renderer-kit/react.css'
 import {useEffect, useMemo} from 'react'
-import {followContext} from '@githubnext/projections-renderer-kit'
-import {GraphCanvas, graphCanvasControls, graphCanvasPace, mountRenderer, useSummaryNouns} from '@githubnext/projections-renderer-kit/react'
-import {boundaryNouns} from '@githubnext/projections-renderer-kit'
-import type {SummaryFactContext, SummaryNouns} from '@githubnext/projections-renderer-kit'
-import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
+import {followContext, boundaryNouns, type SummaryFactContext, type SummaryNouns} from '@githubnext/projections-renderer-kit'
+import {
+  GraphCanvas,
+  graphCanvasControls,
+  graphCanvasPace,
+  mountRenderer,
+  useSummaryNouns,
+  type RendererProps,
+} from '@githubnext/projections-renderer-kit/react'
 import type {Entity} from '@githubnext/projections-schemas'
 import {defineControls} from '@githubnext/projections-renderer-sdk/protocol'
 import {actionPart, attributeChanges, boundaryKinds, infrastructureStatus, plannedAction, resourceType} from './infrastructure/resources.js'

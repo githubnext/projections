@@ -1,6 +1,5 @@
 import {readFileSync} from 'node:fs'
-import {expect, test} from '@playwright/test'
-import type {Locator} from '@playwright/test'
+import {expect, test, type Locator} from '@playwright/test'
 import {compareWithComparator, extraction, openRenderer} from '@githubnext/projections-renderer-harness/playwright'
 
 const declaration = (id: string, signature: string, kind = 'function') => ({id, kind, label: id, data: {signature}})

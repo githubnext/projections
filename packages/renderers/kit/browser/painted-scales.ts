@@ -1,5 +1,4 @@
-import {expect} from '@playwright/test'
-import type {FrameLocator, Page} from '@playwright/test'
+import {expect, type FrameLocator, type Page} from '@playwright/test'
 
 /**
  * Records, in every document of the page (the renderer frame's among them), each scale the element matching

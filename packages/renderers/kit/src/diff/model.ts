@@ -2,11 +2,9 @@
 
 import type {Entity, Relationship} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {classifyChange} from '../emphasis.js'
-import type {ChangeClassification} from '../emphasis.js'
+import {classifyChange, type ChangeClassification} from '../emphasis.js'
 import type {ComparisonModel} from '../model.js'
-import {fieldChanges} from './fields.js'
-import type {FieldChange} from './fields.js'
+import {fieldChanges, type FieldChange} from './fields.js'
 
 /**
  * Diff mode's data: the union of both revisions, every entity and

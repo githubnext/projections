@@ -1,7 +1,10 @@
-import {ease, easeWithin, stepProgress, unitProgress} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, ScheduledStep} from '@githubnext/projections-renderer-kit'
-import {codeStatisticsMeasures, defaultCodeStatisticsOptions} from '@githubnext/projections-renderer-sdk/presentation'
-import type {CodeStatisticsMeasure, CodeStatisticsOptions} from '@githubnext/projections-renderer-sdk/presentation'
+import {ease, easeWithin, stepProgress, unitProgress, type ComparisonModel, type ScheduledStep} from '@githubnext/projections-renderer-kit'
+import {
+  codeStatisticsMeasures,
+  defaultCodeStatisticsOptions,
+  type CodeStatisticsMeasure,
+  type CodeStatisticsOptions,
+} from '@githubnext/projections-renderer-sdk/presentation'
 
 export {codeStatisticsMeasures, defaultCodeStatisticsOptions}
 export type {CodeStatisticsMeasure, CodeStatisticsOptions}

@@ -4,8 +4,7 @@ import {layerGap, nodeSpacing, rootPadding} from './placement.js'
 import type {ElkInput} from './elk-input.js'
 import type {Point} from '../edge-arrows.js'
 import {alignColumns} from './unlinked-columns.js'
-import {columnLine} from './grid.js'
-import type {Grid} from './grid.js'
+import {columnLine, type Grid} from './grid.js'
 
 export interface Box {
   x: number

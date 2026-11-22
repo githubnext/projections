@@ -1,14 +1,15 @@
 // What the gallery presents: documents of scenarios, and for each scenario what its own renderer is given.
 import type {Comparison, Entity, Extraction} from '@githubnext/projections-schemas'
-import {comparisonModes, supportedComparisonModes} from '@githubnext/projections-renderer-sdk/protocol'
-import type {
-  ComparisonMode,
-  InitPayload,
-  ProgressPayload,
-  RendererCapabilities,
-  RendererEnvironment,
-  RendererKind,
-  RendererOptions,
+import {
+  comparisonModes,
+  supportedComparisonModes,
+  type ComparisonMode,
+  type InitPayload,
+  type ProgressPayload,
+  type RendererCapabilities,
+  type RendererEnvironment,
+  type RendererKind,
+  type RendererOptions,
 } from '@githubnext/projections-renderer-sdk/protocol'
 
 /** One scenario, as the `scenarios/v0` vocabulary describes it (docs/models/scenarios-model.md). */

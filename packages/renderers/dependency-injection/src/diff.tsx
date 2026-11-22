@@ -1,5 +1,4 @@
-import {useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {CSSProperties} from 'react'
+import {useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties} from 'react'
 import {
   cardBorderOutset,
   changeMark,
@@ -12,6 +11,8 @@ import {
   svgStatusWidth,
   contentStart,
   textPill,
+  type ChangeClassification,
+  type StatusPart,
 } from '@githubnext/projections-renderer-kit'
 import {
   CardChangeMarks,
@@ -23,17 +24,14 @@ import {
   useLegend,
   useOpeningFloor,
   useStageZoom,
+  type RendererProps,
 } from '@githubnext/projections-renderer-kit/react'
-import type {ChangeClassification, StatusPart} from '@githubnext/projections-renderer-kit'
-import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import type {accepts} from './accepts.js'
 import {unitParts} from './model.js'
-import {capitalize, createDiDiff} from './diff-model.js'
+import {capitalize, createDiDiff, type DiDependencyChange, type DiDiff, type DiDiffUnit} from './diff-model.js'
 import {diMetrics, monoAdvance, sansAdvance} from './geometry.js'
 import {lifetimeDash, markSpan} from './lifetime-mark.js'
-import {facetNouns} from './facets.js'
-import type {DiDependencyChange, DiDiff, DiDiffUnit} from './diff-model.js'
-import type {DiFacetChange} from './facets.js'
+import {facetNouns, type DiFacetChange} from './facets.js'
 import {
   LifetimeMark,
   LinkOrigins,

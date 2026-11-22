@@ -1,8 +1,7 @@
 // Change and accent colors drawn inside one another (probe call `accents`).
 import type {AccentFamily, AccentPaint, NestedAccent} from '../types.js'
 import {describe, visible, visuallyHidden} from './paint.js'
-import {familyHues, paintsOf} from './accents/hues.js'
-import type {Paint} from './accents/hues.js'
+import {familyHues, paintsOf, type Paint} from './accents/hues.js'
 
 interface Painted {
   element: Element

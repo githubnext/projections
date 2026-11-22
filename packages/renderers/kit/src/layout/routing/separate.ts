@@ -1,8 +1,7 @@
 // Separating parallel runs: routes leaving one port turn together, and runs sharing a gap take separate tracks.
 import {trackSpacing} from '../../routes/tracks.js'
 import type {RoutingContext, Segment} from './context.js'
-import {moveRun, turnOf} from './runs.js'
-import type {Run} from './runs.js'
+import {moveRun, turnOf, type Run} from './runs.js'
 import {separateBundles} from './bundles.js'
 import {moveTrunksOff} from './trunk-moves.js'
 

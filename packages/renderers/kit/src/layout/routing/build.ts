@@ -5,8 +5,7 @@ import {gappedBend, routeRadius, routeTail} from '../../routes/s-bend.js'
 import {portInset} from '../../routes/ports.js'
 import {smoothRoute} from '../../routes/smooth.js'
 import {roundedSpline} from '../geometry.js'
-import {routeClearance} from './context.js'
-import type {RoutingContext, Segment} from './context.js'
+import {routeClearance, type RoutingContext, type Segment} from './context.js'
 import {corridorRoute} from './corridor.js'
 
 /**

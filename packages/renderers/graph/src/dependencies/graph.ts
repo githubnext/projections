@@ -1,7 +1,6 @@
 import type {Relationship} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {compareIds, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 import {isRootEntity, membershipKinds, sideOf} from './kinds.js'
 
 /**

@@ -5,8 +5,7 @@
  * to it; one with square corners covers the inside of the border's curve, and the border thins there.
  */
 import type {Locator, Page} from '@playwright/test'
-import type {CornerMeasure, CornerProbe} from './corners/analyze.js'
-import {measureCorners} from './corners/analyze.js'
+import {type CornerMeasure, type CornerProbe, measureCorners} from './corners/analyze.js'
 
 export type {CornerMeasure, CornerProbe, CornerRay, CornerSide} from './corners/analyze.js'
 

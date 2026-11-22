@@ -1,5 +1,4 @@
-import {ramp} from '@githubnext/projections-renderer-kit'
-import type {StepWindows} from '@githubnext/projections-renderer-kit'
+import {ramp, type StepWindows} from '@githubnext/projections-renderer-kit'
 import type {SchemaBox} from './schema.js'
 
 /** Below this, an item is invisible and omitted from the frame. */

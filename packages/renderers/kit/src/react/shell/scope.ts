@@ -3,8 +3,7 @@
 import {useCallback, useMemo, useState} from 'react'
 import type {FilterPayload} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ComparisonModel} from '../../model.js'
-import {changesScope, isFold, scopedModel} from '../../scope.js'
-import type {ScopeView} from '../../scope.js'
+import {changesScope, isFold, scopedModel, type ScopeView} from '../../scope.js'
 import type {DocumentModel} from './document.js'
 import type {MountOptions} from './props.js'
 

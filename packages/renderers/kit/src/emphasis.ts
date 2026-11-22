@@ -1,6 +1,5 @@
 import type {ChangeStatus, Entity, Relationship} from '@githubnext/projections-schemas'
-import type {EntityChange, ScheduledStep} from '@githubnext/projections-renderer-sdk/presentation'
-import {emphasisRise} from '@githubnext/projections-renderer-sdk/presentation'
+import {type EntityChange, type ScheduledStep, emphasisRise} from '@githubnext/projections-renderer-sdk/presentation'
 import {unitProgress} from './motion.js'
 import type {IconName} from '@githubnext/projections-renderer-sdk/protocol'
 

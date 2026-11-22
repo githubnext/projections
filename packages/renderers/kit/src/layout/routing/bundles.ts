@@ -6,8 +6,7 @@ import {sampleSpline} from '../../splines.js'
 import {compareIds} from '../model.js'
 import type {RoutingContext, Segment} from './context.js'
 import {build} from './build.js'
-import {restoreRun} from './runs.js'
-import type {Run} from './runs.js'
+import {restoreRun, type Run} from './runs.js'
 
 /**
  * Puts each bundle of a group of overlapping runs on its own track, `trackSpacing` apart, in the order that crosses

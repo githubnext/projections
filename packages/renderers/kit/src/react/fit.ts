@@ -1,8 +1,6 @@
-import {useLayoutEffect, useRef, useState} from 'react'
-import type {RefObject} from 'react'
+import {useLayoutEffect, useRef, useState, type RefObject} from 'react'
 import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import {fitPadding, fitPaddingDown, fitScale} from '../fit.js'
-import type {Fit, FitOptions} from '../fit.js'
+import {fitPadding, fitPaddingDown, fitScale, type Fit, type FitOptions} from '../fit.js'
 import {openingZoom} from '../zoom.js'
 import {useContentAspect, useFrameFill, useFrameSizing, usePaintHold, useStageHeightCap} from './shell/frame.js'
 

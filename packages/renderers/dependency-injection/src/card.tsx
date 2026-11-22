@@ -1,5 +1,4 @@
-import {useMemo} from 'react'
-import type {CSSProperties, KeyboardEvent} from 'react'
+import {useMemo, type CSSProperties, type KeyboardEvent} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import {
   routeBoxEdge,
@@ -11,9 +10,11 @@ import {
   describeChange,
   edgeMarkerId,
   edgePaint,
+  type BoxEdge,
+  type Point,
+  type RendererLegend,
 } from '@githubnext/projections-renderer-kit'
 import {EdgeArrowMarker, useStageCover, useStageInsetBottom, useStageInsetTop} from '@githubnext/projections-renderer-kit/react'
-import type {BoxEdge, Point, RendererLegend} from '@githubnext/projections-renderer-kit'
 import {lifetimeNames} from './facets.js'
 import type {DiUnit, Lifetime} from './model.js'
 import type {DiLinkFrame} from './transition.js'

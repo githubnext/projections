@@ -1,8 +1,6 @@
 import type {DependencyInjectionExtraction} from '@githubnext/projections-schemas'
-import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, IconName, SummaryFactItem} from '@githubnext/projections-renderer-kit'
-import {facetNouns, unitFacets} from './facets.js'
-import type {DiFacet} from './facets.js'
+import {compareIds, type ComparisonModel, type IconName, type SummaryFactItem} from '@githubnext/projections-renderer-kit'
+import {facetNouns, unitFacets, type DiFacet} from './facets.js'
 import type {DiUnit} from './model.js'
 import {diUnion} from './union.js'
 

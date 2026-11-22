@@ -1,7 +1,6 @@
 // Optical insets: the space between a pill's painted edge and its text's ink, measured from rendered pixels.
 import type {Locator, Page} from '@playwright/test'
-import {inkBounds} from './optical/analyze.js'
-import type {InkBounds} from './optical/analyze.js'
+import {inkBounds, type InkBounds} from './optical/analyze.js'
 
 /** The gaps between a surface's painted edge and the ink inside it, in CSS px (see `opticalInsets`). */
 export interface OpticalInsets {

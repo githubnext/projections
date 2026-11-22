@@ -1,9 +1,7 @@
-import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {compareIds, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {dataOf, sectionSpecs} from './sections.js'
-import type {SectionId, SectionSpec, Value} from './sections.js'
+import {dataOf, sectionSpecs, type SectionId, type SectionSpec, type Value} from './sections.js'
 
 /** Which revision a frame shows: `diff` draws both at once; a side-by-side pane or a single extraction shows one. */
 export type Side = 'diff' | 'before' | 'after'

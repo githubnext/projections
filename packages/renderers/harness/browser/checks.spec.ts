@@ -1,6 +1,5 @@
 import {devices, expect, test} from '@playwright/test'
-import {checkScenario} from '@githubnext/projections-renderer-testing/playwright'
-import type {CheckId} from '@githubnext/projections-renderer-testing/playwright'
+import {checkScenario, type CheckId} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 import {scenarios} from './scenarios.js'
 

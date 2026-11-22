@@ -1,6 +1,5 @@
 // Validators the message parsers share.
-import {rendererProtocolVersion, rendererLimits} from './frame.js'
-import type {Envelope} from './frame.js'
+import {rendererProtocolVersion, rendererLimits, type Envelope} from './frame.js'
 
 export const cssColor = /^(#[0-9a-f]{3}|#[0-9a-f]{6}|#[0-9a-f]{8}|(rgb|rgba|hsl|hsla)\([0-9.,%\s/+-]{1,64}\))$/i
 

@@ -1,6 +1,5 @@
 import {expect, test} from '@playwright/test'
-import type {CornerReport} from '@githubnext/projections-renderer-testing/playwright'
-import {cornerReport, openStage} from '@githubnext/projections-renderer-testing/playwright'
+import {type CornerReport, cornerReport, openStage} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 
 /**

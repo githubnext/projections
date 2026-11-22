@@ -1,11 +1,9 @@
 // Zooming and panning a fitted stage: the zoom actions, Ctrl/⌘-wheel and pinch, the scroll anchor, the text floor the
 // view opens at and the dot grid behind the content.
-import {useEffect, useLayoutEffect, useRef, useState} from 'react'
-import type {RefObject} from 'react'
+import {useEffect, useLayoutEffect, useRef, useState, type RefObject} from 'react'
 import {openingFloorPx} from '@githubnext/projections-renderer-sdk/presentation'
 import {placedAttribute} from '../focus.js'
-import {clampZoom, dotGrid, maxZoom, openingZoom, zoomLimits} from '../zoom.js'
-import type {ScrollStart, StageZoom, StageZoomOptions} from '../zoom.js'
+import {clampZoom, dotGrid, maxZoom, openingZoom, zoomLimits, type ScrollStart, type StageZoom, type StageZoomOptions} from '../zoom.js'
 import {pageWheel, useDragPan} from './drag-pan.js'
 import {useStageCover, useStageInsetTop} from './shell/frame.js'
 import {useControlActions} from './shell/mount.js'

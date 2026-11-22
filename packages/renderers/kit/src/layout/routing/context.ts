@@ -1,8 +1,7 @@
 // The state shared by every phase of routing: the cards, their faces along the axis, and each route's segments.
 import type {Point} from '../../edge-arrows.js'
 import {polylinesCross} from '../../routes/crossings.js'
-import {sampleSpline} from '../../splines.js'
-import type {Spline} from '../../splines.js'
+import {sampleSpline, type Spline} from '../../splines.js'
 import type {LayoutEdge} from '../model.js'
 import {straightRuns} from '../geometry.js'
 

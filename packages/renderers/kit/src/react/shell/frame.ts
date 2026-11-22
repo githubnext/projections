@@ -1,8 +1,7 @@
 // The contexts a kit renderer's components reach the shell through: the paint gate, frame fill and sizing, and content aspect.
 import {createContext, useContext, useEffect, useLayoutEffect} from 'react'
 import type {RendererEnvironment} from '@githubnext/projections-renderer-sdk/protocol'
-import {contentHeightCap} from '../../fit.js'
-import type {CoverRect} from '../../fit.js'
+import {contentHeightCap, type CoverRect} from '../../fit.js'
 
 export const PaintGate = createContext<() => () => void>(() => () => {})
 export interface FrameFillControl {

@@ -1,7 +1,6 @@
 // A ring's units and their SVG shapes, and the styling that draws an edge or a ring.
 import {colorAlpha} from '../paint.js'
-import {spreads} from './edges.js'
-import type {EdgeInfo} from './edges.js'
+import {spreads, type EdgeInfo} from './edges.js'
 
 export type RingState = 'hover' | 'selected' | 'focus'
 /** The unit an entity element belongs to: the nearest marked unit around it, else the outermost entity element. */

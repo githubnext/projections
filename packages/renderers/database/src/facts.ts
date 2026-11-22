@@ -1,10 +1,15 @@
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {classifyChange, compareIds, pluralKind} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, IconName, SummaryFactItem} from '@githubnext/projections-renderer-kit'
+import {
+  classifyChange,
+  compareIds,
+  pluralKind,
+  type ComparisonModel,
+  type IconName,
+  type SummaryFactItem,
+} from '@githubnext/projections-renderer-kit'
 import {isColumn, keyType} from './vocabulary.js'
-import {both} from './change-lines.js'
-import type {ChangeLine} from './change-lines.js'
+import {both, type ChangeLine} from './change-lines.js'
 import {analyse} from './diff-states.js'
 
 /** Singular and plural nouns for each key kind; other kinds are named verbatim. */

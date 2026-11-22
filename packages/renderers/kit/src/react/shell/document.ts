@@ -3,12 +3,9 @@
 import {useEffect, useMemo, useState} from 'react'
 import type {InitPayload, ProgressPayload} from '@githubnext/projections-renderer-sdk/protocol'
 import {isDiff} from '@githubnext/projections-renderer-sdk/react'
-import {stepEmphasis} from '../../emphasis.js'
-import type {EmphasisOf} from '../../emphasis.js'
-import {createModel} from '../../model.js'
-import type {ComparisonModel} from '../../model.js'
-import {DirectionLatch, scheduleSteps, stepEnds, timelineSlots} from '../../timeline.js'
-import type {ScheduledStep} from '../../timeline.js'
+import {stepEmphasis, type EmphasisOf} from '../../emphasis.js'
+import {createModel, type ComparisonModel} from '../../model.js'
+import {DirectionLatch, scheduleSteps, stepEnds, timelineSlots, type ScheduledStep} from '../../timeline.js'
 
 /** A document's comparison model (or why it couldn't be built), with its own direction latch (see `DirectionLatch`). */
 export interface DocumentModel {

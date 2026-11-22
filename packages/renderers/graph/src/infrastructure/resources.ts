@@ -1,7 +1,6 @@
 // How infrastructure resources read on their cards: planned actions, resource types and attribute changes.
 import type {Entity} from '@githubnext/projections-schemas'
-import type {FieldLine, StatusPart, TransitionNode} from '@githubnext/projections-renderer-kit'
-import {fieldLines} from '@githubnext/projections-renderer-kit'
+import {type FieldLine, type StatusPart, type TransitionNode, fieldLines} from '@githubnext/projections-renderer-kit'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**

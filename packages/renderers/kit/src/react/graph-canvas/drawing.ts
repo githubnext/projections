@@ -1,8 +1,7 @@
 // What every drawn part of a laid-out graph reads: its props, accessible names, change marks and focus.
 import type {CSSProperties} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
-import type {StatusPart, ChangeClassification} from '../../emphasis.js'
-import {describeChange} from '../../emphasis.js'
+import {type StatusPart, type ChangeClassification, describeChange} from '../../emphasis.js'
 import type {GraphTransition, TransitionEdge, TransitionNode} from '../../graph-transition.js'
 import {changeMark} from '../../diff/model.js'
 import type {DiffCardText} from '../../diff-card/metrics.js'

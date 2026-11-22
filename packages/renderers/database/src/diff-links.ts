@@ -1,6 +1,5 @@
 // Diff mode's links: every relationship of either revision, linked on the union's layout with its change status.
-import {classifyChange} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {classifyChange, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 import type {SchemaLayout} from './schema.js'
 import {linkEnds, linkPortOffsets, linkTracks} from './links.js'
 import type {FrameLink} from './frame.js'

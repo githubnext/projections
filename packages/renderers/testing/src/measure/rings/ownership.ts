@@ -1,7 +1,6 @@
 // Whether an HTML unit owns its visible edge, so its ring is that edge.
 import {describe} from '../paint.js'
-import {edgeOf, edged} from './edges.js'
-import type {EdgeInfo} from './edges.js'
+import {edgeOf, edged, type EdgeInfo} from './edges.js'
 import {format} from './units.js'
 
 /** Where an HTML unit's visible edge is not its own: the element to mark instead, or what to change. */

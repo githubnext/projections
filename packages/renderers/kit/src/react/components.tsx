@@ -1,17 +1,23 @@
-import {Component, Fragment, useContext, useEffect, useLayoutEffect, useRef, useState} from 'react'
-import type {ErrorInfo, HTMLAttributes, ReactNode} from 'react'
-import type {ChangeStatus} from '@githubnext/projections-schemas'
-import {proseSpans} from '@githubnext/projections-schemas'
+import {
+  Component,
+  Fragment,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ErrorInfo,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react'
+import {type ChangeStatus, proseSpans} from '@githubnext/projections-schemas'
 import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import {identifier, variedBeyond, variedBeyondLabel} from '@githubnext/projections-renderer-sdk/presentation'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, variedBeyond, variedBeyondLabel, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {arrowHead, arrowHeadLength, arrowHeadStyle} from '../arrowhead.js'
 import {LegendContext} from './legend-context.js'
-import {classifyChange, statusLabels, statusParts} from '../emphasis.js'
-import type {StatusPart} from '../emphasis.js'
+import {classifyChange, statusLabels, statusParts, type StatusPart} from '../emphasis.js'
 import {Icon, SvgIcon} from './icons.js'
-import {svgIcon, svgIconGap, svgPartGap, svgWordAdvance} from '../svg-status.js'
-import type {StatusChange} from '../svg-status.js'
+import {svgIcon, svgIconGap, svgPartGap, svgWordAdvance, type StatusChange} from '../svg-status.js'
 
 /**
  * Change badges, faded by emphasis. At zero emphasis they render nothing, so

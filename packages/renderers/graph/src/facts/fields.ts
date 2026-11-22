@@ -1,7 +1,6 @@
 // The data fields a document's cards can show, and how an entity reads in each.
 import type {Entity} from '@githubnext/projections-schemas'
-import {isCardIconName} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {isCardIconName, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 
 /** Choice values longer than this aren't offered (the protocol's limit), so neither are fields with longer pointers. */
 const choiceLength = 64

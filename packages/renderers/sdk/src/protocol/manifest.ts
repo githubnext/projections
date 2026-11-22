@@ -1,8 +1,6 @@
 // A renderer's manifest and the extractions it accepts.
-import {domainSchemas, vocabularyNames} from '@githubnext/projections-schemas'
-import type {DomainSchema, ExtractionOf, Vocabulary} from '@githubnext/projections-schemas'
-import {parseComparisonModes} from './comparison-modes.js'
-import type {ComparisonMode} from './comparison-modes.js'
+import {domainSchemas, vocabularyNames, type DomainSchema, type ExtractionOf, type Vocabulary} from '@githubnext/projections-schemas'
+import {parseComparisonModes, type ComparisonMode} from './comparison-modes.js'
 import {record, keys} from './validation.js'
 
 /** Manifest each renderer bundle ships as `renderer.json` beside its `index.html`. */

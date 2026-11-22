@@ -2,8 +2,7 @@
 import type {GraphLayout} from '../layout.js'
 import type {ComparisonModel} from '../model.js'
 import type {ScheduledStep} from '../timeline.js'
-import {unscheduledWindow} from '../stages.js'
-import type {StepWindows} from '../stages.js'
+import {unscheduledWindow, type StepWindows} from '../stages.js'
 import type {GraphTransition, GraphTransitionOptions} from '../graph-transition.js'
 import {moveCollides} from './collisions.js'
 import {crossingMorphs} from './crossing.js'
@@ -11,8 +10,7 @@ import {diffFrame} from './diff-frame.js'
 import {transitionFrame} from './frame.js'
 import {stageLayout} from './layouts.js'
 import {layerBands} from './bands.js'
-import {transitionTiming} from './timing.js'
-import type {Ends} from './timing.js'
+import {transitionTiming, type Ends} from './timing.js'
 
 /**
  * Lays out a comparison's staged graph transition (see `GraphTransition`): the union of both revisions and each

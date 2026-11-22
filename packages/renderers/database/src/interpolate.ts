@@ -1,14 +1,11 @@
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {current} from '@githubnext/projections-renderer-kit'
-import type {StagedTimeline} from '@githubnext/projections-renderer-kit'
-import {schemaMetrics} from './schema.js'
-import type {SchemaBox, SchemaLayout, SchemaModel, SchemaState} from './schema.js'
+import {current, type StagedTimeline} from '@githubnext/projections-renderer-kit'
+import {schemaMetrics, type SchemaBox, type SchemaLayout, type SchemaModel, type SchemaState} from './schema.js'
 import {lerp, lerpBox, longestIncreasing, smooth, VISIBLE} from './fading.js'
 import type {FrameColumn, FrameTable, FrameTag, SchemaFrame} from './frame.js'
 import type {LinkShape} from './links.js'
-import {columnKey} from './stages.js'
-import type {fades} from './stages.js'
+import {columnKey, type fades} from './stages.js'
 
 /** Everything a frame is interpolated from: the stages, their layouts and drawings, and every item's fade. */
 export interface Staged extends ReturnType<typeof fades> {

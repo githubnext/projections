@@ -1,15 +1,13 @@
 // The graph's frame: every layout the transition passes through, its bounds, and the stage's fit and zoom.
-import {useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {RefObject} from 'react'
+import {useLayoutEffect, useMemo, useRef, useState, type RefObject} from 'react'
 import type {RendererFocus} from '@githubnext/projections-renderer-sdk/protocol'
 import type {GraphTransition} from '../../graph-transition.js'
-import {contentStart, openingZoom} from '../../zoom.js'
+import {contentStart, openingZoom, type ContentBox, type ScrollStart} from '../../zoom.js'
 import {useBorderWidths} from '../border.js'
 import {useFitScale} from '../fit.js'
 import {useCoveredPadding, useScrolledPadding} from '../covered-padding.js'
 import {useFrameSizing, useStageCover, useStageInset, useStageInsetBottom, useStageInsetTop} from '../shell/frame.js'
 import {useOpeningFloor, useStageZoom} from '../zoom.js'
-import type {ContentBox, ScrollStart} from '../../zoom.js'
 import type {LaidOutGraphProps} from './drawing.js'
 import type {FocusArea} from '../../graph-canvas/focus.js'
 

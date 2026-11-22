@@ -1,7 +1,19 @@
-import {codeStatisticsOptions, humanizeKind, summaryChange} from '@githubnext/projections-renderer-kit'
-import type {SummaryFactContext, SummaryFactItem, SummaryNoun, SummaryNouns} from '@githubnext/projections-renderer-kit'
-import {genericMetrics, sharedUnit, statisticsCount} from '@githubnext/projections-renderer-sdk/presentation'
-import type {CodeStatisticsMeasure, CodeStatisticsScope} from '@githubnext/projections-renderer-sdk/presentation'
+import {
+  codeStatisticsOptions,
+  humanizeKind,
+  summaryChange,
+  type SummaryFactContext,
+  type SummaryFactItem,
+  type SummaryNoun,
+  type SummaryNouns,
+} from '@githubnext/projections-renderer-kit'
+import {
+  genericMetrics,
+  sharedUnit,
+  statisticsCount,
+  type CodeStatisticsMeasure,
+  type CodeStatisticsScope,
+} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Entity} from '@githubnext/projections-schemas'
 
 /** The summary bar's words: every row is a language. */

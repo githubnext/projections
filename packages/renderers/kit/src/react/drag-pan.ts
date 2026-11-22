@@ -1,6 +1,5 @@
 // Panning a content-sized stage by dragging, so the host page keeps the wheel and touch scrolling.
-import {useEffect} from 'react'
-import type {RefObject} from 'react'
+import {useEffect, type RefObject} from 'react'
 import {useFrameSizing, useStageHeightCap} from './shell/frame.js'
 
 /** How far, CSS px, a pointer moves before a press on the stage becomes a drag that pans it rather than a click. */

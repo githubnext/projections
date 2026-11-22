@@ -1,10 +1,13 @@
 import {useMemo} from 'react'
-import {DataTable, useTableProps} from '@githubnext/projections-renderer-kit/react'
-import type {DataTableColumn, RendererProps} from '@githubnext/projections-renderer-kit/react'
+import {DataTable, useTableProps, type DataTableColumn, type RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {tableSortControls} from '@githubnext/projections-renderer-kit'
 import type {RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
-import {sentenceCase, statisticsCount} from '@githubnext/projections-renderer-sdk/presentation'
-import type {CodeStatisticsScope, StatisticsKey} from '@githubnext/projections-renderer-sdk/presentation'
+import {
+  sentenceCase,
+  statisticsCount,
+  type CodeStatisticsScope,
+  type StatisticsKey,
+} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {accepts} from './accepts.js'
 

@@ -1,10 +1,7 @@
 // The Changes scope's folds: a run of items a list doesn't show, drawn as one row that expands in place.
-import {useCallback, useState} from 'react'
-import {createElement} from 'react'
-import type {ElementType} from 'react'
+import {useCallback, useState, createElement, type ElementType} from 'react'
 import {ChevronsDownUp, ChevronsUpDown} from 'lucide'
-import {foldList} from '../scope.js'
-import type {ChangesScope, Folded} from '../scope.js'
+import {foldList, type ChangesScope, type Folded} from '../scope.js'
 
 /**
  * Folds a list for the Changes scope (`foldList`) and keeps which folds the person expanded, until the scope's shown

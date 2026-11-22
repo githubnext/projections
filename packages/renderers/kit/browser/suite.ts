@@ -2,9 +2,8 @@ import {expect, test} from '@playwright/test'
 import {openRenderer, samples} from '@githubnext/projections-renderer-harness/playwright'
 import type {FixturePair} from './fixtures.js'
 import {arrowContacts, contactIssues} from './invariants/contacts.js'
-import {measureFrame} from './invariants/frame.js'
+import {measureFrame, type FrameMeasurement} from './invariants/frame.js'
 import {scrubFailures} from './invariants/scrub.js'
-import type {FrameMeasurement} from './invariants/frame.js'
 
 const ids = (frame: FrameMeasurement) =>
   [...new Set([...frame.cards.filter(card => card.opacity > 0.999).map(card => card.id), ...frame.groups])].sort()

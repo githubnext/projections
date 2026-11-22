@@ -1,5 +1,4 @@
-import {followContext} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {followContext, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 
 /** Relationships to what a row points at, drawn as a link from it: a key's table and columns, a column's target. */
 const ends = new Set(['references', 'constrains', 'foreign-key', 'relation', 'enum-type'])

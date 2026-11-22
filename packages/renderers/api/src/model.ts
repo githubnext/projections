@@ -1,6 +1,5 @@
 import type {Entity, Extraction} from '@githubnext/projections-schemas'
-import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ChangesScope, ComparisonModel, Folded} from '@githubnext/projections-renderer-kit'
+import {compareIds, type ChangesScope, type ComparisonModel, type Folded} from '@githubnext/projections-renderer-kit'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Side} from './signature.js'
 

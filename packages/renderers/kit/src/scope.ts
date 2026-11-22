@@ -1,12 +1,16 @@
 // The Changes scope as kit renderers present it: which items a comparison shows (its changes and their context), and
 // how a list folds the runs of items it doesn't show.
-import {changeContext, isScopeChange, scopeRows} from '@githubnext/projections-renderer-sdk/presentation'
-import type {ChangesScope, PresentedStep} from '@githubnext/projections-renderer-sdk/presentation'
+import {
+  changeContext,
+  isScopeChange,
+  scopeRows,
+  type ChangesScope,
+  type PresentedStep,
+} from '@githubnext/projections-renderer-sdk/presentation'
 import type {FilterPayload} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Extraction} from '@githubnext/projections-schemas'
 import type {ComparisonModel} from './model.js'
-import {foldParts, foldPrefix, partsOf, sides} from './scope-parts.js'
-import type {Side} from './scope-parts.js'
+import {foldParts, foldPrefix, partsOf, sides, type Side} from './scope-parts.js'
 
 export {foldPrefix} from './scope-parts.js'
 

@@ -1,8 +1,6 @@
-import {expect, test} from '@playwright/test'
-import type {Page, TestInfo} from '@playwright/test'
+import {expect, test, type Page, type TestInfo} from '@playwright/test'
 import {defaultComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
-import {openStage} from '@githubnext/projections-renderer-testing/playwright'
-import type {IdentifierMeasurement} from '@githubnext/projections-renderer-testing/playwright'
+import {openStage, type IdentifierMeasurement} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 import {scenarios} from './scenarios.js'
 

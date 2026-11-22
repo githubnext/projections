@@ -1,9 +1,7 @@
 import {readFileSync} from 'node:fs'
-import {expect, test} from '@playwright/test'
-import type {Page} from '@playwright/test'
+import {expect, test, type Page} from '@playwright/test'
 import type {Comparison, Extraction} from '@githubnext/projections-schemas'
-import {compare, compareWithComparator, openRenderer} from '@githubnext/projections-renderer-harness/playwright'
-import type {RendererHandle} from '@githubnext/projections-renderer-harness/playwright'
+import {compare, compareWithComparator, openRenderer, type RendererHandle} from '@githubnext/projections-renderer-harness/playwright'
 
 const fixture = (name: string): Extraction =>
   JSON.parse(readFileSync(new URL(`../../../extractors/tetragon-policies/tests/fixtures/${name}`, import.meta.url), 'utf8'))

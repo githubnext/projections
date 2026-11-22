@@ -1,10 +1,8 @@
 import type {Entity} from '@githubnext/projections-schemas'
-import {sentenceCase} from '@githubnext/projections-renderer-sdk/presentation'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {sentenceCase, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {svgStatusWidth} from './svg-status.js'
-import {statusParts} from './emphasis.js'
+import {statusParts, type StatusPart} from './emphasis.js'
 import {cardIconRoom, hasIcon} from './card-icons.js'
-import type {StatusPart} from './emphasis.js'
 
 /** A card's kind line, the small text above its label (see `GraphCanvasProps.kindLine` and `entityKindLine`). */
 export interface KindLineText {

@@ -1,5 +1,4 @@
-import {useLayoutEffect, useState} from 'react'
-import type {RefObject} from 'react'
+import {useLayoutEffect, useState, type RefObject} from 'react'
 
 /**
  * The width the schema is laid out for (the view's, with or without a scrollbar, so zoom never reflows it) and the

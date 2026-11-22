@@ -1,8 +1,6 @@
 import {compareIds} from '@githubnext/projections-renderer-kit'
-import {textMetrics} from './text.js'
-import type {TextSizer} from './text.js'
-import type {SchemaBox, SchemaModel} from './schema.js'
-import {schemaMetrics} from './schema.js'
+import {textMetrics, type TextSizer} from './text.js'
+import {type SchemaBox, type SchemaModel, schemaMetrics} from './schema.js'
 
 /** Where a link meets a card: the middle of a row's first line, or of the header's first line. */
 export const anchorY = (box: SchemaBox, top: number | undefined, header: number) =>

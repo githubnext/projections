@@ -1,9 +1,7 @@
 // A data table's sort as renderer controls, which the host draws in its settings menu and remembers, and which
 // agents read and set; a heading's activation sets them too (`useTableProps`).
-import {defineControls} from '@githubnext/projections-renderer-sdk/protocol'
-import type {ControlValue, RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
-import {isSortable} from './table.js'
-import type {SortableColumn, TableSort} from './table.js'
+import {defineControls, type ControlValue, type RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
+import {isSortable, type SortableColumn, type TableSort} from './table.js'
 
 const columnIdPattern = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,47}$/
 

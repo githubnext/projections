@@ -1,8 +1,6 @@
-import {createTextSizer} from './text.js'
-import type {CardText, MeasureText, RowText, TextChrome, TextSizer} from './text.js'
+import {createTextSizer, type CardText, type MeasureText, type RowText, type TextChrome, type TextSizer} from './text.js'
 import {columnsLayout} from './columns-layout.js'
-import {schemaMetrics} from './schema.js'
-import type {SchemaLayout, SchemaModel} from './schema.js'
+import {schemaMetrics, type SchemaLayout, type SchemaModel} from './schema.js'
 import {layerDepths} from './schema-model.js'
 import {laneAssignments, stackLayout} from './stack-layout.js'
 

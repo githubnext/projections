@@ -1,9 +1,7 @@
-import {useLayoutEffect, useRef, useState} from 'react'
-import type {ReactNode} from 'react'
+import {useLayoutEffect, useRef, useState, type ReactNode} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import {ChangeStatus} from '@githubnext/projections-renderer-kit/react'
-import {defaultChrome} from './text.js'
-import type {MeasureText, TextChrome, TextRole} from './text.js'
+import {defaultChrome, type MeasureText, type TextChrome, type TextRole} from './text.js'
 
 /**
  * Text drawn in the lines the layout counted (see text.ts): each line whole,

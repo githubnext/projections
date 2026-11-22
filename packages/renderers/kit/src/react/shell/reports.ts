@@ -1,17 +1,15 @@
 // What a kit renderer reports to its host besides the selection: declared controls, paint acknowledgements, its
 // height and content shape, its legend and its step boundaries.
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {RefObject} from 'react'
-import {controlValues} from '@githubnext/projections-renderer-sdk/protocol'
-import type {
-  ControlValue,
-  InitPayload,
-  RendererControl,
-  RendererLegend,
-  RendererOptions,
+import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject} from 'react'
+import {
+  controlValues,
+  type ControlValue,
+  type InitPayload,
+  type RendererControl,
+  type RendererLegend,
+  type RendererOptions,
 } from '@githubnext/projections-renderer-sdk/protocol'
-import type {RendererClient} from '@githubnext/projections-renderer-sdk/client'
-import {afterPaint} from '@githubnext/projections-renderer-sdk/client'
+import {type RendererClient, afterPaint} from '@githubnext/projections-renderer-sdk/client'
 import type {FrameFillControl} from './frame.js'
 
 /**

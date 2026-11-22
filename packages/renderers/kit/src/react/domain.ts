@@ -1,8 +1,7 @@
 import {useMemo} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {domainIndex} from '../domain.js'
-import type {DomainIndex} from '../domain.js'
+import {domainIndex, type DomainIndex} from '../domain.js'
 import {entityPresence} from '../emphasis.js'
 import type {ComparisonModel} from '../model.js'
 

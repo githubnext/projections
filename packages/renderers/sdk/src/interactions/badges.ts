@@ -1,8 +1,7 @@
 // The annotation badges: one button per annotated item, in an overlay outside the renderer's root, straddling a corner
 // of the item where it is visible.
 import type {AnchorRect, AnnotationMark} from '../protocol.js'
-import {annotationAnchorAttribute, annotationAnchors, annotationAttribute, toggle} from './attributes.js'
-import type {AnnotationAnchor} from './attributes.js'
+import {annotationAnchorAttribute, annotationAnchors, annotationAttribute, toggle, type AnnotationAnchor} from './attributes.js'
 import {badgeStyle} from './badge-style.js'
 import {clipRect} from './geometry.js'
 import {annotationName, itemName} from './names.js'

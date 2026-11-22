@@ -2,11 +2,9 @@
 import {useEffect, useMemo, useRef, useState} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import {usePaintGate} from '@githubnext/projections-renderer-kit/react'
-import {embedRenderer} from '@githubnext/projections-renderer-sdk/client'
-import type {EmbeddedRenderer} from '@githubnext/projections-renderer-sdk/client'
+import {embedRenderer, type EmbeddedRenderer} from '@githubnext/projections-renderer-sdk/client'
 import type {RendererCapabilities, RendererEnvironment} from '@githubnext/projections-renderer-sdk/protocol'
-import {nestedPresentation, restingProgress, scenarioOf} from './model.js'
-import type {Scenario} from './model.js'
+import {nestedPresentation, restingProgress, scenarioOf, type Scenario} from './model.js'
 
 /**
  * A gallery with at most this many scenarios runs every one's renderer, as does one in a content-sized frame; a larger

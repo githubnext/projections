@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react'
-import type {RefObject} from 'react'
+import {useCallback, useEffect, useRef, useState, type RefObject} from 'react'
 import type {RendererClient} from '@githubnext/projections-renderer-sdk/client'
 import {useInteractions} from '@githubnext/projections-renderer-sdk/react'
 

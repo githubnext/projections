@@ -1,5 +1,4 @@
-import {useLayoutEffect, useRef, useState} from 'react'
-import type {RefObject} from 'react'
+import {useLayoutEffect, useRef, useState, type RefObject} from 'react'
 import type {textPill} from '@githubnext/projections-renderer-kit'
 
 /**

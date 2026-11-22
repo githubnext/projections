@@ -1,9 +1,8 @@
 // The checks of change status: in reserved space, and stated as text.
 import type {ComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
 import type {EntitySample, EntityText, OpeningMeasurement, StageSubject} from '../../types.js'
-import {Skip, progressModes, limit, samples, label} from '../support.js'
+import {Skip, progressModes, limit, samples, label, type Checks} from '../support.js'
 import type {CheckDriver} from '../catalog.js'
-import type {Checks} from '../support.js'
 import {changedEntities, pick, touched} from './support.js'
 
 export const statusChecks: Pick<Checks, 'stable-layout' | 'status-text'> = {

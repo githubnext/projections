@@ -2,11 +2,9 @@ import {arrowHeadReach} from '@githubnext/projections-renderer-kit'
 import {anchorY} from './geometry.js'
 import {lerp, redrawPresence, smooth, VISIBLE} from './fading.js'
 import type {FrameLink, FrameTable} from './frame.js'
-import {selfLoop, sideX, turnRoom} from './links.js'
-import type {LinkShape} from './links.js'
+import {selfLoop, sideX, turnRoom, type LinkShape} from './links.js'
 import type {fades} from './stages.js'
-import {nearest} from './interpolate.js'
-import type {Placed, Stage, Staged} from './interpolate.js'
+import {nearest, type Placed, type Stage, type Staged} from './interpolate.js'
 
 /** A link's drawing at this frame: moving with the cards, or redrawn, with how present the drawing is. */
 function linkShapeAt(staged: Staged, key: string, {from, to, mix}: Stage): {shape: LinkShape | undefined; presence: number} {

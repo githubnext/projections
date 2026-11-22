@@ -1,8 +1,7 @@
 import {compareIds} from '@githubnext/projections-renderer-kit'
 import type {TextSizer} from './text.js'
 import {anchor, cardHeight, orderRanks, rowGeometry} from './geometry.js'
-import {schemaMetrics} from './schema.js'
-import type {SchemaBox, SchemaLayout, SchemaModel, SchemaPoint} from './schema.js'
+import {schemaMetrics, type SchemaBox, type SchemaLayout, type SchemaModel, type SchemaPoint} from './schema.js'
 
 export function laneAssignments(
   model: SchemaModel,

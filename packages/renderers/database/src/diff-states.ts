@@ -1,12 +1,10 @@
 import type {Entity, Relationship} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {sameValue} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {sameValue, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 import {buildModel} from './schema-model.js'
 import {enumValues, isEnum} from './vocabulary.js'
 import type {SchemaModel, SchemaState} from './schema.js'
-import {columnChanges, keyChanges, markerChanges, both} from './change-lines.js'
-import type {ChangeLine} from './change-lines.js'
+import {columnChanges, keyChanges, markerChanges, both, type ChangeLine} from './change-lines.js'
 
 /** An enum's values in both revisions: After's order, each removed value after the value it followed in Before. */
 export function mergeValues(before: readonly string[], after: readonly string[]): string[] {

@@ -1,6 +1,5 @@
 // The summary bar's warning about card icons the graph renderer doesn't draw.
-import {isCardIconName} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, SummaryFactItem} from '@githubnext/projections-renderer-kit'
+import {isCardIconName, type ComparisonModel, type SummaryFactItem} from '@githubnext/projections-renderer-kit'
 import type {ControlValue} from '@githubnext/projections-renderer-sdk/protocol'
 import {pointerField} from './fields.js'
 

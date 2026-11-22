@@ -1,14 +1,12 @@
 import {useEffect, useMemo, useState} from 'react'
 import {countText, entityKindLine, stepEmphasis} from '@githubnext/projections-renderer-kit'
-import {GraphCanvas, graphCanvasControls, useSummaryNouns} from '@githubnext/projections-renderer-kit/react'
+import {GraphCanvas, graphCanvasControls, useSummaryNouns, type RendererProps} from '@githubnext/projections-renderer-kit/react'
 import type {Entity} from '@githubnext/projections-schemas'
-import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import type {RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
-import {dependencyView} from './model.js'
+import {dependencyView, type DependencyView} from './model.js'
 import {dependencyNouns} from './facts.js'
 import {isCollapseCard, isTransitiveSummary, summaryOwner} from './kinds.js'
 import {versionOf, versionStatus} from './versions.js'
-import type {DependencyView} from './model.js'
 
 /** The host draws these for the dependency graph: the canvas zoom and whether every transitive package is shown. */
 export const dependencyControls: readonly RendererControl[] = [

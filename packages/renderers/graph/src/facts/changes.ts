@@ -1,8 +1,7 @@
 // What a modified card lists of its data changes in the diff.
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {fieldLines} from '@githubnext/projections-renderer-kit'
-import type {FieldLine} from '@githubnext/projections-renderer-kit'
+import {fieldLines, type FieldLine} from '@githubnext/projections-renderer-kit'
 
 const isRecord = (value: unknown) => typeof value === 'object' && value !== null && !Array.isArray(value)
 

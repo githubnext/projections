@@ -1,6 +1,5 @@
 // A renderer's requests for built-in renderers' documents (`document-request`), and the host's answers (`document`).
-import {rendererLimits, rendererNamePattern} from '../protocol.js'
-import type {HostMessage, RendererMessage} from '../protocol.js'
+import {rendererLimits, rendererNamePattern, type HostMessage, type RendererMessage} from '../protocol.js'
 
 type Answer = Extract<HostMessage, {type: 'document'}>
 

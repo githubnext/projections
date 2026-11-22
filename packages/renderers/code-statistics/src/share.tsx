@@ -1,8 +1,7 @@
 import {ChangeStatus} from '@githubnext/projections-renderer-kit/react'
 import {donutSlice} from './timeline.js'
 import {Delta} from './marks.js'
-import {ring, sliceSemantics, unchanged} from './presentation.js'
-import type {Arc, RowPresentation} from './presentation.js'
+import {ring, sliceSemantics, unchanged, type Arc, type RowPresentation} from './presentation.js'
 import type {Series} from './series.js'
 
 /**

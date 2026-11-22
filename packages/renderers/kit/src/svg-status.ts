@@ -1,7 +1,6 @@
 // An SVG status line's metrics (`SvgChangeStatus`), so a card can reserve its width before it is drawn.
 import type {ChangeStatus} from '@githubnext/projections-schemas'
-import {variedBeyond} from '@githubnext/projections-renderer-sdk/presentation'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {variedBeyond, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {StatusPart} from './emphasis.js'
 
 /** A row's change, as a status line shows it. */

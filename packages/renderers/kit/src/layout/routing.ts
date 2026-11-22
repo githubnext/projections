@@ -1,10 +1,8 @@
 // Relationship routes between laid-out cards.
-import {joinSplines} from '../splines.js'
-import type {Spline} from '../splines.js'
+import {joinSplines, type Spline} from '../splines.js'
 import type {RoutePorts} from './model.js'
 import {build} from './routing/build.js'
-import {routingContext} from './routing/context.js'
-import type {RoutingInput} from './routing/context.js'
+import {routingContext, type RoutingInput} from './routing/context.js'
 import {untangleConverging} from './routing/converge.js'
 import {assign, byLeaving} from './routing/ports.js'
 import {separateRuns} from './routing/separate.js'

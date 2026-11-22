@@ -140,3 +140,12 @@ export const fitPlanLifecycle = defineMachine<FitPlanState, FitPlanEvent, never,
     },
   },
 })
+
+/** What a planned bar renders from its state: not whether a pointer is pressed, which only defers replanning. */
+export type FitPlanView = Pick<FitPlanState, 'kind' | 'plan' | 'width' | 'run'>
+
+export const fitPlanView = ({kind, plan, width, run}: FitPlanState): FitPlanView => ({kind, plan, width, run})
+
+/** Whether `state` renders as `view` does. */
+export const sameView = (view: FitPlanView, state: FitPlanState) =>
+  view.kind === state.kind && view.plan === state.plan && view.width === state.width && view.run === state.run

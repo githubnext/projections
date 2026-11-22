@@ -259,3 +259,16 @@ test('a control kept for its open popup is forgotten when the popup closes with 
   await settle()
   assert.equal(forgotten, 1)
 })
+
+test('a press and its release change nothing the bar renders, so they never render it again', async () => {
+  const {fitPlanView, sameView} = await import('../dist/fit-plan/lifecycle.js')
+  // WebKit drops a tap's click when the page renders between its touch and its click.
+  let state = {kind: 'settled', plan: 'wide', settled: 'wide', width: 640, run: 3, hand: 'free', frame: false, locked: false}
+  const view = fitPlanView(state)
+  for (const type of ['pressed', 'released']) {
+    state = fitPlanLifecycle.transition(state, {type}).state
+    assert.ok(sameView(view, state), `${type} keeps the view`)
+  }
+  // What the bar shows still renders: another plan tried.
+  assert.ok(!sameView(view, fitPlanLifecycle.transition(state, {type: 'tried', plan: 'narrow'}).state))
+})

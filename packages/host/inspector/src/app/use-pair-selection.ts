@@ -4,7 +4,8 @@ import type {InspectorApi} from '../client/api.js'
 import type {InspectorPairs, InspectorRevision} from '../types.js'
 import {defaultPair, marking, suggestedMarks} from './pairs.js'
 import type {Marks} from './pairs.js'
-import {currentKey, openedOn, pairKey, readJson, recentKey, withRecent, writeJson} from './persistence.js'
+import {currentKey, openedOn, pairKey, readJson, writeJson} from './persistence.js'
+import {useRecentPairs} from './recent-pairs.js'
 import type {InspectorOpenedOn} from './props.js'
 import {workingTree} from './revisions.js'
 
@@ -43,21 +44,7 @@ export function usePairSelection({
   setArtifactMarks: Dispatch<SetStateAction<Marks>>
   setSource: Dispatch<SetStateAction<'live' | 'artifact'>>
 }) {
-  // Recently used Before → After pairs of each projection in this repository, newest first: read from storage when a
-  // projection is first shown, and each pair it shows goes first.
-  const [recentIn, setRecentIn] = useState<{repoKey: string; lists: Record<string, Marks[]>}>({repoKey, lists: {}})
-  const [remembered, setRemembered] = useState<Marks>()
-  const shownPair = marks[projection]
-  let recent = recentIn.repoKey === repoKey ? recentIn.lists : {}
-  if (repoKey && projection && !(projection in recent)) {
-    recent = {...recent, [projection]: readJson<Marks[]>(recentKey(repoKey, projection)) ?? []}
-  }
-  const remember = api && projection && repoKey && shownPair?.a && shownPair.b && shownPair !== remembered ? shownPair : undefined
-  if (remember) {
-    recent = {...recent, [projection]: withRecent(recent[projection], remember)}
-    setRemembered(remember)
-  }
-  if (recent !== recentIn.lists) setRecentIn({repoKey, lists: recent})
+  const recent = useRecentPairs(api, repoKey, projection, marks[projection])
   // The runner's suggested pairs per projection: undefined until asked, null when it suggests none.
   const [suggested, setSuggested] = useState<Record<string, InspectorPairs | null>>({})
   const setMark = useCallback(
@@ -100,12 +87,6 @@ export function usePairSelection({
     const saved = opened.projection === projection && opened.pair ? opened.pair : readJson<Marks>(pairKey(repoKey, projection))
     setMarks(current => ({...current, [projection]: saved?.b ? {a: saved.a, b: saved.b} : projectionDefault}))
   }, [api, projection, repoKey, revisions, marks, setMarks, pairsHere, projectionDefault, openedInitially])
-  const recentHere = recent[projection]
-  useEffect(() => {
-    if (!api || !projection || !repoKey || !shownPair?.b) return
-    writeJson(pairKey(repoKey, projection), shownPair)
-    if (shownPair.a && recentHere) writeJson(recentKey(repoKey, projection), recentHere)
-  }, [api, projection, repoKey, shownPair, recentHere])
   /** Shows a Before → After pair (or one revision, without `a`) of the selected projection. */
   const choosePair = useCallback(
     (pair: Marks) => {

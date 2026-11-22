@@ -33,14 +33,14 @@ export function ModeSwitch({
   const [open, setOpen] = useState(false)
   const button = useRef<VscodeToolbarButton>(null)
   const group = useRef<HTMLDivElement>(null)
-  // The mode chosen with the keyboard, focused once it is drawn checked (and in the tab order).
-  const focusing = useRef<ComparisonMode | undefined>(undefined)
+  // The mode chosen with the keyboard, focused once it is drawn (checked, and in the tab order, unless the choice was
+  // refused); each request once, and only while focus is still in the group.
+  const [focusing, setFocusing] = useState<{mode: ComparisonMode}>()
   useLayoutEffect(() => {
-    const mode = focusing.current
-    if (mode === undefined) return
-    focusing.current = undefined
-    focusControl(group.current?.querySelector(`[data-mode="${mode}"]`))
-  })
+    const element = group.current
+    if (!focusing || !element?.contains(element.ownerDocument.activeElement)) return
+    focusControl(element.querySelector(`[data-mode="${focusing.mode}"]`))
+  }, [focusing])
   // In the renderer's order: its first mode is its default.
   const options = p.availableModes
     .filter(value => modes.includes(value))
@@ -86,7 +86,7 @@ export function ModeSwitch({
   )
   const choose = (next: number) => {
     const option = options[(next + options.length) % options.length]!
-    focusing.current = option.value
+    setFocusing({mode: option.value})
     p.setMode(option.value)
   }
   const keys = (event: KeyboardEvent) => {

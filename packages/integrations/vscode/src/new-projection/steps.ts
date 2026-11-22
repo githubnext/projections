@@ -11,11 +11,12 @@ import {
   languageItems,
   parseExtractors,
   parseRenderers,
+  type BuiltinExtractor,
+  type Language,
+  type Plan,
 } from '../new-projection-model.js'
-import type {BuiltinExtractor, Language, Plan} from '../new-projection-model.js'
 import {byTitle} from '../projections/definitions.js'
-import {CliError, title} from './wizard.js'
-import type {Wizard} from './wizard.js'
+import {CliError, title, type Wizard} from './wizard.js'
 
 /** The built-in extractors (from the CLI) and renderers (from the backend). */
 export async function builtins(wizard: Wizard, folder: vscode.WorkspaceFolder) {

@@ -3,11 +3,9 @@
 // nothing), and Pin or Follow at its end. The choice opens the extension's quick pick; the toolbar's layout reflows it
 // (name and detail, the name alone, or one button) as it narrows. An out-of-date result isn't a tool: the view draws
 // "Out of date · 3 files changed · Refresh" as a pill floating over the stage (`TabStaleNotice`).
-import {StageNotice} from '@githubnext/projections-host-vscode'
-import type {PairForm} from '@githubnext/projections-host-vscode'
+import {StageNotice, type PairForm} from '@githubnext/projections-host-vscode'
 import {createElement as h, useSyncExternalStore} from 'react'
-import {hostTag, pairTag} from '../protocol.js'
-import type {HostMessage, TabPairLabels, TabSide} from '../protocol.js'
+import {hostTag, pairTag, type HostMessage, type TabPairLabels, type TabSide} from '../protocol.js'
 
 let labels: TabPairLabels | undefined
 const listeners = new Set<() => void>()

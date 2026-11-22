@@ -1,8 +1,7 @@
 import type {SideLabel} from '../labels.js'
 import type {Pair} from '../projections/pairs.js'
 import {plural} from '../plural.ts'
-import {pairOf} from './model.ts'
-import type {Choice, RepositoryFacts} from './model.ts'
+import {pairOf, type Choice, type RepositoryFacts} from './model.ts'
 import {resolveChoice, tag} from './resolve.ts'
 
 const shortRef = (ref: string) => (ref === 'working-tree' ? 'working tree' : /^[0-9a-f]{40}$/.test(ref) ? ref.slice(0, 8) : ref)

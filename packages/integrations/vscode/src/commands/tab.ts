@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import {ProjectionTab} from '../panels/projection-tab.js'
-import {definitionFile} from '../projection-sources.js'
-import type {ProjectionSources} from '../projection-sources.js'
+import {definitionFile, type ProjectionSources} from '../projection-sources.js'
 import {modeTitles, nextMode} from '../projections/pairs.js'
 import {rowTarget} from './row.js'
 

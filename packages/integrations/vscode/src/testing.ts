@@ -6,8 +6,7 @@ import {testsApi} from './testing/api.js'
 import {runCases} from './testing/run-cases.js'
 import {runChecks} from './testing/run-checks.js'
 import {plan} from './testing/run.js'
-import {TestState} from './testing/state.js'
-import type {Watched} from './testing/state.js'
+import {TestState, type Watched} from './testing/state.js'
 import {applyTree} from './testing/tree.js'
 
 /** The projections a folder defines, by ID with their titles, and their changes (the side bar's models). */

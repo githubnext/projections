@@ -1,25 +1,28 @@
 import * as vscode from 'vscode'
 import type {Lease} from './backends.js'
-import {changeRecord, markStaleCounts} from './folder-model/changes.js'
-import type {Counted} from './folder-model/changes.js'
+import {changeRecord, markStaleCounts, type Counted} from './folder-model/changes.js'
 import {countAll, runnable} from './folder-model/compare-all.js'
 import {WorkingIdentities} from './folder-model/identity.js'
 import {committedDefinitions, fetchFolder, readable} from './folder-model/requests.js'
 import {rowStatus} from './folder-model/status.js'
-import {byTitle, parseCandidates, parseDefinitions} from './projections/definitions.js'
+import {
+  byTitle,
+  parseCandidates,
+  parseDefinitions,
+  type Candidate,
+  type DefinitionList,
+  type InvalidDefinition,
+  type ProjectionDefinition,
+} from './projections/definitions.js'
 import {parsePairs} from './projections/pair-list.js'
-import {samePair} from './projections/pairs.js'
+import {samePair, type Pair, type PairList} from './projections/pairs.js'
 import {choiceDetail, choiceIcon, choiceName, choiceText} from './choices/names.js'
-import {isChoice, sameChoice} from './choices/model.js'
+import {isChoice, sameChoice, type Choice, type RepositoryFacts} from './choices/model.js'
 import {effectiveChoice, identifyPair} from './choices/resolve.js'
-import type {Choice, RepositoryFacts} from './choices/model.js'
-import {definitionEdits, describePair, workingFacts} from './refs.js'
+import {definitionEdits, describePair, workingFacts, type PairLabels} from './refs.js'
 import type {EditState} from './edits.js'
 import {PairSummaries} from './updates.js'
 import type {ChangeRecord, Staleness, WorkingIdentity} from './staleness.js'
-import type {PairLabels} from './refs.js'
-import type {Candidate, DefinitionList, InvalidDefinition, ProjectionDefinition} from './projections/definitions.js'
-import type {Pair, PairList} from './projections/pairs.js'
 import type {TabSummary} from './projections/rows.js'
 
 const refreshDelayMs = 300

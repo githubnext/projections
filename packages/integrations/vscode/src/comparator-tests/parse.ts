@@ -1,5 +1,16 @@
-import {diagnostics, given, location, record, repositoryPath, strings, text} from './wire.ts'
-import type {CaseFailure, CaseResult, FileResult, ListedFile} from './wire.ts'
+import {
+  diagnostics,
+  given,
+  location,
+  record,
+  repositoryPath,
+  strings,
+  text,
+  type CaseFailure,
+  type CaseResult,
+  type FileResult,
+  type ListedFile,
+} from './wire.ts'
 
 /** `GET /api/comparator-tests`' body: its files, dropping malformed entries. */
 export function parseListing(body: unknown): ListedFile[] {

@@ -2,12 +2,10 @@
 // control operation runs on the Inspector's handle once it is ready, and its result (or why it failed) goes back.
 import type {InspectorHandle} from '@githubnext/projections-inspector/mount'
 import type {ViewKind} from '@githubnext/projections-host-vscode'
-import {controlTag, hostTag} from '../protocol.js'
-import type {ControlMessage} from '../protocol.js'
+import {controlTag, hostTag, type ControlMessage} from '../protocol.js'
 import {anchors, boxes, click, elements, press} from './driving.js'
 import {fromExtension, post} from './host.js'
-import {currentView} from './page-view.js'
-import type {View} from './page-view.js'
+import {currentView, type View} from './page-view.js'
 import {probeReport} from './probe.js'
 import {applySwitch, keep, showAs} from './tab-state.js'
 

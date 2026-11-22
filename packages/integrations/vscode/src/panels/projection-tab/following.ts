@@ -3,8 +3,7 @@
 // tab's counts and staleness are for its own pair.
 import type {Choice} from '../../choices/model.js'
 import type {FolderModel} from '../../folder-model.js'
-import {samePair} from '../../projections/pairs.js'
-import type {Pair} from '../../projections/pairs.js'
+import {samePair, type Pair} from '../../projections/pairs.js'
 import type {TabSummary} from '../../projections/rows.js'
 import {movedPin} from './context.js'
 import type {TabStale} from './freshness.js'

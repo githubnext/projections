@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import {basename} from 'node:path'
-import {sourceKey} from '../backend-sources.js'
-import type {PanelSource} from '../backend-sources.js'
+import {sourceKey, type PanelSource} from '../backend-sources.js'
 import type {Services} from '../services.js'
 import {InspectorWebview} from './inspector-webview.js'
 

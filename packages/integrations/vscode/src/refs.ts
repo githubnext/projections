@@ -4,12 +4,10 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {promisify} from 'node:util'
 import {historyOrder} from './ancestry.js'
-import {isBackwards, sideLabel} from './labels.js'
-import type {RefFacts, RefNames, SideLabel} from './labels.js'
+import {isBackwards, sideLabel, type RefFacts, type RefNames, type SideLabel} from './labels.js'
 import type {Pair} from './projections/pairs.js'
 import type {ProjectionDefinition} from './projections/definitions.js'
-import {declaredFiles, editKey, editState, parseStatus, touchedEntries} from './edits.js'
-import type {EditState} from './edits.js'
+import {declaredFiles, editKey, editState, parseStatus, touchedEntries, type EditState} from './edits.js'
 
 const run = promisify(execFile)
 

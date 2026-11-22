@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import {cliName} from './agent-tools.js'
-import {Asked, cliTool} from './language-model-tools/cli-tool.js'
-import type {Contributed} from './language-model-tools/cli-tool.js'
+import {Asked, cliTool, type Contributed} from './language-model-tools/cli-tool.js'
 import {openProjectionTool} from './language-model-tools/open-projection.js'
 import type {ToolAnswer, ToolInput} from './language-model-tools/types.js'
 import {currentView, refresh} from './language-model-tools/view-tools.js'

@@ -1,11 +1,9 @@
 // A projection tab's pin, as its page keeps it, and the context keys the projection editor's title actions read.
 import * as vscode from 'vscode'
-import {isChoice} from '../../choices/model.js'
+import {isChoice, type Choice} from '../../choices/model.js'
 import {resolveChoice} from '../../choices/resolve.js'
-import type {Choice} from '../../choices/model.js'
 import type {FolderModel} from '../../folder-model.js'
-import {samePair} from '../../projections/pairs.js'
-import type {Pair} from '../../projections/pairs.js'
+import {samePair, type Pair} from '../../projections/pairs.js'
 import type {TabSummary} from '../../projections/rows.js'
 import type {TabPair} from '../../protocol.js'
 

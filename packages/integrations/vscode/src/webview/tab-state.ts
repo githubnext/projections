@@ -1,8 +1,7 @@
 // What a projection tab's page keeps: its state with VS Code's webview state (so a restored or re-shown tab comes back
 // as it was), how it shows its projection, the latest switch of pair it applied, and what the extension says it showed.
 import type {ViewKind} from '@githubnext/projections-host-vscode'
-import {hostTag, restoreTag} from '../protocol.js'
-import type {TabPair, TabRestore} from '../protocol.js'
+import {hostTag, restoreTag, type TabPair, type TabRestore} from '../protocol.js'
 import {fromExtension, post, vscode} from './host.js'
 
 /** What a projection tab keeps with VS Code's webview state, so a restored or re-shown tab comes back as it was. */

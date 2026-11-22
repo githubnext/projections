@@ -6,12 +6,18 @@ import type {DefinitionTarget} from '../definition.js'
 import type {FolderModel} from '../folder-model.js'
 import {count} from '../probe.js'
 import {definitionFile} from '../projection-sources.js'
-import {failureFor} from '../projections/rows.js'
-import {swapped} from '../projections/pairs.js'
-import type {Pair} from '../projections/pairs.js'
-import type {TabSummary} from '../projections/rows.js'
-import {hostTag, restoreTag} from '../protocol.js'
-import type {HostMessage, ProjectionFailure, TabPair, TabPairLabels, TabRestore, WebviewConfig} from '../protocol.js'
+import {failureFor, type TabSummary} from '../projections/rows.js'
+import {swapped, type Pair} from '../projections/pairs.js'
+import {
+  hostTag,
+  restoreTag,
+  type HostMessage,
+  type ProjectionFailure,
+  type TabPair,
+  type TabPairLabels,
+  type TabRestore,
+  type WebviewConfig,
+} from '../protocol.js'
 import type {Services} from '../services.js'
 import {setProjectionIcon} from '../sidebar/items.js'
 import type {Sidebar} from '../sidebar.js'
@@ -19,10 +25,8 @@ import {Switches} from '../updates.js'
 import {InspectorWebview} from './inspector-webview.js'
 import {pairFields, pinnedChoice, setTabContext, tabPair} from './projection-tab/context.js'
 import {tabFacts} from './projection-tab/facts.js'
-import {Following} from './projection-tab/following.js'
-import type {Pin} from './projection-tab/following.js'
-import {Freshness} from './projection-tab/freshness.js'
-import type {TabStale} from './projection-tab/freshness.js'
+import {Following, type Pin} from './projection-tab/following.js'
+import {Freshness, type TabStale} from './projection-tab/freshness.js'
 import {jobHold, startsJob} from './projection-tab/jobs.js'
 import {KeptResults} from './projection-tab/kept.js'
 import {refreshAction, tabPairLabels} from './projection-tab/labels.js'

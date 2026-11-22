@@ -1,7 +1,13 @@
-import {parseTransportMessage, transportTag} from '@githubnext/projections-inspector/transport'
-import type {TransportReply} from '@githubnext/projections-inspector/transport'
-import {customRendererPath, relayed, rendererFileOf, workspaceChanges} from './bridge/responses.ts'
-import type {Relayed, RendererFile, WorkspaceChanges} from './bridge/responses.ts'
+import {parseTransportMessage, transportTag, type TransportReply} from '@githubnext/projections-inspector/transport'
+import {
+  customRendererPath,
+  relayed,
+  rendererFileOf,
+  workspaceChanges,
+  type Relayed,
+  type RendererFile,
+  type WorkspaceChanges,
+} from './bridge/responses.ts'
 import type {Runner} from './runner.js'
 
 /** How long a change subscription waits before answering that nothing changed, as `GET /api/changes` does. */

@@ -1,11 +1,16 @@
 import type * as vscode from 'vscode'
-import {agentPrompt, customItems, rendererChoices, writesExtractor} from '../new-projection-model.js'
-import type {CustomParts, DefinitionDirectory, Plan} from '../new-projection-model.js'
-import type {Candidate} from '../projections/definitions.js'
-import {byTitle} from '../projections/definitions.js'
+import {
+  agentPrompt,
+  customItems,
+  rendererChoices,
+  writesExtractor,
+  type CustomParts,
+  type DefinitionDirectory,
+  type Plan,
+} from '../new-projection-model.js'
+import {type Candidate, byTitle} from '../projections/definitions.js'
 import {askAgent, builtins, create, name, pickExtractor, pickLanguage} from './steps.js'
-import {title} from './wizard.js'
-import type {Wizard} from './wizard.js'
+import {title, type Wizard} from './wizard.js'
 
 /** Where a start writes: the folder and its definitions' directory. */
 export interface Target {

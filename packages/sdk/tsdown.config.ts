@@ -1,5 +1,4 @@
-import {defineConfig} from 'tsdown'
-import type {UserConfig} from 'tsdown'
+import {defineConfig, type UserConfig} from 'tsdown'
 
 // `@githubnext/projections` is this monorepo's internal renderer workspaces bundled into one package: the SDK
 // (`./renderer`, `./renderer/react`, `./vite`), the kit (`./kit`, framework-free, and `./kit/react`), renderer testing

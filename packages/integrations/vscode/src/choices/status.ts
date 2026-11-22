@@ -1,5 +1,4 @@
-import {runningText} from '@githubnext/projections-host-vscode/running'
-import type {Running} from '@githubnext/projections-host-vscode/running'
+import {runningText, type Running} from '@githubnext/projections-host-vscode/running'
 import type {SideLabel} from '../labels.js'
 import type {Pair} from '../projections/pairs.js'
 import {plural} from '../plural.ts'

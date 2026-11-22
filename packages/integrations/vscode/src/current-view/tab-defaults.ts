@@ -1,5 +1,4 @@
-import {resolved} from './types.ts'
-import type {TabDefaults, TabFacts} from './types.ts'
+import {resolved, type TabDefaults, type TabFacts} from './types.ts'
 
 /** What the tools take from a tab's facts. */
 export function tabDefaults(facts: TabFacts): TabDefaults {

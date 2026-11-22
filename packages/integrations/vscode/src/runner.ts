@@ -1,5 +1,4 @@
-import {spawn} from 'node:child_process'
-import type {ChildProcess} from 'node:child_process'
+import {spawn, type ChildProcess} from 'node:child_process'
 import {createInterface} from 'node:readline'
 import {createRpcClient} from './runner/rpc.ts'
 

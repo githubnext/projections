@@ -9,11 +9,9 @@
 import * as vscode from 'vscode'
 import type {Sidebar} from './sidebar.js'
 import {bundledDocsUri} from './docs.js'
-import {partDocs} from './projections/docs.js'
+import {partDocs, type DocsIndex} from './projections/docs.js'
 import {parts} from './projections/rows.js'
-import type {DocsIndex} from './projections/docs.js'
-import {follow} from './configuration-model.js'
-import type {DefinitionNode} from './configuration-model.js'
+import {follow, type DefinitionNode} from './configuration-model.js'
 import {definitionItem} from './definition/tree-item.js'
 import type {BuildState} from './renderer-build-model.js'
 

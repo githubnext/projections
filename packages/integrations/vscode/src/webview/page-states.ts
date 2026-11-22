@@ -1,7 +1,6 @@
 // What a projection tab's page shows before, and instead of, its projection: the skeleton the static page draws until
 // the projection view draws its own parts, and an invalid definition's diagnostics.
-import {hostTag} from '../protocol.js'
-import type {ProjectionFailure} from '../protocol.js'
+import {hostTag, type ProjectionFailure} from '../protocol.js'
 import {post} from './host.js'
 
 /**

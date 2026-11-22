@@ -10,8 +10,8 @@ import {
   tokenModifiers,
   tokenTypes,
   utf16Range,
+  type RulesKind,
 } from './rules-service.js'
-import type {RulesKind} from './rules-service.js'
 
 /** How long typing pauses before a comparator file is checked again. */
 const diagnosticsDelayMs = 300

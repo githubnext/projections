@@ -1,8 +1,7 @@
 import * as vscode from 'vscode'
 import type {Runner} from './runner.js'
 import {byTitle} from './projections/definitions.js'
-import {parseWrite, refusal} from './writes.js'
-import type {ExploreCandidate, OnboardingArguments, OnboardingFile, OnboardingWrite} from './writes.js'
+import {parseWrite, refusal, type ExploreCandidate, type OnboardingArguments, type OnboardingFile, type OnboardingWrite} from './writes.js'
 
 /** The scheme of the preview documents a diff shows: the files' current and proposed contents, read-only. */
 export const previewScheme = 'projections-preview'

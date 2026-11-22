@@ -4334,6 +4334,18 @@ Everything a kit renderer component receives for one host state.
 | `setControl` | `"setControl": { (id: string, value: false \| number \| string \| true): void }` | Sets a declared control from the renderer's own content, as the person changed it there (a sortable column header): the host applies it as if they had set it in its settings, remembers it and sends it back in `controls`. The new value shows at once. |
 | `viewport` | `"viewport": undefined \| { "height": number; "width": number }` | The frame's width and the host window's height, CSS px, as the host last reported them; undefined until then. |
 
+### `SlantedHeading`
+
+```ts
+SlantedHeading(__0: { "children": Iterable<ReactNode, any, any> | Promise<Iterable<ReactNode, any, any> | ReactElement<unknown, string | { (props: any): Iterable<ReactNode, any, any> | Promise | Promise<ReactNode> | ReactElement<unknown, recursive> | ReactPortal | bigint | false | null | number | string | true | undefined } | { new (props: any, context: any): Component<any, any, any> }> | ReactPortal | bigint | false | null | number | string | true | undefined> | ReactElement<unknown, string | { (props: any): Iterable<ReactNode, any, any> | Promise<Iterable<ReactNode, any, any> | ReactElement<unknown, recursive> | ReactPortal | bigint | false | null | number | string | true | undefined> | Promise<ReactNode> | ReactElement | ReactPortal | bigint | false | null | number | string | true | undefined } | { new (props: any, context: any): Component<any, any, any> }> | ReactPortal | bigint | false | null | number | string | true | undefined }): Element
+```
+
+A column heading slanted at 45°, reading up and to the right from its column's bottom centre, so a column is only
+as wide as its cells however long its heading. Render it as the only content of the column's heading cell (a `th`
+with the class `pk-slanted-column`), and call `useSlantedHeadings` with the table, which makes the heading row as
+tall as the longest heading needs. A heading's tail runs over the columns to its right, so the table needs room on
+its right for the last one's: its following columns, or the space beside it.
+
 ### `Stack`
 
 ```ts
@@ -4635,6 +4647,16 @@ frame's top and foot. `height` is the content's height (content units) and the s
 a drawing drawn larger that still fits the stage's height (a flat graph zoomed in) keeps its padding where, centred,
 it clears the bands, and takes just enough more where it doesn't (`scrolledPadding`), so it moves no more than it
 must as it zooms. The fit never reads it.
+
+### `useSlantedHeadings`
+
+```ts
+useSlantedHeadings(table: RefObject<HTMLTableElement | null>): void
+```
+
+Sizes a table's slanted headings (`SlantedHeading`): sets `--pk-slant-length` on the table, the longest heading's
+length in CSS px, from which each `pk-slanted-column` takes the height its slanted heading needs. Layout lengths, so
+a zoomed or fitted drawing doesn't change them; measured on every render and once the fonts load.
 
 ### `useStageCover`
 

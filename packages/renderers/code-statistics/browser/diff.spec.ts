@@ -85,3 +85,56 @@ test('diff mode share rings are keyboard selectable and name both revisions', as
   await page.keyboard.press('Enter')
   await expect.poll(async () => (await stage.state()).selection).toBe('language:Python')
 })
+
+test('the share chart fills a frame the host sizes, and keeps its size in a content-sized one', async ({page}, info) => {
+  test.skip(info.project.name.endsWith('mobile'), 'a desktop stage')
+  await page.setViewportSize({width: 1440, height: 900})
+  const measure = async (height?: number) => {
+    const stage = await openStage(page, harnessInspector(), {
+      scenario: 'code-statistics/languages',
+      comparisonMode: 'diff',
+      options: {chart: 'share'},
+      ...(height ? {height} : {}),
+    })
+    await stage.measure('settle')
+    const result = await stage.frame.locator('.statistics-view').evaluate(view => {
+      const share = view.querySelector('.statistics-share')!
+      const donut = share.querySelector('svg')!.getBoundingClientRect()
+      const list = share.querySelector('.statistics-values')!.getBoundingClientRect()
+      return {
+        fills: view.hasAttribute('data-fills'),
+        donut: Math.round(donut.width),
+        beside: list.left >= donut.right,
+        clipped: [share, ...share.querySelectorAll('.stat-values-row')].filter(row => row.scrollWidth > row.clientWidth + 1).length,
+        scrolls: share.scrollHeight > share.clientHeight + 1,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      }
+    })
+    if (shots && info.project.name.startsWith('chromium')) {
+      mkdirSync(shots, {recursive: true})
+      await stage.frame.locator('body').screenshot({path: `${shots}/code-statistics-share-${height ? 'fill' : 'content'}.png`})
+    }
+    return result
+  }
+  const content = await measure()
+  expect(content.fills).toBe(false)
+  expect(content.donut).toBe(320)
+  const fill = await measure(860)
+  expect(fill).toMatchObject({fills: true, beside: true, clipped: 0, scrolls: false})
+  expect(fill.overflow).toBeLessThanOrEqual(1)
+  expect(fill.donut).toBeGreaterThan(content.donut)
+  // A stage shorter than the list: the list starts at the top, where the share area's scroll reaches it.
+  const short = await openStage(page, harnessInspector(), {
+    scenario: 'code-statistics/languages',
+    comparisonMode: 'diff',
+    options: {chart: 'share'},
+    height: 200,
+  })
+  await short.measure('settle')
+  const reach = await short.frame.locator('.statistics-share').evaluate(share => ({
+    scrolls: share.scrollHeight > share.clientHeight + 1,
+    above: share.getBoundingClientRect().top - share.querySelector('.stat-values-row')!.getBoundingClientRect().top,
+  }))
+  expect(reach.scrolls).toBe(true)
+  expect(reach.above).toBeLessThanOrEqual(0)
+})

@@ -7,7 +7,7 @@ import {
   languageCategory,
   plainCategory,
 } from '@githubnext/projections-renderer-kit'
-import {EmptyDomain, useLegend} from '@githubnext/projections-renderer-kit/react'
+import {EmptyDomain, useFrameFill, useFrameSizing, useLegend} from '@githubnext/projections-renderer-kit/react'
 import type {RendererLegend} from '@githubnext/projections-renderer-kit'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {genericMetrics, sentenceCase, sharedUnit} from '@githubnext/projections-renderer-sdk/presentation'
@@ -129,9 +129,13 @@ export function CodeStatisticsRenderer(props: RendererProps<typeof accepts>) {
     ? tracked.flatMap(change => [change.before?.label ?? '', change.after?.label ?? ''])
     : composition.map(part => part.label)
   const columns = statisticsColumns({shown, tracked, labels, count: p.count, number, diff, highlighting})
+  // A host that sizes the frame itself (a tab, a gallery's stage) gets the share chart grown to the frame's height; a
+  // content-sized host gets it at its own size, as before.
+  const fills = useFrameSizing() !== 'content' && chart === 'share' && shown.length > 0
 
   return (
-    <div className="statistics-view pk-stage" style={columns} data-diff-highlighting={comparing}>
+    <div className="statistics-view pk-stage" style={columns} data-diff-highlighting={comparing} data-fills={fills ? '' : undefined}>
+      {fills && <FillsFrame />}
       <div className="statistics-panel" data-chart={chart} data-projections-content="">
         {/* The host's summary bar states the total, its change and the languages; the chart starts at the top. */}
         {/* The table lists every language whatever the measure counts, so only an extraction without any is empty. */}
@@ -167,4 +171,10 @@ export function CodeStatisticsRenderer(props: RendererProps<typeof accepts>) {
       </div>
     </div>
   )
+}
+
+/** While mounted, the renderer fills its frame's height (see `useFrameFill`), reporting no content height of its own. */
+function FillsFrame() {
+  useFrameFill(undefined)
+  return null
 }

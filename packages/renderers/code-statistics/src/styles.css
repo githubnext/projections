@@ -346,3 +346,57 @@ button.stat-hit:hover {
     padding-right: var(--projections-space-1);
   }
 }
+
+/* In a frame the host sizes itself (`data-fills`), the share chart fills the stage: the panel takes the height the kit's
+   fill column gives it, and the donut grows with its part of the width and the stage's height (less the diff rings'
+   caption), its rows a little taller with the height. When the width runs short the list gives way first, down to its
+   content's width, and then the donut; a narrow stage stacks them and scrolls. */
+.statistics-view[data-fills] .statistics-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.statistics-view[data-fills] .statistics-share {
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  /* A list taller than the stage starts at the top, where the scroll can reach it. */
+  align-items: safe center;
+  min-height: 0;
+  container: statistics-share / size;
+  overflow-y: auto;
+}
+.statistics-view[data-fills] .statistics-share .statistics-values {
+  flex: 0 10 28rem;
+  min-width: max-content;
+}
+.statistics-view[data-fills] .statistics-share > svg {
+  flex: 0 1 auto;
+  min-width: 0;
+  width: min(48cqw, calc(100cqh - 2 * var(--projections-space-4)));
+  max-width: none;
+}
+.statistics-view[data-fills] .statistics-share.diff .stat-rings {
+  flex: 0 1 auto;
+  min-width: 0;
+  width: min(48cqw, calc(100cqh - 2 * var(--projections-space-4) - 2.5rem));
+  max-width: none;
+}
+.statistics-view[data-fills] .statistics-share.diff .stat-rings svg {
+  width: 100%;
+}
+.statistics-view[data-fills] .stat-values-row {
+  min-height: clamp(1.75rem, 7cqh, 2.75rem);
+}
+/* The breakpoint is the view's (`statistics`): the share area can't query itself to wrap. */
+@container statistics (max-width: 520px) {
+  .statistics-view[data-fills] .statistics-share {
+    flex-wrap: wrap;
+  }
+  .statistics-view[data-fills] .statistics-share .statistics-values {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+  .statistics-view[data-fills] .statistics-share > svg,
+  .statistics-view[data-fills] .statistics-share.diff .stat-rings {
+    width: min(calc(100cqw - 2 * var(--projections-space-4)), 60cqh);
+  }
+}

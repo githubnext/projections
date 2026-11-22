@@ -23,6 +23,7 @@ import {generators} from './lib/generated.ts'
 import {cliName, linkedBin} from './lib/invocation.ts'
 import {workspaceRoot} from './lib/repo.ts'
 import {exitCodes, guard, next, progress, settle} from './outcome.ts'
+import {ciCommands} from './ci.ts'
 import {setupCommands} from './setup.ts'
 
 const root = process.env['TOOLS_ROOT'] ?? workspaceRoot
@@ -197,6 +198,8 @@ cli.command('affected', {
   }),
   run: c => guard(() => affectedReport(root, c.options.since)),
 })
+
+cli.command(ciCommands(root))
 
 const gateNames = gates.map(gate => gate.name).join(', ')
 cli.command('check', {

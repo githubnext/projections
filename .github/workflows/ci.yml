@@ -67,12 +67,18 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           if [ "$EVENT" != pull_request ]; then
-            node tools/scripts/ci-plan.mjs --base HEAD --event "$EVENT"
+            node tools/scripts/ci-plan.mjs --base HEAD --event "$EVENT" --plan "$RUNNER_TEMP/ci-plan.json"
             exit
           fi
           # Read now, not from the event, so that adding a label and re-running the workflow takes effect.
           labels=$(gh api "repos/$REPO/issues/$PR/labels" --jq 'map(.name) | join(",")')
-          node tools/scripts/ci-plan.mjs --base HEAD^1 --labels "$labels"
+          node tools/scripts/ci-plan.mjs --base HEAD^1 --labels "$labels" --plan "$RUNNER_TEMP/ci-plan.json"
+      # The plan and the checks it runs, with each file's class and rule: what this run decided and why, after the fact.
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ci-plan
+          path: ${{ runner.temp }}/ci-plan.json
+          retention-days: 90
   # A change to documentation alone: the checks that read it, without a build.
   docs:
     needs: changes

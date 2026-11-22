@@ -36,6 +36,7 @@ exclude:
     - '.github/workflows/release.yml'
     - '.github/ci-rules.schema.json'
     - 'tools/cli/test/ci-plan.cases.schema.json'
+    - 'docs/maintainers/ci-plan.md'
     - 'packages/host/vscode-ui/THIRD_PARTY_NOTICES.md'
     - 'packages/renderers/sdk/vendor/**'
     # Pristine shadcn/ui registry items, the base of the three-way merge in packages/host/core/scripts/shadcn/update.mjs.

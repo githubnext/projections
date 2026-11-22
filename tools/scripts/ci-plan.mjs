@@ -8,17 +8,19 @@
 //   node tools/scripts/ci-plan.mjs --base REF          files changed since the merge base with REF
 //   node tools/scripts/ci-plan.mjs --event push        a run for that GitHub Actions event (the rules' full.events)
 //   node tools/scripts/ci-plan.mjs --labels a,b        a pull request with those labels (the rules' full.labels)
+//   node tools/scripts/ci-plan.mjs --plan FILE         also write the plan and its checks as JSON
+//
+// `npm run tools -- ci explain` says why the plan runs or skips each job.
 //
 // In GitHub Actions it writes each job's decision (by job ID), each condition, the affected suites and the browser
 // matrices to the step's outputs, and the jobs with their reasons to its summary; elsewhere it prints the plan as JSON.
-import {appendFileSync, readFileSync} from 'node:fs'
+import {appendFileSync, writeFileSync} from 'node:fs'
 import {fileURLToPath} from 'node:url'
 import {parseArgs} from 'node:util'
+import {changeSince} from '../cli/src/lib/ci-change.ts'
 import {repoFacts} from '../cli/src/lib/ci-facts.ts'
-import {ciPlan, planOutputs} from '../cli/src/lib/ci-plan.ts'
+import {ciPlan, executions, planOutputs} from '../cli/src/lib/ci-plan.ts'
 import {loadCiRules} from '../cli/src/lib/ci-rules.ts'
-import {changedFiles} from '../cli/src/lib/git.ts'
-import {git} from '../cli/src/lib/repo.ts'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
 const {values} = parseArgs({
@@ -26,26 +28,21 @@ const {values} = parseArgs({
     base: {type: 'string', default: 'origin/main'},
     event: {type: 'string', default: 'pull_request'},
     labels: {type: 'string', default: ''},
+    plan: {type: 'string'},
   },
 })
 // Committed, staged, unstaged and untracked changes since the merge base, as `tools affected` lists them; in CI, the
-// pull request's merge commit against its base.
-const commit = git(root, ['merge-base', 'HEAD', values.base])
-if (commit === undefined) throw new Error(`No merge base with ${values.base}; fetch it, or pass --base`)
-const paths = changedFiles(root, {ref: values.base, commit, reason: '--base'}).map(change => change.path)
+// pull request's merge commit against its base. Lockfiles are compared with their versions at the merge base.
+const {commit, paths, contents} = changeSince(root, values.base)
 const labels = values.labels.split(',').filter(Boolean)
-// The lockfile rules compare a lockfile with its version at the merge base.
-const contents = {
-  before: path => git(root, ['show', `${commit}:${path}`]),
-  after: path => {
-    try {
-      return readFileSync(new URL(path, `file://${root}`), 'utf8')
-    } catch {
-      return undefined
-    }
-  },
-}
-const plan = ciPlan(repoFacts(root), loadCiRules(root), {paths, event: values.event, labels, contents})
+const rules = loadCiRules(root)
+const plan = ciPlan(repoFacts(root), rules, {paths, event: values.event, labels, contents})
+// The plan, with the checks it runs, for the workflow's artifact: what a run decided and why, after the fact.
+if (values.plan)
+  writeFileSync(
+    values.plan,
+    `${JSON.stringify({base: commit, event: values.event, labels, plan, checks: executions(plan, rules)}, null, 2)}\n`,
+  )
 
 const outputs = planOutputs(plan)
 

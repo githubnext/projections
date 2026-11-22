@@ -1,10 +1,11 @@
 # Proposal: simpler CI rules
 
-Status: **accepted with changes; being implemented.** The first step is #159.
-This note measures how far the rules in `.github/ci-rules.json` can be
-simplified, and what each simplification costs, so a person reading the rules
-can tell what runs for a change. It was revised after two reviews; the changes
-are at the end.
+Status: **implemented**, with the reviews' changes: #159 (the rules), #161
+(`tools ci explain`, the generated table, the plan artifact), #162
+(`tools ci replay`) and #163 (the miss detector). This note measures how far the
+rules in `.github/ci-rules.json` can be simplified, and what each simplification
+costs, so a person reading the rules can tell what runs for a change. It was
+revised after two reviews; the changes are at the end.
 
 ## The problem
 
@@ -225,10 +226,15 @@ No cost: no file changes class.
 ## Implementation
 
 1. #159: the rules restated (steps 1 to 5), with the replay showing that plans
-   match today's except where this note says, and the execution plan.
-2. `tools ci explain`, the generated table and the plan artifact.
-3. `tools ci replay`.
-4. The miss detector, report-only.
+   match today's except where this note says, and the execution plan. It also
+   moved `mutants-diff`'s shards and pull-request-only event into the rules
+   (`shards`, `events`), so the execution plan names the checks the workflow
+   runs.
+2. #161: `tools ci explain`, the generated table
+   ([what CI runs for what](../../maintainers/ci-plan.md)) and the plan
+   artifact.
+3. #162: `tools ci replay`.
+4. #163: the miss detector, report-only.
 
 ## What the reviews changed
 

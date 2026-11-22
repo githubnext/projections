@@ -73,12 +73,12 @@ test('the tooltip carries the exact revisions with their commits, the span and t
   }
   const {tooltip, accessibility} = item({id: 'branch'}, {before: base, after: 'working-tree'}, {labels, files: 9})
   assert.match(tooltip, /^\*\*Branch changes\*\*/)
-  assert.match(tooltip, /merge base with main `bbbbbbb` → your files/)
+  assert.match(tooltip, /merge base with main \x60bbbbbbb\x60 → your files/)
   assert.match(tooltip, /3 commits \+ 2 uncommitted · 9 files changed/)
   assert.match(tooltip, /Click to choose what projections show\.$/)
   assert.equal(accessibility, 'Projections: viewing Branch changes')
   const pull = item({id: 'pr:123', title: '#123 Fix the login'}, {before: base, after: head})
-  assert.match(pull.tooltip, /^\*\*PR \\#123\*\*\n\nFix the login\n\n`bbbbbbb` → `aaaaaaa`/)
+  assert.match(pull.tooltip, /^\*\*PR \\#123\*\*\n\nFix the login\n\n\x60bbbbbbb\x60 → \x60aaaaaaa\x60/)
   assert.match(item({id: 'now'}, {after: 'working-tree'}).tooltip, /your files, as they are now/)
   assert.match(
     item({id: 'bookmark:landed'}, {before: 'v1.0', after: base}).tooltip,

@@ -1,5 +1,6 @@
 import type {Extraction, Relationship} from '@githubnext/projections-schemas'
 export * from './generated.js'
+export * from './word-diff.js'
 export * from './quantities.js'
 export * from './steps.js'
 export * from './schedule.js'

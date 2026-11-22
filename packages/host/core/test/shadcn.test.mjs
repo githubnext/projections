@@ -81,7 +81,7 @@ test('an upstream change merges into our file and keeps our edits and header not
   assert.match(result.text, /icon: 'pj:size-9\.5'/)
   assert.doesNotMatch(result.text, /pj:active:not-aria-\[haspopup\]:translate-y-px/)
   assert.match(result.text, /shadcn@9\.9\.9\. MIT/)
-  assert.match(result.text, /no `active:translate-y-px` on the button/)
+  assert.match(result.text, /no \x60active:translate-y-px\x60 on the button/)
 })
 
 test('an upstream change to a line we edited is a conflict with diff3 markers', async () => {

@@ -74,7 +74,7 @@ registerHooks({resolve(specifier, context, nextResolve) {
   const untyped = collect('typescript-public-api', {}, bare)
   assert.equal(untyped.status, 1)
   assert.equal(untyped.stdout, '')
-  assert.match(untyped.stderr, /No `typescript` package is installed there/)
+  assert.match(untyped.stderr, /No \x60typescript\x60 package is installed there/)
 
   const native = collect('code-statistics')
   assert.equal(native.status, 1)

@@ -41,7 +41,7 @@ module.exports = async function currentView({folder, api, invoke}) {
     90_000,
   )
   assert.match(view, /^The projection tab in front is "CI pipeline" \(projection ci-jobs\) in /m, view)
-  assert.match(view, /^Definition: \.github\/projections\/ci-jobs\.json; extractor `github-actions-jobs`/m, view)
+  assert.match(view, /^Definition: \.github\/projections\/ci-jobs\.json; extractor \x60github-actions-jobs\x60/m, view)
   assert.match(view, /, pinned to this tab\./, view)
   assert.match(view, new RegExp(`^Revisions: before ${before}, after ${after}\\.$`, 'm'), view)
   // The mode the tab shows, as its title bar's mode toggle reads it (which it reports every half second).

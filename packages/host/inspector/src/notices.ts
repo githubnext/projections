@@ -10,7 +10,7 @@ const maxNamed = 5
 
 /** `text` as an inline code span of protocol prose. */
 function code(text: string): string {
-  return `\`${text.replace(/[`\\]/g, character => `\\${character}`)}\``
+  return `\`${text.replace(/[\x60\\]/g, character => `\\${character}`)}\``
 }
 
 /** How notices name an extraction's revision: `the working tree`, or the commit's first eight hex digits as code. */

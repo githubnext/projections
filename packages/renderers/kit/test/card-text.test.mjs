@@ -159,7 +159,7 @@ test('the graph renderer docs list exactly the card icons', () => {
   const docs = readFileSync(new URL('../../../../docs/builtins/renderers/graph.md', import.meta.url), 'utf8')
   const listed = /<!-- card-icons -->([\s\S]*?)<!-- end card-icons -->/.exec(docs)?.[1] ?? ''
   assert.deepEqual(
-    [...listed.matchAll(/`([a-z0-9-]+)`/g)].map(match => match[1]),
+    [...listed.matchAll(/\x60([a-z0-9-]+)\x60/g)].map(match => match[1]),
     cardIconNames,
   )
 })

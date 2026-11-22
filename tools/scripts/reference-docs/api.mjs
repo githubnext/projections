@@ -79,16 +79,16 @@ function docText(text, language) {
   return (text ?? '')
     .split('\n')
     .map(line => {
-      if (/^\s*```/.test(line)) {
+      if (/^\s*\x60\x60\x60/.test(line)) {
         fenced = !fenced
         // rustdoc treats an unlabeled block as Rust.
-        return fenced && /^\s*```\s*$/.test(line) ? line.replace('```', `\`\`\`${language}`) : line
+        return fenced && /^\s*\x60\x60\x60\s*$/.test(line) ? line.replace('```', `\`\`\`${language}`) : line
       }
       if (fenced) return line
       const heading = /^#{1,6}\s+(.*)$/.exec(line)
       if (heading) return `**${heading[1]}**`
       // Intra-doc links (rustdoc's [`Name`]) have no target on this page.
-      return line.replace(/\[(`[^`\]]+`)\](?![([])/g, '$1')
+      return line.replace(/\[(\x60[^\x60\]]+\x60)\](?![([])/g, '$1')
     })
     .join('\n')
 }

@@ -128,7 +128,7 @@ export function launcherText(path: string, launcher: Launcher, platform: Platfor
       `set "checkout=${launcher.checkout}"`,
       `set "node=${launcher.node}"`,
       'if exist "%checkout%\\tools\\cli\\src\\launch.ts" goto run',
-      `echo ${message.replace(/`/g, '')}: "%checkout%" 1>&2`,
+      `echo ${message.replace(/\x60/g, '')}: "%checkout%" 1>&2`,
       'exit /b 3',
       ':run',
       'if not exist "%node%" set "node=node"',

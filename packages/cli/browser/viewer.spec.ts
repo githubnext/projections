@@ -87,7 +87,9 @@ const state = async () => (await control('control/state')).body
 /** The page's own text, outside renderer frames, and the paths it names. */
 async function pathsIn(page: Page) {
   const text = await page.evaluate(() => document.body.innerText)
-  return text.match(/(^|[\s("'`])(\/|~\/|\.{1,2}\/)\S*|[\w.-]+\/[\w.-]+\/\S*|\b[\w-]+\.(json|mjs|js|ts|yaml|yml)\b|[A-Za-z]:\\\S*/g) ?? []
+  return (
+    text.match(/(^|[\s("'\x60])(\/|~\/|\.{1,2}\/)\S*|[\w.-]+\/[\w.-]+\/\S*|\b[\w-]+\.(json|mjs|js|ts|yaml|yml)\b|[A-Za-z]:\\\S*/g) ?? []
+  )
 }
 
 test('requests without the token are refused, and the bare port says how to get the link', async ({page}) => {

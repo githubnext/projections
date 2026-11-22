@@ -83,7 +83,10 @@ test('the README table is written from the manifest, and rewriting it is stable'
       files: {'LICENSE-MIT': 'MIT-LICENSE'},
     },
   ]
-  assert.match(readmeTable(entries), /\| `yaml-rust2\/` \| `yaml-rust2` 0\.13\.0 \| `LICENSE-MIT` \(upstream `MIT-LICENSE`\) \|/)
+  assert.match(
+    readmeTable(entries),
+    /\| \x60yaml-rust2\/\x60 \| \x60yaml-rust2\x60 0\.13\.0 \| \x60LICENSE-MIT\x60 \(upstream \x60MIT-LICENSE\x60\) \|/,
+  )
   const readme = withTable('intro\n<!-- generated: notices -->\nold\n<!-- end generated: notices -->\nafter\n', entries)
   assert.ok(readme.startsWith('intro\n<!-- generated: notices -->\n<!-- prettier-ignore -->\n'))
   assert.ok(readme.endsWith('\n<!-- end generated: notices -->\nafter\n'))

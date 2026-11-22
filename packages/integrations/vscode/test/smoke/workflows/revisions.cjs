@@ -10,7 +10,7 @@ module.exports = async function revisions({folder, api, choiceName, swaps, tabSh
   await tabShows('the tab on main → HEAD', summary => summary.pair.before === 'main' && summary.pair.after === 'HEAD')
   // The status bar names two revisions by their ref names for people (HEAD is its branch), with no counts.
   await until('the status bar on main → HEAD', async () => ((await choiceName()) === 'main → feature/auth' ? true : undefined))
-  assert.match(api.statusBar().tooltip, /^\*\*main → feature\/auth\*\*\n\nmain `[0-9a-f]{7}` → feature\/auth `[0-9a-f]{7}`/)
+  assert.match(api.statusBar().tooltip, /^\*\*main → feature\/auth\*\*\n\nmain \x60[0-9a-f]{7}\x60 → feature\/auth \x60[0-9a-f]{7}\x60/)
   assert.deepEqual(api.rows()[0].pair, {before: 'main', after: 'HEAD'})
   assert.equal(api.rows()[0].choice.id, 'custom')
   assert.deepEqual(

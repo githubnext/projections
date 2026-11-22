@@ -1,5 +1,5 @@
 // Generated values in presentation: which of an item's values an extraction declares generated, how a regenerated
-// value's change reads, and a word diff for the optional comparison of two passages. See
+// value's change reads, and (word-diff.ts) a word diff for the optional comparison of two passages. See
 // docs/design/generated-values.md.
 import type {Varied} from '@githubnext/projections-schemas'
 
@@ -108,10 +108,10 @@ const hashed = (value: string | undefined) => value === undefined || value.start
 
 /** A basis part's change in words: `the input`, or `` `context` `` for a part without a word of its own. */
 function partWords(part: string, before: BasisValue | undefined, after: BasisValue | undefined): string {
-  const name = ['input', 'prompt', 'model'].includes(part) ? `the ${part}` : `\`${part.replace(/[`\\]/g, '\\$&')}\``
+  const name = ['input', 'prompt', 'model'].includes(part) ? `the ${part}` : `\`${part.replace(/[\x60\\]/g, '\\$&')}\``
   const [old, next] = [before?.[part], after?.[part]]
   if (old !== undefined && next !== undefined && !hashed(old) && !hashed(next)) {
-    const code = (text: string) => `\`${text.replace(/[`\\]/g, '\\$&')}\``
+    const code = (text: string) => `\`${text.replace(/[\x60\\]/g, '\\$&')}\``
     return `${name} (${code(old)} → ${code(next)})`
   }
   return name
@@ -140,49 +140,4 @@ export function generatedText(value: unknown): string {
   if (typeof value === 'string') return value
   if (value === undefined) return ''
   return JSON.stringify(value, null, 2)
-}
-
-/** One run of a word diff: text both passages share, or text only one has. */
-export interface WordRun {
-  /** The run's text, never empty: the `same` and `removed` runs spell `before`, the `same` and `added` runs `after`. */
-  text: string
-  /** `same` for text both passages have, `removed` for text only `before` has, `added` for text only `after` has. */
-  op: 'same' | 'removed' | 'added'
-}
-
-/** The most tokens a passage may have to be word-diffed. */
-const maxTokens = 2000
-
-/**
- * A word diff of two passages, as runs in reading order (removed text before the text that replaced it), or
- * `undefined` when either is too long to compare. Words, spaces and punctuation are the tokens.
- */
-export function wordDiff(before: string, after: string): WordRun[] | undefined {
-  const tokens = (text: string) => text.match(/\s+|[\p{L}\p{N}_]+|[^\s\p{L}\p{N}_]/gu) ?? []
-  const a = tokens(before)
-  const b = tokens(after)
-  if (a.length > maxTokens || b.length > maxTokens) return undefined
-  // Longest common subsequence, by suffix lengths.
-  const width = b.length + 1
-  const lengths = new Uint16Array((a.length + 1) * width)
-  for (let i = a.length - 1; i >= 0; i--)
-    for (let j = b.length - 1; j >= 0; j--)
-      lengths[i * width + j] =
-        a[i] === b[j] ? lengths[(i + 1) * width + j + 1]! + 1 : Math.max(lengths[(i + 1) * width + j]!, lengths[i * width + j + 1]!)
-  const runs: WordRun[] = []
-  const push = (text: string, op: WordRun['op']) => {
-    const last = runs.at(-1)
-    if (last?.op === op) last.text += text
-    else runs.push({text, op})
-  }
-  let i = 0
-  let j = 0
-  while (i < a.length || j < b.length) {
-    if (i < a.length && j < b.length && a[i] === b[j]) {
-      push(a[i++]!, 'same')
-      j++
-    } else if (j >= b.length || (i < a.length && lengths[(i + 1) * width + j]! >= lengths[i * width + j + 1]!)) push(a[i++]!, 'removed')
-    else push(b[j++]!, 'added')
-  }
-  return runs
 }

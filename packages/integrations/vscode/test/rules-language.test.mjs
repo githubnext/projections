@@ -121,13 +121,13 @@ test('the shipped language service answers editor requests', () => {
   const broken = rules.replace('json(before.schema)', 'jsno(before.schema)')
   const [diagnostic] = editorCall(module, {op: 'diagnostics', source: broken, kind: 'rules'}).diagnostics
   assert.equal(diagnostic.severity, 'error')
-  assert.match(diagnostic.message, /Undeclared function `jsno`; did you mean `json`\?/)
+  assert.match(diagnostic.message, /Undeclared function \x60jsno\x60; did you mean \x60json\x60\?/)
   assert.deepEqual([diagnostic.line, diagnostic.column, diagnostic.endColumn], [6, 25, 29])
 
   const hover = editorCall(module, {op: 'hover', source: rules, kind: 'rules', line: 6, column: 26}).hover
-  assert.match(hover.markdown, /^```\njson\(value: dyn\) -> string\n```/)
+  assert.match(hover.markdown, /^\x60\x60\x60\njson\(value: dyn\) -> string\n\x60\x60\x60/)
   const variable = editorCall(module, {op: 'hover', source: rules, kind: 'rules', line: 8, column: 23}).hover
-  assert.match(variable.markdown, /^```\nvariables\.label: string\n```\n\nThe marker before every summary\./)
+  assert.match(variable.markdown, /^\x60\x60\x60\nvariables\.label: string\n\x60\x60\x60\n\nThe marker before every summary\./)
 
   const completions = editorCall(module, {op: 'complete', source: rules, kind: 'rules', line: 8, column: 22})
   assert.deepEqual(
@@ -150,11 +150,11 @@ test('the service runs requests in a worker, and restarts it after a deadline', 
   try {
     const diagnostics = await service.diagnostics(rules.replace('change.id', 'change.idd'), 'rules')
     assert.equal(diagnostics.length, 1)
-    assert.match(diagnostics[0].message, /No field `idd` on Change; did you mean `id`\?/)
+    assert.match(diagnostics[0].message, /No field \x60idd\x60 on Change; did you mean \x60id\x60\?/)
     const [hover, tokens] = await Promise.all([service.hover(rules, 'rules', 6, 26), service.tokens(rules, 'rules')])
     assert.match(hover.markdown, /json\(value: dyn\) -> string/)
     assert.ok(tokens.length > 10)
-    await assert.rejects(service.request({op: 'nope', source: '', kind: 'rules'}), /`op` must be/)
+    await assert.rejects(service.request({op: 'nope', source: '', kind: 'rules'}), /\x60op\x60 must be/)
     // A worker that never answers is stopped at the deadline, and the next request starts a new one.
     service.dispose()
     options.worker = new URL('data:text/javascript,setInterval(() => {}, 1000)')

@@ -197,7 +197,7 @@ test('a batch splits into one verified document per projection, error items keep
   assert.ok(body.startsWith(commentMarker))
   assert.match(body, /1 changed, 1 failed, 1 new in this pull request/)
   assert.match(body, /<strong>Feature flags<\/strong> \(<code>flags<\/code>\): failed/)
-  assert.match(body, /- `TRUST_REQUIRED`: x{100}/)
+  assert.match(body, /- \x60TRUST_REQUIRED\x60: x{100}/)
   // A hosted view is linked only when one is configured.
   assert.doesNotMatch(body, /https?:\/\//)
   assert.match(
@@ -273,33 +273,39 @@ test('the summary tells each comparison in steps and changes, escapes repository
     ],
   ])
   const text = summaryMarkdown(manifest, documents)
-  assert.match(text, /^### Projections\n\nCompared `ccccccc` \(merge base\) with `bbbbbbb` for pull request #7: 1 changed, 2 unchanged\./)
-  assert.match(text, /\| `services` \| Changed: 4 changes in 3 steps: 3 added, 1 removed \|/)
-  assert.match(text, /\| `files` \| Unchanged: no changes \|/)
+  assert.match(
+    text,
+    /^### Projections\n\nCompared \x60ccccccc\x60 \(merge base\) with \x60bbbbbbb\x60 for pull request #7: 1 changed, 2 unchanged\./,
+  )
+  assert.match(text, /\| \x60services\x60 \| Changed: 4 changes in 3 steps: 3 added, 1 removed \|/)
+  assert.match(text, /\| \x60files\x60 \| Unchanged: no changes \|/)
   // Expected variation alone leaves a comparison unchanged, and is never called a rename.
-  assert.match(text, /\| `timings` \| Unchanged: no changes to review \(1 varied within tolerance\) \|/)
+  assert.match(text, /\| \x60timings\x60 \| Unchanged: no changes to review \(1 varied within tolerance\) \|/)
   assert.match(
     text,
     /<details><summary><strong>Services<\/strong> \(<code>services<\/code>\): changed, 4 changes in 3 steps: 3 added, 1 removed<\/summary>/,
   )
   assert.match(text, /^1\. \*\*Step 1 of 3\*\* \(remove\): Legacy billing retires$/m)
-  assert.match(text, /^ {3}- Removed entity `@\u2060octocat <img src=x>` \(`billing`\)$/m)
+  assert.match(text, /^ {3}- Removed entity \x60@\u2060octocat <img src=x>\x60 \(\x60billing\x60\)$/m)
   assert.match(
     text,
-    /^ {3}- Added entity ``Pay`ments`` \(`payments`\): Split out of \\\*orders\\\* \\\[link\\\]\\\(https:\/\/x\.invalid\\\)$/m,
+    /^ {3}- Added entity \x60\x60Pay\x60ments\x60\x60 \(\x60payments\x60\): Split out of \\\*orders\\\* \\\[link\\\]\\\(https:\/\/x\.invalid\\\)$/m,
   )
-  assert.match(text, /^ {3}- Added relationship `Orders` \(`orders`\) calls ``Pay`ments`` \(`payments`\)$/m)
+  assert.match(
+    text,
+    /^ {3}- Added relationship \x60Orders\x60 \(\x60orders\x60\) calls \x60\x60Pay\x60ments\x60\x60 \(\x60payments\x60\)$/m,
+  )
   assert.match(text, /^3\. \*\*Step 3 of 3\*\*$/m)
   // An unchanged projection has nothing to detail.
   assert.doesNotMatch(text, /<strong>Files<\/strong>/)
-  assert.match(text, /\*\*Projections: Open Artifact…\*\* in VS Code, or run `projections pr 7` in a clone\./)
+  assert.match(text, /\*\*Projections: Open Artifact…\*\* in VS Code, or run \x60projections pr 7\x60 in a clone\./)
   assert.match(text, /extractors that run repository code were trusted/)
   assert.doesNotMatch(text, /@octocat/)
   // Details that don't fit are left out, never cut mid-way.
   const short = summaryMarkdown(manifest, documents, {limit: 900})
   assert.ok(Buffer.byteLength(short) <= 900, String(Buffer.byteLength(short)))
   assert.match(short, /The details of 1 projection didn't fit here\./)
-  assert.match(short, /\| `services` \| Changed/)
+  assert.match(short, /\| \x60services\x60 \| Changed/)
   // A push lists its extractions.
   const push = summaryMarkdown(
     {
@@ -312,10 +318,10 @@ test('the summary tells each comparison in steps and changes, escapes repository
   )
   assert.match(
     push,
-    /Extracted `ddddddd` \(`refs\/heads\/main`\): 1 extracted\. \[View them on projections\.example\]\(https:\/\/projections\.example\/octo-org\/delivery\/commit\/d{40}\)\./,
+    /Extracted \x60ddddddd\x60 \(\x60refs\/heads\/main\x60\): 1 extracted\. \[View them on projections\.example\]\(https:\/\/projections\.example\/octo-org\/delivery\/commit\/d{40}\)\./,
   )
-  assert.match(push, /\| `services` \| Extracted: 3 entities, 1 relationship \|/)
-  assert.match(push, /`projections show --all dddddddddddd`/)
+  assert.match(push, /\| \x60services\x60 \| Extracted: 3 entities, 1 relationship \|/)
+  assert.match(push, /\x60projections show --all dddddddddddd\x60/)
 })
 
 function git(cwd, ...args) {
@@ -432,10 +438,10 @@ test('the collect script runs the real CLI on a pull request: merge base to head
   })
   assert.equal(written.status, 0, written.stderr)
   const text = readFileSync(summary, 'utf8')
-  assert.match(text, /Compared `[0-9a-f]{7}` \(merge base\) with `[0-9a-f]{7}` for pull request #7: 1 changed, 1 failed\./)
-  assert.match(text, /\| `files` \| Changed: \d+ changes? in \d+ steps?/)
+  assert.match(text, /Compared \x60[0-9a-f]{7}\x60 \(merge base\) with \x60[0-9a-f]{7}\x60 for pull request #7: 1 changed, 1 failed\./)
+  assert.match(text, /\| \x60files\x60 \| Changed: \d+ changes? in \d+ steps?/)
   assert.match(text, /^ {3}- Added entity .*delivery\.ts/m)
-  assert.match(text, /- `TRUST_REQUIRED`: /)
+  assert.match(text, /- \x60TRUST_REQUIRED\x60: /)
   assert.doesNotMatch(text, /https?:\/\//)
 })
 
@@ -803,7 +809,10 @@ test('the pull request comment shows before and after snapshots, theme-aware, or
   assert.match(body, /\| — \| <picture>.*routes\.after\.light\.png.*\|/)
   assert.doesNotMatch(body, /snapshots artifact/)
   const linked = commentBody(manifest, new Map(), {snapshots: {index, artifactUrl: 'https://example.invalid/artifact'}})
-  assert.match(linked, /Snapshots of `files`, `routes` are in the \[snapshots artifact\]\(https:\/\/example\.invalid\/artifact\)\./)
+  assert.match(
+    linked,
+    /Snapshots of \x60files\x60, \x60routes\x60 are in the \[snapshots artifact\]\(https:\/\/example\.invalid\/artifact\)\./,
+  )
   assert.doesNotMatch(linked, /<picture>/)
   assert.equal(commentBody(manifest, new Map(), {snapshots: {index}}), commentBody(manifest, new Map()))
 })

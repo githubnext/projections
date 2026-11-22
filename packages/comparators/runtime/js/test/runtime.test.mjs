@@ -96,19 +96,19 @@ test('rejects missing and mistyped exports', async () => {
   await rejects(
     runComparator(build(exports.slice(0, 2)), input),
     'missing-export',
-    /^comparator module does not export `projections_compare`$/,
+    /^comparator module does not export \x60projections_compare\x60$/,
   )
-  await rejects(runComparator(build(exports.slice(1)), input), 'missing-export', /`memory`/)
-  await rejects(runComparator(build([exports[0], exports[2]]), input), 'missing-export', /`projections_alloc`/)
+  await rejects(runComparator(build(exports.slice(1)), input), 'missing-export', /\x60memory\x60/)
+  await rejects(runComparator(build([exports[0], exports[2]]), input), 'missing-export', /\x60projections_alloc\x60/)
   await rejects(
     runComparator(build([exports[0], exports[1], {name: 'projections_compare', kind: 0, index: 2}]), input),
     'invalid-export',
-    /^comparator export `projections_compare` must be a function \(i32, i32\) -> \(i64\), but is a function \(i32, i32\) -> \(i32\)$/,
+    /^comparator export \x60projections_compare\x60 must be a function \(i32, i32\) -> \(i64\), but is a function \(i32, i32\) -> \(i32\)$/,
   )
   await rejects(
     runComparator(build([{name: 'memory', kind: 0, index: 0}, exports[1], exports[2]]), input),
     'invalid-export',
-    /`memory` must be a 32-bit linear memory, but is a function \(i32\) -> \(i32\)/,
+    /\x60memory\x60 must be a 32-bit linear memory, but is a function \(i32\) -> \(i32\)/,
   )
   await rejects(runComparator(new TextEncoder().encode('not wasm'), input), 'invalid-module')
   assert.deepEqual(inspectModule(comparator(comparison, {memory: {min: 2, max: 8}})), {minimumPages: 2, maximumPages: 8})
@@ -218,10 +218,10 @@ test('rejects malformed output', async () => {
     ['[]', /must be a JSON object/],
     ['', /not valid JSON/],
     ['{"protocolVersion":1,"changes":[],"steps":[]}', /protocolVersion 0/],
-    ['{"protocolVersion":0,"changes":{},"steps":[]}', /`changes` must be an array/],
-    ['{"protocolVersion":0,"changes":[]}', /`steps` must be an array/],
-    ['{"protocolVersion":0,"changes":[],"steps":[],"colors":{}}', /unknown field `colors`/],
-    ['{"protocolVersion":0,"changes":[],"steps":[],"order":"mirror"}', /`order` must be an object/],
+    ['{"protocolVersion":0,"changes":{},"steps":[]}', /\x60changes\x60 must be an array/],
+    ['{"protocolVersion":0,"changes":[]}', /\x60steps\x60 must be an array/],
+    ['{"protocolVersion":0,"changes":[],"steps":[],"colors":{}}', /unknown field \x60colors\x60/],
+    ['{"protocolVersion":0,"changes":[],"steps":[],"order":"mirror"}', /\x60order\x60 must be an object/],
   ]) {
     await rejects(runComparator(comparator(output), input), 'invalid-output', message)
   }
@@ -231,9 +231,9 @@ test('rejects invalid input', async () => {
   const bytes = comparator(comparison)
   for (const [value, message] of [
     [[], /must be a JSON object/],
-    [{...input, options: undefined}, /`options` must be an object/],
+    [{...input, options: undefined}, /\x60options\x60 must be an object/],
     [{...input, protocolVersion: 1}, /protocolVersion 0/],
-    [{...input, x: 1}, /unknown field `x`/],
+    [{...input, x: 1}, /unknown field \x60x\x60/],
     [{...input, options: {big: 1n}}, /not serializable/],
   ]) {
     await rejects(runComparator(bytes, value), 'invalid-input', message)

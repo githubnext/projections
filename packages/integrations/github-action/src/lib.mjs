@@ -151,7 +151,7 @@ const oneLine = value => unmention(value).replace(/\s+/g, ' ').trim()
 /** Inline Markdown text. */
 const plain = value =>
   oneLine(value)
-    .replace(/[\\`*_{}[\]<>()#+!|~]/g, '\\$&')
+    .replace(/[\\\x60*_{}[\]<>()#+!|~]/g, '\\$&')
     .replace(/&/g, '&amp;')
 /** HTML text, for <summary>. */
 const html = value =>
@@ -159,7 +159,7 @@ const html = value =>
 /** A code span holding any text. */
 function code(value) {
   const text = oneLine(value) || ' '
-  const fence = '`'.repeat(Math.max(0, ...(text.match(/`+/g) ?? []).map(run => run.length)) + 1)
+  const fence = '`'.repeat(Math.max(0, ...(text.match(/\x60+/g) ?? []).map(run => run.length)) + 1)
   const pad = text.startsWith('`') || text.endsWith('`') ? ' ' : ''
   return `${fence}${pad}${text}${pad}${fence}`
 }

@@ -73,7 +73,7 @@ test('one invalid definition is reported where it is wrong, and the others still
   assert.deepEqual(invalid.diagnostics[0].location, {path: '.github/projections/legacy.json', line: 7, column: 5})
   assert.match(
     invalid.diagnostics[0].message,
-    /^Module comparators were removed; name a comparator file instead: `"comparator": "<path>\.comparator\.yaml"`\. See https:\/\/github\.com\/githubnext\/projections\/blob\/main\/docs\/guides\/comparators\.md$/,
+    /^Module comparators were removed; name a comparator file instead: \x60"comparator": "<path>\.comparator\.yaml"\x60\. See https:\/\/github\.com\/githubnext\/projections\/blob\/main\/docs\/guides\/comparators\.md$/,
   )
   const text = await failed(cli(root, ['list']), /1 definition file is invalid/)
   assert.match(text, /services-node: /)

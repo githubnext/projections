@@ -5,6 +5,8 @@ import {familyHues, paintsOf, type Paint} from './accents/hues.js'
 
 interface Painted {
   element: Element
+  /** Its `::before` or `::after`, drawn in its box. */
+  pseudo?: '::before' | '::after'
   order: number
   /** A surface encloses what is drawn on it: an HTML background or border, an SVG shape's fill or outline. */
   surface: Paint | undefined
@@ -31,7 +33,12 @@ const entityOf = (element: Element) => element.closest('[data-entity-id]')?.getA
 
 function paintOf(painted: Painted, paint: Paint): AccentPaint {
   const entity = entityOf(painted.element)
-  return {element: describe(painted.element), family: paint.family, property: paint.property, ...(entity === undefined ? {} : {entity})}
+  return {
+    element: `${describe(painted.element)}${painted.pseudo ?? ''}`,
+    family: paint.family,
+    property: paint.property,
+    ...(entity === undefined ? {} : {entity}),
+  }
 }
 
 /**
@@ -66,8 +73,9 @@ function inside(inner: DOMRect, outer: DOMRect, outerRound: boolean, innerRound:
 }
 
 /**
- * Every change or accent color drawn inside another: an HTML element whose background or border is a change hue
- * (added, removed, modified, moved) or the accent, with a descendant painting one; or an SVG shape filled or outlined
+ * Every change or accent color drawn inside another: an HTML element whose background, gradient, border or shadow,
+ * its own or its `::before`'s or `::after`'s, is a change hue (added, removed, modified, moved) or the accent, with a
+ * descendant painting one; or an SVG shape filled or outlined
  * in one, with an element painted over it, inside its shape, that paints one. A categorical part's fill or background
  * (`data-projections-category`), focus and selection rings (outlines) and host chrome aren't accents here.
  */
@@ -99,6 +107,19 @@ export function nestedAccents(root: Element = document.body): NestedAccent[] {
         )
         painted.push({element, order: order++, surface, paints, box: element.getBoundingClientRect()})
       }
+      // What an HTML element draws in its `::before` and `::after`: an overlaid edge, a stripe, a marker.
+      if (!(element instanceof SVGElement)) {
+        for (const pseudo of ['::before', '::after'] as const) {
+          const pseudoStyle = getComputedStyle(element, pseudo)
+          if (pseudoStyle.content === 'none' || pseudoStyle.content === 'normal' || pseudoStyle.display === 'none') continue
+          if (pseudoStyle.visibility === 'hidden' || Number(pseudoStyle.opacity) <= 0.01) continue
+          const pseudoPaints = paintsOf(element, pseudoStyle, hues, true)
+          if (pseudoPaints.length) {
+            const surface = pseudoPaints.find(paint => paint.property !== 'color')
+            painted.push({element, pseudo, order: order++, surface, paints: pseudoPaints, box: element.getBoundingClientRect()})
+          }
+        }
+      }
     }
     for (const child of element.children) walk(child)
   }
@@ -108,7 +129,8 @@ export function nestedAccents(root: Element = document.body): NestedAccent[] {
     if (!outer.surface) continue
     const svgRoot = outer.element instanceof SVGElement ? outer.element.ownerSVGElement : null
     for (const inner of painted) {
-      if (inner === outer) continue
+      // An element and what it draws in its own pseudo-elements are one paint: its edge drawn twice isn't nested.
+      if (inner === outer || inner.element === outer.element) continue
       const contained = svgRoot
         ? inner.order > outer.order &&
           svgRoot.contains(inner.element) &&

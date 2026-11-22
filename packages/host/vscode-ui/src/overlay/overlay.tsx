@@ -109,9 +109,9 @@ export function Overlay({
   placed.current = onPlaced
 
   useLayoutEffect(() => {
-    if (!open) return
+    if (!open) return undefined
     const overlay = element.current
-    if (!overlay) return
+    if (!overlay) return undefined
     const place = () => {
       const next = position(anchor.current, overlay, placement)
       setStyle({opacity: 1, ...next.style})

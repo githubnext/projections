@@ -16,7 +16,10 @@ async function setWidth(page: Page, width: number) {
   await page.locator('.fit-sized').evaluate(async (sized: HTMLElement, barWidth) => {
     sized.style.width = `${barWidth}px`
     const bar = sized.querySelector<HTMLElement>('[data-plan]')!
-    const frame = () => new Promise(resolve => requestAnimationFrame(resolve))
+    const frame = () =>
+      new Promise(resolve => {
+        requestAnimationFrame(resolve)
+      })
     await frame()
     for (let i = 0; i < 600 && bar.dataset.fitSettled !== String(barWidth); i++) await frame()
   }, width)
@@ -75,7 +78,16 @@ test('a press is not replanned away before its click, and the bar replans once i
   await page.mouse.move(apply!.x + apply!.width / 2, apply!.y + apply!.height / 2)
   await page.mouse.down()
   // Long enough for a replan: none comes while the pointer is pressed.
-  await page.evaluate(() => new Promise(resolve => setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(resolve)), 50)))
+  await page.evaluate(
+    () =>
+      new Promise(resolve => {
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(resolve)
+          })
+        }, 50)
+      }),
+  )
   expect(await focused(page)).toBeNull()
   await expect(bar(page)).toHaveAttribute('data-plan', 'narrow')
   await expect(bar(page).locator('[data-marked]')).toHaveCount(1)

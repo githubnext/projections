@@ -21,7 +21,9 @@ const server = createServer(async (request, response) => {
     response.writeHead(404).end()
   }
 })
-await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+await new Promise(resolve => {
+  server.listen(0, '127.0.0.1', resolve)
+})
 const origin = `http://127.0.0.1:${server.address().port}`
 
 try {
@@ -99,5 +101,7 @@ try {
     }
   }
 } finally {
-  await new Promise(resolve => server.close(resolve))
+  await new Promise(resolve => {
+    server.close(resolve)
+  })
 }

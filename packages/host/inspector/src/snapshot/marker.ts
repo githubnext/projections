@@ -19,6 +19,11 @@ export function markSnapshot(state: 'ready' | 'failed' | undefined, message?: st
 
 export const frames = (count: number) =>
   new Promise<void>(resolve => {
-    const next = (left: number) => (left ? requestAnimationFrame(() => next(left - 1)) : resolve())
+    const next = (left: number) =>
+      left
+        ? requestAnimationFrame(() => {
+            next(left - 1)
+          })
+        : resolve()
     next(count)
   })

@@ -10,6 +10,8 @@ import {agenticWorkflowsFacts} from '../node_modules/.cache/test/summary.js'
 import {AgenticWorkflowsView} from '../node_modules/.cache/test/view.js'
 import {plain} from '../../kit/test/markup.mjs'
 
+const noop = () => undefined
+
 const runtime = createRulesRuntime()
 const rules = new Uint8Array(
   readFileSync(new URL('../../../comparators/agentic-workflows/agentic-workflows.comparator.yaml', import.meta.url)),
@@ -37,13 +39,13 @@ function props(model, init, overrides = {}) {
     rendererName: 'agentic-workflows',
     selectedId: null,
     hoveredId: null,
-    onSelect() {},
-    onOpen() {},
-    reportSteps() {},
+    onSelect: noop,
+    onOpen: noop,
+    reportSteps: noop,
     controls: {view: 'cards'},
-    declareControls() {},
-    onAction: () => () => {},
-    reportLegend() {},
+    declareControls: noop,
+    onAction: () => noop,
+    reportLegend: noop,
     options: {},
     viewport: undefined,
     reducedMotion: false,

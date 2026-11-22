@@ -1,4 +1,5 @@
 import type {Runner} from './runner.js'
+import {noop} from './noop.ts'
 
 /** A holder's use of a shared backend: the current runner, told when it is replaced, released when done. */
 export interface Lease {
@@ -31,7 +32,7 @@ export class BackendPool<S> {
   private readonly key: (source: S) => string
   private readonly log: (line: string) => void
 
-  constructor(start: (source: S) => Promise<Runner>, key: (source: S) => string, log: (line: string) => void = () => {}) {
+  constructor(start: (source: S) => Promise<Runner>, key: (source: S) => string, log: (line: string) => void = noop) {
     this.start = start
     this.key = key
     this.log = log
@@ -61,10 +62,7 @@ export class BackendPool<S> {
         for (const listener of own) held.listeners.delete(listener)
         if (--held.holders > 0) return
         this.entries.delete(key)
-        void held.runner?.then(
-          runner => runner.stop(),
-          () => {},
-        )
+        void held.runner?.then(runner => runner.stop(), noop)
         held.runner = undefined
       },
     }
@@ -106,11 +104,8 @@ export class BackendPool<S> {
           this.log(`${reason}; restarting the Projections backend`)
           const previous = entry.runner
           entry.runner = undefined
-          void previous?.then(
-            runner => runner.stop(),
-            () => {},
-          )
-          await this.current(entry).catch(() => {})
+          void previous?.then(runner => runner.stop(), noop)
+          await this.current(entry).catch(noop)
         }),
     )
   }
@@ -118,10 +113,7 @@ export class BackendPool<S> {
   /** Stops every backend. */
   dispose() {
     for (const entry of this.entries.values()) {
-      void entry.runner?.then(
-        runner => runner.stop(),
-        () => {},
-      )
+      void entry.runner?.then(runner => runner.stop(), noop)
     }
     this.entries.clear()
   }

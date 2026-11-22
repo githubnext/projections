@@ -31,7 +31,9 @@ export async function browserHarness(engine = 'chromium') {
       response.writeHead(500).end(String(error))
     }
   })
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+  await new Promise(resolve => {
+    server.listen(0, '127.0.0.1', resolve)
+  })
   let browser
   try {
     browser = await (engine === 'webkit' ? webkit : chromium).launch({headless: true})
@@ -49,12 +51,16 @@ export async function browserHarness(engine = 'chromium') {
       startupMs,
       async close() {
         await browser.close()
-        await new Promise(resolve => server.close(resolve))
+        await new Promise(resolve => {
+          server.close(resolve)
+        })
       },
     }
   } catch (error) {
     await browser?.close()
-    await new Promise(resolve => server.close(resolve))
+    await new Promise(resolve => {
+      server.close(resolve)
+    })
     throw error
   }
 }

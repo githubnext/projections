@@ -43,7 +43,7 @@ function useFrameMorph(frame: SchemaFrame, layout: unknown, document: unknown, r
     if (seen.current.layout === layout || !same || reducedMotion) {
       seen.current = {layout, document}
       setMove(undefined)
-      return
+      return undefined
     }
     seen.current = {layout, document}
     // From what was drawn last, which may itself be mid-move.

@@ -19,6 +19,8 @@ import {
   swapPair,
 } from './harness.js'
 
+const noop = () => undefined
+
 const view = (page: Page) => page.locator('.ph')
 const frame = (page: Page) => page.frameLocator('iframe.ph-frame')
 
@@ -118,7 +120,9 @@ test('progress is acknowledged by the renderer after painting and flow-controlle
     for (let value = 0; value <= 60; value += 2) {
       Reflect.set(HTMLInputElement.prototype, 'value', String(value), input)
       input.dispatchEvent(new Event('input', {bubbles: true}))
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise(resolve => {
+        setTimeout(resolve, 10)
+      })
     }
     return performance.now() - start
   })
@@ -557,7 +561,7 @@ test('the transition slider follows exact progress during playback and seeking',
   )
   // Playback may already have reached the end on a slow machine; then there is nothing to pause.
   const pause = page.getByRole('button', {name: 'Pause', exact: true})
-  if (await pause.isVisible()) await pause.click({timeout: 5_000}).catch(() => {})
+  if (await pause.isVisible()) await pause.click({timeout: 5_000}).catch(noop)
   await expect(page.getByRole('button', {name: /^Play (forward|backward)$/u})).toBeVisible()
   const moving = samples.filter(value => value > 0 && value < 100)
   expect(moving.length).toBeGreaterThan(3)

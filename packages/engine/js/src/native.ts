@@ -114,8 +114,14 @@ export function createNativeEngine(options: NativeEngineOptions = {}): Projectio
       })
       child.on('close', (code, signal) => {
         clearTimeout(timer)
-        if (failure) return reject(failure)
-        if (signal || code === null) return reject(new EngineTransportError(`Native engine terminated by ${signal ?? 'unknown signal'}`))
+        if (failure) {
+          reject(failure)
+          return
+        }
+        if (signal || code === null) {
+          reject(new EngineTransportError(`Native engine terminated by ${signal ?? 'unknown signal'}`))
+          return
+        }
         try {
           const response = decodeResponse(Buffer.concat(chunks))
           if ((response.ok && code !== 0) || (!response.ok && code !== 1)) {

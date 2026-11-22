@@ -130,10 +130,14 @@ export class ExtractionCoordinator {
     if (!run) return
     this.#run = undefined
     const {projection, ref} = run.item
-    if (!this.#owns(run)) return this.#publish({active: undefined})
+    if (!this.#owns(run)) {
+      this.#publish({active: undefined})
+      return
+    }
     // Cancelled meanwhile: it isn't extracted again.
     if (run.cancel) {
-      return this.#publish({active: undefined, rows: withRow(this.#snapshot.rows, projection, ref, {...run.row, status: 'cancelled'})})
+      this.#publish({active: undefined, rows: withRow(this.#snapshot.rows, projection, ref, {...run.row, status: 'cancelled'})})
+      return
     }
     this.#publish({
       active: undefined,

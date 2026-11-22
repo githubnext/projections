@@ -26,31 +26,29 @@ export type StaticChecks = [
 export function domainTypeChecks(db: T.DatabaseExtraction, metrics: T.MetricsExtraction, api: T.ApiExtraction, any: T.DomainExtraction) {
   for (const entity of db.entities) {
     if (T.isKind(entity, 'column')) {
-      const type: string = entity.data.type
-      const databaseType: string | null | undefined = entity.data.databaseType
-      const nullable: boolean | undefined = entity.data.nullable
-      void [type, databaseType, nullable]
+      const _type: string = entity.data.type
+      const _databaseType: string | null | undefined = entity.data.databaseType
+      const _nullable: boolean | undefined = entity.data.nullable
     }
     if (T.isKind(entity, 'table')) {
       // @ts-expect-error A kind the schema doesn't type has no typed fields.
-      const type: string = entity.data.type
-      void [type, entity.data.anything]
+      const _type: string = entity.data.type
+      const _anything: unknown = entity.data.anything
     }
   }
   for (const relationship of db.relationships) {
     if (T.isKind(relationship, 'relation')) {
-      const columns: string[] | undefined = relationship.data.columns
-      void columns
+      const _columns: string[] | undefined = relationship.data.columns
     }
   }
-  const value: number = metrics.entities[0]!.data.value
+  const _value: number = metrics.entities[0]!.data.value
   for (const entity of api.entities) {
     if (T.isKind(entity, 'method')) {
-      const signature: string = entity.data.signature
-      void signature
+      const _signature: string = entity.data.signature
     }
   }
-  if (any.schema === 'metrics/v0') void (any.entities[0]!.data.value satisfies number)
-  const general: T.Extraction = db
-  void [value, general]
+  if (any.schema === 'metrics/v0') {
+    const _metric = any.entities[0]!.data.value satisfies number
+  }
+  const _general: T.Extraction = db
 }

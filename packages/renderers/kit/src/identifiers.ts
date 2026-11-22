@@ -65,7 +65,10 @@ export function identifierParts(text: string): LabelPart[] {
       tokens[index + 1]!.token = ''
       return
     }
-    if (!item.code) return push(item.token, false)
+    if (!item.code) {
+      push(item.token, false)
+      return
+    }
     push(item.lead, false)
     push(item.core, true)
     push(item.trail, false)

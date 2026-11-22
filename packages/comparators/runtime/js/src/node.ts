@@ -7,6 +7,8 @@ import {run} from './node-worker.js'
 import {cachedChecks, checkedRules, diagnostic, compareRequest, inspectRequest, loadRulesInterpreter, type RulesRuntime} from './rules.js'
 import {ComparatorRuntimeError, abortable, cancelled, limits} from './abi.js'
 
+const noop = () => undefined
+
 export {ComparatorRuntimeError, limits, type ComparatorErrorCode} from './abi.js'
 export type {RunComparatorOptions} from './host.js'
 export {
@@ -142,7 +144,10 @@ const codes = new Set<string>([
 
 function runNative(executable: string, interpreter: string, request: unknown, deadlineMs: number, signal?: AbortSignal): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    if (signal?.aborted) return reject(cancelled(signal))
+    if (signal?.aborted) {
+      reject(cancelled(signal))
+      return
+    }
     const child = spawn(executable, ['--interpreter', interpreter], {stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true})
     const chunks: Buffer[] = []
     let size = 0
@@ -186,7 +191,7 @@ function runNative(executable: string, interpreter: string, request: unknown, de
         finish(new ComparatorRuntimeError(code as ComparatorRuntimeError['code'], message))
       }
     })
-    child.stdin.on('error', () => {})
+    child.stdin.on('error', noop)
     child.stdin.end(JSON.stringify(request))
   })
 }

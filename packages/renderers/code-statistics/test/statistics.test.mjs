@@ -13,6 +13,8 @@ import {codeStatisticsFacts} from '../node_modules/.cache/test/summary.js'
 import {compared, extractionModel, scheduleSteps, stepEnds, stepHolds} from './engine.mjs'
 import {loadFixture, loadPair} from './fixtures.mjs'
 
+const noop = () => undefined
+
 const before = loadFixture('before')
 const after = loadFixture('after')
 
@@ -224,15 +226,15 @@ async function render(progress, highlighting, overrides = {}) {
       schedule,
       rendererName: 'code-statistics',
       selectedId: null,
-      onSelect() {},
-      onOpen() {},
-      reportSteps() {},
+      onSelect: noop,
+      onOpen: noop,
+      reportSteps: noop,
       controls: {},
-      declareControls() {},
+      declareControls: noop,
       get emphasis() {
         return stepEmphasis(this.schedule ?? [], this.progress, this.highlighting)
       },
-      onAction: () => () => {},
+      onAction: () => noop,
       options: {},
       viewport: undefined,
       reducedMotion: false,

@@ -23,6 +23,8 @@ import {DependencyInjectionRenderer} from '../node_modules/.cache/test/renderer.
 import {compared} from './engine.mjs'
 import {loadPair, scenarios} from './fixtures.mjs'
 
+const noop = () => undefined
+
 const diffOf = async scenario => {
   const {before, after} = loadPair(scenario)
   const {model} = await compared(before, after)
@@ -179,14 +181,14 @@ const diffProps = (model, highlighting) => ({
   direction: 1,
   schedule: [],
   selectedId: null,
-  onSelect() {},
-  onOpen() {},
-  reportSteps() {},
-  reportLegend() {},
+  onSelect: noop,
+  onOpen: noop,
+  reportSteps: noop,
+  reportLegend: noop,
   controls: {},
-  declareControls() {},
+  declareControls: noop,
   emphasis: stepEmphasis([], 1, highlighting),
-  onAction: () => () => {},
+  onAction: () => noop,
   options: {},
   viewport: undefined,
   reducedMotion: false,

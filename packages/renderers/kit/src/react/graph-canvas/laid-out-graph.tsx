@@ -237,7 +237,7 @@ function useViewChange(
   const moved = morph?.from
   useEffect(() => {
     const view = scroller.current?.ownerDocument.defaultView
-    if (!moved || !view) return
+    if (!moved || !view) return undefined
     let started: number | undefined
     let request = 0
     const tick = (time: number) => {

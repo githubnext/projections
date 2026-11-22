@@ -105,7 +105,7 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
   useEffect(() => {
     if (failure) {
       markSnapshot('failed', failure)
-      return
+      return undefined
     }
     const readiness = snapshotReadiness({
       projection,
@@ -118,13 +118,18 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
     })
     if (typeof readiness === 'object') {
       setFailure(readiness.failure)
-      return
+      return undefined
     }
-    if (readiness === 'waiting') return
+    if (readiness === 'waiting') return undefined
     let cancelled = false
     // A quiet moment first: anything the renderer still sends (such as its legend) changes `signature` and starts over.
     void document.fonts.ready
-      .then(() => new Promise(resolve => setTimeout(resolve, quiet)))
+      .then(
+        () =>
+          new Promise(resolve => {
+            setTimeout(resolve, quiet)
+          }),
+      )
       .then(() => frames(2))
       .then(() => {
         if (cancelled) return

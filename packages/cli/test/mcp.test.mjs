@@ -21,7 +21,9 @@ function start(t, root, args, extra = {}) {
   const child = spawn(executable, args, {cwd: root, env, stdio: ['pipe', 'pipe', 'pipe']})
   let stderr = ''
   child.stderr.on('data', bytes => (stderr += String(bytes)))
-  const exited = new Promise(resolve => child.once('exit', (code, signal) => resolve({code, signal})))
+  const exited = new Promise(resolve => {
+    child.once('exit', (code, signal) => resolve({code, signal}))
+  })
   t.after(() => {
     if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL')
   })
@@ -160,7 +162,12 @@ test('projections mcp speaks MCP: initialize, list tools, call them, and write i
   assert.deepEqual((await server.call('ping')).result, {})
 
   server.child.stdin.end()
-  const exit = await Promise.race([server.exited, new Promise(resolve => setTimeout(() => resolve('timeout'), 15_000).unref())])
+  const exit = await Promise.race([
+    server.exited,
+    new Promise(resolve => {
+      setTimeout(() => resolve('timeout'), 15_000).unref()
+    }),
+  ])
   assert.deepEqual(exit, {code: 0, signal: null}, server.stderr())
   assert.deepEqual(server.invalid, [])
 })

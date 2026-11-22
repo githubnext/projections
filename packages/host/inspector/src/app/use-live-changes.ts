@@ -113,7 +113,7 @@ export function useLiveChanges({
     definitionRevision,
   }
   useEffect(() => {
-    if (!api) return
+    if (!api) return undefined
     const abort = new AbortController()
     /** Responds to one change: reloads what it touched, drops stale extractions and runs the preview again. */
     async function respond(set: ChangeSet) {
@@ -160,7 +160,9 @@ export function useLiveChanges({
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the signal can abort during the await
           if (abort.signal.aborted) return
           setWatching(false)
-          await new Promise(resolve => setTimeout(resolve, 2000))
+          await new Promise(resolve => {
+            setTimeout(resolve, 2000)
+          })
           continue
         }
         if (!result) return

@@ -12,6 +12,8 @@ import type {
 } from './protocol.js'
 import type {RendererClient} from './client.js'
 
+const noop = () => undefined
+
 /** What `embedRenderer` runs and how it reports back. */
 export interface EmbedOptions {
   /** The built-in renderer to run, by name, for example `graph`. */
@@ -148,7 +150,7 @@ export function embedRenderer(
     readiness = {resolve, reject}
   })
   // Nobody need observe a failure for it to be handled.
-  ready.catch(() => {})
+  ready.catch(noop)
   const send = (message: HostMessage) => {
     if (disposed || !capabilities) return
     iframe.contentWindow?.postMessage({projections: rendererProtocolVersion, channel, ...message}, '*')
@@ -157,10 +159,9 @@ export function embedRenderer(
     iframe.style.opacity = ''
     iframe.dataset.revealed = 'true'
   }
-  const timer = view.setTimeout(
-    () => capabilities ?? fail(`The ${options.renderer} renderer did not become ready`),
-    rendererLimits.readyTimeoutMs + rendererLimits.documentTimeoutMs,
-  )
+  const timer = view.setTimeout(() => {
+    if (!capabilities) fail(`The ${options.renderer} renderer did not become ready`)
+  }, rendererLimits.readyTimeoutMs + rendererLimits.documentTimeoutMs)
   function fail(message: string) {
     if (failed || disposed) return
     failed = true

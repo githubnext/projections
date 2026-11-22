@@ -146,4 +146,5 @@ export function sidebarItem(node: Node): vscode.TreeItem {
     case 'message':
       return messageItem(node)
   }
+  throw new TypeError('Unknown sidebar node')
 }

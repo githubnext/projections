@@ -45,7 +45,7 @@ test('a link never runs behind a card: in every scenario, layout (ranks, stacked
 }) => {
   test.setTimeout(300_000)
   const read = async (path: string): Promise<unknown> => JSON.parse(await readFile(new URL(`../${path}`, import.meta.url), 'utf8'))
-  const load = async (value: unknown) => (typeof value === 'string' ? read(value) : value)
+  const load = (value: unknown) => (typeof value === 'string' ? read(value) : Promise.resolve(value))
   const {scenarios} = JSON.parse(await readFile(new URL('../scenarios.json', import.meta.url), 'utf8')) as {
     scenarios: {id: string; before?: unknown; after?: unknown; extraction?: unknown}[]
   }

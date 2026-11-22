@@ -48,7 +48,7 @@ export function useInspectorHandle({
   const selected = useRef<string>(undefined)
   if (selected.current === state.projection) selected.current = undefined
   useEffect(() => {
-    if (!handleRef) return
+    if (!handleRef) return undefined
     const handle: InspectorHandle = {
       selectProjection(id) {
         const known = handleState.current.definitions?.definitions.some(item => item.id === id)

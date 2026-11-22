@@ -86,7 +86,9 @@ export function snapToGrid(
       layer.map(box => (box[across] - grid.origin) / grid.laid),
       layer.map(box => columnSpan(grid, box[breadth])),
     )
-    layer.forEach((box, index) => (box[across] = grid.origin + columns[index]! * grid.pitch))
+    layer.forEach((box, index) => {
+      box[across] = grid.origin + columns[index]! * grid.pitch
+    })
   }
   const centre = (box: Box) => box[across] + box[breadth] / 2
   for (const [index, stage] of stages.entries()) {

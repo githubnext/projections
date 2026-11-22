@@ -35,7 +35,9 @@ export function RawDetails({
       beforeLabel={beforeLabel}
       afterLabel={afterLabel}
       selection={p.selection}
-      onSelectTarget={p.selectTarget}
+      onSelectTarget={target => {
+        p.selectTarget(target)
+      }}
       {...(annotations ? {mark, annotations: p.annotationsFor(row.id), onAnnotationActivate: p.activateAnnotation} : {})}
     >
       {p.selection && renderDetails?.(p.selection, p)}

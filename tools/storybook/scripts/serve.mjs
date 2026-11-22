@@ -77,7 +77,9 @@ export async function startStorybookServer({root = storybookDirectory, port = 0}
       response.end()
     }
   })
-  await new Promise(done => server.listen(port, '127.0.0.1', done))
+  await new Promise(done => {
+    server.listen(port, '127.0.0.1', done)
+  })
   const address = server.address()
   return {
     url: `http://127.0.0.1:${address.port}/`,

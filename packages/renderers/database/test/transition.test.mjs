@@ -10,6 +10,8 @@ import {schemaMetrics} from '../node_modules/.cache/test/schema.js'
 import {DatabaseRenderer} from '../node_modules/.cache/test/view.js'
 import {after, before, indexes, retyped} from './fixtures.mjs'
 
+const noop = () => undefined
+
 const engine = createNativeEngine()
 async function transitionOf(a, b, options = {available: 1100}, schedule = scheduleSteps) {
   const model = comparisonModel(a, b, await engine.compare(a, b))
@@ -312,15 +314,15 @@ const props = (model, progress, highlighting) => ({
   schedule: scheduleSteps(model),
   rendererName: 'database',
   selectedId: null,
-  onSelect() {},
-  onOpen() {},
-  reportSteps() {},
+  onSelect: noop,
+  onOpen: noop,
+  reportSteps: noop,
   controls: {},
-  declareControls() {},
+  declareControls: noop,
   get emphasis() {
     return stepEmphasis(this.schedule ?? [], this.progress, this.highlighting)
   },
-  onAction: () => () => {},
+  onAction: () => noop,
   options: {},
   viewport: undefined,
   reducedMotion: false,

@@ -9,6 +9,8 @@ import ts from 'typescript'
 import {apiPageWorkspaces} from './api.mjs'
 import {exists, root} from './shared.mjs'
 
+const noop = () => undefined
+
 /** The opt-out for a symbol exported only for tests or tooling. */
 const optOut = 'internal'
 const codeExtensions = ['.ts', '.tsx', '.mts', '.cts']
@@ -85,7 +87,7 @@ async function entryPoints(workspace, options) {
 
 function compilerOptions(workspace) {
   const config = join(root, workspace, 'tsconfig.json')
-  const parsed = ts.getParsedCommandLineOfConfigFile(config, {}, {...ts.sys, onUnRecoverableConfigFileDiagnostic: () => {}})
+  const parsed = ts.getParsedCommandLineOfConfigFile(config, {}, {...ts.sys, onUnRecoverableConfigFileDiagnostic: noop})
   return {...(parsed?.options ?? {}), noEmit: true, allowJs: true}
 }
 

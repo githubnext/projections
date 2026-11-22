@@ -5,7 +5,7 @@ export function useSize(element: {current: HTMLElement | null}): {width: number;
   const [size, setSize] = useState({width: Infinity, height: 0})
   useEffect(() => {
     const target = element.current
-    if (!target) return
+    if (!target) return undefined
     const observer = new ResizeObserver(([entry]) =>
       setSize(previous => {
         const width = entry?.contentRect.width ?? Infinity,

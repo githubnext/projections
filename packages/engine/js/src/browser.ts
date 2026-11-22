@@ -39,7 +39,7 @@ export async function createWasmEngine(
   const invoke = await createWasmTransport(options)
   const defaultComparator = await createComparatorTransport(comparator)
   return engine(
-    async request => decodeResponse(invoke(encode(request))),
-    async () => defaultComparator,
+    request => Promise.resolve(decodeResponse(invoke(encode(request)))),
+    () => Promise.resolve(defaultComparator),
   )
 }

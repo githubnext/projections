@@ -30,7 +30,7 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
   const {frame} = settings
   // The page's own background shows outside the card's corners: none, so they are transparent, or the matte.
   useLayoutEffect(() => {
-    if (frame !== 'card') return
+    if (frame !== 'card') return undefined
     const root = document.documentElement
     root.style.background = settings.matte ?? 'transparent'
     return () => {

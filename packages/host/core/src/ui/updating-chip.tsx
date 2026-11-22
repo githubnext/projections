@@ -43,7 +43,7 @@ function Chip({reducedMotion}: {reducedMotion: boolean}) {
   useLayoutEffect(() => {
     const element = chip.current
     const parent = element?.offsetParent
-    if (!element || !parent) return
+    if (!element || !parent) return undefined
     const place = () => {
       element.style.top = `${utilityInset}px`
       const own = element.getBoundingClientRect()

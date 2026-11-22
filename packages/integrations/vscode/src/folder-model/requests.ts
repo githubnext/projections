@@ -3,6 +3,7 @@ import {jobChangeCount} from '../projections/pairs.js'
 import {parseDefinitions} from '../projections/definitions.js'
 import type {DefinitionList} from '../projections/definitions.js'
 import type {Pair} from '../projections/pairs.js'
+import {noop} from '../noop.ts'
 
 type Runner = Awaited<ReturnType<Lease['current']>>
 
@@ -63,10 +64,12 @@ export async function countChanges(
     let job = created.body as {status?: string; diagnostics?: {message?: string}[]}
     while (job.status === 'running') {
       if (signal.aborted) {
-        await runner.request({method: 'POST', path: `/api/jobs/${id}/cancel`, body: {}}).catch(() => {})
+        await runner.request({method: 'POST', path: `/api/jobs/${id}/cancel`, body: {}}).catch(noop)
         return undefined
       }
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await new Promise(resolve => {
+        setTimeout(resolve, 300)
+      })
       job = (await runner.request({method: 'GET', path: `/api/jobs/${id}`}, signal)).body as typeof job
     }
     const count = jobChangeCount(job)

@@ -27,6 +27,7 @@ import {jobHold, startsJob} from './projection-tab/jobs.js'
 import {KeptResults} from './projection-tab/kept.js'
 import {refreshAction, tabPairLabels} from './projection-tab/labels.js'
 import {DefinitionRevision} from './projection-tab/revision.js'
+import {noop} from '../noop.ts'
 
 /** A tab's shown extractions' diagnostics, as native diagnostics on its definition file (Problems and squiggles). */
 function reportExtraction(sidebar: Sidebar, folder: vscode.WorkspaceFolder, projection: string, sides: ReturnType<typeof keptSides>) {
@@ -170,12 +171,17 @@ export class ProjectionTab extends InspectorWebview {
   protected override receive(message: unknown) {
     // For tests: a new extraction job reaches the backend late (`holdJobs`), to see what a long job shows.
     const hold = jobHold(message)
-    if (hold > 0) return void setTimeout(() => super.receive(message), hold)
+    if (hold > 0) {
+      setTimeout(() => {
+        super.receive(message)
+      }, hold)
+      return
+    }
     const host = message as (Partial<HostMessage> & {pair?: unknown; results?: unknown}) | null | undefined
     const op = host?.tag === hostTag ? host.op : undefined
-    if (op === 'restore') return this.restore()
-    if (op === 'results') return this.keep(host?.pair, host?.results)
-    super.receive(message)
+    if (op === 'restore') this.restore()
+    else if (op === 'results') this.keep(host?.pair, host?.results)
+    else super.receive(message)
   }
 
   /** The page asked what to show: the tab's pair, and the results it showed last when they are for that pair. */
@@ -225,7 +231,7 @@ export class ProjectionTab extends InspectorWebview {
       ...pairFields(pair),
       definitionRevision: this.revisionFor(pair),
       generation: this.switches.next(),
-    }).catch(() => {})
+    }).catch(noop)
   }
 
   /** The revision whose definition this tab applies to a pair: the working tree's while it has edits, unless Show committed. */
@@ -278,13 +284,20 @@ export class ProjectionTab extends InspectorWebview {
     this.freshness.refresh()
     this.following.refreshing()
     const pin = this.following.takePendingPin()
-    if (pin) return this.pinTo(pin)
+    if (pin) {
+      await this.pinTo(pin)
+      return
+    }
     const pair = this.following.pendingFollow()
-    if (pair) return this.follow(pair)
+    if (pair) {
+      this.follow(pair)
+      return
+    }
     // The definition the tab should apply changed (a commit, or the edits were undone): Refresh applies it.
     const desired = this.revisionFor(this.shownPair())
     if (this.last?.definitionRevision && this.last.definitionRevision !== desired) {
-      return void (await this.control({op: 'setDefinitionRevision', ref: desired}))
+      await this.control({op: 'setDefinitionRevision', ref: desired})
+      return
     }
     await this.control({op: 'refresh'})
   }
@@ -320,8 +333,11 @@ export class ProjectionTab extends InspectorWebview {
         case 'useEdits':
           return this.showCommitted(false)
       }
+      return undefined
     }
-    void run().catch(error => void vscode.window.showErrorMessage(`Projections: ${error instanceof Error ? error.message : error}`))
+    void run().catch(
+      (error: unknown) => void vscode.window.showErrorMessage(`Projections: ${error instanceof Error ? error.message : String(error)}`),
+    )
   }
 
   get title(): string {

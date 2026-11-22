@@ -20,7 +20,7 @@ export function useTextAdvances(
   latest.current = advances
   useLayoutEffect(() => {
     const element = group.current
-    if (!element) return
+    if (!element) return undefined
     const texts = [...element.querySelectorAll<SVGTextElement>(selector)]
     const measure = () => {
       const next = new Map(latest.current)
@@ -35,7 +35,7 @@ export function useTextAdvances(
       if (changed) setAdvances(next)
     }
     measure()
-    if (typeof ResizeObserver === 'undefined') return
+    if (typeof ResizeObserver === 'undefined') return undefined
     const observer = new ResizeObserver(measure)
     for (const text of texts) observer.observe(text)
     return () => observer.disconnect()

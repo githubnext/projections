@@ -79,7 +79,10 @@ export function createBridge(
       }
       if (abort.signal.aborted) return
     }
-    if (latest !== since) return answer()
+    if (latest !== since) {
+      answer()
+      return
+    }
     const waiter = {since, settle: finish}
     const timer = setTimeout(() => {
       waiting.delete(waiter)

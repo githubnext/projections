@@ -57,7 +57,7 @@ export function useScenarios({
   const scenarioFile = live ? policy.scenarios : undefined
   const scenarioVersion = scenarioVersions[projection] ?? 0
   useEffect(() => {
-    if (!api || !projection || !scenarioFile) return
+    if (!api || !projection || !scenarioFile) return undefined
     const abort = new AbortController()
     api
       .scenarios(projection, abort.signal)

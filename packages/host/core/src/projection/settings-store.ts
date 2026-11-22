@@ -130,7 +130,9 @@ export function createSettingsStore(initial: ProjectionOptions): SettingsStore {
     getSnapshot: () => settings,
     subscribe(listener) {
       listeners.add(listener)
-      return () => listeners.delete(listener)
+      return () => {
+        listeners.delete(listener)
+      }
     },
     update(next) {
       options = next

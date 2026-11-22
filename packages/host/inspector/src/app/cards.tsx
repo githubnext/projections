@@ -8,6 +8,7 @@ import {iconButton} from '../shell/controls.js'
 import type {InspectorInvalidDefinition, InspectorJob} from '../types.js'
 import {failureMessage} from '../notices.js'
 import {refName} from './revisions.js'
+import {noop} from '../noop.js'
 
 /**
  * A dismissible one-line tip in its own row (never over content), remembered as dismissed under `storageKey`.
@@ -66,7 +67,7 @@ function CopyButton({text, label}: {text: string; label: string}) {
             setCopied(true)
             setTimeout(() => setCopied(false), 1500)
           })
-          .catch(() => {})
+          .catch(noop)
       }}
     >
       <Copy />

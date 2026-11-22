@@ -150,7 +150,15 @@ function CustomHost({prepared, colorMode, mode}: {prepared: PreparedFixture; col
     >
       <h1 style={{fontSize: 18, margin: '0 0 12px'}}>{projection.title}</h1>
       {/* The toolbar takes focus when its background is clicked, so Space there plays and pauses. */}
-      <div role="toolbar" aria-label="Custom toolbar" tabIndex={-1} style={row} onKeyDown={event => handlePlaybackShortcut(event, p)}>
+      <div
+        role="toolbar"
+        aria-label="Custom toolbar"
+        tabIndex={-1}
+        style={row}
+        onKeyDown={event => {
+          handlePlaybackShortcut(event, p)
+        }}
+      >
         <Choice label="View" options={views.map(kind => ({value: kind, label: viewNames[kind]}))} value={view} onChange={setView} />
         {controls.modeSwitch && (
           <Choice

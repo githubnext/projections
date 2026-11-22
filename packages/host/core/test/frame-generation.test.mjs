@@ -4,6 +4,8 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {RendererFrame} from '../dist/frame.js'
 
+const noop = () => undefined
+
 /** A window, its frame's contentWindow, the messages the frame sent its renderer, and a way to answer as the renderer. */
 function setup() {
   const listeners = new Set()
@@ -15,9 +17,9 @@ function setup() {
     performance: globalThis.performance,
     btoa: globalThis.btoa,
     setTimeout: () => 0,
-    clearTimeout: () => {},
+    clearTimeout: noop,
     requestAnimationFrame: () => 0,
-    cancelAnimationFrame: () => {},
+    cancelAnimationFrame: noop,
     addEventListener: (type, listener) => type === 'message' && listeners.add(listener),
     removeEventListener: (type, listener) => listeners.delete(listener),
     getComputedStyle: () => ({}),
@@ -36,13 +38,13 @@ function setup() {
     getAttribute(name) {
       return this.attributes[name] ?? null
     },
-    removeAttribute() {},
-    addEventListener() {},
-    removeEventListener() {},
+    removeAttribute: noop,
+    addEventListener: noop,
+    removeEventListener: noop,
     getBoundingClientRect: () => ({width: 800, height: 600, left: 0, top: 0}),
-    remove() {},
+    remove: noop,
   }
-  const container = {ownerDocument: {createElement: () => iframe, defaultView: view}, append() {}}
+  const container = {ownerDocument: {createElement: () => iframe, defaultView: view}, append: noop}
   const events = []
   const document = {protocolVersion: 0, schema: 'graph/v0', entities: [], relationships: []}
   const init = generation => ({

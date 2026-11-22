@@ -28,7 +28,7 @@ export function UtilityArea({children}: {children: ReactNode}) {
   useWholePixels(bar)
   useLayoutEffect(() => {
     const area = sticky.current
-    if (!area) return
+    if (!area) return undefined
     // The area is as tall as its inset and the bar, so it sticks only while all of it fits in the stage and never
     // overhangs the stage's end (sticky keeps its margin box in the stage). It takes none of that from the stage: what
     // follows it (the frame, or a view that scrolls) starts that much higher.

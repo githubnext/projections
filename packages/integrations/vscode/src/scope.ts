@@ -4,10 +4,7 @@
  * `provenance.execution.tree` and `scope`, to compare with the working tree's when the scope is verified.
  */
 import {createHash} from 'node:crypto'
-import {execFile} from 'node:child_process'
-import {promisify} from 'node:util'
-
-const run = promisify(execFile)
+import {execFileOutput as run} from './exec.ts'
 
 /** `sha256:<hex>` of `path=object\0` for each scope path, in order; a path the tree lacks is `absent`. */
 export function scopeDigest(entries: readonly (readonly [path: string, object: string | undefined])[]): string {

@@ -21,7 +21,9 @@ function serve(t, root, args = []) {
   })
   let stderr = ''
   child.stderr.on('data', bytes => (stderr += String(bytes)))
-  const exited = new Promise(resolve => child.once('exit', (code, signal) => resolve({code, signal})))
+  const exited = new Promise(resolve => {
+    child.once('exit', (code, signal) => resolve({code, signal}))
+  })
   t.after(() => {
     if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL')
   })
@@ -93,7 +95,9 @@ async function poll(read, done, timeoutMs = 60_000) {
     const value = await read()
     if (done(value)) return value
     if (Date.now() > deadline) assert.fail(`Timed out polling: ${JSON.stringify(value).slice(0, 2000)}`)
-    await new Promise(resolve => setTimeout(resolve, 200))
+    await new Promise(resolve => {
+      setTimeout(resolve, 200)
+    })
   }
 }
 
@@ -192,7 +196,9 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
   // A long poll of /api/changes is cancelled at once.
   const generation = (await backend.request('GET', '/api/changes?since=0')).body.generation
   const poll1 = backend.call('request', {method: 'GET', path: `/api/changes?since=${generation}`})
-  await new Promise(resolve => setTimeout(resolve, 200))
+  await new Promise(resolve => {
+    setTimeout(resolve, 200)
+  })
   const cancelledAt = Date.now()
   backend.send({method: '$/cancelRequest', params: {id: poll1.id}})
   const cancelled = await poll1.reply
@@ -213,7 +219,12 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
   assert.equal(unknown.error.code, -32601)
 
   backend.child.stdin.end()
-  const exit = await Promise.race([backend.exited, new Promise(resolve => setTimeout(() => resolve('timeout'), 15_000).unref())])
+  const exit = await Promise.race([
+    backend.exited,
+    new Promise(resolve => {
+      setTimeout(() => resolve('timeout'), 15_000).unref()
+    }),
+  ])
   assert.deepEqual(exit, {code: 0, signal: null}, backend.stderr())
   assert.deepEqual(backend.invalid, [])
 })

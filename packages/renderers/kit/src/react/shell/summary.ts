@@ -6,6 +6,8 @@ import {rendererSummary} from '../../summary.js'
 import type {ComparisonModel} from '../../model.js'
 import type {MountOptions} from './props.js'
 
+const noop = () => undefined
+
 /**
  * The summary bar's figures: counted here for every document, in the renderer's words once it names its kinds, then
  * the renderer's facts about the document. Renderers name kinds in effects, which run before the shell's, so the first
@@ -22,7 +24,7 @@ export function useSummaryReport(
   const nouns = useRef<SummaryNouns | undefined>(options.nouns)
   const summarized = useRef<{model?: ComparisonModel | Error; controls: Record<string, ControlValue>}>({controls: {}})
   const sentSummary = useRef('')
-  const sendSummary = useRef(() => {})
+  const sendSummary = useRef<() => void>(noop)
   sendSummary.current = () => {
     if (!client || !init) return
     const {model: current, controls: values} = summarized.current

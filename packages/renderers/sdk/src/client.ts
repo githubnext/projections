@@ -190,7 +190,10 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
   const documents = documentRequests(view, post, message => new RendererConnectionError(message))
   const subscribers = new Set<(message: HostMessage) => void>()
   const deliver = (message: HostMessage) => {
-    if (message.type === 'document') return documents.answer(message)
+    if (message.type === 'document') {
+      documents.answer(message)
+      return
+    }
     if (message.type === 'select') rings?.controller.set({selected: message.id})
     if (message.type === 'hover') rings?.controller.set({hovered: message.id})
     if (message.type === 'init') rings?.controller.set({hovered: null, selected: null})

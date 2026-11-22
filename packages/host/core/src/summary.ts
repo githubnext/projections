@@ -193,7 +193,7 @@ export function useSummaryFit(
   const [shown, setShown] = useState(count)
   useLayoutEffect(() => {
     const element = bar.current
-    if (!element) return
+    if (!element) return undefined
     const measure = () => {
       const row = element.querySelector('[data-summary-measure]')
       const figures = row ? [...row.querySelectorAll<HTMLElement>('[data-summary-figure]')] : []

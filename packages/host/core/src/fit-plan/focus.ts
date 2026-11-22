@@ -70,7 +70,7 @@ export function useFocusRetention(
 
   useLayoutEffect(() => {
     const element = bar.current
-    if (!element) return
+    if (!element) return undefined
     const track = (event: FocusEvent) => {
       const target = event.target instanceof Element ? event.target.closest('[data-focus-id]') : null
       focus.current = target && element.contains(target) ? {element: target, id: target.getAttribute('data-focus-id')!} : null

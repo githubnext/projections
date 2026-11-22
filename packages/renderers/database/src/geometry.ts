@@ -53,7 +53,9 @@ export function keepOrder(list: string[], later: ReadonlyMap<string, number> | u
   const slots = list.flatMap((id, index) => (later.has(id) ? [index] : []))
   const kept = slots.map(index => list[index]!).sort((a, b) => later.get(a)! - later.get(b)!)
   const result = [...list]
-  slots.forEach((slot, index) => (result[slot] = kept[index]!))
+  slots.forEach((slot, index) => {
+    result[slot] = kept[index]!
+  })
   return result
 }
 

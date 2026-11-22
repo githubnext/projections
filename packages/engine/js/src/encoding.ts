@@ -15,7 +15,10 @@ function unicode(value: string, path: string): void {
 function jsonValue(value: unknown, path: string, ancestors: Set<object>, depth: number): void {
   if (depth > 64) invalid('depth-limit', path, 'JSON transport nesting exceeds 64')
   if (value === null || typeof value === 'boolean') return
-  if (typeof value === 'string') return unicode(value, path)
+  if (typeof value === 'string') {
+    unicode(value, path)
+    return
+  }
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) invalid('nonfinite-number', path, 'Numbers must be finite')
     if (Number.isInteger(value) && !Number.isSafeInteger(value)) {

@@ -13,6 +13,8 @@ import {compared, extractionModel, scheduleSteps, stepEnds, stepHolds} from './e
 import {loadFixture, loadPair, scenarios} from './fixtures.mjs'
 import {checkTransitionFrame} from './invariants.mjs'
 
+const noop = () => undefined
+
 const before = loadFixture('before')
 const after = loadFixture('after')
 const unitId = name => `service:Orders:${name}:unkeyed`
@@ -75,15 +77,15 @@ const rendererProps = (model, schedule = scheduleSteps(model), progress = 1, hig
   schedule,
   rendererName: 'dependency-injection',
   selectedId: null,
-  onSelect() {},
-  onOpen() {},
-  reportSteps() {},
+  onSelect: noop,
+  onOpen: noop,
+  reportSteps: noop,
   controls: {},
-  declareControls() {},
+  declareControls: noop,
   get emphasis() {
     return stepEmphasis(this.schedule ?? [], this.progress, this.highlighting)
   },
-  onAction: () => () => {},
+  onAction: () => noop,
   options: {},
   viewport: undefined,
   reducedMotion: false,
@@ -453,13 +455,13 @@ test('the dependency-injection card shows container scope names, and an alias is
         schedule: scheduleSteps(model),
         rendererName: 'dependency-injection',
         selectedId: null,
-        onSelect() {},
-        onOpen() {},
-        reportSteps() {},
+        onSelect: noop,
+        onOpen: noop,
+        reportSteps: noop,
         controls: {},
-        declareControls() {},
+        declareControls: noop,
         emphasis: () => 0,
-        onAction: () => () => {},
+        onAction: () => noop,
         options: {},
         viewport: undefined,
         reducedMotion: false,

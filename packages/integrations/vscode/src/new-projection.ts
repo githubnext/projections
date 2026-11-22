@@ -75,8 +75,11 @@ export function registerNewProjection(host: NewProjectionHost) {
         case 'custom':
           return await fromCustomParts(wizard, target)
         case 'agent':
-          return await withAgent(wizard, target, prompt => (lastPrompt = prompt))
+          return await withAgent(wizard, target, prompt => {
+            lastPrompt = prompt
+          })
       }
+      return undefined
     } catch (failure) {
       await wizard.showCliError(failure)
       return undefined
@@ -99,7 +102,9 @@ export function registerNewProjection(host: NewProjectionHost) {
         if (!wizard.shownInput) throw new Error('No input box is shown')
         wizard.shownInput.value = value
         // The extension host sends the value on its next tick: accept once the workbench has it.
-        await new Promise(resolve => setTimeout(resolve, 200))
+        await new Promise(resolve => {
+          setTimeout(resolve, 200)
+        })
         await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem')
       },
       prompt: () => lastPrompt ?? null,

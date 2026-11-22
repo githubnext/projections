@@ -6,6 +6,8 @@ import type {VscodeArgs} from '../../src/vscode-render.js'
 import {mobile, preparedLoader, renderDetails, sampleAnnotations, scenarioArgTypes, scenarioFixture} from '../../src/stories.js'
 import type {Loaded} from '../../src/stories.js'
 
+const noop = () => undefined
+
 interface ViewArgs extends VscodeArgs {
   /** Offer only the host's table and text views, as when no renderer bundle is available. */
   withoutRenderer?: boolean
@@ -100,7 +102,7 @@ const meta = {
                   label="Out of date"
                   {...(args.outOfDate ? {detail: `${args.outOfDate} file${args.outOfDate === 1 ? '' : 's'} changed`} : {})}
                   title="The working tree changed since this result. Nothing refreshes on its own: Refresh extracts it again."
-                  action={{label: 'Refresh', icon: 'refresh', onClick: () => {}}}
+                  action={{label: 'Refresh', icon: 'refresh', onClick: noop}}
                 />
               ),
             }

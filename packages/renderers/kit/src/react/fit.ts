@@ -45,7 +45,7 @@ export function useFitScale(
   const hasContent = size !== undefined
   useLayoutEffect(() => {
     const element = stage.current
-    if (!element) return
+    if (!element) return undefined
     let observedFill: Element | undefined
     // Measures, and has `watcher` (the stage's observer) watch the frame's fill once there is one.
     const measure = (watcher: ResizeObserver) => {
@@ -164,10 +164,10 @@ const arrivalTimeout = 1000
 function useArrivedHeight(stage: RefObject<HTMLElement | null>, height: number | undefined, hold: () => () => void): void {
   useLayoutEffect(() => {
     const view = stage.current?.ownerDocument.documentElement
-    if (height === undefined || !view) return
+    if (height === undefined || !view) return undefined
     const target = Math.min(rendererLimits.maxHeight, Math.max(rendererLimits.minHeight, Math.ceil(height)))
     const arrived = () => Math.abs(view.clientHeight - target) <= 1
-    if (arrived()) return
+    if (arrived()) return undefined
     const release = hold()
     const observer = new ResizeObserver(() => {
       if (arrived()) done()

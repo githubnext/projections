@@ -312,7 +312,9 @@ export function diCardText(input: DiCardTextInput): DiCardText {
   const note: DiSpan[] | undefined = input.note
     ? [...(input.note.prefix ? [{text: input.note.prefix, code: false}] : []), {text: input.note.text, code: input.note.code}]
     : undefined
-  names.forEach((spans, index) => push('implementation', spans, 'start', next(index === 0 ? diffCardMetrics.labelGap : 0)))
+  names.forEach((spans, index) => {
+    push('implementation', spans, 'start', next(index === 0 ? diffCardMetrics.labelGap : 0))
+  })
   const firstName = lines.find(line => line.role === 'implementation')!
   if (note && names.length === 1 && spansWidth(firstName.spans) + textGap + spansWidth(note) <= lineRoom) {
     push('note', note, 'end', firstName.y)
@@ -320,19 +322,19 @@ export function diCardText(input: DiCardTextInput): DiCardText {
     // Under the name, wrapped: the prefix stays in words on the first line.
     const prefix = note[1] ? note[0]! : undefined
     const value = note.at(-1)!
-    wrapText(`${prefix?.text ?? ''}${value.text}`, charsIn(lineRoom, value.code ? monoAdvance : sansAdvance)).forEach((text, index) =>
+    wrapText(`${prefix?.text ?? ''}${value.text}`, charsIn(lineRoom, value.code ? monoAdvance : sansAdvance)).forEach((text, index) => {
       push(
         'note',
         index === 0 && prefix && text.startsWith(prefix.text)
           ? [prefix, {text: text.slice(prefix.text.length), code: value.code}]
           : [{text, code: value.code}],
-      ),
-    )
+      )
+    })
   }
 
   // The other facets that changed, then the links the unit gained and lost.
   input.facets.forEach((facet, index) =>
-    facetLines(facet).forEach((pieces, line) =>
+    facetLines(facet).forEach((pieces, line) => {
       push(
         'facet',
         pieces.map(piece => ({
@@ -342,8 +344,8 @@ export function diCardText(input: DiCardTextInput): DiCardText {
         })),
         'start',
         next(index === 0 && line === 0 ? diffCardMetrics.fieldsGap : 0),
-      ),
-    ),
+      )
+    }),
   )
   const dependencies = dependencyLines(input.dependencies).map((pieces, index) => ({
     y: next(index === 0 ? diffCardMetrics.fieldsGap : 0),

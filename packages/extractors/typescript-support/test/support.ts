@@ -1,6 +1,6 @@
 import {spawn} from 'node:child_process'
 import {cp, mkdir, readFile, rm} from 'node:fs/promises'
-import {existsSync} from 'node:fs'
+import {existsSync, rmSync} from 'node:fs'
 import {createRequire} from 'node:module'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -36,7 +36,10 @@ export function toolchain(): Promise<string> {
   prepared ??= (async () => {
     await rm(sharedCheckout, {recursive: true, force: true})
     await installToolchain(sharedCheckout)
-    process.once('exit', () => import('node:fs').then(fs => fs.rmSync(sharedCheckout, {recursive: true, force: true})))
+    // An exit listener runs synchronously: work it starts asynchronously never finishes.
+    process.once('exit', () => {
+      rmSync(sharedCheckout, {recursive: true, force: true})
+    })
     return sharedCheckout
   })()
   return prepared

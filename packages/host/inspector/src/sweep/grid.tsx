@@ -83,7 +83,7 @@ export function SweepGrid({
   }, [api])
   const running = sweep?.status === 'running'
   useEffect(() => {
-    if (!running) return
+    if (!running) return undefined
     const timer = setInterval(() => {
       api.sweep().then(setSweep, () => undefined)
     }, 1000)

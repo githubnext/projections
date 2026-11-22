@@ -367,7 +367,7 @@ export function KindLegend({kinds, label = 'Entity kinds'}: {kinds: readonly str
   const report = useContext(LegendContext)
   const key = JSON.stringify([label, kinds])
   useEffect(() => {
-    if (!report) return
+    if (!report) return undefined
     const [title, items] = JSON.parse(key) as [string, string[]]
     report({title, items: items.slice(0, rendererLimits.legendItems).map(kind => ({label: kind.slice(0, rendererLimits.legendLabel)}))})
     return () => report({items: []})

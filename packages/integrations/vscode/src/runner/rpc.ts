@@ -20,6 +20,9 @@ export class RpcError extends Error {
   }
 }
 
+/** Why `signal` aborted: its reason, else an AbortError. */
+const abortReason = (signal: AbortSignal | undefined): unknown => signal?.reason ?? new DOMException('Aborted', 'AbortError')
+
 /** Speaks JSON-RPC 2.0 with one message per line on `output` (to the backend) and `input` (from it). */
 export function createRpcClient({input, output, log}: {input: Readable; output: Writable; log?: (line: string) => void}): RpcClient {
   let nextId = 1
@@ -56,13 +59,13 @@ export function createRpcClient({input, output, log}: {input: Readable; output: 
   return {
     call(method, params, signal) {
       if (closed !== undefined) return Promise.reject(new Error(closed))
-      if (signal?.aborted) return Promise.reject(signal.reason ?? new DOMException('Aborted', 'AbortError'))
+      if (signal?.aborted) return Promise.reject(abortReason(signal))
       const id = nextId++
       return new Promise((resolve, reject) => {
         const abort = () => {
           if (!pending.delete(id)) return
           write({method: '$/cancelRequest', params: {id}})
-          reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'))
+          reject(abortReason(signal))
         }
         signal?.addEventListener('abort', abort, {once: true})
         pending.set(id, {
@@ -83,7 +86,9 @@ export function createRpcClient({input, output, log}: {input: Readable; output: 
     },
     onNotification(listener) {
       listeners.add(listener)
-      return () => listeners.delete(listener)
+      return () => {
+        listeners.delete(listener)
+      }
     },
     close(reason) {
       if (closed !== undefined) return

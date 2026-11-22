@@ -69,7 +69,7 @@ for (const colorMode of ['light', 'dark'] as const) {
       }, rows)
       expect(ids.length, 'rows to ring').toBeGreaterThan(0)
       const states: [string, () => Promise<void>][] = [
-        ['at rest', async () => {}],
+        ['at rest', () => Promise.resolve()],
         ...ids.flatMap((id): [string, () => Promise<void>][] => [
           [`${id} selected`, () => stage.select(id)],
           [

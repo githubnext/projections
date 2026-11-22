@@ -60,9 +60,13 @@ npm(['run', 'build'], renderer)
 
 // `npm run dev`: Vite's development server, which the Inspector prefers while it runs.
 const vite = spawn(process.execPath, [join(renderer, 'node_modules/vite/bin/vite.js'), '--port', '0'], {cwd: renderer, stdio: 'ignore'})
-process.once('exit', () => vite.kill())
+process.once('exit', () => {
+  vite.kill()
+})
 export const record = join(renderer, 'node_modules/.projections/renderer-dev-server.json')
 for (let waited = 0; !existsSync(record); waited += 100) {
   if (waited > 30_000) throw new Error('The renderer development server did not start')
-  await new Promise(done => setTimeout(done, 100))
+  await new Promise(done => {
+    setTimeout(done, 100)
+  })
 }

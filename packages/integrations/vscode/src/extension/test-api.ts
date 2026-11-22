@@ -135,7 +135,9 @@ export function extensionApi({
         if (!picks.shown || !item) throw new Error(`No ${label} in the quick pick`)
         picks.shown.activeItems = [item]
         // The extension host sends the active item on its next tick: accept once the workbench has it.
-        await new Promise(resolve => setTimeout(resolve, 200))
+        await new Promise(resolve => {
+          setTimeout(resolve, 200)
+        })
         await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem')
       },
       /** The latest `changes` generation of the first folder, and the one each tab of a projection last checked. */

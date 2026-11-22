@@ -6,6 +6,8 @@ import {createNativeEngine, EngineError} from '../dist/native.js'
 import {createWasmEngine} from '../dist/browser.js'
 import {comparatorCases, engineCases} from './vectors.mjs'
 
+const noop = () => undefined
+
 const wasmBytes = await readFile(new URL('../artifacts/engine.wasm', import.meta.url))
 const comparatorBytes = await readFile(new URL('../artifacts/default-comparator.wasm', import.meta.url))
 const engines = {
@@ -144,7 +146,7 @@ for (const [name, engine] of Object.entries(engines)) {
       9007199254740992,
       undefined,
       1n,
-      () => {},
+      noop,
       Symbol('not-json'),
       '\ud800',
       new Date(),

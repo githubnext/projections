@@ -100,7 +100,11 @@ export function columnsLayout(model: SchemaModel, cardWidth: number, sizer: Text
   const x = (rank: number) => rank * (cardWidth + rankGap)
   const tables = new Map<string, SchemaBox>()
   const rows = new Map<string, number>()
-  for (const table of model.tables) model.columns.get(table)!.forEach((column, index) => rows.set(column, index))
+  for (const table of model.tables) {
+    model.columns.get(table)!.forEach((column, index) => {
+      rows.set(column, index)
+    })
+  }
   const routes = new Map<string, SchemaPoint[]>()
   const waypoints: Waypoints = new Map()
   // Long links reserve a slot in every rank they cross, so they never pass through a card: from the dependent's rank to

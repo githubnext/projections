@@ -132,4 +132,5 @@ export function viewerReducer(state: ViewerState, action: ViewerAction): ViewerS
       return {...state, progress, playing: state.direction === 1 ? progress < 1 : progress > 0}
     }
   }
+  throw new TypeError('Unknown viewer action')
 }

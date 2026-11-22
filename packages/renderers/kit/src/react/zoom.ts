@@ -70,7 +70,7 @@ export function useScrollAnchor(
   }).current
   useEffect(() => {
     const element = scroller.current
-    if (!element) return
+    if (!element) return undefined
     // The view is placed here, so the shell's opening scroll (see `useOpeningReveal`) leaves it alone.
     element.setAttribute(placedAttribute, '')
     const onScroll = () => {
@@ -188,7 +188,7 @@ export function useStageZoom(
   // React's wheel listeners are passive, so this one is registered directly to be able to prevent page zoom.
   useEffect(() => {
     const element = scroller.current
-    if (!element) return
+    if (!element) return undefined
     const onWheel = (event: globalThis.WheelEvent) => {
       if (!event.ctrlKey && !event.metaKey) return
       event.preventDefault()
@@ -222,7 +222,7 @@ export function useStageZoom(
 function useDotGrid(scroller: RefObject<HTMLElement | null>, scale: number): void {
   useLayoutEffect(() => {
     const element = scroller.current
-    if (!element) return
+    if (!element) return undefined
     const place = () => {
       const content = element.firstElementChild
       const box = element.getBoundingClientRect()

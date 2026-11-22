@@ -137,11 +137,11 @@ export function useComparisonPair(options: ComparisonPairOptions): ComparisonPai
   const beforeDocument = before && after && before.key !== after.key ? before.document : undefined
   const afterDocument = after?.document
   useEffect(() => {
-    if (!afterDocument) return
+    if (!afterDocument) return undefined
     if (!beforeDocument) {
       setOutcome({status: 'single', document: afterDocument})
       callbacks.current.onComparison?.(undefined)
-      return
+      return undefined
     }
     const abort = new AbortController()
     setOutcome({status: 'computing'})

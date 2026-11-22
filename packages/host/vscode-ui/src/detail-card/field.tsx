@@ -68,7 +68,9 @@ export function FieldRow({
         data-side={property.side}
         aria-pressed={selected}
         data-selected={selected || undefined}
-        onClick={() => p.selectTarget(selected ? item : property)}
+        onClick={() => {
+          p.selectTarget(selected ? item : property)
+        }}
       >
         {content}
         <AnnotationCount count={count} />

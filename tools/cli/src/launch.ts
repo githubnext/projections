@@ -29,7 +29,11 @@ if (node.path === process.execPath) {
   const child = spawn(node.path, [bin, ...process.argv.slice(2)], {cwd: root, stdio: 'inherit'})
   // A terminal's Ctrl-C reaches the child too (one process group); other signals are passed on.
   const signals = ['SIGINT', 'SIGTERM', 'SIGHUP'] as const
-  for (const signal of signals) process.on(signal, () => signal !== 'SIGINT' && child.kill(signal))
+  for (const signal of signals) {
+    process.on(signal, () => {
+      if (signal !== 'SIGINT') child.kill(signal)
+    })
+  }
   child.on('error', error => {
     say(`could not run ${node.path}: ${error.message}`)
     process.exit(3)

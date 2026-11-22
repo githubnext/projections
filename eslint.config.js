@@ -91,6 +91,7 @@ export default defineConfig(
         },
       ],
       '@typescript-eslint/strict-boolean-expressions': ['error', {allowNullableString: true, allowNullableBoolean: true}],
+      '@typescript-eslint/prefer-promise-reject-errors': ['error', {allowThrowingUnknown: true}],
       '@typescript-eslint/no-use-before-define': ['error', {functions: false, classes: false, typedefs: false, ignoreTypeReferences: true}],
       '@typescript-eslint/class-methods-use-this': ['error', {ignoreClassesThatImplementAnInterface: true, ignoreOverrideMethods: true}],
       '@typescript-eslint/no-shadow': ['error', {ignoreTypeValueShadow: true, ignoreFunctionTypeParameterNameValueShadow: true}],
@@ -244,22 +245,7 @@ export default defineConfig(
     // Rules this configuration turns on whose existing violations are still being fixed (docs/maintainers/linting.md#turning-on-a-rule).
     // Each comes off this list in the change that fixes the last of them; nothing is added to it.
     rules: Object.fromEntries(
-      [
-        '@typescript-eslint/await-thenable',
-        '@typescript-eslint/consistent-return',
-        '@typescript-eslint/no-confusing-void-expression',
-        '@typescript-eslint/no-empty-function',
-        '@typescript-eslint/no-meaningless-void-operator',
-        '@typescript-eslint/no-misused-promises',
-        '@typescript-eslint/no-non-null-assertion',
-        '@typescript-eslint/no-unsafe-type-assertion',
-        '@typescript-eslint/prefer-promise-reject-errors',
-        '@typescript-eslint/require-await',
-        '@typescript-eslint/strict-void-return',
-        '@typescript-eslint/use-unknown-in-catch-callback-variable',
-        'array-callback-return',
-        'no-promise-executor-return',
-      ].map(rule => [rule, 'off']),
+      ['@typescript-eslint/no-non-null-assertion', '@typescript-eslint/no-unsafe-type-assertion'].map(rule => [rule, 'off']),
     ),
   },
 )

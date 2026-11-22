@@ -12,6 +12,8 @@ import {
 } from '../dist/ui/transport.js'
 import {externalUrl} from '../dist/ui/host.js'
 
+const noop = () => undefined
+
 test('API paths are server-relative /api/ paths without traversal, fragments or control characters', () => {
   for (const path of ['/api/definitions?ref=working-tree', '/api/jobs/abc/cancel', '/api/changes?since=3']) {
     assert.equal(isApiPath(path), true, path)
@@ -191,7 +193,7 @@ test('a message transport with subscriptions asks its bridge for the next change
   await assert.rejects(waiting)
   assert.deepEqual(posted.at(-1), {tag: transportTag, type: 'abort', id: posted.at(-2).id})
   // Without subscriptions there is no `next`, so the client long-polls through `request`.
-  assert.equal(createMessageTransport({post: () => {}, listen: () => () => {}}).next, undefined)
+  assert.equal(createMessageTransport({post: noop, listen: () => noop}).next, undefined)
   assert.deepEqual(parseTransportMessage({tag: transportTag, type: 'next', id: 1, channel: 'fixtures', since: 0}), {
     tag: transportTag,
     type: 'next',

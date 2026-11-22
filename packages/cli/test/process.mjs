@@ -3,6 +3,8 @@ import {chmod, writeFile} from 'node:fs/promises'
 import path from 'node:path'
 import {createInterface} from 'node:readline'
 
+const noop = () => undefined
+
 /** Runs an argv without a shell; rejects with stderr on a nonzero exit, timeout or oversized output. */
 export function runBounded(command, args, {label, cwd, env, timeoutMs = 60_000, input, maxStdoutBytes = 8 * 1024 * 1024}) {
   return new Promise((resolve, reject) => {
@@ -44,7 +46,7 @@ export async function startBackend(executable, args, {cwd, env}) {
   child.stderr.on('data', bytes => {
     diagnostics += String(bytes)
   })
-  child.stdin.on('error', () => {})
+  child.stdin.on('error', noop)
   const exited = new Promise((resolve, reject) => {
     child.once('exit', (code, signal) => resolve({code, signal}))
     child.once('error', reject)
@@ -110,7 +112,9 @@ export async function startBackend(executable, args, {cwd, env}) {
 export async function finishedJob(backend, started, {attempts = 3000, intervalMs = 20} = {}) {
   let job = started
   for (let count = 0; count < attempts && job.status === 'running'; count++) {
-    await new Promise(resolve => setTimeout(resolve, intervalMs))
+    await new Promise(resolve => {
+      setTimeout(resolve, intervalMs)
+    })
     job = (await backend.request('GET', `/api/jobs/${job.id}`)).body
   }
   return job

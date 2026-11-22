@@ -157,4 +157,5 @@ export function present(node: Node, context: PresentContext): ViewingItem {
     case 'choice':
       return choice(node, context)
   }
+  throw new TypeError('Unknown viewing node')
 }

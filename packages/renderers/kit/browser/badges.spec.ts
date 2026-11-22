@@ -93,7 +93,14 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
   )
   await target.evaluate(shown => window.showBadges(shown), cells)
   await expect(target.locator('.pk-svg-icon rect')).toHaveCount(cells.filter(cell => cell.kind === 'svg-icon').length)
-  await target.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await target.evaluate(
+    () =>
+      new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(resolve)
+        })
+      }),
+  )
   const boxes = await target.evaluate(
     shown =>
       shown.map(cell => {

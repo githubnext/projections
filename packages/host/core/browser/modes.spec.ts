@@ -379,7 +379,9 @@ test('in swipe, each revision label is clipped with its own area as the divider 
 test('a view mounted before its renderer catalog loads keeps initialMode diff until the renderer declares it', async ({page}) => {
   // The catalog arrives late, so the view first has no renderer: the chosen mode must not be clamped to the defaults.
   await page.route('**/renderers/index.json', async route => {
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise(resolve => {
+      setTimeout(resolve, 1500)
+    })
     await route.continue()
   })
   await page.goto(explorer('before=v1&after=v3&mode=diff&lateCatalog'))

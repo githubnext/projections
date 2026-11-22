@@ -102,7 +102,7 @@ function useTagLayout(tags: readonly Tag[], frame: SchemaFrame) {
   const placed = useRef<{lines: number[]; available: number}>(undefined)
   useLayoutEffect(() => {
     const outer = room.current
-    if (!outer) return
+    if (!outer) return undefined
     const resize = () => {
       const width = outer.clientWidth
       setAvailable(previous => {
@@ -112,7 +112,7 @@ function useTagLayout(tags: readonly Tag[], frame: SchemaFrame) {
       })
     }
     resize()
-    if (typeof ResizeObserver === 'undefined') return
+    if (typeof ResizeObserver === 'undefined') return undefined
     const observer = new ResizeObserver(resize)
     observer.observe(outer)
     return () => observer.disconnect()

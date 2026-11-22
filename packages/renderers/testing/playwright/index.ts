@@ -13,6 +13,8 @@ import type {FilterPayload, RendererOptions} from '@githubnext/projections-rende
 import type {FixturesInspector, InspectorOptions} from './server.js'
 import {startInspector} from './server.js'
 import {bounded, StageRecord} from './bounded.js'
+import {checksPerStageRequest, framesPerStagePage, framesSinceNavigation, keepsRemovedFrames, stageNeedsFreshPage} from './frames.js'
+import {allChecks} from '../src/checks/catalog.js'
 import type {
   CheckId,
   CheckResult,
@@ -50,9 +52,14 @@ export function scenarioKeys(path: string): string[] {
   return (document.scenarios ?? []).map(scenario => `${source}/${scenario.id}`)
 }
 
-async function stagePage(page: Page, inspector: FixturesInspector): Promise<void> {
+/** Opens the stage page, or starts it over in WebKit once it has started `frames` renderer frames. */
+async function stagePage(page: Page, inspector: FixturesInspector, frames = framesPerStagePage): Promise<void> {
   if (!page.url().startsWith(inspector.page({view: 'stage'}).split('#')[0]!)) {
+    framesSinceNavigation(page)
     await page.goto(inspector.page({view: 'stage'}))
+  } else if (stageNeedsFreshPage(page, frames)) {
+    // A fresh document releases the frames WebKit kept (see `framesPerStagePage`).
+    await page.reload()
   }
   await page.waitForFunction(
     () => document.documentElement.dataset.projectionsStage === 'ready' || document.documentElement.dataset.projectionsStage === 'failed',
@@ -214,8 +221,22 @@ export async function checkScenario(
   scenario: string,
   options: {checks?: CheckId[]} = {},
 ): Promise<CheckResult[]> {
-  await stagePage(page, inspector)
-  return page.evaluate(([scenario, options]) => window.projectionsStage.runChecks(scenario, options), [scenario, options] as const)
+  // The checks start their frames in the page, out of `stagePage`'s reach: in WebKit they run a few at a time, and
+  // the page starts over between them (one suite for a large graph would otherwise keep over a gigabyte of frames).
+  const ids = options.checks ?? allChecks
+  const batch = keepsRemovedFrames(page) ? checksPerStageRequest : ids.length
+  const results: CheckResult[] = []
+  for (let start = 0; start < ids.length; start += batch) {
+    await stagePage(page, inspector, 1)
+    const checks = ids.slice(start, start + batch)
+    results.push(
+      ...(await page.evaluate(([scenario, options]) => window.projectionsStage.runChecks(scenario, options), [
+        scenario,
+        {...options, checks},
+      ] as const)),
+    )
+  }
+  return results
 }
 
 /** The failures in check results, one line each, for assertion messages. */

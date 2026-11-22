@@ -2768,6 +2768,7 @@ The host state `useRenderer` keeps, each field as the host last sent it.
 |---|---|---|
 | `annotations` | `"annotations": Array<AnnotationMark>` | The host's latest `annotations` (capability `annotations`); empty until it sends any. |
 | `environment` | `"environment": RendererEnvironment \| undefined` | The theme, motion preference, locale and pane from `init` or a later `environment`; undefined until `init`. |
+| `filter` | `"filter": FilterPayload \| undefined` | The host's scope, summary filter and find (capability `filter`); undefined until it sends one. Kept from the first message: a host sends the filter it has chosen right after `init`, before a later subscriber could see it. |
 | `hovered` | `"hovered": null \| string` | The entity the host says is hovered in any pane, or `null`. |
 | `init` | `"init": RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": X; "before": X; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": X; "mode": "extraction" } \| undefined` | The extraction or comparison to present; undefined until the host sends `init`, or when the renderer doesn't accept it. |
 | `options` | `"options": RendererOptions` | The host's latest `options` (control values by ID); `{}` until it sends any. Prefer `controlValues`. |

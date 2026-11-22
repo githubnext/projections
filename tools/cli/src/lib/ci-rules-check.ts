@@ -1,28 +1,20 @@
-// Checks what .github/ci-rules.json's schema can't: that the groups, conditions, tags and browser suites its rules
-// refer to exist. The planner refuses rules that fail it, and the tools package's tests run it on the file.
+// Checks what .github/ci-rules.json's schema can't: that the groups and conditions its rules refer to, and the browser
+// suites it configures, exist. The planner refuses rules that fail it, and the tools package's tests run it on the file.
 import type {CiRules, When} from './ci-rules.schema.ts'
 
-/** References the schema can't check: groups, conditions, tags and browser suites that don't exist. */
+/** References the schema can't check: groups, conditions and browser suites that don't exist. */
 export function ruleProblems(rules: CiRules, suites: readonly string[]): string[] {
   const problems: string[] = []
   const name = (kind: string, known: object, value: string, where: string) => {
     if (!(value in known)) problems.push(`${where}: no ${kind} ${value}`)
   }
   const visit = (when: When, where: string): void => {
-    if (typeof when === 'string') {
-      if (when === 'reachesSuite' && !where.startsWith('browser.')) problems.push(`${where}: reachesSuite outside a browser suite`)
-      return
-    }
+    if (typeof when === 'string') return
     if ('any' in when) when.any.forEach((item, index) => visit(item, `${where}.any[${index}]`))
-    else if ('all' in when) when.all.forEach((item, index) => visit(item, `${where}.all[${index}]`))
     else if ('not' in when) visit(when.not, `${where}.not`)
     else if ('if' in when) name('condition', rules.conditions, when.if, where)
-    else if ('tag' in when) name('tag', rules.tags, when.tag, where)
-    else if ('changed' in when) name('group', rules.groups, when.changed, where)
-    else if ('reaches' in when) {
-      name('group', rules.groups, when.reaches, where)
-      if (when.from) name('group', rules.groups, when.from, where)
-    }
+    else if ('touches' in when) name('group', rules.groups, when.touches, where)
+    else if ('reaches' in when) name('group', rules.groups, when.reaches, where)
   }
   for (const [group, {include, exclude = []}] of Object.entries(rules.groups))
     for (const selector of [...include, ...exclude])
@@ -32,7 +24,6 @@ export function ruleProblems(rules: CiRules, suites: readonly string[]): string[
     if ('when' in definition) visit(definition.when, `jobs.${job}`)
     else definition.matrix.forEach((item, index) => visit(item.when, `jobs.${job}.matrix[${index}]`))
   }
-  visit(rules.browser.default.when, 'browser.default')
   for (const [suite, definition] of Object.entries(rules.browser.suites)) {
     if (!suites.includes(suite)) problems.push(`browser.suites: ${suite} has no test:browser script`)
     if (definition.when) visit(definition.when, `browser.suites.${suite}`)

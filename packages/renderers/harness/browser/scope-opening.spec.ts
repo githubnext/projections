@@ -101,3 +101,27 @@ for (const focused of [false, true])
       if (!focused) expect(view.drawn, `${view.label} at zoom ${view.zoom}`).toBeLessThanOrEqual(view.stage + 1)
     }
   })
+
+/**
+ * A host that has its scope before the frame is ready sends it right after the documents, so it arrives while the
+ * graph lays out every item. That layout is already out of date when it's done: the graph waits for the scope's own
+ * rather than first drawing every item, which opened framed on the changes within them, past the stage, and then
+ * jumped. Every view it commits is the scope's layout, fitted.
+ */
+test('a graph whose scope arrives with its documents opens on the scope, never on every item first', async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'One host timing case, in desktop Chromium.')
+  await recordGraphViews(page)
+  const inspector = harnessInspector()
+  const load = {scenario: 'graph/platform-worker', comparisonMode: 'diff', width: 520} as const
+  const {subject} = await openStage(page, inspector, load)
+  const everything = await (await rendererFrame(page)).locator('svg.graph').getAttribute('aria-label')
+  await openStage(page, inspector, {...load, filter: {query: '', changesOnly: true, ids: null, scope: changesScope(subject)}})
+  const frame = await rendererFrame(page)
+  await expect(frame.locator('svg.graph')).toBeVisible()
+  const views = await frame.evaluate(() => window.graphViews!.splice(0))
+  expect(views.length, 'the graph was drawn').toBeGreaterThan(0)
+  const labels = [...new Set(views.map(view => view.label))]
+  expect(labels, 'one layout, the scope’s').toHaveLength(1)
+  expect(labels[0], 'the scope, not every item').not.toBe(everything)
+  for (const view of views) expect(view.drawn, `${view.label} at zoom ${view.zoom}`).toBeLessThanOrEqual(view.stage + 1)
+})

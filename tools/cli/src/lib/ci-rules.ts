@@ -3,7 +3,7 @@
 // tools package's tests validate the file against the schema.
 import type {CiRules, When} from './ci-rules.schema.ts'
 import type {RepoFacts} from './ci-facts.ts'
-import {dependantsOf} from './packages.ts'
+import type {Unit} from './packages.ts'
 import {matches, readJson} from './repo.ts'
 
 export type {CiRules, When}
@@ -46,23 +46,42 @@ export function resolveGroups(rules: CiRules, facts: RepoFacts): Map<string, Set
   return resolved
 }
 
-/** What a predicate is evaluated against. */
+/**
+ * The workspaces and crates a change reaches, each with its witness: the unit it depends on that led there (itself,
+ * for those the change touches). Dependants are followed only from units that contain or build in a changed file, not
+ * from crates whose tests alone read one.
+ */
+export function reach(units: readonly Unit[], touched: Iterable<string>, tested: ReadonlySet<string>): Map<string, string> {
+  const reverse = new Map<string, string[]>()
+  for (const unit of units)
+    for (const dependency of unit.dependsOn) reverse.set(dependency, [...(reverse.get(dependency) ?? []), unit.path])
+  const witness = new Map<string, string>()
+  for (const unit of touched) witness.set(unit, unit)
+  const queue = [...witness.keys()].filter(unit => !tested.has(unit)).sort()
+  const expanded = new Set(queue)
+  while (queue.length) {
+    const unit = queue.shift() as string
+    for (const dependant of (reverse.get(unit) ?? []).sort()) {
+      if (!witness.has(dependant)) witness.set(dependant, unit)
+      if (expanded.has(dependant)) continue
+      expanded.add(dependant)
+      queue.push(dependant)
+    }
+  }
+  return witness
+}
+
+/** What a predicate is evaluated against: a pull request that follows its change. */
 export type Context = {
   rules: CiRules
-  facts: RepoFacts
   groups: Map<string, Set<string>>
-  /** Why everything runs; empty when the plan follows the change. */
-  full: string[]
   docsOnly: boolean
   paths: readonly string[]
-  tags: Set<string>
-  generators: Set<string>
+  mutants: RepoFacts['mutants']
   /** Workspaces and crates containing, building in or reading a changed file. */
-  built: string[]
-  /** Those, and the crates whose tests alone read a changed file. */
-  changed: string[]
-  /** The browser suite being decided, for `reachesSuite`. */
-  suite?: {path: string; uses: string[]}
+  touched: ReadonlySet<string>
+  /** Those, and everything depending on one that contains or builds in a changed file: each with its witness. */
+  reached: ReadonlyMap<string, string>
 }
 
 function group(context: Context, name: string): Set<string> {
@@ -71,24 +90,11 @@ function group(context: Context, name: string): Set<string> {
   return members
 }
 
-/** The built units in `from` (all, without it), and everything depending on them. */
-function reached(context: Context, from: string | undefined): Set<string> {
-  const keep = from ? group(context, from) : undefined
-  const built = keep ? context.built.filter(path => keep.has(path)) : context.built
-  return new Set([...built, ...dependantsOf(context.facts.units, built)])
-}
-
 export function holds(when: When, context: Context): boolean {
   if (when === 'always') return true
-  if (when === 'full') return context.full.length > 0
+  if (when === 'never') return false
   if (when === 'docsOnly') return context.docsOnly
-  if (when === 'reachesSuite') {
-    if (!context.suite) throw new Error(`${RULES}: reachesSuite outside a browser suite`)
-    const reach = reached(context, undefined)
-    return reach.has(context.suite.path) || context.suite.uses.some(path => reach.has(path))
-  }
   if ('any' in when) return when.any.some(item => holds(item, context))
-  if ('all' in when) return when.all.every(item => holds(item, context))
   if ('not' in when) return !holds(when.not, context)
   if ('if' in when) {
     const condition = context.rules.conditions[when.if]
@@ -97,33 +103,20 @@ export function holds(when: When, context: Context): boolean {
   }
   if ('changes' in when) {
     if (Array.isArray(when.changes)) return context.paths.some(path => matches(path, when.changes as string[]))
-    const {examine, exclude} = context.facts.mutants
+    const {examine, exclude} = context.mutants
     return context.paths.some(path => matches(path, examine) && !matches(path, exclude))
   }
-  if ('tag' in when) return context.tags.has(when.tag)
-  if ('generator' in when) return context.generators.has(when.generator)
-  if ('changed' in when) {
-    const members = group(context, when.changed)
-    return context.changed.some(path => members.has(path))
-  }
-  const members = group(context, when.reaches)
-  return [...reached(context, when.from)].some(path => members.has(path))
+  if ('touches' in when) return [...group(context, when.touches)].some(unit => context.touched.has(unit))
+  return [...group(context, when.reaches)].some(unit => context.reached.has(unit))
 }
 
 /** The reason a job gives when everything runs; the plan's `full` says why it does. */
 export const FULL = 'Everything runs'
 
-/** Why a predicate holds: the descriptions of the conditions and tags on the way. */
+/** Why a predicate holds: the descriptions of the named conditions on the way. */
 export function reasons(when: When, context: Context): string[] {
-  if (!holds(when, context)) return []
-  if (when === 'full') return [FULL]
-  if (typeof when === 'string') return []
+  if (typeof when === 'string' || !holds(when, context)) return []
   if ('any' in when) return [...new Set(when.any.flatMap(item => reasons(item, context)))]
-  if ('all' in when) return [...new Set(when.all.flatMap(item => reasons(item, context)))]
-  if ('if' in when) {
-    const inner = reasons(context.rules.conditions[when.if]?.when as When, context)
-    return inner.includes(FULL) ? [FULL] : [context.rules.conditions[when.if]?.description as string]
-  }
-  if ('tag' in when) return [context.rules.tags[when.tag]?.description as string]
+  if ('if' in when) return [context.rules.conditions[when.if]?.description as string]
   return []
 }

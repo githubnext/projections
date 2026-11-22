@@ -98,7 +98,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const stageMaxHeight = tokens?.['stage-max-height']
   const stageCover = useStageCoverOf(tokens?.['stage-cover'])
   const automatic = (options.steps ?? 'schedule') === 'schedule'
-  const filter = useHostFilter(client)
+  const filter = useHostFilter(renderer.filter)
   const {scope, document} = useScopeView(resolved, filter, model, options.scope, init?.projection.renderer)
   const {comparing, diff, position, schedule, highlighting, emphasis} = useTimeline(
     init,

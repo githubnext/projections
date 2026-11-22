@@ -1,12 +1,13 @@
 // Rounded, edged boxes whose contents fill their corners: the edge must be drawn over them (probe call `frames`).
 import type {CoveredFrame} from '../types.js'
-import {cornerNames, cornerOverlaid, cornerPoint, type Corner} from './frames/overlays.js'
-import {describe, px, visible} from './paint.js'
+import {cornerNames, cornerOverlaid, cornerPoint, cornerRadii, type Corner} from './frames/overlays.js'
+import {colorAlpha, describe, px, visible} from './paint.js'
 
-const transparent = (color: string) => /^(?:transparent|rgba\([^)]*,\s*0\))$/u.test(color.trim())
+const transparent = (color: string) => colorAlpha(color) <= 0.01
 
-/** Whether an element paints a surface: a background color or image. */
-const paints = (style: CSSStyleDeclaration) => !transparent(style.backgroundColor) || style.backgroundImage !== 'none'
+/** Whether an element paints a surface: a background color or image, or replaced content (a renderer's frame, an image). */
+const paints = (element: Element, style: CSSStyleDeclaration) =>
+  !transparent(style.backgroundColor) || style.backgroundImage !== 'none' || element.matches('iframe, img, video, canvas, embed, object')
 
 /**
  * Its edge: the width of its visible border (a transparent one draws nothing), or of an outline drawn inside its box,
@@ -24,19 +25,43 @@ function edgeOf(style: CSSStyleDeclaration): {width: number; by: 'border' | 'out
 }
 
 /**
- * Whether a fill draws an edge itself, on the sides of `corner`: a visible border, or an inset shadow (as a data
- * table's first cell draws the table's left edge). Such a box is the edge there, as a data table's rows are its frame,
- * not a fill painted over it.
+ * The sides a box's inset shadows draw a sharp, visible edge along: offset toward a side, or spread all round (as a data
+ * table's first cell draws the table's left edge).
+ */
+function shadowSides(style: CSSStyleDeclaration): Set<string> {
+  const sides = new Set<string>()
+  for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/u)) {
+    if (!/\binset\b/u.test(shadow)) continue
+    const color = /(?:rgba?|color|hsla?|oklch|oklab|lab|lch)\([^)]*\)|transparent/u.exec(shadow)?.[0] ?? 'currentColor'
+    if (color !== 'currentColor' && transparent(color)) continue
+    const [x = 0, y = 0, blur = 0, spread = 0] = shadow
+      .replace(color, '')
+      .split(/\s+/u)
+      .filter(part => /^-?[\d.]+px$/u.test(part))
+      .map(px)
+    if (blur > 0.01) continue
+    if (x > 0.01 || spread > 0.01) sides.add('left')
+    if (x < -0.01 || spread > 0.01) sides.add('right')
+    if (y > 0.01 || spread > 0.01) sides.add('top')
+    if (y < -0.01 || spread > 0.01) sides.add('bottom')
+  }
+  return sides
+}
+
+/**
+ * Whether a fill draws an edge itself, on the sides of `corner`: a visible border, or a sharp, visible inset shadow
+ * along one. Such a box is the edge there, as a data table's rows are its frame, not a fill painted over it.
  */
 function drawsEdge(style: CSSStyleDeclaration, corner: Corner): boolean {
   const sides = [corner.startsWith('top') ? 'top' : 'bottom', corner.endsWith('left') ? 'left' : 'right']
-  const bordered = sides.some(
+  const shadowed = shadowSides(style)
+  return sides.some(
     side =>
-      style.getPropertyValue(`border-${side}-style`) !== 'none' &&
-      px(style.getPropertyValue(`border-${side}-width`)) > 0 &&
-      !transparent(style.getPropertyValue(`border-${side}-color`)),
+      shadowed.has(side) ||
+      (style.getPropertyValue(`border-${side}-style`) !== 'none' &&
+        px(style.getPropertyValue(`border-${side}-width`)) > 0 &&
+        !transparent(style.getPropertyValue(`border-${side}-color`))),
   )
-  return bordered || /\binset\b/u.test(style.boxShadow)
 }
 
 /** Whether a descendant paints under its frame's outline: outside any positioned layer, or below the frame's paint. */
@@ -61,16 +86,16 @@ export function coveredFrames(root: Element = document.body): CoveredFrame[] {
   for (const element of root.querySelectorAll('*')) {
     if (element instanceof SVGElement || element.hasAttribute('data-projections-host-overlay') || !visible(element)) continue
     const style = getComputedStyle(element)
-    const radii = new Map(cornerNames.map(corner => [corner, px(style.getPropertyValue(`border-${corner}-radius`))]))
-    const radius = Math.max(...radii.values())
     const edge = edgeOf(style)
-    if (!edge || radius <= edge.width) continue
+    if (!edge) continue
     const box = element.getBoundingClientRect()
-    if (box.width < 2 * radius || box.height < 2 * radius) continue
+    // Each corner's radius as drawn: the smaller of its two, fitted as CSS fits them.
+    const radii = cornerRadii(element)
+    if (Math.max(...radii.values()) <= edge.width) continue
     for (const fill of element.querySelectorAll('*')) {
       if (fill instanceof SVGElement || !visible(fill)) continue
       const fillStyle = getComputedStyle(fill)
-      if (!paints(fillStyle)) continue
+      if (!paints(fill, fillStyle)) continue
       const inner = fill.getBoundingClientRect()
       // The corners its painted box reaches into, as far as the edge's inside, its edge not drawn over it there.
       const reached = cornerNames.filter(corner => {
@@ -79,7 +104,7 @@ export function coveredFrames(root: Element = document.body): CoveredFrame[] {
           (radii.get(corner) ?? 0) > edge.width &&
           Math.abs((corner.endsWith('left') ? inner.left : inner.right) - x) <= edge.width + 0.5 &&
           Math.abs((corner.startsWith('top') ? inner.top : inner.bottom) - y) <= edge.width + 0.5 &&
-          !(edge.by === 'border' && cornerOverlaid(element, corner, edge.width)) &&
+          !(edge.by === 'border' && cornerOverlaid(element, corner, edge.width, fill)) &&
           !drawsEdge(fillStyle, corner)
         )
       })

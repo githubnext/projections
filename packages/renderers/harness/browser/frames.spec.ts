@@ -163,3 +163,33 @@ test("the frame-edges probe finds a rule drawing in a kit frame's ::after, and l
     expect.arrayContaining([expect.stringMatching(/^\.gl-stage::after \{ content, background/u)]),
   )
 })
+
+// The probe's edge cases: modern transparent colors, inset shadows that draw no edge, fitted pill radii, a nested
+// renderer's frame, and overlays that can't draw over a fill.
+test('the frame-edges probe reads transparency, shadows, fitted radii, frames and overlay stacking', async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'The probe reads computed styles, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'gallery/fixture-change', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  await stage.frame.locator('.pk').evaluate(root => {
+    const probe = document.createElement('div')
+    const box = 'width: 160px; height: 60px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 8px'
+    const fill = 'display: block; width: 100%; height: 100%; background: var(--band)'
+    probe.innerHTML = `
+      <style>
+        .fe-under, .fe-faded { position: relative; isolation: isolate; }
+        .fe-under::after, .fe-faded::after { content: ''; position: absolute; inset: -1px; border: 1px solid var(--border); border-radius: inherit; }
+        .fe-under::after { z-index: -1; }
+        .fe-under > span { position: relative; z-index: 1; }
+        .fe-faded::after { opacity: 0; }
+      </style>
+      <div class="fe-clear" style="${box}; border-color: color(srgb 0 0 0 / 0)"><span style="${fill}"></span></div>
+      <div class="fe-shadow" style="${box}"><span style="${fill}; box-shadow: inset 0 0 0 1px transparent"></span></div>
+      <div class="fe-pill" style="${box}; height: 40px; border-radius: 9999px"><span style="${fill}"></span></div>
+      <div class="fe-frame" style="${box}"><iframe style="display: block; width: 100%; height: 100%; border: 0" srcdoc="<p>nested</p>"></iframe></div>
+      <div class="fe-under" style="${box}"><span style="${fill}"></span></div>
+      <div class="fe-faded" style="${box}"><span style="${fill}"></span></div>`
+    root.prepend(probe)
+  })
+  const found = (await stage.measure<CoveredFrame[]>('frames')).map(frame => frame.element).filter(element => element.includes('.fe-'))
+  expect(found.toSorted()).toEqual(['div.fe-faded', 'div.fe-frame', 'div.fe-pill', 'div.fe-shadow', 'div.fe-under'])
+})

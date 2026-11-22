@@ -33,6 +33,19 @@ function cornerRadius(value: string, width: number, height: number): [number, nu
   const length = (part: string, reference: number) => (part.endsWith('%') ? (px(part) / 100) * reference : px(part))
   return [length(h, width), length(v, height)]
 }
+/**
+ * A box's corner radii as drawn, horizontal and vertical, in the order top-left, top-right, bottom-right, bottom-left:
+ * percentages resolved and scaled down as CSS does where adjacent ones overlap.
+ */
+export function fittedRadii(style: CSSStyleDeclaration, width: number, height: number): [number, number][] {
+  return fitRadii(
+    [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].map(value =>
+      cornerRadius(value, width, height),
+    ),
+    width,
+    height,
+  )
+}
 /** Scales radii down as CSS does where adjacent ones overlap. */
 function fitRadii(radii: [number, number][], width: number, height: number): [number, number][] {
   const [tl, tr, br, bl] = radii as [[number, number], [number, number], [number, number], [number, number]]

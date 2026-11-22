@@ -58,10 +58,10 @@ function drawing(name) {
   if (custom[name]) return custom[name]
   if (name.startsWith('part:')) {
     const part = readFileSync(new URL(`../../../../brand/parts/${name.slice('part:'.length)}.svg`, import.meta.url), 'utf8')
-    return /<svg[^>]*>([\s\S]*)<\/svg>/.exec(part)[1].replaceAll('currentColor', '#000')
+    return /<svg[^>]*>([\s\S]*)<\/svg>/u.exec(part)[1].replaceAll('currentColor', '#000')
   }
   const svg = readFileSync(join(codicons, `${name}.svg`), 'utf8')
-  const inner = /<svg[^>]*>([\s\S]*)<\/svg>/.exec(svg)?.[1]
+  const inner = /<svg[^>]*>([\s\S]*)<\/svg>/u.exec(svg)?.[1]
   if (!inner) throw new Error(`Unreadable codicon ${name}`)
   return `<g fill="#000">${inner.trim()}</g>`
 }
@@ -85,7 +85,7 @@ ${lines.join('\n')}
 
 /** The codicon each outline renderer icon is drawn with (\`part:<name>\` is the projection part's own icon, brand/parts); the badge icons are the SDK's badge glyphs. */
 export const codiconNames: Record<string, string> = ${JSON.stringify(map, null, 2)
-    .replace(/"([a-z-]+)":/g, (_, key) => (/-/.test(key) ? `'${key}':` : `${key}:`))
+    .replace(/"([a-z-]+)":/gu, (_, key) => (/-/u.test(key) ? `'${key}':` : `${key}:`))
     .replaceAll('"', "'")}
 `,
 )

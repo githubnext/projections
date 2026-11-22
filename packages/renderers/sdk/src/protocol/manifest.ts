@@ -96,7 +96,7 @@ export function parseRendererManifest(value: unknown): RendererManifest {
   const name = value.name
   const title = value.title
   const handles = value.handles
-  if (typeof name !== 'string' || !/^[a-z0-9][a-z0-9-]{0,63}$/.test(name)) {
+  if (typeof name !== 'string' || !/^[a-z0-9][a-z0-9-]{0,63}$/u.test(name)) {
     throw new Error('Renderer manifest name must be a lowercase identifier')
   }
   // Characters (code points), as the manifest schema's maxLength counts them.
@@ -106,7 +106,7 @@ export function parseRendererManifest(value: unknown): RendererManifest {
   if (
     !Array.isArray(handles) ||
     handles.length > 100 ||
-    !handles.every(item => typeof item === 'string' && /^[a-z0-9][a-z0-9/.-]{0,63}$/.test(item))
+    !handles.every(item => typeof item === 'string' && /^[a-z0-9][a-z0-9/.-]{0,63}$/u.test(item))
   ) {
     throw new Error('Renderer manifest handles must be renderer names')
   }

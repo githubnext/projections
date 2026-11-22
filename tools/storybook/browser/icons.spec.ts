@@ -52,7 +52,7 @@ for (const story of stories) {
     // SvgIcon resolves its layers after mounting.
     await expect(page.locator('.pk-svg-icon:not(:has(rect))')).toHaveCount(0)
     const drawn = await page.locator('[data-gallery-icon]').evaluateAll((rows): Drawn[] => {
-      const urls = (value: string) => value.match(/url\(/g)?.length ?? 0
+      const urls = (value: string) => value.match(/url\(/gu)?.length ?? 0
       const probe = document.createElement('span')
       const resolved = (row: Element, value: string) => {
         row.querySelector('th')!.append(probe)

@@ -6,7 +6,7 @@ export function pointerLines(text) {
   let at = 0
   let line = 1
   const space = () => {
-    while (at < text.length && /\s/.test(text[at])) {
+    while (at < text.length && /\s/u.test(text[at])) {
       if (text[at] === '\n') line++
       at++
     }
@@ -49,7 +49,7 @@ export function pointerLines(text) {
       }
       at++
     } else if (text[at] === '"') string()
-    else while (at < text.length && !/[\s,\]}]/.test(text[at])) at++
+    else while (at < text.length && !/[\s,\]}]/u.test(text[at])) at++
   }
   value('')
   return lines

@@ -233,13 +233,13 @@ function onEmphasis(bg: Rgba, accent: Rgba): Rgba {
 
 /** A font family list safe to send as a token: plain names and quoted names, no functions, braces or semicolons. */
 export function fontList(value: string | undefined): string | undefined {
-  const text = value?.trim().replace(/\s+/g, ' ')
+  const text = value?.trim().replace(/\s+/gu, ' ')
   if (!text || text.length > rendererLimits.tokenLength) return undefined
   return isFontList(text) ? text : undefined
 }
 
-const quotedName = /^[^\\;{}<>]+$/
-const plainNameCharacter = /[\w -]/
+const quotedName = /^[^\\;{}<>]+$/u
+const plainNameCharacter = /[\w -]/u
 
 /**
  * Whether the text (spaces collapsed) is names separated by commas: each `"quoted"`, `'quoted'` (no backslashes,

@@ -91,9 +91,9 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
     checker
       .typeToString(value, undefined, ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.InTypeAlias)
       .replace(
-        /import\("([^"]+)"\)/g,
+        /import\("([^"]+)"\)/gu,
         (_match, module: string) =>
-          `import(${JSON.stringify(path.isAbsolute(module) ? path.basename(module).replace(/\.[cm]?[jt]sx?$/, '') : module)})`,
+          `import(${JSON.stringify(path.isAbsolute(module) ? path.basename(module).replace(/\.[cm]?[jt]sx?$/u, '') : module)})`,
       )
   function type(value: ts.Type, seen = new Set<ts.Type>(), expand?: ts.Symbol): string {
     if (seen.has(value)) return value.aliasSymbol?.name ?? value.symbol?.name ?? 'recursive'

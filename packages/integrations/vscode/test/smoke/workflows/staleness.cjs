@@ -50,8 +50,8 @@ module.exports = async function staleness({folder, api, mergeBase, projectionTab
   await until('the status bar out of date', async () =>
     api.status() === '$(projections-mark) Branch changes $(warning)' ? true : undefined,
   )
-  assert.match(api.statusBar().tooltip, /Packages is out of date: 1 file changed since its result\. Click to refresh it\./)
-  assert.match(api.statusBar().tooltip, /1 projection is out of date: the files changed since its result\. Refresh its tab/)
+  assert.match(api.statusBar().tooltip, /Packages is out of date: 1 file changed since its result\. Click to refresh it\./u)
+  assert.match(api.statusBar().tooltip, /1 projection is out of date: the files changed since its result\. Refresh its tab/u)
   assert.equal(api.statusBar().accessibility, 'Projections: viewing Branch changes, out of date')
   // Nothing extracted again: the same jobs and the same result, once the tab has checked the change (the page would
   // have asked for a job on the same notification).
@@ -70,11 +70,11 @@ module.exports = async function staleness({folder, api, mergeBase, projectionTab
   api.holdJobs(4000)
   await api.control('packages', {op: 'click', selector: '.phv-stage-notice-action'})
   await until('the status bar spinner', async () =>
-    /^\$\(projections-mark\) Branch changes \$\(sync(~spin)?\)$/.test(api.status()) ? true : undefined,
+    /^\$\(projections-mark\) Branch changes \$\(sync(?:~spin)?\)$/u.test(api.status()) ? true : undefined,
   )
   assert.equal(api.statusBar().accessibility, 'Projections: viewing Branch changes, extracting')
-  assert.match(api.statusBar().tooltip, /\n\nPackages: Extracting…\n/)
-  assert.doesNotMatch(api.statusBar().tooltip, /Click to refresh it/)
+  assert.match(api.statusBar().tooltip, /\n\nPackages: Extracting…\n/u)
+  assert.doesNotMatch(api.statusBar().tooltip, /Click to refresh it/u)
   await until('the summary bar spinner', async () => ((await spinners()) ? true : undefined))
   assert.deepEqual(
     (await api.control('packages', {op: 'elements', selector: '.phv-summary-bar [data-summary-running]', attribute: 'title'})).map(
@@ -95,7 +95,7 @@ module.exports = async function staleness({folder, api, mergeBase, projectionTab
   })
   assert.ok(refreshed.jobs > current.jobs, `${refreshed.jobs} jobs after ${current.jobs}`)
   assert.equal((await api.control('packages', {op: 'elements', selector: '[data-notice]'})).length, 0)
-  await until('the row counted again', async () => /^\d+ changes?$/.test(api.rows()[0].projections[0].status))
+  await until('the row counted again', async () => /^\d+ changes?$/u.test(api.rows()[0].projections[0].status))
   await until('the status bar current', async () => (api.status() === '$(projections-mark) Branch changes' ? true : undefined))
   await until('the summary bar spinner gone', async () => ((await spinners()) === 0 ? true : undefined))
   // Put the file back: out of date again, and refreshed.
@@ -108,7 +108,7 @@ module.exports = async function staleness({folder, api, mergeBase, projectionTab
     const bar = api.statusBar()
     const choosing = vscode.commands.executeCommand(bar.command, vscode.Uri.parse(bar.arguments[0]))
     const shown = await until('the Viewing quick pick with Refresh', async () => api.pickItems() ?? undefined)
-    assert.match(shown.items[0], /^\$\(refresh\) Refresh · 1 file changed$/)
+    assert.match(shown.items[0], /^\$\(refresh\) Refresh · 1 file changed$/u)
     assert.equal(shown.items[1], '---')
     await api.pick(shown.items[0])
     await choosing

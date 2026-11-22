@@ -30,7 +30,7 @@ test('explore reports the shortest path to a state that breaks an invariant', ()
       error instanceof ExplorationError &&
       error.check === 'at most three' &&
       error.path.steps.length === 2 &&
-      /counting --fast--> counting --fast--> counting/.test(error.message),
+      /counting --fast--> counting --fast--> counting/u.test(error.message),
   )
 })
 
@@ -42,7 +42,7 @@ test('explore checks every step with transition invariants', () => {
         events: [{type: 'step'}, {type: 'fast'}],
         transitions: {'one at a time': ({from, to}) => to.n - from.n <= 1},
       }),
-    /one at a time fails on "fast" in "counting": counting --fast--> counting/,
+    /one at a time fails on "fast" in "counting": counting --fast--> counting/u,
   )
 })
 
@@ -52,7 +52,7 @@ test("explore fires the state's timers, and complete fails on a handler no event
   assert.equal(only.states.size, 2)
   assert.throws(
     () => explore(counter, {from: {kind: 'counting', n: 0}, events: [{type: 'step'}], complete: true}),
-    /never taken.*counting\.fast, stopped\.rest/,
+    /never taken.*counting\.fast, stopped\.rest/u,
   )
   const all = explore(counter, {from: {kind: 'counting', n: 0}, events: [{type: 'step'}, {type: 'fast'}, {type: 'rest'}], complete: true})
   assert.deepEqual(all.untaken, [])

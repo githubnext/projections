@@ -55,8 +55,8 @@ test('credential-like strings are removed', () => {
   ]) {
     assert.ok(!redacted.includes(secret), `${secret} leaked: ${redacted}`)
   }
-  assert.match(redacted, /https:\/\/user:\[redacted\]@example\.com/)
-  assert.match(redacted, /NPM_TOKEN=\[redacted\]/)
+  assert.match(redacted, /https:\/\/user:\[redacted\]@example\.com/u)
+  assert.match(redacted, /NPM_TOKEN=\[redacted\]/u)
   // Ordinary text is untouched.
   assert.equal(redactSecrets('the token budget is 4000; tokens=12'), 'the token budget is 4000; tokens=12')
 })
@@ -106,9 +106,9 @@ test('missing fields read "No response", as GitHub writes them, and long fields 
     {repository: 'o/r', root, home},
   )
   assert.ok(draft.title.length <= 110)
-  assert.match(draft.body, /### Details\n\n_No response_/)
-  assert.match(draft.body, /more characters\)/)
-  assert.match(draft.body, /- Rust: not installed/)
+  assert.match(draft.body, /### Details\n\n_No response_/u)
+  assert.match(draft.body, /more characters\)/u)
+  assert.match(draft.body, /- Rust: not installed/u)
   assert.equal(new URL(draft.url).searchParams.get('details'), null)
 })
 

@@ -14,7 +14,7 @@ const rest = options.filter(option => option !== '--keep-going')
 if (rest.length && (rest.length !== 2 || rest[0] !== '--except')) throw new Error('Expected only --except <directories> and --keep-going')
 const except = new Set(
   (rest[1] ?? '')
-    .split(/[\s,]+/)
+    .split(/[\s,]+/u)
     .filter(Boolean)
     .map(directory => resolve(root, directory)),
 )

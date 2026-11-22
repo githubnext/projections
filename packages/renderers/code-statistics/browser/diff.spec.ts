@@ -76,7 +76,7 @@ test('diff mode share rings are keyboard selectable and name both revisions', as
   })
   await stage.measure('settle')
   const ruby = stage.frame.locator('g.stat-arc[data-entity-id="language:Ruby"]')
-  await expect(ruby).toHaveAttribute('aria-label', /^Ruby, was 120 lines of code, −120, was \d+ percent, Removed$/)
+  await expect(ruby).toHaveAttribute('aria-label', /^Ruby, was 120 lines of code, −120, was \d+ percent, Removed$/u)
   await expect(ruby.locator('.stat-ring-slice.before')).toHaveCount(1)
   await expect(ruby.locator('.stat-ring-slice.after')).toHaveCount(0)
   const python = stage.frame.locator('g.stat-arc[data-entity-id="language:Python"]')

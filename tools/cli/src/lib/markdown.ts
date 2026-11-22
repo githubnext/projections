@@ -9,17 +9,17 @@ export interface FrontMatter {
 
 /** Splits leading `---` front matter (flat `key: value` pairs, quoted or not) from the body. */
 export function parseFrontMatter(text: string): FrontMatter {
-  const normalized = text.replace(/^\uFEFF/, '').replaceAll('\r\n', '\n')
-  const match = /^---\n([\s\S]*?)\n---(?:\n|$)/.exec(normalized)
+  const normalized = text.replace(/^\uFEFF/u, '').replaceAll('\r\n', '\n')
+  const match = /^---\n([\s\S]*?)\n---(?:\n|$)/u.exec(normalized)
   if (!match) return {data: {}, body: normalized, present: false}
   const data: Record<string, string> = {}
   let key: string | undefined
   for (const line of (match[1] ?? '').split('\n')) {
-    const pair = /^([A-Za-z][\w-]*):\s*(.*)$/.exec(line)
+    const pair = /^([A-Za-z][\w-]*):(.*)$/u.exec(line)
     if (pair) {
       key = pair[1]!
       data[key] = unquote((pair[2] ?? '').trim())
-    } else if (key && /^\s+\S/.test(line)) {
+    } else if (key && /^\s+\S/u.test(line)) {
       // A folded continuation line (`description: >-`, or a plain scalar wrapped onto the next line).
       const previous = ['>-', '>', '|'].includes(data[key] ?? '') ? '' : (data[key] ?? '')
       data[key] = `${previous} ${line.trim()}`.trim()
@@ -37,7 +37,7 @@ function unquote(value: string): string {
 /** Removes front matter, leaving the Markdown a renderer without front matter support should show. */
 export function stripFrontMatter(text: string): string {
   const {body, present} = parseFrontMatter(text)
-  return present ? body.replace(/^\n+/, '') : text
+  return present ? body.replace(/^\n+/u, '') : text
 }
 
 /** The text outside HTML tags, in one pass: each `<…>` with something inside is dropped; a `<` that closes nothing stays. */
@@ -57,13 +57,13 @@ export function withoutTags(text: string): string {
 /** Inline Markdown to plain text: links and images to their text; code spans, emphasis and HTML tags removed. */
 export function plain(markdown: string): string {
   const text = markdown
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-    .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
+    .replace(/!\[([^\]]*)\]\([^)]*\)/gu, '$1')
+    .replace(/\[([^\]]+)\]\([^)]*\)/gu, '$1')
+    .replace(/\[([^\]]+)\]\[[^\]]*\]/gu, '$1')
   return withoutTags(text)
-    .replace(/\x60([^\x60]*)\x60/g, '$1')
-    .replace(/(\*\*|__)(.*?)\1/g, '$2')
-    .replace(/\s+/g, ' ')
+    .replace(/\x60([^\x60]*)\x60/gu, '$1')
+    .replace(/(\*\*|__)(.*?)\1/gu, '$2')
+    .replace(/\s+/gu, ' ')
     .trim()
 }
 
@@ -72,22 +72,29 @@ export function firstParagraph(markdown: string): string | undefined {
   let fenced = false
   const paragraph: string[] = []
   for (const line of parseFrontMatter(markdown).body.split('\n')) {
-    if (/^\s*(\x60\x60\x60|~~~)/.test(line)) {
+    if (/^\s*(?:\x60\x60\x60|~~~)/u.test(line)) {
       fenced = !fenced
       if (paragraph.length) break
       continue
     }
     if (fenced) continue
-    const prose = line.trim() !== '' && !/^\s*(#|[-*+] |\d+\. |>|\||<|!\[|\[!\[)/.test(line)
+    const prose = line.trim() !== '' && !/^\s*(?:[#>|<]|[-*+] |\d+\. |!\[|\[!\[)/u.test(line)
     if (prose) paragraph.push(line.trim())
     else if (paragraph.length) break
   }
   return plain(paragraph.join(' ')) || undefined
 }
 
+/** A heading's text after its `#`s and a space: without the spaces around it, or a closing run of `#`s. */
+function headingText(rest: string): string {
+  const text = rest.trim()
+  const open = text.replace(/#+$/u, '').trimEnd()
+  return open || text.slice(0, 1)
+}
+
 /** The first `# ` heading, as plain text. */
 export function title(markdown: string): string | undefined {
-  const match = /^# +(.+)$/m.exec(parseFrontMatter(markdown).body)
+  const match = /^# +(\S.*)$/mu.exec(parseFrontMatter(markdown).body)
   return match ? plain(match[1]!) || undefined : undefined
 }
 
@@ -105,9 +112,9 @@ export function headings(markdown: string): Heading[] {
     .replaceAll('\r\n', '\n')
     .split('\n')
     .forEach((line, index) => {
-      if (/^\s*(\x60\x60\x60|~~~)/.test(line)) fenced = !fenced
-      const match = !fenced && /^(#{1,6}) +(.+?)\s*#*\s*$/.exec(line)
-      if (match) found.push({level: match[1]!.length, text: plain(match[2]!), line: index + 1})
+      if (/^\s*(?:\x60\x60\x60|~~~)/u.test(line)) fenced = !fenced
+      const match = !fenced && /^(#{1,6}) (.+)$/u.exec(line)
+      if (match) found.push({level: match[1]!.length, text: plain(headingText(match[2]!)), line: index + 1})
     })
   return found
 }
@@ -130,8 +137,8 @@ export function section(markdown: string, name: string): string | undefined {
 export function listItems(markdown: string): string[] {
   const items: string[] = []
   for (const line of markdown.split('\n')) {
-    if (/^[-*+] /.test(line)) items.push(line.slice(2).trim())
-    else if (/^\s+\S/.test(line) && items.length) items[items.length - 1] += ` ${line.trim()}`
+    if (/^[-*+] /u.test(line)) items.push(line.slice(2).trim())
+    else if (/^\s+\S/u.test(line) && items.length) items[items.length - 1] += ` ${line.trim()}`
   }
   return items.map(plain)
 }

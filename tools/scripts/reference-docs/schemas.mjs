@@ -24,11 +24,11 @@ export async function schemas() {
   const directory = 'packages/schemas/schemas'
   const files = (await readdir(join(root, directory), {recursive: true}))
     .map(file => file.split('\\').join('/'))
-    .filter(file => /(?:^|\/)v\d+\.json$/.test(file))
+    .filter(file => /(?:^|\/)v\d+\.json$/u.test(file))
     .sort()
   const loaded = await Promise.all(
     files.map(async file => {
-      const [, path, version] = /^(.+)\/v(\d+)\.json$/.exec(file)
+      const [, path, version] = /^(.+)\/v(\d+)\.json$/u.exec(file)
       return {
         file,
         name: `${path.replaceAll('/', '-')}${version === '0' ? '' : `-v${version}`}`,
@@ -39,8 +39,8 @@ export async function schemas() {
   const byId = new Map(loaded.map(entry => [entry.schema.$id, entry]))
   const title = schema => {
     const text = String(schema.title ?? '')
-      .replace(/^Projections\s+/, '')
-      .replace(/\s+v\d+$/, '')
+      .replace(/^Projections\s+/u, '')
+      .replace(/\s+v\d+$/u, '')
     return text.charAt(0).toUpperCase() + text.slice(1)
   }
   const pages = {}
@@ -51,7 +51,7 @@ export async function schemas() {
       const local = id === '' || id === schema.$id
       const other = local ? undefined : byId.get(id)
       if (!local && !other) return code(target)
-      const definition = pointer?.match(/^\/\$defs\/(.+)$/)?.[1]
+      const definition = pointer?.match(/^\/\$defs\/(.+)$/u)?.[1]
       const base = local ? '' : `${other.name}.md`
       if (definition) return `[${code(definition)}](${base}#${definition.toLowerCase()})`
       return local ? `[the document](#document)` : `[${title(other.schema)}](${base})`

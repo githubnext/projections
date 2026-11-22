@@ -11,7 +11,7 @@ module.exports = async function invalidDefinition({folder, api}) {
     const found = await api.control('legacy', {op: 'elements', selector: '.projection-failure'})
     return found.length ? found[0].text : undefined
   })
-  assert.match(failure, /legacy can't load/)
-  assert.match(failure, /\.github\/projections\/legacy\.json:7: Module comparators were removed/)
+  assert.match(failure, /legacy can't load/u)
+  assert.match(failure, /\.github\/projections\/legacy\.json:7: Module comparators were removed/u)
   assert.ok(!failure.includes('{"'), failure)
 }

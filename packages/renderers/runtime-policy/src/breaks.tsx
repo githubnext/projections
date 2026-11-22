@@ -6,7 +6,7 @@ import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
  * Where a long code value may wrap: after a path separator or punctuation (`/`, `.`, `-`, `=`, `,`, `:`) that ends a
  * part, so a leading `/` (`/home`) or a run like `/.` stays with what follows.
  */
-const separator = /(?<=[^/.\-=,:][/.\-=,:])(?=.)/
+const separator = /(?<=[^/.\-=,:][/.\-=,:])(?=.)/u
 
 /**
  * Code, with a break opportunity after each separator, so a path or label selector wraps at its parts

@@ -29,7 +29,7 @@ const resolveColor = (page: Page, color: string) =>
 
 const channels = (name: keyof typeof shadcnPalette, mode: Mode) => shadcnPalette[name][mode === 'dark' ? 1 : 0]
 const root = (page: Page, mode: Mode) => page.getByTestId(`${mode}-root`)
-const serif = /(^|,)\s*"?serif"?\s*(,|$)/
+const serif = /(^|,)\s*"?serif"?\s*(,|$)/u
 
 async function open(page: Page) {
   const errors: string[] = []
@@ -126,7 +126,7 @@ test('components inside .pj-root ignore the page styles', async ({page}) => {
   const heading = light.getByTestId('heading')
   expect(await css(heading, 'text-transform')).toBe('none')
   expect(await css(heading, 'margin-top')).toBe('0px')
-  expect(await css(heading, 'text-align')).toMatch(/^(start|left)$/)
+  expect(await css(heading, 'text-align')).toMatch(/^(start|left)$/u)
 
   expect(await css(light.getByTestId('table'), 'border-top-width')).toBe('0px')
   const cell = light.getByTestId('cell')
@@ -135,7 +135,7 @@ test('components inside .pj-root ignore the page styles', async ({page}) => {
   // The card's own spacing, not the page's `div { padding: 3px }`.
   expect(await css(light.getByTestId('card'), 'padding-top')).toBe('24px')
   // Ring and shadow utilities compose `--tw-*` variables; the build's scoped defaults keep them valid.
-  expect(await css(light.getByTestId('card'), 'box-shadow')).toMatch(/0px 0px 0px 1px/)
+  expect(await css(light.getByTestId('card'), 'box-shadow')).toMatch(/0px 0px 0px 1px/u)
   expect(await css(light.getByTestId('badge'), 'font-size')).toBe('12px')
 
   const input = light.getByTestId('input')
@@ -200,7 +200,7 @@ for (const mode of ['light', 'dark'] as const) {
     expect(await css(content, 'border-top-left-radius')).toBe('8px')
     expect(await css(content, 'font-family')).not.toMatch(serif)
     // Never the page's own `enter` keyframes (shadcn's item-aligned select doesn't animate).
-    expect(await css(content, 'animation-name')).toMatch(/^(none|pj-.+)$/)
+    expect(await css(content, 'animation-name')).toMatch(/^(none|pj-.+)$/u)
     const option = page.getByRole('option', {name: 'Table'})
     expect(await css(option, 'font-size')).toBe('14px')
     // Every item's text sits past the selected item's lens dot, which is on the left.
@@ -254,7 +254,7 @@ test('the default ProjectionView keeps its styles inside the page and leaks none
   const search = await openFilter(view)
   await expect(search).toBeVisible()
   // On narrow toolbars the field opens in a popover that may remount it once; read the settled field.
-  await expect.poll(() => css(search, 'font-size')).toMatch(/^1[46]px$/)
+  await expect.poll(() => css(search, 'font-size')).toMatch(/^1[46]px$/u)
   await expect.poll(() => css(search, 'height')).toBe('32px')
   const cell = view.locator('tr[data-row-id="checkout"] td').first()
   expect(await css(cell, 'border-left-width')).toBe('0px')

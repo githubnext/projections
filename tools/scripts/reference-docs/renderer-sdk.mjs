@@ -16,7 +16,7 @@ export async function rendererSdk() {
   const moduleName = subpath => {
     if (subpath === './vite') return `Vite build (${code(`${publicName}/vite`)})`
     if (subpath === './react') return `React (${code(`${publicName}/renderer/react`)})`
-    const module = subpath === '.' ? 'Renderer' : subpath.slice(2).replace(/^./, letter => letter.toUpperCase())
+    const module = subpath === '.' ? 'Renderer' : subpath.slice(2).replace(/^./u, letter => letter.toUpperCase())
     return `${module} (${code(`${publicName}/renderer`)})`
   }
   const subpath = entity => {

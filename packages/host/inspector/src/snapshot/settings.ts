@@ -44,7 +44,7 @@ export function snapshotSettings(search: string): SnapshotSettings {
     throw new Error('Snapshot progress must be between 0 and 1')
   }
   const definition = query.get('definition') ?? undefined
-  if (definition !== undefined && definition !== 'working-tree' && !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(definition)) {
+  if (definition !== undefined && definition !== 'working-tree' && !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(definition)) {
     throw new Error('The snapshot definition revision must be a full commit or working-tree')
   }
   const on = query.get('focus') ?? undefined

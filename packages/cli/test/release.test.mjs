@@ -13,7 +13,7 @@ const workflow = async file => YAML.parse(await read(`.github/workflows/${file}`
 const lockfile = YAML.parse(await read('.github/workflows/actions.lock'))
 /** Asserts a workflow runs an action at an exact release tag that the workflow dependency lockfile locks for it. */
 function assertLocked(file, uses, message = uses) {
-  assert.match(uses, /^[\w.-]+\/[\w./-]+@v\d+\.\d+\.\d+$/, message)
+  assert.match(uses, /^[\w.-]+\/[\w./-]+@v\d+\.\d+\.\d+$/u, message)
   const [action, ref] = uses.split('@')
   const key = `${action.split('/').slice(0, 2).join('/')}@${ref}`
   assert.ok(lockfile.workflows[`.github/workflows/${file}`]?.includes(key), `${message} is locked for ${file}`)
@@ -38,9 +38,9 @@ const vsceTargets = {
 
 /** The value of one top-level `[dist]` key, as single-line TOML source text. */
 function setting(toml, key) {
-  const section = toml.split(/^\[/m).find(part => part.startsWith('dist]'))
+  const section = toml.split(/^\[/mu).find(part => part.startsWith('dist]'))
   const joined = section.replace(
-    /\[\s*\n([^\]]*)\]/g,
+    /\[[^\S\n]*\n([^\]]*)\]/gu,
     (_, items) =>
       `[${items
         .split('\n')
@@ -61,15 +61,15 @@ test('dist releases every target natively with attestations, no source tarball a
   assert.equal(setting(toml, 'install-updater'), 'false')
   assert.equal(setting(toml, 'installers'), '["shell", "powershell"]')
   assert.equal(setting(toml, 'install-path'), '["$PROJECTIONS_INSTALL_DIR/", "~/.projections/bin"]')
-  assert.match(setting(toml, 'cargo-dist-version'), /^"\d+\.\d+\.\d+"$/)
-  const targets = [...setting(toml, 'targets').matchAll(/"([^"]+)"/g)].map(match => match[1])
+  assert.match(setting(toml, 'cargo-dist-version'), /^"\d+\.\d+\.\d+"$/u)
+  const targets = [...setting(toml, 'targets').matchAll(/"([^"]+)"/gu)].map(match => match[1])
   assert.deepEqual(targets.sort(), Object.keys(assets).sort())
-  const runners = toml.split('[dist.github-custom-runners]')[1].split(/^\[/m)[0]
+  const runners = toml.split('[dist.github-custom-runners]')[1].split(/^\[/mu)[0]
   for (const target of [...targets, 'global']) {
     assert.match(runners, new RegExp(`^${target} = "[\\w.-]+"$`, 'm'), `${target} needs a runner`)
   }
-  const commits = toml.split('[dist.github-action-commits]')[1].split(/^\[/m)[0]
-  for (const line of commits.trim().split('\n')) assert.match(line, /^"[\w/-]+" = "v\d+\.\d+\.\d+"$/, line)
+  const commits = toml.split('[dist.github-action-commits]')[1].split(/^\[/mu)[0]
+  for (const line of commits.trim().split('\n')) assert.match(line, /^"[\w/-]+" = "v\d+\.\d+\.\d+"$/u, line)
   assert.equal(setting(toml, 'plan-jobs'), '["./release-inputs"]')
   assert.equal(setting(toml, 'global-artifacts-jobs'), '["./release-proof"]')
   assert.equal(setting(toml, 'publish-jobs'), '["./release-approval"]')
@@ -84,18 +84,18 @@ test('the generated workflow pins every action and announces only after every pr
     if (job.uses) {
       assert.match(
         job.uses,
-        /^\$\/\.github\/workflows\/(release-inputs|release-proof|release-approval|publish-schemas|publish-npm|move-major-tag)\.yml$/,
+        /^\$\/\.github\/workflows\/(release-inputs|release-proof|release-approval|publish-schemas|publish-npm|move-major-tag)\.yml$/u,
         name,
       )
     }
     for (const step of job.steps ?? []) if (step.uses) assertLocked('release.yml', step.uses, `${name}: ${step.uses}`)
   }
   assert.ok(release.jobs.host.needs.includes('custom-release-proof'))
-  assert.match(release.jobs.host.if, /needs\.custom-release-proof\.result == 'success'/)
+  assert.match(release.jobs.host.if, /needs\.custom-release-proof\.result == 'success'/u)
   // Announced only once a person approves the release.
   assert.deepEqual(release.jobs['custom-release-approval'].needs, ['plan', 'host'])
   assert.deepEqual(release.jobs.announce.needs, ['plan', 'host', 'custom-release-approval'])
-  assert.match(release.jobs.announce.if, /needs\.custom-release-approval\.result == 'success'/)
+  assert.match(release.jobs.announce.if, /needs\.custom-release-approval\.result == 'success'/u)
   assert.deepEqual(release.jobs['custom-release-approval'].permissions, {actions: 'read', attestations: 'write', 'id-token': 'write'})
   assert.deepEqual(release.jobs['custom-release-proof'].permissions, {contents: 'read'})
   // dist attests the CLI archives as it builds them, so its build jobs' token is read-only.
@@ -137,10 +137,10 @@ test('custom release jobs pin actions, use least privilege and name each executa
   for (const [target, id] of Object.entries(assets)) {
     assert.match(naming, new RegExp(`${target}\\) id=${id} vsce=${vsceTargets[target]} ;;`))
   }
-  assert.match(naming, /"gh-projections-\$id"/)
+  assert.match(naming, /"gh-projections-\$id"/u)
   assert.match(
     steps.find(step => step.name === 'Prove the installed binary').run,
-    /cli\/test\/binary\.mjs --binary "release\/\$ASSET" --gh-extension/,
+    /cli\/test\/binary\.mjs --binary "release\/\$ASSET" --gh-extension/u,
   )
   assert.equal(steps.at(-1).with.name, 'artifacts-gh-${{ env.ID }}', 'announce publishes every artifacts-* artifact')
   assert.deepEqual(steps.at(-1).with.path.trim().split('\n'), [
@@ -159,7 +159,7 @@ test('every native proof packages the VS Code extension with its executable and 
   const run = steps.find(step => step.name === 'Package and install the VS Code extension').run
   assert.match(
     run,
-    /node packages\/integrations\/vscode\/scripts\/release-asset\.mjs --target "\$VSCE_TARGET" --binary "release\/\$ASSET" --out vsix/,
+    /node packages\/integrations\/vscode\/scripts\/release-asset\.mjs --target "\$VSCE_TARGET" --binary "release\/\$ASSET" --out vsix/u,
   )
   const index = name => steps.findIndex(step => step.name === name || step.uses?.startsWith(name))
   assert.ok(index('Prove the installed binary') < index('Package and install the VS Code extension'))
@@ -173,9 +173,9 @@ test("only a stable release that is its major version's newest moves the major v
   const releases = [release('v0.1.0'), release('v0.2.0'), release('v0.3.0-beta.1', true), release('v1.0.0'), release('v0.9.0', false, true)]
   assert.deepEqual(majorTagMove('v0.2.0', releases), {major: 'v0'}, 'v1.0.0 is another major version')
   assert.deepEqual(majorTagMove('v1.0.0', releases), {major: 'v1'}, 'created if missing')
-  assert.match(majorTagMove('v0.1.0', releases).reason, /v0\.2\.0 is newer than v0\.1\.0, so v0 stays/, 'never backwards')
-  assert.match(majorTagMove('v0.3.0-beta.1', releases).reason, /not a stable release tag/)
-  assert.match(majorTagMove('v0.9.0', releases).reason, /not a published stable release/, 'a draft')
+  assert.match(majorTagMove('v0.1.0', releases).reason, /v0\.2\.0 is newer than v0\.1\.0, so v0 stays/u, 'never backwards')
+  assert.match(majorTagMove('v0.3.0-beta.1', releases).reason, /not a stable release tag/u)
+  assert.match(majorTagMove('v0.9.0', releases).reason, /not a published stable release/u, 'a draft')
   const job = (await workflow('move-major-tag.yml')).jobs.move
   // The tag ruleset's only bypass is a deploy key, whose private half is a secret of the major-tag environment.
   assert.deepEqual(job.permissions, {contents: 'read'})
@@ -183,10 +183,10 @@ test("only a stable release that is its major version's newest moves the major v
   const move = job.steps.find(step => step.name === 'Move the tag')
   assert.equal(move.run.includes('${{'), false, 'Expressions must enter through environment, not shell text')
   assert.equal(move.env.DEPLOY_KEY, '${{ secrets.MAJOR_TAG_DEPLOY_KEY }}')
-  assert.match(move.run, /node tools\/scripts\/major-tag\.mjs "\$TAG"/)
-  assert.match(move.run, /push -q --force "\$remote" "\$commit:refs\/tags\/\$major"/)
-  assert.match(move.run, /remote="git@github\.com:\$REPOSITORY\.git"/)
-  assert.match(move.run, /StrictHostKeyChecking=yes/)
+  assert.match(move.run, /node tools\/scripts\/major-tag\.mjs "\$TAG"/u)
+  assert.match(move.run, /push -q --force "\$remote" "\$commit:refs\/tags\/\$major"/u)
+  assert.match(move.run, /remote="git@github\.com:\$REPOSITORY\.git"/u)
+  assert.match(move.run, /StrictHostKeyChecking=yes/u)
   for (const step of job.steps) if (step.uses) assertLocked('move-major-tag.yml', step.uses)
 })
 
@@ -198,15 +198,15 @@ test('every release attaches the package tarball, proved with the release CLI in
     steps.some(step => step.with?.name === 'artifacts-build-local-x86_64-unknown-linux-musl'),
     'the release Linux executable',
   )
-  assert.match(run('Check the version'), /announcement_tag/)
-  assert.match(run('Build and pack the package'), /node packages\/sdk\/scripts\/release-asset\.mjs release\n/)
+  assert.match(run('Check the version'), /announcement_tag/u)
+  assert.match(run('Build and pack the package'), /node packages\/sdk\/scripts\/release-asset\.mjs release\n/u)
   const proof = 'Prove the tarball in a scaffolded renderer and a renderer without React'
   const prove = run(proof)
-  assert.match(prove, /cli\/scripts\/release-asset\.mjs dist-archives x86_64-unknown-linux-musl projections cli-release/)
+  assert.match(prove, /cli\/scripts\/release-asset\.mjs dist-archives x86_64-unknown-linux-musl projections cli-release/u)
   // Outside packages/cli/dist and target/, so the CLI scaffolds as a release does: on its release's tarball URL.
   assert.match(
     prove,
-    /PROJECTIONS_CLI="\$PWD\/cli-release\/projections" node packages\/sdk\/scripts\/check-pack\.mjs --tarball "release\/\$ASSET"/,
+    /PROJECTIONS_CLI="\$PWD\/cli-release\/projections" node packages\/sdk\/scripts\/check-pack\.mjs --tarball "release\/\$ASSET"/u,
   )
   const upload = steps.at(-1)
   assert.equal(upload.with.name, 'artifacts-npm-package', 'announce publishes every artifacts-* artifact')
@@ -263,7 +263,7 @@ test('a release waits for a person to approve the release environment, which mus
   }
   // Every file announce attaches: every artifacts-* artifact but the granular manifests.
   assert.deepEqual(approve.steps[0].with, {pattern: 'artifacts-*', path: 'artifacts', 'merge-multiple': true})
-  assert.match(approve.steps[1].run, /rm -f artifacts\/\*-dist-manifest\.json/)
+  assert.match(approve.steps[1].run, /rm -f artifacts\/\*-dist-manifest\.json/u)
   assert.ok(approve.steps[2].uses.startsWith('actions/attest@'))
   assert.equal(approve.steps[2].with['subject-path'], 'artifacts/*')
 
@@ -276,21 +276,21 @@ test('a release waits for a person to approve the release environment, which mus
   const tagsOnly = {total_count: 1, branch_policies: [{name: 'v*.*.*', type: 'tag'}]}
   const passed = await checkEnvironment(t, {[environment]: [200, protectedEnvironment], [policies]: [200, tagsOnly]})
   assert.equal(passed.code, 0, passed.output)
-  assert.match(passed.output, /release requires a reviewer, and only v\*\.\*\.\* tags may deploy to it/)
+  assert.match(passed.output, /release requires a reviewer, and only v\*\.\*\.\* tags may deploy to it/u)
 
   // Fails closed on anything else.
   for (const [why, replies, message] of [
-    ['missing', {}, /doesn't exist/],
-    ['unreadable', {[environment]: [403, {}]}, /Couldn't read the release environment \(HTTP 403\)/],
+    ['missing', {}, /doesn't exist/u],
+    ['unreadable', {[environment]: [403, {}]}, /Couldn't read the release environment \(HTTP 403\)/u],
     [
       'no reviewers',
       {[environment]: [200, {...protectedEnvironment, protection_rules: []}], [policies]: [200, tagsOnly]},
-      /no required reviewers/,
+      /no required reviewers/u,
     ],
     [
       'any branch',
       {[environment]: [200, {...protectedEnvironment, deployment_branch_policy: null}], [policies]: [200, tagsOnly]},
-      /doesn't limit deployments to selected tags/,
+      /doesn't limit deployments to selected tags/u,
     ],
     [
       'a branch too',
@@ -298,23 +298,23 @@ test('a release waits for a person to approve the release environment, which mus
         [environment]: [200, protectedEnvironment],
         [policies]: [200, {total_count: 2, branch_policies: [...tagsOnly.branch_policies, {name: 'main', type: 'branch'}]}],
       },
-      /but its deployment policies are/,
+      /but its deployment policies are/u,
     ],
     [
       'another tag',
       {[environment]: [200, protectedEnvironment], [policies]: [200, {total_count: 1, branch_policies: [{name: 'v*', type: 'tag'}]}]},
-      /but its deployment policies are/,
+      /but its deployment policies are/u,
     ],
     [
       'no policies',
       {[environment]: [200, protectedEnvironment], [policies]: [200, {total_count: 0, branch_policies: []}]},
-      /but its deployment policies are/,
+      /but its deployment policies are/u,
     ],
-    ['unreadable policies', {[environment]: [200, protectedEnvironment]}, /deployment policies \(HTTP 404\)/],
+    ['unreadable policies', {[environment]: [200, protectedEnvironment]}, /deployment policies \(HTTP 404\)/u],
   ]) {
     const failed = await checkEnvironment(t, replies)
     assert.equal(failed.code, 1, `${why}: ${failed.output}`)
     assert.match(failed.output, message, why)
-    assert.match(failed.output, /Nothing was published/, why)
+    assert.match(failed.output, /Nothing was published/u, why)
   }
 })

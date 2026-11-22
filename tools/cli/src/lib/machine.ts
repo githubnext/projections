@@ -10,13 +10,13 @@ export function availableMemory(): {available: number; total: number} {
   const total = totalmem()
   if (process.platform === 'darwin') {
     const vm = spawnSync('vm_stat', {encoding: 'utf8'}).stdout ?? ''
-    const page = Number(/page size of (\d+) bytes/.exec(vm)?.[1] ?? 16384)
+    const page = Number(/page size of (\d+) bytes/u.exec(vm)?.[1] ?? 16384)
     const pages = (label: string) => Number(new RegExp(`${label}:\\s+(\\d+)`).exec(vm)?.[1] ?? 0)
     const available = (pages('Pages free') + pages('Pages inactive') + pages('Pages speculative') + pages('Pages purgeable')) * page
     if (available > 0) return {available, total}
   }
   if (process.platform === 'linux' && existsSync('/proc/meminfo')) {
-    const kib = /MemAvailable:\s+(\d+)/.exec(readFileSync('/proc/meminfo', 'utf8'))?.[1]
+    const kib = /MemAvailable:\s+(\d+)/u.exec(readFileSync('/proc/meminfo', 'utf8'))?.[1]
     if (kib) return {available: Number(kib) * 1024, total}
   }
   return {available: freemem(), total}

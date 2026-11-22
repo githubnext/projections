@@ -5,7 +5,7 @@
 // value names, possible values, literal default, and whether it is required or repeatable.
 
 const cell = text => text.replaceAll('\\|', '|')
-const codeSpans = text => [...text.matchAll(/\x60([^\x60]+)\x60/g)].map(match => match[1])
+const codeSpans = text => [...text.matchAll(/\x60([^\x60]+)\x60/gu)].map(match => match[1])
 
 /** The possible values an argument's description lists after `One of`. */
 function possibleValues(description) {
@@ -16,29 +16,29 @@ function possibleValues(description) {
   if (rest.startsWith('One of:')) {
     return rest
       .slice('One of:'.length)
-      .split(/;\s+(?=\x60)/)
+      .split(/;\s+(?=\x60)/u)
       .map(part => codeSpans(part)[0])
       .filter(Boolean)
   }
-  return codeSpans(rest.slice(0, rest.search(/\x60\.(\s|$)/) + 2))
+  return codeSpans(rest.slice(0, rest.search(/\x60\.(\s|$)/u) + 2))
 }
 
 /** One argument's signature: `-p, --projection <ID>...: "a" | "b" = default (required)`. */
 export function argumentSignature(display, description) {
-  const repeatable = /(^|\s)Repeatable\.(\s|$)/.test(description) && !display.endsWith('...')
+  const repeatable = /(?:^|\s)Repeatable\.(?:\s|$)/u.test(description) && !display.endsWith('...')
   const values = possibleValues(description)
-  const defaults = /(?:^|\s)Default: \x60([^\x60]*)\x60\./.exec(description)
+  const defaults = /(?:^|\s)Default: \x60([^\x60]*)\x60\./u.exec(description)
   return [
     display,
     repeatable ? '...' : '',
     values.length ? `: ${values.map(value => JSON.stringify(value)).join(' | ')}` : '',
     defaults ? ` = ${defaults[1]}` : '',
-    /(^|\s)Required\.(\s|$)/.test(description) ? ' (required)' : '',
+    /(?:^|\s)Required\.(?:\s|$)/u.test(description) ? ' (required)' : '',
   ].join('')
 }
 
 /** An argument's name: its long flag, else its short one, else (a positional argument) its value names. */
-const argumentName = display => /--[\w-]+/.exec(display)?.[0] ?? /^-\w/.exec(display)?.[0] ?? display
+const argumentName = display => /--[\w-]+/u.exec(display)?.[0] ?? /^-\w/u.exec(display)?.[0] ?? display
 
 /**
  * The commands and arguments of the CLI reference's text, without the commands `exclude` names (a command and its
@@ -52,7 +52,7 @@ export function cliDeclarations({text, source, exclude = []}) {
   let usage = false
   text.split('\n').forEach((line, index) => {
     const location = {line: index + 1}
-    const heading = /^## (?:\x60projections(?: (.+))?\x60|(Global options))$/.exec(line)
+    const heading = /^## (?:\x60projections(?: (.+))?\x60|(Global options))$/u.exec(line)
     if (heading) {
       const path = heading[1] ?? ''
       command = excluded(path) ? undefined : {path, id: `cli:projections${path ? ` ${path}` : ''}`, global: Boolean(heading[2])}
@@ -82,7 +82,7 @@ export function cliDeclarations({text, source, exclude = []}) {
       if (entity) entity.data.signature = line.trim()
       return
     }
-    const row = /^\| \x60((?:[^\x60\\]|\\.)+)\x60 \| (.*) \|$/.exec(line)
+    const row = /^\| \x60((?:[^\x60\\]|\\.)+)\x60 \| (.*) \|$/u.exec(line)
     if (!row) return
     const display = cell(row[1])
     const description = cell(row[2])

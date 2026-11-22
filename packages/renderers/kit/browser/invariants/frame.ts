@@ -133,7 +133,7 @@ export function measureFrame(root: Element): FrameMeasurement {
       }
       const head = arrowhead?.getAttribute('d')
       if (head) {
-        const [tip, left, right] = [...head.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
+        const [tip, left, right] = [...head.matchAll(/(-?[\d.]+),(-?[\d.]+)/gu)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
         const faces = [
           [Math.abs(y - y0), 0, 1],
           [Math.abs(y - y1), 0, -1],
@@ -146,11 +146,11 @@ export function measureFrame(root: Element): FrameMeasurement {
         if (!((dx * nx + dy * ny) / Math.hypot(dx, dy) > 0.9)) issues.push(`arrowhead points away from its card: ${link.dataset.edgeKey}`)
       }
       const path = link.querySelector('path.graph-edge')?.getAttribute('d') ?? ''
-      if (/NaN|Infinity/.test(path)) issues.push(`nonfinite route: ${link.dataset.edgeKey}`)
+      if (/NaN|Infinity/u.test(path)) issues.push(`nonfinite route: ${link.dataset.edgeKey}`)
       // The shaft ends at the middle of the head's flat base and arrives along the head's axis, never at the tip.
       const [bx, by] = (arrowhead?.dataset.base ?? '').split(',').map(Number) as [number, number]
       const [ax, ay] = (arrowhead?.dataset.direction ?? '').split(',').map(Number) as [number, number]
-      const coordinates = [...path.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
+      const coordinates = [...path.matchAll(/(-?[\d.]+),(-?[\d.]+)/gu)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
       const end = coordinates.at(-1),
         before = coordinates.at(-2)
       if (arrowhead && end && before) {

@@ -11,7 +11,7 @@ module.exports = async function parts({folder, api}) {
   await vscode.commands.executeCommand('projections.openPart', folder, 'packages', 'extractor')
   // The definition's editor, wherever it opened: `activeTextEditor` can lag behind a webview tab's group.
   const definitionEditor = () =>
-    vscode.window.visibleTextEditors.find(editor => /\/projections\/packages\.json$/.test(editor.document.uri.path))
+    vscode.window.visibleTextEditors.find(editor => /\/projections\/packages\.json$/u.test(editor.document.uri.path))
   const definition = await until('the definition with the extractor selected', async () => {
     const editor = definitionEditor()
     return editor && !editor.selection.isEmpty ? editor : undefined

@@ -15,7 +15,7 @@ test('a link no route can take around the cards is drawn the way that crosses th
   const link = {key: 'l', id: 'l', fromId: 'source', toId: 'target', from: {x: 50, y: 40}, to: {x: 50, y: 300}}
   const route = routeLinks(cards, [link], 0.5).get('l')
   assert.deepEqual(route.crossing, ['top'])
-  assert.match(route.d, /^M/)
+  assert.match(route.d, /^M/u)
   // With the ring open on one side, the link goes around and crosses nothing.
   cards.delete('right')
   assert.equal(routeLinks(cards, [link], 0.5).get('l').crossing, undefined)

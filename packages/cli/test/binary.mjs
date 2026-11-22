@@ -97,16 +97,16 @@ try {
   const json = (args, options) => JSON.parse(run(args, options).stdout)
 
   const version = run(['--version'], {cwd: root}).stdout.trim()
-  assert.match(version, /^projections \d+\.\d+\.\d+/)
-  assert.match(run(['--help'], {cwd: root}).stdout, /how a change reshapes them/)
+  assert.match(version, /^projections \d+\.\d+\.\d+/u)
+  assert.match(run(['--help'], {cwd: root}).stdout, /how a change reshapes them/u)
   const licenses = run(['licenses'], {cwd: root}).stdout
-  assert.match(licenses, /^MIT License/)
-  assert.match(licenses, /Copyright \(c\) GitHub, Inc\./)
+  assert.match(licenses, /^MIT License/u)
+  assert.match(licenses, /Copyright \(c\) GitHub, Inc\./u)
   assert.ok(licenses.includes('Third-party licenses for the bundled native and Wasm engines.'))
   for (const dependency of ['react', 'wasmi', 'windows-sys', 'tokio', 'elkjs', 'perfect-arrows']) {
     assert.ok(licenses.includes(`===== ${dependency} `), `Missing ${dependency} notice`)
   }
-  assert.match(licenses, /Distributed under EPL-2\.0\. Source: https:\/\/github\.com\/kieler\/elkjs\/tree\//)
+  assert.match(licenses, /Distributed under EPL-2\.0\. Source: https:\/\/github\.com\/kieler\/elkjs\/tree\//u)
 
   // A repository with a built-in projection and one compared by a custom comparator.
   await mkdir(repo)
@@ -158,14 +158,14 @@ try {
   )
   const shown = json(['show', before, '-p', 'files', '--json'])
   assert.equal(shown.format, 'projections.extraction')
-  assert.match(run(['show', before, '-p', 'files']).stdout, /core\.txt/)
+  assert.match(run(['show', before, '-p', 'files']).stdout, /core\.txt/u)
   const defaultComparison = json(['compare', `${before}..${after}`, '-p', 'files', '--json'])
   assert.equal(defaultComparison.comparator.id, 'default')
   assert.ok(defaultComparison.comparison.changes.some(change => change.status === 'added'))
-  assert.match(run(['compare', `${before}..${after}`, '-p', 'files']).stdout, /Added/)
+  assert.match(run(['compare', `${before}..${after}`, '-p', 'files']).stdout, /Added/u)
   const custom = json(['compare', `${before}..${after}`, '-p', 'files-rules', '--json'])
   assert.equal(custom.comparator.id, 'tools/priority-order.comparator.yaml')
-  assert.match(custom.comparator.digest, /^sha256:[a-f0-9]{64}$/)
+  assert.match(custom.comparator.digest, /^sha256:[a-f0-9]{64}$/u)
   assert.equal(custom.comparison.changes.length, defaultComparison.comparison.changes.length)
   assert.equal(json(['compare', `${before}..${after}`, '--all', '--json']).failed, 0)
   run(['show', after, '-p', 'files', '--output', 'after.json'])
@@ -278,7 +278,7 @@ try {
     )
     commit('Django')
     const result = run(['show', '-p', 'django', '--trust', '--json'], {status: 1})
-    assert.match(result.stderr, /[Dd]jango/)
+    assert.match(result.stderr, /[Dd]jango/u)
     assert.ok(existsSync(path.join(await cached(), 'python/django_schema.py')))
     proved.python = true
   }
@@ -374,8 +374,8 @@ try {
     }
     const api = JSON.parse(result.stdout).extraction
     const signatures = api.entities.map(entity => entity.data.signature).join('\n')
-    assert.match(signatures, /Binary\.Greeter\.Greet\(System\.String\? name = null\)/)
-    assert.doesNotMatch(signatures, /Hidden/)
+    assert.match(signatures, /Binary\.Greeter\.Greet\(System\.String\? name = null\)/u)
+    assert.doesNotMatch(signatures, /Hidden/u)
     const helper = path.join(await cached(), 'dotnet')
     assert.deepEqual((await readdir(helper)).sort(), [
       'Projections.Dotnet.deps.json',
@@ -422,7 +422,7 @@ try {
     ghRun(['extension', 'install', '.'], install)
     assert.equal(ghRun(['projections', '--version'], repo).trim(), version)
     assert.ok(JSON.parse(ghRun(['projections', 'list', '--json'], repo)).projections.some(item => item.id === 'files'))
-    assert.match(ghRun(['extension', 'list'], repo), /projections/)
+    assert.match(ghRun(['extension', 'list'], repo), /projections/u)
     proved.ghExtension = true
   }
 

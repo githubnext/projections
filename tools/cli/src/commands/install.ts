@@ -145,7 +145,7 @@ function linkCli(binary: string, directory: string): {path: string; previous?: s
 
 /** Rewrites a manifest, keeping its indentation and final newline. */
 function writeManifest(path: string, text: string, manifest: unknown) {
-  const indent = /^[ \t]+(?=")/m.exec(text)?.[0] ?? '  '
+  const indent = /^[ \t]+(?=")/mu.exec(text)?.[0] ?? '  '
   writeFileSync(path, `${JSON.stringify(manifest, null, indent)}${text.endsWith('\n') ? '\n' : ''}`)
 }
 
@@ -255,7 +255,7 @@ export async function installReport(root: string, options: InstallOptions, progr
   }
 
   const binary = join(root, cliBinary)
-  const cliVersion = () => probe(root, [binary, '--version'])?.replace(/^projections\s+/, '')
+  const cliVersion = () => probe(root, [binary, '--version'])?.replace(/^projections\s+/u, '')
 
   // ── cli ──
   if (!failed && selected.includes('cli')) {
@@ -290,7 +290,7 @@ export async function installReport(root: string, options: InstallOptions, progr
   if (!failed && selected.includes('vscode')) {
     const target = vsceTarget()
     const manifest = readJson<{version: string}>(root, 'packages/integrations/vscode/package.json')
-    const registry = /^registry\s*=\s*(\S+)/m.exec(readText(root, '.npmrc') ?? '')?.[1]
+    const registry = /^registry\s*=\s*(\S+)/mu.exec(readText(root, '.npmrc') ?? '')?.[1]
     if (!target) {
       steps.push({step: 'vscode', status: 'failed', detail: `VS Code has no platform package for ${process.platform}-${process.arch}`})
       failed = true

@@ -153,7 +153,7 @@ test('targets encode to URL-safe text and back', () => {
     {kind: 'entity', id: 'x', side: 'after', path: propertyPath('a/b', 'c~d', 0)},
   ]) {
     const text = encodeTarget(target)
-    assert.match(text, /^[A-Za-z0-9._~%-]+$/)
+    assert.match(text, /^[\w.~%-]+$/u)
     assert.deepEqual(decodeTarget(text), target)
   }
   assert.equal(propertyPath('a/b', 'c~d', 0), '/a~1b/c~0d/0')
@@ -189,7 +189,7 @@ test('target digests use the engine canonical form and change only with the targ
     {kind: 'entity', id: 'auth', side: 'after'},
   ])
   const [afterApi, afterOwner, missing] = await targetDigests(engine, after, [api, owner, {kind: 'entity', id: 'auth', side: 'after'}])
-  assert.match(beforeApi, /^sha256:[0-9a-f]{64}$/)
+  assert.match(beforeApi, /^sha256:[0-9a-f]{64}$/u)
   assert.notEqual(beforeApi, afterApi)
   assert.notEqual(beforeOwner, afterOwner)
   assert.ok(beforeAuth)

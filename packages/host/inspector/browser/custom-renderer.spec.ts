@@ -132,8 +132,8 @@ test('a custom renderer becomes ready with the committed definition (definitionR
   // The bundle is read from the commit HEAD names: a symbolic revision isn't a stable renderer URL.
   const frame = page.locator('iframe.ph-frame').first()
   await expect(frame).toHaveAttribute('src', new RegExp(`/custom-renderers/[0-9a-f]+/${repository.head}/cards/index\\.html#`))
-  await expect(frame).toHaveAttribute('aria-label', /Package cards/)
-  await expect(page.getByText(/did not become ready/)).toHaveCount(0)
+  await expect(frame).toHaveAttribute('aria-label', /Package cards/u)
+  await expect(page.getByText(/did not become ready/u)).toHaveCount(0)
   await expect(page.frameLocator('iframe.ph-frame').first().locator('[data-entity-id]').first()).toBeAttached()
 })
 

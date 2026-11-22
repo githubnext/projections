@@ -2,7 +2,7 @@ import type {CSSProperties, ReactNode} from 'react'
 import {parseRevisionLabel} from '../revision-label.js'
 
 const mono = 'var(--projections-font-family-mono, ui-monospace, SFMono-Regular, Menlo, monospace)'
-const hash = /^[0-9a-f]{7,}$/
+const hash = /^[0-9a-f]{7,}$/u
 /** The name's colour: the playback bar's text (its percent and step labels), muted. */
 const nameColour = 'var(--ph-pane-chip-name, var(--ph-utility-muted, var(--projections-color-fg-muted, #59636e)))'
 /**
@@ -36,7 +36,7 @@ export function ChipText({label, words, hidden}: {label: ReactNode; words: boole
   if (typeof label !== 'string') return label
   if (words) return <span style={trimmed({color: nameColour})}>{label}</span>
   const {name, detail, when} = parseRevisionLabel(label)
-  const subject = detail?.replace(/^"(.*)"$/, '$1')
+  const subject = detail?.replace(/^"(.*)"$/u, '$1')
   return (
     <>
       <span

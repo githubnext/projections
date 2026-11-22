@@ -8,7 +8,7 @@ import type {UserConfig} from 'tsdown'
 // Internal `@githubnext/projections-*` workspaces are bundled, JavaScript and declarations alike, so nothing published
 // names them. Third-party packages stay dependencies, so a renderer's own bundle attributes them in its notices
 // (`./vite`), and React, Vite and Playwright are peers.
-const internal = /^@githubnext\/projections-/
+const internal = /^@githubnext\/projections-/u
 const peers = ['react', 'react-dom', 'vite', '@playwright/test']
 const dependencies = ['elkjs', 'lucide', 'perfect-arrows', 'typebox']
 // The kit's layout engine is chosen by the `#layout-engine` import (this package's `imports`): a Web Worker in the
@@ -16,7 +16,7 @@ const dependencies = ['elkjs', 'lucide', 'perfect-arrows', 'typebox']
 const layoutEngine = '#layout-engine'
 // Third-party data vendored into the SDK (`vendor/linguist`) stays a file of its own beside its license and
 // `vendor.json`, so renderer builds attribute it.
-const vendored = /[\\/]vendor[\\/]linguist[\\/]languages\.js$/
+const vendored = /[\\/]vendor[\\/]linguist[\\/]languages\.js$/u
 
 const shared = {
   format: 'esm',
@@ -60,18 +60,18 @@ export default defineConfig([
         // import no React; the hooks import the SDK).
         includeDependenciesRecursively: false,
         groups: [
-          {name: 'react', test: /[\\/]renderers[\\/]sdk[\\/]dist[\\/]react\.js$/},
-          {name: 'languages', test: /[\\/]renderers[\\/]sdk[\\/]dist[\\/]languages\.js$/},
+          {name: 'react', test: /[\\/]renderers[\\/]sdk[\\/]dist[\\/]react\.js$/u},
+          {name: 'languages', test: /[\\/]renderers[\\/]sdk[\\/]dist[\\/]languages\.js$/u},
           // Generated SDK modules (`*.generated.js`) belong to the SDK chunk too.
-          {name: 'sdk', test: /[\\/]renderers[\\/]sdk[\\/]dist[\\/](?!vite\.js$)[a-z-]+(\.generated)?\.js$/},
-          {name: 'schemas', test: /[\\/]schemas[\\/]dist[\\/].*\.js$/},
+          {name: 'sdk', test: /[\\/]renderers[\\/]sdk[\\/]dist[\\/](?!vite\.js$)[a-z-]+(\.generated)?\.js$/u},
+          {name: 'schemas', test: /[\\/]schemas[\\/]dist[\\/].*\.js$/u},
         ],
       },
     },
     deps: {
       alwaysBundle: [internal],
-      neverBundle: [...peers, ...dependencies, /^react\//, /^react-dom\//, /^elkjs\//, /^node:/, layoutEngine],
-      onlyImport: [...peers, ...dependencies, /^node:/, layoutEngine, '../vendor/linguist/languages.js'],
+      neverBundle: [...peers, ...dependencies, /^react\//u, /^react-dom\//u, /^elkjs\//u, /^node:/u, layoutEngine],
+      onlyImport: [...peers, ...dependencies, /^node:/u, layoutEngine, '../vendor/linguist/languages.js'],
       dts: {alwaysBundle: [internal]},
     },
     plugins: [
@@ -95,6 +95,6 @@ export default defineConfig([
     outDir: 'dist',
     clean: false,
     dts: false,
-    deps: {neverBundle: [/^elkjs\//], onlyImport: ['elkjs']},
+    deps: {neverBundle: [/^elkjs\//u], onlyImport: ['elkjs']},
   },
 ])

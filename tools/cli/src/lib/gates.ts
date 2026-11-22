@@ -154,7 +154,7 @@ export const gates: Gate[] = [
     description: 'Formatting (oxfmt --check)',
     plan: context => {
       if (!context.affected) return {commands: [npx('oxfmt', '--check')]}
-      const files = changedFiles(context, /\.([cm]?[jt]sx?|json|jsonc|ya?ml|css|html|toml)$/)
+      const files = changedFiles(context, /\.([cm]?[jt]sx?|json|jsonc|ya?ml|css|html|toml)$/u)
       return files.length
         ? {commands: [npx('oxfmt', '--check', '--no-error-on-unmatched-pattern', ...files)]}
         : {skip: 'no formattable file changed'}
@@ -186,7 +186,7 @@ export const gates: Gate[] = [
     plan: context =>
       context.affected &&
       !context.affected.kinds.includes('rust') &&
-      !(context.files ?? []).some(path => /^notices\/|^tools\/scripts\/(crate-)?notices\.mjs$|^dist-workspace\.toml$/.test(path))
+      !(context.files ?? []).some(path => /^notices\/|^tools\/scripts\/(?:crate-)?notices\.mjs$|^dist-workspace\.toml$/u.test(path))
         ? {skip: 'no crate, notices or release target changed'}
         : {commands: [npm('run', '--silent', 'check:notices')]},
   },
@@ -227,7 +227,7 @@ export const gates: Gate[] = [
       if (
         context.affected &&
         !context.affected.regenerate.some(generator => generator.name === 'reference-docs' || generator.name === 'builtin-docs') &&
-        !(context.files ?? []).some(path => /^docs\/(reference|agents|builtins)\//.test(path))
+        !(context.files ?? []).some(path => /^docs\/(?:reference|agents|builtins)\//u.test(path))
       ) {
         return {skip: 'no reference docs source changed'}
       }
@@ -248,7 +248,7 @@ export const gates: Gate[] = [
     plan: context => {
       if (context.affected && !context.affected.kinds.includes('rust')) return {skip: 'no Rust changed'}
       // The workspace manifest, lockfile and toolchain belong to no crate and affect every one.
-      const everything = (context.files ?? []).some(path => /^(Cargo\.(toml|lock)|rust-toolchain\.toml)$/.test(path))
+      const everything = (context.files ?? []).some(path => /^(?:Cargo\.(?:toml|lock)|rust-toolchain\.toml)$/u.test(path))
       const crates = context.affected && !everything ? affectedCrates(context, context.fast) : []
       if (context.affected && !everything && !crates.length) return {skip: 'no crate changed'}
       return {
@@ -316,7 +316,7 @@ export function bound(problems: readonly Problem[], limit: number): {problems: P
 
 /** A command for display, with long file lists shortened. */
 export function abbreviate(command: Command, keep = 4): string {
-  const files = command.argv.filter(word => /\.\w+$/.test(word) && !word.startsWith('-'))
+  const files = command.argv.filter(word => /\.\w+$/u.test(word) && !word.startsWith('-'))
   if (files.length <= keep) return display(command)
   const shown = new Set(files.slice(0, keep))
   const argv = command.argv.filter(word => !files.includes(word) || shown.has(word))

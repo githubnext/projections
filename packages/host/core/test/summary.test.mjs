@@ -145,10 +145,10 @@ test('the controller filters by a figure, within the scope rather than instead o
 test('the Default UI bar draws each figure with its changes as filter toggles', () => {
   const controller = probe({})
   const html = renderToStaticMarkup(createElement(SummaryBar, {projection: controller}))
-  assert.match(html, /aria-label="Summary"/)
-  assert.match(html, /data-sentence="2 workspaces \+1 \u22121 · 1 external package ~1 · 1 dependency · 1 dev dependency \+1"/)
-  assert.match(html, /data-summary-delta="added"[^>]*><span class="ph-cap">\+1</)
-  assert.match(html, /aria-label="1 workspace removed"/)
+  assert.match(html, /aria-label="Summary"/u)
+  assert.match(html, /data-sentence="2 workspaces \+1 \u22121 · 1 external package ~1 · 1 dependency · 1 dev dependency \+1"/u)
+  assert.match(html, /data-summary-delta="added"[^>]*><span class="ph-cap">\+1</u)
+  assert.match(html, /aria-label="1 workspace removed"/u)
 })
 
 test('a renderer fact is a figure of its own: its count as sent, its icon and tone, and a filter by the items it names', () => {
@@ -178,8 +178,11 @@ test('a renderer fact is a figure of its own: its count as sent, its icon and to
   assert.equal(figuresSentence(figures, true, 'en-US'), '2 workspaces +1 \u22121 · 1 new workspace · 3 notes')
   const controller = probe({})
   const html = renderToStaticMarkup(createElement(SummaryBar, {projection: {...controller, summary: figures}}))
-  assert.match(html, /data-summary-fact=""[^]*?<button[^>]*data-tone="added"[^>]*>.*?data-icon="added".*?1 new workspace<\/span><\/button>/)
-  assert.match(html, /data-summary-key="fact:note"[^]*?<span[^>]*data-summary-total="3"[^>]*><span class="ph-cap">3 notes<\/span>/)
+  assert.match(
+    html,
+    /data-summary-fact=""[\s\S]*?<button[^>]*data-tone="added"[^>]*>.*?data-icon="added".*?1 new workspace<\/span><\/button>/u,
+  )
+  assert.match(html, /data-summary-key="fact:note"[\s\S]*?<span[^>]*data-summary-total="3"[^>]*><span class="ph-cap">3 notes<\/span>/u)
 })
 
 test('a fact carries its changes and a description: the bar draws the changes as a count does, without filters', () => {
@@ -207,14 +210,14 @@ test('a fact carries its changes and a description: the bar draws the changes as
   const html = renderToStaticMarkup(createElement(SummaryBar, {projection: {...controller, summary: figures}}))
   assert.match(
     html,
-    /data-summary-key="fact:rules"[^]*?<span[^>]*data-summary-delta="added"[^>]*><span aria-hidden="true" class="ph-cap">\+1<\/span><span class="pj:sr-only">1 added<\/span>/,
+    /data-summary-key="fact:rules"[\s\S]*?<span[^>]*data-summary-delta="added"[^>]*><span aria-hidden="true" class="ph-cap">\+1<\/span><span class="pj:sr-only">1 added<\/span>/u,
   )
   assert.doesNotMatch(
     html,
-    /<button[^>]*data-summary-delta="added"[^>]*>(<span[^>]*>)?\+1(<\/span>)?<\/button><\/li><li[^>]*data-summary-key="fact:breaking"/,
+    /<button[^>]*data-summary-delta="added"[^>]*>(<span[^>]*>)?\+1(<\/span>)?<\/button><\/li><li[^>]*data-summary-key="fact:breaking"/u,
   )
   assert.match(
     html,
-    /<button[^>]*aria-description="Classified by the shared rules"[^>]*title="Classified by the shared rules\nShow only the breaking changes"/,
+    /<button[^>]*aria-description="Classified by the shared rules"[^>]*title="Classified by the shared rules\nShow only the breaking changes"/u,
   )
 })

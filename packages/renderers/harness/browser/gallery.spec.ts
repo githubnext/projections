@@ -14,10 +14,10 @@ for (const {key} of scenarios) {
     const view = page.locator('.ph')
     await expect(view, key).toHaveAttribute('data-renderer-status', 'ready')
     // Every pane paints; a scenario opens in its renderer's default mode (diff when supported, else side by side).
-    for (const pane of await view.locator('.ph-frame-host').all()) await expect(pane, key).toHaveAttribute('data-rendered-progress', /\d/)
+    for (const pane of await view.locator('.ph-frame-host').all()) await expect(pane, key).toHaveAttribute('data-rendered-progress', /\d/u)
     const mode = await view.getAttribute('data-comparison-mode')
     if (mode === 'animated') {
-      await expect(view).toHaveAttribute('data-rendered-progress', /\d/)
+      await expect(view).toHaveAttribute('data-rendered-progress', /\d/u)
       await page.getByRole('slider', {name: 'Transition'}).fill('100')
       await expect(view).toHaveAttribute('data-rendered-progress', '1')
     } else if (mode === 'diff') {

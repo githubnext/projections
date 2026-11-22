@@ -74,19 +74,19 @@ const testsOf = async workspace => {
   if (!tests.has(workspace)) {
     tests.set(
       workspace,
-      await Promise.all((await files(join(workspace, 'test'), /\.(test\.[cm]?[jt]sx?|[cm]?ts)$/)).map(path => readFile(path, 'utf8'))),
+      await Promise.all((await files(join(workspace, 'test'), /\.(?:test\.[cm]?[jt]sx?|[cm]?ts)$/u)).map(path => readFile(path, 'utf8'))),
     )
   }
   return tests.get(workspace)
 }
-const definition = /\b(export\s+)?const\s+(\w+)\s*=\s*defineMachine\s*</g
-for (const path of await files(join(root, 'packages'), /\.tsx?$/)) {
+const definition = /\b(export\s+)?const\s+(\w+)\s*=\s*defineMachine\s*</gu
+for (const path of await files(join(root, 'packages'), /\.tsx?$/u)) {
   if (posix(relative(root, path)).startsWith('packages/machine/')) continue
   const text = await readFile(path, 'utf8')
   if (!text.includes('defineMachine')) continue
   const at = index => text.slice(0, index).split('\n').length
   const named = [...text.matchAll(definition)]
-  if (named.length !== (text.match(/\bdefineMachine\s*</g) ?? []).length) {
+  if (named.length !== (text.match(/\bdefineMachine\s*</gu) ?? []).length) {
     problems.push(
       `${posix(relative(root, path))}:${at(text.indexOf('defineMachine'))}: bind each machine to an exported const, so its explore test can import it`,
     )

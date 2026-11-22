@@ -9,7 +9,7 @@ export interface VscodeLegendProps {
   className?: string | undefined
 }
 
-const swatchHue = /^color-(added|removed|modified|moved)(?:-muted|-emphasis|-border|-highlight)?$/
+const swatchHue = /^color-(added|removed|modified|moved)(?:-muted|-emphasis|-border|-highlight)?$/u
 
 /**
  * The renderer's legend, drawn once outside the panes like VS Code's panel footer: a swatch in a change hue keeps that

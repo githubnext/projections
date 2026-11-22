@@ -184,10 +184,10 @@ test('Recent changes: the commits that change any projection, with what each cha
   assert.deepEqual(chosen.find(row => row.group === 'recent').expanded, true)
   assert.equal(chosen.at(-1).selected, false)
   const tooltip = recentTooltip(found[1], 'data:image/png;base64,AAAA')
-  assert.match(tooltip, /^\*\*Split billing\*\*/)
-  assert.match(tooltip, /\x602222222\x60 → \x601111111\x60 · 2026-11-01/)
-  assert.match(tooltip, /Changes Packages \\\(1 change\\\), Package cards \\\(2 changes\\\)\./)
-  assert.match(tooltip, /!\[What it changes in Packages\]\(data:image\/png;base64,AAAA\)/)
+  assert.match(tooltip, /^\*\*Split billing\*\*/u)
+  assert.match(tooltip, /\x602222222\x60 → \x601111111\x60 · 2026-11-01/u)
+  assert.match(tooltip, /Changes Packages \\\(1 change\\\), Package cards \\\(2 changes\\\)\./u)
+  assert.match(tooltip, /!\[What it changes in Packages\]\(data:image\/png;base64,AAAA\)/u)
   // Running, with nothing found yet: a progress row; done with nothing: says so.
   assert.deepEqual(
     shape(
@@ -226,7 +226,7 @@ test('Viewing rows say short facts; their tooltips explain', () => {
     '',
     'Every projection tab shows this, unless it is pinned.',
   ])
-  assert.match(choiceTooltip({id: 'branch'}, main), /Not available here: you're on main\./)
+  assert.match(choiceTooltip({id: 'branch'}, main), /Not available here: you're on main\./u)
 })
 
 test('a Projections row: its change count as a badge in the modified color, muted until compared', () => {

@@ -92,7 +92,7 @@ test('a renderer gets built-in renderer documents by name only, and can run one 
   // The probe reports what the host answered, then again once the built-in document runs nested, under the nesting
   // frame's policy, and speaks the protocol to it: each report carries both, so neither can replace the other.
   await expect(alert).toContainText(
-    /documents graph=html; hostile=refused \(hostile is a custom renderer; hosts supply only built-in renderers\); no-such-renderer=refused \(no-such-renderer is not a built-in renderer\); nested graph ready/,
+    /documents graph=html; hostile=refused \(hostile is a custom renderer; hosts supply only built-in renderers\); no-such-renderer=refused \(no-such-renderer is not a built-in renderer\); nested graph ready/u,
   )
   // The request naming a path was dropped as invalid, never answered.
   await expect(alert).not.toContainText('../renderers')
@@ -126,7 +126,7 @@ test('progress is acknowledged by the renderer after painting and flow-controlle
   await expect(view(page)).toHaveAttribute('data-rendered-progress', '0.6')
   const report = page.getByRole('alert').filter({hasText: 'progress messages'})
   await expect(report).toContainText('last progress:0.6')
-  const received = Number(/received (\d+) progress messages/.exec((await report.textContent())!)![1])
+  const received = Number(/received (\d+) progress messages/u.exec((await report.textContent())!)![1])
   // Each frame takes the probe 300 ms, and the host keeps at most one progress in flight. It sends the initial
   // progress, the first new value, one more per frame painted while values arrive, and the latest when the
   // last frame finishes; superseded values are never sent.
@@ -198,7 +198,7 @@ test('custom comparators run sandboxed in the browser and their result is valida
   const custom = await steps()
   expect(custom).toHaveLength(defaultSteps.length)
   expect(custom).not.toEqual(defaultSteps)
-  expect(custom[0]).toMatch(/payments|Audit log/)
+  expect(custom[0]).toMatch(/payments|Audit log/u)
 })
 
 test('extractions from different definitions are not compared, and the reason is explained', async ({page}) => {
@@ -208,7 +208,7 @@ test('extractions from different definitions are not compared, and the reason is
   await expect(alert).toContainText('The inputs differs.')
   await expect(page.locator('[data-error-code="definition-mismatch"]')).toBeVisible()
   await expect(page.locator('.ph')).toHaveCount(0)
-  await alert.getByRole('button', {name: /on its own/}).click()
+  await alert.getByRole('button', {name: /on its own/u}).click()
   await expect(page.locator('.ph-explorer')).toHaveAttribute('data-outcome', 'single')
 })
 
@@ -232,7 +232,7 @@ test('reduced motion shows endpoints immediately and reaches the renderer', asyn
   await expect(view(page)).toHaveAttribute('data-renderer-status', 'ready')
   await expect(frame(page).locator('html')).toHaveAttribute('data-reduced-motion', 'true')
   // The one play button shows the other endpoint: from the after revision, the before one, and back.
-  await expect(page.getByRole('button', {name: /^(Play|Pause)/})).toHaveCount(0)
+  await expect(page.getByRole('button', {name: /^(Play|Pause)/u})).toHaveCount(0)
   await page.getByRole('button', {name: 'Show v1 · base'}).click()
   await expect(view(page)).toHaveAttribute('data-progress', '0')
   await expect(view(page)).toHaveAttribute('data-rendered-progress', '0')
@@ -241,7 +241,7 @@ test('reduced motion shows endpoints immediately and reaches the renderer', asyn
   await expect(page.getByRole('button', {name: 'Show v1 · base'})).toBeVisible()
   // The dense row explains it on the slider (its description and tooltip) rather than in a line of its own.
   await expect(page.getByRole('slider', {name: 'Transition'})).toHaveAccessibleDescription(
-    /^Reduced motion: playback shows an endpoint immediately\./,
+    /^Reduced motion: playback shows an endpoint immediately\./u,
   )
 })
 
@@ -312,7 +312,7 @@ test('animated playback loops: it reaches the after revision, holds, and returns
   await page.waitForTimeout(400)
   await expect(view(page)).toHaveAttribute('data-progress', stopped!)
   // One play button, which continues the way playback last went.
-  await expect(page.getByRole('button', {name: /^Play (forward|backward)$/})).toHaveCount(1)
+  await expect(page.getByRole('button', {name: /^Play (forward|backward)$/u})).toHaveCount(1)
   await expect(page.getByRole('button', {name: 'Pause', exact: true})).toHaveCount(0)
 })
 
@@ -385,7 +385,7 @@ const withoutAnimation = new Set(['api/v0'])
 async function scrubOrDiff(page: Page, schema: string) {
   if (withoutAnimation.has(schema)) {
     // Asked for animated, which it doesn't offer, it opens in side by side unless a mode was chosen; no transition.
-    await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', /side-by-side|diff/)
+    await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', /side-by-side|diff/u)
     await expect(page.getByRole('slider', {name: 'Transition'})).toHaveCount(0)
     return
   }
@@ -453,10 +453,10 @@ test('embedders can control progress and playback', async ({page}) => {
 
   // The view's own Play button requests playback from the embedder.
   await page.getByRole('button', {name: 'Tour: seek 25%'}).click()
-  await page.getByRole('button', {name: /^Play (forward|backward)$/}).click()
+  await page.getByRole('button', {name: /^Play (forward|backward)$/u}).click()
   await expect(page.getByLabel('Tour playing')).toHaveText('yes')
   await page.getByRole('button', {name: 'Tour: pause'}).click()
-  await expect(page.getByRole('button', {name: /^Play (forward|backward)$/})).toBeVisible()
+  await expect(page.getByRole('button', {name: /^Play (forward|backward)$/u})).toBeVisible()
 })
 
 test('controlled playback under reduced motion shows the endpoint immediately', async ({page}) => {
@@ -469,7 +469,7 @@ test('controlled playback under reduced motion shows the endpoint immediately', 
 
 test('renderers declare controls that the host draws and delivers as options and actions', async ({page}) => {
   await open(page, 'renderer=hostile&probe=controls')
-  const report = page.getByRole('alert').filter({hasText: /options|action/})
+  const report = page.getByRole('alert').filter({hasText: /options|action/u})
   await expect(report).toContainText('options layout=vertical labels=true zoom=100 grid=undefined action=none')
   // The `zoom` group is drawn in the toolbar row; the other declared controls are in Settings.
   const zoom = await inToolbar(page.getByRole('group', {name: 'Projection toolbar'}), scope => scope.getByRole('group', {name: 'Zoom'}))
@@ -479,7 +479,7 @@ test('renderers declare controls that the host draws and delivers as options and
   await expect(report).toContainText('action=fit')
   // The other declared controls are in Settings, in the renderer's options submenu (no zoom there).
   const settings = await openSettings(page)
-  await expect(settings.getByRole('menuitem', {name: /Zoom/})).toHaveCount(0)
+  await expect(settings.getByRole('menuitem', {name: /Zoom/u})).toHaveCount(0)
   const options = await openSettingsSubmenu(page, 'Hostile probe options')
   await options.getByRole('group', {name: 'Layout'}).getByRole('menuitemradio', {name: 'Horizontal'}).click()
   await expect(report).toContainText('options layout=horizontal labels=true zoom=150')
@@ -499,7 +499,7 @@ test('definition presentation defaults seed host and renderer settings, with not
     rendererOptions: {layout: 'horizontal', zoom: 150, labels: 'sometimes', shading: true},
   }
   await open(page, `renderer=hostile&probe=controls&defaults=${encodeURIComponent(JSON.stringify(defaults))}`)
-  const report = page.getByRole('alert').filter({hasText: /options/})
+  const report = page.getByRole('alert').filter({hasText: /options/u})
   await expect(report).toContainText('options layout=horizontal labels=true zoom=150')
   const settings = await openSettings(page)
   await expect(submenuItem(settings, 'Highlight changes')).toContainText('Always')
@@ -558,7 +558,7 @@ test('the transition slider follows exact progress during playback and seeking',
   // Playback may already have reached the end on a slow machine; then there is nothing to pause.
   const pause = page.getByRole('button', {name: 'Pause', exact: true})
   if (await pause.isVisible()) await pause.click({timeout: 5_000}).catch(() => {})
-  await expect(page.getByRole('button', {name: /^Play (forward|backward)$/})).toBeVisible()
+  await expect(page.getByRole('button', {name: /^Play (forward|backward)$/u})).toBeVisible()
   const moving = samples.filter(value => value > 0 && value < 100)
   expect(moving.length).toBeGreaterThan(3)
   expect(

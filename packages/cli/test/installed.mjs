@@ -130,7 +130,7 @@ try {
   await writeFile(path.join(repo, 'services.json'), JSON.stringify(services))
   const after = commit()
   const comparison = JSON.parse(cli('compare', `${before}..${after}`, '-p', 'services-node', '--trust', '--json'))
-  assert.match(cli('compare', `${before}..${after}`, '-p', 'services-node', '--trust'), /Added entity/)
+  assert.match(cli('compare', `${before}..${after}`, '-p', 'services-node', '--trust'), /Added entity/u)
   assert.ok(comparison.comparison.changes.length > 0)
   const collected = JSON.parse(cli('show', '--all', before, '--trust', '--json'))
   assert.equal(collected.results.length, 2)
@@ -167,7 +167,7 @@ try {
   for (const name of ['node', 'node.exe']) assert.ok(!existsSync(path.join(noNode, name)), `${noNode} must not contain Node`)
   const noNodeCli = (...args) =>
     execFileSync(binary, args, {cwd: repo, encoding: 'utf8', env: {PATH: noNode, ...isolated}, maxBuffer: 8 * 1024 * 1024})
-  assert.match(noNodeCli('--help'), /how a change reshapes them/)
+  assert.match(noNodeCli('--help'), /how a change reshapes them/u)
   assert.equal(
     JSON.parse(noNodeCli('show', prBase, '-p', 'files', '--json')).digest,
     JSON.parse(cli('show', prBase, '-p', 'files', '--json')).digest,
@@ -210,7 +210,7 @@ try {
       },
     )
     assert.equal(pr.status, 1, pr.stderr)
-    assert.match(pr.stderr, /1 of the pull request's comparisons failed/)
+    assert.match(pr.stderr, /1 of the pull request's comparisons failed/u)
     const prReview = JSON.parse(pr.stdout)
     assert.equal(prReview.mergeBase, prBase)
     assert.equal(prReview.execution, 'untrusted')
@@ -232,7 +232,7 @@ try {
       encoding: 'utf8',
       env: {PATH: process.env.PATH, LANG: 'C.UTF-8', ...isolated},
     }).stderr,
-    /No \x60typescript\x60 package is installed there/,
+    /No \x60typescript\x60 package is installed there/u,
   )
   await writeFile(path.join(repo, '.gitignore'), 'node_modules/\n')
   await cp(path.join(source, 'node_modules/typescript'), path.join(repo, 'node_modules/typescript'), {recursive: true})
@@ -289,8 +289,8 @@ try {
     const api = JSON.parse(cli('show', '-p', 'native-dotnet', '--trust', '--json')).extraction
     assert.equal(api.schema, 'api/v0')
     const signatures = api.entities.map(entity => entity.data.signature).join('\n')
-    assert.match(signatures, /Installed\.Greeter\.Greet\(System\.String\? name = null\)/)
-    assert.doesNotMatch(signatures, /Hidden/)
+    assert.match(signatures, /Installed\.Greeter\.Greet\(System\.String\? name = null\)/u)
+    assert.doesNotMatch(signatures, /Hidden/u)
     assert.ok(!existsSync(path.join(repo, 'dotnet/obj')), 'application build outputs stay outside the checkout')
   }
   // The packed executable's editor backend, without Node on PATH, runs a comparison job.
@@ -319,8 +319,8 @@ try {
       env: {PATH: process.env.PATH, LANG: 'C.UTF-8', ...isolated},
       maxBuffer: 64 * 1024 * 1024,
     })
-    assert.match(licenses, /Copyright \(c\) GitHub, Inc\./)
-    assert.match(licenses, /Permission is hereby granted, free of charge/)
+    assert.match(licenses, /Copyright \(c\) GitHub, Inc\./u)
+    assert.match(licenses, /Permission is hereby granted, free of charge/u)
     for (const dependency of ['react', 'react-dom', 'scheduler', 'elkjs']) assert.ok(licenses.includes(`===== ${dependency} `))
     assert.ok(licenses.includes('LICENSE.schemasafe.txt'))
     assert.ok(licenses.includes('Third-party licenses for the bundled native and Wasm engines.'))

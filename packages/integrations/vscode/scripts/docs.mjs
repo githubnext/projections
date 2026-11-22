@@ -30,27 +30,27 @@ export const referencePages = {
 export function bundledName(file) {
   if (file === referencePages.index) return 'index.md'
   if (file.startsWith(`${builtinsDir}/`)) return file.slice(builtinsDir.length + 1)
-  return /\/README\.md$/.test(file) ? file.replace(/\/README\.md$/, '.md') : file
+  return /\/README\.md$/u.test(file) ? file.replace(/\/README\.md$/u, '.md') : file
 }
 
 /** Each `## \`name\`` section of a generated reference page: its name, handles (renderers) and page (from the repository root). */
 export function referenceSections(text, page) {
   const sections = []
-  for (const section of text.split(/^## /m).slice(1)) {
-    const name = /^\x60([^\x60]+)\x60/.exec(section)?.[1]
-    const linked = /See \[its page\]\(([^)\s]+)\)/.exec(section)?.[1]
+  for (const section of text.split(/^## /mu).slice(1)) {
+    const name = /^\x60([^\x60]+)\x60/u.exec(section)?.[1]
+    const linked = /See \[its page\]\(([^)\s]+)\)/u.exec(section)?.[1]
     if (!name || !linked) continue
-    const handles = /^- Handles: (.*)$/m.exec(section)?.[1]
+    const handles = /^- Handles: (.*)$/mu.exec(section)?.[1]
     sections.push({
       name,
-      handles: handles ? [...handles.matchAll(/\x60([^\x60]+)\x60/g)].map(match => match[1]) : [name],
+      handles: handles ? [...handles.matchAll(/\x60([^\x60]+)\x60/gu)].map(match => match[1]) : [name],
       page: posix.normalize(posix.join(posix.dirname(page), linked)),
     })
   }
   return sections
 }
 
-const imagePattern = /\.(png|jpe?g|gif|svg|webp)$/i
+const imagePattern = /\.(?:png|jpe?g|gif|svg|webp)$/iu
 
 /**
  * A bundled page's text with its links rewritten (`file` is the page's path in the repository; `bundled` maps each
@@ -61,8 +61,8 @@ const imagePattern = /\.(png|jpe?g|gif|svg|webp)$/i
 export function rewriteLinks(text, file, bundled) {
   const self = bundled.get(file) ?? bundledName(file)
   const target = (href, image) => {
-    if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith('#') || href.startsWith('/')) return undefined
-    const [location = '', fragment] = href.split(/#(.*)/s)
+    if (/^[a-z][a-z0-9+.-]*:/iu.test(href) || href.startsWith('#') || href.startsWith('/')) return undefined
+    const [location = '', fragment] = href.split(/#(.*)/su)
     const resolved = posix.normalize(posix.join(posix.dirname(file), decodeURI(location)))
     if (resolved.startsWith('..')) return undefined
     const anchor = fragment === undefined ? '' : `#${fragment}`
@@ -74,19 +74,19 @@ export function rewriteLinks(text, file, bundled) {
   }
   const links = prose =>
     prose
-      .replace(/(!?)\[((?:[^[\]]|\[[^\]]*\])*)\]\(\s*([^)\s]+)(\s+"[^"]*")?\s*\)/g, (whole, bang, label, href, title = '') => {
+      .replace(/(!?)\[((?:[^[\]]|\[[^\]]*\])*)\]\(\s*([^)\s]+)(\s+"[^"]*")?\s*\)/gu, (whole, bang, label, href, title = '') => {
         const image = bang === '!' && imagePattern.test(href.split('#')[0])
         const rewritten = target(href, image)
         if (rewritten === undefined) return whole
         return image ? `[${label || posix.basename(href)}](${rewritten}${title})` : `${bang}[${label}](${rewritten}${title})`
       })
-      .replace(/^(\s*\[[^\]]+\]:\s*)(\S+)(.*)$/gm, (whole, start, href, rest) => {
+      .replace(/^(\s*\[[^\]]+\]:\s*)(\S+)((?:\s.*)?)$/gmu, (whole, start, href, rest) => {
         const rewritten = target(href, false)
         return rewritten === undefined ? whole : `${start}${rewritten}${rest}`
       })
   // Prose between fenced code blocks (a link's text may span lines); the blocks as they are.
   return text
-    .split(/(^[ \t]*(?:\x60\x60\x60|~~~)[^\n]*\n[\s\S]*?^[ \t]*(?:\x60\x60\x60|~~~)[ \t]*$)/m)
+    .split(/(^[ \t]*(?:\x60\x60\x60|~~~)[^\n]*\n[\s\S]*?^[ \t]*(?:\x60\x60\x60|~~~)[ \t]*$)/mu)
     .map((part, index) => (index % 2 ? part : links(part)))
     .join('')
 }
@@ -102,8 +102,8 @@ export function slug(text) {
 /** The text with fenced code blocks and code spans blanked out, keeping offsets. */
 const withoutCode = text =>
   text
-    .replace(/^[ \t]*(\x60\x60\x60|~~~)[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm, block => block.replace(/[^\n]/g, ' '))
-    .replace(/(\x60+)(?!\x60)[\s\S]*?(?<!\x60)\1(?!\x60)/g, span => span.replace(/[^\n]/g, ' '))
+    .replace(/^[ \t]*(\x60\x60\x60|~~~)[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gmu, block => block.replace(/[^\n]/gu, ' '))
+    .replace(/(\x60+)(?!\x60)[\s\S]+?(?<!\x60)\1(?!\x60)/gu, span => span.replace(/[^\n]/gu, ' '))
 
 /** The text outside HTML tags, in one pass: each `<…>` with something inside is dropped; a `<` that closes nothing stays. */
 function withoutTags(text) {
@@ -123,21 +123,21 @@ function withoutTags(text) {
 export function anchors(text) {
   const found = new Set()
   const seen = new Map()
-  for (const match of withoutCode(text).matchAll(/^#{1,6} +(.+?)[ \t]*#*[ \t]*$/gm)) {
+  for (const match of withoutCode(text).matchAll(/^#{1,6} .+$/gmu)) {
     const heading = text
       .slice(match.index, match.index + match[0].length)
-      .replace(/^#{1,6} +/, '')
-      .replace(/[ \t]*#*[ \t]*$/, '')
-    const plain = withoutTags(heading.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1'))
-      .replace(/\x60([^\x60]*)\x60/g, '$1')
-      .replace(/(\*\*|__)(.*?)\1/g, '$2')
+      .replace(/^#{1,6} +/u, '')
+      .replace(/[ \t]*(?:#+[ \t]*)?$/u, '')
+    const plain = withoutTags(heading.replace(/!?\[([^\]]*)\]\([^)]*\)/gu, '$1'))
+      .replace(/\x60([^\x60]*)\x60/gu, '$1')
+      .replace(/(\*\*|__)(.*?)\1/gu, '$2')
       .trim()
     const base = slug(plain)
     const count = seen.get(base) ?? 0
     seen.set(base, count + 1)
     found.add(count ? `${base}-${count}` : base)
   }
-  for (const match of text.matchAll(/<[a-z][^>]*?\s(?:id|name)=["']([^"']+)["']/gi)) found.add(match[1])
+  for (const match of text.matchAll(/<[a-z][^>]*?\s(?:id|name)=["']([^"']+)["']/giu)) found.add(match[1])
   return found
 }
 
@@ -152,18 +152,18 @@ export function bundleProblems(pages) {
   for (const [page, text] of pages) {
     const scan = withoutCode(text)
     const hrefs = [
-      ...[...scan.matchAll(/\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g)].map(match => match[1]),
-      ...[...scan.matchAll(/^ {0,3}\[[^\]\n]+\]:[ \t]*<?(\S+?)>?(?:\s|$)/gm)].map(match => match[1]),
-      ...[...scan.matchAll(/<(?:a|img|source)\b[^>]*?\s(?:href|src)=["']([^"']+)["']/gi)].map(match => match[1]),
+      ...[...scan.matchAll(/\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/gu)].map(match => match[1]),
+      ...[...scan.matchAll(/^ {0,3}\[[^\]\n]+\]:[ \t]*<?(\S+?)>?(?:\s|$)/gmu)].map(match => match[1]),
+      ...[...scan.matchAll(/<(?:a|img|source)\b[^>]*?\s(?:href|src)=["']([^"']+)["']/giu)].map(match => match[1]),
     ]
     for (const href of hrefs) {
       const problem = why => problems.push(`${page}: ${href}: ${why}`)
-      if (/^(https|mailto):/i.test(href)) continue
-      if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith('//') || href.startsWith('/')) {
+      if (/^(?:https|mailto):/iu.test(href)) continue
+      if (/^[a-z][a-z0-9+.-]*:/iu.test(href) || href.startsWith('//') || href.startsWith('/')) {
         problem('not a link the preview can open')
         continue
       }
-      const [location = '', fragment] = href.split(/#(.*)/s)
+      const [location = '', fragment] = href.split(/#(.*)/su)
       const target = location ? posix.normalize(posix.join(posix.dirname(page), decodeURI(location))) : page
       if (!pages.has(target)) problem('not a bundled page')
       else if (fragment !== undefined && !headings.get(target).has(decodeURIComponent(fragment))) {
@@ -202,8 +202,8 @@ export async function planDocs(root) {
   // its page links one ("How it works") on GitHub.
   const files = new Set(seeds)
   for (const file of seeds) {
-    for (const match of (await read(file)).matchAll(/\]\(\s*([^)\s#]+\.md)(?:#[^)\s]*)?(?:\s+"[^"]*")?\s*\)/g)) {
-      if (/^[a-z][a-z0-9+.-]*:/i.test(match[1])) continue
+    for (const match of (await read(file)).matchAll(/\]\(\s*([^)\s#]+\.md)(?:#[^)\s]*)?(?:\s+"[^"]*")?\s*\)/gu)) {
+      if (/^[a-z][a-z0-9+.-]*:/iu.test(match[1])) continue
       const linked = posix.normalize(posix.join(posix.dirname(file), decodeURI(match[1])))
       if (linked.startsWith('docs/') && (await exists(path.join(root, linked)))) files.add(linked)
     }
@@ -217,7 +217,7 @@ export async function planDocs(root) {
   const pages = new Map()
   // Without front matter (a description for this repository's tools), which the preview would show as a table.
   for (const [file, name] of bundled) {
-    pages.set(name, rewriteLinks((await read(file)).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/, ''), file, bundled))
+    pages.set(name, rewriteLinks((await read(file)).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/u, ''), file, bundled))
   }
   const index = {
     format: 'projections.vscode.docs',

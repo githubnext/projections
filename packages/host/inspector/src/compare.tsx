@@ -5,7 +5,7 @@ import {LoaderCircle} from 'lucide-react'
 
 const workingTree = 'working-tree'
 /** A ref as people write it: "Working tree" (any case) is the working tree. */
-export const parseRef = (text: string) => (/^working[ -]?tree$/i.test(text.trim()) ? workingTree : text.trim())
+export const parseRef = (text: string) => (/^working[ -]?tree$/iu.test(text.trim()) ? workingTree : text.trim())
 const shown = (ref: string) => (ref === workingTree ? 'Working tree' : ref)
 
 /**

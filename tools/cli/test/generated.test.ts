@@ -39,7 +39,7 @@ test("the registry matches this repository: each generator's outputs exist, and 
   }
   const unregistered = markedFiles(
     workspaceRoot,
-    files.filter(path => !/(^|\/)fixtures\//.test(path)),
+    files.filter(path => !/(?:^|\/)fixtures\//u.test(path)),
   ).filter(path => !generatorFor(path))
   assert.deepEqual(unregistered, [], 'register these in tools/cli/src/lib/generated.ts')
 })

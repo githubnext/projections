@@ -41,17 +41,17 @@ export function counts(output: string): {passed?: number; failed?: number} {
   let passed = 0
   let failed = 0
   let seen = false
-  for (const match of output.matchAll(/^(?:# |ℹ )(pass|fail) (\d+)$/gm)) {
+  for (const match of output.matchAll(/^(?:# |ℹ )(pass|fail) (\d+)$/gmu)) {
     seen = true
     if (match[1] === 'pass') passed += Number(match[2])
     else failed += Number(match[2])
   }
-  for (const match of output.matchAll(/test result: \w+\. (\d+) passed; (\d+) failed/g)) {
+  for (const match of output.matchAll(/test result: \w+\. (\d+) passed; (\d+) failed/gu)) {
     seen = true
     passed += Number(match[1])
     failed += Number(match[2])
   }
-  for (const match of output.matchAll(/^\s+(\d+) (passed|failed|flaky)\b/gm)) {
+  for (const match of output.matchAll(/^\s+(\d+) (passed|failed|flaky)\b/gmu)) {
     seen = true
     if (match[2] === 'passed') passed += Number(match[1])
     else if (match[2] === 'failed') failed += Number(match[1])
@@ -66,7 +66,7 @@ const MAX_BROWSER_WORKERS = 2
  * (`node --test test/*.test.mjs`), and node reads options only before those, so an appended one is ignored.
  */
 export function nodeTestPattern(filter: string): string {
-  return [process.env.NODE_OPTIONS, `--test-name-pattern="${filter.replace(/[\\"]/g, '\\$&')}"`].filter(Boolean).join(' ')
+  return [process.env.NODE_OPTIONS, `--test-name-pattern="${filter.replace(/[\\"]/gu, '\\$&')}"`].filter(Boolean).join(' ')
 }
 
 /** The test commands for the options: workspace suites, Rust crates and, only when asked, one browser project. */
@@ -95,7 +95,7 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
     if (!candidates.length) notes.push('No selected workspace has browser tests.')
     for (const unit of candidates) {
       const script = JSON.parse(readFileSync(join(root, unit.path, 'package.json'), 'utf8')).scripts['test:browser'] as string
-      const playwright = /playwright test\s*$/.test(script)
+      const playwright = /playwright test\s*$/u.test(script)
       runs.push({
         target: `${unit.path} (browser)`,
         command: {
@@ -161,7 +161,7 @@ export async function testReport(root: string, options: TestOptions, progress?: 
     const status = ran.exitCode === 0 ? 'pass' : 'fail'
     const cwd = units.find(unit => unit.path === target)?.path ?? ''
     const problems =
-      status === 'fail' ? parseProblems(ran.output, root, cwd).filter(problem => !/subtests? failed/.test(problem.message)) : []
+      status === 'fail' ? parseProblems(ran.output, root, cwd).filter(problem => !/subtests? failed/u.test(problem.message)) : []
     progress?.(`  ${status} (${Math.round(ran.durationMs / 1000)}s)`)
     results.push({
       target,

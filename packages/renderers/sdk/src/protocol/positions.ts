@@ -2,7 +2,7 @@
 import type {AnchorRect, ScrollPosition} from './messages.js'
 import {coordinate, keys, record} from './validation.js'
 
-const scrollKeyPattern = /^[A-Za-z0-9_.:>\- ]{1,256}$/
+const scrollKeyPattern = /^[\w.:>\- ]{1,256}$/u
 
 export function anchorRect(value: unknown): AnchorRect | undefined {
   if (!record(value) || !keys(value, ['x', 'y', 'width', 'height'])) return undefined

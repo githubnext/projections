@@ -33,7 +33,7 @@ export interface QuickPickProps extends Omit<OverlayProps, 'role' | 'children' |
 
 /** The items whose label, description or detail hold every word of the query. */
 function filterItems(items: readonly QuickPickItem[], query: string): readonly QuickPickItem[] {
-  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  const terms = query.trim().toLowerCase().split(/\s+/u).filter(Boolean)
   return items.filter(item =>
     terms.every(term => `${item.label} ${item.description ?? ''} ${item.detail ?? ''}`.toLowerCase().includes(term)),
   )

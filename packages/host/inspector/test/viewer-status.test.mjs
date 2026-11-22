@@ -9,6 +9,6 @@ test("an extraction leaves the viewer's status line empty: the stage says so", (
 })
 
 test('a failed extraction and a missing trust still say so in the status line', () => {
-  assert.match(statusText(state, {status: 'failed'}), /extractor didn't run/)
+  assert.match(statusText(state, {status: 'failed'}), /extractor didn't run/u)
   assert.equal(statusText(state, {status: 'trust'}), 'Needs trust')
 })

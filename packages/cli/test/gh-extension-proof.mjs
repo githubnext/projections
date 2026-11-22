@@ -85,24 +85,24 @@ export async function verifyGhExtension({source, fixture, binary, repo, revision
     const help = await invoke('gh', ['projections', '--help'], repo)
     const standalone = await invoke(path.join(fixture, 'packages/cli/dist/projections'), ['--help'], repo)
     assert.equal(help.stdout, standalone.stdout)
-    assert.match(help.stdout, /show\s+Show one revision/)
+    assert.match(help.stdout, /show\s+Show one revision/u)
     const collection = await invoke('gh', ['projections', 'show', revision, '-p', 'services-node', '--trust', '--json'], repo)
     // How and when it ran differ: HEAD has moved past the revision, so it is materialized rather than extracted in place.
     const stable = ({provenance: {execution, limitations, ...provenance}, ...document}) => ({...document, provenance})
     assert.deepEqual(stable(JSON.parse(collection.stdout)), stable(snapshot))
-    await assert.rejects(invoke('gh', ['projections', 'show', revision, '-p', 'services-node'], repo), /--trust/)
+    await assert.rejects(invoke('gh', ['projections', 'show', revision, '-p', 'services-node'], repo), /--trust/u)
     const output = 'gh snapshot with spaces.json'
     await invoke('gh', ['projections', 'show', revision, '-p', 'services-node', '--trust', '--output', output], repo)
     assert.equal(JSON.parse(await readFile(path.join(repo, output), 'utf8')).digest, snapshot.digest)
     const main = path.join(fixture, 'packages/cli/dist/projections')
     await rename(main, `${main}.saved`)
     try {
-      await assert.rejects(invoke('gh', ['projections', '--help'], repo), /built native CLI is missing[\s\S]*npm ci[\s\S]*npm run build/)
+      await assert.rejects(invoke('gh', ['projections', '--help'], repo), /built native CLI is missing[\s\S]*npm ci[\s\S]*npm run build/u)
     } finally {
       await rename(`${main}.saved`, main)
     }
     const installed = await invoke('gh', ['extension', 'list'], fixture)
-    assert.match(installed.stdout, /gh projections/)
+    assert.match(installed.stdout, /gh projections/u)
     assert.deepEqual(requests, [], 'Local installation/invocation must not call a live API or update endpoint')
   } finally {
     await new Promise((resolve, reject) => proxy.close(error => (error ? reject(error) : resolve())))

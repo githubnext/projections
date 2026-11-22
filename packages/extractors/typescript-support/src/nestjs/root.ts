@@ -21,8 +21,8 @@ async function bootstrapFile(context: ExtractorContext): Promise<string> {
               file =>
                 sourceFile.test(file) &&
                 !file.endsWith('.d.ts') &&
-                !/(?:^|\/)node_modules\//.test(file) &&
-                !/\.(?:spec|test|e2e-spec)\.[cm]?tsx?$/.test(file),
+                !/(?:^|\/)node_modules\//u.test(file) &&
+                !/\.(?:spec|test|e2e-spec)\.[cm]?tsx?$/u.test(file),
             )
             .map(async file => ((await readSource(context, file)).includes('NestFactory.') ? file : undefined)),
         )
@@ -86,7 +86,7 @@ export async function rootModule(context: ExtractorContext): Promise<RootModule>
     if (!specifier.startsWith('.')) {
       throw new Error(`${entry} imports ${local} from the package ${specifier}. Set inputs.module to "<file>#<module class>".`)
     }
-    const base = path.posix.join(path.posix.dirname(entry), specifier.replace(/\.[cm]?js$/, ''))
+    const base = path.posix.join(path.posix.dirname(entry), specifier.replace(/\.[cm]?js$/u, ''))
     const file = [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, base].find(candidate => context.files.includes(candidate))
     if (!file) throw new Error(`Cannot find the module ${specifier} that ${entry} imports ${local} from.`)
     return {file: await sourcePath(context, file), name: (element.propertyName ?? element.name).text, entry}

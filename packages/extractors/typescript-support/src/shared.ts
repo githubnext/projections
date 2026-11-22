@@ -28,7 +28,7 @@ export function repositoryRoot(context: ExtractorContext): string {
 }
 
 export async function sourcePath(context: ExtractorContext, relative: string): Promise<string> {
-  if (path.isAbsolute(relative) || relative.split(/[\\/]/).includes('..')) {
+  if (path.isAbsolute(relative) || relative.split(/[\\/]/u).includes('..')) {
     throw new Error(`Path must stay within the repository: ${relative}`)
   }
   const root = await realpath(repositoryRoot(context))
@@ -57,7 +57,7 @@ export async function containedPath(context: ExtractorContext, relative: string)
  * they stay inside `root`.
  */
 export async function containedIn(root: string, relative: string): Promise<string> {
-  if (path.isAbsolute(relative) || relative.split(/[\\/]/).includes('..')) {
+  if (path.isAbsolute(relative) || relative.split(/[\\/]/u).includes('..')) {
     throw new Error(`Path must stay within the repository: ${relative}`)
   }
   const inside = (file: string) => {
@@ -65,7 +65,7 @@ export async function containedIn(root: string, relative: string): Promise<strin
     return offset === '' || (offset !== '..' && !offset.startsWith(`..${path.sep}`) && !path.isAbsolute(offset))
   }
   let cursor = root
-  for (const segment of relative.split(/[\\/]/).filter(part => part && part !== '.')) {
+  for (const segment of relative.split(/[\\/]/u).filter(part => part && part !== '.')) {
     cursor = path.join(cursor, segment)
     if ((await lstat(cursor)).isSymbolicLink()) {
       cursor = await realpath(cursor)
@@ -117,7 +117,7 @@ export function glob(pattern: string): RegExp {
       } else source += '.*'
     } else if (character === '*') source += '[^/]*'
     else if (character === '?') source += '[^/]'
-    else source += character.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
+    else source += character.replace(/[\\^$.*+?()[\]{}|]/gu, '\\$&')
   }
   return new RegExp(`^${source}$`)
 }

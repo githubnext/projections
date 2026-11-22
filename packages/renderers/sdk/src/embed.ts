@@ -74,12 +74,12 @@ function randomToken(view: Window): string {
  */
 export function withFragment(html: string, fragment: string): string {
   // Only ASCII is folded, so indices stay those of `html`.
-  const lower = html.replace(/[A-Z]/g, letter => letter.toLowerCase())
+  const lower = html.replace(/[A-Z]/gu, letter => letter.toLowerCase())
   let nonce: string | undefined
   for (let tag = openingTag(lower, 'script', 0); tag && !nonce; tag = openingTag(lower, 'script', tag.end)) {
-    nonce = /\snonce="([A-Za-z0-9+/=_-]+)"/.exec(html.slice(tag.start, tag.end))?.[1]
+    nonce = /\snonce="([\w+/=-]+)"/u.exec(html.slice(tag.start, tag.end))?.[1]
   }
-  const script = `<script${nonce ? ` nonce="${nonce}"` : ''}>location.hash=${JSON.stringify(fragment).replace(/</g, '\\u003c')}</script>`
+  const script = `<script${nonce ? ` nonce="${nonce}"` : ''}>location.hash=${JSON.stringify(fragment).replace(/</gu, '\\u003c')}</script>`
   const head = openingTag(lower, 'head', 0)
   if (head) return `${html.slice(0, head.end)}${script}${html.slice(head.end)}`
   return `${script}${html}`
@@ -89,7 +89,7 @@ export function withFragment(html: string, fragment: string): string {
 function openingTag(lower: string, name: string, from: number): {start: number; end: number} | undefined {
   for (let start = lower.indexOf(`<${name}`, from); start >= 0; start = lower.indexOf(`<${name}`, start + 1)) {
     const next = lower[start + name.length + 1]
-    if (next !== '>' && next !== '/' && !/\s/.test(next ?? '')) continue
+    if (next !== '>' && next !== '/' && !/\s/u.test(next ?? '')) continue
     const close = lower.indexOf('>', start)
     return close < 0 ? undefined : {start, end: close + 1}
   }

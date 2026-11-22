@@ -79,6 +79,6 @@ test('a frame stays transparent behind the host loading status until the rendere
   await expect(frame).toHaveCSS('opacity', '0')
   await expect(frame).toHaveCSS('color-scheme', 'light dark')
   expect(new URL((await frame.getAttribute('src'))!).hash).toContain('color=dark')
-  await expect(page.getByRole('status').filter({hasText: /Loading the .* renderer/})).toBeVisible()
+  await expect(page.getByRole('status').filter({hasText: /Loading the .* renderer/u})).toBeVisible()
   await expect(view(page)).toHaveAttribute('data-renderer-status', 'loading')
 })

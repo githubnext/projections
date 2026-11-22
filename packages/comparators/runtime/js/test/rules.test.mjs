@@ -26,7 +26,7 @@ test('checks a rules file once and identifies it by its canonical form', async (
   const module = new WebAssembly.Module(await readFile(new URL('../dist/rules.wasm', import.meta.url)))
   const [section] = WebAssembly.Module.customSections(module, 'projections.interpreter')
   const interpreter = new TextDecoder().decode(section)
-  assert.match(interpreter, /^sha256:[0-9a-f]{64}$/)
+  assert.match(interpreter, /^sha256:[0-9a-f]{64}$/u)
   assert.equal(checked.digest, sha256(`projections-rules-comparator\n${interpreter}\n${checked.canonical}`))
   assert.deepEqual(await checkRulesInThreadForTests(rules), checked)
   // Comments and layout are not part of a rules comparator's identity.
@@ -46,7 +46,7 @@ test('runs a rules file in a worker, with the same comparison as in-thread', asy
   }
   const comparison = await runtime.compare(rules, input)
   assert.equal(comparison.protocolVersion, 0)
-  assert.ok(comparison.changes.some(change => change.correspondence === 'declared' && /moved/.test(change.summary)))
+  assert.ok(comparison.changes.some(change => change.correspondence === 'declared' && /moved/u.test(change.summary)))
   assert.deepEqual(
     comparison.steps.map(step => step.kind),
     ['remove', 'restructure', 'add'],
@@ -64,7 +64,7 @@ test('returns lint warnings with a checked rules file', async () => {
   assert.equal(warnings.length, 1)
   assert.equal(warnings[0].code, 'chained-conditional')
   assert.equal(warnings[0].path, '/metadata/values/size')
-  assert.match(warnings[0].message, /^Line 5, column \d+: A chain of 3 conditionals/)
+  assert.match(warnings[0].message, /^Line 5, column \d+: A chain of 3 conditionals/u)
 })
 
 test('reports every rules problem with its YAML line and column', async () => {
@@ -74,8 +74,8 @@ test('reports every rules problem with its YAML line and column', async () => {
     assert.ok(error instanceof RulesError, error)
     assert.equal(error.code, 'invalid-module')
     assert.ok(error.diagnostics.length >= 1)
-    assert.match(error.message, /chnages/)
-    assert.match(error.message, /Line 5, column 17/)
+    assert.match(error.message, /chnages/u)
+    assert.match(error.message, /Line 5, column 17/u)
     return true
   })
 })
@@ -112,7 +112,7 @@ test('the native runner (wasmi) checks and compares exactly as the Worker does',
   await assert.rejects(native.check(new TextEncoder().encode('format: x\n')), error => {
     assert.ok(error instanceof ComparatorRuntimeError)
     assert.equal(error.code, 'invalid-module')
-    assert.match(error.message, /Line 1, column 9/)
+    assert.match(error.message, /Line 1, column 9/u)
     return true
   })
   await assert.rejects(

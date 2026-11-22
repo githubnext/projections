@@ -37,7 +37,7 @@ function host() {
       settled: state => states.push(state),
     })
     const say = message => {
-      const channel = new URLSearchParams(/location\.hash="([^"]+)"/.exec(iframe.srcdoc)[1]).get('channel')
+      const channel = new URLSearchParams(/location\.hash="([^"]+)"/u.exec(iframe.srcdoc)[1]).get('channel')
       for (const listener of listeners) listener({source: iframe.contentWindow, data: {projections: 0, channel, ...message}})
     }
     return {iframe, states, stop, say, started: () => iframe.srcdoc !== ''}

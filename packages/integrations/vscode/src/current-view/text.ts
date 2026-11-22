@@ -4,7 +4,7 @@ import type {TabFacts, ViewSide} from './types.ts'
 
 /** A revision as the agent reads it: a commit's first 8 characters, else the ref. */
 export function shortRevision(ref: string): string {
-  return /^[0-9a-f]{40}$/.test(ref) ? ref.slice(0, 8) : ref
+  return /^[0-9a-f]{40}$/u.test(ref) ? ref.slice(0, 8) : ref
 }
 
 /** A part as a definition names it: a built-in's ID, a command, a bundle or a comparator file. */

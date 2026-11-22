@@ -77,7 +77,7 @@ export async function chooseMode(page: Page, name: string) {
   if (await inline.isVisible()) await inline.getByRole('radio', {name, exact: true}).click()
   else {
     await page
-      .getByRole('button', {name: /^Comparison mode: /})
+      .getByRole('button', {name: /^Comparison mode: /u})
       .first()
       .click()
     await page.getByRole('dialog', {name: 'Comparison mode'}).getByRole('radio', {name, exact: true}).click()

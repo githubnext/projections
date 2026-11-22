@@ -68,7 +68,7 @@ export function toolbarInsets(toolbar: Locator, options: {wrappers: string; seco
       'button, a[href], input, select, textarea, [role="button"], [role="radiogroup"], [role="radio"], [role="combobox"], [role="checkbox"], [role="switch"], [role="slider"], [role="menuitem"], [tabindex]'
     const drawn = (node: Element) => {
       const own = getComputedStyle(node)
-      const filled = !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(own.backgroundColor)
+      const filled = !/^(?:transparent|rgba\(0, 0, 0, 0\))$/u.test(own.backgroundColor)
       const bordered = ['top', 'right', 'bottom', 'left'].some(
         side => parseFloat(own.getPropertyValue(`border-${side}-width`)) > 0 && own.getPropertyValue(`border-${side}-style`) !== 'none',
       )

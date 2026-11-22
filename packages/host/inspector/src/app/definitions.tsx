@@ -18,7 +18,7 @@ export function partPath(definition: Definition | undefined, part: 'extractor' |
   if (part === 'extractor') {
     const extractor = definition.extractor
     if (typeof extractor === 'string') return undefined
-    return extractor.sources?.[0] ?? extractor.command.slice(1).find(arg => /\.[a-z0-9]+$/i.test(arg) && !arg.startsWith('-'))
+    return extractor.sources?.[0] ?? extractor.command.slice(1).find(arg => /\.[a-z0-9]+$/iu.test(arg) && !arg.startsWith('-'))
   }
   if (part === 'renderer') return typeof definition.renderer === 'string' ? undefined : definition.renderer.bundle
   return customComparator(definition.comparator)?.file
@@ -97,7 +97,7 @@ export function projectionTrust(definitions: InspectorDefinitionList | undefined
   // What runs to extract a revision, as a person would type it.
   const runCommand =
     runDefinition && typeof runDefinition.extractor !== 'string'
-      ? runDefinition.extractor.command.map(arg => (/\s/.test(arg) ? JSON.stringify(arg) : arg)).join(' ')
+      ? runDefinition.extractor.command.map(arg => (/\s/u.test(arg) ? JSON.stringify(arg) : arg)).join(' ')
       : undefined
   return {policy, extractorFrom, runPolicy, rendererPolicy, usesOwnRenderer, authorized, trusted, needsTrust, runCommand}
 }

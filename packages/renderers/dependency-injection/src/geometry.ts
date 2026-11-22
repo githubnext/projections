@@ -149,7 +149,7 @@ export interface DiCardTextInput {
 }
 
 /** A line that ends after one of the characters `wrapText` prefers to break after. */
-const breakable = /[_./\-,:\s]$/
+const breakable = /[_./\-,:\s]$/u
 
 /**
  * Runs of text flowed onto lines `width` wide: a run that doesn't fit what's

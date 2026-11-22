@@ -63,7 +63,7 @@ function branches(node, seen = new Set()) {
 
 const deprecated = node => {
   const resolved = resolve(node) ?? {}
-  return resolved.deprecated === true || /^\s*deprecated\b/i.test(resolved.description ?? '')
+  return resolved.deprecated === true || /^\s*deprecated\b/iu.test(resolved.description ?? '')
 }
 
 /** The fields a node knows, each with whether gh-aw marks it deprecated, from every branch. */
@@ -95,7 +95,7 @@ function defaultMaxima() {
   const maxima = {}
   for (const [kind, handler] of Object.entries(branches(nodeAt('safe-outputs')).find(branch => branch.properties)?.properties ?? {})) {
     const max = branches(handler).find(branch => branch.properties?.max)?.properties.max
-    const found = max && (resolve(max).description ?? '').match(/\(default:\s*(\d+|unlimited)\b/)
+    const found = max && (resolve(max).description ?? '').match(/\(default:\s*(\d+|unlimited)\b/u)
     if (found) maxima[kind] = found[1] === 'unlimited' ? 'unlimited' : Number(found[1])
   }
   return Object.fromEntries(Object.entries(maxima).sort(([a], [b]) => (a < b ? -1 : 1)))

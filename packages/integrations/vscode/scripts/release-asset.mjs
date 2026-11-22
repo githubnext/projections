@@ -46,7 +46,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     // stage() checks the executable is this extension's version: the release's CLI.
     const directory = await stage({root, target, binary: path.resolve(binary), out: path.join(scratch, 'stage')})
     // The staged directory has its own package.json, so npm wouldn't read the workspace's .npmrc there.
-    const registry = /^registry\s*=\s*(\S+)/m.exec(readFileSync(path.join(root, '../../../.npmrc'), 'utf8'))?.[1]
+    const registry = /^registry\s*=\s*(\S+)/mu.exec(readFileSync(path.join(root, '../../../.npmrc'), 'utf8'))?.[1]
     const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx'
     run(npx, ['--yes', vsce, 'package', '--target', target, '--no-dependencies', '--out', vsix], {
       cwd: directory,
@@ -70,7 +70,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       encoding: 'utf8',
       shell: process.platform === 'win32',
     }).stdout
-    if (!listed.split(/\r?\n/).includes(`${extensionId}@${version}`)) {
+    if (!listed.split(/\r?\n/u).includes(`${extensionId}@${version}`)) {
       throw new Error(`VS Code lists ${JSON.stringify(listed.trim())}, not ${extensionId}@${version}`)
     }
     const [installed] = readdirSync(extensions).filter(name => name.startsWith(`${extensionId}-${version}`))

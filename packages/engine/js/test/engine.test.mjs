@@ -227,7 +227,7 @@ for (const [name, engine] of Object.entries(engines)) {
     )
     await assert.rejects(
       engine.compare(state(), state([], [], 'dag/v0')),
-      error => error.diagnostics[0].code === 'comparator-error' && /schema-mismatch at \/after\/schema/.test(error.message),
+      error => error.diagnostics[0].code === 'comparator-error' && /schema-mismatch at \/after\/schema/u.test(error.message),
     )
     await assert.rejects(
       engine.validateComparison(state(), state([], [], 'dag/v0'), {protocolVersion: 0, changes: [], steps: []}),
@@ -252,7 +252,7 @@ for (const [name, engine] of Object.entries(engines)) {
     ]) {
       await assert.rejects(
         engine.compare(left, right),
-        error => error.diagnostics[0].code === 'comparator-error' && /ambiguous-correspondence/.test(error.message),
+        error => error.diagnostics[0].code === 'comparator-error' && /ambiguous-correspondence/u.test(error.message),
       )
     }
   })

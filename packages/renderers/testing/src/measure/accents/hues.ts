@@ -14,12 +14,12 @@ const leastChroma = 10
 const hueTolerance = 30
 
 function rgba(color: string): Rgba | undefined {
-  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?$/i.exec(color.trim())
+  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?$/iu.exec(color.trim())
   if (hex) return [parseInt(hex[1]!, 16), parseInt(hex[2]!, 16), parseInt(hex[3]!, 16), hex[4] ? parseInt(hex[4], 16) / 255 : 1]
-  const match = /rgba?\(([^)]*)\)/.exec(color)
+  const match = /rgba?\(([^)]*)\)/u.exec(color)
   if (!match) return undefined
   const [r = 0, g = 0, b = 0, a = 1] = match[1]!
-    .split(/[\s,/]+/)
+    .split(/[\s,/]+/u)
     .filter(Boolean)
     .map(Number)
   return [r, g, b, a]
@@ -98,8 +98,8 @@ export function paintsOf(element: Element, style: CSSStyleDeclaration, hues: Map
     }
   }
   // An inset shadow draws an edge inside the box, as `pk-region` does.
-  for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/)) {
-    if (/\binset\b/.test(shadow)) add('inset box-shadow', /rgba?\([^)]*\)|#[0-9a-f]{6,8}\b/i.exec(normalizeColors(shadow))?.[0] ?? '')
+  for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/u)) {
+    if (/\binset\b/u.test(shadow)) add('inset box-shadow', /rgba?\([^)]*\)|#[0-9a-f]{6,8}\b/iu.exec(normalizeColors(shadow))?.[0] ?? '')
   }
   if (ownText(element)) add('color', style.color)
   return paints

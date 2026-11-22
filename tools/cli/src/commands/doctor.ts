@@ -17,11 +17,11 @@ export interface Finding {
   fix?: string
 }
 
-const PUBLIC_REGISTRY = /registry\.npmjs\.org|registry\.yarnpkg\.com/
+const PUBLIC_REGISTRY = /registry\.npmjs\.org|registry\.yarnpkg\.com/u
 
 /** The registry `.npmrc` configures, and the one npm actually resolves here (environment overrides included). */
 export function registryFindings(root: string, resolved: string | undefined): Finding[] {
-  const configured = /^registry\s*=\s*(\S+)/m.exec(readText(root, '.npmrc') ?? '')?.[1]
+  const configured = /^registry\s*=\s*(\S+)/mu.exec(readText(root, '.npmrc') ?? '')?.[1]
   const findings: Finding[] = []
   if (!configured) {
     findings.push({check: 'registry', status: 'fail', detail: '.npmrc configures no registry', fix: 'restore the committed .npmrc'})
@@ -33,7 +33,7 @@ export function registryFindings(root: string, resolved: string | undefined): Fi
       fix: 'restore the committed .npmrc',
     })
   }
-  const normalize = (url: string | undefined) => url?.replace(/\/?$/, '/')
+  const normalize = (url: string | undefined) => url?.replace(/\/?$/u, '/')
   if (resolved === undefined) findings.push({check: 'registry', status: 'warn', detail: 'could not ask npm for its registry'})
   else if (PUBLIC_REGISTRY.test(resolved)) {
     findings.push({
@@ -58,7 +58,7 @@ function rustSourcesNewest(root: string) {
   const units = loadUnits(root).filter(unit => unit.kinds.includes('crate'))
   let newest: {path: string; mtime: number} | undefined
   for (const unit of units) {
-    const candidate = newestMtime(root, unit.path, path => /\.(rs|toml)$/.test(path))
+    const candidate = newestMtime(root, unit.path, path => /\.(?:rs|toml)$/u.test(path))
     if (candidate && (!newest || candidate.mtime > newest.mtime)) newest = candidate
   }
   return newest

@@ -8,14 +8,14 @@ import test from 'node:test'
 import {fileURLToPath} from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
-const react = /^(react|react-dom)(\/|$)|^@githubnext\/projections-renderer-sdk\/react$/
-const specifiers = text => [...text.matchAll(/(?:\bfrom|\bimport)\s*\(?\s*['"]([^'"]+)['"]/g)].map(match => match[1])
+const react = /^(?:react|react-dom)(?:\/|$)|^@githubnext\/projections-renderer-sdk\/react$/u
+const specifiers = text => [...text.matchAll(/(?:\bfrom|\bimport)\s*(?:\(\s*)?['"]([^'"]+)['"]/gu)].map(match => match[1])
 
 const sources = (directory, files = []) => {
   for (const entry of readdirSync(directory, {withFileTypes: true})) {
     const path = join(directory, entry.name)
     if (entry.isDirectory()) sources(path, files)
-    else if (/\.tsx?$/.test(entry.name)) files.push(path)
+    else if (/\.tsx?$/u.test(entry.name)) files.push(path)
   }
   return files
 }
@@ -29,7 +29,7 @@ test('only src/react.ts and src/react/ import React, and nothing else imports th
     if (file.endsWith('.tsx')) problems.push(`${relative(root, file)} is JSX outside src/react/`)
     for (const specifier of specifiers(readFileSync(file, 'utf8'))) {
       if (react.test(specifier)) problems.push(`${relative(root, file)} imports ${specifier}`)
-      else if (specifier.startsWith('.') && reactSide(resolve(dirname(file), specifier).replace(/\.js$/, '.ts'))) {
+      else if (specifier.startsWith('.') && reactSide(resolve(dirname(file), specifier).replace(/\.js$/u, '.ts'))) {
         problems.push(`${relative(root, file)} imports ${specifier}, a React module`)
       }
     }
@@ -57,7 +57,7 @@ test("the built entry's declarations, and the SDK declarations they name, never 
     seen.add(file)
     for (const specifier of specifiers(readFileSync(file, 'utf8'))) {
       if (react.test(specifier)) problems.push(`${relative(root, file)} names ${specifier}`)
-      else if (specifier.startsWith('.')) visit(resolve(dirname(file), specifier).replace(/\.js$/, '.d.ts'))
+      else if (specifier.startsWith('.')) visit(resolve(dirname(file), specifier).replace(/\.js$/u, '.d.ts'))
       else if (specifier.startsWith('@githubnext/projections-')) visit(workspaceFile(specifier, file, 'types'))
     }
   }

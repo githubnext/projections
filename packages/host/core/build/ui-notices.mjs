@@ -53,7 +53,7 @@ export async function hostUiNotices() {
   const notices = [`\n===== shadcn/ui (components copied into @githubnext/projections-host) =====\n`, await readFile(shadcnLicense, 'utf8')]
   for (const [name, path] of await runtimeDependencies(hostManifest)) {
     const manifest = JSON.parse(await readFile(path, 'utf8'))
-    const license = readdirSync(dirname(path)).find(file => /^licen[cs]e(\.(md|txt))?$/i.test(file))
+    const license = readdirSync(dirname(path)).find(file => /^licen[cs]e(?:\.(?:md|txt))?$/iu.test(file))
     const author = typeof manifest.author === 'string' ? manifest.author : manifest.author?.name
     const text = license
       ? await readFile(join(dirname(path), license), 'utf8')

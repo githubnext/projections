@@ -17,7 +17,7 @@ test('with no route around the cards, routeBoxEdge returns the least-overlapping
   assert.equal(routed.blocked, true)
   // The direct way in crosses only the ring's top; going round to a side would cross that and a wall.
   assert.deepEqual(routed.crossed, [0])
-  assert.match(routed.least.d, /^M/)
+  assert.match(routed.least.d, /^M/u)
   assert.throws(
     () => boxEdge(source, target, ring),
     error => error instanceof NoRouteError && error.blocked.crossed.length === 1,

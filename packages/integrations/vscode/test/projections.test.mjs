@@ -51,7 +51,7 @@ test('definitions keep the valid ones beside the invalid ones, with where each i
     },
   ])
   assert.equal(parseDefinitions({definitions: [], setup: {command: 'projections init <id>'}}).setup, true)
-  assert.throws(() => parseDefinitions({}), /unexpected shape/)
+  assert.throws(() => parseDefinitions({}), /unexpected shape/u)
   assert.deepEqual(failureFor(list.invalid[0]), {
     title: "legacy can't load: its definition is invalid",
     diagnostics: [
@@ -255,14 +255,14 @@ test('every link the extension contributes stays in VS Code, or goes to an exist
   const {DOCS_BASE} = await import('../src/projections/docs.ts')
   const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
   const text = JSON.stringify(manifest)
-  for (const link of [...text.matchAll(/https:\/\/github\.com\/githubnext\/projections\/blob\/[^)"\s\\]+/g)].map(match => match[0])) {
+  for (const link of [...text.matchAll(/https:\/\/github\.com\/githubnext\/projections\/blob\/[^)"\s\\]+/gu)].map(match => match[0])) {
     assert.ok(link.startsWith(DOCS_BASE), link)
     assert.ok(existsSync(new URL(`../../../../${link.slice(DOCS_BASE.length).split('#')[0]}`, import.meta.url)), link)
   }
-  assert.doesNotMatch(text, /projections\.githubnext\.com/)
+  assert.doesNotMatch(text, /projections\.githubnext\.com/u)
   // The welcome's catalog of built-ins is the bundled index, in the Markdown preview.
   const welcome = manifest.contributes.viewsWelcome.map(item => item.contents).join('\n')
-  const opened = [...welcome.matchAll(/\(command:projections\.openDocumentation\?([^)]+)\)/g)].map(match =>
+  const opened = [...welcome.matchAll(/\(command:projections\.openDocumentation\?([^)]+)\)/gu)].map(match =>
     JSON.parse(decodeURIComponent(match[1])),
   )
   assert.deepEqual(opened, [['index.md']])

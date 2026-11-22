@@ -122,7 +122,7 @@ export function feedbackReport(root: string, options: FeedbackOptions) {
     ])
   let created = create(true)
   let note: string | undefined
-  if (!created.ok && /label/i.test(created.stderr)) {
+  if (!created.ok && /label/iu.test(created.stderr)) {
     created = create(false)
     note = `The ${FEEDBACK_LABEL} label doesn't exist in ${repository}; filed without it.`
   }

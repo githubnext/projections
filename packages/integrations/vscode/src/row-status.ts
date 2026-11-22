@@ -37,7 +37,7 @@ export function badgeText(count: number): string {
  */
 export function rowStatus(status: string, choice?: string): RowStatus {
   const on = choice ? ` (${choice})` : ''
-  const count = /^(\d+) changes?$/.exec(status)
+  const count = /^(\d+) changes?$/u.exec(status)
   if (count) {
     const changes = Number(count[1])
     return {

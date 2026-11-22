@@ -6,7 +6,7 @@ import type {ExtractorContext} from '../shared.js'
 /** The oldest `@nestjs/core` with preview mode and the serialized graph. */
 export const MINIMUM_NEST: [number, number] = [9, 3]
 export const SCOPES = ['DEFAULT', 'TRANSIENT', 'REQUEST'] as const
-export const sourceFile = /\.(?:ts|tsx|mts|cts)$/
+export const sourceFile = /\.(?:ts|tsx|mts|cts)$/u
 
 export type Token = unknown
 export interface Wrapper {

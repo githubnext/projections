@@ -275,7 +275,7 @@ export function freeId(base: string, taken: (id: string) => boolean): string {
 export type InitFailure = 'exists' | 'language' | 'other'
 
 export function initFailure(message: string): InitFailure {
-  if (/already exists at|already has files/.test(message)) return 'exists'
+  if (/already exists at|already has files/u.test(message)) return 'exists'
   if (message.includes("Choose the extractor's language")) return 'language'
   return 'other'
 }
@@ -287,7 +287,7 @@ export function failureMessage(stderr: string): string {
     .map(line => line.trim())
     .filter(Boolean)
   const error = lines.find(line => line.startsWith('Error:'))
-  return (error ?? lines.at(-1) ?? 'projections init failed').replace(/^Error:\s*/, '')
+  return (error ?? lines.at(-1) ?? 'projections init failed').replace(/^Error:\s*/u, '')
 }
 
 /**
@@ -298,9 +298,9 @@ export function agentPrompt(output: string, description: string, id: string): st
   const lines = output.split('\n')
   const heading = lines.findIndex(line => line.trim() === 'Ask your coding agent:')
   const printed = heading >= 0 ? lines[heading + 1]?.trim() : undefined
-  const what = description.trim().replace(/[.\s]+$/, '')
+  const what = description.trim().replace(/[.\s]+$/u, '')
   const prompt =
     printed ||
     `Build the "${id}" projection in this repository so it shows <what this projection should show>. Follow the projections skill, and verify it with \`projections check -p ${id} --trust\` before you finish.`
-  return prompt.replace(/<what this projection should show>/, what)
+  return prompt.replace(/<what this projection should show>/u, what)
 }

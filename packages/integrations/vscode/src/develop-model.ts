@@ -29,11 +29,11 @@ export interface DevelopChange {
  * is new or minified), with a final newline.
  */
 export function jsonText(value: unknown, existing?: string): string {
-  const indent = existing ? /\n([ \t]+)\S/.exec(existing)?.[1] : undefined
+  const indent = existing ? /\n([ \t]+)\S/u.exec(existing)?.[1] : undefined
   return `${JSON.stringify(value, null, indent ?? 2)}\n`
 }
 
-const short = (ref: string) => (/^[0-9a-f]{40}$/.test(ref) ? ref.slice(0, 8) : ref)
+const short = (ref: string) => (/^[0-9a-f]{40}$/u.test(ref) ? ref.slice(0, 8) : ref)
 /**
  * The bookmarks file with a bookmark of a pair added (`.projections-bookmarks.json`, as `projections` reads it): an
  * ID from the projection and the pair, unique in the file; the file's other bookmarks kept, sorted by ID, and its
@@ -51,7 +51,7 @@ export function addBookmark(
   }
   const bookmarks = file.bookmarks as {id?: unknown}[]
   const ids = new Set(bookmarks.map(item => String(item.id)))
-  const base = `${bookmark.projectionId}-${short(bookmark.after)}`.replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 90)
+  const base = `${bookmark.projectionId}-${short(bookmark.after)}`.replace(/[^\w.-]/gu, '-').slice(0, 90)
   let id = base
   for (let index = 2; ids.has(id); index++) id = `${base}-${index}`
   const next = [
@@ -113,8 +113,8 @@ export function parseScenarios(text: string): {title?: string; renderer?: string
  */
 export function scenariosFor(file: {directory: string; renderer?: string}, renderer: {label: string; bundle?: string}): boolean {
   if (renderer.bundle) {
-    const bundle = renderer.bundle.replace(/^\.\//, '')
-    const directory = file.directory.replace(/^\.\/?/, '').replace(/\/$/, '')
+    const bundle = renderer.bundle.replace(/^\.\//u, '')
+    const directory = file.directory.replace(/^\.\/?/u, '').replace(/\/$/u, '')
     return directory === '' || bundle.startsWith(`${directory}/`)
   }
   return file.renderer === renderer.label

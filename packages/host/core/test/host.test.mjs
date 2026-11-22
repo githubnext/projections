@@ -63,9 +63,9 @@ const document = (value, overrides = {}) => ({
 
 test('the renderer policy is identical for serving layers and forbids every request', () => {
   assert.equal(buildPolicy, sdkPolicy)
-  assert.match(sdkPolicy, /connect-src 'none'/)
-  assert.match(sdkPolicy, /sandbox allow-scripts/)
-  assert.doesNotMatch(sdkPolicy, /'self'/)
+  assert.match(sdkPolicy, /connect-src 'none'/u)
+  assert.match(sdkPolicy, /sandbox allow-scripts/u)
+  assert.doesNotMatch(sdkPolicy, /'self'/u)
   assert.equal(rendererResponseHeaders('x/index.html')['content-security-policy'], sdkPolicy)
   assert.equal(rendererResponseHeaders('x/index.html')['x-content-type-options'], 'nosniff')
 })
@@ -100,12 +100,12 @@ test('renderer resolution prefers an exact bundle name, then handles, and explai
   ]
   assert.equal(resolveRenderer('dag', catalog).renderer?.name, 'dag')
   assert.equal(resolveRenderer('graph-horizontal', catalog).renderer?.name, 'graph')
-  assert.match(resolveRenderer('flags', catalog).notice, /"flags" is not available/)
-  assert.match(resolveRenderer({bundle: 'r/dist'}, catalog).notice, /custom renderer r\/dist is not available.*built-in table view/)
+  assert.match(resolveRenderer('flags', catalog).notice, /"flags" is not available/u)
+  assert.match(resolveRenderer({bundle: 'r/dist'}, catalog).notice, /custom renderer r\/dist is not available.*built-in table view/u)
   // A custom renderer that isn't supplied falls back to the built-in renderer for the extraction's schema.
   const fallback = resolveRenderer({bundle: 'r/dist'}, catalog, undefined, 'dag/v0')
   assert.equal(fallback.renderer?.name, 'dag')
-  assert.match(fallback.notice, /custom renderer r\/dist is not available here\. Showing the built-in DAG renderer instead\./)
+  assert.match(fallback.notice, /custom renderer r\/dist is not available here\. Showing the built-in DAG renderer instead\./u)
   const withheld = resolveRenderer({bundle: 'r/dist'}, catalog, {withheld: 'It needs trust.'}, 'graph/v0')
   assert.equal(withheld.renderer?.name, 'graph')
   assert.equal(withheld.notice, 'It needs trust. Showing the built-in Graph renderer instead.')
@@ -152,7 +152,7 @@ test('a renderer that declares what it accepts is not given other extractions: t
   const custom = {...entry('custom', 'Flags', [{schema: 'graph/v0'}]), source: 'custom'}
   assert.match(
     resolveRenderer({bundle: 'r/dist'}, catalog, custom, {schema: 'database/v0'}).notice,
-    /^The Flags renderer presents \x60graph\/v0\x60.*built-in Database renderer instead\.$/,
+    /^The Flags renderer presents \x60graph\/v0\x60.*built-in Database renderer instead\.$/u,
   )
   // Unchecked without an extraction, and a schema name alone checks only the schema.
   assert.equal(resolveRenderer('database', catalog).renderer?.name, 'database')
@@ -275,7 +275,7 @@ test('the default comparator runs with the definition options; a module runs on 
         },
       ),
     }),
-    error => error.code === 'comparator-failed' && /is invalid: Line 2/.test(error.message),
+    error => error.code === 'comparator-failed' && /is invalid: Line 2/u.test(error.message),
   )
   await assert.rejects(
     computeComparison({
@@ -286,7 +286,7 @@ test('the default comparator runs with the definition options; a module runs on 
         throw new Error('trap')
       }),
     }),
-    error => error.code === 'comparator-failed' && /trap/.test(error.message),
+    error => error.code === 'comparator-failed' && /trap/u.test(error.message),
   )
   await assert.rejects(
     computeComparison({
@@ -330,7 +330,7 @@ test('hosts supply built-in renderer documents by name from their own catalog, a
     [entry('graph', 'builtin'), entry('database', 'builtin', {document: async () => 'rewritten'}), entry('mine', 'custom')],
     fetcher,
   )
-  await assert.rejects(documents('graph'), /Renderer request failed \(503\)/)
+  await assert.rejects(documents('graph'), /Renderer request failed \(503\)/u)
   assert.equal(await documents('graph'), '<!doctype html><title>/renderers/graph/index.html</title>')
   assert.equal(await documents('graph'), '<!doctype html><title>/renderers/graph/index.html</title>')
   assert.deepEqual(fetched, [
@@ -339,8 +339,8 @@ test('hosts supply built-in renderer documents by name from their own catalog, a
   ])
   assert.equal(await documents('dag'), await documents('graph'), 'a name the bundle handles')
   assert.equal(await documents('database'), 'rewritten', "an entry's own document wins")
-  await assert.rejects(documents('mine'), /mine is a custom renderer; hosts supply only built-in renderers/)
-  await assert.rejects(documents('missing'), /missing is not a built-in renderer/)
-  await assert.rejects(documents('../graph/index.html'), /is not a built-in renderer/)
+  await assert.rejects(documents('mine'), /mine is a custom renderer; hosts supply only built-in renderers/u)
+  await assert.rejects(documents('missing'), /missing is not a built-in renderer/u)
+  await assert.rejects(documents('../graph/index.html'), /is not a built-in renderer/u)
   assert.equal(fetched.length, 2)
 })

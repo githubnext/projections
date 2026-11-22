@@ -5,7 +5,7 @@
  */
 export function projectionPath(folderName: string, title: string): string {
   // eslint-disable-next-line no-control-regex
-  const clean = (text: string) => text.replace(/[/\\]/g, '∕').replace(/[\u0000-\u001f]/g, '') || 'projection'
+  const clean = (text: string) => text.replace(/[/\\]/gu, '∕').replace(/[\u0000-\u001f]/gu, '') || 'projection'
   return `/${clean(folderName)}/${clean(title)}`
 }
 
@@ -18,5 +18,5 @@ export function parseProjectionQuery(query: string): {folder: string; id: string
   const params = new URLSearchParams(query)
   const folder = params.get('folder')
   const id = params.get('id')
-  return folder && id && /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(id) ? {folder, id} : undefined
+  return folder && id && /^[A-Za-z0-9][\w.-]{0,99}$/u.test(id) ? {folder, id} : undefined
 }

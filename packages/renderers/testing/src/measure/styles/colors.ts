@@ -4,7 +4,7 @@ import {normalizeColors, px, colorAlpha} from '../paint.js'
 /** Colors listed in a `box-shadow`, normalized. */
 function shadowColors(value: string): string[] {
   if (value === 'none') return []
-  return [...normalizeColors(value).matchAll(/rgba?\([^)]*\)|#[0-9a-f]{6,8}\b/gi)].map(match => match[0])
+  return [...normalizeColors(value).matchAll(/rgba?\([^)]*\)|#[0-9a-f]{6,8}\b/giu)].map(match => match[0])
 }
 
 /** The fill and stroke an SVG element paints itself. */
@@ -18,7 +18,7 @@ function svgPaints(element: Element, style: CSSStyleDeclaration, text: string, c
         : (element instanceof SVGGeometryElement && !(element instanceof SVGLineElement)) ||
           // Text paints its fill on its own characters; a <text> of <tspan>s passes it on.
           (element instanceof SVGTextContentElement && Boolean(text))
-    if (paints && /^(rgb|color)/.test(value)) colors[property] = normalizeColors(value)
+    if (paints && /^(?:rgb|color)/u.test(value)) colors[property] = normalizeColors(value)
   }
 }
 

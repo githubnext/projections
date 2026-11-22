@@ -70,7 +70,7 @@ export function statusName(
 /** A side in the tooltip: its name and its commit, `` main `a1b2c3d` ``, or `your files`. */
 export function sideDetail(ref: string, label: SideLabel | undefined): string {
   if (ref === 'working-tree' || label?.kind === 'working-tree') return 'your files'
-  const commit = label?.commit ?? (/^[0-9a-f]{40}$/.test(ref) ? ref : undefined)
+  const commit = label?.commit ?? (/^[0-9a-f]{40}$/u.test(ref) ? ref : undefined)
   const name = label?.name ?? ref
   if (commit && (label?.kind === 'commit' || name === commit || name === commit.slice(0, 8))) return `\`${shortCommit(commit)}\``
   return commit ? `${escapeMarkdown(name)} \`${shortCommit(commit)}\`` : escapeMarkdown(name)

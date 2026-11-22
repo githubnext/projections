@@ -130,7 +130,7 @@ const mod = process.platform === 'darwin' ? 'Meta' : 'Control'
  * closed.
  */
 async function sidebar(page: Page, open = true) {
-  const toggle = page.getByRole('button', {name: /^(Show|Hide) .* sidebar$/})
+  const toggle = page.getByRole('button', {name: /^(Show|Hide) .* sidebar$/u})
   if (((await toggle.getAttribute('aria-pressed')) === 'true') !== open) await toggle.click()
   if (open) await expect(page.getByRole('complementary', {name: 'Explorer'})).toBeVisible()
   else await expect(page.getByRole('complementary', {name: 'Explorer'})).toHaveCount(0)
@@ -144,7 +144,7 @@ const drawer = (page: Page) => page.viewportSize()!.width < 1012
  * extractors need none.
  */
 async function trust(page: Page) {
-  await expect(page.locator('.pi-trust-state')).toHaveAttribute('data-trust', /granted|not-needed/)
+  await expect(page.locator('.pi-trust-state')).toHaveAttribute('data-trust', /granted|not-needed/u)
 }
 
 /**
@@ -270,7 +270,7 @@ async function titleToggle(page: Page, name: RegExp) {
 /** Opens the bottom panel at a tab. */
 async function panel(page: Page, name: string) {
   if (drawer(page)) await sidebar(page, false)
-  if (!(await page.getByRole('region', {name: 'Panel'}).count())) await (await titleToggle(page, /^Show panel$/)).click()
+  if (!(await page.getByRole('region', {name: 'Panel'}).count())) await (await titleToggle(page, /^Show panel$/u)).click()
   await closeMore(page)
   await page
     .getByRole('tablist', {name: 'Panel views'})
@@ -287,12 +287,12 @@ test('real local Git extractions of a Before → After pair, in-browser comparis
   // WebKit sometimes reports the spec's benign "ResizeObserver loop" notice (a resize settling over two frames) as a
   // page error; it is not a failure, and every other error still is.
   page.on('pageerror', failure => {
-    if (!/^ResizeObserver loop completed with undelivered notifications\.?$/.test(failure.message)) errors.push(failure.message)
+    if (!/^ResizeObserver loop completed with undelivered notifications\.?$/u.test(failure.message)) errors.push(failure.message)
   })
   await page.goto(app.url)
   await expect(page.locator('.pi-activity[data-watching]')).toBeAttached()
   await chooseProjection(page, 'Checkout architecture')
-  expect(await definitionFrom(page)).toMatch(/^Working tree/)
+  expect(await definitionFrom(page)).toMatch(/^Working tree/u)
   // The default pair is real history, HEAD~1 → HEAD, not the dirty tree.
   await sidebar(page)
   await expect(refField(page, 'Before')).toHaveValue('HEAD~1')
@@ -348,7 +348,7 @@ test('real local Git extractions of a Before → After pair, in-browser comparis
   await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible()
   const raw = await panel(page, 'Raw output')
   await expect(raw).toContainText('Extracted local graph')
-  await expect(raw.getByRole('heading', {name: /^Run .+: completed$/})).toHaveCount(3)
+  await expect(raw.getByRole('heading', {name: /^Run .+: completed$/u})).toHaveCount(3)
   await expect(await panel(page, 'Extraction')).toContainText('"previousIds"')
   const changes = await panel(page, 'Changes')
   await expect(changes.getByRole('cell', {name: 'declared', exact: true})).toBeVisible()
@@ -359,7 +359,7 @@ test('real local Git extractions of a Before → After pair, in-browser comparis
   expect(digests).toHaveLength(2)
   expect(new Set(digests).size).toBe(1)
   await page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: 'Provenance'}).press('ArrowRight')
-  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Diagnostics/})).toBeFocused()
+  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Diagnostics/u})).toBeFocused()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   expect(errors).toEqual([])
 })
@@ -386,7 +386,7 @@ test("Definition from applies another revision's definition to both sides, extra
   await expect(page.getByRole('heading', {name: 'Checkout architecture'}).first()).toBeAttached({timeout: 20_000})
   await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible()
   await expect(page.locator('.ph-error[data-error-code="definition-mismatch"]')).toHaveCount(0)
-  await chooseDefinitionFrom(page, /^Working tree/)
+  await chooseDefinitionFrom(page, /^Working tree/u)
   await expect(page.getByRole('heading', {name: 'Draft architecture'}).first()).toBeAttached({timeout: 20_000})
   await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible()
 })
@@ -396,7 +396,7 @@ test('actual slow extractor is cancellable and untrusted startup cannot execute'
   await chooseProjection(page, 'Slow extractor')
   await trust(page)
   // The pair starts extracting by itself, and can be cancelled from the view.
-  await expect(page.locator('.pi-empty')).toContainText(/Extracting HEAD(~1)?…/)
+  await expect(page.locator('.pi-empty')).toContainText(/Extracting HEAD(~1)?…/u)
   await page.locator('.pi-empty').getByRole('button', {name: 'Cancel', exact: true}).click()
   await sidebar(page)
   await expect(page.locator('[data-revision="HEAD~1"]')).toHaveAttribute('data-status', 'cancelled')
@@ -474,7 +474,7 @@ test('a focused title-bar control keeps focus while the bar fits itself to a new
     join(app.repo, '.projections/architecture.json'),
     JSON.stringify({id: 'architecture', title: 'Saved', renderer: 'architecture', extractor: {command: [process.execPath, 'collect.mjs']}}),
   )
-  await expect(status).toContainText(/ · replayed /, {timeout: 20_000})
+  await expect(status).toContainText(/ · replayed /u, {timeout: 20_000})
   await expect(more).toBeFocused()
 })
 
@@ -491,12 +491,12 @@ test('the status line names the pair and why it was last replayed', async ({page
   await chooseProjection(page, 'Checkout architecture')
   await trust(page)
   await expect(status).toHaveAttribute('data-activity', 'pair')
-  await expect(status).toContainText(/^HEAD~1 → HEAD · extracted /)
+  await expect(status).toContainText(/^HEAD~1 → HEAD · extracted /u)
   await expect(status.locator('code')).toHaveText(['HEAD~1', 'HEAD'])
   // The relative time is shown, but not re-announced as it ticks; assistive technology reads the clock time.
-  await expect(status.locator('[aria-hidden="true"]')).toHaveText(/^(just now|\d+ s ago)$/)
+  await expect(status.locator('[aria-hidden="true"]')).toHaveText(/^(just now|\d+ s ago)$/u)
   // The whole line is its tooltip, so a truncated line can still be read.
-  await expect(status).toHaveAttribute('title', /^HEAD~1 → HEAD · extracted at /)
+  await expect(status).toHaveAttribute('title', /^HEAD~1 → HEAD · extracted at /u)
   // Saving the projection's code replays both sides, and the line names the change.
   await save(
     join(app.repo, '.projections/architecture.json'),
@@ -507,7 +507,7 @@ test('the status line names the pair and why it was last replayed', async ({page
       extractor: {command: [process.execPath, 'collect.mjs']},
     }),
   )
-  await expect(status).toContainText(/ · replayed .*after the definition(, the working tree)? changed$/, {timeout: 20_000})
+  await expect(status).toContainText(/ · replayed .*after the definition(, the working tree)? changed$/u, {timeout: 20_000})
   await expect(page.getByRole('heading', {name: 'Saved architecture'}).first()).toBeAttached()
   await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible()
   // A saved artifact says so.
@@ -581,7 +581,7 @@ test('the Before → After pair: swap, a tag or SHA by name, one revision, remem
   await setRef(page, 'Revision', 'v1')
   if (drawer(page)) await sidebar(page, false)
   await expect(page.locator('.ph[data-mode="extraction"]')).toBeVisible()
-  await expect(page.locator('.pi-titlebar').getByRole('status')).toContainText(/^v1 · /)
+  await expect(page.locator('.pi-titlebar').getByRole('status')).toContainText(/^v1 · /u)
 })
 
 test('saving the projection re-extracts both sides; one side failing leaves the other shown with its failure', async ({page, app}) => {
@@ -618,7 +618,7 @@ test('saving the projection re-extracts both sides; one side failing leaves the 
   await expect(page.locator('.ph[data-mode="extraction"]')).toBeVisible()
   await expect(page.locator('.pi-titlebar').getByRole('status')).toContainText('Before (HEAD~1) failed to extract')
   await failure.getByRole('button', {name: 'Diagnostics', exact: true}).click()
-  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Diagnostics/})).toHaveAttribute(
+  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Diagnostics/u})).toHaveAttribute(
     'aria-selected',
     'true',
   )
@@ -658,10 +658,10 @@ test('a projection is three parts: override the renderer and the comparator for 
   // The renderer: built-ins that can't present this extractor's schema are listed, disabled, with the reason.
   await parts.getByRole('combobox', {name: 'Renderer', exact: true}).click()
   const listbox = page.getByRole('listbox')
-  const database = listbox.getByRole('option', {name: /^Database/})
+  const database = listbox.getByRole('option', {name: /^Database/u})
   await expect(database).toHaveAttribute('aria-disabled', 'true')
   await expect(database).toContainText('Expects `database/v0`; this extractor emits `architecture/v0`')
-  await listbox.getByRole('option', {name: /^Graph/}).click()
+  await listbox.getByRole('option', {name: /^Graph/u}).click()
   await expect(listbox).toHaveCount(0)
   const renderer = parts.locator('[data-part="renderer"]')
   await expect(renderer.locator('.pi-changed')).toHaveText('changed from definition')
@@ -671,7 +671,7 @@ test('a projection is three parts: override the renderer and the comparator for 
   await parts.getByRole('button', {name: 'Save to definition…'}).click()
   const saveDialog = page.getByRole('dialog', {name: 'Save to definition'})
   // Once the runner previews the edit, the diff is its exact edit of the file: the fixture's one-line JSON, rewritten pretty.
-  await expect(saveDialog.getByRole('button', {name: /^Save to .*architecture\.json$/})).toBeEnabled()
+  await expect(saveDialog.getByRole('button', {name: /^Save to .*architecture\.json$/u})).toBeEnabled()
   await expect(saveDialog.locator('[data-kind="removed"]').filter({hasText: '"renderer":"architecture"'})).toHaveCount(1)
   await expect(saveDialog.locator('[data-kind="added"]').filter({hasText: '"renderer": "graph"'})).toHaveCount(1)
   await expect(saveDialog.getByRole('button', {name: 'Copy definition JSON'})).toBeVisible()
@@ -696,19 +696,19 @@ test('a projection is three parts: override the renderer and the comparator for 
   // The same overrides are in the command palette.
   // The drawer (on a phone) closes first, so More's popover opens over the view.
   if (drawer(page)) await sidebar(page, false)
-  await (await titleToggle(page, /^Command palette$/)).click()
+  await (await titleToggle(page, /^Command palette$/u)).click()
   await page.keyboard.type('use renderer')
   const palette = page.getByRole('dialog', {name: 'Command palette'})
-  await expect(palette.getByRole('option', {name: /^Use renderer: Graph/})).toBeVisible()
-  await expect(palette.getByRole('option', {name: /^Use renderer: Database/})).toHaveCount(0)
-  await palette.getByRole('option', {name: /^Use renderer: Graph/}).click()
+  await expect(palette.getByRole('option', {name: /^Use renderer: Graph/u})).toBeVisible()
+  await expect(palette.getByRole('option', {name: /^Use renderer: Database/u})).toHaveCount(0)
+  await palette.getByRole('option', {name: /^Use renderer: Graph/u}).click()
   await sidebar(page)
   await expect(renderer.locator('.pi-changed')).toHaveText('changed from definition')
   // The drawer (on a phone) closes first, so More's popover opens over the view.
   if (drawer(page)) await sidebar(page, false)
-  await (await titleToggle(page, /^Command palette$/)).click()
+  await (await titleToggle(page, /^Command palette$/u)).click()
   await page.keyboard.type('use extractor')
-  await expect(palette.getByRole('option', {name: /^Use extractor: Built-in repository-map/})).toBeVisible()
+  await expect(palette.getByRole('option', {name: /^Use extractor: Built-in repository-map/u})).toBeVisible()
   await page.keyboard.press('Escape')
 })
 
@@ -746,7 +746,7 @@ test('offline saved artifact uses strict Wasm validation and rejects forged or d
   // A saved comparison becomes a preselected pair that the browser recomputes.
   await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible()
   await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', 'diff')
-  await expect(page.getByRole('button', {name: /^Set Before .* as Before$/})).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', {name: /^Set Before .* as Before$/u})).toHaveAttribute('aria-pressed', 'true')
   await upload.setInputFiles({
     name: 'forged.json',
     mimeType: 'application/json',
@@ -781,7 +781,7 @@ test('extractor failures retain raw evidence, open diagnostics, and a supplied r
   if (drawer(page)) await sidebar(page, false)
   await expect(page.locator('.pi-error[role=alert]')).toContainText('failed')
   await expect(page.locator('.ph')).toHaveCount(0)
-  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Diagnostics/})).toHaveAttribute(
+  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Diagnostics/u})).toHaveAttribute(
     'aria-selected',
     'true',
   )
@@ -794,7 +794,7 @@ test('extractor failures retain raw evidence, open diagnostics, and a supplied r
   await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', 'diff')
   await sidebar(page)
   await expect(page.getByLabel('Any ref')).toHaveCount(0)
-  await expect(page.getByRole('button', {name: /^Extract /})).toHaveCount(0)
+  await expect(page.getByRole('button', {name: /^Extract /u})).toHaveCount(0)
 })
 
 test('the built-in renderer presents a saved review in a sandboxed frame', async ({page, app}) => {
@@ -827,10 +827,10 @@ test('the snapshot page presents the served document chrome-free and marks when 
   await expect(page.locator('iframe.ph-frame')).toHaveCount(2)
   for (const frame of await page.locator('iframe.ph-frame').all()) await expect(frame).toHaveAttribute('sandbox', 'allow-scripts')
   // No controls but the summary bar's figures, which the picture draws below the stage as every view has it.
-  await expect(page.getByRole('group', {name: 'Summary'})).toHaveAttribute('data-sentence', /\S/)
+  await expect(page.getByRole('group', {name: 'Summary'})).toHaveAttribute('data-sentence', /\S/u)
   await expect(page.getByRole('group', {name: 'Summary'}).locator('[data-summary-figure]')).not.toHaveCount(0)
   await expect(page.getByRole('button').and(page.locator(':not([data-summary-bar] *)'))).toHaveCount(0)
-  await expect(page.getByText(/Before · [0-9a-f]{8}/)).toBeVisible()
+  await expect(page.getByText(/Before · [0-9a-f]{8}/u)).toBeVisible()
   // By default one card frames the stage, the legend and the summary bar, on no page background.
   await expect(page.locator('#snapshot[data-frame="card"] .pi-snapshot-card [data-summary-bar]')).toBeVisible()
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).toBe('rgba(0, 0, 0, 0)')
@@ -843,14 +843,14 @@ test('the snapshot page presents the served document chrome-free and marks when 
   await page.goto(snapshot('progress=0'))
   await expect(html).toHaveAttribute('data-projections-snapshot', 'ready')
   // The card, by its accessible name, shows the before revision's name (not a hidden tooltip with the same text).
-  await expect(page.frameLocator('iframe.ph-frame').getByRole('button', {name: /^Inspect (\S+ )?Legacy inventory,/})).toBeVisible()
+  await expect(page.frameLocator('iframe.ph-frame').getByRole('button', {name: /^Inspect (\S+ )?Legacy inventory,/u})).toBeVisible()
   // The graph renderer's diff, one static frame.
   await page.goto(snapshot('mode=diff'))
   await expect(html).toHaveAttribute('data-projections-snapshot', 'ready')
   await expect(page.locator('iframe.ph-frame')).toHaveCount(1)
   // What can't be shown fails with a reason instead of an image.
   await page.goto(snapshot('progress=2'))
-  await expect(html).toHaveAttribute('data-projections-snapshot-error', /progress/)
+  await expect(html).toHaveAttribute('data-projections-snapshot-error', /progress/u)
 })
 
 test('a renderer that never becomes ready is reported and the built-in views remain usable', async ({page, app}) => {
@@ -944,7 +944,7 @@ test('keyboard first: the command palette, sidebar and panel shortcuts', async (
   await expect(page.getByLabel('Open saved artifact', {exact: true})).toBeFocused()
   await page.keyboard.press(`${mod}+i`)
   await sidebar(page)
-  await expect(page.getByRole('button', {name: /^Set After .* as Before$/})).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', {name: /^Set After .* as Before$/u})).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('the Explorer: open by default, ⌘B toggles it, its width is remembered, a drawer on phones', async ({page, app}, testInfo) => {
@@ -1002,7 +1002,7 @@ test('the projection switcher: the centred document title, opened by a click or 
   await expect(trigger).toHaveAttribute('aria-label', 'Projection: Checkout architecture')
   await expect(trigger).toHaveAttribute('aria-haspopup', 'dialog')
   await expect(trigger).toHaveAttribute('aria-expanded', 'false')
-  await expect(trigger).toHaveAttribute('title', /^Checkout architecture \(architecture\)/)
+  await expect(trigger).toHaveAttribute('title', /^Checkout architecture \(architecture\)/u)
   const box = (await trigger.boundingBox())!
   expect(Math.abs(box.x + box.width / 2 - page.viewportSize()!.width / 2)).toBeLessThanOrEqual(1)
   // A click opens it on the current projection, checked: every projection with its ID and status.
@@ -1072,7 +1072,7 @@ test('the projection switcher: the centred document title, opened by a click or 
   await chooseProjection(page, 'Repository files')
   await expect(trigger).toHaveAttribute('aria-label', 'Projection: Repository files, 1 other projection failing')
   await expect(trigger.locator('.pi-failing')).toHaveText('1 failing')
-  await expect(trigger).toHaveAttribute('title', /Failing: Failing extractor/)
+  await expect(trigger).toHaveAttribute('title', /Failing: Failing extractor/u)
   await trigger.click()
   const broken = list.locator('[data-projection="broken"]')
   await expect(broken).toHaveAttribute('data-status', 'failed')
@@ -1106,7 +1106,7 @@ test('the Settings gear is a toolbar item whose menu chooses the theme from the 
   const gear = page.locator('.pi-settings')
   await expect(gear).toHaveAttribute('title', 'Settings')
   // The toolbar's roving focus reaches the gear: Arrow Left from its neighbor, Commands (or More on a phone).
-  const next = toolbar.getByRole('button', {name: /^(Command palette|More actions)$/})
+  const next = toolbar.getByRole('button', {name: /^(Command palette|More actions)$/u})
   // Just after loading, the title bar can replan its layout between the focus and the key: start over until it lands.
   await expect(async () => {
     await next.focus()
@@ -1284,7 +1284,7 @@ test('the title bar is a planned toolbar: no overlap, nothing clipped or truncat
     const center = (await switcher(page).boundingBox())!
     expect(Math.abs(center.x + center.width / 2 - width / 2), at).toBeLessThanOrEqual(1)
     expect(center.width, at).toBeGreaterThanOrEqual(96)
-    await expect(switcher(page), at).toHaveAttribute('title', /^Checkout architecture \(architecture\)/)
+    await expect(switcher(page), at).toHaveAttribute('title', /^Checkout architecture \(architecture\)/u)
     // Every item is in the bar, or in "More actions" by the same name; the status line keeps its text for assistive technology.
     await expect(page.locator('.pi-activity[data-watching]'), at).toBeAttached()
     await expect(page.locator('.pi-trust-state'), at).toBeVisible()
@@ -1295,7 +1295,7 @@ test('the title bar is a planned toolbar: no overlap, nothing clipped or truncat
     }
     // The Settings gear is already an icon: it stays in the bar at every width.
     await expect(titlebar.getByRole('button', {name: 'Settings', exact: true}), at).toBeVisible()
-    for (const name of [/^(Show|Hide) explorer sidebar$/, /^(Show|Hide) panel$/, /^(Show|Hide) details panel$/, /^Command palette$/]) {
+    for (const name of [/^(Show|Hide) explorer sidebar$/u, /^(Show|Hide) panel$/u, /^(Show|Hide) details panel$/u, /^Command palette$/u]) {
       await expect(titlebar.or(more).getByRole('button', {name}).first(), `${name} ${at}`).toBeVisible()
     }
     await expect(
@@ -1504,7 +1504,7 @@ test('the docked Details panel: toggled and resized like the Explorer, remembere
     return
   }
   // Checkout is unchanged: every item lists it.
-  await page.getByRole('radiogroup', {name: 'Scope'}).getByRole('radio', {name: /^All/}).click()
+  await page.getByRole('radiogroup', {name: 'Scope'}).getByRole('radio', {name: /^All/u}).click()
   await page.getByRole('button', {name: 'Checkout', exact: true}).click()
   await expect(raw).toContainText('checkout')
   // The worker's details are gone (its layer; the revisions' commit subjects mention the worker too).
@@ -1517,7 +1517,7 @@ test('the docked Details panel: toggled and resized like the Explorer, remembere
   await expect(dock).toBeVisible()
   await page.keyboard.press(`${mod}+k`)
   await page.keyboard.type('details panel')
-  const option = page.getByRole('dialog', {name: 'Command palette'}).getByRole('option', {name: /^Hide details panel/})
+  const option = page.getByRole('dialog', {name: 'Command palette'}).getByRole('option', {name: /^Hide details panel/u})
   await expect(option).toContainText(process.platform === 'darwin' ? '⌥⌘B' : 'Ctrl+Alt+B')
   await page.keyboard.press('Escape')
   // Its handle resizes it from the keyboard too; its width and visibility are remembered.
@@ -1563,7 +1563,7 @@ test('the command palette input has no focus ring; the active command row is hig
 
 /** Opens or closes the docked Details panel (a sheet below 1012px), from its title-bar toggle (or More on a phone). */
 async function details(page: Page, open = true) {
-  const toggle = await titleToggle(page, /^(Show|Hide) details panel$/)
+  const toggle = await titleToggle(page, /^(Show|Hide) details panel$/u)
   if (((await toggle.getAttribute('aria-pressed')) === 'true') !== open) await toggle.click()
   await closeMore(page)
   if (open) await expect(page.getByRole('complementary', {name: 'Details'})).toBeVisible()

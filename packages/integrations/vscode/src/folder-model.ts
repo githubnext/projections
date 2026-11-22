@@ -346,7 +346,7 @@ export class FolderModel implements vscode.Disposable {
 
   /** The projections that changed in the folder's choice's pair, as far as tabs and Compare All have counted. */
   changedCount(): number {
-    return this.projections.filter(definition => /^\d+ changes?$/.test(this.status(definition.id))).length
+    return this.projections.filter(definition => /^\d+ changes?$/u.test(this.status(definition.id))).length
   }
 
   /**

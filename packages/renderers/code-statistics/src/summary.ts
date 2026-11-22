@@ -81,5 +81,5 @@ function metricFacts(
 /** A unit as a noun: a word's singular for one (`methods` → `1 method`); a short symbol (`ms`) as it is. */
 export function unitNoun(unit: string): SummaryNoun {
   const words = humanizeKind(unit)
-  return /^[A-Za-z]{1,3}$/.test(unit) || !words.singular ? {singular: unit, plural: unit} : {singular: words.singular, plural: unit}
+  return /^[A-Za-z]{1,3}$/u.test(unit) || !words.singular ? {singular: unit, plural: unit} : {singular: words.singular, plural: unit}
 }

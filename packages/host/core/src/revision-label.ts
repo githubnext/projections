@@ -11,7 +11,7 @@ export interface RevisionLabelParts {
 }
 
 const separator = ' · '
-const agePattern = /\bago$|^just now$/
+const agePattern = /\bago$|^just now$/u
 
 /** A revision label from its parts: `main · "Add auth" · 2 days ago`, leaving out the parts it lacks. */
 export const formatRevisionLabel = ({name, detail, when}: RevisionLabelParts): string =>
@@ -26,7 +26,7 @@ export function parseRevisionLabel(label: string): RevisionLabelParts & {subject
   const name = parts.shift()?.trim() || label
   const when = parts.length && agePattern.test(parts.at(-1)!) ? parts.pop() : undefined
   const detail = parts.length ? parts.join(separator) : undefined
-  const subject = detail && /^".*"$/.test(detail) ? detail.slice(1, -1) : undefined
+  const subject = detail && /^".*"$/u.test(detail) ? detail.slice(1, -1) : undefined
   return {name, ...(detail ? {detail} : {}), ...(subject ? {subject} : {}), ...(when ? {when} : {})}
 }
 

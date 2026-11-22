@@ -8,22 +8,22 @@ import {join} from 'node:path'
  * bundles use it at build time.
  */
 
-const packageRoot = /^(.*[\\/]node_modules[\\/](?:@[^\\/]+[\\/])?[^\\/]+)[\\/]/
+const packageRoot = /^(.*[\\/]node_modules[\\/](?:@[^\\/]+[\\/])?[^\\/]+)[\\/]/u
 // Third-party data vendored into this repository: `vendor/<name>/` with a `vendor.json` ({name, version, license}) and
 // the upstream license file.
-const vendorRoot = /^(.*[\\/]vendor[\\/][^\\/]+)[\\/]/
-const licenseFile = /^(licen[cs]e|copying|notice)([-_.].*)?$/i
+const vendorRoot = /^(.*[\\/]vendor[\\/][^\\/]+)[\\/]/u
+const licenseFile = /^(?:licen[cs]e|copying|notice)(?:[-_.].*)?$/iu
 // Licenses whose binary-form distribution must say where the source is.
-const sourceRequired = /\b(EPL|MPL|LGPL|GPL|CDDL|EUPL|CPL)\b/
+const sourceRequired = /\b(?:EPL|MPL|LGPL|GPL|CDDL|EUPL|CPL)\b/u
 
 /** An SPDX expression's first `OR` alternative, without parentheses: `(MPL-2.0 OR Apache-2.0)` is MPL-2.0. */
 function firstAlternative(expression) {
-  const words = expression.split(/\s+/)
+  const words = expression.split(/\s+/u)
   const or = words.indexOf('OR', 1)
   return words
     .slice(0, or < 0 ? undefined : or)
     .join(' ')
-    .replace(/[()]/g, '')
+    .replace(/[()]/gu, '')
     .trim()
 }
 
@@ -39,7 +39,7 @@ function firstAlternative(expression) {
 export function bundledPackages(moduleIds) {
   const found = new Map()
   for (const id of moduleIds) {
-    const unprefixed = id.replace(/^\0/, '')
+    const unprefixed = id.replace(/^\0/u, '')
     const query = unprefixed.indexOf('?')
     const file = query < 0 ? unprefixed : unprefixed.slice(0, query)
     const match = packageRoot.exec(file)
@@ -78,8 +78,8 @@ export function bundledPackages(moduleIds) {
 function copyrights(files) {
   const lines = new Set()
   for (const file of files) {
-    for (const match of readFileSync(file, 'utf8').matchAll(/Copyright\s+(?:\(c\)|©)[^\n]*/gi)) {
-      lines.add(match[0].replace(/[\s*/]+$/, '').trim())
+    for (const match of readFileSync(file, 'utf8').matchAll(/Copyright\s+(?:\(c\)|©)[^\n]*/giu)) {
+      lines.add(match[0].replace(/[\s*/]+$/u, '').trim())
     }
   }
   return [...lines].sort()
@@ -90,7 +90,7 @@ function scripts(directory) {
   return readdirSync(directory, {withFileTypes: true}).flatMap(file =>
     file.isDirectory() && file.name !== 'node_modules'
       ? scripts(join(directory, file.name))
-      : file.isFile() && /\.[cm]?js$/.test(file.name)
+      : file.isFile() && /\.[cm]?js$/u.test(file.name)
         ? [join(directory, file.name)]
         : [],
   )
@@ -101,9 +101,9 @@ function repository(directory) {
   const manifest = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'))
   const url = typeof manifest.repository === 'string' ? manifest.repository : manifest.repository?.url
   return url
-    ?.replace(/^git\+/, '')
-    .replace(/^git:\/\//, 'https://')
-    .replace(/\.git$/, '')
+    ?.replace(/^git\+/u, '')
+    .replace(/^git:\/\//u, 'https://')
+    .replace(/\.git$/u, '')
 }
 
 /**
@@ -154,7 +154,7 @@ export function bundleNotices(title, moduleIds) {
  */
 export function noticeSections(text) {
   const sections = new Map()
-  const headings = [...text.matchAll(/^===== .+ =====$/gm)]
+  const headings = [...text.matchAll(/^===== .+ =====$/gmu)]
   for (const [index, heading] of headings.entries()) {
     sections.set(heading[0], text.slice(heading.index, headings[index + 1]?.index ?? text.length).trimEnd())
   }

@@ -100,7 +100,7 @@ async function main(): Promise<void> {
     (repository.project !== undefined &&
       (typeof repository.project !== 'string' ||
         path.isAbsolute(repository.project) ||
-        repository.project.split(/[\\/]/).some(part => part === '..')))
+        repository.project.split(/[\\/]/u).some(part => part === '..')))
   ) {
     throw new Error('Invalid extractor worker request')
   }

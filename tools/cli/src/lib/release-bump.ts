@@ -18,7 +18,7 @@ function editJson(text: string, edits: {key: string; within?: string; value: str
   for (const {key, within, value} of edits) {
     const start = within ? result.indexOf(`"${within}"`) : 0
     const end = within ? result.indexOf('}', start) : result.length
-    const pattern = new RegExp(`("${key.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}"\\s*:\\s*)"[^"]*"`)
+    const pattern = new RegExp(`("${key.replace(/[.*+?^${}()|[\]\\/]/gu, '\\$&')}"\\s*:\\s*)"[^"]*"`)
     const segment = result.slice(start, end)
     result = result.slice(0, start) + segment.replace(pattern, `$1"${value}"`) + result.slice(end)
   }
@@ -39,7 +39,7 @@ export function setReleaseVersion(root: string, next: string): string[] {
   const cargo = readText(root, 'Cargo.toml') ?? ''
   const found = tableVersion(cargo, 'workspace.package')
   if (typeof found !== 'object') throw new Error('Cargo.toml has no [workspace.package] version')
-  const versionAt = (text: string, index: number) => text.slice(0, index) + text.slice(index).replace(/"[^"]*"/, `"${next}"`)
+  const versionAt = (text: string, index: number) => text.slice(0, index) + text.slice(index).replace(/"[^"]*"/u, `"${next}"`)
   update(root, 'Cargo.toml', cargo, versionAt(cargo, found.index), changed)
 
   const releasedCrates = new Set(crates.filter(crate => crate.released).map(crate => crate.name))

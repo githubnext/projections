@@ -95,7 +95,7 @@ export function loadRulesInterpreter(key: string, load: () => Promise<Uint8Array
       // The interpreter's identity is the source digest its build embeds; builds on different hosts differ in bytes.
       const [section] = WebAssembly.Module.customSections(module, INTERPRETER_SECTION)
       const embedded = section ? new TextDecoder().decode(section) : ''
-      return {module, digest: /^sha256:[0-9a-f]{64}$/.test(embedded) ? embedded : await sha256(bytes)}
+      return {module, digest: /^sha256:[0-9a-f]{64}$/u.test(embedded) ? embedded : await sha256(bytes)}
     })()
     interpreter.catch(() => interpreters.delete(key))
     interpreters.set(key, interpreter)

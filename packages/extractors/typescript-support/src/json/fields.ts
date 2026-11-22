@@ -12,6 +12,6 @@ export function text(value: unknown, label: string): string {
 
 export function identifier(value: unknown, label: string): string {
   const id = text(value, label)
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$/.test(id)) throw new Error(`${label} must be 1-100 filename-safe ASCII characters`)
+  if (!/^[a-zA-Z0-9][\w.-]{0,99}$/u.test(id)) throw new Error(`${label} must be 1-100 filename-safe ASCII characters`)
   return id
 }

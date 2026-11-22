@@ -46,17 +46,17 @@ function embeddingSafe() {
           initial = declaration.value
         })
         rule.walkDecls('syntax', declaration => {
-          syntax = declaration.value.replace(/["']/g, '')
+          syntax = declaration.value.replace(/["']/gu, '')
         })
         // A registered zero keeps its type (minification writes `0px` as `0`); unregistered, `calc(1px + 0)` is invalid.
         if (initial === '0') {
-          initial = /length/.test(syntax)
+          initial = /length/u.test(syntax)
             ? '0px'
-            : /percentage/.test(syntax)
+            : /percentage/u.test(syntax)
               ? '0%'
-              : /time/.test(syntax)
+              : /time/u.test(syntax)
                 ? '0s'
-                : /angle/.test(syntax)
+                : /angle/u.test(syntax)
                   ? '0deg'
                   : initial
         }
@@ -94,7 +94,7 @@ function embeddingSafe() {
       css.walkRules(rule => {
         if (inKeyframes(rule)) return
         const selectors = rule.selectors.map(selector =>
-          /^(:root|:host)$/.test(selector)
+          /^(?::root|:host)$/u.test(selector)
             ? root
             : selector === root ||
                 selector.startsWith(`${root} `) ||
@@ -108,18 +108,18 @@ function embeddingSafe() {
       })
 
       const names = new Map()
-      css.walkAtRules(/keyframes$/, rule => {
+      css.walkAtRules(/keyframes$/u, rule => {
         const name = rule.params.trim()
         if (!name.startsWith('pj-')) names.set(name, `pj-${name}`)
         rule.params = names.get(name) ?? name
       })
       if (names.size) {
         const pattern = new RegExp(
-          `(?<![\\w-])(${[...names.keys()].map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?![\\w-])`,
+          `(?<![\\w-])(${[...names.keys()].map(name => name.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')).join('|')})(?![\\w-])`,
           'g',
         )
         css.walkDecls(declaration => {
-          if (/^(animation|animation-name)$/.test(declaration.prop) || /^--(pj-animate|tw-animation)/.test(declaration.prop)) {
+          if (/^(?:animation|animation-name)$/u.test(declaration.prop) || /^--(?:pj-animate|tw-animation)/u.test(declaration.prop)) {
             declaration.value = declaration.value.replace(pattern, name => names.get(name))
           }
         })
@@ -127,7 +127,10 @@ function embeddingSafe() {
 
       css.walkDecls(declaration => {
         if (declaration.value.includes('rem')) {
-          declaration.value = declaration.value.replace(/(-?\d*\.?\d+)rem\b/g, (_, value) => `${Number((Number(value) * 16).toFixed(4))}px`)
+          declaration.value = declaration.value.replace(
+            /(-?(?:\d+(?:\.\d+)?|\.\d+))rem\b/gu,
+            (_, value) => `${Number((Number(value) * 16).toFixed(4))}px`,
+          )
         }
       })
     },
@@ -146,14 +149,14 @@ export function scopeViolations(css) {
     if (inKeyframes(rule)) return
     if (rule.nodes?.some(node => node.type === 'rule')) problems.push(`nested rule under ${rule.selector}`)
     for (const selector of rule.selectors) {
-      if (!selector.startsWith(root) || /^\.pj-root[\w-]/.test(selector)) problems.push(`selector escapes ${root}: ${selector}`)
+      if (!selector.startsWith(root) || /^\.pj-root[\w-]/u.test(selector)) problems.push(`selector escapes ${root}: ${selector}`)
     }
   })
   parsed.walkDecls(declaration => {
-    if (declaration.prop.startsWith('--') && !/^--(pj|tw)-/.test(declaration.prop)) {
+    if (declaration.prop.startsWith('--') && !/^--(?:pj|tw)-/u.test(declaration.prop)) {
       problems.push(`custom property ${declaration.prop} is not --pj-/--tw- prefixed`)
     }
-    if (/\d(r?em)?rem\b/.test(declaration.value) || /\brem\b/.test(declaration.value)) {
+    if (/\d(?:r?em)?rem\b/u.test(declaration.value) || /\brem\b/u.test(declaration.value)) {
       problems.push(`rem unit in ${declaration.prop}: ${declaration.value}`)
     }
   })

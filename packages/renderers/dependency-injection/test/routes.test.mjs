@@ -10,7 +10,7 @@ import {loadPair} from './fixtures.mjs'
 
 /** An arrow's SVG path (`M`, `L` and `C` commands) as a chain of cubics. */
 function pathSpline(d) {
-  const tokens = d.match(/[MLC]|-?[\d.]+(?:e-?\d+)?/g)
+  const tokens = d.match(/[MLC]|-?[\d.]+(?:e-?\d+)?/gu)
   const chain = []
   let command,
     numbers = []
@@ -31,7 +31,7 @@ function pathSpline(d) {
     numbers = []
   }
   for (const token of tokens) {
-    if (/[MLC]/.test(token)) {
+    if (/[MLC]/u.test(token)) {
       flush()
       command = token
     } else numbers.push(token)

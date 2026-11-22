@@ -121,13 +121,13 @@ test('the shipped language service answers editor requests', () => {
   const broken = rules.replace('json(before.schema)', 'jsno(before.schema)')
   const [diagnostic] = editorCall(module, {op: 'diagnostics', source: broken, kind: 'rules'}).diagnostics
   assert.equal(diagnostic.severity, 'error')
-  assert.match(diagnostic.message, /Undeclared function \x60jsno\x60; did you mean \x60json\x60\?/)
+  assert.match(diagnostic.message, /Undeclared function \x60jsno\x60; did you mean \x60json\x60\?/u)
   assert.deepEqual([diagnostic.line, diagnostic.column, diagnostic.endColumn], [6, 25, 29])
 
   const hover = editorCall(module, {op: 'hover', source: rules, kind: 'rules', line: 6, column: 26}).hover
-  assert.match(hover.markdown, /^\x60\x60\x60\njson\(value: dyn\) -> string\n\x60\x60\x60/)
+  assert.match(hover.markdown, /^\x60\x60\x60\njson\(value: dyn\) -> string\n\x60\x60\x60/u)
   const variable = editorCall(module, {op: 'hover', source: rules, kind: 'rules', line: 8, column: 23}).hover
-  assert.match(variable.markdown, /^\x60\x60\x60\nvariables\.label: string\n\x60\x60\x60\n\nThe marker before every summary\./)
+  assert.match(variable.markdown, /^\x60\x60\x60\nvariables\.label: string\n\x60\x60\x60\n\nThe marker before every summary\./u)
 
   const completions = editorCall(module, {op: 'complete', source: rules, kind: 'rules', line: 8, column: 22})
   assert.deepEqual(
@@ -150,16 +150,16 @@ test('the service runs requests in a worker, and restarts it after a deadline', 
   try {
     const diagnostics = await service.diagnostics(rules.replace('change.id', 'change.idd'), 'rules')
     assert.equal(diagnostics.length, 1)
-    assert.match(diagnostics[0].message, /No field \x60idd\x60 on Change; did you mean \x60id\x60\?/)
+    assert.match(diagnostics[0].message, /No field \x60idd\x60 on Change; did you mean \x60id\x60\?/u)
     const [hover, tokens] = await Promise.all([service.hover(rules, 'rules', 6, 26), service.tokens(rules, 'rules')])
-    assert.match(hover.markdown, /json\(value: dyn\) -> string/)
+    assert.match(hover.markdown, /json\(value: dyn\) -> string/u)
     assert.ok(tokens.length > 10)
-    await assert.rejects(service.request({op: 'nope', source: '', kind: 'rules'}), /\x60op\x60 must be/)
+    await assert.rejects(service.request({op: 'nope', source: '', kind: 'rules'}), /\x60op\x60 must be/u)
     // A worker that never answers is stopped at the deadline, and the next request starts a new one.
     service.dispose()
     options.worker = new URL('data:text/javascript,setInterval(() => {}, 1000)')
     options.deadlineMs = 200
-    await assert.rejects(service.tokens(rules, 'rules'), /took longer than 200 ms/)
+    await assert.rejects(service.tokens(rules, 'rules'), /took longer than 200 ms/u)
     options.worker = worker
     assert.ok((await service.tokens(rules, 'rules')).length > 10)
   } finally {
@@ -173,7 +173,7 @@ test('a module without the language service is reported, not fatal', async () =>
     const empty = path.join(directory, 'empty.wasm')
     await writeFile(empty, new Uint8Array([0, 0x61, 0x73, 0x6d, 1, 0, 0, 0]))
     const service = new RulesService({worker, wasm: empty})
-    await assert.rejects(service.tokens(rules, 'rules'), /has no projections_rules_editor/)
+    await assert.rejects(service.tokens(rules, 'rules'), /has no projections_rules_editor/u)
     service.dispose()
   } finally {
     await rm(directory, {recursive: true, force: true})

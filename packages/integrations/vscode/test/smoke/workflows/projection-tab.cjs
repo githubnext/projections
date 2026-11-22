@@ -21,9 +21,9 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
   // ready, already has the toolbar strip (empty: no stand-ins for its controls) and "Loading Packages…", and the backend
   // was bound only after it.
   const firstTab = api.tabs('packages')[0]
-  assert.match(firstTab.firstPage?.html ?? '', /<div class="pj-skeleton-toolbar" aria-hidden="true"><\/div>/)
-  assert.doesNotMatch(firstTab.firstPage.html, /pj-skeleton-(modes|end|icon)/)
-  assert.match(firstTab.firstPage.html, /Loading Packages…/)
+  assert.match(firstTab.firstPage?.html ?? '', /<div class="pj-skeleton-toolbar" aria-hidden="true"><\/div>/u)
+  assert.doesNotMatch(firstTab.firstPage.html, /pj-skeleton-(modes|end|icon)/u)
+  assert.match(firstTab.firstPage.html, /Loading Packages…/u)
   assert.ok(
     firstTab.boundAt === null || firstTab.firstPage.at <= firstTab.boundAt,
     JSON.stringify({at: firstTab.firstPage.at, bound: firstTab.boundAt}),
@@ -40,9 +40,9 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
   // The summary bar along the bottom of the tab: each kind in the dependency graph's words, with the comparison's changes.
   const changesBar = await until('the summary bar with changes', async () => {
     const sentence = await summaryBar()
-    return /^\d+ workspaces? .*· \d+ dependenc(y|ies)/.test(sentence) && /[+\u2212~]\d/.test(sentence) ? sentence : undefined
+    return /^\d+ workspaces? .*· \d+ dependenc(?:y|ies)/u.test(sentence) && /[+\u2212~]\d/u.test(sentence) ? sentence : undefined
   })
-  assert.ok(!/\bpackage:|depends-on|devDependencies/.test(changesBar), changesBar)
+  assert.ok(!/\bpackage:|depends-on|devDependencies/u.test(changesBar), changesBar)
   // D2: with nothing picked, a new tab opens on the automatic choice. The demo repository is on feature/auth, a commit
   // ahead of main, with an uncommitted definition, so it's My branch: the merge base with main → the working tree.
   assert.deepEqual([shown.pair.before, shown.pair.after], [mergeBase, 'working-tree'])
@@ -50,10 +50,10 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
   assert.deepEqual([automatic.id, automatic.automatic, automatic.remembered], ['branch', true, null])
   // D6: no Compare section or its setting; the side bar's header line names the choice.
   const views = manifest.views.projections.map(view => view.id)
-  assert.ok(!views.some(id => /compare/i.test(id)), views.join())
+  assert.ok(!views.some(id => /compare/iu.test(id)), views.join())
   assert.equal(manifest.configuration.properties['projections.compareStyle'], undefined)
   // Each choice says its span with real ref names, then its size.
-  assert.match(api.rows()[0].header, /^Branch changes · main → your files · 1 commit \+ \d+ uncommitted$/)
+  assert.match(api.rows()[0].header, /^Branch changes · main → your files · 1 commit \+ \d+ uncommitted$/u)
   // The Viewing view is the one list of what every tab shows: native rows, the current one checked (and ", selected"
   // to a screen reader). Its title stays "Viewing": the status bar item is the readout of the choice, the projector
   // mark and the choice's short name, nothing the tab shows. Rows say short facts; their tooltips explain.
@@ -66,10 +66,10 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
     assert.equal(bar.text, '$(projections-mark) Branch changes')
     assert.deepEqual([bar.command, bar.arguments], ['projections.changePair', [folder.toString()]])
     // The details are the tooltip's: the revisions with their commits, the span and the files changed.
-    assert.match(bar.tooltip, /^\*\*Branch changes\*\*/)
+    assert.match(bar.tooltip, /^\*\*Branch changes\*\*/u)
     assert.match(bar.tooltip, new RegExp(`\\\`${mergeBase.slice(0, 7)}\\\` → your files`))
     await until('the files changed in the tooltip', async () =>
-      /1 commit \+ \d+ uncommitted · \d+ files? changed/.test(api.statusBar().tooltip) ? true : undefined,
+      /1 commit \+ \d+ uncommitted · \d+ files? changed/u.test(api.statusBar().tooltip) ? true : undefined,
     )
     assert.equal(bar.accessibility, 'Projections: viewing Branch changes')
     // The projector mark is a product icon of the extension's font.
@@ -82,8 +82,8 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
       checked.map(row => row.id),
       ['branch'],
     )
-    assert.match(checked[0].accessibility, /, selected$/)
-    assert.ok(viewing.rows.filter(row => !row.checked).every(row => !/, selected$/.test(row.accessibility ?? '')))
+    assert.match(checked[0].accessibility, /, selected$/u)
+    assert.ok(viewing.rows.filter(row => !row.checked).every(row => !/, selected$/u.test(row.accessibility ?? '')))
     assert.deepEqual(
       viewing.rows
         .filter(
@@ -95,16 +95,16 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
     )
     const fact = id => viewing.rows.find(row => row.id === id)?.description
     assert.deepEqual([fact('now'), fact('branch'), fact('compare')], ['', '1 commit', ''])
-    assert.match(fact('uncommitted'), /^\d+ files?$/)
+    assert.match(fact('uncommitted'), /^\d+ files?$/u)
     assert.ok(
       viewing.rows.every(row => (row.description ?? '').length <= 20),
       JSON.stringify(viewing.rows.map(row => row.description)),
     )
-    assert.match(viewing.rows.find(row => row.id === 'branch').tooltip, /What your branch changes/)
+    assert.match(viewing.rows.find(row => row.id === 'branch').tooltip, /What your branch changes/u)
     // "Bookmark this" is on the current row.
-    assert.match(checked[0].contextValue, /\bbookmarkable\b/)
+    assert.match(checked[0].contextValue, /\bbookmarkable\b/u)
     assert.equal(await swaps(), 0)
-    assert.ok(!JSON.stringify(viewing.rows).match(/\b[Pp]airs?\b/), JSON.stringify(viewing.rows))
+    assert.ok(!JSON.stringify(viewing.rows).match(/\b[Pp]airs?\b/u), JSON.stringify(viewing.rows))
   }
   // Tabs have no choice control of their own: they follow the side bar's.
   await until(
@@ -133,10 +133,10 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
   assert.equal((await api.control('packages', {op: 'elements', selector: '.tp-picker'})).length, 0, 'no Before and After pickers')
   // Side by side labels its panes (chips on the stage) as the pickers name the revisions, never a bare commit.
   await api.control('packages', {op: 'view', action: 'setMode', value: 'side-by-side'})
-  const named = text => text.replace(/^(Before|After) revision: /, '')
+  const named = text => text.replace(/^(Before|After) revision: /u, '')
   await until('the side by side pane labels, named for people', async () => {
     const found = await api.control('packages', {op: 'elements', selector: '[data-pane-chip]'})
-    return found.length === 2 && found.every(band => band.text && !/^[0-9a-f]{8}$/.test(named(band.text))) ? found : undefined
+    return found.length === 2 && found.every(band => band.text && !/^[0-9a-f]{8}$/u.test(named(band.text))) ? found : undefined
   })
   // The panes fill the stage edge to edge: no margin, no gap, no rounded card; one 1px divider between them.
   {
@@ -157,7 +157,7 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
     assert.ok(near(box.left, stage.left) && near(box.right, stage.right), JSON.stringify({box, stage}))
   }
   await until('the change count in the side bar', async () =>
-    /^(\d+ changes?|no change)$/.test(api.rows()[0].projections[0].status) ? true : undefined,
+    /^(?:\d+ changes?|no change)$/u.test(api.rows()[0].projections[0].status) ? true : undefined,
   )
   // Play runs the whole transition in the webview. Starting playback changes what the tab reports, so the extension
   // names the pair again; that relabelling must not recompute the comparison, which replaced the subject and reset the
@@ -210,12 +210,12 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
   {
     const [row] = api.rows()[0].projections
     const decoration = api.decoration('packages')
-    const count = /^(\d+) changes?$/.exec(row.status)?.[1]
-    assert.match(row.resource ?? '', /^projections-row:/)
+    const count = /^(\d+) changes?$/u.exec(row.status)?.[1]
+    assert.match(row.resource ?? '', /^projections-row:/u)
     if (count) {
       assert.deepEqual([decoration.badge, decoration.color], [Number(count) > 9 ? '9+' : count, 'gitDecoration.modifiedResourceForeground'])
       console.log(`Projections row badge: ${decoration.badge} (${decoration.tooltip})`)
     } else assert.equal(decoration.badge, null)
-    assert.ok(!/change/.test(row.description), row.description)
+    assert.ok(!/change/u.test(row.description), row.description)
   }
 }

@@ -70,7 +70,7 @@ function childDirectories(directory: string): string[] {
 /** The Node version a checkout pins in `.node-version`, without a leading `v`. */
 export function pinnedNode(root: string): string | undefined {
   try {
-    return readFileSync(join(root, '.node-version'), 'utf8').trim().replace(/^v/, '') || undefined
+    return readFileSync(join(root, '.node-version'), 'utf8').trim().replace(/^v/u, '') || undefined
   } catch {
     return undefined
   }
@@ -111,7 +111,7 @@ export interface NodeChoice {
 /** The Node to run a checkout's tools with: its pinned version when this one is it or a version manager has it, else this one. */
 export function findNode(root: string, host: Host = currentHost(), exists: (path: string) => boolean = existsSync): NodeChoice {
   const pinned = pinnedNode(root)
-  const current = {path: host.execPath, version: host.version.replace(/^v/, ''), pinned, matched: pinned === undefined}
+  const current = {path: host.execPath, version: host.version.replace(/^v/u, ''), pinned, matched: pinned === undefined}
   if (pinned === undefined || current.version === pinned) return {...current, matched: true}
   const found = nodeCandidates(pinned, host).find(exists)
   return found ? {path: found, version: pinned, pinned, matched: true} : current
@@ -119,7 +119,7 @@ export function findNode(root: string, host: Host = currentHost(), exists: (path
 
 /** A shell word: single-quoted, with embedded single quotes closed, escaped and reopened. */
 function shellQuote(value: string): string {
-  return `'${value.replace(/'/g, `'\\''`)}'`
+  return `'${value.replace(/'/gu, `'\\''`)}'`
 }
 
 export interface Launcher {
@@ -142,7 +142,7 @@ export function launcherText(path: string, launcher: Launcher, platform: Platfor
       `set "checkout=${launcher.checkout}"`,
       `set "node=${launcher.node}"`,
       'if exist "%checkout%\\tools\\cli\\src\\launch.ts" goto run',
-      `echo ${message.replace(/\x60/g, '')}: "%checkout%" 1>&2`,
+      `echo ${message.replace(/\x60/gu, '')}: "%checkout%" 1>&2`,
       'exit /b 3',
       ':run',
       'if not exist "%node%" set "node=node"',
@@ -172,7 +172,7 @@ export function readLauncher(text: string | undefined): {kind: 'absent'} | {kind
   if (!text.includes(MARKER)) return {kind: 'foreign'}
   const value = (name: string) => {
     const posix = new RegExp(`^${name}=('(?:[^']|'\\\\'')*')$`, 'm').exec(text)?.[1]
-    if (posix) return posix.slice(1, -1).replace(/'\\''/g, "'")
+    if (posix) return posix.slice(1, -1).replace(/'\\''/gu, "'")
     return new RegExp(`^set "${name}=(.*)"\\r?$`, 'm').exec(text)?.[1] ?? ''
   }
   return {kind: 'launcher', checkout: value('checkout'), node: value('node')}

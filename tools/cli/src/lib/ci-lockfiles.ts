@@ -101,16 +101,16 @@ interface CargoPackage {
 
 export function parseCargoLock(text: string): CargoPackage[] {
   return text
-    .split(/^\[\[package\]\]$/m)
+    .split(/^\[\[package\]\]$/mu)
     .slice(1)
     .map(block => {
       const field = (name: string) => new RegExp(`^${name} = "([^"]*)"`, 'm').exec(block)?.[1]
-      const list = /^dependencies = \[([\s\S]*?)^\]/m.exec(block)?.[1] ?? ''
+      const list = /^dependencies = \[([\s\S]*?)^\]/mu.exec(block)?.[1] ?? ''
       return {
         name: field('name') ?? '',
         version: field('version') ?? '',
         source: field('source'),
-        dependencies: [...list.matchAll(/"([^"]+)"/g)].map(match => match[1]!),
+        dependencies: [...list.matchAll(/"([^"]+)"/gu)].map(match => match[1]!),
         text: block.trim(),
       }
     })
@@ -129,7 +129,7 @@ function cargoGraph(text: string | undefined, units: readonly Unit[]): Graph {
     graph.edges.set(
       key(item),
       item.dependencies.flatMap(dependency => {
-        const [, name, version, source] = /^(\S+)(?: (\S+))?(?: \((.+)\))?$/.exec(dependency) ?? []
+        const [, name, version, source] = /^(\S+)(?: (\S+))?(?: \((.+)\))?$/u.exec(dependency) ?? []
         const found = packages.find(
           other => other.name === name && (!version || other.version === version) && (!source || other.source === source),
         )

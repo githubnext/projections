@@ -175,7 +175,7 @@ function send(response: ServerResponse, status: number, type: string, body: stri
 /** The bytes of a relayed result: JSON as text, `{base64}` as bytes, anything else as text. */
 function payload({contentType, body}: RequestResult): string | Buffer {
   if (body === null || body === undefined) return ''
-  if (/^application\/([\w.-]+\+)?json\b/i.test(contentType)) return JSON.stringify(body)
+  if (/^application\/(?:[\w.-]+\+)?json\b/iu.test(contentType)) return JSON.stringify(body)
   if (typeof body === 'object' && typeof (body as {base64?: unknown}).base64 === 'string') {
     return Buffer.from((body as {base64: string}).base64, 'base64')
   }

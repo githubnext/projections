@@ -47,7 +47,7 @@ export function rendererResponseHeaders(path) {
   }
 }
 
-const namePattern = /^[a-z0-9][a-z0-9-]{0,63}$/
+const namePattern = /^[a-z0-9][a-z0-9-]{0,63}$/u
 
 const noticesTitle = 'Third-party software in the built-in renderer bundles (packages/renderers/*/index.html).'
 

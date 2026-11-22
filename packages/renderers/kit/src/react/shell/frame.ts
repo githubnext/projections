@@ -115,7 +115,7 @@ export function stageInsetOf(
   tokens: Record<string, string> | undefined,
   name: 'stage-inset' | 'stage-inset-top' | 'stage-inset-bottom' = 'stage-inset',
 ): number | undefined {
-  const match = /^\s*(\d+(?:\.\d+)?)(px)?\s*$/.exec(tokens?.[name] ?? '')
+  const match = /^\s*(\d+(?:\.\d+)?)(?:px)?\s*$/u.exec(tokens?.[name] ?? '')
   return match ? Number(match[1]) : undefined
 }
 

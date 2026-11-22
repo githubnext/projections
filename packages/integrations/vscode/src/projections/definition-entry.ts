@@ -19,7 +19,7 @@ export function definitionEntry(text: string, key: string): {start: number; end:
     if (char === '"') {
       const end = stringEnd(index)
       // A top-level key: a string at depth 1 followed by a colon.
-      if (depth === 1 && /^\s*:/.test(text.slice(end, end + 32)) && !found) {
+      if (depth === 1 && /^\s*:/u.test(text.slice(end, end + 32)) && !found) {
         if (JSON.parse(text.slice(index, end)) === key) found = {start: index}
       } else if (depth === 1) lastValueEnd = end
       index = end - 1
@@ -30,9 +30,9 @@ export function definitionEntry(text: string, key: string): {start: number; end:
       depth--
       if (depth === 1) lastValueEnd = index + 1
       if (depth === 0) break
-    } else if (depth === 1 && /[\w.+-]/.test(char)) {
+    } else if (depth === 1 && /[\w.+-]/u.test(char)) {
       // A number, `true`, `false` or `null` value.
-      while (index + 1 < text.length && /[\w.+-]/.test(text[index + 1]!)) index++
+      while (index + 1 < text.length && /[\w.+-]/u.test(text[index + 1]!)) index++
       lastValueEnd = index + 1
     }
     if (found && found.valueStart === undefined && char === ':' && depth === 1) found.valueStart = index

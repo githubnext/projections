@@ -96,9 +96,9 @@ test('localizing keeps fragments and leaves other URLs alone; mixed bases are re
         {file: 'a/v0.json', schema: {$id: 'https://one.test/a/v0.json'}},
         {file: 'b/v0.json', schema: {$id: 'https://two.test/b/v0.json'}},
       ]),
-    /bases differ/,
+    /bases differ/u,
   )
-  assert.throws(() => schemaBase([{file: 'a/v0.json', schema: {$id: 'https://one.test/b/v0.json'}}]), /no \$id ending/)
+  assert.throws(() => schemaBase([{file: 'a/v0.json', schema: {$id: 'https://one.test/b/v0.json'}}]), /no \$id ending/u)
 })
 
 test('the manifest contributes the bundled schemas for definitions and comparator files', () => {
@@ -127,7 +127,7 @@ test("the mark and the part icons are glyphs of the packaged icon font, and the 
   assert.deepEqual(Object.keys(icons), ['projections-mark', 'projections-extractor', 'projections-comparator', 'projections-renderer'])
   assert.equal(icons['projections-mark'].default.fontCharacter, '\\E000')
   // VS Code rejects every icon an extension contributes if one ID isn't two segments or more (`component-iconname`).
-  for (const id of Object.keys(icons)) assert.match(id, /^[a-z0-9]+(-[a-z0-9]+)+$/)
+  for (const id of Object.keys(icons)) assert.match(id, /^[a-z0-9]+(-[a-z0-9]+)+$/u)
   for (const {default: icon} of Object.values(icons)) {
     const font = await readFile(fileURLToPath(new URL(`../${icon.fontPath}`, import.meta.url)))
     assert.equal(font.toString('latin1', 0, 4), 'wOFF')
@@ -165,7 +165,7 @@ test("the mark and the part icons are glyphs of the packaged icon font, and the 
   for (const name of Object.keys(icons).filter(candidate => candidate !== 'projections-mark')) {
     assert.ok(definition.includes(`'${name}'`), name)
   }
-  assert.doesNotMatch(definition, /ThemeIcon\('(inspect|git-compare|eye)'\)|'inspect' :|'git-compare' :/)
+  assert.doesNotMatch(definition, /ThemeIcon\('(inspect|git-compare|eye)'\)|'inspect' :|'git-compare' :/u)
 })
 
 test(
@@ -211,9 +211,9 @@ test(
     await writeFile(binary, '#!/bin/sh\necho "projections 1.2.4"\n')
     await assert.rejects(
       stage({root, target: 'darwin-arm64', binary, out: path.join(root, '.package')}),
-      /is projections 1\.2\.4; this extension \(1\.2\.3\)/,
+      /is projections 1\.2\.4; this extension \(1\.2\.3\)/u,
     )
-    await assert.rejects(stage({root, target: 'beos-x64', binary, out: path.join(root, '.package')}), /Unknown target/)
+    await assert.rejects(stage({root, target: 'beos-x64', binary, out: path.join(root, '.package')}), /Unknown target/u)
     assert.equal(targets['alpine-x64'], 'linux-x64')
     assert.deepEqual(packageManifest({name: 'x', scripts: {}, devDependencies: {}, dependencies: {}}), {name: 'x'})
   },
@@ -313,8 +313,8 @@ test("the repository's bundle: every built-in extractor and renderer handle has 
   }
   // Every link opens in the preview (a bundled page and its heading) or on GitHub; no image is left to load.
   assert.deepEqual(bundleProblems(pages), [])
-  for (const [page, text] of pages) assert.doesNotMatch(text, /!\[[^\]]*\]\((?!https:)/, `${page} loads an image`)
-  for (const [page, text] of pages) assert.doesNotMatch(text, /^---\n/, `${page} keeps its front matter`)
+  for (const [page, text] of pages) assert.doesNotMatch(text, /!\[[^\]]*\]\((?!https:)/u, `${page} loads an image`)
+  for (const [page, text] of pages) assert.doesNotMatch(text, /^---\n/u, `${page} keeps its front matter`)
   const size = [...pages.values()].reduce((total, text) => total + text.length, 0)
   // Guards against accidentally bundling generated or binary-like content, not against ordinary doc growth.
   assert.ok(size < 2_000_000, `${size} characters`)

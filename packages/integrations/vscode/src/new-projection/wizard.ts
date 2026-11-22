@@ -53,7 +53,7 @@ export class Wizard {
   runCli(folder: vscode.WorkspaceFolder, args: string[]) {
     return new Promise<string>((resolve, reject) => {
       const executable = this.cli().path
-      this.host.output.info(`projections ${args.map(arg => (/^[\w./@:-]+$/.test(arg) ? arg : JSON.stringify(arg))).join(' ')}`)
+      this.host.output.info(`projections ${args.map(arg => (/^[\w./@:-]+$/u.test(arg) ? arg : JSON.stringify(arg))).join(' ')}`)
       execFile(executable, args, {cwd: folder.uri.fsPath, maxBuffer: 32 * 1024 * 1024}, (error, stdout, stderr) => {
         if (!error) return resolve(stdout)
         const missing = (error as NodeJS.ErrnoException).code === 'ENOENT'

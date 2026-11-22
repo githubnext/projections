@@ -21,7 +21,7 @@ test('a release publishes immutable snapshots, and a stable release also replace
   assert.equal(stable.prerelease, false)
   assert.deepEqual(
     stable.snapshots.map(({path}) => path),
-    files.map(({path}) => path.replace(/\.json$/, '/0.2.0.json')),
+    files.map(({path}) => path.replace(/\.json$/u, '/0.2.0.json')),
   )
   assert.ok(stable.snapshots.some(({path}) => path === 'graph/v0/0.2.0.json'))
   assert.ok(stable.snapshots.some(({path}) => path === 'vocabularies/runtime-policy/v0/0.2.0.json'))
@@ -38,7 +38,7 @@ test('a release publishes immutable snapshots, and a stable release also replace
 test('only release versions name snapshots', () => {
   assert.deepEqual(releaseVersion('0.1.0'), {version: '0.1.0', prerelease: false})
   for (const tag of ['latest', 'v1', 'v1.2', 'v01.2.3', 'v1.2.3+build', 'v1.2.3/../x', '../v1.2.3-x/y']) {
-    assert.throws(() => releaseVersion(tag), /not a release version/, tag)
+    assert.throws(() => releaseVersion(tag), /not a release version/u, tag)
   }
 })
 

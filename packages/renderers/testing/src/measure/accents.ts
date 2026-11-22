@@ -20,7 +20,7 @@ function svgSurface(element: Element, style: CSSStyleDeclaration): boolean {
   // A path encloses when it is filled, or closed (an outline drawn round something).
   if (element instanceof SVGPathElement) {
     return (
-      (style.fill !== 'none' && !/^(rgba?\(.*,\s*0\)|transparent)$/.test(style.fill)) || /[zZ]\s*$/.test(element.getAttribute('d') ?? '')
+      (style.fill !== 'none' && !/^(?:rgba?\(.*,\s*0\)|transparent)$/u.test(style.fill)) || /z\s*$/iu.test(element.getAttribute('d') ?? '')
     )
   }
   return true

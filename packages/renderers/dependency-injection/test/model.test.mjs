@@ -279,8 +279,8 @@ test('a changed lifetime morphs its mark and crossfades its label inside its own
   // Both labels are drawn while it crossfades, the old fading out as the new fades in.
   const html = renderToStaticMarkup(createElement(DependencyInjectionRenderer, rendererProps(model, schedule, step.time, 1)))
   const card = html.slice(html.indexOf(`data-unit-id="${unitId('IOrderRepository')}"`))
-  assert.match(card, /class="node-detail di-lifetime-label[^"]*"[^>]*opacity="0\.\d+"[^>]*>Scoped</)
-  assert.match(card, /class="node-detail di-lifetime-label[^"]*"[^>]*opacity="0\.\d+"[^>]*>Singleton</)
+  assert.match(card, /class="node-detail di-lifetime-label[^"]*"[^>]*opacity="0\.\d+"[^>]*>Scoped</u)
+  assert.match(card, /class="node-detail di-lifetime-label[^"]*"[^>]*opacity="0\.\d+"[^>]*>Singleton</u)
 })
 
 test('the lifetime mark is solid for a singleton, dashed for scoped and dotted for transient, end to end', () => {
@@ -306,41 +306,41 @@ test('endpoints render with no change emphasis, and the midpoint marks what chan
   const props = (progress, highlighting) => rendererProps(model, scheduleSteps(model), progress, highlighting)
   for (const progress of [0, 1]) {
     const html = renderToStaticMarkup(createElement(DependencyInjectionRenderer, props(progress, 0)))
-    assert.doesNotMatch(html, /node-emphasis|node-status|di-link-emphasis|pk-svg-status/)
+    assert.doesNotMatch(html, /node-emphasis|node-status|di-link-emphasis|pk-svg-status/u)
   }
   // Just after the last (adding) step, with the host's highlighting at full strength.
   const mid = renderToStaticMarkup(createElement(DependencyInjectionRenderer, props(stepEnds(scheduleSteps(model)).at(-1), 1)))
-  assert.match(mid, /node-emphasis added/)
-  assert.match(mid, /node-emphasis modified/)
-  assert.match(mid, /node-footer-band added/)
+  assert.match(mid, /node-emphasis added/u)
+  assert.match(mid, /node-emphasis modified/u)
+  assert.match(mid, /node-footer-band added/u)
   // Changed cards state their status as text (an icon and a word) in the reserved footer band, saying what changed
   // about a modified card; every card keeps the same box.
   assert.match(
     mid,
-    /class="pk-svg-status"[^>]*><g class="pk-status-part added"[^>]*><g class="pk-svg-icon" data-icon="added" aria-hidden="true"><\/g><text[^>]*>Added<\/text>/,
+    /class="pk-svg-status"[^>]*><g class="pk-status-part added"[^>]*><g class="pk-svg-icon" data-icon="added" aria-hidden="true"><\/g><text[^>]*>Added<\/text>/u,
   )
   assert.match(
     mid,
-    /class="pk-svg-status"[^>]*><g class="pk-status-part modified"[^>]*><g class="pk-svg-icon" data-icon="modified" aria-hidden="true"><\/g><text[^>]*>Lifetime changed<\/text>/,
+    /class="pk-svg-status"[^>]*><g class="pk-status-part modified"[^>]*><g class="pk-svg-icon" data-icon="modified" aria-hidden="true"><\/g><text[^>]*>Lifetime changed<\/text>/u,
   )
   const surfaces = html =>
-    new Set([...html.matchAll(/<rect class="di-card-surface" data-projections-edge="" ([^>]*?)\/?>/g)].map(match => match[1]))
+    new Set([...html.matchAll(/<rect class="di-card-surface" data-projections-edge="" ([^>]*?)\/?>/gu)].map(match => match[1]))
   assert.deepEqual([...surfaces(mid)], [`x="-132" y="-37" width="264" height="74" rx="6"`])
   assert.deepEqual(
     surfaces(mid),
     surfaces(renderToStaticMarkup(createElement(DependencyInjectionRenderer, props(stepEnds(scheduleSteps(model)).at(-1), 0)))),
   )
-  assert.match(mid, /aria-label="Inspect registration of IOrderRepository, Singleton: [^"]*, Modified"/)
-  assert.match(mid, /aria-label="Inspect implementation PriceCalculator/)
+  assert.match(mid, /aria-label="Inspect registration of IOrderRepository, Singleton: [^"]*, Modified"/u)
+  assert.match(mid, /aria-label="Inspect implementation PriceCalculator/u)
   // A single revision is the same composition with nothing changed.
   const single = renderToStaticMarkup(
     createElement(DependencyInjectionRenderer, {...props(1, 0), model: extractionModel(after), comparing: false}),
   )
-  assert.equal((single.match(/class="di-card /g) ?? []).length, buildDiModel(after).units.length)
+  assert.equal((single.match(/class="di-card /gu) ?? []).length, buildDiModel(after).units.length)
   // Without a comparison a card reserves no status footer, as the kit's graph cards don't.
-  assert.match(single, /<rect class="di-card-surface" data-projections-edge="" x="-132" y="-28" width="264" height="56" rx="6"/)
+  assert.match(single, /<rect class="di-card-surface" data-projections-edge="" x="-132" y="-28" width="264" height="56" rx="6"/u)
   // The key is the host's: none in the frame, and the renderer's legend names the runtime-resolution line.
-  assert.doesNotMatch(single, /legend/i)
+  assert.doesNotMatch(single, /legend/iu)
   assert.ok(createDiTransition(extractionModel(after), []).runtimeResolution)
   assert.deepEqual(
     diLegend(true).items.map(item => [item.shape, item.token]),
@@ -351,7 +351,7 @@ test('endpoints render with no change emphasis, and the midpoint marks what chan
       ['dashed', 'color-fg-muted'],
     ],
   )
-  assert.match(diLegend(true).items.at(-1).label, /^Resolved at runtime/)
+  assert.match(diLegend(true).items.at(-1).label, /^Resolved at runtime/u)
   // One line of short words: no title, and no item says how its line is drawn; its swatch (the card's lifetime mark,
   // or the link's line) shows it.
   assert.equal(diLegend(true, true).title, undefined)
@@ -359,16 +359,16 @@ test('endpoints render with no change emphasis, and the midpoint marks what chan
     diLegend(true, true)
       .items.map(item => item.label)
       .join(' '),
-    /dotted|dashed/,
+    /dotted|dashed/u,
   )
   assert.equal(diLegend(false).items.length, 3)
   // Type names and keys are identifiers (monospace); the lifetime stays sans.
-  assert.match(single, /<text class="node-kind di-contract"[^>]*data-projections-identifier=""[^>]*>IOrderRepository</)
-  assert.match(single, /<text class="node-label di-implementation"[^>]*data-projections-identifier=""[^>]*>OrderService</)
-  assert.match(single, /class="node-detail di-key"[^>]*>key <tspan data-projections-identifier="">orders</)
+  assert.match(single, /<text class="node-kind di-contract"[^>]*data-projections-identifier=""[^>]*>IOrderRepository</u)
+  assert.match(single, /<text class="node-label di-implementation"[^>]*data-projections-identifier=""[^>]*>OrderService</u)
+  assert.match(single, /class="node-detail di-key"[^>]*>key <tspan data-projections-identifier="">orders</u)
   // A card registered as its own type says so in words, in the kind line.
-  assert.match(single, /<text class="node-kind di-self"(?![^>]*data-projections-identifier)[^>]*>Self-registered</)
-  assert.doesNotMatch(single, /class="node-detail di-lifetime-label[^"]*"[^>]*data-projections-identifier/)
+  assert.match(single, /<text class="node-kind di-self"(?![^>]*data-projections-identifier)[^>]*>Self-registered</u)
+  assert.doesNotMatch(single, /class="node-detail di-lifetime-label[^"]*"[^>]*data-projections-identifier/u)
 })
 
 test('a unit inserted into a constructor chain arrives in its own step, and the chain rewires in its own', async () => {
@@ -469,7 +469,7 @@ test('the dependency-injection card shows container scope names, and an alias is
   }
   const nest = await render('nestjs-orders')
   // The container's own scope name, exactly as the data has it.
-  assert.match(nest, /data-projections-identifier="">REQUEST</)
+  assert.match(nest, /data-projections-identifier="">REQUEST</u)
   // The key is the host's; the renderer's legend gains the alias line when an alias is drawn.
   const {before: nestBefore, after: nestAfter} = loadPair('nestjs-orders')
   const {model} = await compared(nestBefore, nestAfter)
@@ -479,9 +479,9 @@ test('the dependency-injection card shows container scope names, and an alias is
     ['Alias: the same instance', 'dotted'],
   )
   assert.equal(diLegend(false).items.length, 3)
-  assert.match(nest, /an alias of PaymentGateway/)
-  assert.match(nest, /declared Singleton but re-created with the scoped services it injects/)
-  assert.match(await render('spring-orders'), /data-projections-identifier="">prototype</)
+  assert.match(nest, /an alias of PaymentGateway/u)
+  assert.match(nest, /declared Singleton but re-created with the scoped services it injects/u)
+  assert.match(await render('spring-orders'), /data-projections-identifier="">prototype</u)
 })
 
 test('a name shown only to tell lookalike cards apart never marks the card changed', async () => {

@@ -25,10 +25,10 @@ const exempt = new Set([
 const ignored = new Set(['node_modules', 'dist', 'test-results', 'playwright-report', '.cache', 'storybook-static'])
 const extensions = new Set(['.css', '.ts', '.tsx'])
 const recasing = [
-  /text-transform\s*:\s*(uppercase|capitalize)/i,
-  /textTransform\s*:\s*['"](uppercase|capitalize)['"]/,
-  /font-variant(-caps)?\s*:\s*[^;]*small-caps/i,
-  /fontVariant(Caps)?\s*:\s*['"][^'"]*small-caps/,
+  /text-transform\s*:\s*(uppercase|capitalize)/iu,
+  /textTransform\s*:\s*['"](uppercase|capitalize)['"]/u,
+  /font-variant(-caps)?\s*:[^;]*small-caps/iu,
+  /fontVariant(Caps)?\s*:\s*['"][^'"]*small-caps/u,
 ]
 const failures = []
 let files = 0
@@ -41,7 +41,7 @@ async function visit(directory) {
       await visit(path)
       continue
     }
-    if (!extensions.has(extname(entry.name)) || /\.(spec|test)\.tsx?$/.test(entry.name)) continue
+    if (!extensions.has(extname(entry.name)) || /\.(?:spec|test)\.tsx?$/u.test(entry.name)) continue
     if (exempt.has(relative(root, path).split(sep).join('/'))) continue
     files++
     const lines = (await readFile(path, 'utf8')).split('\n')

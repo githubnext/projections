@@ -18,7 +18,7 @@ const surfaces = ['color-surface-canvas', 'color-surface-raised', 'color-surface
 for (const mode of ['light', 'dark']) {
   const tokens = defaultThemeTokens(mode)
   test(`${mode}: stacked surfaces step visibly, and the divider separates any two at 3:1 or more`, () => {
-    for (const name of [...surfaces, 'color-divider']) assert.match(tokens[name], /^#[0-9a-f]{6}$/, name)
+    for (const name of [...surfaces, 'color-divider']) assert.match(tokens[name], /^#[0-9a-f]{6}$/u, name)
     const [canvas, raised, header, inset] = surfaces.map(name => tokens[name])
     for (const [a, b, label] of [
       [canvas, raised, 'canvas and card'],
@@ -38,7 +38,7 @@ for (const mode of ['light', 'dark']) {
     for (const change of ['added', 'removed', 'modified', 'moved']) {
       assert.ok(tokens[`color-${change}-muted`], `${change} fill`)
       const edge = tokens[`color-${change}-border`]
-      assert.match(edge, /^#[0-9a-f]{6}$/, `${change} edge`)
+      assert.match(edge, /^#[0-9a-f]{6}$/u, `${change} edge`)
       for (const surface of ['color-surface-raised', 'color-surface-canvas']) {
         assert.ok(contrast(edge, tokens[surface]) >= 3, `${change} edge on ${surface}: ${contrast(edge, tokens[surface]).toFixed(2)}`)
       }

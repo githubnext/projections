@@ -6,7 +6,7 @@ export function assertDefinitionList(value: unknown): asserts value is Inspector
     !record(value) ||
     !Array.isArray(value.definitions) ||
     typeof value.ref !== 'string' ||
-    (value.commit !== undefined && (typeof value.commit !== 'string' || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(value.commit))) ||
+    (value.commit !== undefined && (typeof value.commit !== 'string' || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(value.commit))) ||
     typeof value.executionAuthorized !== 'boolean' ||
     (value.rules !== undefined && (!Array.isArray(value.rules) || value.rules.some(path => typeof path !== 'string'))) ||
     (value.invalid !== undefined &&

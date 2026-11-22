@@ -44,7 +44,7 @@ export function resolveBase(root: string, since?: string): Base | undefined {
   const branch = git(root, ['rev-parse', '--abbrev-ref', 'HEAD'])
   const upstream = git(root, ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'])
   const candidates: [string, string][] = []
-  if (upstream && upstream.replace(/^[^/]+\//, '') !== branch) candidates.push([upstream, 'merge base with the upstream branch'])
+  if (upstream && upstream.replace(/^[^/]+\//u, '') !== branch) candidates.push([upstream, 'merge base with the upstream branch'])
   const fallback = defaultBranch(root)
   if (fallback) candidates.push([fallback, 'merge base with the default branch'])
   for (const [ref, reason] of candidates) {

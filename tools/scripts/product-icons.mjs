@@ -106,9 +106,9 @@ const root = new URL('../../', import.meta.url)
  * its hole the other way, and no other shapes overlap with opposite winding.
  */
 export function markOutline(source) {
-  const elements = [...source.matchAll(/<(path|circle)\b([^>]*)\/>/g)]
+  const elements = [...source.matchAll(/<(path|circle)\b([^>]*)\/>/gu)]
   const attribute = (attributes, name) => new RegExp(`\\s${name}="([^"]*)"`).exec(attributes)?.[1]
-  if (!elements.length || source.replace(/<(path|circle)\b[^>]*\/>/g, '').match(/<(?!\/?svg\b)\w/)) {
+  if (!elements.length || source.replace(/<(path|circle)\b[^>]*\/>/gu, '').match(/<(?!\/?svg\b)\w/u)) {
     throw new Error('The mark must be paths and circles only')
   }
   return elements

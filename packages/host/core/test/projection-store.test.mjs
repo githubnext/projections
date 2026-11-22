@@ -162,7 +162,7 @@ test('a projection that never settles says so, and its snapshot still shows the 
     store.start()
     store.getSnapshot().select('api')
     assert.equal(errors.length, 1)
-    assert.match(errors[0].message, /didn't settle/)
+    assert.match(errors[0].message, /didn't settle/u)
     assert.ok(['api', 'web'].includes(store.getSnapshot().selectedId))
   } finally {
     globalThis.reportError = original

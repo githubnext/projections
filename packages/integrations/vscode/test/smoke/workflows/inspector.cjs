@@ -54,7 +54,7 @@ module.exports = async function inspector({folder}) {
   })
 
   // Evidence opens the file at its line.
-  const item = compared.items.find(row => row.kind !== 'relationship' && /auth/.test(row.label)) ?? compared.items[0]
+  const item = compared.items.find(row => row.kind !== 'relationship' && /auth/u.test(row.label)) ?? compared.items[0]
   assert.equal(await control({op: 'selectEntity', entity: item.id}), true)
   // The selection's evidence is in the docked Details panel.
   if ((await elements('button[aria-label="Show details panel"]')).length) {
@@ -90,5 +90,5 @@ module.exports = async function inspector({folder}) {
   await vscode.commands.executeCommand('projections.compareBranchWithDefault')
   const branch = await control({op: 'summary'})
   assert.equal(branch.pair.after, 'HEAD')
-  assert.match(branch.pair.before, /^[0-9a-f]{40}$/)
+  assert.match(branch.pair.before, /^[0-9a-f]{40}$/u)
 }

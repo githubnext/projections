@@ -82,9 +82,9 @@ test('the catalogs are read as the CLI and the backend list them', () => {
       ['nestjs-di', true],
     ],
   )
-  assert.throws(() => parseExtractors({}), /no extractors/)
+  assert.throws(() => parseExtractors({}), /no extractors/u)
   assert.deepEqual(renderers[0].handles.slice(0, 2), ['graph', 'dag'])
-  assert.throws(() => parseRenderers(null), /no renderers/)
+  assert.throws(() => parseRenderers(null), /no renderers/u)
 })
 
 test('the renderers offered fit the extractor, its default first under the name its template uses', () => {
@@ -106,14 +106,14 @@ test('the first pick offers suggestions, or exploring when there are none', () =
     startItems(2).map(item => item.start),
     ['suggestion', 'builtin', 'custom', 'agent'],
   )
-  assert.match(startItems(2)[0].detail, /^2 built-in projections apply/)
-  assert.match(startItems(1)[0].detail, /^One built-in projection applies/)
+  assert.match(startItems(2)[0].detail, /^2 built-in projections apply/u)
+  assert.match(startItems(1)[0].detail, /^One built-in projection applies/u)
   assert.deepEqual(
     startItems(0).map(item => item.start),
     ['explore', 'builtin', 'custom', 'agent'],
   )
   // Sentence case, after the codicon.
-  for (const item of startItems(0)) assert.match(item.label, /^\$\([a-z-]+\) [A-Z][^A-Z]*$/, item.label)
+  for (const item of startItems(0)) assert.match(item.label, /^\$\([a-z-]+\) [A-Z][^A-Z]*$/u, item.label)
   assert.deepEqual(
     customItems.map(item => [item.parts, writesExtractor(item.parts)]),
     [
@@ -179,13 +179,13 @@ test('IDs are checked against the definition schema the CLI validates with, and 
   const problem = id => idProblem(id, {pattern, taken})
   assert.equal(problem('service-map'), undefined)
   assert.equal(problem('v2.api_routes'), undefined)
-  assert.match(problem(''), /Enter an ID/)
-  assert.match(problem('-leading'), /letters, digits/)
-  assert.match(problem('has space'), /letters, digits/)
-  assert.match(problem('a'.repeat(101)), /letters, digits/)
-  assert.match(problem('environment'), /environment file/)
-  assert.match(problem('packages'), /already exists/)
-  assert.throws(() => identifierPattern({properties: {}}), /no projection ID pattern/)
+  assert.match(problem(''), /Enter an ID/u)
+  assert.match(problem('-leading'), /letters, digits/u)
+  assert.match(problem('has space'), /letters, digits/u)
+  assert.match(problem('a'.repeat(101)), /letters, digits/u)
+  assert.match(problem('environment'), /environment file/u)
+  assert.match(problem('packages'), /already exists/u)
+  assert.throws(() => identifierPattern({properties: {}}), /no projection ID pattern/u)
   assert.equal(freeId('deps', taken), 'deps')
   assert.equal(freeId('packages', taken), 'packages-2')
 })
@@ -213,5 +213,5 @@ test("the agent's prompt is the one projections init printed, with what the pers
     agentPrompt(printed, 'the feature flags and the services that read them.', 'flags'),
     'Build the "flags" projection in this repository so it shows the feature flags and the services that read them. Start from the scaffold.',
   )
-  assert.match(agentPrompt('', 'routes', 'api'), /^Build the "api" projection in this repository so it shows routes\./)
+  assert.match(agentPrompt('', 'routes', 'api'), /^Build the "api" projection in this repository so it shows routes\./u)
 })

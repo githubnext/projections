@@ -6,21 +6,21 @@ export interface LabelPart {
   code: boolean
 }
 
-const requestMethod = /^(?:GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS)$/
+const requestMethod = /^(?:GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS)$/u
 /** File names, dotted members and IDs: `main.js`, `Client.request`, `checkout.latency.p50`. */
-const dotted = /^[\w@$-]+(?:\.[\w$-]+)*\.[A-Za-z_$][\w$-]*$/
-const word = /^[A-Za-z$][\w$]*$/
-const call = /^[A-Za-z_$][\w$.]*\(\)$/
-const pathLike = /^[\w@~.:{}[\]*$-]*\/[\w@~.:{}[\]*$/-]*$/
+const dotted = /^[\w@$-]+(?:\.[\w$-]+)*\.[A-Za-z_$][\w$-]*$/u
+const word = /^[A-Za-z$][\w$]*$/u
+const call = /^[A-Za-z_$][\w$.]*\(\)$/u
+const pathLike = /^[\w@~.:{}[\]*$-]*\/[\w@~.:{}[\]*$/-]*$/u
 
 function isCode(token: string): boolean {
-  if (!/[A-Za-z]/.test(token)) return false
+  if (!/[A-Za-z]/u.test(token)) return false
   // snake_case: an underscore after the first character and before the last.
   const snake = word.test(token) && token.slice(1, -1).includes('_')
   if (dotted.test(token) || snake || call.test(token)) return true
   // A path, but not prose such as `and/or`: rooted, nested, or ending in a file name.
   return (
-    pathLike.test(token) && (/^[/.~@]/.test(token) || token.split('/').length > 2 || dotted.test(token.slice(token.lastIndexOf('/') + 1)))
+    pathLike.test(token) && (/^[/.~@]/u.test(token) || token.split('/').length > 2 || dotted.test(token.slice(token.lastIndexOf('/') + 1)))
   )
 }
 
@@ -49,13 +49,13 @@ export function identifierParts(text: string): LabelPart[] {
     if (last?.code === code) last.text += value
     else parts.push({text: value, code})
   }
-  const tokens = text.split(/(\s+)/).map(token => {
+  const tokens = text.split(/(\s+)/u).map(token => {
     const [lead, bare, rest] = punctuated(token)
     // A call keeps its closing parenthesis: `fetchJson()`.
     const closes = bare.endsWith('(') && rest.startsWith(')')
     const core = closes ? `${bare})` : bare,
       trail = closes ? rest.slice(1) : rest
-    return {token, lead, core, trail, code: !/^\s*$/.test(token) && isCode(core)}
+    return {token, lead, core, trail, code: !/^\s*$/u.test(token) && isCode(core)}
   })
   tokens.forEach((item, index) => {
     const next = tokens[index + 2]

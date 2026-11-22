@@ -96,14 +96,14 @@ const events = async () =>
 try {
   await command(window, 'View: Show Projections')
   const sidebar = window.locator('.part.sidebar')
-  const projections = sidebar.locator('.pane', {has: window.locator('.pane-header', {hasText: /^\s*Projections/})})
+  const projections = sidebar.locator('.pane', {has: window.locator('.pane-header', {hasText: /^\s*Projections/u})})
   const row = projections.locator('.monaco-list-row', {hasText: title}).first()
   await row.waitFor({timeout: 90_000})
   await row.click()
   const frame = await inspectorFrame(window)
   await frame.locator('.phv-root[data-renderer-status="ready"]').first().waitFor({timeout: 120_000})
   await sleep(3000)
-  const viewing = sidebar.locator('.pane', {has: window.locator('.pane-header', {hasText: /^\s*Viewing/})})
+  const viewing = sidebar.locator('.pane', {has: window.locator('.pane-header', {hasText: /^\s*Viewing/u})})
   // Recent changes, open: it checks the recent commits (with every projection), which is left to finish first.
   const recent = viewing.locator('.monaco-list-row', {hasText: 'Recent changes'}).first()
   if ((await recent.getAttribute('aria-expanded')) !== 'true') await recent.click()

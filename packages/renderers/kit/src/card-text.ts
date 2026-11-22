@@ -26,8 +26,8 @@ export interface KindLineText {
  * colons, inner capitals, digits) is data, shown verbatim in mono.
  */
 export function entityKindLine(kind: string): KindLineText {
-  if (!/^[a-z]+(?:[-_ ][a-z]+)*$/.test(kind)) return {text: kind, identifier: true}
-  return {text: sentenceCase(kind.replace(/[-_]+/g, ' '))}
+  if (!/^[a-z]+(?:[-_ ][a-z]+)*$/u.test(kind)) return {text: kind, identifier: true}
+  return {text: sentenceCase(kind.replace(/[-_]+/gu, ' '))}
 }
 
 /**
@@ -99,7 +99,7 @@ export const subtitleMetrics = {line: 16, gap: 17, lines: 3} as const
  */
 export function proseLines(text: string, room: number, textScale = 1, max: number = subtitleMetrics.lines): string[] {
   const fits = Math.max(1, Math.floor(room / cardTextWidth('x', 'prose', textScale)))
-  const words = text.split(/\s+/).filter(Boolean)
+  const words = text.split(/\s+/u).filter(Boolean)
   const lines: string[] = []
   let line = ''
   for (let index = 0; index < words.length; index++) {
@@ -123,7 +123,7 @@ export function proseLines(text: string, room: number, textScale = 1, max: numbe
     shown[shown.length - 1] = `${shown
       .at(-1)!
       .slice(0, Math.max(1, fits - 1))
-      .replace(/\s+$/, '')}…`
+      .replace(/\s+$/u, '')}…`
   }
   return shown
 }

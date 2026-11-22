@@ -50,11 +50,11 @@ test('public API resolves barrel aliases, overloads, classes, methods, generics 
   assert.equal(state.schema, 'api/v0')
   assert.match(
     String(state.entities.find(node => node.label === 'select')?.data?.signature),
-    /select\(input: string\): string; select\(input: number\): number/,
+    /select\(input: string\): string; select\(input: number\): number/u,
   )
-  assert.match(String(state.entities.find(node => node.label === 'Box')?.data?.signature), /<T extends string = string>/)
-  assert.match(String(state.entities.find(node => node.label === 'result')?.data?.signature), /"count": number; "name": string/)
-  assert.match(String(state.entities.find(node => node.label === 'run')?.data?.signature), /"run"\(input: number\): number/)
+  assert.match(String(state.entities.find(node => node.label === 'Box')?.data?.signature), /<T extends string = string>/u)
+  assert.match(String(state.entities.find(node => node.label === 'result')?.data?.signature), /"count": number; "name": string/u)
+  assert.match(String(state.entities.find(node => node.label === 'run')?.data?.signature), /"run"\(input: number\): number/u)
   assert(!state.entities.some(node => node.label === 'secret'))
   assert(state.entities.every(node => typeof node.data?.signature === 'string'))
   assert(state.entities.every(node => node.evidence?.[0]?.source && !path.isAbsolute(node.evidence[0].source)))
@@ -99,8 +99,8 @@ test('overlapping overload swaps change the exported signature and checker-selec
   const chooseAfter = right.entities.find(node => node.label === 'choose')!
   assert.equal(chooseBefore.id, chooseAfter.id)
   assert.notEqual(chooseBefore.data?.signature, chooseAfter.data?.signature)
-  assert.match(String(chooseBefore.data?.signature), /^choose\(x: any\): "wide"; choose\(x: string\): "narrow"$/)
-  assert.match(String(chooseAfter.data?.signature), /^choose\(x: string\): "narrow"; choose\(x: any\): "wide"$/)
+  assert.match(String(chooseBefore.data?.signature), /^choose\(x: any\): "wide"; choose\(x: string\): "narrow"$/u)
+  assert.match(String(chooseAfter.data?.signature), /^choose\(x: string\): "narrow"; choose\(x: any\): "wide"$/u)
   assert.equal(left.entities.find(node => node.label === 'selected')?.data?.signature, 'selected: "wide"')
   assert.equal(right.entities.find(node => node.label === 'selected')?.data?.signature, 'selected: "narrow"')
   assert.equal((await compareExtractions(left, right)).changes.find(change => change.id === chooseBefore.id)?.status, 'modified')
@@ -148,7 +148,7 @@ test('private and hash-private nominal brands change class APIs without exposing
     assert.equal(token.id, unbranded.id)
     assert.equal(brand(token, 'nominalBrand'), true)
     assert.equal((await compareExtractions(structural, branded)).changes.find(change => change.id === token.id)?.status, 'modified')
-    assert.doesNotMatch(await canonicalize(branded), /hiddenBrand|runtimeBrand|secret payload/)
+    assert.doesNotMatch(await canonicalize(branded), /hiddenBrand|runtimeBrand|secret payload/u)
     const renamed = await collectTypeScript(
       await fixture(
         t,
@@ -204,7 +204,7 @@ test('callable interfaces, predicates and computed members have stable, observab
   )
   const state = await collectTypeScript(before)
   assert(state.entities.some(node => node.label === 'call' && String(node.data?.signature).includes('(value: string): number')))
-  assert.match(String(state.entities.find(node => node.label === 'isText')?.data?.signature), /value is string/)
+  assert.match(String(state.entities.find(node => node.label === 'isText')?.data?.signature), /value is string/u)
   assert.equal(await canonicalize(state), await canonicalize(await collectTypeScript(moved)))
   const changed = await fixture(
     t,
@@ -260,7 +260,7 @@ test('a wildcard target needs a subpath with exactly one `*`', async t => {
     },
     'typescript-public-api',
   )
-  await assert.rejects(collectTypeScript(context), /maps to wildcard .* without exactly one/)
+  await assert.rejects(collectTypeScript(context), /maps to wildcard .* without exactly one/u)
 })
 test('conditional exports with conflicting class members fail rather than dropping a surface', async t => {
   const context = await fixture(
@@ -272,7 +272,7 @@ test('conditional exports with conflicting class members fail rather than droppi
     },
     'typescript-public-api',
   )
-  await assert.rejects(collectTypeScript(context), /Conflicting public exports/)
+  await assert.rejects(collectTypeScript(context), /Conflicting public exports/u)
 })
 test('tsconfig programs honor JSONC, extends, excludes and checker path aliases', async t => {
   const context = await fixture(
@@ -303,7 +303,7 @@ test('untracked installed declarations are read through guarded module resolutio
   )
   context.files = context.files.filter(file => !file.startsWith('node_modules/'))
   const state = await collectTypeScript(context)
-  assert.match(String(state.entities[0]?.data?.signature), /Thing/)
+  assert.match(String(state.entities[0]?.data?.signature), /Thing/u)
 })
 test('tsconfig default ambient type discovery respects installed @types packages', async t => {
   const context = await fixture(
@@ -318,31 +318,31 @@ test('tsconfig default ambient type discovery respects installed @types packages
     'typescript-public-api',
   )
   context.files = context.files.filter(file => !file.startsWith('node_modules/'))
-  assert.match(String((await collectTypeScript(context)).entities[0]?.data?.signature), /value: number/)
+  assert.match(String((await collectTypeScript(context)).entities[0]?.data?.signature), /value: number/u)
 })
 test('actionable diagnostics and missing config/entrypoints fail instead of empty success', async t => {
   await assert.rejects(
     collectTypeScript(await fixture(t, {'index.ts': 'export const x: number = "bad";'}, 'typescript-public-api')),
-    /index\.ts:1: TS2322/,
+    /index\.ts:1: TS2322/u,
   )
   await assert.rejects(
     collectTypeScript(await fixture(t, {'index.ts': 'export const = ;'}, 'typescript-public-api')),
-    /TypeScript analysis failed/,
+    /TypeScript analysis failed/u,
   )
   await assert.rejects(
     collectTypeScript(await fixture(t, {'index.ts': 'export const x = 1;'}, 'typescript-public-api', {tsconfig: 'missing.json'})),
-    /ENOENT|Missing/,
+    /ENOENT|Missing/u,
   )
   await assert.rejects(
     collectTypeScript(await fixture(t, {'package.json': '{"name":"app"}', 'index.ts': 'export const x = 1;'}, 'typescript-public-api')),
-    /Cannot identify the public API. Define \x60package.json\x60 \x60exports\x60 or \x60types\x60/,
+    /Cannot identify the public API. Define \x60package.json\x60 \x60exports\x60 or \x60types\x60/u,
   )
 })
 test('unsafe paths and symlinks leaving the repository are rejected; symlinks inside it are followed', async t => {
   const context = await fixture(t, {'index.ts': 'export const value = 1;'}, 'typescript-public-api')
   const escaping = structuredClone(context)
   escaping.input.projection.definition.inputs = {entrypoints: ['../outside.ts']}
-  await assert.rejects(collectTypeScript(escaping), /Path must stay within/)
+  await assert.rejects(collectTypeScript(escaping), /Path must stay within/u)
   const root = context.input.repository.root
   await symlink(path.join(root, 'index.ts'), path.join(root, 'linked.ts'))
   // An in-repository link is an alias of its target, never a second source.
@@ -353,7 +353,7 @@ test('unsafe paths and symlinks leaving the repository are rejected; symlinks in
   )
   const outside = await fixture(t, {'secret.ts': 'export const secret = 1;'}, 'typescript-public-api')
   await symlink(path.join(outside.input.repository.root, 'secret.ts'), path.join(root, 'escape.ts'))
-  await assert.rejects(collectTypeScript({...context, files: [...context.files, 'escape.ts']}), /symlinks that leave the repository/)
+  await assert.rejects(collectTypeScript({...context, files: [...context.files, 'escape.ts']}), /symlinks that leave the repository/u)
 })
 test('a materialized revision reads installed dependencies from the checkout, and workspace packages from the revision', async t => {
   const workspace = {
@@ -404,7 +404,7 @@ test('a materialized revision reads installed dependencies from the checkout, an
   await writeFile(path.join(outside, 'package.json'), JSON.stringify({name: 'money', types: './index.d.ts'}))
   await rm(path.join(checkout, 'node_modules/money'), {recursive: true})
   await symlink(outside, path.join(checkout, 'node_modules/money'), 'dir')
-  await assert.rejects(collectTypeScript({...context, checkout}), /symlinks that leave the repository/)
+  await assert.rejects(collectTypeScript({...context, checkout}), /symlinks that leave the repository/u)
 })
 test("inherited library members cite the repository declaration, never the compiler's lib files", async t => {
   const context = await fixture(
@@ -473,7 +473,7 @@ test('a monorepo: workspace symlinks are followed and only the selected packages
   // Selecting the duplicates themselves still fails.
   const both = structuredClone(context)
   both.input.projection.definition.inputs = {entrypoints: {'.': 'examples/one/index.ts', './two': 'examples/two/index.ts'}}
-  await assert.rejects(collectTypeScript(both), /Duplicate package name \x60example\x60/)
+  await assert.rejects(collectTypeScript(both), /Duplicate package name \x60example\x60/u)
 })
 test('compiler resolution cannot follow outside-root imports or unlisted symlinked source', async t => {
   const outside = await fixture(t, {'index.ts': 'export interface Secret { value: string }'}, 'typescript-public-api')
@@ -484,10 +484,10 @@ test('compiler resolution cannot follow outside-root imports or unlisted symlink
     },
     'typescript-public-api',
   )
-  await assert.rejects(collectTypeScript(context), /TS2307/)
+  await assert.rejects(collectTypeScript(context), /TS2307/u)
   await writeFile(path.join(context.input.repository.root, 'index.ts'), 'export { Secret } from "./linked.js";')
   await symlink(path.join(outside.input.repository.root, 'index.ts'), path.join(context.input.repository.root, 'linked.ts'))
-  await assert.rejects(collectTypeScript(context), /symlinks/)
+  await assert.rejects(collectTypeScript(context), /symlinks/u)
 })
 test('missing dependencies cannot be downgraded to success-shaped any public APIs', async t => {
   const context = await fixture(
@@ -497,10 +497,10 @@ test('missing dependencies cannot be downgraded to success-shaped any public API
     },
     'typescript-public-api',
   )
-  await assert.rejects(collectTypeScript(context), /TS2307/)
+  await assert.rejects(collectTypeScript(context), /TS2307/u)
   // There is no input that skips semantic diagnostics.
   context.input.projection.definition.inputs = {diagnostics: 'syntax'}
-  await assert.rejects(collectTypeScript(context), /TS2307/)
+  await assert.rejects(collectTypeScript(context), /TS2307/u)
 })
 test('contract facts record checker-resolved types for API compatibility', async t => {
   const root = path.resolve('test/fixtures/compatibility/before')

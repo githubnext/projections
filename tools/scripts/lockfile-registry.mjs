@@ -18,7 +18,7 @@ const fix = process.argv.includes('--fix')
 
 /** The registry.npmjs.org URL for a tarball path ending in `<name>/-/<file>.tgz` (scoped names included). */
 export function npmjsTarball(url) {
-  const match = /\/((?:@[^/]+\/)?[^/]+)\/-\/([^/]+\.tgz)$/.exec(new URL(url).pathname)
+  const match = /\/((?:@[^/]+\/)?[^/]+)\/-\/([^/]+\.tgz)$/u.exec(new URL(url).pathname)
   return match ? `${npmjs}${match[1]}/-/${match[2]}` : undefined
 }
 
@@ -32,7 +32,7 @@ for (const relative of lockfiles) {
   let changed = false
   for (const [key, entry] of Object.entries(lock.packages ?? {})) {
     const resolved = entry?.resolved
-    if (typeof resolved !== 'string' || !/^https?:/.test(resolved) || resolved.startsWith(npmjs)) continue
+    if (typeof resolved !== 'string' || !/^https?:/u.test(resolved) || resolved.startsWith(npmjs)) continue
     const replacement = npmjsTarball(resolved)
     if (fix && replacement) {
       entry.resolved = replacement

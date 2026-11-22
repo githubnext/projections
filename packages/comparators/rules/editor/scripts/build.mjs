@@ -41,7 +41,7 @@ const result = spawnSync(
       ...process.env,
       CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS: [
         `--remap-path-prefix=${cargoHome}=/cargo`,
-        `--remap-path-prefix=${root.replace(/[\\/]$/, '')}=/projections`,
+        `--remap-path-prefix=${root.replace(/[\\/]$/u, '')}=/projections`,
       ].join(' '),
     },
   },
@@ -60,7 +60,7 @@ for (const [name, kind] of [
   if (exports.get(name) !== kind) throw new Error(`rules-editor.wasm must export ${kind} ${name}`)
 }
 const text = new TextDecoder('latin1').decode(bytes)
-for (const prefix of [cargoHome, root.replace(/[\\/]$/, ''), homedir()]) {
+for (const prefix of [cargoHome, root.replace(/[\\/]$/u, ''), homedir()]) {
   if (prefix && text.includes(prefix)) throw new Error(`rules-editor.wasm names the machine-specific path ${prefix}; remap it`)
 }
 mkdirSync(new URL('../dist/', import.meta.url), {recursive: true})

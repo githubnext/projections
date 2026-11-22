@@ -39,16 +39,16 @@ for (const story of stories) {
     // WebKit reports the spec's benign "ResizeObserver loop" notice (a resize settling over two frames) as a page error,
     // as when a toolbar ladder mounts its views one after another; it is not a failure, and every other error still is.
     page.on('pageerror', error => {
-      if (!/^ResizeObserver loop completed with undelivered notifications\.?$/.test(error.message)) errors.push(error.message)
+      if (!/^ResizeObserver loop completed with undelivered notifications\.?$/u.test(error.message)) errors.push(error.message)
     })
     await page.goto(new URL(`iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}`, process.env.PROJECTIONS_STORYBOOK_URL).href)
-    await expect(page.locator('body')).toHaveClass(/sb-show-main/)
-    await expect(page.locator('body')).not.toHaveClass(/sb-show-errordisplay/)
+    await expect(page.locator('body')).toHaveClass(/sb-show-main/u)
+    await expect(page.locator('body')).not.toHaveClass(/sb-show-errordisplay/u)
     await expect(page.locator('#storybook-root')).not.toBeEmpty()
     // A story that mounts its views one after another (the toolbar ladders) has mounted them all.
     await expect(page.locator('[data-story-pending]')).toHaveCount(0, {timeout: 0})
     // Comparisons finish and every renderer frame settles; none fails.
-    await expect(page.getByText(/Starting the engine|Computing the comparison/)).toHaveCount(0)
+    await expect(page.getByText(/Starting the engine|Computing the comparison/u)).toHaveCount(0)
     // However long that takes within the test's budget: a ladder of views loads 14 renderer frames, which Linux WebKit
     // takes longer than one expectation's timeout to paint.
     await expect(page.locator('.ph[data-renderer-status="loading"]')).toHaveCount(0, {timeout: 0})

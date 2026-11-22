@@ -5,7 +5,7 @@ import {pairOf} from './model.ts'
 import type {Choice, RepositoryFacts} from './model.ts'
 import {resolveChoice, tag} from './resolve.ts'
 
-const shortRef = (ref: string) => (ref === 'working-tree' ? 'working tree' : /^[0-9a-f]{40}$/.test(ref) ? ref.slice(0, 8) : ref)
+const shortRef = (ref: string) => (ref === 'working-tree' ? 'working tree' : /^[0-9a-f]{40}$/u.test(ref) ? ref.slice(0, 8) : ref)
 
 /**
  * A choice's name: `Current state`, `Uncommitted changes`, `Branch changes`, `PR #12`, `Last commit`, `Since v1.0`,
@@ -19,7 +19,7 @@ export function choiceName(choice: Choice, facts: RepositoryFacts): string {
   if (id === 'last-commit') return 'Last commit'
   if (id === 'release') {
     const before = tag(facts)?.before
-    return before ? `Since ${before.replace(/^refs\/tags\//, '')}` : 'Release'
+    return before ? `Since ${before.replace(/^refs\/tags\//u, '')}` : 'Release'
   }
   if (id.startsWith('pr:')) return `PR #${id.slice(3)}`
   if (id.startsWith('bookmark:')) {
@@ -69,11 +69,11 @@ export function choiceDetail(
   if (id === 'branch') return `${facts.defaultBranch ?? 'the default branch'} → ${yourFiles} · ${branchDetail(facts)}`
   if (id === 'last-commit') return 'previous commit → last commit'
   if (id.startsWith('pr:')) {
-    return [choice.title ?? `#${id.slice(3)}`, ...(pair ? [pairNames(pair, labels).replace(/working tree/g, yourFiles)] : [])].join(' · ')
+    return [choice.title ?? `#${id.slice(3)}`, ...(pair ? [pairNames(pair, labels).replace(/working tree/gu, yourFiles)] : [])].join(' · ')
   }
   // A pair named by its revisions needs no detail; a titled one (a commit subject) shows them.
   if (id.startsWith('pair:') && !choice.title) return ''
-  return pair ? pairNames(pair, labels).replace(/^working tree$|(?<=→ )working tree$/, yourFiles) : ''
+  return pair ? pairNames(pair, labels).replace(/^working tree$|(?<=→ )working tree$/u, yourFiles) : ''
 }
 
 /** `Branch changes · main → your files · 3 commits + 1 uncommitted`. */

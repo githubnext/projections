@@ -52,7 +52,7 @@ function matches(item: SwitcherItem, query: string): boolean {
   const haystack = `${item.title} ${item.id}`.toLowerCase()
   return query
     .toLowerCase()
-    .split(/\s+/)
+    .split(/\s+/u)
     .filter(Boolean)
     .every(word => haystack.includes(word))
 }

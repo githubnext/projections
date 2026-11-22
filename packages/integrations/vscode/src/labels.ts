@@ -82,11 +82,11 @@ export function sideLabel(facts: RefFacts, names: RefNames, now: number = Date.n
   }
   const branches = names.branches ?? []
   const tags = names.tags ?? []
-  const ref = facts.ref.replace(/^refs\/(heads|tags)\//, '')
+  const ref = facts.ref.replace(/^refs\/(?:heads|tags)\//u, '')
   if (branches.some(branch => branch.name === ref)) return {...dated, kind: 'branch', name: ref}
   if (tags.some(tag => tag.name === ref)) return {...dated, kind: 'tag', name: ref}
   if (ref === 'HEAD' && names.head?.branch) return {...dated, kind: 'branch', name: names.head.branch}
-  const commit = facts.commit ?? (/^[0-9a-f]{40}$/.test(ref) ? ref : undefined)
+  const commit = facts.commit ?? (/^[0-9a-f]{40}$/u.test(ref) ? ref : undefined)
   if (commit) {
     // The branch at the commit (the current one, then the default, then any), then a tag, then the merge base.
     const at = branches.filter(branch => branch.commit === commit)

@@ -11,12 +11,12 @@ test('the public contract has seven domain schemas and no extractor catalog depe
   assert.ok(domainSchemas.includes('database/v0'))
   assert.ok(!domainSchemas.includes('schema/v0'))
   const declarations = readFileSync(new URL('../dist/index.d.ts', import.meta.url), 'utf8')
-  assert.doesNotMatch(declarations, /playground|primer|BuiltinCollectorId/)
+  assert.doesNotMatch(declarations, /playground|primer|BuiltinCollectorId/u)
   // Types come from the package's own TypeBox schemas, as types only: the entry loads no schema builder.
-  for (const [, source] of declarations.matchAll(/from\s+['"]([^'"]+)['"]/g)) assert.match(source, /^(?:typebox|\.\/.+)$/)
+  for (const [, source] of declarations.matchAll(/from\s+['"]([^'"]+)['"]/gu)) assert.match(source, /^(?:typebox|\.\/.+)$/u)
   const entry = readFileSync(new URL('../dist/index.js', import.meta.url), 'utf8')
-  assert.doesNotMatch(entry, /['"](?:typebox|\.\/typebox\/[^'"]*)['"]/)
-  assert.doesNotMatch(declarations, /\b(?:nodes|edges|stateDigest|ProjectionState|SnapshotDocument|collector)\b/)
+  assert.doesNotMatch(entry, /['"](?:typebox|\.\/typebox\/[^'"]*)['"]/u)
+  assert.doesNotMatch(declarations, /\b(?:nodes|edges|stateDigest|ProjectionState|SnapshotDocument|collector)\b/u)
 })
 
 test('the shared native/Wasm conformance corpus covers raw input, comparison integrity and the default comparator', () => {

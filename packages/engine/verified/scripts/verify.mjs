@@ -92,7 +92,7 @@ export function toolchain({install = false} = {}) {
 export function consistent() {
   const {macros} = pins()
   const manifest = readFileSync(join(crate, 'Cargo.toml'), 'utf8')
-  const used = /^verus_builtin_macros\s*=\s*"=([^"]+)"/m.exec(manifest)?.[1]
+  const used = /^verus_builtin_macros\s*=\s*"=([^"]+)"/mu.exec(manifest)?.[1]
   if (used !== macros) {
     return [`packages/engine/verified/Cargo.toml uses verus_builtin_macros ${used ?? '(none)'}, but verus.toml pins ${macros}`]
   }
@@ -104,7 +104,7 @@ export function prove(verus) {
   const started = Date.now()
   const run = spawnSync(verus, ['--crate-type=lib', '--rlimit', '30', join(crate, 'src', 'lib.rs')], {encoding: 'utf8'})
   const output = `${run.stdout ?? ''}${run.stderr ?? ''}`
-  const results = /verification results:: (\d+) verified, (\d+) errors/.exec(output)
+  const results = /verification results:: (\d+) verified, (\d+) errors/u.exec(output)
   return {
     ok: run.status === 0 && results?.[2] === '0',
     verified: Number(results?.[1] ?? 0),

@@ -126,7 +126,7 @@ export function useComparison({
         (source === document.projection.id
           ? document.projection.title
           : lists[ref]?.definitions.find(definition => definition.id === source)?.title) ||
-        document.projection.renderer.bundle.replace(/\/+$/, '').split('/').at(-1) ||
+        document.projection.renderer.bundle.replace(/\/+$/u, '').split('/').at(-1) ||
         customManifest.title
       return customRenderer(
         {...customManifest, title},

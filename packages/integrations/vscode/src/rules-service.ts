@@ -59,8 +59,8 @@ export interface RulesCompletions {
 
 /** Which files the service is for: comparator files (`rules`, as the interpreter reads them) and their tests. */
 export function rulesKind(path: string): RulesKind | undefined {
-  if (/\.comparator\.test\.ya?ml$/.test(path)) return 'tests'
-  if (/\.comparator\.ya?ml$/.test(path)) return 'rules'
+  if (/\.comparator\.test\.ya?ml$/u.test(path)) return 'tests'
+  if (/\.comparator\.ya?ml$/u.test(path)) return 'rules'
   return undefined
 }
 

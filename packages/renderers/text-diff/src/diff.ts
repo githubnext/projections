@@ -30,7 +30,7 @@ const defaultMaxDistance = 2_000
 /** Splits text into lines, keeping each line's terminator. A trailing terminator ends the last line rather than starting an empty one. */
 export function splitLines(text: string): Line[] {
   const lines: Line[] = []
-  const pattern = /\r\n|\n|\r/g
+  const pattern = /\r\n|\n|\r/gu
   let start = 0
   for (let match = pattern.exec(text); match; match = pattern.exec(text)) {
     lines.push({text: text.slice(start, match.index), eol: match[0] as Line['eol']})

@@ -39,7 +39,7 @@ const icons: Record<string, string> = {
 
 /** A description's first sentence, for people. */
 export function firstSentence(text: string): string {
-  const end = text.search(/\.(\s|$)/)
+  const end = text.search(/\.(?:\s|$)/u)
   return end < 0 ? text : text.slice(0, end + 1)
 }
 
@@ -94,6 +94,6 @@ export function confirmation(title: string, preview: ToolResult): {title: string
   const text = preview.content
     .map(part => part.text ?? '')
     .join('')
-    .replace(/\n*Nothing was written\.\n*$/, '\n')
+    .replace(/\n*Nothing was written\.\n*$/u, '\n')
   return {title: `${title}?`, message: text, token}
 }

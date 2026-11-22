@@ -15,7 +15,7 @@ export function generatedList(root: string) {
   // Fixtures are test data: a header there describes the fixture's own project, not a file this repository generates.
   const marked = markedFiles(
     root,
-    files.filter(path => !/(^|\/)fixtures\//.test(path)),
+    files.filter(path => !/(?:^|\/)fixtures\//u.test(path)),
   )
   const unregistered = marked.filter(path => !generators.some(generator => outputFiles(root, generator, [path]).length))
   return {
@@ -71,7 +71,7 @@ export async function checkGenerator(root: string, generator: Generator): Promis
         const files = parseProblems(ran.output, root)
           .map(problem => problem.file)
           .filter((file): file is string => !!file)
-        const stale = ran.output.match(/^ {2}(\S+\.\w+)/gm)?.map(line => line.trim()) ?? []
+        const stale = ran.output.match(/^ {2}\S+\.\w+/gmu)?.map(line => line.trim()) ?? []
         return {
           name: generator.name,
           status: 'stale',
@@ -90,7 +90,7 @@ export async function checkGenerator(root: string, generator: Generator): Promis
       if (ran.exitCode !== 0) return {name: generator.name, status: 'error', detail: tail(ran.output, 4).join(' | ')}
     }
     // Committed outputs are formatted like every other file, so compare formatted output.
-    const formattable = outputFiles(root, generator).filter(path => /\.([cm]?[jt]sx?|json|jsonc|ya?ml|css|html|toml)$/.test(path))
+    const formattable = outputFiles(root, generator).filter(path => /\.(?:[cm]?[jt]sx?|json|jsonc|ya?ml|css|html|toml)$/u.test(path))
     if (formattable.length) await run(root, {argv: ['npx', '--no-install', 'oxfmt', '--no-error-on-unmatched-pattern', ...formattable]})
     const after = snapshot(root, outputFiles(root, generator))
     const changed = [...new Set([...before.keys(), ...after.keys()])].filter(path => before.get(path) !== after.get(path))

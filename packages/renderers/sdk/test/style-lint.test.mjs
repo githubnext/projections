@@ -28,7 +28,7 @@ test('hard-coded colors, font sizes and families and !important are warnings; fa
 `)
   assert.deepEqual(errors, [])
   assert.deepEqual(
-    warnings.map(warning => warning.replace(/^styles:\d+: /, '').replace(/ \{.*\}: /, ': ')),
+    warnings.map(warning => warning.replace(/^styles:\d+: /u, '').replace(/ \{.*\}: /u, ': ')),
     [
       ".a: the color #3366cc isn't a theme token; use var(--projections-color-…) (token.color in TSX)",
       ".b: the color rgb(0 0 0 / 0.2) isn't a theme token; use var(--projections-color-…) (token.color in TSX)",

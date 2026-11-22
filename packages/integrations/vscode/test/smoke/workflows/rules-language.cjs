@@ -46,7 +46,7 @@ module.exports = async function rulesLanguage({folder}) {
     new vscode.Position(rankLine, columnOf('range(') + 1),
   )
   const hoverText = hovers.flatMap(hover => hover.contents.map(content => content.value ?? String(content))).join('\n')
-  assert.match(hoverText, /lists\.range\(n: int\) -> list<int>/)
+  assert.match(hoverText, /lists\.range\(n: int\) -> list<int>/u)
   const completions = await vscode.commands.executeCommand(
     'vscode.executeCompletionItemProvider',
     rulesFile,
@@ -62,7 +62,7 @@ module.exports = async function rulesLanguage({folder}) {
   const rulesProblem = await until('the deliberate error', async () =>
     vscode.languages.getDiagnostics(rulesFile).find(item => item.source === 'projections rules'),
   )
-  assert.match(rulesProblem.message, /^Undeclared function \x60lists\.rnge\x60/)
+  assert.match(rulesProblem.message, /^Undeclared function \x60lists\.rnge\x60/u)
   assert.equal(rulesProblem.severity, vscode.DiagnosticSeverity.Error)
   assert.deepEqual(
     [rulesProblem.range.start.line, rulesProblem.range.start.character, rulesProblem.range.end.character],

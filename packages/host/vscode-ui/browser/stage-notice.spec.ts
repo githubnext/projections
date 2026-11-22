@@ -149,7 +149,7 @@ test('the notice stays put while a document-style renderer scrolls under it', as
       const scrollers = [document.scrollingElement!, ...document.querySelectorAll('*')].filter(
         element =>
           element.scrollHeight > element.clientHeight + 40 &&
-          (element === document.scrollingElement || /auto|scroll/.test(getComputedStyle(element).overflowY)),
+          (element === document.scrollingElement || /auto|scroll/u.test(getComputedStyle(element).overflowY)),
       )
       for (const element of scrollers) element.scrollTop = 600
       return Math.max(0, ...scrollers.map(element => element.scrollTop))

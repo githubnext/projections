@@ -17,16 +17,16 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 export function parseColor(value: string | undefined): Rgba | undefined {
   if (!value) return undefined
   const text = value.trim().toLowerCase()
-  const hex = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/.exec(text)?.[1]
+  const hex = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/u.exec(text)?.[1]
   if (hex) {
     const full = hex.length <= 4 ? [...hex].map(digit => digit + digit).join('') : hex
     const channel = (index: number) => Number.parseInt(full.slice(index * 2, index * 2 + 2), 16)
     return {r: channel(0), g: channel(1), b: channel(2), a: full.length === 8 ? channel(3) / 255 : 1}
   }
   // One run of anything but `)`: the parts are split (and blanks dropped) below, so no backtracking between runs.
-  const functional = /^rgba?\(([^)]+)\)$/.exec(text)?.[1]
+  const functional = /^rgba?\(([^)]+)\)$/u.exec(text)?.[1]
   if (functional) {
-    const parts = functional.split(/[\s,/]+/).filter(Boolean)
+    const parts = functional.split(/[\s,/]+/u).filter(Boolean)
     if (parts.length < 3 || parts.length > 4) return undefined
     const numbers = parts.map((part, index) =>
       part.endsWith('%') ? (Number(part.slice(0, -1)) / 100) * (index < 3 ? 255 : 1) : Number(part),

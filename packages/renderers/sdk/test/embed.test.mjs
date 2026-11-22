@@ -51,7 +51,7 @@ function fixture(documents = {graph: '<!doctype html><html><head><title>Graph</t
     },
   }
   const fromFrame = (message, source = contentWindow) => {
-    const channel = new URLSearchParams(/location\.hash="([^"]+)"/.exec(iframe.srcdoc)[1]).get('channel')
+    const channel = new URLSearchParams(/location\.hash="([^"]+)"/u.exec(iframe.srcdoc)[1]).get('channel')
     for (const listener of listeners) listener({source, data: {projections: 0, channel, ...message}})
   }
   return {
@@ -87,7 +87,7 @@ test('embedRenderer runs the host-supplied document in a sandboxed srcdoc frame 
   // The fragment is set first thing in the head, before the renderer's own scripts connect.
   assert.match(
     f.iframe.srcdoc,
-    /^<!doctype html><html><head><script>location\.hash="channel=[0-9a-f]{48}&origin=null&color=dark"<\/script><title>/,
+    /^<!doctype html><html><head><script>location\.hash="channel=[0-9a-f]{48}&origin=null&color=dark"<\/script><title>/u,
   )
   nested.select('a')
   assert.equal(f.sent.length, 0, 'nothing is sent before ready')
@@ -130,7 +130,7 @@ test('embedRenderer reports a refused document as a failure', async () => {
   const f = fixture({})
   const failures = []
   const nested = embedRenderer(f.client, f.container, {renderer: 'mine', title: 'Mine', init, onFailure: message => failures.push(message)})
-  await assert.rejects(nested.ready, /mine is not a built-in renderer/)
+  await assert.rejects(nested.ready, /mine is not a built-in renderer/u)
   assert.deepEqual(failures, ['mine is not a built-in renderer'])
   assert.equal(f.iframe.srcdoc, '')
 })
@@ -149,7 +149,7 @@ test("embedRenderer can choose what to present from the nested renderer's capabi
     progress: capabilities => (capabilities.comparisonModes?.includes('diff') ? undefined : {progress: 1, highlighting: 1, direction: 1}),
   })
   await new Promise(setImmediate)
-  assert.match(f.iframe.srcdoc, /color=light/)
+  assert.match(f.iframe.srcdoc, /color=light/u)
   f.fromFrame({type: 'ready', capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']}})
   await nested.ready
   assert.deepEqual(seen, [{changeHighlighting: 'supported', comparisonModes: ['diff']}])

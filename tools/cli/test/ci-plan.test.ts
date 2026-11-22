@@ -94,14 +94,14 @@ test('the rules checks catch references to groups, conditions and suites that do
     'jobs.verus.any[2].not: no group none',
     'browser.suites: packages/nothing has no test:browser script',
   ])
-  assert.throws(() => ciPlan(facts, broken, {paths: []}), /no condition nope/)
+  assert.throws(() => ciPlan(facts, broken, {paths: []}), /no condition nope/u)
 })
 
 test('the workflow gates each job on the rules decision of the same name', () => {
   const workflow = readFileSync(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8')
-  const gated = new Set([...workflow.matchAll(/needs\.changes\.outputs\.([\w-]+)/g)].map(match => match[1]!))
+  const gated = new Set([...workflow.matchAll(/needs\.changes\.outputs\.([\w-]+)/gu)].map(match => match[1]!))
   const mapped = new Set(
-    [...workflow.matchAll(/^ {6}([\w-]+): \$\{\{ steps\.plan\.outputs\.([\w-]+) \}\}$/gm)].filter(m => m[1] === m[2]).map(m => m[1]),
+    [...workflow.matchAll(/^ {6}([\w-]+): \$\{\{ steps\.plan\.outputs\.([\w-]+) \}\}$/gmu)].filter(m => m[1] === m[2]).map(m => m[1]),
   )
   const outputs = [...Object.keys(rules.jobs), 'browser', 'browser-macos']
   assert.deepEqual([...gated].sort(), [...outputs].sort())
@@ -177,7 +177,7 @@ test("a lockfile change runs the jobs for what its changed packages reach; the r
   assert.deepEqual(vscode.full, [])
   assert.deepEqual(vscode.changed, ['packages/integrations/vscode'])
   assert.deepEqual(plan(bump('node_modules/eslint'), lock).full.length, 1)
-  assert.match(plan(lock, undefined).full[0]!, /no earlier version/)
+  assert.match(plan(lock, undefined).full[0]!, /no earlier version/u)
 })
 
 test('a unit is reached through what it depends on, not through a crate whose tests alone read the change', () => {
@@ -217,7 +217,7 @@ test("a job the workflow shards is one check per shard, and a job limited to som
   for (const [job, definition] of Object.entries(rules.jobs)) {
     if (!('shards' in definition) || !definition.shards) continue
     const block = new RegExp(`^  ${job}:\\n([\\s\\S]*?)\\n  \\S`, 'm').exec(workflow)?.[1] ?? ''
-    const shards = /shard: \[([\d, ]+)\]/.exec(block)?.[1]?.split(',').map(Number)
+    const shards = /shard: \[([\d, ]+)\]/u.exec(block)?.[1]?.split(',').map(Number)
     assert.deepEqual(
       shards,
       Array.from({length: definition.shards}, (_, index) => index),

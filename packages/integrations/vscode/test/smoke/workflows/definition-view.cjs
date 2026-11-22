@@ -36,7 +36,7 @@ module.exports = async function definitionView({folder, api, manifest}) {
     ['definition', 'extractor', 'comparator', 'renderer'],
   )
   assert.equal(shown.rows[0].label, 'packages.json')
-  assert.match(shown.rows[0].tooltip, /\.github\/projections\/packages\.json/)
+  assert.match(shown.rows[0].tooltip, /\.github\/projections\/packages\.json/u)
   // Another projection's tab: the view moves to it, its title unchanged; back again, it follows.
   await vscode.commands.executeCommand('projections.openProjection', folder, 'legacy')
   assert.ok(staticTitle((await definitionOn('legacy')).title))
@@ -47,7 +47,7 @@ module.exports = async function definitionView({folder, api, manifest}) {
   await vscode.commands.executeCommand('projections.definition.pin')
   await vscode.commands.executeCommand('projections.openProjection', folder, 'legacy')
   await until('the legacy tab active', async () =>
-    /legacy/.test(String(vscode.window.tabGroups.activeTabGroup.activeTab?.input?.uri ?? '')) ? true : undefined,
+    /legacy/u.test(String(vscode.window.tabGroups.activeTabGroup.activeTab?.input?.uri ?? '')) ? true : undefined,
   )
   const pinned = await api.definition()
   assert.deepEqual([pinned.projection, pinned.pinned, pinned.message], ['packages', true, 'Pinned to Packages'])
@@ -61,7 +61,7 @@ module.exports = async function definitionView({folder, api, manifest}) {
   await until(
     'the definition open',
     async () =>
-      vscode.window.visibleTextEditors.some(editor => /\/projections\/packages\.json$/.test(editor.document.uri.path)) || undefined,
+      vscode.window.visibleTextEditors.some(editor => /\/projections\/packages\.json$/u.test(editor.document.uri.path)) || undefined,
   )
   assert.equal((await api.definition()).projection, 'packages')
   await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
@@ -81,7 +81,7 @@ module.exports = async function definitionView({folder, api, manifest}) {
         ? tab
         : undefined
     })
-  const docsRows = (await api.definition()).rows.filter(item => /docs$/.test(item.contextValue ?? ''))
+  const docsRows = (await api.definition()).rows.filter(item => /docs$/u.test(item.contextValue ?? ''))
   assert.deepEqual(
     docsRows.map(item => [item.label, item.command.command, item.command.arguments]),
     [
@@ -90,7 +90,7 @@ module.exports = async function definitionView({folder, api, manifest}) {
       ['Renderer', 'projections.openDocumentation', ['renderers/graph.md']],
     ],
   )
-  for (const row of docsRows) assert.match(row.tooltip, /click to read its documentation here in VS Code/)
+  for (const row of docsRows) assert.match(row.tooltip, /click to read its documentation here in VS Code/u)
   await api.definitionActivate('renderer')
   await docsPreview('renderers/graph.md')
   assert.ok(api.docs().reads.includes('renderers/graph.md'), JSON.stringify(api.docs().reads))
@@ -102,7 +102,7 @@ module.exports = async function definitionView({folder, api, manifest}) {
   const itemMenus = manifest.menus['view/item/context']
   assert.ok(
     itemMenus.some(
-      item => item.command === 'projections.configureComparator' && item.group === 'inline' && /definition-comparator/.test(item.when),
+      item => item.command === 'projections.configureComparator' && item.group === 'inline' && /definition-comparator/u.test(item.when),
     ),
   )
   const github = itemMenus.filter(item => item.command === 'projections.openDocumentationOnGitHub')
@@ -140,9 +140,9 @@ module.exports = async function definitionView({folder, api, manifest}) {
     api.sources().map(item => item.split(': ')[0]),
     ['Definition', 'Extractor', 'Comparator', 'Renderer'],
   )
-  assert.match(api.sources()[2], /Default · Configure…$/)
+  assert.match(api.sources()[2], /Default · Configure…$/u)
   const beside = await until('the definition beside the tab', async () =>
-    vscode.window.visibleTextEditors.find(editor => /\/projections\/packages\.json$/.test(editor.document.uri.path)),
+    vscode.window.visibleTextEditors.find(editor => /\/projections\/packages\.json$/u.test(editor.document.uri.path)),
   )
   // Beside the projection tab, not over it: the tab stays open.
   assert.ok(

@@ -12,7 +12,7 @@ async function read(directory, prefix = '') {
   for (const entry of await readdir(path.join(directory, prefix), {withFileTypes: true})) {
     const relative = prefix ? `${prefix}/${entry.name}` : entry.name
     if (entry.isDirectory()) found.push(...(await read(directory, relative)))
-    else if (/^v\d+\.json$/.test(entry.name)) {
+    else if (/^v\d+\.json$/u.test(entry.name)) {
       found.push({file: relative, schema: JSON.parse(await readFile(path.join(directory, relative), 'utf8'))})
     }
   }

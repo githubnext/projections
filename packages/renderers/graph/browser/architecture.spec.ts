@@ -82,7 +82,7 @@ test('a definition can show a data field as badges, color cards by a field and r
   const worker = renderer.frame.locator('[data-entity-id="unit:worker"]')
   await expect(worker.locator('.node-badge-text')).toHaveText(['process', 'network'])
   await expect(worker.locator('.node-accent')).toHaveCount(1)
-  await expect(worker).toHaveAttribute('aria-label', /scope: internal, process, network/)
+  await expect(worker).toHaveAttribute('aria-label', /scope: internal, process, network/u)
   // Badges are identifiers, in the monospace font.
   await expect(worker.locator('.node-badge-text').first()).toHaveAttribute('data-projections-identifier', '')
   await expect
@@ -138,7 +138,7 @@ test('a large architecture collapses unchanged boundaries, and its diff opens on
   await expect(extractors).toHaveCount(1)
   await expect(frame.getByRole('button', {name: 'Show 30 components of extractors'})).toHaveCount(1)
   // Joined links name the boundary, not the summary card's ID.
-  await expect(frame.getByRole('button', {name: /^Inspect relationship extractors → sdk/})).toHaveCount(1)
+  await expect(frame.getByRole('button', {name: /^Inspect relationship extractors → sdk/u})).toHaveCount(1)
   await expect(frame.locator('[data-entity-id="extractors/extractor-01"]')).toHaveCount(0)
   // Everything doesn't fit at the text floor, so the diff opens on its changes.
   const measured = await renderer.measure<{canvases: {zoom: number; changes: {count: number; inView: number}}[]}>('opening')
@@ -256,7 +256,7 @@ test('a definition can give cards a subtitle, size them by a number and add word
   const server = renderer.frame.locator('[data-entity-id="unit:server"]')
   const store = renderer.frame.locator('[data-entity-id="unit:store"]')
   // The subtitle wraps to the card's one width, a line per tspan.
-  await expect(server.locator('.node-subtitle')).toContainText(/Serves the\s*server/)
+  await expect(server.locator('.node-subtitle')).toContainText(/Serves the\s*server/u)
   await expect(server.locator('.node-detail')).toHaveText('9K')
   // Every card keeps one width, and the number is its only mark of size: no bar along its top edge.
   const width = async (card: typeof server) => Number(await card.locator('.node-surface').getAttribute('width'))

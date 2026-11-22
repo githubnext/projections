@@ -9,7 +9,7 @@ const literal = value => JSON.stringify(value)
 const typing = ['type', '$ref', 'const', 'enum', 'properties', 'additionalProperties', 'items', 'anyOf', 'oneOf', 'allOf']
 // An alternative such as `{"required": ["item"]}` constrains its object rather than giving it another type.
 const typed = schema => typeof schema === 'boolean' || typing.some(key => key in schema)
-const grouped = text => (/ [|&] /.test(text) ? `(${text})` : text)
+const grouped = text => (/ [|&] /u.test(text) ? `(${text})` : text)
 
 function constraints(schema) {
   const parts = []
@@ -108,7 +108,7 @@ export function schemaDeclarations({document, schema, text, source}) {
       nest(id, field.schema, field.pointer, '.')
     }
   }
-  const version = schema.$id ? schema.$id.replace(/^.*\/([^/]+)\/(v\d+)\.json$/, '$1/$2') : undefined
+  const version = schema.$id ? schema.$id.replace(/^.*\/([^/]+)\/(v\d+)\.json$/u, '$1/$2') : undefined
   declare(
     undefined,
     {id: document.id, kind: 'document', label: document.label, data: {signature: `${document.file}${version ? ` (${version})` : ''}`}},

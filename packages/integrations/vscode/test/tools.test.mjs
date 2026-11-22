@@ -104,15 +104,15 @@ test('a write asks the person with its preview, and only when there is something
   assert.equal(confirmation('Adopt projections', {...preview, isError: true}), undefined)
   assert.equal(confirmation('Adopt projections', {...preview, structuredContent: {written: false}}), undefined)
   assert.equal(toolText(parseToolResult(preview)), preview.content[0].text)
-  assert.throws(() => parseToolResult({}), /invalid tool result/)
-  assert.throws(() => parseTools({tools: [{}]}), /invalid tools/)
+  assert.throws(() => parseToolResult({}), /invalid tool result/u)
+  assert.throws(() => parseTools({tools: [{}]}), /invalid tools/u)
 })
 
 test('package.json contributes every CLI tool, as scripts/tools.mjs writes them', {skip: !existsSync(cli) && 'no CLI build'}, async () => {
   const tools = pkg.contributes.languageModelTools
   assert.deepEqual(tools, await contributions(), 'run node scripts/tools.mjs')
   for (const tool of tools) {
-    assert.match(tool.name, /^projections_[a-z_]+$/)
+    assert.match(tool.name, /^projections_[a-z_]+$/u)
     assert.ok(tool.modelDescription.length > 80, tool.name)
     assert.ok(tool.userDescription && tool.displayName && tool.icon, tool.name)
     assert.equal(tool.inputSchema.type, 'object')
@@ -125,7 +125,7 @@ test('package.json contributes every CLI tool, as scripts/tools.mjs writes them'
   )
   assert.ok(tools.some(tool => tool.name === 'projections_open_projection'))
   const current = tools.find(tool => tool.name === 'projections_current_view')
-  assert.match(current?.modelDescription ?? '', /"this projection"/)
+  assert.match(current?.modelDescription ?? '', /"this projection"/u)
   assert.deepEqual(current.tags, ['projections'])
   for (const name of ['projections_refresh', 'projections_screenshot']) {
     assert.ok(

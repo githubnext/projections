@@ -111,7 +111,7 @@ function oklab(hex: string): [number, number, number] {
     0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
   ]
 }
-const hex = /^#[0-9a-f]{6}$/i
+const hex = /^#[0-9a-f]{6}$/iu
 function distance(a: string, b: string): number {
   if (!hex.test(a) || !hex.test(b)) return Infinity
   const [x, y] = [oklab(a), oklab(b)]
@@ -195,7 +195,7 @@ export function categoryPalette(
       .map(({category}) => (category.language ? languageColor(category.language, mode) : undefined))
       .filter((color): color is string => color !== undefined),
   }))
-  const slotOf = (token: ThemeTokenName) => (/^chart-\d+$/.test(token) ? Number(token.slice(6)) : 0)
+  const slotOf = (token: ThemeTokenName) => (/^chart-\d+$/u.test(token) ? Number(token.slice(6)) : 0)
   // Pinned colors are reserved first, so assigned ones keep clear of them.
   const taken = new Set<number>([...pinned.values()].map(slotOf).filter(Boolean))
   const used = (mode: (typeof modes)[number]) => [

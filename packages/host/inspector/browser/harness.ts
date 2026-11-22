@@ -72,7 +72,7 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
   const windows = process.platform === 'win32'
   const git = await realpath(
     execFileSync(windows ? 'where' : 'which', ['git'], {encoding: 'utf8'})
-      .split(/\r?\n/)[0]!
+      .split(/\r?\n/u)[0]!
       .trim(),
   )
   const tools = windows ? dirname(git) : await mkdtemp(join(tmpdir(), 'projections-browser-tools-'))
@@ -124,7 +124,7 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
       return route.fulfill({status: 200, headers: {'content-type': types['.html']!, 'content-security-policy': policy}, body: page})
     }
     if (url.pathname === '/harness.js') return route.fulfill({status: 200, headers: {'content-type': types['.js']!}, body: script})
-    if (!/^\/(api|renderers|custom-renderers)\//.test(url.pathname)) {
+    if (!/^\/(?:api|renderers|custom-renderers)\//u.test(url.pathname)) {
       const file = join(client, ...url.pathname.split('/').filter(part => part && part !== '..'))
       if (!file.startsWith(client) || !existsSync(file)) return route.fulfill({status: 404, body: 'Not found'})
       return route.fulfill({

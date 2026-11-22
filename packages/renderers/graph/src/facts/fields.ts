@@ -15,7 +15,7 @@ export function fieldPointer(field: string): string {
 
 /** The data field a `/data/<field>` pointer names, or undefined for anything else. */
 export function pointerField(pointer: string): string | undefined {
-  const match = /^\/data\/([^/]+)$/.exec(pointer)
+  const match = /^\/data\/([^/]+)$/u.exec(pointer)
   return match ? match[1]!.replaceAll('~1', '/').replaceAll('~0', '~') : undefined
 }
 

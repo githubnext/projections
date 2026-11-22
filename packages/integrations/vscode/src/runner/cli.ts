@@ -68,7 +68,7 @@ export const supportedProtocols = [1]
  * any compatible release.
  */
 export function compatibleVersion(extension: string, cli: string): boolean {
-  const parse = (version: string) => /^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/.exec(version.trim())?.slice(1, 4).map(Number)
+  const parse = (version: string) => /^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/u.exec(version.trim())?.slice(1, 4).map(Number)
   const [a, b] = [parse(extension), parse(cli)]
   if (!a || !b) return false
   return a[0] === b[0] && (a[0] !== 0 || a[1] === b[1])

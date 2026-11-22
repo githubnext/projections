@@ -81,7 +81,7 @@ module.exports = async function nestedRenderers({folder, api}) {
   )
   assert.match(
     report,
-    /documents graph=html with nonce; nesting=refused \(nesting is not a built-in renderer\); no-such-renderer=refused \(no-such-renderer is not a built-in renderer\)/,
+    /documents graph=html with nonce; nesting=refused \(nesting is not a built-in renderer\); no-such-renderer=refused \(no-such-renderer is not a built-in renderer\)/u,
   )
   // The built-in document runs nested under the webview's nonce policy, and speaks the protocol to its nesting frame.
   await until(
@@ -119,7 +119,7 @@ module.exports = async function nestedRenderers({folder, api}) {
     90_000,
   )
   const [frame] = await api.control('gallery', {op: 'elements', selector: 'iframe.ph-frame', attribute: 'aria-label'})
-  assert.match(frame?.value ?? '', /Gallery/)
+  assert.match(frame?.value ?? '', /Gallery/u)
   assert.equal((await api.control('gallery', {op: 'elements', selector: '.phv-notice[data-severity="warning"]'})).length, 0)
   await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
 }

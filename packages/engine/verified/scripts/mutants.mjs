@@ -25,7 +25,7 @@ export async function mutants() {
   for (const file of readdirSync(directory)
     .filter(name => name.endsWith('.mjs'))
     .sort()) {
-    const module = file.replace(/\.mjs$/, '.rs')
+    const module = file.replace(/\.mjs$/u, '.rs')
     if (!existsSync(join(sources, module))) throw new Error(`mutants/${file} has no src/${module}`)
     const {default: list} = await import(pathToFileURL(join(directory, file)).href)
     all.push(...list.map(mutant => ({...mutant, file: module})))
@@ -58,7 +58,7 @@ async function plant(executable, mutant) {
       text = text.replaceAll(from, to)
     }
     writeFileSync(path, text)
-    const {ok, output} = await verus(executable, scratch, mutant.file.replace(/\.rs$/, ''))
+    const {ok, output} = await verus(executable, scratch, mutant.file.replace(/\.rs$/u, ''))
     const caught = !ok && [mutant.clause, mutant.step].some(expected => expected && output.includes(expected))
     const detail = caught ? undefined : ok ? 'Verus accepted it' : `Verus rejected it, but not on: ${mutant.clause}\n${output}`
     return {name: mutant.name, caught, detail}

@@ -26,7 +26,7 @@ const within = (root: string, file: string): boolean => {
 
 /** The checkout directory corresponding to a repository-relative path, or the checkout itself. */
 export function startDirectory(toolchain: Toolchain, relative: string | undefined): string {
-  if (relative === undefined || path.isAbsolute(relative) || relative.split(/[\\/]/).includes('..')) return toolchain.checkout
+  if (relative === undefined || path.isAbsolute(relative) || relative.split(/[\\/]/u).includes('..')) return toolchain.checkout
   for (
     let directory = path.resolve(toolchain.checkout, relative);
     within(toolchain.checkout, directory);

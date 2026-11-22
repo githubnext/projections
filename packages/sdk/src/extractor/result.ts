@@ -48,7 +48,7 @@ function listed(items: unknown, field: 'entities' | 'relationships'): Record<str
   } else list = Object.entries(items).map(([key, item]) => keyed(key, item))
   for (const item of list) {
     if (typeof item.id !== 'string' || !item.id) {
-      throw new RangeError(`${article(singular[field]).replace(/^a/, 'A')}'s id must be a nonempty string, not ${quoted(item.id)}`)
+      throw new RangeError(`${article(singular[field]).replace(/^a/u, 'A')}'s id must be a nonempty string, not ${quoted(item.id)}`)
     }
     for (const name of requiredFields[field]) {
       if (typeof item[name] !== 'string') throw new RangeError(`The ${singular[field]} ${quoted(item.id)} needs ${name}, a string`)

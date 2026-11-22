@@ -32,7 +32,8 @@ const types = {
 }
 
 /** The bodies of a page's inline `<script>` elements (those without `src`). */
-const inlineScripts = html => [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(match => match[1]).filter(Boolean)
+const inlineScripts = html =>
+  [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gu)].map(match => match[1]).filter(Boolean)
 
 /** Serves the built Storybook on a loopback port; `close` stops it. */
 export async function startStorybookServer({root = storybookDirectory, port = 0} = {}) {

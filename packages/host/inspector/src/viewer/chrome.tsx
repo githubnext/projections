@@ -225,7 +225,7 @@ export function ViewerShown({store}: {store: Store}) {
 export function shownRevision(state: ViewerState): string | undefined {
   const after = state.after ?? 'working-tree'
   if (after === 'working-tree') return undefined
-  return /^[0-9a-f]{40}$/i.test(after) ? after.slice(0, 7) : after
+  return /^[0-9a-f]{40}$/iu.test(after) ? after.slice(0, 7) : after
 }
 
 /** The page before the agent shows a projection: the status line alone. The Inspector replaces it once mounted. */

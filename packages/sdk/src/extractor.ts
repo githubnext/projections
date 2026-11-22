@@ -26,7 +26,7 @@ export const MAX_BASIS_PARTS = 16
 /** The longest value of one basis part, in UTF-8 bytes. */
 export const MAX_BASIS_PART_BYTES = 256
 
-const partName = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
+const partName = /^[A-Za-z][\w-]{0,63}$/u
 
 /**
  * RFC 8785 canonical JSON: object keys in UTF-16 code-unit order (JavaScript's default string order), numbers and

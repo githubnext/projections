@@ -16,10 +16,10 @@ module.exports = async function schemas({folder}) {
     })
     const messages = diagnostics.map(diagnostic => diagnostic.message)
     assert.ok(
-      messages.some(message => /renderer/.test(message)),
+      messages.some(message => /renderer/u.test(message)),
       messages.join(' | '),
     )
-    assert.ok(!messages.some(message => /Unable to load schema|Downloading schemas is disabled/.test(message)), messages.join(' | '))
+    assert.ok(!messages.some(message => /Unable to load schema|Downloading schemas is disabled/u.test(message)), messages.join(' | '))
   } finally {
     await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
     await vscode.workspace.fs.delete(bad)

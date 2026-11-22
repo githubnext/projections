@@ -63,8 +63,8 @@ test('play, seek and reverse use bounded elapsed time and stop at endpoints', ()
   assert.equal(state.progress, 1)
   assert.equal(state.playing, true)
   assert.equal(viewerReducer(state, {type: 'seek', value: 0.83}).progress, 0.83)
-  assert.throws(() => viewerReducer(state, {type: 'seek', value: NaN}), /finite/)
-  assert.throws(() => viewerReducer(state, {type: 'advance', elapsedMs: 1, durationMs: 0}), /duration/)
+  assert.throws(() => viewerReducer(state, {type: 'seek', value: NaN}), /finite/u)
+  assert.throws(() => viewerReducer(state, {type: 'advance', elapsedMs: 1, durationMs: 0}), /duration/u)
 })
 
 test('initial and reset state start paused at the requested progress', () => {
@@ -141,6 +141,6 @@ test('comparisons expand into before/after pairs, including splits and merges, w
   )
   assert.throws(
     () => presentComparison(extraction([billing]), extraction([invoicing]), {protocolVersion: 0, changes: [], steps: []}),
-    /omits/,
+    /omits/u,
   )
 })

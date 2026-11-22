@@ -63,7 +63,7 @@ const posix = (path: string) => path.split(sep).join('/')
 const isFile = (path: string) => existsSync(path) && statSync(path).isFile()
 
 /** Configuration at a workspace's top level that its build reads: its manifest, tsconfigs and tool configs. */
-const configFile = /^(package\.json|tsconfig.*\.json|.+\.config\.[cm]?[jt]s)$/
+const configFile = /^(?:package\.json|tsconfig.*\.json|.+\.config\.[cm]?[jt]s)$/u
 
 /**
  * A workspace's build inputs besides its src, as paths from the root, sorted: its manifest, tsconfigs and the
@@ -84,8 +84,8 @@ export function buildInputs(root: string, unit: Unit): string[] {
   // Relative `extends` only: a package's tsconfig is a dependency, which the lockfile versions.
   while (tsconfigs.length) {
     const tsconfig = tsconfigs.pop()!
-    const extended = /"extends"\s*:\s*("[^"]*"|\[[^\]]*\])/.exec(readFileSync(tsconfig, 'utf8'))?.[1] ?? ''
-    for (const [, name] of extended.matchAll(/"(\.{1,2}\/[^"]*)"/g)) {
+    const extended = /"extends"\s*:\s*("[^"]*"|\[[^\]]*\])/u.exec(readFileSync(tsconfig, 'utf8'))?.[1] ?? ''
+    for (const [, name] of extended.matchAll(/"(\.{1,2}\/[^"]*)"/gu)) {
       const path = join(dirname(tsconfig), name!.endsWith('.json') ? name! : `${name}.json`)
       if (isFile(path) && !inputs.has(posix(relative(root, path)))) {
         add(path)
@@ -106,15 +106,15 @@ export function buildInputs(root: string, unit: Unit): string[] {
   for (const name of queue) {
     const script = scripts[name]
     if (script === undefined) continue
-    for (const [, run] of script.matchAll(/\bnpm run ([\w:.-]+)/g)) {
+    for (const [, run] of script.matchAll(/\bnpm run ([\w:.-]+)/gu)) {
       for (const next of [`pre${run}`, run!, `post${run}`]) if (!queue.includes(next)) queue.push(next)
     }
-    for (const token of script.split(/[\s"'\x60=;&|()<>]+/)) {
-      if (!/[./]/.test(token) || token.startsWith('-')) continue
+    for (const token of script.split(/[\s"'\x60=;&|()<>]+/u)) {
+      if (!/[./]/u.test(token) || token.startsWith('-')) continue
       const path = join(directory, token)
       // What the build writes is not an input to it.
       const within = posix(relative(directory, path))
-      if (/^(dist|artifacts|node_modules)(\/|$)/.test(within) || !isFile(path)) continue
+      if (/^(?:dist|artifacts|node_modules)(?:\/|$)/u.test(within) || !isFile(path)) continue
       add(path)
     }
   }

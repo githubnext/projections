@@ -95,7 +95,7 @@ test('the share chart fills a frame the host sizes, and keeps its size in a cont
       scenario: 'code-statistics/languages',
       comparisonMode: 'diff',
       options: {chart: 'share'},
-      ...(height ? {height} : {}),
+      ...(height !== undefined && height !== 0 ? {height} : {}),
     })
     await stage.measure('settle')
     const result = await stage.frame.locator('.statistics-view').evaluate(view => {
@@ -113,7 +113,9 @@ test('the share chart fills a frame the host sizes, and keeps its size in a cont
     })
     if (shots && info.project.name.startsWith('chromium')) {
       mkdirSync(shots, {recursive: true})
-      await stage.frame.locator('body').screenshot({path: `${shots}/code-statistics-share-${height ? 'fill' : 'content'}.png`})
+      await stage.frame
+        .locator('body')
+        .screenshot({path: `${shots}/code-statistics-share-${height !== undefined && height !== 0 ? 'fill' : 'content'}.png`})
     }
     return result
   }

@@ -84,14 +84,27 @@ function ownText(element: Element): string {
   return text.trim()
 }
 
-/** Each hued paint of an element: an HTML background, border, inset shadow edge and own text; an SVG fill and stroke. */
-export function paintsOf(element: Element, style: CSSStyleDeclaration, hues: Map<AccentFamily, number>): Paint[] {
+/** Each color a value names (a gradient's stops, a shadow's color), spelled as `normalizeColors` spells them. */
+function colorsIn(value: string): string[] {
+  return [...normalizeColors(value).matchAll(/rgba?\([^)]*\)|#[0-9a-f]{6,8}\b/giu)].map(match => match[0])
+}
+
+/**
+ * Each hued paint of an element, or of its `::before` or `::after` (`pseudo`): an HTML background (its color and a
+ * gradient's stops), border, box shadow (an inset one draws an edge inside the box, as `pk-region` does; an outset one
+ * round it) and own text, or a pseudo-element's generated text; an SVG fill and stroke. Outlines are rings, not paint.
+ * A categorical part's fill and background (`data-projections-category`), its pseudo-elements' included, are the
+ * category palette's, not accents; its borders, shadows and text still count.
+ */
+export function paintsOf(element: Element, style: CSSStyleDeclaration, hues: Map<AccentFamily, number>, pseudo = false): Paint[] {
   const paints: Paint[] = []
+  const categorical = element.hasAttribute('data-projections-category')
   const add = (property: string, color: string) => {
+    if (categorical && ['fill', 'background-color', 'background-image'].includes(property)) return
     const family = familyOf(color, hues)
-    if (family) paints.push({family, property})
+    if (family && !paints.some(paint => paint.family === family && paint.property === property)) paints.push({family, property})
   }
-  if (element instanceof SVGElement) {
+  if (element instanceof SVGElement && !pseudo) {
     const geometry = element instanceof SVGGeometryElement
     const text = element instanceof SVGTextContentElement && Boolean(ownText(element))
     if ((geometry && !(element instanceof SVGLineElement)) || text) add('fill', style.fill)
@@ -99,15 +112,17 @@ export function paintsOf(element: Element, style: CSSStyleDeclaration, hues: Map
     return paints
   }
   add('background-color', style.backgroundColor)
+  if (style.backgroundImage !== 'none') for (const color of colorsIn(style.backgroundImage)) add('background-image', color)
   for (const side of ['top', 'right', 'bottom', 'left']) {
     if (style.getPropertyValue(`border-${side}-style`) !== 'none' && px(style.getPropertyValue(`border-${side}-width`)) > 0) {
       add(`border-${side}-color`, style.getPropertyValue(`border-${side}-color`))
     }
   }
-  // An inset shadow draws an edge inside the box, as `pk-region` does.
   for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/u)) {
-    if (/\binset\b/u.test(shadow)) add('inset box-shadow', /rgba?\([^)]*\)|#[0-9a-f]{6,8}\b/iu.exec(normalizeColors(shadow))?.[0] ?? '')
+    const [color = ''] = colorsIn(shadow)
+    add(/\binset\b/u.test(shadow) ? 'inset box-shadow' : 'box-shadow', color)
   }
-  if (ownText(element)) add('color', style.color)
+  const text = pseudo ? /^"(.+)"$/u.exec(style.content)?.[1]?.trim() : ownText(element)
+  if (text) add('color', style.color)
   return paints
 }

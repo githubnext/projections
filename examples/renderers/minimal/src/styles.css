@@ -115,11 +115,15 @@ ol {
 .item[data-status='modified'] {
   --status-color: var(--modified);
 }
-/* Hover, focus and selection rings are the SDK's: an outline on each item's own element (connectRenderer adds them). */
+/*
+ * Hover, focus and selection rings are the SDK's: an outline on each item's own element (connectRenderer adds them).
+ * The name is in the text color, not the accent: a changed item is tinted in its change's color, and a change or
+ * accent color never sits inside another (the `nested-accents` check).
+ */
 .item-label {
   font: inherit;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--fg);
   background: none;
   border: 0;
   padding: 0;

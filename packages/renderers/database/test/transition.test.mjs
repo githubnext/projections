@@ -719,6 +719,6 @@ test('where a cycle is broken depends on the graph alone, not on the order its t
     {from: 'c', to: 'a'},
   ]
   const forward = layerDepths(['b', 'c', 'a'], [...cycleLinks, ...brokenLinks])
-  const reverse = layerDepths(['a', 'c', 'b'], [...after, ...before].reverse())
+  const reverse = layerDepths(['a', 'c', 'b'], [...brokenLinks, ...cycleLinks].reverse())
   assert.deepEqual(new Map([...reverse].sort()), new Map([...forward].sort()))
 })

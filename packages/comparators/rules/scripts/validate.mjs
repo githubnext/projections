@@ -73,8 +73,8 @@ for (const [name, text] of testDocuments) {
     console.error(`invalid ${name}: ${JSON.stringify(validateTests.errors, null, 2)}`)
   }
 }
-for (const [name, text, schema] of documents) {
-  if (schema && !validate(parse(text))) {
+for (const [name, text, validated] of documents) {
+  if (validated && !validate(parse(text))) {
     failed = true
     console.error(`invalid ${name}: ${JSON.stringify(validate.errors, null, 2)}`)
     continue

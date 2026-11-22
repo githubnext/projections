@@ -141,17 +141,24 @@ function handle(page: Page, subject: StageSubject, record: StageRecord): StageHa
       }
     },
     select: id => call('select', () => page.evaluate(selectedId => window.projectionsStage.select(selectedId), id)),
-    setOptions: options => call('setOptions', () => page.evaluate(stageOptions => window.projectionsStage.setOptions(stageOptions), options)),
+    setOptions: options =>
+      call('setOptions', () => page.evaluate(stageOptions => window.projectionsStage.setOptions(stageOptions), options)),
     action: id => call(`action(${id})`, () => page.evaluate(actionId => window.projectionsStage.action(actionId), id)),
     hover: id => call('hover', () => page.evaluate(hoveredId => window.projectionsStage.hover(hoveredId), id)),
     filter: payload => call('filter', () => page.evaluate(filterPayload => window.projectionsStage.filter(filterPayload), payload)),
     setEnvironment: environment =>
-      call('setEnvironment', () => page.evaluate(stageEnvironment => window.projectionsStage.setEnvironment(stageEnvironment), environment)),
+      call('setEnvironment', () =>
+        page.evaluate(stageEnvironment => window.projectionsStage.setEnvironment(stageEnvironment), environment),
+      ),
     setWidth: width => call(`setWidth(${width})`, () => page.evaluate(frameWidth => window.projectionsStage.setWidth(frameWidth), width)),
     measure: <T>(probe: ProbeCall, args?: unknown) =>
       call(
         `measure(${probe})`,
-        () => page.evaluate(([probeName, probeArgs]) => window.projectionsStage.measure(probeName, probeArgs), [probe, args] as const) as Promise<T>,
+        () =>
+          page.evaluate(([probeName, probeArgs]) => window.projectionsStage.measure(probeName, probeArgs), [
+            probe,
+            args,
+          ] as const) as Promise<T>,
       ),
     state: () => call('state', () => page.evaluate(() => window.projectionsStage.state())),
   }
@@ -174,7 +181,10 @@ export async function openStage(
     const {scenario, ...overrides} = request
     record.scenario = scenario
     await ask(record, 'loadScenario', () =>
-      page.evaluate(([key, scenarioOverrides]) => window.projectionsStage.loadScenario(key, scenarioOverrides), [scenario, overrides] as const),
+      page.evaluate(([key, scenarioOverrides]) => window.projectionsStage.loadScenario(key, scenarioOverrides), [
+        scenario,
+        overrides,
+      ] as const),
     )
     const subject = await ask(record, 'subject', () => page.evaluate(() => window.projectionsStage.subject()))
     return handle(page, subject, record)

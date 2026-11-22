@@ -191,3 +191,67 @@ test('needs carried to new plans by a key, and shifted alike when the shown plan
   shiftNeeds(carried, 'merged, two rows', 300)
   assert.equal(carried.get('centre, two rows'), 940)
 })
+
+test('focus that moves into a control’s own popup is still the control’s: choosing an item may remount it', async () => {
+  const {leftOnPurpose} = await import('../dist/fit-plan/focus.js')
+  const outside = {}
+  const bar = {ownerDocument: {activeElement: outside}, contains: element => element !== outside}
+  const control = expanded => ({isConnected: true, getAttribute: name => (name === 'aria-expanded' ? String(expanded) : null)})
+  // A menu button whose menu is open, focus in the menu (portalled outside the bar): kept.
+  assert.equal(leftOnPurpose(control(true), bar), false)
+  // Focus moved elsewhere from a control with nothing open: forgotten.
+  assert.equal(leftOnPurpose(control(false), bar), true)
+  // Focus still in the bar, or a control that left the document (a remount): kept.
+  assert.equal(leftOnPurpose(control(false), {...bar, contains: () => true}), false)
+  assert.equal(leftOnPurpose({...control(false), isConnected: false}, bar), false)
+  // A custom element whose popup button is in its shadow root (focus is retargeted to the host): kept while it's open.
+  const host = expanded => ({isConnected: true, getAttribute: () => null, shadowRoot: {querySelector: () => (expanded ? {} : null)}})
+  assert.equal(leftOnPurpose(host(true), bar), false)
+  assert.equal(leftOnPurpose(host(false), bar), true)
+})
+
+test('a control kept for its open popup is forgotten when the popup closes with focus elsewhere, not when it remounts', async () => {
+  const {untilPopupCloses} = await import('../dist/fit-plan/focus.js')
+  const settle = () => new Promise(resolve => setTimeout(resolve, 0))
+  let notify
+  class Observer {
+    constructor(callback) {
+      notify = callback
+    }
+    observe() {}
+    disconnect() {
+      notify = undefined
+    }
+  }
+  const document = {activeElement: {}}
+  const bar = {ownerDocument: document, contains: element => element === 'in-bar'}
+  const control = {isConnected: true, expanded: true, getAttribute: name => (name === 'aria-expanded' ? String(control.expanded) : null)}
+  // The person pressed elsewhere: the popup closes, focus stays outside the bar.
+  let forgotten = 0
+  untilPopupCloses(control, bar, () => forgotten++, Observer)
+  notify()
+  await settle()
+  assert.equal(forgotten, 0, 'still open')
+  control.expanded = false
+  notify()
+  await settle()
+  assert.equal(forgotten, 1)
+  assert.equal(notify, undefined, 'it stops watching')
+  // Escape returns focus to the control in the bar as the popup closes: kept.
+  control.expanded = true
+  untilPopupCloses(control, bar, () => forgotten++, Observer)
+  control.expanded = false
+  document.activeElement = 'in-bar'
+  notify()
+  await settle()
+  assert.equal(forgotten, 1)
+  // Choosing an item remounted the control: kept, for the bar to restore.
+  document.activeElement = {}
+  control.expanded = true
+  untilPopupCloses(control, bar, () => forgotten++, Observer)
+  control.isConnected = false
+  control.expanded = false
+  notify?.()
+  await settle()
+  assert.equal(forgotten, 1)
+})

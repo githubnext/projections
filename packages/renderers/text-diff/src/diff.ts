@@ -1,3 +1,5 @@
+import {myers} from './myers.js'
+
 /** One line of text and the terminator that ended it (`''` for a final line without one). */
 export interface Line {
   text: string
@@ -21,8 +23,6 @@ export interface DiffLimits {
   /** Upper bound on the edit distance searched. */
   maxDistance?: number
 }
-
-import {myers} from './myers.js'
 
 const defaultBudget = 40_000_000
 const defaultMaxDistance = 2_000

@@ -1,10 +1,8 @@
 // A presentation frame: every item at one progress, timed by the comparison's steps.
 import type {Entity, Extraction, Relationship} from '@githubnext/projections-schemas'
-import {emphasisRise, scheduleSteps, stepProgress} from '../schedule.js'
-import type {ScheduledStep} from '../schedule.js'
+import {emphasisRise, scheduleSteps, stepProgress, type ScheduledStep} from '../schedule.js'
 import type {PresentedOrder} from '../steps.js'
-import {snapshotChanges} from './changes.js'
-import type {EntityChange, PresentedChanges} from './changes.js'
+import {snapshotChanges, type EntityChange, type PresentedChanges} from './changes.js'
 import {diffEmphasis, phaseProgress, stepPhases, unit} from './progress.js'
 
 /**

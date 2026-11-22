@@ -1,7 +1,7 @@
 // A revision's structure, as the Changes scope derives context from it for a comparison saved without context: the
 // same structural context the Engine's core context makes.
-import {isContainment} from './context.js'
-import type {ContainmentSource, ScopeRow} from './context.js'
+import {isContainment, type ContainmentSource} from './containment.js'
+import type {ScopeRow} from './context.js'
 
 type Side = 'before' | 'after'
 

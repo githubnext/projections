@@ -1,5 +1,10 @@
 // shadcn/ui components (radix-vega style, shadcn@4.23.0, MIT; see LICENSE.shadcn.txt) with the `pj-` prefix, for Projections apps.
 // Render them inside `ScopedRoot` and load `@githubnext/projections-host/ui.css`.
+import type {ComponentProps} from 'react'
+import type {Badge} from './badge.js'
+import type {Button} from './button.js'
+import type {NativeSelect} from './native-select.js'
+
 export {ScopedRoot} from './scoped-root.js'
 export type {ScopedRootProps} from './scoped-root.js'
 export {Alert, AlertDescription, AlertTitle} from './alert.js'
@@ -57,10 +62,6 @@ export {ToggleGroup, ToggleGroupItem} from './toggle-group.js'
 export {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from './tooltip.js'
 export {cn} from '../lib/utils.js'
 
-import type {ComponentProps} from 'react'
-import type {Badge} from './badge.js'
-import type {Button} from './button.js'
-import type {NativeSelect} from './native-select.js'
 /** Props of the vendored components, which upstream doesn't name. */
 export type BadgeProps = ComponentProps<typeof Badge>
 /** The props of the vendored `Button`: a native `button`'s, its `variant` and `size`, and `asChild`. */

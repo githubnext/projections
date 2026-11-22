@@ -1,8 +1,13 @@
 // A reference consumer of the target hooks: the details slot and the targets panel.
-import {useState} from 'react'
-import type {RefObject} from 'react'
-import {decodeTarget, encodeTarget, useProjectionAnchor} from '@githubnext/projections-host'
-import type {ProjectionController, ProjectionSelection, TargetResolution} from '@githubnext/projections-host'
+import {useState, type RefObject} from 'react'
+import {
+  decodeTarget,
+  encodeTarget,
+  useProjectionAnchor,
+  type ProjectionController,
+  type ProjectionSelection,
+  type TargetResolution,
+} from '@githubnext/projections-host'
 
 /** A consumer's details content: the selection's targets and where the renderer draws it. */
 export function DetailsSlot({selection, projection}: {selection: ProjectionSelection; projection: ProjectionController}) {

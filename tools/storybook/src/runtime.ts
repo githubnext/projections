@@ -4,8 +4,7 @@ import {createWasmEngine} from '@githubnext/projections-engine/browser'
 import engineWasm from '@githubnext/projections-engine/engine.wasm?url'
 import defaultComparatorWasm from '@githubnext/projections-engine/default-comparator.wasm?url'
 import {createRulesRuntime} from '@githubnext/projections-comparator-runtime/browser'
-import {loadRendererCatalog} from '@githubnext/projections-host'
-import type {ComparatorSource, RendererEntry, RulesRuntime} from '@githubnext/projections-host'
+import {loadRendererCatalog, type ComparatorSource, type RendererEntry, type RulesRuntime} from '@githubnext/projections-host'
 
 /** A static asset (`scripts/assets.mjs`), resolved against `iframe.html` at the Storybook root. */
 export const asset = (path: string) => new URL(path, document.baseURI)

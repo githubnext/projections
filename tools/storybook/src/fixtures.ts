@@ -1,10 +1,14 @@
 // Story fixtures: the renderer packages' authored scenarios (scenarios.json), as saved extractions and view subjects.
 import scenarios from 'virtual:projections-scenarios'
 import type {Definition, Extraction, ExtractionDocument, PresentationSettings} from '@githubnext/projections-schemas'
-import {computeComparison, resolveRenderer} from '@githubnext/projections-host'
-import type {ExtractionChoice, RendererResolution, ViewSubject} from '@githubnext/projections-host'
-import {loadComparator, rules} from './runtime.js'
-import type {Runtime} from './runtime.js'
+import {
+  computeComparison,
+  resolveRenderer,
+  type ExtractionChoice,
+  type RendererResolution,
+  type ViewSubject,
+} from '@githubnext/projections-host'
+import {loadComparator, rules, type Runtime} from './runtime.js'
 
 /**
  * A renderer package's authored scenario, as `scripts/scenarios.mjs` reads it: one `extraction`, or a `before` and an

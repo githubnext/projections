@@ -3,16 +3,14 @@ import type {Meta, StoryObj} from '@storybook/react-vite'
 import {InspectorApp, InspectorHostProvider} from '@githubnext/projections-inspector'
 import type {InspectorHost} from '@githubnext/projections-inspector/mount'
 import {loadArtifact} from '@githubnext/projections-engine/artifacts'
-import {VscodeProjectionView, vscodeColorMode, vscodeThemeKindOf} from '@githubnext/projections-host-vscode'
-import type {VscodeThemeFixture} from '@githubnext/projections-host-vscode'
+import {VscodeProjectionView, vscodeColorMode, vscodeThemeKindOf, type VscodeThemeFixture} from '@githubnext/projections-host-vscode'
 import '@githubnext/projections-host/ui.css'
 import '@githubnext/projections-inspector/styles.css'
 import '@githubnext/projections-host-vscode/inspector.css'
 import {VscodeThemeFrame, vscodeThemeOf} from '../../src/vscode-frame.js'
 import {extractionChoices} from '../../src/fixtures.js'
 import {rules} from '../../src/runtime.js'
-import {runtimeLoader, scenarioArgTypes, scenarioFixture} from '../../src/stories.js'
-import type {Loaded, ScenarioArgs} from '../../src/stories.js'
+import {runtimeLoader, scenarioArgTypes, scenarioFixture, type Loaded, type ScenarioArgs} from '../../src/stories.js'
 
 /** The VS Code theme as the Inspector's host theme (`InspectorHost.theme`), as the extension's webview supplies it. */
 function hostOf(theme: VscodeThemeFixture): InspectorHost {

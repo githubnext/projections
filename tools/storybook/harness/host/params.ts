@@ -1,7 +1,6 @@
 // The harness's query parameters and the synthetic saved extractions they configure.
 import type {Definition, DomainSchema, Extraction, ExtractionDocument} from '@githubnext/projections-schemas'
-import {isProjectionTarget} from '@githubnext/projections-host'
-import type {EvidenceLink, ExtractionChoice, TargetAnnotation} from '@githubnext/projections-host'
+import {isProjectionTarget, type EvidenceLink, type ExtractionChoice, type TargetAnnotation} from '@githubnext/projections-host'
 import type {ComparisonExplorerProps} from '@githubnext/projections-host/ui'
 import {demonstration, laterRevision} from './fixtures.js'
 

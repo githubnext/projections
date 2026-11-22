@@ -9,9 +9,15 @@
  *    then acknowledge each painted progress with `rendered`.
  */
 import './styles.css'
-import {afterPaint, applyEnvironment, connectRenderer, RendererConnectionError} from '@githubnext/projections/renderer'
-import type {RendererClient} from '@githubnext/projections/renderer'
-import type {InitPayload, ProgressPayload} from '@githubnext/projections/renderer'
+import {
+  afterPaint,
+  applyEnvironment,
+  connectRenderer,
+  RendererConnectionError,
+  type RendererClient,
+  type InitPayload,
+  type ProgressPayload,
+} from '@githubnext/projections/renderer'
 import type {Change, Comparison, Extraction} from '@githubnext/projections/schemas'
 
 const extractionProgress: ProgressPayload = {progress: 1, highlighting: 0, direction: 1}

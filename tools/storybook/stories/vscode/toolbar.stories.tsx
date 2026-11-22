@@ -1,12 +1,9 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import type {ReactNode} from 'react'
-import type {Meta, StoryObj} from '@storybook/react-vite'
+import {useCallback, useEffect, useMemo, useRef, useState, type ReactNode} from 'react'
+import type {Meta, StoryObj, StoryContext} from '@storybook/react-vite'
 import {VscodeThemeFrame, vscodeThemeOf, vscodeThemes} from '../../src/vscode-frame.js'
-import {renderVscodeExplorer} from '../../src/vscode-render.js'
-import type {VscodeArgs} from '../../src/vscode-render.js'
+import {renderVscodeExplorer, type VscodeArgs} from '../../src/vscode-render.js'
 import {runtimeLoader, scenarioArgTypes} from '../../src/stories.js'
 import type {VscodeThemeFixture} from '@githubnext/projections-host-vscode'
-import type {StoryContext} from '@storybook/react-vite'
 import './toolbar.css'
 
 /** Container widths the toolbar's priority collapse is shown at, widest first (packages/host/vscode-ui/README.md "Building blocks"). */

@@ -1,12 +1,17 @@
 // Shared story arguments, loaders and consumer content for both UIs' stories.
 import type {ReactNode} from 'react'
 import type {Extraction} from '@githubnext/projections-schemas'
-import {encodeTarget, propertyPath, useProjectionAnchor} from '@githubnext/projections-host'
-import type {ComparisonMode, ProjectionController, ProjectionSelection, TargetAnnotation} from '@githubnext/projections-host'
-import {fixture, fixtures, fixturesOf, prepareFixture} from './fixtures.js'
-import type {Fixture, PreparedFixture} from './fixtures.js'
-import {loadRuntime} from './runtime.js'
-import type {Runtime} from './runtime.js'
+import {
+  encodeTarget,
+  propertyPath,
+  useProjectionAnchor,
+  type ComparisonMode,
+  type ProjectionController,
+  type ProjectionSelection,
+  type TargetAnnotation,
+} from '@githubnext/projections-host'
+import {fixture, fixtures, fixturesOf, prepareFixture, type Fixture, type PreparedFixture} from './fixtures.js'
+import {loadRuntime, type Runtime} from './runtime.js'
 
 /** A view a story opens on: the renderer's, or the host's built-in table or text view. */
 export type ViewKind = 'renderer' | 'table' | 'text'

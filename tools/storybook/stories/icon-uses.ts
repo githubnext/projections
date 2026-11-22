@@ -1,7 +1,6 @@
 // Where the renderers use the icons, each beside the words that renderer draws it with: read from the renderers' own
 // vocabularies, so these groups follow them. The SDK vocabulary stories show every icon; these show them in use.
-import {statusIcons, statusLabels} from '@githubnext/projections-renderer-kit'
-import type {StatusPart} from '@githubnext/projections-renderer-kit'
+import {statusIcons, statusLabels, type StatusPart} from '@githubnext/projections-renderer-kit'
 import {generatedLabel, variedBeyondLabel} from '@githubnext/projections-renderer-sdk/presentation'
 import {compatibilityLabels, compatibilityLevels} from '../../../packages/renderers/api/src/compatibility.js'
 import {actionPart, infrastructureStatus} from '../../../packages/renderers/graph/src/infrastructure/resources.js'

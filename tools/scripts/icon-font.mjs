@@ -15,11 +15,11 @@ function tokenize(d) {
   const commands = []
   let index = 0
   const space = () => {
-    while (index < d.length && /[\s,]/.test(d[index])) index++
+    while (index < d.length && /[\s,]/u.test(d[index])) index++
   }
   const number = () => {
     space()
-    const match = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/.exec(d.slice(index))
+    const match = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/iu.exec(d.slice(index))
     if (!match) throw new Error(`Expected a number at ${index} in ${d}`)
     index += match[0].length
     return Number(match[0])
@@ -44,7 +44,7 @@ function tokenize(d) {
         upper === 'A' ? [number(), number(), number(), flag(), flag(), number(), number()] : Array.from({length: arity[upper]}, number)
       commands.push({command: letter, values})
       space()
-    } while (index < d.length && /[\d.+-]/.test(d[index]))
+    } while (index < d.length && /[\d.+-]/u.test(d[index]))
   }
   return commands
 }
@@ -235,7 +235,7 @@ function nameTable(family, version) {
     [3, `${family} ${version}`],
     [4, family],
     [5, `Version ${version}`],
-    [6, family.replace(/[^A-Za-z0-9-]/g, '')],
+    [6, family.replace(/[^A-Z0-9-]/giu, '')],
   ]
   const strings = records.map(([, text]) => Buffer.from(text, 'utf16le').swap16())
   const header = Buffer.alloc(6 + 12 * records.length)

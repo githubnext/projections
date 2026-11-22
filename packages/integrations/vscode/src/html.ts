@@ -101,7 +101,7 @@ export function skeletonHtml({
 </html>`
 }
 
-const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
+const escape = (text: string) => text.replace(/&/gu, '&amp;').replace(/"/gu, '&quot;').replace(/</gu, '&lt;')
 
 export function webviewHtml({
   cspSource,
@@ -120,7 +120,7 @@ export function webviewHtml({
   script: string
 }): string {
   // `<` is escaped so the JSON can't end its script element.
-  const json = JSON.stringify(config).replace(/</g, '\\u003c')
+  const json = JSON.stringify(config).replace(/</gu, '\\u003c')
   return `<!doctype html>
 <html lang="en">
 <head>

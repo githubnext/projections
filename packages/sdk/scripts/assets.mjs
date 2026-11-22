@@ -14,11 +14,11 @@ await cp(new URL('icons.css', sdk), `${root}dist/renderer/icons.css`)
 /** The kit stylesheet `name` with its partials (`styles/*.css`) inlined where it imports them. */
 async function inlined(name) {
   const entry = await readFile(new URL(name, kit), 'utf8')
-  const partials = /^@import '\.\/(styles\/[a-z-]+\.css)';\n/gm
+  const partials = /^@import '\.\/(styles\/[a-z-]+\.css)';\n/gmu
   const styles = (
     await Promise.all(entry.split(partials).map((part, index) => (index % 2 ? readFile(new URL(part, kit), 'utf8') : part)))
   ).join('')
-  if (/^@import '\.\/(?!base\.css')/m.test(styles)) throw new Error(`The kit's ${name} imports a file this script doesn't inline`)
+  if (/^@import '\.\/(?!base\.css')/mu.test(styles)) throw new Error(`The kit's ${name} imports a file this script doesn't inline`)
   return styles
 }
 

@@ -45,7 +45,7 @@ await main(async request => {
         )
         .map(member => member.name.text)
       // What the model reads: the class's own source, not its file, so an edit elsewhere doesn't regenerate it.
-      const input = node.getText(source).replace(/\r\n?/g, '\n')
+      const input = node.getText(source).replace(/\r\n?/gu, '\n')
       const summaryBasis = basis({input, prompt: PROMPT, model})
       const summary = await store.generate(SUMMARY, summaryBasis, () => summarize(model, name, members))
       const file = path.relative(program.root, node.getSourceFile().fileName).split(path.sep).join('/')

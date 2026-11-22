@@ -139,7 +139,7 @@ export function ModeSwitch({
           arrowing.current = false
         }}
         onKeyDownCapture={event => {
-          arrowing.current = /^(Arrow|Home$|End$)/.test(event.key)
+          arrowing.current = /^(?:Arrow|Home$|End$)/u.test(event.key)
         }}
       >
         {group(true)}

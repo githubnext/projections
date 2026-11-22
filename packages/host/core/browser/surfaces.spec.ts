@@ -13,7 +13,7 @@ async function open(page: Page, scheme: 'light' | 'dark', query: string) {
   await page.emulateMedia({colorScheme: scheme})
   await page.goto(explorer(query))
   await expect(page.locator('.ph-explorer')).toBeVisible()
-  await expect(page.locator('.ph')).toHaveClass(scheme === 'dark' ? /pj-dark/ : /^(?!.*pj-dark)/)
+  await expect(page.locator('.ph')).toHaveClass(scheme === 'dark' ? /pj-dark/u : /^(?!.*pj-dark)/u)
 }
 
 /** A color as sRGB channels and alpha (0–255), resolved by painting it: any CSS color syntax compares equal. */
@@ -69,7 +69,7 @@ async function tintedRegions(page: Page) {
         {hue: 'lens', fill: token('lens-muted'), edge: token('lens')},
       ]
       const colors = (value: string) =>
-        [...value.matchAll(/(?:rgba?|oklch|oklab|lab|lch|color)\([^()]*\)|#[\da-f]{3,8}\b/gi)].map(match => rgba(match[0]))
+        [...value.matchAll(/(?:rgba?|oklch|oklab|lab|lch|color)\([^()]*\)|#[\da-f]{3,8}\b/giu)].map(match => rgba(match[0]))
       const regions: {element: string; hue: string; edges: number}[] = []
       const unknown: string[] = []
       for (const element of document.querySelectorAll<HTMLElement>(`:is(${scopes}), :is(${scopes}) *`)) {

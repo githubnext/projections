@@ -47,7 +47,7 @@ import {topologyEntities} from './areas.mjs'
 const {root: repo, inputs} = request
 const roots = (inputs.roots ?? [{path: '.'}]).map(root => ({
   ...root,
-  path: root.path.replace(/\/$/, '').replace(/^\.$/, ''),
+  path: root.path.replace(/\/$/u, '').replace(/^\.$/u, ''),
 }))
 const excluded = inputs.exclude ?? ['examples/', 'cli/templates/']
 const devDependencies = inputs.devDependencies ?? true

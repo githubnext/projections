@@ -5,7 +5,7 @@ import type {ControlValue, RendererControl} from '@githubnext/projections-render
 import {isSortable} from './table.js'
 import type {SortableColumn, TableSort} from './table.js'
 
-const columnIdPattern = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,47}$/
+const columnIdPattern = /^[A-Za-z0-9][\w.-]{0,47}$/u
 
 /** The sort control's value for a sort: `<column>:ascending`, `<column>:descending`, or `none`. */
 export function tableSortValue(sort: TableSort): string {

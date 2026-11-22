@@ -7,7 +7,7 @@ export function glassSupported(agent = globalThis.navigator?.userAgent ?? ''): b
   const css = globalThis.CSS
   if (!css?.supports('backdrop-filter', 'blur(1px)') && !css?.supports('-webkit-backdrop-filter', 'blur(1px)')) return false
   // Desktop Chromium names itself (`Chrome/`, `Edg/`); Chrome, Edge and Firefox on iOS are WebKit (`CriOS/`, `EdgiOS/`, `FxiOS/`).
-  return !(agent.includes('AppleWebKit') && !/Chrome\/|Chromium\/|Edg\//.test(agent))
+  return !(agent.includes('AppleWebKit') && !/Chrome\/|Chromium\/|Edg\//u.test(agent))
 }
 
 /** The glass's fill, as a share of its surface: muted text on it keeps at least 4.5:1 over a busy drawing. */

@@ -21,10 +21,10 @@ export interface Project {
   /** The compiler's declaration library directory. */
   libraries: string
 }
-export const sourceExtension = /\.(?:[cm]?[jt]sx?)$/
+export const sourceExtension = /\.[cm]?[jt]sx?$/u
 export const slash = (value: string): string => value.split(path.sep).join('/')
 /** Raw tool text (compiler diagnostics) as protocol prose: backticks and backslashes escaped. */
-export const escape = (text: string): string => text.replace(/[\\\x60]/g, character => `\\${character}`)
+export const escape = (text: string): string => text.replace(/[\\\x60]/gu, character => `\\${character}`)
 /** `text` as an inline code span of protocol prose (see the contracts' text with inline code). */
 export const code = (text: string): string => `\`${escape(text)}\``
 /** TypeScript spells file names with `/` on every platform; this is the native path. */

@@ -34,7 +34,7 @@ function run(helper, testCase) {
   const input = testCase.stdinText ?? JSON.stringify(testCase.stdin)
   const outcome = spawnSync(program, argv, {input, encoding: 'utf8', env: {...environment, ...variables}})
   if (outcome.status === 0) return {value: JSON.parse(outcome.stdout)}
-  const error = /^error: (.*)$/m.exec(outcome.stderr)
+  const error = /^error: (.*)$/mu.exec(outcome.stderr)
   assert.ok(error, `${helper} failed without a message: ${outcome.stderr}`)
   assert.equal(outcome.stdout, '', `${helper} wrote output and failed`)
   return {error: error[1]}

@@ -48,7 +48,7 @@ export function scenarioKeys(path: string): string[] {
   const file = statSync(path).isDirectory() ? join(path, 'scenarios.json') : path
   const document = JSON.parse(readFileSync(file, 'utf8')) as {scenarios?: {id: string}[]}
   const name = basename(file)
-  const source = name === 'scenarios.json' ? basename(dirname(resolve(file))) : name.replace(/\.json$/, '').replace(/\.scenarios$/, '')
+  const source = name === 'scenarios.json' ? basename(dirname(resolve(file))) : name.replace(/\.json$/u, '').replace(/\.scenarios$/u, '')
   return (document.scenarios ?? []).map(scenario => `${source}/${scenario.id}`)
 }
 

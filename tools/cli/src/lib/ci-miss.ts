@@ -32,7 +32,7 @@ export interface Miss {
 }
 
 /** A job's ID: its name before ` (`, the matrix entry. */
-const jobId = (name: string) => name.replace(/ \(.*$/, '')
+const jobId = (name: string) => name.replace(/ \(.*$/u, '')
 
 /** Whether the plan ran a job: a check of that name, or the check a workflow-sharded job (mutants-diff (3)) belongs to. */
 const ran = (checks: readonly string[], name: string) => checks.some(check => check === name || name.startsWith(`${check} (`))

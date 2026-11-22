@@ -24,7 +24,7 @@ export function ciExplainReport(root: string, {files, base, event, labels}: Expl
   // Named files are compared, like a lockfile, with their versions at the merge base when there is one.
   const commit = git(root, ['merge-base', 'HEAD', base])
   // Repository-relative, as Git lists changed files: `./a/b`, `a//b` and absolute paths inside the checkout too.
-  const named = files.map(file => posix.normalize(relativeTo(root, file)).replace(/\/$/, ''))
+  const named = files.map(file => posix.normalize(relativeTo(root, file)).replace(/\/$/u, ''))
   const change = named.length
     ? {paths: named, contents: commit === undefined ? undefined : contentsSince(root, commit)}
     : changeSince(root, base)

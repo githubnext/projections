@@ -12,12 +12,12 @@ import {plural} from '../plural.ts'
 /** A revision as the Viewing view's rows show it: a commit's short SHA (7), the working tree, or a ref verbatim. */
 export function shortCommit(ref: string): string {
   if (ref === 'working-tree') return 'working tree'
-  return /^[0-9a-f]{40}$/.test(ref) ? ref.slice(0, 7) : ref
+  return /^[0-9a-f]{40}$/u.test(ref) ? ref.slice(0, 7) : ref
 }
 
 /** Markdown with what a commit subject or a name could make of it escaped. */
 export function escapeMarkdown(text: string): string {
-  return text.replace(/[\\\x60*_{}[\]()#+!<>|~]/g, '\\$&')
+  return text.replace(/[\\\x60*_{}[\]()#+!<>|~]/gu, '\\$&')
 }
 
 /** A commit that changes at least one projection, from a run over the recent commits. */

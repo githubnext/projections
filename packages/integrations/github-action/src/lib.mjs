@@ -5,8 +5,8 @@ export const artifactManifest = 'projections.artifact.json'
 export const commentMarker = '<!-- projections:sticky-comment -->'
 export const maxProjections = 60
 export const maxDocumentBytes = 8 * 1024 * 1024
-const projectionId = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$/
-const commit = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/
+const projectionId = /^[a-zA-Z0-9][\w.-]{0,99}$/u
+const commit = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u
 const documentStatuses = new Set(['changed', 'unchanged', 'extracted', 'head-only', 'base-only'])
 
 export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex')
@@ -28,9 +28,9 @@ export function eventSubject(eventName, event, ref) {
   }
   if (eventName === 'push') {
     const revision = event?.after
-    if (!commit.test(revision ?? '') || /^0+$/.test(revision)) throw new Error('The push event has no commit (was a branch deleted?)')
+    if (!commit.test(revision ?? '') || /^0+$/u.test(revision)) throw new Error('The push event has no commit (was a branch deleted?)')
     // eslint-disable-next-line no-control-regex -- Refs never contain control characters.
-    if (!/^refs\/(?:heads|tags)\/[^\u0000-\u001f\u007f]{1,250}$/.test(ref ?? '')) throw new Error(`Unsupported push ref ${ref}`)
+    if (!/^refs\/(?:heads|tags)\/[^\u0000-\u001f\u007f]{1,250}$/u.test(ref ?? '')) throw new Error(`Unsupported push ref ${ref}`)
     return {kind: 'push', ref, revision}
   }
   throw new Error(
@@ -148,20 +148,20 @@ export const commentLimit = 60000
 
 // Repository text (titles, labels, summaries, diagnostics) is untrusted: it is escaped so it can't add markup,
 // links or images, and a word joiner after each @ keeps it from mentioning anyone.
-const unmention = value => String(value ?? '').replace(/@/g, '@\u2060')
-const oneLine = value => unmention(value).replace(/\s+/g, ' ').trim()
+const unmention = value => String(value ?? '').replace(/@/gu, '@\u2060')
+const oneLine = value => unmention(value).replace(/\s+/gu, ' ').trim()
 /** Inline Markdown text. */
 const plain = value =>
   oneLine(value)
-    .replace(/[\\\x60*_{}[\]<>()#+!|~]/g, '\\$&')
-    .replace(/&/g, '&amp;')
+    .replace(/[\\\x60*_{}[\]<>()#+!|~]/gu, '\\$&')
+    .replace(/&/gu, '&amp;')
 /** HTML text, for <summary>. */
 const html = value =>
-  oneLine(value).replace(/[&<>"']/g, character => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[character])
+  oneLine(value).replace(/[&<>"']/gu, character => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[character])
 /** A code span holding any text. */
 function code(value) {
   const text = oneLine(value) || ' '
-  const fence = '`'.repeat(Math.max(0, ...(text.match(/\x60+/g) ?? []).map(run => run.length)) + 1)
+  const fence = '`'.repeat(Math.max(0, ...(text.match(/\x60+/gu) ?? []).map(run => run.length)) + 1)
   const pad = text.startsWith('`') || text.endsWith('`') ? ' ' : ''
   return `${fence}${pad}${text}${pad}${fence}`
 }
@@ -281,7 +281,7 @@ export function hostedLink(manifest, hostedUrl) {
   if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error(`hosted-url must be an http(s) origin, not ${origin}`)
   const {owner, name} = manifest.repository
   const subject = manifest.subject.kind === 'pull-request' ? `pull/${manifest.subject.number}` : `commit/${manifest.subject.revision}`
-  return `${url.origin}${url.pathname.replace(/\/+$/, '')}/${encodeURIComponent(owner)}/${encodeURIComponent(name)}/${subject}`
+  return `${url.origin}${url.pathname.replace(/\/+$/u, '')}/${encodeURIComponent(owner)}/${encodeURIComponent(name)}/${subject}`
 }
 
 /**
@@ -368,7 +368,7 @@ export function snapshotIds(text) {
   const ids = [
     ...new Set(
       String(text ?? '')
-        .split(/[\s,]+/)
+        .split(/[\s,]+/u)
         .filter(Boolean),
     ),
   ]
@@ -407,19 +407,15 @@ export function snapshotPlan(manifest, ids) {
 export function repositoryDirectory(text) {
   const value = String(text ?? '')
     .trim()
-    .replace(/^\/+|\/+$/g, '')
+    .replace(/^\/+|\/+$/gu, '')
   const parts = value.split('/')
-  if (
-    !value ||
-    value.length > 200 ||
-    parts.some(part => !/^[A-Za-z0-9._-]+$/.test(part) || part === '.' || part === '..' || part === '.git')
-  ) {
+  if (!value || value.length > 200 || parts.some(part => !/^[\w.-]+$/u.test(part) || part === '.' || part === '..' || part === '.git')) {
     throw new Error(`snapshots-path must be a relative directory such as .github/projections/snapshots, not ${JSON.stringify(text)}`)
   }
   return value
 }
 
-const branchName = /^(?!-|\/|.*(?:\.\.|\/\/|\.lock$|\/$|@\{))[A-Za-z0-9._/-]{1,100}$/
+const branchName = /^(?!-|\/|.*(?:\.\.|\/\/|\.lock$|\/$|@\{))[\w./-]{1,100}$/u
 
 /**
  * Where the snapshots of this run are committed, if anywhere: on a push to the
@@ -456,7 +452,7 @@ export function gitBlobSha(bytes) {
   return createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex')
 }
 
-const attribute = value => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+const attribute = value => String(value).replace(/&/gu, '&amp;').replace(/"/gu, '&quot;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;')
 
 /** A light snapshot that switches to its dark one with the viewer's theme. */
 function picture(light, dark, alt) {
@@ -493,7 +489,7 @@ export function workflowPath(workflowRef, repository) {
   const prefix = `${repository}/`
   if (!workflowRef?.toLowerCase().startsWith(prefix.toLowerCase())) return undefined
   const file = workflowRef.slice(prefix.length).split('@')[0]
-  return /^\.github\/workflows\/[A-Za-z0-9._-]+\.ya?ml$/.test(file) ? file : undefined
+  return /^\.github\/workflows\/[\w.-]+\.ya?ml$/u.test(file) ? file : undefined
 }
 
 /**

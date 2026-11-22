@@ -44,7 +44,7 @@ module.exports = async function explore({folder}) {
   await assert.rejects(fs.stat(path.join(folder.fsPath, '.github/projections/repository-map.json')))
   const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).map(tab => tab.label)
   assert.ok(
-    tabs.some(label => /Adopt repository-map \(preview\)/.test(label)),
+    tabs.some(label => /Adopt repository-map \(preview\)/u.test(label)),
     tabs.join(', '),
   )
 }

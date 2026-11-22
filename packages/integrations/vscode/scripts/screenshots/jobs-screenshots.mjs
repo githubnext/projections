@@ -128,7 +128,7 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       }
       const comparison = await crop()
       await sidebar.locator('.monaco-list-row', {hasText: 'Current state'}).first().click()
-      for (let tries = 0; tries < 120 && /[+\u2212~]\d/.test((await bar.getAttribute('data-sentence')) ?? '+1'); tries++) {
+      for (let tries = 0; tries < 120 && /[+\u2212~]\d/u.test((await bar.getAttribute('data-sentence')) ?? '+1'); tries++) {
         await new Promise(resolve => setTimeout(resolve, 500))
       }
       await new Promise(resolve => setTimeout(resolve, 3000))
@@ -232,7 +232,7 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       await writeFile(web, `${JSON.stringify(edited, null, 2)}\n`)
       await frame.locator('.phv-stage-notice').waitFor({timeout: 30_000})
       await sidebar
-        .locator('.monaco-list-row', {hasText: /Packages.*Out of date/})
+        .locator('.monaco-list-row', {hasText: /Packages.*Out of date/u})
         .first()
         .waitFor({timeout: 30_000})
       await new Promise(resolve => setTimeout(resolve, 1000))
@@ -246,7 +246,7 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       await frame.locator('.tp-edits[data-edits="yours"]').waitFor({timeout: 60_000})
       await frame.locator('.phv-root[data-renderer-status="ready"]').first().waitFor({timeout: 60_000})
       await sidebar
-        .locator('.monaco-list-row', {hasText: /Packages.*edited/})
+        .locator('.monaco-list-row', {hasText: /Packages.*edited/u})
         .first()
         .waitFor({timeout: 30_000})
       await new Promise(resolve => setTimeout(resolve, 3000))

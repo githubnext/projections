@@ -29,8 +29,8 @@ const walk = dir => {
     if (['node_modules', 'target', 'dist', '.git'].includes(name)) continue
     const path = join(dir, name)
     if (statSync(path).isDirectory()) walk(path)
-    else if (/\.comparator\.test\.ya?ml$/.test(name)) tests.push(path)
-    else if (/\.comparator\.ya?ml$/.test(name) || (dir.includes(join('comparators', 'rules')) && name.endsWith('.yaml'))) files.push(path)
+    else if (/\.comparator\.test\.ya?ml$/u.test(name)) tests.push(path)
+    else if (/\.comparator\.ya?ml$/u.test(name) || (dir.includes(join('comparators', 'rules')) && name.endsWith('.yaml'))) files.push(path)
   }
 }
 const only = process.argv.slice(2).map(dir => resolve(dir))
@@ -50,13 +50,13 @@ const walkDocs = dir => {
 if (!only.length) walkDocs(join(root, 'docs'))
 for (const path of only.length ? [] : [...docs.sort(), join(root, 'packages/cli/templates/SKILL.md')]) {
   const text = readFileSync(path, 'utf8')
-  for (const match of text.matchAll(/\x60\x60\x60yaml\n(# [^\n]*\.comparator\.ya?ml\n[\s\S]*?)\x60\x60\x60/g)) {
+  for (const match of text.matchAll(/\x60\x60\x60yaml\n(# [^\n]*\.comparator\.ya?ml\n[\s\S]*?)\x60\x60\x60/gu)) {
     // Excerpts (`...`) aren't whole files.
     if (!match[1].includes('\n...') && !match[1].includes(': ...')) {
       documents.push([`${path.slice(root.length)} (${match[1].split('\n')[0].slice(2)})`, match[1], true])
     }
   }
-  for (const match of text.matchAll(/\x60\x60\x60yaml\n(# [^\n]*\.comparator\.test\.ya?ml\n[\s\S]*?)\x60\x60\x60/g)) {
+  for (const match of text.matchAll(/\x60\x60\x60yaml\n(# [^\n]*\.comparator\.test\.ya?ml\n[\s\S]*?)\x60\x60\x60/gu)) {
     if (!match[1].includes('\n...') && !match[1].includes(': ...')) {
       testDocuments.push([`${path.slice(root.length)} (${match[1].split('\n')[0].slice(2)})`, match[1]])
     }

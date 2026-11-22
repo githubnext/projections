@@ -37,7 +37,7 @@ async function expectCentered(status: Locator, area: Locator) {
 }
 
 /** Holds every renderer bundle's page, so its frame stays loading (until the host's ready deadline). */
-const holdRenderers = (page: Page) => page.route(/\/renderers\/[^/]+\/index\.html/, () => {})
+const holdRenderers = (page: Page) => page.route(/\/renderers\/[^/]+\/index\.html/u, () => {})
 
 const sizes = [
   {name: 'at this viewport', viewport: undefined},
@@ -51,7 +51,7 @@ for (const {name, viewport} of sizes) {
     await page.goto(explorer())
     const pane = page.locator('.ph-frame-host[data-renderer-status="loading"]')
     const status = pane.locator('.ph-loading')
-    await expect(status).toContainText(/Loading the .* renderer…/)
+    await expect(status).toContainText(/Loading the .* renderer…/u)
     // The stage's single card, inside its edge.
     await expectCentered(status, page.locator('.ph-stage .ph-single'))
     // The frame keeps its place under the status, filling the stage: revealing it moves nothing.
@@ -60,7 +60,7 @@ for (const {name, viewport} of sizes) {
 
   test(`starting the engine is centered in the explorer's place ${name}`, async ({page}) => {
     if (viewport) await page.setViewportSize(viewport)
-    await page.route(/\.wasm(\?|$)/, () => {})
+    await page.route(/\.wasm(\?|$)/u, () => {})
     await page.goto(explorer())
     const status = page.locator('.demo-sized .ph-loading')
     await expect(status).toContainText('Starting the engine…')

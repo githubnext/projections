@@ -33,7 +33,8 @@ export function arrowContacts(root: Element): ArrowContact[] {
     y: number
   }
   const contacts: ArrowContact[] = []
-  const points = (d: string): P[] => [...d.matchAll(/(-?[\d.]+)[ ,](-?[\d.]+)/g)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
+  const points = (d: string): P[] =>
+    [...d.matchAll(/(-?[\d.]+)[ ,](-?[\d.]+)/gu)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
   const scaleOf = (element: SVGGraphicsElement) => {
     const m = element.getScreenCTM()!
     return Math.sqrt(Math.abs(m.a * m.d - m.b * m.c))
@@ -90,7 +91,7 @@ export function arrowContacts(root: Element): ArrowContact[] {
   // Marker heads: the marker's outline placed at the path's end, turned to its final direction.
   for (const path of root.querySelectorAll<SVGPathElement>('[data-to-id] path[marker-end]')) {
     const link = path.closest<SVGGElement>('[data-to-id]')!
-    const id = /url\(#(.+)\)/.exec(path.getAttribute('marker-end') ?? '')?.[1]
+    const id = /url\(#(.+)\)/u.exec(path.getAttribute('marker-end') ?? '')?.[1]
     const marker = id ? root.querySelector(`marker#${CSS.escape(id)} path`) : null
     const card = root.querySelector(`[data-unit-id="${CSS.escape(link.dataset.toId ?? '')}"]`)
     if (!marker || !card || path.closest('.di-link-halo')) continue
@@ -121,10 +122,10 @@ export function arrowContacts(root: Element): ArrowContact[] {
     const style = getComputedStyle(table)
     // An outer ring (an inset-free box shadow's spread) paints outside the box; an outline drawn inset does not.
     const rings = style.boxShadow
-      .split(/,(?![^(]*\))/)
+      .split(/,(?![^(]*\))/u)
       .filter(shadow => shadow.trim() !== 'none' && !shadow.includes('inset'))
       // A shadow's lengths are its x and y offsets, blur and spread, in px; its color may hold other numbers.
-      .map(shadow => Number.parseFloat([...shadow.matchAll(/(-?[\d.]+)px/g)][3]?.[1] ?? '0') || 0)
+      .map(shadow => Number.parseFloat([...shadow.matchAll(/(-?[\d.]+)px/gu)][3]?.[1] ?? '0') || 0)
     const outline =
       style.outlineStyle === 'none' ? 0 : Math.max(0, Number.parseFloat(style.outlineWidth) + Number.parseFloat(style.outlineOffset))
     const ring = Math.max(0, ...rings, outline) * scale

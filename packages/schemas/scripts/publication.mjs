@@ -16,9 +16,9 @@ const directory = join(root, 'schemas')
 
 /** A release version from a release tag (`v0.2.0`, `projections-cli/v0.2.0`) or version (`0.2.0-beta.1`). */
 export function releaseVersion(tag) {
-  const version = String(tag).replace(/^.*\//, '').replace(/^v/, '')
+  const version = String(tag).replace(/^.*\//u, '').replace(/^v/u, '')
   // Build metadata (`+…`) is excluded: it isn't part of a release's identity and doesn't belong in a URL.
-  if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/.test(version)) {
+  if (!/^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/u.test(version)) {
     throw new Error(`${tag} is not a release version, such as v0.2.0 or v0.2.0-beta.1`)
   }
   return {version, prerelease: version.includes('-')}
@@ -64,7 +64,7 @@ export async function publication() {
   const byId = new Map(files.map(file => [file.schema.$id, file]))
 
   for (const {path, schema} of files) {
-    if (!/^(?:[a-z0-9][a-z0-9-]*\/){1,2}v\d+\.json$/.test(path)) problems.push(`${path} is not at <name>/v<major>.json`)
+    if (!/^(?:[a-z0-9][a-z0-9-]*\/){1,2}v\d+\.json$/u.test(path)) problems.push(`${path} is not at <name>/v<major>.json`)
     if (schema.$schema !== 'https://json-schema.org/draft/2020-12/schema') problems.push(`${path} is not draft 2020-12`)
     if (schema.$id !== `${schemaBaseUrl}${path}`) problems.push(`${path} has the $id ${schema.$id}, not ${schemaBaseUrl}${path}`)
     for (const reference of references(schema)) {
@@ -101,7 +101,7 @@ export function releaseFiles(files, tag) {
   return {
     version,
     prerelease,
-    snapshots: files.map(({path, bytes}) => ({path: path.replace(/\.json$/, `/${version}.json`), bytes})),
+    snapshots: files.map(({path, bytes}) => ({path: path.replace(/\.json$/u, `/${version}.json`), bytes})),
     current: prerelease ? [] : files,
   }
 }

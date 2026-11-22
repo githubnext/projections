@@ -48,8 +48,8 @@ for (const render of renders) {
     if (result.stderr) process.stderr.write(result.stderr)
     if (result.status !== 0) {
       // The error's own line; a hint or the extractor's stderr may follow it.
-      const lines = (result.stderr || `exit status ${result.status}`).trim().split(/\r?\n/)
-      const message = (lines.findLast(line => /^projections: (?!note: )/.test(line)) ?? lines.at(-1)).replace(/^projections: /, '')
+      const lines = (result.stderr || `exit status ${result.status}`).trim().split(/\r?\n/u)
+      const message = (lines.findLast(line => /^projections: (?!note: )/u.test(line)) ?? lines.at(-1)).replace(/^projections: /u, '')
       console.log(`::warning title=Projection snapshot ${render.id}::${message}`)
       failed.push({id: render.id, ...(render.side ? {side: render.side} : {}), theme, message})
       continue

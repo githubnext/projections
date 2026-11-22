@@ -35,7 +35,7 @@ module.exports = async function customRenderer({folder, tests, api}) {
     90_000,
   )
   const [frame] = await api.control('cards', {op: 'elements', selector: 'iframe.ph-frame', attribute: 'aria-label'})
-  assert.match(frame?.value ?? '', /Package cards/)
+  assert.match(frame?.value ?? '', /Package cards/u)
   assert.equal((await api.control('cards', {op: 'elements', selector: '.phv-root[data-renderer-status="failed"]'})).length, 0)
   // The Definition view follows the tab; its title stays "Definition" (the tab names the projection).
   await until('the Definition view on cards', async () => ((await api.definition()).projection === 'cards' ? true : undefined))
@@ -84,7 +84,7 @@ module.exports = async function customRenderer({folder, tests, api}) {
     })
     assert.ok(vscode.tasks.taskExecutions.some(execution => execution.task.definition.type === 'projections-renderer'))
     await vscode.commands.executeCommand('projections.openProjection', folder, 'cards', {preview: false})
-    await until('the Renderer row says built', async () => /· built$/.test((await rendererRow())?.description ?? '') || undefined)
+    await until('the Renderer row says built', async () => /· built$/u.test((await rendererRow())?.description ?? '') || undefined)
     // A failed build: the Renderer row says so with its error, and Problems has it.
     await saveSource('FAIL\n')
     // Vite prints a header ("Transform failed with 1 error:") before the located error, and a pipe may deliver
@@ -97,15 +97,15 @@ module.exports = async function customRenderer({folder, tests, api}) {
     await vscode.commands.executeCommand('projections.openProjection', folder, 'cards', {preview: false})
     const failedRow = await until('the Renderer row says it failed', async () => {
       const row = await rendererRow()
-      return /build failed$/.test(row?.description ?? '') ? row : undefined
+      return /build failed$/u.test(row?.description ?? '') ? row : undefined
     })
-    assert.match(failedRow.tooltip, /main\.tsx:1:1: The source says FAIL/)
+    assert.match(failedRow.tooltip, /main\.tsx:1:1: The source says FAIL/u)
     // On the file the build names (its real path: macOS's temporary directory is under /private).
     const problem = await until('the error in Problems', async () =>
-      vscode.languages.getDiagnostics().find(([, items]) => items.some(item => /The source says FAIL/.test(item.message))),
+      vscode.languages.getDiagnostics().find(([, items]) => items.some(item => /The source says FAIL/u.test(item.message))),
     )
     // The URI's path, '/'-separated on every platform.
-    assert.match(problem[0].path, /cards\/src\/main\.tsx$/)
+    assert.match(problem[0].path, /cards\/src\/main\.tsx$/u)
     await saveSource('export const cards = 3\n')
     await until('built again', async () => (cardsBuild()?.state.phase === 'built' ? true : undefined))
   } else {

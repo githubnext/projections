@@ -47,7 +47,7 @@ function foldLabel(rows: readonly {before?: {kind: string}; after?: {kind: strin
       const noun = humanizeKind(kind)
       return `${count.toLocaleString('en-US')} ${count === 1 ? noun.singular : noun.plural}`
     })
-  if (words.length === 1) return words[0]!.replace(/^(\S+) /, '$1 unchanged ')
+  if (words.length === 1) return words[0]!.replace(/^(\S+) /u, '$1 unchanged ')
   return `Unchanged: ${words.slice(0, -1).join(', ')} and ${words.at(-1)!}`
 }
 
@@ -87,7 +87,7 @@ export function foldParts<X extends Extraction>(
     const entity = {
       id,
       kind,
-      label: opened ? `Hide ${label.replace(/^Unchanged: /, '')}` : label,
+      label: opened ? `Hide ${label.replace(/^Unchanged: /u, '')}` : label,
       data: opened ? {open: true} : {},
     } as X['entities'][number]
     foldRows.push({

@@ -14,7 +14,7 @@ export function holdJobs(ms: number) {
 }
 
 /** Whether a request from the page starts a new extraction job. */
-export const startsJob = (method: string, path: string) => method === 'POST' && /^\/api\/jobs(\?|$)/.test(path)
+export const startsJob = (method: string, path: string) => method === 'POST' && /^\/api\/jobs(?:\?|$)/u.test(path)
 
 /** For tests: how long to hold a message from the page before it reaches the backend; 0 unless it starts a job. */
 export function jobHold(message: unknown): number {

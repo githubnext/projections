@@ -9,7 +9,7 @@ export function scopeHiddenText(hidden: readonly ScopeHidden[]): string | undefi
   if (!hidden.length) return undefined
   const parts = hidden.map(item => `${item.count.toLocaleString('en-US')} ${item.count === 1 ? item.noun.singular : item.noun.plural}`)
   const list = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)!}` : parts[0]!
-  return `Hiding ${list.replace(/^(\S+) /, '$1 unchanged ')}`
+  return `Hiding ${list.replace(/^(\S+) /u, '$1 unchanged ')}`
 }
 
 /**

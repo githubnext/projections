@@ -26,17 +26,17 @@ test('snapshot settings come from the query string, with light theme, the card f
 })
 
 test('snapshot settings reject anything the CLI never sends', () => {
-  assert.throws(() => snapshotSettings('?theme=sepia'), /theme/)
-  assert.throws(() => snapshotSettings('?mode=swipe'), /mode/)
-  for (const progress of ['2', '-0.1', '', 'NaN', 'one']) assert.throws(() => snapshotSettings(`?progress=${progress}`), /progress/)
-  assert.throws(() => snapshotSettings('?definition=HEAD'), /full commit/)
-  assert.throws(() => snapshotSettings('?focus=middle'), /focus/)
-  assert.throws(() => snapshotSettings('?entity='), /entity/)
-  assert.throws(() => snapshotSettings('?frame=polaroid'), /frame/)
-  for (const matte of ['white', '#12345', '0d1117']) assert.throws(() => snapshotSettings(`?matte=${encodeURIComponent(matte)}`), /matte/)
-  assert.throws(() => snapshotSettings('?frame=none&matte=%23fff'), /matte/)
-  assert.throws(() => snapshotSettings('?direction=sideways'), /direction/)
-  for (const turn of ['0', '', 'NaN', '1001']) assert.throws(() => snapshotSettings(`?turn=${turn}`), /turn/)
+  assert.throws(() => snapshotSettings('?theme=sepia'), /theme/u)
+  assert.throws(() => snapshotSettings('?mode=swipe'), /mode/u)
+  for (const progress of ['2', '-0.1', '', 'NaN', 'one']) assert.throws(() => snapshotSettings(`?progress=${progress}`), /progress/u)
+  assert.throws(() => snapshotSettings('?definition=HEAD'), /full commit/u)
+  assert.throws(() => snapshotSettings('?focus=middle'), /focus/u)
+  assert.throws(() => snapshotSettings('?entity='), /entity/u)
+  assert.throws(() => snapshotSettings('?frame=polaroid'), /frame/u)
+  for (const matte of ['white', '#12345', '0d1117']) assert.throws(() => snapshotSettings(`?matte=${encodeURIComponent(matte)}`), /matte/u)
+  assert.throws(() => snapshotSettings('?frame=none&matte=%23fff'), /matte/u)
+  assert.throws(() => snapshotSettings('?direction=sideways'), /direction/u)
+  for (const turn of ['0', '', 'NaN', '1001']) assert.throws(() => snapshotSettings(`?turn=${turn}`), /turn/u)
 })
 
 test('the custom renderer prefix must be a same-origin directory, and is absent when the server serves none', () => {
@@ -48,7 +48,7 @@ test('the custom renderer prefix must be a same-origin directory, and is absent 
   assert.equal(customRendererPrefix({renderers: [], customRendererBase: null}, origin), undefined)
   assert.equal(customRendererPrefix({renderers: []}, origin), undefined)
   for (const base of ['https://example.com/x/', '/custom-renderers/ab12', '/x/?q=1', 7]) {
-    assert.throws(() => customRendererPrefix({customRendererBase: base}, origin), /custom renderer base/)
+    assert.throws(() => customRendererPrefix({customRendererBase: base}, origin), /custom renderer base/u)
   }
 })
 

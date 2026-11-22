@@ -23,7 +23,9 @@ const ownsEscape = (event: KeyboardEvent<HTMLElement>) =>
     .composedPath()
     .some(
       node =>
-        node instanceof HTMLElement && /^VSCODE-(SINGLE|MULTI)-SELECT$/.test(node.tagName) && (node as HTMLElement & {open?: boolean}).open,
+        node instanceof HTMLElement &&
+        /^VSCODE-(?:SINGLE|MULTI)-SELECT$/u.test(node.tagName) &&
+        (node as HTMLElement & {open?: boolean}).open,
     )
 
 const focusable =

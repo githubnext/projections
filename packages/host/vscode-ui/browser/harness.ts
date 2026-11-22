@@ -49,7 +49,7 @@ export const focused = (page: Page) =>
 /** The WCAG contrast of two computed CSS colors (`rgb()`/`rgba()`, `background` composited on `base`). */
 export function contrast(foreground: string, background: string, base = 'rgb(255, 255, 255)'): number {
   const parse = (value: string) => {
-    const parts = value.match(/[\d.]+/g)!.map(Number)
+    const parts = value.match(/[\d.]+/gu)!.map(Number)
     return {r: parts[0]!, g: parts[1]!, b: parts[2]!, a: parts[3] ?? 1}
   }
   const over = (top: ReturnType<typeof parse>, bottom: ReturnType<typeof parse>) => ({
@@ -73,7 +73,7 @@ export function contrast(foreground: string, background: string, base = 'rgb(255
 export const colors = (locator: Locator) =>
   locator.evaluate(element => {
     const parse = (value: string) => {
-      const parts = value.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0, 0]
+      const parts = value.match(/[\d.]+/gu)?.map(Number) ?? [0, 0, 0, 0]
       return {r: parts[0]!, g: parts[1]!, b: parts[2]!, a: value.startsWith('rgba') ? parts[3]! : 1}
     }
     const layers: ReturnType<typeof parse>[] = []

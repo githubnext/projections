@@ -106,7 +106,7 @@ export function globToRegExp(glob: string): RegExp {
       index += slash ? 2 : 1
     } else if (char === '*') pattern += '[^/]*'
     else if (char === '?') pattern += '[^/]'
-    else pattern += /[.+^${}()|[\]\\]/.test(char) ? `\\${char}` : char
+    else pattern += /[.+^${}()|[\]\\]/u.test(char) ? `\\${char}` : char
   }
   return new RegExp(`^${pattern}$`)
 }
@@ -157,7 +157,7 @@ export interface Ran {
 /** The shell-like display form of a command. */
 export function display(command: Command): string {
   const env = command.replaceEnv ? [] : Object.entries(command.env ?? {}).map(([key, value]) => `${key}=${value}`)
-  const quote = (word: string) => (/^[\w@%+=:,./-]+$/.test(word) ? word : `'${word.replaceAll("'", "'\\''")}'`)
+  const quote = (word: string) => (/^[\w@%+=:,./-]+$/u.test(word) ? word : `'${word.replaceAll("'", "'\\''")}'`)
   return [...env, ...command.argv.map(quote)].join(' ')
 }
 
@@ -166,7 +166,7 @@ function executable(name: string): {file: string; prefix: string[]} {
   if (name === 'node') return {file: process.execPath, prefix: []}
   if (name === 'npm' && process.env.npm_execpath) return {file: process.execPath, prefix: [process.env.npm_execpath]}
   if (name === 'npx' && process.env.npm_execpath) {
-    const npx = process.env.npm_execpath.replace(/npm-cli\.js$/, 'npx-cli.js')
+    const npx = process.env.npm_execpath.replace(/npm-cli\.js$/u, 'npx-cli.js')
     if (existsSync(npx)) return {file: process.execPath, prefix: [npx]}
   }
   return {file: name, prefix: []}

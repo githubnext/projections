@@ -8,7 +8,7 @@ import {dirname, join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
-export const license = name => /^(LICENSE|LICENCE|COPYING|NOTICE)([-_.].*)?$/i.test(name)
+export const license = name => /^(?:LICENSE|LICENCE|COPYING|NOTICE)(?:[-_.].*)?$/iu.test(name)
 const wasm = 'wasm32-unknown-unknown'
 
 /** The host the Rust compiler builds for. */
@@ -16,7 +16,7 @@ export function hostPlatform() {
   const compiler = spawnSync('rustc', ['-vV'], {cwd: root, encoding: 'utf8'})
   if (compiler.error) throw compiler.error
   if (compiler.status !== 0) throw new Error(compiler.stderr)
-  const host = /^host: (.+)$/m.exec(compiler.stdout)?.[1]
+  const host = /^host: (.+)$/mu.exec(compiler.stdout)?.[1]
   if (!host) throw new Error('Rust compiler did not report its build host')
   return host
 }
@@ -24,7 +24,7 @@ export function hostPlatform() {
 /** The platforms dist-workspace.toml releases the CLI for. */
 export function releaseTargets() {
   const toml = readFileSync(join(root, 'dist-workspace.toml'), 'utf8')
-  const targets = [...(/^targets\s*=\s*\[([^\]]*)\]/m.exec(toml)?.[1] ?? '').matchAll(/"([^"]+)"/g)].map(match => match[1])
+  const targets = [...(/^targets\s*=\s*\[([^\]]*)\]/mu.exec(toml)?.[1] ?? '').matchAll(/"([^"]+)"/gu)].map(match => match[1])
   if (!targets.length) throw new Error('dist-workspace.toml names no release targets')
   return targets
 }

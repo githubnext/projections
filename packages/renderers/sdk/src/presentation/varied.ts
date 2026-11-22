@@ -40,7 +40,7 @@ const pointerSegments = (path: string): string[] =>
   path
     .split('/')
     .slice(1)
-    .map(segment => segment.replace(/~1/g, '/').replace(/~0/g, '~'))
+    .map(segment => segment.replace(/~1/gu, '/').replace(/~0/gu, '~'))
 
 /**
  * A varied value's name for display: its pointer below `/data/`, segments
@@ -55,7 +55,7 @@ export function variedName(path: string): string {
 export function variedValue(item: unknown, path: string): unknown {
   let value: unknown = item
   for (const segment of pointerSegments(path)) {
-    if (Array.isArray(value)) value = /^(0|[1-9][0-9]*)$/.test(segment) ? value[Number(segment)] : undefined
+    if (Array.isArray(value)) value = /^(?:0|[1-9]\d*)$/u.test(segment) ? value[Number(segment)] : undefined
     else if (value !== null && typeof value === 'object' && Object.hasOwn(value, segment)) {
       value = (value as Record<string, unknown>)[segment]
     } else return undefined

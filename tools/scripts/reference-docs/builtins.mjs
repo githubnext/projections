@@ -12,7 +12,7 @@ import {builtRenderers, code, fail, formatMarkdown, json, outDir, projections, r
 const builtinsDir = 'docs/builtins'
 /** Built-ins without a page, reported after the other pages are written. */
 export const missingPages = []
-const regionPattern = /<!-- generated: ([a-z-]+) -->\n[\s\S]*?<!-- end generated: \1 -->/g
+const regionPattern = /<!-- generated: ([a-z-]+) -->\n[\s\S]*?<!-- end generated: \1 -->/gu
 /** The extractor ids, renderer names and comparator a built-in page may describe, with each page's path. */
 const builtinPage = {
   extractor: id => `${builtinsDir}/extractors/${id}.md`,
@@ -25,9 +25,9 @@ const modeNames = {'side-by-side': 'Side by side', animated: 'Animated', swipe: 
 
 /** A schema pattern of alternatives (`^(?:dependents|data\..+)$`) as its values: `dependents`, `data.<key>`. */
 const patternValues = pattern => {
-  const alternatives = /^\^\(\?:(.*)\)\$$/.exec(pattern)?.[1]?.split('|')
+  const alternatives = /^\^\(\?:(.*)\)\$$/u.exec(pattern)?.[1]?.split('|')
   if (!alternatives) return `matches ${code(pattern)}`
-  return alternatives.map(item => code(item.replace(/\\\.\.\+$/, '.<key>').replace(/\\(.)/g, '$1'))).join(' or ')
+  return alternatives.map(item => code(item.replace(/\\\.\.\+$/u, '.<key>').replace(/\\(.)/gu, '$1'))).join(' or ')
 }
 
 /** Fills a page's regions from `regions` (name → Markdown); a region the page lacks, or one it has that isn't known, fails. */
@@ -51,8 +51,8 @@ export async function builtins() {
   const definitionSchema = JSON.parse(await readFile(join(root, 'packages/schemas/schemas/definition/v0.json'), 'utf8'))
   const page = (file, from) => posix.relative(posix.dirname(from), file)
   const schemaLink = (schema, from) => {
-    const name = schema.replace(/\/v\d+$/, '')
-    const target = `${outDir}/schemas/${name.replace(/\//g, '-')}.md`
+    const name = schema.replace(/\/v\d+$/u, '')
+    const target = `${outDir}/schemas/${name.replace(/\//gu, '-')}.md`
     return `[${code(schema)}](${page(target, from)})`
   }
   const rendererFor = handle => found.find(({manifest}) => manifest.handles.includes(handle))
@@ -139,7 +139,7 @@ export async function builtins() {
       ['Renderer', 'What it draws', 'Also answers to'],
       found.map(({pkg, manifest}) => [
         link(builtinPage.renderer(manifest.name), manifest.title),
-        sentence(pkg.description.replace(/^Built-in Projections [^:]*renderer:\s*/i, '').replace(/^./, first => first.toUpperCase())),
+        sentence(pkg.description.replace(/^Built-in Projections [^:]*renderer:\s*/iu, '').replace(/^./u, first => first.toUpperCase())),
         manifest.handles
           .filter(handle => handle !== manifest.name)
           .map(code)

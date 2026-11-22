@@ -75,7 +75,7 @@ const workspaceOf = (context: GateContext, path: string) =>
 
 /** Files every lint result depends on: the configuration, what it imports, and the compiler options. */
 const lintConfiguration =
-  /^(eslint\.config\.js|tsconfig\.base\.json|package(-lock)?\.json|tools\/scripts\/(lint|engine-contracts)\.mjs|tools\/scripts\/check-machines\/lifecycle-rule\.mjs)$/
+  /^(?:eslint\.config\.js|tsconfig\.base\.json|package(?:-lock)?\.json|tools\/scripts\/(?:lint|engine-contracts)\.mjs|tools\/scripts\/check-machines\/lifecycle-rule\.mjs)$/u
 
 /**
  * The lint gate, a process per workspace as npm run lint runs it, since one process over many workspaces holds every
@@ -87,7 +87,7 @@ const lintConfiguration =
 export function lintPlan(context: GateContext): Plan {
   const configuration = (context.files ?? []).some(path => lintConfiguration.test(path))
   if (!context.affected || (configuration && !context.fast)) return {commands: [npm('run', '--silent', 'lint')]}
-  const files = changedFiles(context, /\.([cm]?[jt]sx?)$/)
+  const files = changedFiles(context, /\.[cm]?[jt]sx?$/u)
   const eslint = (...paths: string[]) => npx('eslint', '--quiet', '--no-warn-ignored', ...paths)
   const outside = files.filter(path => !workspaceOf(context, path))
   if (!context.fast) {
@@ -106,7 +106,7 @@ export function lintPlan(context: GateContext): Plan {
   const {ready, note: waiting} = withCurrentDependencies(context, [...byUnit.keys()])
   const groups = [
     outside,
-    ...[...byUnit].map(([unit, paths]) => (ready.includes(unit) ? paths : paths.filter(path => /\.[cm]?js$/.test(path)))),
+    ...[...byUnit].map(([unit, paths]) => (ready.includes(unit) ? paths : paths.filter(path => /\.[cm]?js$/u.test(path)))),
   ].filter(group => group.length)
   const note = [configuration ? `the lint configuration changed: run npm run lint to lint everything` : undefined, waiting]
     .filter(Boolean)

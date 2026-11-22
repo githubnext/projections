@@ -122,10 +122,10 @@ for (const engine of ['chromium', 'webkit']) {
       workerResult.canonical,
       await native.canonicalize({protocolVersion: 0, schema: 'graph/v0', entities: [], relationships: []}),
     )
-    assert.match(workerResult.invalid, /^EngineError: duplicate-key/)
+    assert.match(workerResult.invalid, /^EngineError: duplicate-key/u)
     assert.deepEqual(workerResult.envelope, {format: 'projections.extraction', provenance: {ref: 'one'}})
-    assert.match(workerResult.envelopeError, /^EngineError: duplicate-key/)
-    for (const error of workerResult.errors) assert.match(error, /^EngineTransportError:/)
+    assert.match(workerResult.envelopeError, /^EngineError: duplicate-key/u)
+    for (const error of workerResult.errors) assert.match(error, /^EngineTransportError:/u)
     console.log(`${engine}: Worker disposal, pending rejection, crash, timeout and initialization failures pass`)
     const large = graph(10000, 50000)
     const expected = await native.compare(large, large)

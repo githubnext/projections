@@ -19,7 +19,7 @@ export const partIcons = {
 function partFact(node: DefinitionNode): string {
   if (node.file) return node.file.split('/').at(-1) ?? node.file
   const value = node.value ?? ''
-  if (node.kind === 'renderer' && value.includes('/')) return value.replace(/\/+$/, '').split('/').slice(-2).join('/')
+  if (node.kind === 'renderer' && value.includes('/')) return value.replace(/\/+$/u, '').split('/').slice(-2).join('/')
   return value
 }
 
@@ -31,7 +31,7 @@ export interface ItemContext {
   build: BuildState | undefined
 }
 
-const at = (context: ItemContext, path: string) => vscode.Uri.joinPath(context.folder.uri, ...path.replace(/^\.\//, '').split('/'))
+const at = (context: ItemContext, path: string) => vscode.Uri.joinPath(context.folder.uri, ...path.replace(/^\.\//u, '').split('/'))
 const open = (context: ItemContext, path: string): vscode.Command => ({
   title: 'Open File',
   command: 'vscode.open',

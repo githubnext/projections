@@ -83,7 +83,7 @@ test('the dependency graph names its option groups by what they hold, not the re
   await open(page, 'dependencies')
   const settings = await openSettings(page)
   const options = settings.getByRole('group', {name: 'Graph'})
-  await expect(options.locator('[aria-haspopup="menu"]')).toHaveText([/^Packages/, /^Dependencies/])
+  await expect(options.locator('[aria-haspopup="menu"]')).toHaveText([/^Packages/u, /^Dependencies/u])
   await submenuItem(settings, 'Packages').click()
   await expect(menuItem(page.getByRole('menu', {name: 'Packages'}), 'All packages')).not.toBeChecked()
 })

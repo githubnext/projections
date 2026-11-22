@@ -4,14 +4,14 @@ import {join, prefixOf} from './units.mjs'
 
 /** A file's language, by its name, or a shell script's by its `#!` line; null for anything else. */
 export function languageOf(file, read) {
-  if (/\.rs$/.test(file)) return 'rust'
-  if (/\.(m|c)?[jt]sx?$/.test(file)) return 'javascript'
-  if (/\.go$/.test(file)) return 'go'
-  if (/\.py$/.test(file)) return 'python'
-  if (/\.java$/.test(file)) return 'java'
-  if (/\.cs$/.test(file)) return 'csharp'
-  if (/\.css$/.test(file)) return 'css'
-  if (/(^|\/)[^./]+$/.test(file) && /^#!.*\b(ba|z)?sh\b/.test(read(file).slice(0, 64))) return 'shell'
+  if (/\.rs$/u.test(file)) return 'rust'
+  if (/\.(?:m|c)?[jt]sx?$/u.test(file)) return 'javascript'
+  if (/\.go$/u.test(file)) return 'go'
+  if (/\.py$/u.test(file)) return 'python'
+  if (/\.java$/u.test(file)) return 'java'
+  if (/\.cs$/u.test(file)) return 'csharp'
+  if (/\.css$/u.test(file)) return 'css'
+  if (/(?:^|\/)[^./]+$/u.test(file) && /^#!.*\b(?:ba|z)?sh\b/u.test(read(file).slice(0, 64))) return 'shell'
   return null
 }
 
@@ -83,9 +83,9 @@ export function assignSources({units, addUnit, roots, files, read}) {
     const name = segments.at(-1)
     if (name === 'build.rs') return 'build'
     if (segments.some(segment => testSegments.has(segment))) return 'test'
-    if (/\.(test|spec|stories|bench)\.[^.]+$/.test(name) || /(^|_)tests?\.rs$/.test(name)) return 'test'
+    if (/\.(?:test|spec|stories|bench)\.[^.]+$/u.test(name) || /(?:^|_)tests?\.rs$/u.test(name)) return 'test'
     if (segments.slice(0, -1).some(segment => segment === 'scripts' || segment === 'build')) return 'build'
-    if (/\.config\.[cm]?[jt]s$/.test(name)) return 'build'
+    if (/\.config\.[cm]?[jt]s$/u.test(name)) return 'build'
     return 'source'
   }
 
@@ -93,7 +93,7 @@ export function assignSources({units, addUnit, roots, files, read}) {
   const singles = new Map([...units.values()].filter(unit => unit.single).map(unit => [unit.single, unit]))
   for (const file of files) {
     const language = languageOf(file, read)
-    if (!language || /(^|\/)(node_modules|dist|target|\.data)(\/|$)/.test(file)) continue
+    if (!language || /(?:^|\/)(?:node_modules|dist|target|\.data)(?:\/|$)/u.test(file)) continue
     const owner = singles.get(file) ?? ownerOf(file, language)
     if (!owner) continue
     const relative = owner.single ? path.posix.basename(file) : file.slice(owner.directory.length + 1)
@@ -107,24 +107,24 @@ export function assignSources({units, addUnit, roots, files, read}) {
 export function stripComments(text, language) {
   let result = text
   if (['rust', 'javascript', 'go', 'java', 'csharp', 'css'].includes(language)) {
-    result = result.replace(/\/\*[\s\S]*?\*\//g, block => block.replace(/[^\n]/g, ' '))
+    result = result.replace(/\/\*[\s\S]*?\*\//gu, block => block.replace(/[^\n]/gu, ' '))
   }
   if (language === 'css') return result.split('\n')
-  const comment = language === 'python' || language === 'shell' ? /^\s*#(?!!).*$/ : /(^|[\s;,{}()])\/\/.*$/
+  const comment = language === 'python' || language === 'shell' ? /^\s*#(?!!).*$/u : /(^|[\s;,{}()])\/\/.*$/u
   return result.split('\n').map(line => line.replace(comment, (_, lead = '') => lead))
 }
 
 export function withoutRustTests(lines) {
   const kept = [...lines]
   for (let index = 0; index < kept.length; index += 1) {
-    if (!/^\s*#\[cfg\(test\)\]\s*$/.test(kept[index])) continue
+    if (!/^\s*#\[cfg\(test\)\]\s*$/u.test(kept[index])) continue
     let cursor = index + 1
-    while (cursor < kept.length && /^\s*(#\[.*|)$/.test(kept[cursor])) cursor += 1
-    if (cursor >= kept.length || !/^\s*(pub(\([^)]*\))?\s+)?mod\s+\w+\s*\{/.test(kept[cursor])) continue
+    while (cursor < kept.length && /^\s*(?:#\[.*)?$/u.test(kept[cursor])) cursor += 1
+    if (cursor >= kept.length || !/^\s*(?:pub(?:\([^)]*\))?\s+)?mod\s+\w+\s*\{/u.test(kept[cursor])) continue
     let depth = 0
     let end = cursor
     for (; end < kept.length; end += 1) {
-      for (const character of kept[end].replace(/"(\\.|[^"\\])*"|'(\\.|[^'\\])'/g, '')) {
+      for (const character of kept[end].replace(/"(\\.|[^"\\])*"|'(\\.|[^'\\])'/gu, '')) {
         if (character === '{') depth += 1
         else if (character === '}') depth -= 1
       }

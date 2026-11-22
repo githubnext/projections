@@ -10,7 +10,7 @@ module.exports = async function revisions({folder, api, choiceName, swaps, tabSh
   await tabShows('the tab on main → HEAD', summary => summary.pair.before === 'main' && summary.pair.after === 'HEAD')
   // The status bar names two revisions by their ref names for people (HEAD is its branch), with no counts.
   await until('the status bar on main → HEAD', async () => ((await choiceName()) === 'main → feature/auth' ? true : undefined))
-  assert.match(api.statusBar().tooltip, /^\*\*main → feature\/auth\*\*\n\nmain \x60[0-9a-f]{7}\x60 → feature\/auth \x60[0-9a-f]{7}\x60/)
+  assert.match(api.statusBar().tooltip, /^\*\*main → feature\/auth\*\*\n\nmain \x60[0-9a-f]{7}\x60 → feature\/auth \x60[0-9a-f]{7}\x60/u)
   assert.deepEqual(api.rows()[0].pair, {before: 'main', after: 'HEAD'})
   assert.equal(api.rows()[0].choice.id, 'custom')
   assert.deepEqual(
@@ -42,11 +42,11 @@ module.exports = async function revisions({folder, api, choiceName, swaps, tabSh
   // Compare All counts every projection on the folder's pair; the badge says how many changed.
   await vscode.commands.executeCommand('projections.compareAll', folder)
   await until('the badge', async () => (api.badge() >= 1 ? true : undefined))
-  assert.match(api.rows()[0].projections[0].status, /^\d+ changes?$/)
+  assert.match(api.rows()[0].projections[0].status, /^\d+ changes?$/u)
   // D6: a row's Refresh re-extracts its open tab, which reports its count again.
   await vscode.commands.executeCommand('projections.refreshProjection', {
     model: {folder: vscode.workspace.workspaceFolders[0]},
     definition: {id: 'packages'},
   })
-  await until('the refreshed row', async () => (/^\d+ changes?$/.test(api.rows()[0].projections[0].status) ? true : undefined))
+  await until('the refreshed row', async () => (/^\d+ changes?$/u.test(api.rows()[0].projections[0].status) ? true : undefined))
 }

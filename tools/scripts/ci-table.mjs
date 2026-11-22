@@ -19,7 +19,7 @@ const facts = repoFacts(root)
 const rules = loadCiRules(root)
 const {cases} = JSON.parse(readFileSync(join(root, 'tools/cli/test/ci-plan.cases.json'), 'utf8'))
 
-const short = suite => suite.replace(/^packages\//, '').replace(/^tools\//, '')
+const short = suite => suite.replace(/^packages\//u, '').replace(/^tools\//u, '')
 const counted = (name, count) => (count > 1 ? `${name} ×${count}` : name)
 
 /** What a plan runs, in a phrase: the gated jobs, then the browser suites and their job counts. */

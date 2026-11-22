@@ -123,7 +123,7 @@ test('the diff draws each rule once, with interpretations, without overlap or ov
   const starts = await lineStarts(renderer)
   expect(starts.length).toBeGreaterThan(0)
   expect(
-    starts.filter(start => /^[·•|,;—–]/.test(start)),
+    starts.filter(start => /^[·•|,;—–]/u.test(start)),
     'a line starts with a separator',
   ).toEqual([])
   await renderer.iframe.screenshot({path: test.info().outputPath('diff.png')})
@@ -204,7 +204,7 @@ test('deployment facts: agent, kernels, warnings and the policies covering each 
   const guard = frame.locator('[data-entity-id="policy:tetragon:TracingPolicyNamespaced:payments:shell-guard"]')
   await expect(guard.locator('.rp-warning').first()).toContainText("The repository's CRD rejects this policy")
   await expect(frame.locator('[data-entity-id="hook:kprobe:tcp_connect"] .rp-warning')).toHaveText(
-    /Unavailable on general: tcp_connect is not a kernel symbol there\./,
+    /Unavailable on general: tcp_connect is not a kernel symbol there\./u,
   )
   const web = frame.locator('[data-entity-id="workload:StatefulSet:checkout:checkout-web"]')
   await expect(web.locator('.rp-chip.added.filled')).toContainText('protect-credentials')

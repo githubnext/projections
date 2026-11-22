@@ -145,7 +145,7 @@ export class StatusBar implements vscode.Disposable {
       accessibility: this.item.accessibilityInformation?.label ?? null,
       command: typeof this.item.command === 'object' ? this.item.command.command : (this.item.command ?? null),
       arguments: typeof this.item.command === 'object' ? (this.item.command.arguments ?? []).map(String) : [],
-      icon: /^\$\(([^)]+)\)/.exec(this.item.text)?.[1] ?? null,
+      icon: /^\$\(([^)]+)\)/u.exec(this.item.text)?.[1] ?? null,
     }
   }
 

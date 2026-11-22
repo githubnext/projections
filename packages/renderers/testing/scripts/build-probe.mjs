@@ -18,4 +18,4 @@ await build({
   },
 })
 const probe = await readFile(new URL('../dist/probe.js', import.meta.url), 'utf8')
-if (/<\/script/i.test(probe)) throw new Error('The probe must not contain </script')
+if (/<\/script/iu.test(probe)) throw new Error('The probe must not contain </script')

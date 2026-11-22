@@ -126,7 +126,7 @@ export const comparatorCases = [
     before: state(),
     after: state('dag/v0'),
     expectedErrorCode: 'comparator-error',
-    expectedMessage: /schema-mismatch/,
+    expectedMessage: /schema-mismatch/u,
   },
   {
     id: 'modified-rename-relationship-endpoint-equality',
@@ -169,7 +169,7 @@ export const comparatorCases = [
       {...node('d'), previousIds: ['b']},
     ]),
     expectedErrorCode: 'comparator-error',
-    expectedMessage: /ambiguous-correspondence/,
+    expectedMessage: /ambiguous-correspondence/u,
   },
   {
     id: 'invalid-options',
@@ -177,6 +177,6 @@ export const comparatorCases = [
     after: state(),
     options: {order: {by: 'size'}},
     expectedErrorCode: 'comparator-error',
-    expectedMessage: /invalid-options/,
+    expectedMessage: /invalid-options/u,
   },
 ]

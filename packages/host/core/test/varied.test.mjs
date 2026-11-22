@@ -81,12 +81,12 @@ test('the details’ varied list is neutral: paths and values in the monospace f
   const markup = renderToStaticMarkup(
     createElement(VariedList, {varied: [...rowDetails(subject, row('parse'), rows).varied, ...details.varied]}),
   )
-  assert.match(markup, /aria-label="Volatile values"/)
-  assert.match(markup, /<code class="ph-field-name[^"]*pj:font-mono[^"]*">durationMs<\/code>/)
-  assert.match(markup, /class="ph-varied-values[^"]*pj:font-mono/)
-  assert.match(markup, /within tolerance/)
-  assert.match(markup, /beyond tolerance \(volatile\)/)
-  assert.doesNotMatch(markup, /data-change=|text-added|text-removed|text-modified|bg-added|bg-removed|bg-modified/)
+  assert.match(markup, /aria-label="Volatile values"/u)
+  assert.match(markup, /<code class="ph-field-name[^"]*pj:font-mono[^"]*">durationMs<\/code>/u)
+  assert.match(markup, /class="ph-varied-values[^"]*pj:font-mono/u)
+  assert.match(markup, /within tolerance/u)
+  assert.match(markup, /beyond tolerance \(volatile\)/u)
+  assert.doesNotMatch(markup, /data-change=|text-added|text-removed|text-modified|bg-added|bg-removed|bg-modified/u)
   assert.equal(renderToStaticMarkup(createElement(VariedList, {varied: []})), '')
 })
 
@@ -151,11 +151,11 @@ test('turning one filter on turns the other off', () => {
 test('the toolbar count shows "N varied within tolerance" as a toggle, and nothing when none varied', () => {
   const controller = {comparing: true, variation: {within: 3, beyond: 1}, variedOnly: false, setVariedOnly() {}}
   const markup = renderToStaticMarkup(createElement(VariedToggle, {projection: controller}))
-  assert.match(markup, /<span>3 varied within tolerance<\/span>/)
-  assert.match(markup, /aria-pressed="false"/)
-  assert.match(markup, /pj:text-muted-foreground/)
-  assert.doesNotMatch(markup, /added|removed|modified/)
-  assert.match(renderToStaticMarkup(createElement(VariedToggle, {projection: {...controller, variedOnly: true}})), /aria-pressed="true"/)
+  assert.match(markup, /<span>3 varied within tolerance<\/span>/u)
+  assert.match(markup, /aria-pressed="false"/u)
+  assert.match(markup, /pj:text-muted-foreground/u)
+  assert.doesNotMatch(markup, /added|removed|modified/u)
+  assert.match(renderToStaticMarkup(createElement(VariedToggle, {projection: {...controller, variedOnly: true}})), /aria-pressed="true"/u)
   for (const variation of [undefined, {within: 0, beyond: 2}]) {
     assert.equal(renderToStaticMarkup(createElement(VariedToggle, {projection: {...controller, variation}})), '')
   }
@@ -164,5 +164,5 @@ test('the toolbar count shows "N varied within tolerance" as a toggle, and nothi
 
 test('the text view says how many unchanged items varied within tolerance', () => {
   const markup = renderToStaticMarkup(createElement(TextView, {subject, rows, selectedId: null, onSelect() {}, progress: 1}))
-  assert.match(markup, /2 changes in 1 step: 0 added, 0 removed, 2 modified\. 2 items are unchanged, 1 of them varied within tolerance\./)
+  assert.match(markup, /2 changes in 1 step: 0 added, 0 removed, 2 modified\. 2 items are unchanged, 1 of them varied within tolerance\./u)
 })

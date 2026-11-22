@@ -35,10 +35,10 @@ test('real CLI collects both sample languages, compares history, exports immutab
   assert.equal(comparison.comparison.changes.filter(change => change.status === 'added').length, 2)
   assert.equal(comparison.comparator.id, 'default')
   const text = (await cli(root, ['compare', `${before}..${after}`, '-p', 'services-node', '--trust'])).stdout
-  assert.match(text, /^Services \(Node\) \(projection services-node\)|projection services-node/m)
-  assert.match(text, /Step 1 of \d/)
-  assert.match(text, /Added entity/)
-  assert.match((await cli(root, ['show', after, '-p', 'services-node', '--trust'])).stdout, /Showing commit [0-9a-f]{12}\./)
+  assert.match(text, /^Services \(Node\) \(projection services-node\)|projection services-node/mu)
+  assert.match(text, /Step 1 of \d/u)
+  assert.match(text, /Added entity/u)
+  assert.match((await cli(root, ['show', after, '-p', 'services-node', '--trust'])).stdout, /Showing commit [0-9a-f]{12}\./u)
   const output = path.join(root, '..', `extraction-${path.basename(root)}.json`)
   t.after(() => rm(output, {force: true}))
   await cli(root, ['show', after, '-p', 'services-node', '--trust', '--output', output])
@@ -48,21 +48,21 @@ test('real CLI collects both sample languages, compares history, exports immutab
       .changes.length,
     0,
   )
-  assert.match((await cli(root, ['compare', '--before-extraction', output, '--after-extraction', output])).stdout, /No changes\./)
+  assert.match((await cli(root, ['compare', '--before-extraction', output, '--after-extraction', output])).stdout, /No changes\./u)
   const bytes = await readFile(output)
   const saved = JSON.parse(bytes)
   assert.equal(saved.provenance.revision.commit, after)
   assert.equal(saved.provenance.revision.dirty, false)
-  assert.match(saved.provenance.definitionDigest, /^sha256:[0-9a-f]{64}$/)
+  assert.match(saved.provenance.definitionDigest, /^sha256:[0-9a-f]{64}$/u)
   assert.ok(saved.extraction.entities.every(entity => entity.evidence[0].source === 'services.json'))
-  await assert.rejects(cli(root, ['show', before, '-p', 'services-node']), /--trust/)
+  await assert.rejects(cli(root, ['show', before, '-p', 'services-node']), /--trust/u)
 })
 
 test('one invalid definition is reported where it is wrong, and the others still list and check', async t => {
   const {root} = await fixture(t)
   await writeFile(path.join(root, '.github/projections/legacy.json'), legacyDefinition)
   commit(root)
-  const listed = await failed(cli(root, ['list', '--json']), /1 definition file is invalid/)
+  const listed = await failed(cli(root, ['list', '--json']), /1 definition file is invalid/u)
   const document = JSON.parse(listed)
   assert.deepEqual(document.projections.map(item => item.id).sort(), ['services-node', 'services-python'])
   assert.equal(document.invalid.length, 1)
@@ -73,22 +73,22 @@ test('one invalid definition is reported where it is wrong, and the others still
   assert.deepEqual(invalid.diagnostics[0].location, {path: '.github/projections/legacy.json', line: 7, column: 5})
   assert.match(
     invalid.diagnostics[0].message,
-    /^Module comparators were removed; name a comparator file instead: \x60"comparator": "<path>\.comparator\.yaml"\x60\. See https:\/\/github\.com\/githubnext\/projections\/blob\/main\/docs\/guides\/comparators\.md$/,
+    /^Module comparators were removed; name a comparator file instead: \x60"comparator": "<path>\.comparator\.yaml"\x60\. See https:\/\/github\.com\/githubnext\/projections\/blob\/main\/docs\/guides\/comparators\.md$/u,
   )
-  const text = await failed(cli(root, ['list']), /1 definition file is invalid/)
-  assert.match(text, /services-node: /)
-  assert.match(text, /legacy: invalid: \.github\/projections\/legacy\.json:7:5: Module comparators were removed/)
+  const text = await failed(cli(root, ['list']), /1 definition file is invalid/u)
+  assert.match(text, /services-node: /u)
+  assert.match(text, /legacy: invalid: \.github\/projections\/legacy\.json:7:5: Module comparators were removed/u)
 
-  const checked = JSON.parse(await failed(cli(root, ['check', '--no-render', '--json']), /./))
+  const checked = JSON.parse(await failed(cli(root, ['check', '--no-render', '--json']), /./u))
   assert.equal(checked.ok, false)
   const legacy = checked.projections.find(item => item.id === 'legacy')
   assert.equal(legacy.steps[0].status, 'fail')
-  assert.match(legacy.steps[0].message, /legacy\.json:7:5: Module comparators were removed/)
+  assert.match(legacy.steps[0].message, /legacy\.json:7:5: Module comparators were removed/u)
   assert.equal(legacy.diagnostics[0].pointer, '/comparator/module')
   // The valid projections are still checked (they run repository code, so their extraction needs --trust).
   assert.ok(checked.projections.some(item => item.id === 'services-node' && item.steps[0].status === 'pass'))
   // A projection the command names that is invalid fails with its diagnostic, not as unknown.
-  await failed(cli(root, ['show', '-p', 'legacy']), /legacy\.json:7:5: Module comparators were removed/)
+  await failed(cli(root, ['show', '-p', 'legacy']), /legacy\.json:7:5: Module comparators were removed/u)
 })
 
 test('comparator files run in the embedded interpreter, deterministically', async t => {
@@ -118,7 +118,7 @@ test('comparator files run in the embedded interpreter, deterministically', asyn
     JSON.parse((await cli(root, ['compare', `${before}..${after}`, '-p', 'services-ordered', '--trust', '--json'])).stdout)
   const first = await run()
   assert.equal(first.comparator.id, 'tools/order.comparator.yaml')
-  assert.match(first.comparator.digest, /^sha256:[0-9a-f]{64}$/)
+  assert.match(first.comparator.digest, /^sha256:[0-9a-f]{64}$/u)
   // Each extraction records when it ran; everything else is identical.
   const withoutTimes = document => {
     for (const side of [document.before, document.after]) delete side.provenance.execution?.at
@@ -131,7 +131,7 @@ test('comparator files run in the embedded interpreter, deterministically', asyn
     path.join(root, 'tools/order.comparator.yaml'),
     'format: projections.comparator\nversion: 0\nchecks:\n  - assert: size(options) > 99\n    message: "\'refused\'"\n',
   )
-  await failed(cli(root, ['compare', before, '-p', 'services-ordered', '--trust', '--definition', 'head']), /refused/)
+  await failed(cli(root, ['compare', before, '-p', 'services-ordered', '--trust', '--definition', 'head']), /refused/u)
 })
 
 test('extractor list/init work without execution; invalid flags, duplicate output paths and implicit trust fail explicitly', async t => {
@@ -176,10 +176,10 @@ test('extractor list/init work without execution; invalid flags, duplicate outpu
   await cli(root, ['init', 'custom', '--command', JSON.stringify([process.execPath, 'collect.mjs'])])
   const custom = JSON.parse(await readFile(path.join(root, '.github/projections/custom.json'), 'utf8'))
   assert.deepEqual(custom.extractor.command, [process.execPath, 'collect.mjs'])
-  await assert.rejects(cli(root, ['init', 'files']), /already exists/)
-  await assert.rejects(cli(root, ['extractor', 'list', '--trust']), /unexpected argument/)
-  await assert.rejects(cli(root, ['compare', '-p', 'services-node', '--trust']), /revisions to compare/)
-  await assert.rejects(cli(root, ['compare', 'HEAD', '-p', 'services-node', '--all']), /cannot be used with '--all'/)
+  await assert.rejects(cli(root, ['init', 'files']), /already exists/u)
+  await assert.rejects(cli(root, ['extractor', 'list', '--trust']), /unexpected argument/u)
+  await assert.rejects(cli(root, ['compare', '-p', 'services-node', '--trust']), /revisions to compare/u)
+  await assert.rejects(cli(root, ['compare', 'HEAD', '-p', 'services-node', '--all']), /cannot be used with '--all'/u)
   const listed = JSON.parse((await cli(root, ['list', '--json'])).stdout)
   assert.deepEqual(
     listed.projections.map(item => [item.id, item.requiresTrust]),
@@ -190,9 +190,9 @@ test('extractor list/init work without execution; invalid flags, duplicate outpu
       ['services-python', true],
     ],
   )
-  await assert.rejects(cli(root, ['show', '-p', 'services-node', '--before', 'HEAD']), /unexpected argument/)
+  await assert.rejects(cli(root, ['show', '-p', 'services-node', '--before', 'HEAD']), /unexpected argument/u)
   for (const removed of ['collect', 'collect-all', 'compare-all', 'compare-bookmarks', 'catalog', 'bookmarks', 'review', 'snapshot']) {
-    await assert.rejects(cli(root, [removed]), /unrecognized subcommand/)
+    await assert.rejects(cli(root, [removed]), /unrecognized subcommand/u)
   }
 })
 
@@ -207,8 +207,8 @@ test('a saved document is served over stdio without running extractors', async t
   assert.equal((await backend.request('GET', '/api/document')).body.document.format, 'projections.extraction')
   assert.equal((await backend.request('POST', '/api/jobs', {projectionId: 'services-node', before: 'HEAD'})).status, 403)
   // The local web app is gone: the extension is the Inspector's host.
-  await assert.rejects(cli(root, ['inspect']), /unrecognized subcommand/)
-  await assert.rejects(cli(root, ['explore', '--web']), /unexpected argument/)
+  await assert.rejects(cli(root, ['inspect']), /unrecognized subcommand/u)
+  await assert.rejects(cli(root, ['explore', '--web']), /unexpected argument/u)
 })
 
 test('batch CLI preserves successful items, explicit unknown IDs and saved working-tree scenarios', async t => {
@@ -221,7 +221,7 @@ test('batch CLI preserves successful items, explicit unknown IDs and saved worki
       ['services-python', 'extracted'],
     ],
   )
-  const untrusted = JSON.parse(await failed(cli(root, ['show', '--all', '--json']), /2 of the batch's items failed/))
+  const untrusted = JSON.parse(await failed(cli(root, ['show', '--all', '--json']), /2 of the batch's items failed/u))
   assert.deepEqual(
     untrusted.results.map(item => [item.diagnostics[0].code, item.definition.id]),
     [
@@ -242,7 +242,7 @@ test('batch CLI preserves successful items, explicit unknown IDs and saved worki
   assert.equal(saved.results[0].status, 'unchanged')
   assert.equal(saved.results[0].comparison.after.provenance.revision.kind, 'working-tree')
   const missing = JSON.parse(
-    await failed(cli(root, ['bookmark', 'run', 'working', 'missing', '--trust', '--json']), /1 of the batch's items failed/),
+    await failed(cli(root, ['bookmark', 'run', 'working', 'missing', '--trust', '--json']), /1 of the batch's items failed/u),
   )
   assert.deepEqual(
     missing.results.map(item => [item.id, item.status]),
@@ -251,7 +251,7 @@ test('batch CLI preserves successful items, explicit unknown IDs and saved worki
       ['missing', 'error'],
     ],
   )
-  assert.match((await cli(root, ['bookmark', 'run', '--trust'])).stdout, /== working ==[\s\S]*No changes\./)
+  assert.match((await cli(root, ['bookmark', 'run', '--trust'])).stdout, /== working ==[\s\S]*No changes\./u)
   assert.equal(JSON.parse((await cli(root, ['compare', `${before}..${before}`, '--all', '--trust', '--json'])).stdout).results.length, 2)
 })
 
@@ -285,7 +285,7 @@ test(
     const review = JSON.parse(
       await failed(
         cli(root, ['pr', '42', '-R', 'example/tiny', '--cache', cache, '--id', 'files', '--id', 'services-node', '--json'], env),
-        /1 of the pull request's comparisons failed/,
+        /1 of the pull request's comparisons failed/u,
       ),
     )
     assert.equal(review.execution, 'untrusted')
@@ -296,10 +296,13 @@ test(
       ['changed', 'error'],
     )
     assert.equal(review.comparisons.results[1].diagnostics[0].code, 'TRUST_REQUIRED')
-    await failed(cli(root, ['pr', '42', '-R', 'example/tiny', '--cache', cache, '--trust'], env), /unexpected argument/)
+    await failed(cli(root, ['pr', '42', '-R', 'example/tiny', '--cache', cache, '--trust'], env), /unexpected argument/u)
     const comparison = path.join(root, 'review.json')
     await writeFile(comparison, JSON.stringify(review.comparisons.results[0].comparison))
     assert.equal(JSON.parse((await cli(root, ['validate', comparison, '--json'])).stdout).format, 'projections.comparison')
-    await failed(cli(root, ['site', '--document', `good=${comparison}`, '--directory', path.join(root, 'site')]), /unrecognized subcommand/)
+    await failed(
+      cli(root, ['site', '--document', `good=${comparison}`, '--directory', path.join(root, 'site')]),
+      /unrecognized subcommand/u,
+    )
   },
 )

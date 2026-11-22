@@ -48,10 +48,10 @@ test('a transition returns the next state, its effects and whether a handler too
 })
 
 test('a state or event the definition lacks, or a transition to an unknown state, throws', () => {
-  assert.throws(() => runner.transition({kind: 'paused'}, {type: 'start', run: 1}), /no state "paused"/)
-  assert.throws(() => runner.transition({kind: 'idle'}, {type: 'pause'}), /no handler for "pause"/)
+  assert.throws(() => runner.transition({kind: 'paused'}, {type: 'start', run: 1}), /no state "paused"/u)
+  assert.throws(() => runner.transition({kind: 'idle'}, {type: 'pause'}), /no handler for "pause"/u)
   const broken = defineMachine()({states: {a: {on: {go: () => ({kind: 'b'})}}}})
-  assert.throws(() => broken.transition({kind: 'a'}, {type: 'go'}), /no state "b"/)
+  assert.throws(() => broken.transition({kind: 'a'}, {type: 'go'}), /no state "b"/u)
 })
 
 test("an actor runs effects, keeps each state's activities running and stops them when the state leaves", () => {
@@ -177,7 +177,7 @@ test("a runner's error or rejection is reported, and the actor keeps going", asy
 
 test('two activities with one key in a state are a definition error', () => {
   const twice = defineMachine()({states: {a: {on: {}, activities: () => [after('t', 1, {type: 'x'}), after('t', 2, {type: 'x'})]}}})
-  assert.throws(() => createActor(twice, {state: {kind: 'a'}}).start(), /two activities keyed "t"/)
+  assert.throws(() => createActor(twice, {state: {kind: 'a'}}).start(), /two activities keyed "t"/u)
 })
 
 // A counter for ordering checks: `add` adds, effects ask for work and report back.

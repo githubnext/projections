@@ -117,7 +117,7 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
 
   const definitions = await backend.request('GET', '/api/definitions?ref=working-tree')
   assert.equal(definitions.status, 200)
-  assert.match(definitions.contentType, /^application\/json/)
+  assert.match(definitions.contentType, /^application\/json/u)
   const ids = definitions.body.definitions.map(definition => definition.id)
   assert.ok(ids.includes('repository-map') && !ids.includes('services-node'), ids.join())
   assert.equal(definitions.body.executionAuthorized, false)
@@ -131,7 +131,7 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
   // HTTP-level refusals are results, not JSON-RPC errors.
   const missing = await backend.request('GET', '/api/nothing')
   assert.equal(missing.status, 404)
-  assert.match(missing.body.diagnostics[0].message, /Unknown Inspector API route/)
+  assert.match(missing.body.diagnostics[0].message, /Unknown Inspector API route/u)
   const undefinedProjection = await backend.request('POST', '/api/jobs', {projectionId: 'nothing', before: 'HEAD'})
   assert.equal(undefinedProjection.status, 202)
   const failed = await poll(
@@ -167,7 +167,7 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
   assert.ok(cell, JSON.stringify(swept.body.sweep.cells))
   const query = new URLSearchParams({projection: 'repository-map', before: cell.before, after: cell.after})
   const thumbnail = await backend.request('GET', `/api/sweep/thumbnail?${query}`)
-  if (thumbnail.status === 400 && /browser/i.test(JSON.stringify(thumbnail.body))) {
+  if (thumbnail.status === 400 && /browser/iu.test(JSON.stringify(thumbnail.body))) {
     t.diagnostic(`No browser for thumbnails: ${JSON.stringify(thumbnail.body)}`)
   } else {
     assert.equal(thumbnail.status, 200, JSON.stringify(thumbnail.body))
@@ -178,7 +178,7 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
   // Adopting previews without writing; writing needs the preview's digest.
   const preview = await backend.request('POST', '/api/adopt', {projections: ['repository-map'], dryRun: true, bookmarks: 0})
   assert.equal(preview.status, 200, JSON.stringify(preview.body))
-  assert.match(preview.body.digest, /^sha256:/)
+  assert.match(preview.body.digest, /^sha256:/u)
   await assert.rejects(access(path.join(root, '.github/projections/repository-map.json')))
   const stale = await backend.request('POST', '/api/adopt', {projections: ['repository-map'], digest: 'sha256:0', bookmarks: 0})
   assert.equal(stale.status, 409)
@@ -266,7 +266,7 @@ test('serve --stdio stops on shutdown and exit, honors --trust, and requires --s
     () => assert.fail('serve without --stdio must fail'),
     error => error,
   )
-  assert.match(failure.output.stderr, /needs --stdio/)
+  assert.match(failure.output.stderr, /needs --stdio/u)
   assert.equal(failure.output.stdout, '')
 })
 
@@ -279,7 +279,7 @@ test(
     assert.equal((await backend.call('initialize').reply).result.explore, false)
     const adopt = await backend.request('POST', '/api/adopt', {projections: ['repository-map'], digest: 'sha256:0'})
     assert.equal(adopt.status, 403)
-    assert.match(JSON.stringify(adopt.body), /explore session/)
+    assert.match(JSON.stringify(adopt.body), /explore session/u)
     const job = await backend.request('POST', '/api/jobs', {projectionId: 'services-node', before: 'HEAD'})
     const refused = await poll(
       () => backend.request('GET', `/api/jobs/${job.body.id}`),
@@ -319,7 +319,7 @@ test('serve --stdio lists every valid definition beside an invalid one, with its
           job => job.body.status !== 'running',
         )
       : bad
-  assert.match(JSON.stringify(finished.body), /Module comparators were removed/)
+  assert.match(JSON.stringify(finished.body), /Module comparators were removed/u)
 })
 
 test('serve --stdio presents a saved document, or renderer scenarios with their custom comparators, running nothing', async t => {
@@ -357,7 +357,7 @@ test('serve --stdio presents a saved document, or renderer scenarios with their 
   assert.ok(renderer, JSON.stringify(catalog.renderers).slice(0, 500))
   const bundle = await fixtures.request('GET', new URL(renderer.url, 'http://stdio.invalid').pathname)
   assert.equal(bundle.status, 200)
-  assert.match(bundle.contentType, /^text\/html/)
+  assert.match(bundle.contentType, /^text\/html/u)
   fixtures.child.stdin.end()
   assert.equal((await fixtures.exited).code, 0)
   assert.deepEqual([...document.invalid, ...fixtures.invalid], [])
@@ -367,6 +367,6 @@ test('serve --stdio presents a saved document, or renderer scenarios with their 
       cwd: root,
       env: executionEnvironment(process.env),
     }),
-    /cannot be used with/,
+    /cannot be used with/u,
   )
 })

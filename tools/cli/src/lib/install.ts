@@ -19,10 +19,10 @@ export type Editor = (typeof editors)[number]
  * build is a new version that VS Code and npm reinstall. The base keeps the CLI compatible (same major and minor).
  */
 export function devVersion(base: string, commit: string, dirty: boolean, now = new Date()): string {
-  const release = base.replace(/[-+].*$/, '')
+  const release = base.replace(/[-+].*$/u, '')
   // A numeric prerelease identifier can't have a leading zero; an all-digit hash gets git describe's `g` prefix.
-  const id = /^\d+$/.test(commit) ? `g${commit}` : commit
-  const stamp = now.toISOString().replace(/\D/g, '').slice(0, 14)
+  const id = /^\d+$/u.test(commit) ? `g${commit}` : commit
+  const stamp = now.toISOString().replace(/\D/gu, '').slice(0, 14)
   return `${release}-dev.${id}${dirty ? `.dirty.${stamp}` : ''}`
 }
 
@@ -145,7 +145,7 @@ export function findEditor(editor: Editor, exists: (path: string) => boolean = e
 export function withoutNpmConfig(environment: NodeJS.ProcessEnv): Record<string, string> {
   return Object.fromEntries(
     Object.entries(environment).filter(
-      (entry): entry is [string, string] => entry[1] !== undefined && !/^npm_(config|package|lifecycle)_/i.test(entry[0]),
+      (entry): entry is [string, string] => entry[1] !== undefined && !/^npm_(?:config|package|lifecycle)_/iu.test(entry[0]),
     ),
   )
 }

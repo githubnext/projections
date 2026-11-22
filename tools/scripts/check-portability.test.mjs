@@ -104,6 +104,6 @@ test('an exception needs a reason, excuses only its rule in its file, and fails 
     ['posix-path-module'],
   )
   assert.deepEqual(check([['packages/x/src/a.ts', '']], [entry]).stale, [entry])
-  assert.throws(() => check(files, [{...entry, reason: ' '}]), /needs a path, a rule and a reason/)
-  assert.throws(() => check(files, [{...entry, rule: 'tabs'}]), /no rule tabs/)
+  assert.throws(() => check(files, [{...entry, reason: ' '}]), /needs a path, a rule and a reason/u)
+  assert.throws(() => check(files, [{...entry, rule: 'tabs'}]), /no rule tabs/u)
 })

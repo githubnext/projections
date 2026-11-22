@@ -5,9 +5,9 @@ import {ExtractionSchema, Text} from './extraction.js'
 import {annotated, define} from './support.js'
 
 /** The published document name of a domain schema: `database/v0` is `database` (`/schemas/database/v0.json`). */
-export const domainDocument = (schema: DomainSchema) => schema.replace(/\/v\d+$/, '')
+export const domainDocument = (schema: DomainSchema) => schema.replace(/\/v\d+$/u, '')
 /** The published document name of a vocabulary: `vocabularies/dependency-injection` for `dependency-injection/v0`. */
-export const vocabularyDocument = (vocabulary: Vocabulary) => `vocabularies/${vocabulary.replace(/\/v\d+$/, '')}`
+export const vocabularyDocument = (vocabulary: Vocabulary) => `vocabularies/${vocabulary.replace(/\/v\d+$/u, '')}`
 
 // As the engine checks them: numbers are any finite JSON number.
 const primitiveSchemas: Record<PrimitiveType, () => object> = {

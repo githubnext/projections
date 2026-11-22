@@ -35,7 +35,7 @@ const glyphs = Object.fromEntries(
     const svg = svgOf(tokens[iconToken(name)])
     return [
       name,
-      {paths: [...svg.matchAll(/ d="([^"]+)"/g)].map(match => match[1]!), stroke: Number(/stroke-width="([\d.]+)"/.exec(svg)?.[1])},
+      {paths: [...svg.matchAll(/ d="([^"]+)"/gu)].map(match => match[1]!), stroke: Number(/stroke-width="([\d.]+)"/u.exec(svg)?.[1])},
     ]
   }),
 ) as Record<string, {paths: string[]; stroke: number}>
@@ -85,7 +85,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
       Promise.all(
         values.map(value => {
           const image = new Image()
-          image.src = /^url\("(.*)"\)$/.exec(value)![1]!
+          image.src = /^url\("(.*)"\)$/u.exec(value)![1]!
           return image.decode()
         }),
       ),

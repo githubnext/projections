@@ -85,7 +85,7 @@ export function contextReport(root: string) {
 
 export function mapReport(root: string, filter?: string) {
   const units = loadUnits(root).filter(
-    unit => !filter || unit.path.startsWith(filter.replace(/\/$/, '')) || unit.names.some(name => name.includes(filter)),
+    unit => !filter || unit.path.startsWith(filter.replace(/\/$/u, '')) || unit.names.some(name => name.includes(filter)),
   )
   return {
     count: units.length,
@@ -104,13 +104,13 @@ export function mapReport(root: string, filter?: string) {
 function testsFor(root: string, path: string, unit: Unit | undefined): string[] {
   const found = new Set<string>()
   const directory = dirname(path)
-  const stem = basename(path, extname(path)).replace(/\.(test|spec)$/, '')
-  if (/\.(test|spec)\.[cm]?[jt]sx?$/.test(path) || /(^|\/)tests?\//.test(path)) found.add(path)
+  const stem = basename(path, extname(path)).replace(/\.(?:test|spec)$/u, '')
+  if (/\.(?:test|spec)\.[cm]?[jt]sx?$/u.test(path) || /(?:^|\/)tests?\//u.test(path)) found.add(path)
   const look = (dir: string) => {
     if (!existsSync(join(root, dir))) return
     for (const entry of readdirSync(join(root, dir))) {
-      if (entry.startsWith(`${stem}.`) && /\.(test|spec)\.[cm]?[jt]sx?$/.test(entry)) found.add(`${dir}/${entry}`)
-      if (entry === `${stem}.rs` && /(^|\/)tests$/.test(dir)) found.add(`${dir}/${entry}`)
+      if (entry.startsWith(`${stem}.`) && /\.(?:test|spec)\.[cm]?[jt]sx?$/u.test(entry)) found.add(`${dir}/${entry}`)
+      if (entry === `${stem}.rs` && /(?:^|\/)tests$/u.test(dir)) found.add(`${dir}/${entry}`)
     }
   }
   look(directory)
@@ -128,7 +128,7 @@ function testsFor(root: string, path: string, unit: Unit | undefined): string[] 
 }
 
 export function explainReport(root: string, target: string) {
-  const path = relativeTo(root, target).replace(/^\.\//, '').replace(/\/$/, '')
+  const path = relativeTo(root, target).replace(/^\.\//u, '').replace(/\/$/u, '')
   const units = loadUnits(root)
   const unit = findUnit(units, path) ?? ownerOf(units, path)
   const exists = existsSync(join(root, path))
@@ -138,12 +138,12 @@ export function explainReport(root: string, target: string) {
   const tests: string[] = []
   const kind = (pattern: RegExp) => pattern.test(path)
   if (generator) checks.push(`${TOOLS} generated check --only ${generator.name}`)
-  if (kind(/\.([cm]?[jt]sx?)$/)) checks.push(`${TOOLS} check --only format,lint,typecheck --affected`)
-  if (kind(/\.(json|ya?ml|css|html)$/)) checks.push(`${TOOLS} check --only format --affected`)
-  if (kind(/\.rs$|Cargo\.toml$/)) checks.push(`${TOOLS} check --only cargo-fmt,clippy --affected`)
-  if (kind(/\.comparator(\.test)?\.ya?ml$/) || kind(/\.md$/)) checks.push(`${TOOLS} check --only comparators`)
-  if (kind(/(^|\/)README\.md$/)) checks.push(`${TOOLS} check --only readmes`)
-  if (kind(/\.md$/)) checks.push(`${TOOLS} check --only links`)
+  if (kind(/\.[cm]?[jt]sx?$/u)) checks.push(`${TOOLS} check --only format,lint,typecheck --affected`)
+  if (kind(/\.(?:json|ya?ml|css|html)$/u)) checks.push(`${TOOLS} check --only format --affected`)
+  if (kind(/\.rs$|Cargo\.toml$/u)) checks.push(`${TOOLS} check --only cargo-fmt,clippy --affected`)
+  if (kind(/\.comparator(?:\.test)?\.ya?ml$/u) || kind(/\.md$/u)) checks.push(`${TOOLS} check --only comparators`)
+  if (kind(/(?:^|\/)README\.md$/u)) checks.push(`${TOOLS} check --only readmes`)
+  if (kind(/\.md$/u)) checks.push(`${TOOLS} check --only links`)
   if (!checks.length) checks.push(`${TOOLS} check --affected`)
   if (unit) {
     if (unit.kinds.includes('npm') && unit.scripts.includes('test')) tests.push(`${TOOLS} test ${unit.path}`)

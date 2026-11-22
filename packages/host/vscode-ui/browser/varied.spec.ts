@@ -36,7 +36,7 @@ for (const theme of ['light-modern', 'dark-modern'] as const) {
     await expect(beyond).toHaveAttribute('data-within', 'false')
     await expect(beyond).toContainText('beyond tolerance (volatile)')
     expect(await beyond.locator('.phv-varied-values').evaluate(element => getComputedStyle(element).fontFamily)).toMatch(
-      /mono|menlo|consolas|courier/i,
+      /mono|menlo|consolas|courier/iu,
     )
     await page.keyboard.press('Escape')
 
@@ -49,7 +49,7 @@ test('the count sits at the end of the summary bar, never in the toolbar, at any
   await page.setViewportSize({width: 320, height: 800})
   await page.goto(story('projection-view--volatile-variation', 'light-modern'))
   await ready(page)
-  await expect(page.locator('.phv-toolbar').getByRole('button', {name: /varied within tolerance/})).toHaveCount(0)
+  await expect(page.locator('.phv-toolbar').getByRole('button', {name: /varied within tolerance/u})).toHaveCount(0)
   const bar = page.getByRole('group', {name: 'Summary'})
   await bar.getByRole('button', {name: '2 varied within tolerance'}).click()
   await expect(bar.getByRole('button', {name: '2 varied within tolerance'})).toHaveAttribute('aria-pressed', 'true')

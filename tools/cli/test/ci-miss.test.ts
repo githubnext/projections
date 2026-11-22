@@ -44,10 +44,10 @@ test('a job the plan skipped is a likely miss when it passed on the parent commi
 
 test('the miss detector runs on pushes to main after every other job, and never fails the run', () => {
   const workflow = readFileSync(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8')
-  const job = /^ {2}ci-miss:\n([\s\S]*?)\n {2}\S/m.exec(workflow)?.[1] ?? ''
-  assert.match(job, /if: always\(\) && github\.event_name == 'push'/)
-  assert.match(job, /continue-on-error: true/)
-  const ok = /^ {2}ci-ok:\n[\s\S]*?needs:\n((?: {6}- [\w-]+\n)+)/m.exec(workflow)?.[1] ?? ''
-  const needs = (block: string) => [...block.matchAll(/^ {6}- ([\w-]+)$/gm)].map(match => match[1])
+  const job = /^ {2}ci-miss:\n([\s\S]*?)\n {2}\S/mu.exec(workflow)?.[1] ?? ''
+  assert.match(job, /if: always\(\) && github\.event_name == 'push'/u)
+  assert.match(job, /continue-on-error: true/u)
+  const ok = /^ {2}ci-ok:\n[\s\S]*?needs:\n((?: {6}- [\w-]+\n)+)/mu.exec(workflow)?.[1] ?? ''
+  const needs = (block: string) => [...block.matchAll(/^ {6}- ([\w-]+)$/gmu)].map(match => match[1])
   assert.deepEqual(needs(job), needs(ok))
 })

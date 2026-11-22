@@ -13,7 +13,7 @@ const script = (name: string) =>
 test('Cargo.toml uses the verus_builtin_macros version verus.toml pins', async () => {
   const {consistent, pins} = await script('verify.mjs')
   assert.deepEqual(consistent!(), [])
-  assert.match((pins!() as {release: string}).release, /^0\.\d{4}\.\d{2}\.\d{2}\.[0-9a-f]{7}$/)
+  assert.match((pins!() as {release: string}).release, /^0\.\d{4}\.\d{2}\.\d{2}\.[0-9a-f]{7}$/u)
 })
 
 test('every mutant names a clause and plants a change its module still contains', async () => {

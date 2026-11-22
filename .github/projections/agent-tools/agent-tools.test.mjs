@@ -49,7 +49,7 @@ fn named(description: &str) -> Value {
     list: ['a', 'b'],
     off: false,
   })
-  assert.throws(() => evaluate(tokenize('unknown_fn()')), /test\.rs:1: unknown function unknown_fn/)
+  assert.throws(() => evaluate(tokenize('unknown_fn()')), /test\.rs:1: unknown function unknown_fn/u)
 })
 
 test('parameter types and limits read as agents read them', () => {

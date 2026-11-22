@@ -6,8 +6,8 @@ import {sortedUnique} from './files.mjs'
 export function literals(lines) {
   const found = []
   lines.forEach((line, index) => {
-    for (const match of line.matchAll(/'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)"|\x60((?:\\.|[^\x60\\])*)\x60/g)) {
-      found.push({value: (match[1] ?? match[2] ?? match[3]).replace(/\$\{[^}]*\}/g, '@'), line: index + 1})
+    for (const match of line.matchAll(/'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)"|\x60((?:\\.|[^\x60\\])*)\x60/gu)) {
+      found.push({value: (match[1] ?? match[2] ?? match[3]).replace(/\$\{[^}]*\}/gu, '@'), line: index + 1})
     }
   })
   return found
@@ -59,7 +59,7 @@ export function manifestRelationships(cx) {
   // The unit owning a repository path: the deepest unit directory containing it (a helper over its parent crate).
   function unitAtPath(root, target) {
     // Built JavaScript (`dist/extractor.mjs`) belongs to the npm package where a crate shares its directory.
-    const language = /\.(m|c)?[jt]sx?$/.test(target) || /(^|\/)dist(\/|$)/.test(target) ? 'javascript' : null
+    const language = /\.(?:m|c)?[jt]sx?$/u.test(target) || /(?:^|\/)dist(?:\/|$)/u.test(target) ? 'javascript' : null
     const rank = unit => (unit.kind === 'helper' ? 2 : unit.language === language ? 1 : 0)
     let best = null
     for (const unit of units.values()) {
@@ -94,18 +94,18 @@ export function manifestRelationships(cx) {
       if (entry.role !== 'build' || entry.language !== 'javascript' || !read(entry.file).includes('wasm32-unknown-unknown')) continue
       const values = literals(linesOf(entry))
       const compiled = sortedUnique(
-        values.map(item => /wasm32-unknown-unknown\/release\/([a-z0-9_]+)\.wasm$/.exec(item.value)?.[1]).filter(Boolean),
+        values.map(item => /wasm32-unknown-unknown\/release\/([a-z0-9_]+)\.wasm$/u.exec(item.value)?.[1]).filter(Boolean),
       )
       for (const ident of compiled) {
         const crate = unitByCrateIdent.get(ident)
         if (!crate) continue
         const written = values.find(item => {
-          if (!/\.wasm$/.test(item.value) || item.value.includes('wasm32-unknown-unknown')) return false
-          if (/^\.\.?\//.test(item.value)) {
+          if (!/\.wasm$/u.test(item.value) || item.value.includes('wasm32-unknown-unknown')) return false
+          if (/^\.\.?\//u.test(item.value)) {
             const owner = unitAtPath(unit.root, path.posix.normalize(path.posix.join(path.posix.dirname(entry.file), item.value)))
             return !owner || owner.id === unit.id || owner.id === crate
           }
-          return !namesOtherUnit(item.value.replace(/^@\//, ''), unit.root, unit.id, crate)
+          return !namesOtherUnit(item.value.replace(/^@\//u, ''), unit.root, unit.id, crate)
         })
         const name = path.posix.basename(written?.value ?? `${ident}.wasm`)
         const id = `wasm:${name}`

@@ -15,7 +15,7 @@ interface ParsedVersion {
 
 /** A plain or range-prefixed semantic version (`1.2.3`, `^18.3.0`, `v2`, `4.0.0.0-rc.1+build`); anything else isn't ordered. */
 function parseVersion(text: string): ParsedVersion | undefined {
-  const match = /^(?:[\^~=v]|[<>]=?)?\s*(\d+(?:\.\d+)*)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/.exec(text.trim())
+  const match = /^(?:[\^~=v]|[<>]=?)?\s*(\d+(?:\.\d+)*)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/u.exec(text.trim())
   if (!match) return undefined
   return {core: match[1]!.split('.').map(Number), pre: match[2] ? match[2].split('.') : []}
 }
@@ -27,8 +27,8 @@ function comparePre(left: string[], right: string[]): number {
     const a = left[index],
       b = right[index]
     if (a === undefined || b === undefined) return a === undefined ? -1 : 1
-    const numeric = /^\d+$/.test(a),
-      otherNumeric = /^\d+$/.test(b)
+    const numeric = /^\d+$/u.test(a),
+      otherNumeric = /^\d+$/u.test(b)
     if (numeric && otherNumeric) {
       if (Number(a) !== Number(b)) return Number(a) - Number(b)
       continue

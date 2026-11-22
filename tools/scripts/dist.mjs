@@ -16,7 +16,7 @@ import {fileURLToPath} from 'node:url'
 const root = fileURLToPath(new URL('../../', import.meta.url))
 const check = process.argv.includes('--check')
 const dist = process.env.DIST ?? 'dist'
-const pinned = /^cargo-dist-version\s*=\s*"([^"]+)"/m.exec(await readFile(path.join(root, 'dist-workspace.toml'), 'utf8'))?.[1]
+const pinned = /^cargo-dist-version\s*=\s*"([^"]+)"/mu.exec(await readFile(path.join(root, 'dist-workspace.toml'), 'utf8'))?.[1]
 const run = (command, args, cwd) => {
   const result = spawnSync(command, args, {cwd, encoding: 'utf8'})
   if (result.error) throw new Error(`${command} could not run (${result.error.message}); install dist ${pinned} or set DIST`)

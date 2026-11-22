@@ -38,8 +38,8 @@ test("the helper requires the repository's own typescript and never falls back t
   const result = await runHelper('typescript-public-api', request('typescript-public-api', root), root)
   assert.equal(result.status, 1)
   assert.equal(result.stdout, '')
-  assert.match(result.stderr, /typescript-public-api uses the TypeScript 5\.x or 6\.x compiler API from the repository's own installation/)
-  assert.match(result.stderr, /Run your package manager's install .* \x60npm install --save-dev typescript@6\x60/)
+  assert.match(result.stderr, /typescript-public-api uses the TypeScript 5\.x or 6\.x compiler API from the repository's own installation/u)
+  assert.match(result.stderr, /Run your package manager's install .* \x60npm install --save-dev typescript@6\x60/u)
 })
 
 test('a repository with only the native TypeScript 7 compiler is told to add the TypeScript 6 API package', async t => {
@@ -53,8 +53,8 @@ test('a repository with only the native TypeScript 7 compiler is told to add the
   })
   const result = await runHelper('typescript-public-api', request('typescript-public-api', root), root)
   assert.equal(result.status, 1)
-  assert.match(result.stderr, /@typescript\/native-preview 7\.0\.0-dev\.20261101\.1 \(TypeScript 7's native compiler\)/)
-  assert.match(result.stderr, /\x60pnpm add --save-dev --workspace-root @typescript\/typescript6\x60/)
+  assert.match(result.stderr, /@typescript\/native-preview 7\.0\.0-dev\.20261101\.1 \(TypeScript 7's native compiler\)/u)
+  assert.match(result.stderr, /\x60pnpm add --save-dev --workspace-root @typescript\/typescript6\x60/u)
 })
 
 test('the revision is read from the extraction root while the compiler comes from the checkout', async t => {
@@ -120,8 +120,8 @@ test('entry points limit the program to what they reach, leaving out tests whose
     await toolchain(),
   )
   assert.equal(whole.status, 1)
-  assert.match(whole.stderr, /src\/index\.test\.ts:1: TS2307/)
-  assert.match(whole.stderr, /Some modules didn't resolve: install the repository's dependencies, or set \x60inputs\.entrypoints\x60/)
+  assert.match(whole.stderr, /src\/index\.test\.ts:1: TS2307/u)
+  assert.match(whole.stderr, /Some modules didn't resolve: install the repository's dependencies, or set \x60inputs\.entrypoints\x60/u)
 })
 
 test('typescript resolves from the configured tsconfig directory, as the package that owns it would', async t => {
@@ -139,7 +139,7 @@ test('typescript resolves from the configured tsconfig directory, as the package
   assert.equal(nested.status, 0, nested.stderr)
   const unconfigured = await runHelper('typescript-public-api', request('typescript-public-api', root), root)
   assert.equal(unconfigured.status, 1)
-  assert.match(unconfigured.stderr, /resolved from \. in the repository checkout/)
+  assert.match(unconfigured.stderr, /resolved from \. in the repository checkout/u)
 })
 
 test('installations outside the checkout are rejected rather than used silently', async t => {
@@ -150,7 +150,7 @@ test('installations outside the checkout are rejected rather than used silently'
   await symlink(path.join(outside, 'node_modules/typescript'), path.join(root, 'node_modules/typescript'))
   const result = await runHelper('typescript-public-api', request('typescript-public-api', root), root)
   assert.equal(result.status, 1)
-  assert.match(result.stderr, /typescript package resolved outside the repository checkout/)
+  assert.match(result.stderr, /typescript package resolved outside the repository checkout/u)
 })
 
 test('unsupported TypeScript versions fail with the supported range and the TypeScript 7 remedy', async t => {
@@ -166,11 +166,11 @@ test('unsupported TypeScript versions fail with the supported range and the Type
   await install('4.9.5')
   const old = await runHelper('typescript-public-api', request('typescript-public-api', root), root)
   assert.equal(old.status, 1)
-  assert.match(old.stderr, /requires TypeScript 5\.x or 6\.x; the repository has typescript 4\.9\.5/)
+  assert.match(old.stderr, /requires TypeScript 5\.x or 6\.x; the repository has typescript 4\.9\.5/u)
   await install('7.0.2')
   const native = await runHelper('typescript-public-api', request('typescript-public-api', root), root)
   assert.equal(native.status, 1)
-  assert.match(native.stderr, /typescript 7\.0\.2 .* is the native compiler without that API; add @typescript\/typescript6/)
+  assert.match(native.stderr, /typescript 7\.0\.2 .* is the native compiler without that API; add @typescript\/typescript6/u)
   // The TypeScript 6 API package published for TypeScript 7 projects is used alongside it.
   const api = path.join(root, 'node_modules/@typescript/typescript6')
   await mkdir(path.dirname(api), {recursive: true})
@@ -196,15 +196,15 @@ test('the helper requires Node.js 20 or newer and says so', async t => {
   })
   assert.equal(result.status, 1)
   assert.equal(result.stdout, '')
-  assert.match(result.stderr, /requires Node\.js 20 or newer; \x60node\x60 on PATH is v18\.20\.8/)
+  assert.match(result.stderr, /requires Node\.js 20 or newer; \x60node\x60 on PATH is v18\.20\.8/u)
 })
 
 test('the helper rejects extractors that run natively and invalid invocations', async () => {
   const root = await toolchain()
   const native = await runHelper('code-statistics', request('code-statistics', root), root)
   assert.equal(native.status, 1)
-  assert.match(native.stderr, /The Node extractor helper does not implement code-statistics/)
+  assert.match(native.stderr, /The Node extractor helper does not implement code-statistics/u)
   const relative = await runHelper('typescript-public-api', request('typescript-public-api', root), 'relative/checkout')
   assert.equal(relative.status, 1)
-  assert.match(relative.stderr, /Usage: extractor\.mjs <extractor> <absolute repository checkout>/)
+  assert.match(relative.stderr, /Usage: extractor\.mjs <extractor> <absolute repository checkout>/u)
 })

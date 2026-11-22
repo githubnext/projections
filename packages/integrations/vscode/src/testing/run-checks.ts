@@ -69,7 +69,7 @@ export async function runChecks(
       state.record(item, 'failed', [{message: text}])
       continue
     }
-    if (text) run.appendOutput(`${outcome.warning ? 'Warning: ' : ''}${item.label}: ${text.replace(/\n/g, '\r\n')}\r\n`, undefined, item)
+    if (text) run.appendOutput(`${outcome.warning ? 'Warning: ' : ''}${item.label}: ${text.replace(/\n/gu, '\r\n')}\r\n`, undefined, item)
     if (outcome.state === 'passed') run.passed(item)
     else run.skipped(item)
     state.record(item, outcome.state, text ? [{message: text}] : [])

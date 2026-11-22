@@ -9,7 +9,7 @@ test('the full-screen fallback returns the page to where it was scrolled', async
   })
   await page.goto(explorer())
   const root = page.locator('.ph')
-  await expect(root).toHaveAttribute('data-renderer-status', /ready|none/)
+  await expect(root).toHaveAttribute('data-renderer-status', /ready|none/u)
   await page.evaluate(() => {
     document.body.style.paddingBottom = '3000px'
     window.scrollTo(0, 425)

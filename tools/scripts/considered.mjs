@@ -87,7 +87,7 @@ async function install() {
     // tar extracts both archive kinds (bsdtar on macOS and Windows).
     const extracted = spawnSync('tar', ['-xf', name], {cwd: scratch, stdio: 'inherit'})
     if (extracted.status !== 0) throw new Error(`Extracting ${name} failed`)
-    const unpacked = join(scratch, name.replace(/\.(tar\.gz|zip)$/, ''))
+    const unpacked = join(scratch, name.replace(/\.(tar\.gz|zip)$/u, ''))
     if (!existsSync(join(unpacked, `considered${exe}`))) throw new Error(`${name} has no considered${exe}`)
     renameSync(unpacked, target)
   } finally {

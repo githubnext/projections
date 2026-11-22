@@ -11,10 +11,10 @@ module.exports = async function agentTools({folder, api, invoke}) {
   for (const name of ['projections_list_projections', 'projections_compare', 'projections_open_projection', 'projections_set_part']) {
     assert.ok(names.includes(name), names.join())
   }
-  assert.match(await invoke('projections_list_projections', {}), /- packages: Packages\. Extractor workspace-dependencies/)
+  assert.match(await invoke('projections_list_projections', {}), /- packages: Packages\. Extractor workspace-dependencies/u)
   const compared = await invoke('projections_compare', {projection: 'packages', before: 'main', after: 'HEAD'})
-  assert.match(compared, /\d+ changes in \d+ steps?: /)
-  const entity = /Added entity [^\n]*\[([^\]]*auth)\]$/m.exec(compared)?.[1]
+  assert.match(compared, /\d+ changes in \d+ steps?: /u)
+  const entity = /Added entity [^\n]*\[([^\]]*auth)\]$/mu.exec(compared)?.[1]
   assert.ok(entity, compared)
   // The editor action: the projection's tab, pinned to the pair, with the entity selected.
   const opened = await invoke('projections_open_projection', {projection: 'packages', before: 'main', after: 'HEAD', entity, pin: true})
@@ -25,17 +25,17 @@ module.exports = async function agentTools({folder, api, invoke}) {
   const file = path.join(folder.fsPath, '.github', 'projections', 'packages.json')
   const original = await fs.readFile(file, 'utf8')
   const prepared = await tools.prepare('projections_set_part', {projection: 'packages', renderer: 'dag'})
-  assert.match(prepared.invocationMessage, /packages/)
+  assert.match(prepared.invocationMessage, /packages/u)
   assert.equal(await fs.readFile(file, 'utf8'), original)
   if (vscode.workspace.isTrusted) {
-    assert.match(prepared.confirmation.message, /\+ {3}"renderer": "dag"/)
+    assert.match(prepared.confirmation.message, /\+ {3}"renderer": "dag"/u)
     // Approved: the write is the preview's.
-    assert.match(await tools.invoke('projections_set_part', {projection: 'packages', renderer: 'dag'}), /^Saved the renderer of packages/)
-    assert.match(await fs.readFile(file, 'utf8'), /"renderer": "dag"/)
+    assert.match(await tools.invoke('projections_set_part', {projection: 'packages', renderer: 'dag'}), /^Saved the renderer of packages/u)
+    assert.match(await fs.readFile(file, 'utf8'), /"renderer": "dag"/u)
     await fs.writeFile(file, original)
   } else {
     assert.equal(prepared.confirmation, undefined)
-    assert.match(await tools.invoke('projections_set_part', {projection: 'packages', renderer: 'dag'}), /trusted workspace/)
+    assert.match(await tools.invoke('projections_set_part', {projection: 'packages', renderer: 'dag'}), /trusted workspace/u)
     assert.equal(await fs.readFile(file, 'utf8'), original)
   }
 }

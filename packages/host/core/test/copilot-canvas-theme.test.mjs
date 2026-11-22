@@ -99,7 +99,7 @@ for (const colorMode of ['dark', 'light']) {
 
   test(`${colorMode}: change colors and the categorical palette stay the token set's unless contrast needs them moved`, () => {
     const defaults = defaultThemeTokens(colorMode)
-    for (const name of themeTokenNames.filter(name => /^color-(added|removed|modified|moved)|^chart-/.test(name))) {
+    for (const name of themeTokenNames.filter(name => /^color-(?:added|removed|modified|moved)|^chart-/u.test(name))) {
       if (!(name in tokens)) continue
       // Moved only toward white (or black), which keeps the hue: never another color.
       const [before, after] = [parseColor(defaults[name]), parseColor(tokens[name])]

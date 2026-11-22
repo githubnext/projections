@@ -31,7 +31,7 @@ export interface PairList {
 /** A revision as people read it: the working tree, a short commit, or the ref as it is. */
 export function refLabel(value: string): string {
   if (value === 'working-tree') return 'Working tree'
-  return /^[0-9a-f]{40}$/.test(value) ? value.slice(0, 8) : value
+  return /^[0-9a-f]{40}$/u.test(value) ? value.slice(0, 8) : value
 }
 
 /** `main → HEAD`, or one revision alone. */

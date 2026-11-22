@@ -27,7 +27,7 @@ export function parsePullRequests(text: string): PullRequest[] {
     if (
       typeof item?.number !== 'number' ||
       typeof item.headRefOid !== 'string' ||
-      !/^[0-9a-f]{40}$/.test(item.headRefOid) ||
+      !/^[0-9a-f]{40}$/u.test(item.headRefOid) ||
       typeof item.baseRefName !== 'string'
     ) {
       return []

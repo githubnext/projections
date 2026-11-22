@@ -6,19 +6,19 @@ import {code, fail, header, outDir, requireBuilt, root, table} from './shared.mj
 export async function tokens() {
   const module = await import(await requireBuilt('packages/renderers/sdk/dist/tokens.js'))
   const source = await readFile(join(root, 'packages/renderers/sdk/src/tokens.ts'), 'utf8')
-  const doc = /\/\*\*([\s\S]*?)\*\/\s*const definitions/.exec(source)?.[1]
+  const doc = /\/\*\*([\s\S]*?)\*\/\s*const definitions/u.exec(source)?.[1]
   if (!doc) fail('packages/renderers/sdk/src/tokens.ts: the token set has no documentation comment')
   const intro = doc
     .split('\n')
-    .map(line => line.replace(/^\s*\* ?/, ''))
+    .map(line => line.replace(/^\s*\* ?/u, ''))
     .join('\n')
     .trim()
   const iconSource = await readFile(join(root, 'packages/renderers/sdk/src/icons.ts'), 'utf8')
-  const iconDoc = /\/\*\*((?:(?!\*\/)[\s\S])*)\*\/\s*export const iconNames/.exec(iconSource)?.[1]
+  const iconDoc = /\/\*\*((?:(?!\*\/)[\s\S])*)\*\/\s*export const iconNames/u.exec(iconSource)?.[1]
   const comment = text =>
     text
       .split('\n')
-      .map(line => line.replace(/^\s*\* ?/, ''))
+      .map(line => line.replace(/^\s*\* ?/u, ''))
       .join('\n')
       .trim()
   const light = module.defaultThemeTokens('light')
@@ -34,7 +34,7 @@ export async function tokens() {
   }
   const titles = {color: 'Colors', chart: 'Chart palette', font: 'Type', line: 'Line heights', space: 'Spacing', radius: 'Radii'}
   const swatch = value =>
-    /^(#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i.test(value)
+    /^(?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/iu.test(value)
       ? `<span class="docs-swatch" style="background: ${value}"></span> ${code(value)}`
       : code(value)
   const page = `${header(['packages/renderers/sdk/src/tokens.ts', 'packages/renderers/sdk/src/icons.ts'])}# Theme tokens
@@ -70,7 +70,7 @@ ${table(
     code(`--projections-${name}`),
     light[name] === 'none'
       ? code('none')
-      : `<span class="docs-icon" role="img" aria-label="${name.slice('icon-'.length)}" style="--docs-icon: ${light[name].replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"></span>`,
+      : `<span class="docs-icon" role="img" aria-label="${name.slice('icon-'.length)}" style="--docs-icon: ${light[name].replace(/&/gu, '&amp;').replace(/"/gu, '&quot;')}"></span>`,
   ]),
 )}
 `

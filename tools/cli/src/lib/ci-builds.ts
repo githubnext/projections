@@ -6,11 +6,11 @@ import {join, posix} from 'node:path'
 import {findUnit, ownerOf, type Unit} from './packages.ts'
 import {readJson, readText} from './repo.ts'
 
-const scriptPath = /\.(?:[cm]?js|ts)$/
+const scriptPath = /\.(?:[cm]?js|ts)$/u
 
 /** Script files a script's text names: `node scripts/x.mjs`, `new URL('../x.mjs', import.meta.url)`, 'packages/…'. */
 function scriptsNamed(root: string, text: string, from: string, directory: string): string[] {
-  const named = [...text.matchAll(/(?:^|[\s'"\x60(])((?:\.{1,2}\/|packages\/|tools\/|scripts\/)[\w./-]+)/g)].map(match => match[1]!)
+  const named = [...text.matchAll(/(?:^|[\s'"\x60(])((?:\.{1,2}\/|packages\/|tools\/|scripts\/)[\w./-]+)/gu)].map(match => match[1]!)
   return named
     .filter(path => scriptPath.test(path))
     .flatMap(path => [posix.normalize(posix.join(path.startsWith('.') ? from : directory, path)), posix.normalize(path)])
@@ -30,7 +30,7 @@ export function buildDependencies(root: string, units: readonly Unit[], unit: Un
     const owner = ownerOf(units, file)
     if (owner && owner.path !== unit.path) found.add(owner.path)
     const text = readText(root, file) ?? ''
-    for (const match of text.matchAll(/(?:-p|--package)['",\s]+([\w-]+)/g)) {
+    for (const match of text.matchAll(/(?:-p|--package)['",\s]+([\w-]+)/gu)) {
       const crate = findUnit(units, match[1]!)
       if (crate?.kinds.includes('crate') && crate.path !== unit.path) found.add(crate.path)
     }

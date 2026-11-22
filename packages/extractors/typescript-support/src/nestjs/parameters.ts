@@ -8,12 +8,12 @@ export function parameterNames(fn: unknown, constructor: boolean): string[] {
   }
   let start: number
   if (constructor) {
-    const match = /\bconstructor\s*\(/.exec(text)
+    const match = /\bconstructor\s*\(/u.exec(text)
     if (!match) return []
     start = match.index + match[0].length
   } else {
     const open = text.indexOf('(')
-    const arrow = /^\s*(?:async\s+)?([A-Za-z_$][\w$]*)\s*=>/.exec(text)
+    const arrow = /^\s*(?:async\s+)?([A-Za-z_$][\w$]*)\s*=>/u.exec(text)
     if (arrow && (open < 0 || arrow.index + arrow[0].length < open)) return [arrow[1]!]
     if (open < 0) return []
     start = open + 1
@@ -38,5 +38,5 @@ export function parameterNames(fn: unknown, constructor: boolean): string[] {
     }
     current += character
   }
-  return names.map(name => /^\s*(?:\.\.\.)?([A-Za-z_$][\w$]*)/.exec(name)?.[1] ?? '')
+  return names.map(name => /^\s*(?:\.\.\.)?([A-Za-z_$][\w$]*)/u.exec(name)?.[1] ?? '')
 }

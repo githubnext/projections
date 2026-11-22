@@ -14,8 +14,8 @@ export function header({style, version, notes = []}) {
   ]
 }
 
-const headerPattern = /^\/\/ Adapted from shadcn\/ui \(https:\/\/ui\.shadcn\.com\), style ([\w-]+), shadcn@([\w.+-]+)\./m
-const notesPattern = /^\/\/ shadcn; see LICENSE\.shadcn\.txt\. Local changes: .*? lucide-react(?:; (.*))?\.$/m
+const headerPattern = /^\/\/ Adapted from shadcn\/ui \(https:\/\/ui\.shadcn\.com\), style ([\w-]+), shadcn@([\w.+-]+)\./mu
+const notesPattern = /^\/\/ shadcn; see LICENSE\.shadcn\.txt\. Local changes: .*? lucide-react(?:; (.*))?\.$/mu
 
 /** Reads the style, version and extra local-change notes from a vendored file's header, or null if it has none. */
 export function parseHeader(source) {

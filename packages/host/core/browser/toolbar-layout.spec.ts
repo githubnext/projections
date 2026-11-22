@@ -90,11 +90,11 @@ for (const [mode, query, expected] of [
       const names = await reachableNames(page)
       for (const name of expected) expect(names, `${name} ${at}`).toContain(name)
       expect(
-        names.some(name => /^(Compare from|Revisions?: )/.test(name)),
+        names.some(name => /^(?:Compare from|Revisions?: )/u.test(name)),
         at,
       ).toBe(true)
       expect(
-        names.some(name => /^(Play (forward|backward)|Pause)$/.test(name)),
+        names.some(name => /^(?:Play (?:forward|backward)|Pause)$/u.test(name)),
         at,
       ).toBe(mode !== 'side by side')
       expect(

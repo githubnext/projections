@@ -32,7 +32,7 @@ for (const ui of ['default'] as const) {
         ).href,
       )
       const body = page.locator('.ph-stage-body.ph-panes').first()
-      await expect(body).toHaveAttribute('data-content-aspect', /\d/, {timeout: 30_000})
+      await expect(body).toHaveAttribute('data-content-aspect', /\d/u, {timeout: 30_000})
       // Settled: the arrangement holds for a moment.
       let previous = ''
       for (let attempt = 0; attempt < 20; attempt++) {

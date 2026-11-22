@@ -11,7 +11,7 @@ export async function cli() {
     }
   }
   walk(tree)
-  const paragraphs = text => (text ?? '').trim().replace(/\n(?=\S)/g, '\n\n')
+  const paragraphs = text => (text ?? '').trim().replace(/\n(?=\S)/gu, '\n\n')
   const display = argument => {
     const values = argument.valueNames.map(name => `<${name}>`).join(' ')
     if (argument.positional) return code(argument.multiple ? `${values}...` : values)
@@ -20,12 +20,12 @@ export async function cli() {
   }
   const describe = argument => {
     // A default the help describes in words, such as `[default: every one the working tree defines]`.
-    const help = (argument.longHelp ?? argument.help ?? '').replace(/\s*\[default: ([^\]]*)\]\s*$/, (_, value) => `. Default: ${value}`)
+    const help = (argument.longHelp ?? argument.help ?? '').replace(/\s*\[default: ([^\]]*)\]\s*$/u, (_, value) => `. Default: ${value}`)
     const parts = [sentence(help)]
     if (argument.possibleValues.length) {
       parts.push(
         argument.possibleValues.some(value => value.help)
-          ? `One of: ${argument.possibleValues.map(value => `${code(value.name)}${value.help ? ` — ${value.help.replace(/\.$/, '')}` : ''}`).join('; ')}.`
+          ? `One of: ${argument.possibleValues.map(value => `${code(value.name)}${value.help ? ` — ${value.help.replace(/\.$/u, '')}` : ''}`).join('; ')}.`
           : `One of ${argument.possibleValues.map(value => code(value.name)).join(', ')}.`,
       )
     }
@@ -42,8 +42,8 @@ export async function cli() {
   const anchor = command =>
     command.path
       .toLowerCase()
-      .replace(/[^a-z0-9 _-]/g, '')
-      .replace(/ /g, '-')
+      .replace(/[^a-z0-9 _-]/gu, '')
+      .replace(/ /gu, '-')
   const page = `${header(['the CLI’s command definitions (projections __reference)'])}# CLI reference
 
 ${[

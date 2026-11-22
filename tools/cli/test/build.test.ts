@@ -88,11 +88,11 @@ test('--fast typechecks only the changed workspaces, once their dependencies are
   const context = {root, units, affected: affected(['app'], [], ['ts']), fast: true}
   assert.deepEqual(argvs(plan('typecheck', context)), ['npm run typecheck --workspace @fixture/app'])
   workspace(root, 'lib', {src: 300, dist: 200})
-  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(lib unbuilt, unfinished or out of date\)/)
+  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(lib unbuilt, unfinished or out of date\)/u)
   // One that can be checked still is; the other waits, noted.
   const both = plan('typecheck', {...context, affected: affected(['app', 'lib'], ['other'], ['ts'])})
   assert.deepEqual(argvs(both), ['npm run typecheck --workspace @fixture/lib'])
-  assert.match((both as {note: string}).note, /app/)
+  assert.match((both as {note: string}).note, /app/u)
 })
 
 test('--fast waits for transitive dependencies too, and for one built after a dependency of its own', () => {
@@ -104,10 +104,10 @@ test('--fast waits for transitive dependencies too, and for one built after a de
   assert.deepEqual(argvs(plan('typecheck', context)), ['npm run typecheck --workspace @fixture/app'])
   // base rebuilt after lib: lib's declarations may describe the old base.
   workspace(root, 'base', {src: 100, dist: 400})
-  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(lib unbuilt, unfinished or out of date\)/)
+  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(lib unbuilt, unfinished or out of date\)/u)
   workspace(root, 'lib', {src: 100, dist: 500})
   workspace(root, 'base', {src: 600, dist: 400})
-  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(base unbuilt, unfinished or out of date\)/)
+  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(base unbuilt, unfinished or out of date\)/u)
 })
 
 test('lint: a process per workspace; --fast lints changed TypeScript once its dependencies are current, and JavaScript always', () => {
@@ -129,7 +129,7 @@ test('lint: a process per workspace; --fast lints changed TypeScript once its de
   workspace(root, 'lib', {src: 300, dist: 200})
   const waiting = plan('lint', fast)
   assert.deepEqual(argvs(waiting), [eslint('tools/d.mjs'), eslint('app/scripts/b.mjs'), eslint('other/src/c.ts')])
-  assert.match((waiting as {note: string}).note, /app \(lib/)
+  assert.match((waiting as {note: string}).note, /app \(lib/u)
   // --affected lints whole workspaces, dependants included; the lint configuration, or everything, is npm run lint.
   const affectedOnly = {root, units, affected: affected(['lib'], ['app'], ['ts']), files: ['lib/src/index.ts']}
   assert.deepEqual(argvs(plan('lint', affectedOnly)), [eslint('lib'), eslint('app')])
@@ -305,8 +305,8 @@ test('test --filter narrows each runner to the matching tests, and needs a targe
     runs.map(command => command.argv.join(' ')),
     ['npm test --workspace @fixture/app', 'cargo test --locked -p fixture-app parses'],
   )
-  assert.match(runs[0]?.env?.NODE_OPTIONS ?? '', /--test-name-pattern="parses"/)
-  assert.throws(() => testPlan(fixture, {filter: 'parses'}), /needs a target/)
+  assert.match(runs[0]?.env?.NODE_OPTIONS ?? '', /--test-name-pattern="parses"/u)
+  assert.throws(() => testPlan(fixture, {filter: 'parses'}), /needs a target/u)
 })
 
 test('test --filter: node --test with named files runs only the matching tests', () => {
@@ -321,6 +321,6 @@ test('test --filter: node --test with named files runs only the matching tests',
     encoding: 'utf8',
   })
   assert.equal(ran.status, 0, ran.stderr)
-  assert.match(ran.stdout, /^# tests 1$/m)
-  assert.match(ran.stdout, /ok 1 - alpha one/)
+  assert.match(ran.stdout, /^# tests 1$/mu)
+  assert.match(ran.stdout, /ok 1 - alpha one/u)
 })

@@ -192,7 +192,7 @@ test('doctor: not linked, linked here or elsewhere, a stale link to a moved chec
   const stale = linkFindings(there, on)
   assert.equal(stale.length, 1)
   assert.equal(stale[0]?.status, 'warn')
-  assert.match(stale[0]?.detail ?? '', /no longer a Projections checkout \(moved or deleted\)/)
+  assert.match(stale[0]?.detail ?? '', /no longer a Projections checkout \(moved or deleted\)/u)
 
   writeFileSync(path, 'someone else\n')
   assert.deepEqual(only(there), [`warn: ${path} exists but wasn't written by tools link`])

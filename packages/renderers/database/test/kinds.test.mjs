@@ -105,8 +105,8 @@ test("Prisma's implicit many-to-many relations link their tables, with no arrowh
   ])
   for (const link of frame.links) assert.ok(link.points.length >= 2, `${link.key} is drawn`)
   const markup = markupOf(prisma())
-  assert.match(markup, /aria-label="Many-to-many relationship between Post and Tag"/)
-  assert.match(markup, /aria-label="Many-to-many relationship between User and User"/)
+  assert.match(markup, /aria-label="Many-to-many relationship between Post and Tag"/u)
+  assert.match(markup, /aria-label="Many-to-many relationship between User and User"/u)
   // Neither end depends on the other, so neither gets an arrowhead.
-  assert.doesNotMatch(markup, /data-head-of-link=/)
+  assert.doesNotMatch(markup, /data-head-of-link=/u)
 })

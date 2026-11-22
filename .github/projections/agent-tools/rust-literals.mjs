@@ -17,25 +17,25 @@ export function tokenize(text, firstLine = 1) {
     if (char === '\n') {
       line++
       at++
-    } else if (/\s/.test(char)) at++
+    } else if (/\s/u.test(char)) at++
     else if (text.startsWith('//', at)) at = text.includes('\n', at) ? text.indexOf('\n', at) : text.length
     else if (text.startsWith('/*', at)) {
       const end = text.indexOf('*/', at + 2)
       line += text.slice(at, end).split('\n').length - 1
       at = end + 2
-    } else if (char === '"' || /^r#*"/.test(text.slice(at, at + 8))) {
+    } else if (char === '"' || /^r#*"/u.test(text.slice(at, at + 8))) {
       const start = line
       const {value, end} = char === '"' ? quoted(text, at) : raw(text, at)
       line += text.slice(at, end).split('\n').length - 1
       push('string', value, start)
       at = end
     } else if (char === "'") at = quote(text, at, line, push)
-    else if (/[0-9]/.test(char)) {
-      const number = /^[0-9][0-9_]*(\.[0-9][0-9_]*)?([a-z][a-z0-9]*)?/.exec(text.slice(at))[0]
-      push('number', Number(number.replace(/_/g, '').replace(/[a-z][a-z0-9]*$/, '')), line)
+    else if (/\d/u.test(char)) {
+      const number = /^\d[0-9_]*(?:\.\d[0-9_]*)?(?:[a-z][a-z0-9]*)?/u.exec(text.slice(at))[0]
+      push('number', Number(number.replace(/_/gu, '').replace(/[a-z][a-z0-9]*$/u, '')), line)
       at += number.length
-    } else if (/[A-Za-z_]/.test(char)) {
-      const name = /^[A-Za-z_]\w*/.exec(text.slice(at))[0]
+    } else if (/[A-Za-z_]/u.test(char)) {
+      const name = /^[A-Za-z_]\w*/u.exec(text.slice(at))[0]
       push('ident', name, line)
       at += name.length
     } else {
@@ -55,7 +55,7 @@ function quote(text, at, line, push) {
     push('char', text.slice(at + 1, close), line)
     return close + 1
   }
-  const name = /^'[A-Za-z_]\w*/.exec(text.slice(at))[0]
+  const name = /^'[A-Za-z_]\w*/u.exec(text.slice(at))[0]
   push('lifetime', name, line)
   return at + name.length
 }
@@ -75,7 +75,7 @@ export function quoted(text, start) {
     const next = text[at + 1]
     if (next === '\n') {
       at += 2
-      while (/\s/.test(text[at])) at++
+      while (/\s/u.test(text[at])) at++
     } else if (next === 'u') {
       const close = text.indexOf('}', at)
       value += String.fromCodePoint(Number.parseInt(text.slice(at + 3, close), 16))
@@ -89,7 +89,7 @@ export function quoted(text, start) {
 }
 
 function raw(text, start) {
-  const hashes = /^r(#*)"/.exec(text.slice(start))[1]
+  const hashes = /^r(#*)"/u.exec(text.slice(start))[1]
   const open = start + 2 + hashes.length
   const close = text.indexOf(`"${hashes}`, open)
   return {value: text.slice(open, close), end: close + 1 + hashes.length}
@@ -118,7 +118,7 @@ export const lineAt = (text, offset) => text.slice(0, offset).split('\n').length
 /** A file's `fn name(params) -> Value { body }` helpers and string consts, and an evaluator over them. */
 export function rustModule(text, file) {
   const helpers = new Map()
-  for (const match of text.matchAll(/fn (\w+)\(([^)]*)\) -> Value \{/g)) {
+  for (const match of text.matchAll(/fn (\w+)\(([^)]*)\) -> Value \{/gu)) {
     const open = match.index + match[0].length - 1
     const params = match[2]
       .split(',')
@@ -127,7 +127,7 @@ export function rustModule(text, file) {
     helpers.set(match[1], {params, tokens: tokenize(balanced(text, open).inner, lineAt(text, open))})
   }
   const consts = new Map()
-  for (const match of text.matchAll(/const (\w+): &(?:'static )?str = ("(?:[^"\\]|\\.)*");/g)) {
+  for (const match of text.matchAll(/const (\w+): &(?:'static )?str = ("(?:[^"\\]|\\.)*");/gu)) {
     consts.set(match[1], quoted(match[2], 0).value)
   }
 
@@ -244,7 +244,7 @@ class Parser {
         token.line,
       )
     }
-    if (this.is('{') && /^[A-Z]/.test(path)) return this.struct()
+    if (this.is('{') && /^[A-Z]/u.test(path)) return this.struct()
     if (path.includes('::')) return path
     if (!this.scope.has(path)) this.fail(`unknown name ${path}`, token)
     return this.scope.get(path)
@@ -330,7 +330,7 @@ function format([template, ...args], scope) {
   const named = new Map(args.filter(arg => arg.key).map(arg => [arg.key, arg.value]))
   const positional = args.filter(arg => !arg.key).map(arg => arg.value)
   let next = 0
-  return template.value.replace(/\{\{|\}\}|\{(\w*)\}/g, (all, name) => {
+  return template.value.replace(/\{\{|\}\}|\{(\w*)\}/gu, (all, name) => {
     if (all === '{{') return '{'
     if (all === '}}') return '}'
     if (!name) return String(positional[next++])

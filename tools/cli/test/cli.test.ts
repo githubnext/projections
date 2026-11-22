@@ -68,7 +68,7 @@ test('docs search ranks titles and sections; docs read finds by title and prints
   assert.ok(hit && next)
   assert.equal(hit.path, 'docs/guide.md')
   assert.equal(hit.section, 'Installing widgets')
-  assert.match(next, /docs read docs\/guide\.md --section "Installing widgets"/)
+  assert.match(next, /docs read docs\/guide\.md --section "Installing widgets"/u)
   const read = (await runJson<Report<typeof docsRead>>(['docs', 'read', 'guide', '--section', 'Removing', '--json'])).json
   assert.deepEqual(
     {path: read.path, text: read.text, truncated: read.truncated},
@@ -85,7 +85,7 @@ test('usage errors exit 2 with a hint', async () => {
   assert.equal(unknownDoc.json.code, 'USAGE')
   const unknownGate = await runJson<Failure>(['check', '--only', 'nope', '--json'])
   assert.equal(unknownGate.exit, exitCodes.usage)
-  assert.match(unknownGate.json.message, /Unknown gate nope/)
+  assert.match(unknownGate.json.message, /Unknown gate nope/u)
 })
 
 test('check: a failing gate reports {file, line, message} and next, and exits 1', async () => {
@@ -131,7 +131,7 @@ test('feedback drafts without submitting: a title, a body and a prefilled URL', 
   assert.equal(exit, 0)
   assert.equal(json.status, 'draft')
   assert.equal(json.draft.title, '[agent feedback] map misses a crate')
-  assert.match(json.url, /^https:\/\/github\.com\/githubnext\/projections\/issues\/new\?template=agent-feedback\.yml&/)
+  assert.match(json.url, /^https:\/\/github\.com\/githubnext\/projections\/issues\/new\?template=agent-feedback\.yml&/u)
 })
 
 test('update shadcn: without the updater script it is a missing prerequisite (exit 3)', async () => {

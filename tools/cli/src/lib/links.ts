@@ -25,17 +25,17 @@ export function anchors(markdown: string): Set<string> {
     seen.set(base, count + 1)
     found.add(count ? `${base}-${count}` : base)
   }
-  for (const match of blankCode(markdown).matchAll(/<[a-z][^>]*?\s(?:id|name)=["']([^"']+)["']/gi)) found.add(match[1]!)
+  for (const match of blankCode(markdown).matchAll(/<[a-z][^>]*?\s(?:id|name)=["']([^"']+)["']/giu)) found.add(match[1]!)
   return found
 }
 
 /** Fenced blocks and code spans replaced by spaces, keeping offsets and line numbers. */
 function blankCode(markdown: string): string {
-  const blank = (text: string) => text.replace(/[^\n]/g, ' ')
+  const blank = (text: string) => text.replace(/[^\n]/gu, ' ')
   let fence: string | undefined
   const lines = markdown.replaceAll('\r\n', '\n').split('\n')
   const kept = lines.map(line => {
-    const marker = /^\s{0,3}(\x60{3,}|~{3,})/.exec(line)?.[1]
+    const marker = /^\s{0,3}(\x60{3,}|~{3,})/u.exec(line)?.[1]
     if (fence) {
       if (marker && marker[0] === fence[0] && marker.length >= fence.length && line.trim() === marker) fence = undefined
       return blank(line)
@@ -46,7 +46,7 @@ function blankCode(markdown: string): string {
     }
     return line
   })
-  return kept.join('\n').replace(/(\x60+)(?!\x60)[\s\S]*?(?<!\x60)\1(?!\x60)/g, blank)
+  return kept.join('\n').replace(/(\x60+)(?!\x60)[\s\S]+?(?<!\x60)\1(?!\x60)/gu, blank)
 }
 
 export interface Link {
@@ -59,12 +59,12 @@ export function links(markdown: string): Link[] {
   const text = blankCode(markdown)
   const lineAt = (offset: number) => text.slice(0, offset).split('\n').length
   const found: Link[] = []
-  const inline = /\]\(\s*(<[^>\n]*>|[^\s()<>]*(?:\([^\s()]*\)[^\s()<>]*)*)(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g
-  const definition = /^ {0,3}\[[^\]\n]+\]:[ \t]*(<[^>\n]*>|\S+)/gm
-  const html = /<(?:a|img|source|link)\b[^>]*?\s(?:href|src|srcset)=["']([^"']+)["']/gi
+  const inline = /\]\(\s*(<[^>\n]*>|[^\s()<>]*(?:\([^\s()]*\)[^\s()<>]*)*)(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/gu
+  const definition = /^ {0,3}\[[^\]\n]+\]:[ \t]*(<[^>\n]*>|\S+)/gmu
+  const html = /<(?:a|img|source|link)\b[^>]*?\s(?:href|src|srcset)=["']([^"']+)["']/giu
   for (const pattern of [inline, definition, html]) {
     for (const match of text.matchAll(pattern)) {
-      const target = match[1]!.replace(/^<(.*)>$/, '$1').trim()
+      const target = match[1]!.replace(/^<(.*)>$/u, '$1').trim()
       if (target) found.push({target, line: lineAt(match.index)})
     }
   }
@@ -72,7 +72,7 @@ export function links(markdown: string): Link[] {
 }
 
 /** Links to other sites, mail and the like: anything with a scheme or a host. */
-const external = (target: string) => /^[a-z][a-z\d+.-]*:/i.test(target) || target.startsWith('//')
+const external = (target: string) => /^[a-z][a-z\d+.-]*:/iu.test(target) || target.startsWith('//')
 
 function decode(text: string): string {
   try {
@@ -113,14 +113,14 @@ function pagesIn(root: string): Pages {
  */
 function resolveTarget(root: string, pages: Pages, from: string, target: string, self: string): string | undefined {
   const hash = target.indexOf('#')
-  const rawPath = (hash < 0 ? target : target.slice(0, hash)).replace(/\?.*$/, '')
+  const rawPath = (hash < 0 ? target : target.slice(0, hash)).replace(/\?.*$/u, '')
   const anchor = hash < 0 ? undefined : decode(target.slice(hash + 1))
   if (rawPath.startsWith('/')) return `${target}: a root-relative link breaks when the repository moves; use a relative path`
-  const path = rawPath ? posix(normalize(join(from, decode(rawPath)))).replace(/\/$/, '') : self
+  const path = rawPath ? posix(normalize(join(from, decode(rawPath)))).replace(/\/$/u, '') : self
   if (path === '..' || path.startsWith('../')) return `${target} points outside the repository`
   const found = kind(root, path)
   if (!found) return `${target}: ${path} does not exist`
-  if (!anchor || /^L\d+(-L\d+)?$/.test(anchor)) return undefined
+  if (!anchor || /^L\d+(?:-L\d+)?$/u.test(anchor)) return undefined
   const page = found === 'directory' ? (kind(root, `${path}/README.md`) ? `${path}/README.md` : undefined) : path
   if (!page?.endsWith('.md')) return undefined
   if (!pages.anchors(page).has(anchor)) return `${target}: ${page} has no heading or anchor #${anchor}`
@@ -151,9 +151,9 @@ export function docPathProblems(root: string, files: readonly string[]): Problem
     const text = readText(root, file)
     if (text === undefined) continue
     text.split('\n').forEach((line, index) => {
-      for (const match of line.matchAll(/(?<![\w.-])docs\/[\w./-]*?\.md(#[\w-]+)?(?![\w-])/g)) {
+      for (const match of line.matchAll(/(?<![\w.-])docs\/[\w./-]*?\.md(?:#[\w-]+)?(?![\w-])/gu)) {
         // A URL's path (`https://example.com/docs/x.md`) is another site's, not a page here.
-        if (/https?:\/\/\S*$/.test(line.slice(0, match.index))) continue
+        if (/https?:\/\/\S*$/u.test(line.slice(0, match.index))) continue
         const message = resolveTarget(root, pages, '.', match[0], file)
         if (message) problems.push({file, line: index + 1, message: `Missing documentation page: ${message}`})
       }
@@ -163,10 +163,10 @@ export function docPathProblems(root: string, files: readonly string[]): Problem
 }
 
 /** Test inputs, fixtures and golden outputs: they name paths that need not exist. */
-const scaffolding = /(^|\/)(tests?|fixtures?|golden|snapshots|__snapshots__)(\/|$)|(^|\/)[^/]*(\.test\.|fixtures?\.)[^/]*$/
+const scaffolding = /(?:^|\/)(?:tests?|fixtures?|golden|snapshots|__snapshots__)(?:\/|$)|(?:^|\/)[^/]*(?:\.test\.|fixtures?\.)[^/]*$/u
 
 /** Source text that can name documentation pages: code, schemas, manifests and workflows. */
-const source = /\.(?:[cm]?[jt]sx?|rs|cs|go|py|sh|json|jsonc|ya?ml|toml|html|css)$/
+const source = /\.(?:[cm]?[jt]sx?|rs|cs|go|py|sh|json|jsonc|ya?ml|toml|html|css)$/u
 
 /** The repository's files as git sees them (tracked, plus untracked files that aren't ignored), else a walk. */
 export function repositoryFiles(root: string): string[] {
@@ -183,7 +183,7 @@ export function repositoryFiles(root: string): string[] {
 export function linkProblems(root: string, files: readonly string[] = repositoryFiles(root)): Problem[] {
   const markdown = files.filter(path => path.endsWith('.md') && !scaffolding.test(path))
   const sources = files.filter(
-    path => source.test(path) && !scaffolding.test(path) && !/(^|\/)(package-lock\.json|Cargo\.lock)$/.test(path),
+    path => source.test(path) && !scaffolding.test(path) && !/(?:^|\/)(?:package-lock\.json|Cargo\.lock)$/u.test(path),
   )
   return [...markdownLinkProblems(root, markdown), ...docPathProblems(root, sources)]
 }

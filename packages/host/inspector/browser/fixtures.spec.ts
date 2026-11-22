@@ -77,7 +77,7 @@ const test = base.extend<{fixtures: Fixtures}>({
 /** At phone widths the sidebar floats over the view and starts closed. */
 async function sidebar(page: Page, open = true) {
   if ((page.viewportSize()?.width ?? 1440) >= 768) return
-  const toggle = page.getByRole('button', {name: /^(Show|Hide) .* sidebar$/})
+  const toggle = page.getByRole('button', {name: /^(Show|Hide) .* sidebar$/u})
   if (((await toggle.getAttribute('aria-pressed')) === 'true') !== open) await toggle.click()
 }
 
@@ -88,7 +88,7 @@ function at(fixtures: Fixtures, scenario: string): string {
 
 async function checks(page: Page) {
   await page
-    .getByRole('button', {name: /Run checks/})
+    .getByRole('button', {name: /Run checks/u})
     .first()
     .click()
   const list = page.getByRole('list', {name: 'Built-in checks'})
@@ -149,7 +149,7 @@ test('the checks panel catches a deliberately broken renderer', async ({page, fi
   await expect(list.locator('[data-check="legend"]')).toHaveAttribute('data-status', 'fail')
   await expect(list.locator('[data-check="selection"]')).toHaveAttribute('data-status', 'pass')
   const failed = await list.locator('[data-status="fail"]').count()
-  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Checks/})).toHaveText(`Checks${failed}`)
+  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Checks/u})).toHaveText(`Checks${failed}`)
   await sidebar(page)
   await expect(page.locator(`[data-scenario="cases/broken"] [aria-label="Failed"]`)).toBeVisible()
 })
@@ -192,7 +192,7 @@ test('fixtures and renderer bundles reload live when their files change', async 
     .toBe(true)
   await writeFile(join(fixtures.directory, 'after.json'), '{"protocolVersion": 0')
   await expect(page.locator('#pi-panel-content')).toContainText('SCENARIO_UNAVAILABLE', reload)
-  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Diagnostics/})).toHaveAttribute(
+  await expect(page.getByRole('tablist', {name: 'Panel views'}).getByRole('tab', {name: /^Diagnostics/u})).toHaveAttribute(
     'aria-selected',
     'true',
   )

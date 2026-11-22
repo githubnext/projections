@@ -109,9 +109,9 @@ export default defineConfig(rendererConfig({entry: 'src/main.ts', name: 'plain',
   for (const name of ['react', 'react-dom', 'scheduler']) {
     if (notices.includes(`===== ${name} `)) fail(`A renderer without React attributes ${name} in its notices`)
   }
-  if (/react\.(production|development)|__SECRET_INTERNALS|ReactCurrentDispatcher|react-dom/.test(page)) {
+  if (/react\.(?:production|development)|__SECRET_INTERNALS|ReactCurrentDispatcher|react-dom/u.test(page)) {
     fail('A renderer without React bundles React')
   }
-  if (!/\.pk\s*\{[^}]*--surface:/.test(page)) fail("A renderer without React doesn't bundle the kit's base styles")
+  if (!/\.pk\s*\{[^}]*--surface:/u.test(page)) fail("A renderer without React doesn't bundle the kit's base styles")
   console.log(`  built dist/index.html (${(page.length / 1024).toFixed(1)} kB) with the kit's base styles and no React`)
 }

@@ -45,7 +45,7 @@ for (const {suffix, theme, kind} of themes) {
     await sidebar.locator('.monaco-list-row', {hasText: 'Packages'}).first().waitFor({timeout: 60_000})
     await pause(1500)
     const pick = window.locator('.quick-input-widget')
-    const projections = sidebar.locator('.pane-header', {hasText: /^\s*Projections/})
+    const projections = sidebar.locator('.pane-header', {hasText: /^\s*Projections/u})
     /** The window's top part: the side bar down to the Projections section's rows, and the quick pick over the editor. */
     const top = async file => {
       await pause(800)

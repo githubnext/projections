@@ -77,7 +77,7 @@ test('rejects modules with imports before running them', async () => {
   await rejects(
     runComparator(bytes, input),
     'forbidden-import',
-    /^comparator modules must have zero imports, but this module has 2: env\.clock, wasi_snapshot_preview1\.fd_write$/,
+    /^comparator modules must have zero imports, but this module has 2: env\.clock, wasi_snapshot_preview1\.fd_write$/u,
   )
 })
 
@@ -96,19 +96,19 @@ test('rejects missing and mistyped exports', async () => {
   await rejects(
     runComparator(build(exports.slice(0, 2)), input),
     'missing-export',
-    /^comparator module does not export \x60projections_compare\x60$/,
+    /^comparator module does not export \x60projections_compare\x60$/u,
   )
-  await rejects(runComparator(build(exports.slice(1)), input), 'missing-export', /\x60memory\x60/)
-  await rejects(runComparator(build([exports[0], exports[2]]), input), 'missing-export', /\x60projections_alloc\x60/)
+  await rejects(runComparator(build(exports.slice(1)), input), 'missing-export', /\x60memory\x60/u)
+  await rejects(runComparator(build([exports[0], exports[2]]), input), 'missing-export', /\x60projections_alloc\x60/u)
   await rejects(
     runComparator(build([exports[0], exports[1], {name: 'projections_compare', kind: 0, index: 2}]), input),
     'invalid-export',
-    /^comparator export \x60projections_compare\x60 must be a function \(i32, i32\) -> \(i64\), but is a function \(i32, i32\) -> \(i32\)$/,
+    /^comparator export \x60projections_compare\x60 must be a function \(i32, i32\) -> \(i64\), but is a function \(i32, i32\) -> \(i32\)$/u,
   )
   await rejects(
     runComparator(build([{name: 'memory', kind: 0, index: 0}, exports[1], exports[2]]), input),
     'invalid-export',
-    /\x60memory\x60 must be a 32-bit linear memory, but is a function \(i32\) -> \(i32\)/,
+    /\x60memory\x60 must be a 32-bit linear memory, but is a function \(i32\) -> \(i32\)/u,
   )
   await rejects(runComparator(new TextEncoder().encode('not wasm'), input), 'invalid-module')
   assert.deepEqual(inspectModule(comparator(comparison, {memory: {min: 2, max: 8}})), {minimumPages: 2, maximumPages: 8})
@@ -119,7 +119,7 @@ test('terminates comparators that run past the deadline', async () => {
   await rejects(
     runComparator(comparator(comparison, {body: forever}), input, {deadlineMs: 200}),
     'deadline',
-    /^comparator exceeded its 200 ms deadline$/,
+    /^comparator exceeded its 200 ms deadline$/u,
   )
   assert.ok(performance.now() - started < 5000)
   // Start functions run under the same deadline.
@@ -132,14 +132,14 @@ test('the caller’s signal stops a running comparator, and one already aborted 
   const started = performance.now()
   const running = runComparator(comparator(comparison, {body: forever}), input, {deadlineMs: 30_000}, controller.signal)
   setTimeout(() => controller.abort(new Error('the artifact deadline passed')), 100)
-  await rejects(running, 'cancelled', /^the comparator run was cancelled: the artifact deadline passed$/)
+  await rejects(running, 'cancelled', /^the comparator run was cancelled: the artifact deadline passed$/u)
   // Well before the comparator's own 30 s deadline: the Worker was terminated, not left looping.
   assert.ok(performance.now() - started < 5000)
   await rejects(runComparator(comparator(comparison), input, {}, AbortSignal.abort()), 'cancelled')
 })
 
 test('stops memory growth beyond the cap', async () => {
-  const limit = /^comparator tried to grow its memory beyond the 1048576-byte limit$/
+  const limit = /^comparator tried to grow its memory beyond the 1048576-byte limit$/u
   const grow = pages => [...op.i32Const(pages), ...op.memoryGrow, ...op.drop]
   // Growth that succeeds natively is detected afterward.
   await rejects(runComparator(comparator(comparison, {body: grow(100)}), input, {maxMemoryPages: 16}), 'memory-limit', limit)
@@ -173,28 +173,28 @@ test('surfaces comparator errors', async () => {
   await rejects(
     runComparator(comparator('{"error":"priority list is empty"}'), input),
     'comparator-error',
-    /^comparator failed: priority list is empty$/,
+    /^comparator failed: priority list is empty$/u,
   )
   for (const output of ['{"error":42}', '{"error":"x","steps":[]}']) {
-    await rejects(runComparator(comparator(output), input), 'invalid-output', /exactly/)
+    await rejects(runComparator(comparator(output), input), 'invalid-output', /exactly/u)
   }
 })
 
 test('surfaces traps', async () => {
-  await rejects(runComparator(comparator(comparison, {body: op.unreachable}), input), 'trap', /^comparator trapped: /)
+  await rejects(runComparator(comparator(comparison, {body: op.unreachable}), input), 'trap', /^comparator trapped: /u)
 })
 
 test('rejects oversize output and malformed return values', async () => {
   await rejects(
     runComparator(comparator(comparison, {packed: 0xffff_ffff}), input),
     'output-too-large',
-    /^comparator output is 4294967295 bytes, exceeding the 33554432-byte limit$/,
+    /^comparator output is 4294967295 bytes, exceeding the 33554432-byte limit$/u,
   )
   await rejects(runComparator(comparator(comparison), input, {maxOutputBytes: 10}), 'output-too-large')
   await rejects(
     runComparator(comparator(comparison, {packed: 0x0001_0000_0002_0000n}), input),
     'invalid-return',
-    /projections_compare returned 131072 bytes at 65536, outside its 131072-byte memory/,
+    /projections_compare returned 131072 bytes at 65536, outside its 131072-byte memory/u,
   )
   const bytes = wasm({
     types: [
@@ -208,20 +208,20 @@ test('rejects oversize output and malformed return values', async () => {
     memories: [{min: 1}],
     exports,
   })
-  await rejects(runComparator(bytes, input), 'invalid-return', /projections_alloc\(\d+\) returned 4294967295/)
+  await rejects(runComparator(bytes, input), 'invalid-return', /projections_alloc\(\d+\) returned 4294967295/u)
 })
 
 test('rejects malformed output', async () => {
   for (const [output, message] of [
-    [new Uint8Array([0xff, 0xfe]), /not UTF-8/],
-    ['{"protocolVersion":0,', /not valid JSON/],
-    ['[]', /must be a JSON object/],
-    ['', /not valid JSON/],
-    ['{"protocolVersion":1,"changes":[],"steps":[]}', /protocolVersion 0/],
-    ['{"protocolVersion":0,"changes":{},"steps":[]}', /\x60changes\x60 must be an array/],
-    ['{"protocolVersion":0,"changes":[]}', /\x60steps\x60 must be an array/],
-    ['{"protocolVersion":0,"changes":[],"steps":[],"colors":{}}', /unknown field \x60colors\x60/],
-    ['{"protocolVersion":0,"changes":[],"steps":[],"order":"mirror"}', /\x60order\x60 must be an object/],
+    [new Uint8Array([0xff, 0xfe]), /not UTF-8/u],
+    ['{"protocolVersion":0,', /not valid JSON/u],
+    ['[]', /must be a JSON object/u],
+    ['', /not valid JSON/u],
+    ['{"protocolVersion":1,"changes":[],"steps":[]}', /protocolVersion 0/u],
+    ['{"protocolVersion":0,"changes":{},"steps":[]}', /\x60changes\x60 must be an array/u],
+    ['{"protocolVersion":0,"changes":[]}', /\x60steps\x60 must be an array/u],
+    ['{"protocolVersion":0,"changes":[],"steps":[],"colors":{}}', /unknown field \x60colors\x60/u],
+    ['{"protocolVersion":0,"changes":[],"steps":[],"order":"mirror"}', /\x60order\x60 must be an object/u],
   ]) {
     await rejects(runComparator(comparator(output), input), 'invalid-output', message)
   }
@@ -230,18 +230,18 @@ test('rejects malformed output', async () => {
 test('rejects invalid input', async () => {
   const bytes = comparator(comparison)
   for (const [value, message] of [
-    [[], /must be a JSON object/],
-    [{...input, options: undefined}, /\x60options\x60 must be an object/],
-    [{...input, protocolVersion: 1}, /protocolVersion 0/],
-    [{...input, x: 1}, /unknown field \x60x\x60/],
-    [{...input, options: {big: 1n}}, /not serializable/],
+    [[], /must be a JSON object/u],
+    [{...input, options: undefined}, /\x60options\x60 must be an object/u],
+    [{...input, protocolVersion: 1}, /protocolVersion 0/u],
+    [{...input, x: 1}, /unknown field \x60x\x60/u],
+    [{...input, options: {big: 1n}}, /not serializable/u],
   ]) {
     await rejects(runComparator(bytes, value), 'invalid-input', message)
   }
   await rejects(
     runComparator(bytes, input, {maxInputBytes: 8}),
     'input-too-large',
-    /^comparator input is \d+ bytes, exceeding the 8-byte limit$/,
+    /^comparator input is \d+ bytes, exceeding the 8-byte limit$/u,
   )
 })
 

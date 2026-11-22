@@ -74,8 +74,8 @@ for (const fixture of fixtures) {
     if (surfaces.every(name => contrast(parseColor(foreground), color(tokens, name)) >= (hc ? 7 : 4.5))) {
       assert.equal(tokens['color-fg'], same(foreground))
     }
-    assert.equal(tokens['font-family'], v['--vscode-font-family'].trim().replace(/\s+/g, ' '))
-    assert.equal(tokens['font-family-mono'], v['--vscode-editor-font-family'].trim().replace(/\s+/g, ' '))
+    assert.equal(tokens['font-family'], v['--vscode-font-family'].trim().replace(/\s+/gu, ' '))
+    assert.equal(tokens['font-family-mono'], v['--vscode-editor-font-family'].trim().replace(/\s+/gu, ' '))
     for (const [hue, variable] of [
       ['added', '--vscode-gitDecoration-addedResourceForeground'],
       ['removed', '--vscode-gitDecoration-deletedResourceForeground'],
@@ -111,6 +111,6 @@ for (const fixture of fixtures) {
         assert.ok(contrast(fg, composite(color(tokens, fill), color(tokens, 'color-surface-raised'))) >= text, `text on ${fill}`)
       }
     }
-    if (hc) assert.match(tokens['shadow-md'], /#00000000$/, 'high contrast draws no shadows')
+    if (hc) assert.match(tokens['shadow-md'], /#00000000$/u, 'high contrast draws no shadows')
   })
 }

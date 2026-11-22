@@ -87,13 +87,13 @@ export function apiEntries(project: Project): Entry[] {
     const alternatives = [
       absolute,
       absolute
-        .replace(/\.mjs$/, '.mts')
-        .replace(/\.cjs$/, '.cts')
-        .replace(/\.jsx?$/, '.ts'),
+        .replace(/\.mjs$/u, '.mts')
+        .replace(/\.cjs$/u, '.cts')
+        .replace(/\.jsx?$/u, '.ts'),
       absolute
-        .replace(/\.mjs$/, '.d.mts')
-        .replace(/\.cjs$/, '.d.cts')
-        .replace(/\.js$/, '.d.ts'),
+        .replace(/\.mjs$/u, '.d.mts')
+        .replace(/\.cjs$/u, '.d.cts')
+        .replace(/\.js$/u, '.d.ts'),
     ]
     const file = alternatives.find(candidate => project.sources.some(item => native(item.source.fileName) === candidate))
     if (!file) {

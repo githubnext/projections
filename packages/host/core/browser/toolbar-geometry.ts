@@ -180,7 +180,7 @@ export const reachableNames = (page: Page) =>
       const controls = 'button, select, input, output, [role="radiogroup"]'
       const names = new Set([...toolbar.querySelectorAll(controls)].filter(shown).map(nameOf))
       const triggers = [...toolbar.querySelectorAll('button[aria-haspopup="dialog"]')].filter(
-        trigger => shown(trigger) && /^(More|More playback controls|Revisions?: |Comparison mode: )/.test(nameOf(trigger)),
+        trigger => shown(trigger) && /^(?:More|Revisions?: |Comparison mode: )/u.test(nameOf(trigger)),
       ) as HTMLElement[]
       for (const trigger of triggers) {
         trigger.click()

@@ -7,7 +7,7 @@ import type {DiUnit} from './model.js'
 import {diUnion} from './union.js'
 
 const pluralOf = (noun: string) =>
-  /[^aeiou]y$/.test(noun) ? `${noun.slice(0, -1)}ies` : /(s|x|z|ch|sh)$/.test(noun) ? `${noun}es` : `${noun}s`
+  /[^aeiou]y$/u.test(noun) ? `${noun.slice(0, -1)}ies` : /(?:[sxz]|ch|sh)$/u.test(noun) ? `${noun}es` : `${noun}s`
 
 /** A unit's kind, in the extraction's own words: a `service`, or an `implementation` no registration resolves. */
 export const unitKind = (unit: DiUnit): string => (unit.serviceId ? 'service' : 'implementation')

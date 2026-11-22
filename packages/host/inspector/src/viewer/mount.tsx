@@ -82,7 +82,7 @@ function reportBody(
 /** Mounts the viewer into `element`, served by `projections view` (or relayed to it by the host's `transport`). */
 export function mountViewer(element: HTMLElement, options: MountViewerOptions = {}): MountedViewer {
   const base = new URL(options.base ?? new URL('./', document.baseURI))
-  const at = (path: string) => new URL(path.replace(/^\//, ''), base)
+  const at = (path: string) => new URL(path.replace(/^\//u, ''), base)
   const transport = options.transport ?? fetchTransport(base, at)
   const themed = viewerTheme(options.host?.theme)
   const host: InspectorHost = {...options.host, theme: themed.theme}

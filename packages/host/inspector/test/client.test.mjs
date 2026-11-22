@@ -43,7 +43,7 @@ test('requests carry no trust escalation payload, and refusals keep their status
   assert.equal(calls[0].url, 'http://127.0.0.1:1234/api/jobs')
   assert.equal(JSON.parse(calls[0].init.body).trust, undefined)
   const failed = createInspectorClient({transport: fetchTransport(async () => new Response('execution not authorized', {status: 403}))})
-  await assert.rejects(() => failed.run({projectionId: 'x', before: 'HEAD'}), /403.*not authorized/)
+  await assert.rejects(() => failed.run({projectionId: 'x', before: 'HEAD'}), /403.*not authorized/u)
 })
 
 test('offline Inspector renders as a local artifact inspector, not a working mocked extractor', () => {
@@ -100,7 +100,7 @@ test('extraction jobs carry the definition revision and comparator requests are 
     {rules: 'not base64!', digest: `sha256:${'a'.repeat(64)}`},
     {rules: 'AAAA', digest: `sha256:${'a'.repeat(64)}`, extra: 1},
   ]) {
-    assert.throws(() => parseComparatorResponse(invalid), /comparator/)
+    assert.throws(() => parseComparatorResponse(invalid), /comparator/u)
   }
 })
 
@@ -115,9 +115,9 @@ test('renderer lists are optional and custom renderer bases stay same-origin', a
   })
   assert.throws(
     () => parseRendererList({renderers: ['graph'], customRendererBase: 'https://example.com/'}, 'http://127.0.0.1:1234'),
-    /same-origin/,
+    /same-origin/u,
   )
-  assert.throws(() => parseRendererList({renderers: ['../basic']}, 'http://127.0.0.1:1234'), /renderer list/)
+  assert.throws(() => parseRendererList({renderers: ['../basic']}, 'http://127.0.0.1:1234'), /renderer list/u)
   // The native runner lists renderer.json manifests.
   assert.deepEqual(
     parseRendererList(
@@ -126,7 +126,7 @@ test('renderer lists are optional and custom renderer bases stay same-origin', a
     ),
     {renderers: ['graph']},
   )
-  assert.throws(() => parseRendererList({renderers: [{name: '../basic'}]}, 'http://127.0.0.1:1234'), /renderer list/)
+  assert.throws(() => parseRendererList({renderers: [{name: '../basic'}]}, 'http://127.0.0.1:1234'), /renderer list/u)
 })
 
 test('renderer development servers are loopback http origins only', () => {
@@ -156,11 +156,11 @@ test('renderer development servers are loopback http origins only', () => {
         catalog({key: 'k', path: '/p', manifest, url: 'https://example.com/', development: true}),
         'http://127.0.0.1:1234',
       ),
-    /renderer URL/,
+    /renderer URL/u,
   )
   assert.throws(
     () => parseFixtureCatalog(catalog({key: 'k', path: '/p', manifest, url: 'http://localhost:5173/'}), 'http://127.0.0.1:1234'),
-    /renderer URL/,
+    /renderer URL/u,
     'only development entries leave the Inspector origin',
   )
   // A bundle withheld for trust has no manifest or URL; one with a URL isn't withheld.
@@ -168,7 +168,7 @@ test('renderer development servers are loopback http origins only', () => {
   assert.equal(parseFixtureCatalog(catalog(withheld), 'http://127.0.0.1:1234').renderers[0].withheld, 'Needs --trust.')
   assert.throws(
     () => parseFixtureCatalog(catalog({...withheld, manifest, url: '/custom-renderers/c/fixtures/k/index.html'}), 'http://127.0.0.1:1234'),
-    /renderer/,
+    /renderer/u,
   )
 })
 
@@ -233,7 +233,7 @@ test('history sweeps start, read and fetch thumbnails as PNGs only', async () =>
   const cell = {projection: 'prisma-schema', before: 'a1', after: 'b2'}
   assert.equal((await client.sweepThumbnail(cell)).size, 4)
   assert.equal(calls[3].url, 'http://127.0.0.1:1234/api/sweep/thumbnail?projection=prisma-schema&before=a1&after=b2')
-  await assert.rejects(() => client.sweepThumbnail(cell), /invalid thumbnail/)
+  await assert.rejects(() => client.sweepThumbnail(cell), /invalid thumbnail/u)
 })
 
 test('sweep columns summarize how often a projection changed and order by signal', async () => {

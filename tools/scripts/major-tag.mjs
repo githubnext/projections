@@ -14,7 +14,7 @@ import {newestInMajor} from '../../packages/integrations/github-action/src/relea
 
 /** `{major}` when the release `tag` moves `major`'s tag to itself, else `{reason}` it doesn't. */
 export function majorTagMove(tag, releases) {
-  const stable = /^v(\d+)\.\d+\.\d+$/.exec(tag)
+  const stable = /^v(\d+)\.\d+\.\d+$/u.exec(tag)
   if (!stable) return {reason: `${tag} is not a stable release tag such as v0.1.0, so no major version tag moves`}
   const major = `v${stable[1]}`
   if (!releases.some(release => release.tagName === tag && !release.isDraft && !release.isPrerelease)) {

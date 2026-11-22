@@ -40,7 +40,7 @@ module.exports = async function definitionEdits({folder, api}) {
       'the notice',
       async () => (await api.control('packages', {op: 'elements', selector: '[data-notice] [title]', attribute: 'title'}))[0]?.value,
     ),
-    /Refresh applies your edits/,
+    /Refresh applies your edits/u,
   )
   // Until Refresh applies them, the results aren't the edits': no indicator.
   assert.equal(await editsMark(), undefined)
@@ -48,7 +48,7 @@ module.exports = async function definitionEdits({folder, api}) {
   await refreshPackages()
   await tabApplies('the tab applying the edits', 'working-tree', jobsBefore)
   assert.equal(await until('"Your edits"', async () => ((await editsMark()) === 'yours' ? 'yours' : undefined)), 'yours')
-  assert.match((await api.control('packages', {op: 'elements', selector: '.tp-edits'}))[0].text, /Your edits ·\s*Show committed/)
+  assert.match((await api.control('packages', {op: 'elements', selector: '.tp-edits'}))[0].text, /Your edits ·\s*Show committed/u)
   assert.equal(api.tabs('packages')[0].stale, null)
 
   // Show committed: the committed definition, until the edits change again or Use my edits. (The Inspector keeps
@@ -56,7 +56,7 @@ module.exports = async function definitionEdits({folder, api}) {
   await api.control('packages', {op: 'click', selector: '.tp-edits button', text: 'Show committed'})
   await tabApplies('the tab on the committed version', 'HEAD')
   assert.equal(await until('"Committed version"', async () => ((await editsMark()) === 'committed' ? 'committed' : undefined)), 'committed')
-  assert.match((await api.control('packages', {op: 'elements', selector: '.tp-edits'}))[0].text, /Committed version ·\s*Use my edits/)
+  assert.match((await api.control('packages', {op: 'elements', selector: '.tp-edits'}))[0].text, /Committed version ·\s*Use my edits/u)
   // Remembered with the tab's state: reloaded as with the window, it comes back on the committed version.
   api.reload('packages')
   await until('the reloaded tab on the committed version', async () => {

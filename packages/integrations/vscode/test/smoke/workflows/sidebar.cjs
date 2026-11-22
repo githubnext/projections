@@ -37,7 +37,7 @@ module.exports = async function sidebar({folder, api}) {
     }
     // No "pair" in a command's title.
     assert.deepEqual(
-      contributed.commands.filter(command => /\bpairs?\b/i.test(command.title)).map(command => command.title),
+      contributed.commands.filter(command => /\bpairs?\b/iu.test(command.title)).map(command => command.title),
       [],
     )
     // Add to CI… is in the Projections view's "…" menu (not its title's buttons), and nothing writes a workflow.
@@ -46,12 +46,12 @@ module.exports = async function sidebar({folder, api}) {
       contributed.menus['view/title'].some(
         item =>
           item.command === 'projections.addToCi' &&
-          /view == projections\.projections/.test(item.when) &&
+          /view == projections\.projections/u.test(item.when) &&
           !item.group.startsWith('navigation'),
       ),
     )
     const rowMenu = contributed.menus['view/item/context']
-      .filter(item => /viewItem == projection\b/.test(item.when ?? ''))
+      .filter(item => /viewItem == projection\b/u.test(item.when ?? ''))
       .map(item => item.command)
     assert.ok(rowMenu.includes('projections.openDefinition') && !rowMenu.includes('projections.develop'), rowMenu.join())
     // One tab type: no Develop tab, editor or command (developing is the side bar's collapsed sections).
@@ -63,9 +63,9 @@ module.exports = async function sidebar({folder, api}) {
     rows.invalid.map(row => [row.id, row.path, row.description]),
     [['legacy', '.github/projections/legacy.json', 'failed']],
   )
-  assert.match(rows.invalid[0].messages[0], /^Module comparators were removed; name a comparator file instead/)
+  assert.match(rows.invalid[0].messages[0], /^Module comparators were removed; name a comparator file instead/u)
   assert.ok(
-    rows.candidates.some(candidate => candidate.id === 'repository-map' && /match/.test(candidate.reason)),
+    rows.candidates.some(candidate => candidate.id === 'repository-map' && /match/u.test(candidate.reason)),
     JSON.stringify(rows.candidates),
   )
   // Suggested: the candidates not adopted, each with Adopt inline.
@@ -80,5 +80,5 @@ module.exports = async function sidebar({folder, api}) {
     return found.length ? found : undefined
   })
   assert.equal(problem.range.start.line, 6)
-  assert.match(problem.message, /Module comparators were removed/)
+  assert.match(problem.message, /Module comparators were removed/u)
 }

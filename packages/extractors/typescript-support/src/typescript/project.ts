@@ -50,7 +50,7 @@ function selectedEntryFiles(options: ReturnType<typeof inputs>): string[] {
 async function loadTracked(context: ExtractorContext, files: SourceFiles): Promise<void> {
   for (const file of [...context.files].sort()) {
     if (
-      (sourceExtension.test(file) || path.basename(file) === 'package.json' || /^tsconfig.*\.json$/.test(path.basename(file))) &&
+      (sourceExtension.test(file) || path.basename(file) === 'package.json' || /^tsconfig.*\.json$/u.test(path.basename(file))) &&
       !file.split('/').includes('node_modules')
     ) {
       await containedPath(context, file)

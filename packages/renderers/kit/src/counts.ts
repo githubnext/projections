@@ -7,7 +7,7 @@ export function countText(count: number, singular: string, plural = `${singular}
 
 /** A kind's plural, as English forms it: `services`, `classes`, `dependencies`. Kinds are shown verbatim otherwise. */
 export function pluralKind(kind: string): string {
-  if (/[^aeiou]y$/.test(kind)) return `${kind.slice(0, -1)}ies`
-  if (/(s|x|z|ch|sh)$/.test(kind)) return `${kind}es`
+  if (/[^aeiou]y$/u.test(kind)) return `${kind.slice(0, -1)}ies`
+  if (/(?:[sxz]|ch|sh)$/u.test(kind)) return `${kind}es`
   return `${kind}s`
 }

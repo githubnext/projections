@@ -14,7 +14,7 @@ const optOut = 'internal'
 const codeExtensions = ['.ts', '.tsx', '.mts', '.cts']
 
 /** A vendored third-party file, kept as upstream ships it (packages/host/core/src/ui/components): its header says so. */
-const vendored = source => /^\/\/ Adapted from /m.test(source.text.slice(0, 200))
+const vendored = source => /^\/\/ Adapted from /mu.test(source.text.slice(0, 200))
 
 const toPosix = path => path.split('\\').join('/')
 const repositoryPath = path => toPosix(relative(root, path))
@@ -51,11 +51,11 @@ function typedTarget(target) {
 /** The source a declaration path was built from: itself when it is hand-written, else under the tsconfig's `rootDir`. */
 async function sourceOf(workspace, target, options) {
   const path = posix.normalize(`${workspace}/${target}`)
-  if (!/\.d\.[cm]?ts$/.test(path) && (await exists(path))) return path
+  if (!/\.d\.[cm]?ts$/u.test(path) && (await exists(path))) return path
   const outDir = options.outDir ? repositoryPath(options.outDir) : `${workspace}/dist`
   const rootDir = options.rootDir ? repositoryPath(options.rootDir) : `${workspace}/src`
   if (path.startsWith(`${outDir}/`)) {
-    const stem = `${rootDir}/${path.slice(outDir.length + 1)}`.replace(/\.d\.([cm]?)ts$/, '')
+    const stem = `${rootDir}/${path.slice(outDir.length + 1)}`.replace(/\.d\.[cm]?ts$/u, '')
     for (const extension of ['.ts', '.tsx']) if (await exists(`${stem}${extension}`)) return `${stem}${extension}`
   }
   // A hand-written declaration file beside its JavaScript (build/*.d.mts) is the source consumers read.

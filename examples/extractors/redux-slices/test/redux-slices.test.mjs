@@ -46,5 +46,5 @@ test('no matching APIs is an empty architecture; invalid conventions fail', asyn
     writeFileSync(`${root}/index.ts`, 'export const value = 1;\n')
     assert.equal((await run('redux-slices', root)).entities.length, 0)
   })
-  await assert.rejects(run('redux-slices', fixture('redux-slices', 'slices'), {sliceApis: [{}]}), /requires nonempty module/)
+  await assert.rejects(run('redux-slices', fixture('redux-slices', 'slices'), {sliceApis: [{}]}), /requires nonempty module/u)
 })

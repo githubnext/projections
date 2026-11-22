@@ -205,13 +205,13 @@ test('the diff marks changes in place, in words, and leaves the summary to the h
   const model = await modelOf('cleanup')
   const html = render(model, true)
   assert.ok(!html.includes('pk-diff-summary') && !html.includes('1 column made required'))
-  assert.match(html, /data-entity-id="table:Users"[^>]*data-change="removed"/)
-  assert.match(html, /data-entity-id="column:Customers.BillingEmail"[^>]*data-change="modified"/)
+  assert.match(html, /data-entity-id="table:Users"[^>]*data-change="removed"/u)
+  assert.match(html, /data-entity-id="column:Customers.BillingEmail"[^>]*data-change="modified"/u)
   assert.ok(html.includes('Made required'))
   // The renamed index: its old name struck through under the new one, and both said in words.
   assert.ok(html.includes('<del class="pk-change-pill" data-change="removed"><span class="sr-only">was </span>'))
   assert.ok(html.includes('IX_Invoices_Number'))
-  assert.match(html, /, now (<!-- -->)?UX_Invoices_Number/)
+  assert.match(html, /, now (<!-- -->)?UX_Invoices_Number/u)
   // Not in diff mode: no summary or change lines.
   const animated = render(model, false)
   for (const mark of ['database-spanning', 'database-change-line', 'data-diff']) assert.ok(!animated.includes(mark), mark)

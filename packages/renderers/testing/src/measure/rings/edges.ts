@@ -12,12 +12,12 @@ interface EdgeBox {
 export function spreads(value: string): {outer: number; inner: number} {
   const result = {outer: 0, inner: 0}
   if (!value || value === 'none') return result
-  for (const shadow of value.split(/,(?![^(]*\))/)) {
-    const colorless = shadow.replace(/(?:rgba?|hsla?|color|oklch|oklab|lab|lch|hwb)\([^()]*\)/gi, '')
-    const color = /(?:rgba?|hsla?|color|oklch|oklab|lab|lch|hwb)\([^()]*\)/i.exec(shadow)?.[0] ?? 'black'
-    const [x = 0, y = 0, blur = 0, spread = 0] = [...colorless.matchAll(/-?[\d.]+(?:px)?/g)].map(match => px(match[0]))
+  for (const shadow of value.split(/,(?![^(]*\))/u)) {
+    const colorless = shadow.replace(/(?:rgba?|hsla?|color|oklch|oklab|lab|lch|hwb)\([^()]*\)/giu, '')
+    const color = /(?:rgba?|hsla?|color|oklch|oklab|lab|lch|hwb)\([^()]*\)/iu.exec(shadow)?.[0] ?? 'black'
+    const [x = 0, y = 0, blur = 0, spread = 0] = [...colorless.matchAll(/-?[\d.]+(?:px)?/gu)].map(match => px(match[0]))
     if (Math.abs(x) > 0.01 || Math.abs(y) > 0.01 || blur > 0.01 || spread <= 0.01 || colorAlpha(color) <= 0.01) continue
-    if (/\binset\b/.test(shadow)) result.inner = Math.max(result.inner, spread)
+    if (/\binset\b/u.test(shadow)) result.inner = Math.max(result.inner, spread)
     else result.outer = Math.max(result.outer, spread)
   }
   return result
@@ -29,7 +29,7 @@ function sideBorder(style: CSSStyleDeclaration, side: string): number {
     : px(style.getPropertyValue(`border-${side}-width`))
 }
 function cornerRadius(value: string, width: number, height: number): [number, number] {
-  const [h = '0', v = h] = value.split(/\s+/)
+  const [h = '0', v = h] = value.split(/\s+/u)
   const length = (part: string, reference: number) => (part.endsWith('%') ? (px(part) / 100) * reference : px(part))
   return [length(h, width), length(v, height)]
 }

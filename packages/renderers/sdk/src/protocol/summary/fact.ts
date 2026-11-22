@@ -46,7 +46,7 @@ export interface SummaryFactItem {
   description?: string
 }
 
-const summaryIconPattern = /^[a-z][a-z0-9-]{0,63}$/
+const summaryIconPattern = /^[a-z][a-z0-9-]{0,63}$/u
 
 /** Validates a fact item whose ID isn't among `facts`. */
 export function parseFactItem(item: Fields, facts: ReadonlySet<string>): SummaryFactItem | undefined {

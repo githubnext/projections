@@ -12,9 +12,9 @@ const namedBulky = 2
 /** A data field's name in plain words: `testTokens` and `test_tokens` read `test tokens`. */
 export function fieldWords(field: string): string {
   return field
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-    .replace(/[_-]+/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/gu, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/gu, '$1 $2')
+    .replace(/[_-]+/gu, ' ')
     .trim()
     .toLowerCase()
 }
@@ -30,7 +30,7 @@ export function cardChanges(row: EntityChange<Entity>, shown: readonly string[] 
   const lines = fieldLines(row, {exclude: shown})
   const bulky = (line: FieldLine) => [row.before, row.after].some(side => isRecord(side?.data?.[line.key]))
   const compact = new Intl.NumberFormat(locale, {notation: 'compact', maximumFractionDigits: 1})
-  const number = (text: string) => (/^-?\d+(\.\d+)?$/.test(text) && Math.abs(Number(text)) >= 1000 ? compact.format(Number(text)) : text)
+  const number = (text: string) => (/^-?\d+(?:\.\d+)?$/u.test(text) && Math.abs(Number(text)) >= 1000 ? compact.format(Number(text)) : text)
   const plain = lines
     .filter(line => !bulky(line))
     .map(line => ({...line, key: fieldWords(line.key), before: number(line.before), after: number(line.after), prose: true as const}))

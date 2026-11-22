@@ -37,12 +37,12 @@ test('source launcher requires a built native executable, not Node', posixOnly, 
   for (const name of ['dirname', 'readlink']) await symlink(`/usr/bin/${name}`, path.join(tools, name))
   const missing = run(launcher, [], {env: {PATH: tools}})
   assert.equal(missing.status, 1)
-  assert.match(missing.stderr, /built native CLI is missing/)
-  assert.doesNotMatch(missing.stderr, /Node.*required/)
+  assert.match(missing.stderr, /built native CLI is missing/u)
+  assert.doesNotMatch(missing.stderr, /Node.*required/u)
   const unbuilt = run(launcher)
   assert.equal(unbuilt.status, 1)
-  assert.match(unbuilt.stderr, /built native CLI is missing/)
-  assert.match(unbuilt.stderr, /npm ci\n {2}npm run build/)
+  assert.match(unbuilt.stderr, /built native CLI is missing/u)
+  assert.match(unbuilt.stderr, /npm ci\n {2}npm run build/u)
 })
 
 test('source launcher resolves relative symlinks and execs the selected CLI with caller cwd/argv/exit intact', posixOnly, async t => {

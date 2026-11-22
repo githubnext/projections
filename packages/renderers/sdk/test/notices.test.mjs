@@ -15,7 +15,7 @@ const workspace = fileURLToPath(new URL('../../../../', import.meta.url))
 async function packagesOf(moduleIds) {
   const found = new Set()
   for (const id of moduleIds) {
-    const path = id.replace(/^\0/, '').replace(/\?.*$/, '')
+    const path = id.replace(/^\0/u, '').replace(/\?.*$/u, '')
     const at = path.lastIndexOf('/node_modules/')
     if (at < 0) continue
     const parts = path.slice(at + '/node_modules/'.length).split('/')
@@ -63,7 +63,7 @@ test('every built-in renderer bundle lists every npm package its script includes
       bundled.some(name => name.startsWith('react ')),
       `${directory}: the probe build found its packages`,
     )
-    if (/[\\/](graph|dag|architecture)$/.test(directory)) {
+    if (/[\\/](?:graph|dag|architecture)$/u.test(directory)) {
       assert.ok(
         bundled.some(name => name.startsWith('elkjs ')),
         `${directory} bundles ELK`,
@@ -81,10 +81,10 @@ test("the graph renderer bundle carries ELK's full EPL-2.0 license, copyrights a
   const text = await readFile(join(workspace, 'packages/renderers/graph/dist/THIRD_PARTY_NOTICES.txt'), 'utf8')
   const section = [...noticeSections(text)].find(([heading]) => heading.startsWith('===== elkjs '))?.[1]
   assert.ok(section, 'elkjs is listed')
-  assert.match(section, /Distributed under EPL-2\.0\. Source: https:\/\/github\.com\/kieler\/elkjs\/tree\/\d+\.\d+\.\d+, unmodified\./)
-  assert.match(section, /Copyright \(c\) \d{4} Kiel University and others/)
-  assert.match(section, /# Eclipse Public License - v 2\.0/)
-  assert.match(section, /Exhibit A/)
+  assert.match(section, /Distributed under EPL-2\.0\. Source: https:\/\/github\.com\/kieler\/elkjs\/tree\/\d+\.\d+\.\d+, unmodified\./u)
+  assert.match(section, /Copyright \(c\) \d{4} Kiel University and others/u)
+  assert.match(section, /# Eclipse Public License - v 2\.0/u)
+  assert.match(section, /Exhibit A/u)
 })
 
 test('a renderer build fails when it bundles a package that declares no license', {timeout: 60_000}, async () => {
@@ -104,7 +104,7 @@ test('a renderer build fails when it bundles a package that declares no license'
         logLevel: 'silent',
         ...rendererConfig({entry: join(directory, 'main.js'), name: 'probe', title: 'Probe', outDir: join(directory, 'dist')}),
       }),
-      /unlicensed@1\.0\.0 has no license file or license field/,
+      /unlicensed@1\.0\.0 has no license file or license field/u,
     )
   } finally {
     await rm(directory, {recursive: true, force: true})
@@ -116,7 +116,7 @@ test('merged notices list each package version once', () => {
   const a = `${bundleNotices('A', [])}\n${react}`,
     b = `B\n\n${react}\n===== elkjs 0.12.1 (EPL-2.0) =====\nEPL text\n`
   const merged = mergeNotices('Renderers', [a, b])
-  assert.equal(merged.match(/===== react /g).length, 1)
+  assert.equal(merged.match(/===== react /gu).length, 1)
   assert.deepEqual(headings(merged), ['elkjs 0.12.1', 'react 19.0.0'])
   assert.deepEqual(headings(mergeNotices('Renderers', [a, b], new Set(['react']))), ['elkjs 0.12.1'])
 })
@@ -155,10 +155,10 @@ test('module ID queries and SPDX alternatives are read in linear time', async ()
       ['elected'],
     )
     const entry = license => ({name: 'elected', version: '1.0.0', license, directory, files: []})
-    assert.match(packageNotice(entry('(MPL-2.0 OR Apache-2.0)')), /Distributed under MPL-2\.0\. Source/)
+    assert.match(packageNotice(entry('(MPL-2.0 OR Apache-2.0)')), /Distributed under MPL-2\.0\. Source/u)
     const started = performance.now()
     assert.deepEqual(bundledPackages([`${'?'.repeat(100_000)}\n`]), [])
-    assert.match(packageNotice(entry(`MPL-2.0${' '.repeat(100_000)}x`)), /Distributed under MPL-2\.0 x\. Source/)
+    assert.match(packageNotice(entry(`MPL-2.0${' '.repeat(100_000)}x`)), /Distributed under MPL-2\.0 x\. Source/u)
     assert.ok(performance.now() - started < 1000, `took ${Math.round(performance.now() - started)} ms`)
   } finally {
     await rm(root, {recursive: true, force: true})

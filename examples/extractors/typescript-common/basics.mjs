@@ -6,7 +6,7 @@ export {readRequest}
 
 /** Evidence illustrates an entity; extractions keep a representative sample. */
 export const MAX_EVIDENCE = 25
-export const sourceExtension = /\.(?:[cm]?[jt]sx?)$/
+export const sourceExtension = /\.[cm]?[jt]sx?$/u
 export const slash = value => value.split(path.sep).join('/')
 export const compareIds = (left, right) => (left < right ? -1 : left > right ? 1 : 0)
 /** An entity or relationship ID from its parts. */

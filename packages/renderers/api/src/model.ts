@@ -41,7 +41,7 @@ export function limitScope(scope: ChangesScope, rows: readonly {id: string}[], l
 /** An ID as people read it: extractors percent-encode the IDs nested in it (`ts-api%3A(root)` is `ts-api:(root)`). */
 export function readableId(id: string): string {
   let text = id
-  for (let depth = 0; depth < 8 && /%[0-9A-Fa-f]{2}/.test(text); depth++) {
+  for (let depth = 0; depth < 8 && /%[0-9A-F]{2}/iu.test(text); depth++) {
     try {
       text = decodeURIComponent(text)
     } catch {

@@ -132,7 +132,7 @@ const withoutTextBox = (page: Page) =>
     const fallbacks: string[] = []
     const visit = (rules: CSSRuleList) => {
       for (const rule of rules) {
-        if (rule instanceof CSSSupportsRule && /not\s*\(\s*text-box/.test(rule.conditionText)) {
+        if (rule instanceof CSSSupportsRule && /not\s*\(\s*text-box/u.test(rule.conditionText)) {
           fallbacks.push(...[...rule.cssRules].map(inner => inner.cssText))
         } else if ('cssRules' in rule) visit((rule as CSSGroupingRule).cssRules)
       }

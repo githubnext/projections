@@ -48,7 +48,7 @@ test('a bookmark or a recent change is its subject, cut at about 24 characters w
   assert.equal(item({id: 'bookmark:landed'}, {before: 'v1.0', after: base}).text, '$(projections-mark) Move the session store…')
   const recent = {id: `pair:${base}..${head}`, pair: {before: base, after: head}, title: 'Rename every package to its scope'}
   assert.equal(item(recent, recent.pair).text, '$(projections-mark) Rename every package to…')
-  assert.doesNotMatch(item(recent, recent.pair).text, /[0-9a-f]{7}/)
+  assert.doesNotMatch(item(recent, recent.pair).text, /[0-9a-f]{7}/u)
 })
 
 test('two revisions read by their ref names, a short commit only where nothing names one', () => {
@@ -72,33 +72,33 @@ test('the tooltip carries the exact revisions with their commits, the span and t
     after: label('working-tree', 'working-tree', 'Working tree'),
   }
   const {tooltip, accessibility} = item({id: 'branch'}, {before: base, after: 'working-tree'}, {labels, files: 9})
-  assert.match(tooltip, /^\*\*Branch changes\*\*/)
-  assert.match(tooltip, /merge base with main \x60bbbbbbb\x60 → your files/)
-  assert.match(tooltip, /3 commits \+ 2 uncommitted · 9 files changed/)
-  assert.match(tooltip, /Click to choose what projections show\.$/)
+  assert.match(tooltip, /^\*\*Branch changes\*\*/u)
+  assert.match(tooltip, /merge base with main \x60bbbbbbb\x60 → your files/u)
+  assert.match(tooltip, /3 commits \+ 2 uncommitted · 9 files changed/u)
+  assert.match(tooltip, /Click to choose what projections show\.$/u)
   assert.equal(accessibility, 'Projections: viewing Branch changes')
   const pull = item({id: 'pr:123', title: '#123 Fix the login'}, {before: base, after: head})
-  assert.match(pull.tooltip, /^\*\*PR \\#123\*\*\n\nFix the login\n\n\x60bbbbbbb\x60 → \x60aaaaaaa\x60/)
-  assert.match(item({id: 'now'}, {after: 'working-tree'}).tooltip, /your files, as they are now/)
+  assert.match(pull.tooltip, /^\*\*PR \\#123\*\*\n\nFix the login\n\n\x60bbbbbbb\x60 → \x60aaaaaaa\x60/u)
+  assert.match(item({id: 'now'}, {after: 'working-tree'}).tooltip, /your files, as they are now/u)
   assert.match(
     item({id: 'bookmark:landed'}, {before: 'v1.0', after: base}).tooltip,
-    /^\*\*Bookmark: Move the session store into the auth package\*\*/,
+    /^\*\*Bookmark: Move the session store into the auth package\*\*/u,
   )
   const pinned = item({id: 'branch'}, {before: base, after: 'working-tree'}, {pinned: {title: 'Packages', name: 'PR #7'}})
-  assert.match(pinned.tooltip, /Packages is pinned to PR \\#7; it doesn't follow this\./)
+  assert.match(pinned.tooltip, /Packages is pinned to PR \\#7; it doesn't follow this\./u)
 })
 
 test('the tab in front out of date ends the item with a warning; the tooltip says why and how many', () => {
   const stale = item({id: 'branch'}, {before: base, after: 'working-tree'}, {stale: 2, front: {title: 'Packages', files: 19}})
   assert.equal(stale.text, '$(projections-mark) Branch changes $(warning)')
-  assert.match(stale.tooltip, /Packages is out of date: 19 files changed since its result\. Click to refresh it\./)
-  assert.match(stale.tooltip, /2 projections are out of date: the files changed since their result\. Refresh their tabs/)
+  assert.match(stale.tooltip, /Packages is out of date: 19 files changed since its result\. Click to refresh it\./u)
+  assert.match(stale.tooltip, /2 projections are out of date: the files changed since their result\. Refresh their tabs/u)
   assert.equal(stale.accessibility, 'Projections: viewing Branch changes, out of date')
   // Other tabs out of date, the one in front current: no warning, the count stays in the tooltip.
   const others = item({id: 'branch'}, {before: base, after: 'working-tree'}, {stale: 1})
   assert.equal(others.text, '$(projections-mark) Branch changes')
   assert.equal(others.accessibility, 'Projections: viewing Branch changes')
-  assert.match(others.tooltip, /1 projection is out of date/)
+  assert.match(others.tooltip, /1 projection is out of date/u)
 })
 
 test("the tab in front's job ends the item with a spinner, in the warning's place; the tooltip and label say what it does", () => {
@@ -107,12 +107,12 @@ test("the tab in front's job ends the item with a spinner, in the warning's plac
     running: {title: 'Packages', kind: 'extracting'},
   })
   assert.equal(extracting.text, '$(projections-mark) Branch changes $(sync~spin)')
-  assert.match(extracting.tooltip, /\n\nPackages: Extracting…\n/)
+  assert.match(extracting.tooltip, /\n\nPackages: Extracting…\n/u)
   assert.equal(extracting.accessibility, 'Projections: viewing Branch changes, extracting')
   const comparing = item({id: 'branch'}, pair, {
     running: {title: 'Packages', kind: 'comparing'},
   })
-  assert.match(comparing.tooltip, /Packages: Comparing…/)
+  assert.match(comparing.tooltip, /Packages: Comparing…/u)
   assert.equal(comparing.accessibility, 'Projections: viewing Branch changes, comparing')
   // Running takes precedence over out of date (a Refresh): no warning, and no "Click to refresh it" meanwhile.
   const refreshing = item({id: 'branch'}, pair, {
@@ -121,8 +121,8 @@ test("the tab in front's job ends the item with a spinner, in the warning's plac
     stale: 1,
   })
   assert.equal(refreshing.text, '$(projections-mark) Branch changes $(sync~spin)')
-  assert.doesNotMatch(refreshing.tooltip, /Click to refresh it/)
-  assert.match(refreshing.tooltip, /1 projection is out of date/)
+  assert.doesNotMatch(refreshing.tooltip, /Click to refresh it/u)
+  assert.match(refreshing.tooltip, /1 projection is out of date/u)
   assert.equal(refreshing.accessibility, 'Projections: viewing Branch changes, extracting')
   // Under reduced motion the icon holds still.
   assert.equal(
@@ -137,8 +137,8 @@ test("the tab in front's job ends the item with a spinner, in the warning's plac
   })
   assert.equal(others.text, '$(projections-mark) Branch changes')
   assert.equal(others.accessibility, 'Projections: viewing Branch changes')
-  assert.match(others.tooltip, /\n\n2 other tabs extracting\.\n/)
-  assert.match(item({id: 'branch'}, pair, {others: ['comparing']}).tooltip, /\n\n1 other tab comparing\.\n/)
+  assert.match(others.tooltip, /\n\n2 other tabs extracting\.\n/u)
+  assert.match(item({id: 'branch'}, pair, {others: ['comparing']}).tooltip, /\n\n1 other tab comparing\.\n/u)
 })
 
 /** Timers on a clock the test moves (`advance`), for `runningIndicator`. */

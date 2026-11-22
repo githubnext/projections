@@ -22,11 +22,11 @@ const engine = createNativeEngine()
 const root = fileURLToPath(new URL('../../../../', import.meta.url))
 const published = join(root, 'packages/schemas/schemas')
 const ajv = new Ajv2020({allErrors: false, strictTuples: false})
-for (const file of readdirSync(published, {recursive: true}).filter(file => /v\d+\.json$/.test(file))) {
+for (const file of readdirSync(published, {recursive: true}).filter(file => /v\d+\.json$/u.test(file))) {
   ajv.addSchema(JSON.parse(readFileSync(join(published, file), 'utf8')))
 }
 const extractionSchema = ajv.getSchema(schemaUrl('extraction'))
-const domainSchema = schema => ajv.getSchema(schemaUrl(schema.replace(/\/v\d+$/, '')))
+const domainSchema = schema => ajv.getSchema(schemaUrl(schema.replace(/\/v\d+$/u, '')))
 
 /** Rules only the engine checks: identity, topology, raw JSON and size. */
 const engineOnly = new Set(['cycle', 'multiple-parents', 'duplicate-id', 'missing-endpoint', 'ambiguous-identity', 'depth-limit'])

@@ -41,7 +41,7 @@ test('the summary bar counts regenerated items on their own, and its toggle show
   await open(page)
   const bar = page.getByRole('group', {name: 'Summary'})
   await expect(bar.getByRole('button', {name: '1 regenerated'})).toBeVisible()
-  await expect(bar.getByRole('button', {name: /varied within tolerance/})).toHaveCount(0)
+  await expect(bar.getByRole('button', {name: /varied within tolerance/u})).toHaveCount(0)
   await regenerated(page).click()
   await expect(regenerated(page)).toHaveAttribute('aria-pressed', 'true')
   await showAs(page, 'Table')
@@ -52,7 +52,7 @@ test('the summary bar counts regenerated items on their own, and its toggle show
 test('the renderer leaves an item regenerated from the same inputs neutral, and marks no generated change volatile', async ({page}) => {
   await open(page)
   const cart = frame(page).locator('[data-entity-id="class:Cart"]').first()
-  await expect(cart).not.toHaveAttribute('data-change', /./)
+  await expect(cart).not.toHaveAttribute('data-change', /./u)
   await expect(cart.locator('[data-change-status], [data-varied]')).toHaveCount(0)
   await expect(frame(page).locator('[data-varied="beyond"]')).toHaveCount(0)
 })
@@ -95,5 +95,5 @@ test('a changed basis says why and shows both passages, with a word diff one tog
       .locator('.ph-generated-why code')
       .first()
       .evaluate(element => getComputedStyle(element).fontFamily),
-  ).toMatch(/mono/i)
+  ).toMatch(/mono/iu)
 })

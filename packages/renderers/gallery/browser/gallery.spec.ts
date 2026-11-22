@@ -69,11 +69,11 @@ test('the host theme reaches nested renderers, and a custom bundle is named, nev
 test('a comparison marks the scenarios a change added, removed and redrew, and offers both revisions of a redrawn one', async ({page}) => {
   const gallery = await openRenderer(page, {renderer: 'gallery', before, after, comparisonMode: 'diff', width: 1200})
   const card = (document: string, scenario: string) => gallery.frame.locator(`[data-entity-id="${id(document, scenario)}"]`)
-  await expect(card('cards/scenarios.json', 'cards')).toHaveAttribute('data-change', /added/)
-  await expect(card('text-diff/scenarios.json', 'banner')).toHaveAttribute('data-change', /removed/)
+  await expect(card('cards/scenarios.json', 'cards')).toHaveAttribute('data-change', /added/u)
+  await expect(card('text-diff/scenarios.json', 'banner')).toHaveAttribute('data-change', /removed/u)
   const shop = card('graph/scenarios.json', 'shop')
-  await expect(shop).toHaveAttribute('data-change', /modified/)
-  await expect(card('graph/scenarios.json', 'payments-split')).not.toHaveAttribute('data-change', /./)
+  await expect(shop).toHaveAttribute('data-change', /modified/u)
+  await expect(card('graph/scenarios.json', 'payments-split')).not.toHaveAttribute('data-change', /./u)
   // A redrawn scenario draws its after revision (with the cache), and its before revision on request.
   const drawn = gallery.frame.frameLocator(`[data-entity-id="${id('graph/scenarios.json', 'shop')}"] iframe`)
   await expect(drawn.locator('[data-entity-id="cache"]').first()).toBeAttached({timeout: 15_000})

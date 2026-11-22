@@ -30,7 +30,7 @@ export const targets = {
 /** The README a package ships: without the front matter (its description, for this repository's tools), which the
  * Marketplace would show as text. */
 export function packageReadme(text) {
-  return text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/, '')
+  return text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/u, '')
 }
 
 /** The manifest a package ships: no scripts or development dependencies; the dependencies are bundled. */

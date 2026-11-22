@@ -45,7 +45,7 @@ function sourceModules(root: string, unit: Unit): string[] {
     path =>
       sources.test(path) &&
       `/${path.slice(unit.path.length + 1)}`.includes('/src/') &&
-      !/\.(?:test|spec)\./.test(path) &&
+      !/\.(?:test|spec)\./u.test(path) &&
       !path.endsWith('.d.ts'),
   )
 }

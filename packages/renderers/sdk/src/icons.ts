@@ -138,21 +138,19 @@ export const iconTokenLength = 4096
  * whose data is percent-encoded, so it needs no quoting and can't close the `url()`.
  */
 export function isIconValue(value: string): boolean {
-  return (
-    value === 'none' || (value.length <= iconTokenLength && /^url\("data:image\/svg\+xml,[A-Za-z0-9%._~!$&'*+,;=:@/?-]*"\)$/.test(value))
-  )
+  return value === 'none' || (value.length <= iconTokenLength && /^url\("data:image\/svg\+xml,[\w%.~!$&'*+,;=:@/?-]*"\)$/u.test(value))
 }
 
 /** An SVG document as a CSS image value, for an icon token. */
 export function svgIconValue(svg: string): string {
-  return `url("data:image/svg+xml,${encodeURIComponent(svg).replace(/[()]/g, character => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)}")`
+  return `url("data:image/svg+xml,${encodeURIComponent(svg).replace(/[()]/gu, character => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)}")`
 }
 
 function lucide(node: IconNode): string {
   const attributes = (values: Record<string, string | number | undefined>) =>
     Object.entries(values)
       .filter(([, value]) => value !== undefined)
-      .map(([key, value]) => ` ${key}="${String(value).replace(/"/g, '&quot;')}"`)
+      .map(([key, value]) => ` ${key}="${String(value).replace(/"/gu, '&quot;')}"`)
       .join('')
   const children = node.map(([tag, values]) => `<${tag}${attributes(values as Record<string, string | number | undefined>)}/>`).join('')
   return svgIconValue(

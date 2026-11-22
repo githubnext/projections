@@ -13,7 +13,7 @@ import {lifecycleFiles, machinesPlugin} from './tools/scripts/check-machines/lif
 const shadcn = 'packages/host/core/src/ui/components'
 const vendored = readdirSync(`${import.meta.dirname}/${shadcn}/upstream`)
   .filter(file => file.endsWith('.json') && file !== 'manifest.json')
-  .map(file => `${shadcn}/${file.replace(/\.json$/, '.tsx')}`)
+  .map(file => `${shadcn}/${file.replace(/\.json$/u, '.tsx')}`)
 
 export default defineConfig(
   {

@@ -46,7 +46,7 @@ test('one revision counts every output’s lines, without changes', () => {
   const extraction = JSON.parse(readFileSync(new URL('../fixtures/parcel-cli-after.json', import.meta.url), 'utf8'))
   const init = {...base, mode: 'extraction', extraction}
   const facts = textDiffFacts({init, model: extractionModel(extraction), controls: {}, rendererName: 'text-diff'})
-  const lineCount = text => text.split(/\r\n|\n|\r/).length - (/(\r\n|\n|\r)$/.test(text) || text === '' ? 1 : 0)
+  const lineCount = text => text.split(/\r\n|\n|\r/u).length - (/(?:\r\n|\n|\r)$/u.test(text) || text === '' ? 1 : 0)
   const expected = extraction.entities.reduce((sum, entity) => sum + lineCount(entity.data.text), 0)
   assert.deepEqual(facts, [{type: 'fact', id: 'lines', count: expected, noun: {singular: 'line', plural: 'lines'}}])
 })

@@ -40,7 +40,8 @@ export function affordanceFailures(root: Element): string[] {
       if (outline > 0 && !element.matches(':focus-visible')) {
         failures.push(`part ${id} draws an outline inside unit ${unit.getAttribute('data-entity-id')}`)
       }
-      if (/(^|,\s*)(rgba?\([^)]*\)\s+)?0px 0px 0px [1-9]/.test(style.boxShadow)) failures.push(`part ${id} draws a ring-shaped box shadow`)
+      if (/(?:^|,\s*)(?:rgba?\([^)]*\)\s+)?0px 0px 0px [1-9]/u.test(style.boxShadow))
+        failures.push(`part ${id} draws a ring-shaped box shadow`)
       if (
         element instanceof SVGGeometryElement &&
         !element.matches(':focus-visible') &&

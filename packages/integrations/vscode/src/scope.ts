@@ -18,7 +18,7 @@ export function scopeDigest(entries: readonly (readonly [path: string, object: s
 
 /** A tree's scope identity, or nothing when git can't say. */
 export async function scopedTreeOf(cwd: string, tree: string, scope: readonly string[]): Promise<string | undefined> {
-  if (!/^[0-9a-f]{40,64}$/.test(tree)) return undefined
+  if (!/^[0-9a-f]{40,64}$/u.test(tree)) return undefined
   try {
     const entries = await Promise.all(
       scope.map(async path => {

@@ -57,7 +57,7 @@ export interface RendererBuildOptions {
   outDir?: string
 }
 
-const escape = (value: string) => value.replace(/[&<>"']/g, character => `&#${character.charCodeAt(0)};`)
+const escape = (value: string) => value.replace(/[&<>"']/gu, character => `&#${character.charCodeAt(0)};`)
 
 /**
  * Before `init`, a renderer document is transparent and draws nothing, so the
@@ -220,7 +220,7 @@ export function rendererEntryPlugin(options: Omit<RendererBuildOptions, 'outDir'
     },
     transform(code, id) {
       if (!serve || !options.entry || id.split('?')[0] !== file(options.entry).path) return null
-      if (!/\bmountRenderer\s*\(/.test(code) || code.includes('import.meta.hot')) return null
+      if (!/\bmountRenderer\s*\(/u.test(code) || code.includes('import.meta.hot')) return null
       return {code: code + hotAccept, map: null}
     },
   }
@@ -234,7 +234,7 @@ export function rendererEntryPlugin(options: Omit<RendererBuildOptions, 'outDir'
 export const rendererDevServerFile = 'node_modules/.projections/renderer-dev-server.json'
 
 /** Loopback origins only; a renderer frame's opaque origin is `null`. */
-const loopback = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/
+const loopback = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/u
 
 /**
  * Loads the renderer check probe from a local Inspector (a loopback host
@@ -252,7 +252,7 @@ const devProbeScript =
  * Inspector's check probe may load.
  */
 export function rendererDevContentSecurityPolicy(origin: string): string {
-  const socket = origin.replace(/^http/, 'ws')
+  const socket = origin.replace(/^http/u, 'ws')
   return rendererMetaContentSecurityPolicy
     .split('; ')
     .map(directive => {
@@ -311,11 +311,11 @@ export function rendererDevServerPlugin(options: Omit<RendererBuildOptions, 'out
             {
               name: 'projections-raw',
               setup(build) {
-                build.onResolve({filter: /\?raw$/}, async args => {
+                build.onResolve({filter: /\?raw$/u}, async args => {
                   const resolved = await build.resolve(args.path.slice(0, -'?raw'.length), {kind: args.kind, resolveDir: args.resolveDir})
                   return resolved.errors.length ? {errors: resolved.errors} : {path: resolved.path, namespace: 'projections-raw'}
                 })
-                build.onLoad({filter: /.*/, namespace: 'projections-raw'}, args => ({
+                build.onLoad({filter: /.*/u, namespace: 'projections-raw'}, args => ({
                   contents: readText(args.path),
                   loader: 'text',
                 }))
@@ -354,7 +354,7 @@ export function rendererDevServerPlugin(options: Omit<RendererBuildOptions, 'out
           response.end('Renderer development servers serve loopback hosts only')
           return
         }
-        const entry = options.view ? devEntryUrl : `/${options.entry!.replace(/^\.?\//, '')}`
+        const entry = options.view ? devEntryUrl : `/${options.entry!.replace(/^\.?\//u, '')}`
         response.setHeader('content-type', 'text/html; charset=utf-8')
         response.setHeader('content-security-policy', rendererDevContentSecurityPolicy(origin))
         response.setHeader('cache-control', 'no-store')
@@ -394,14 +394,14 @@ export function rendererStyleLintPlugin(): Plugin {
     apply: 'build',
     enforce: 'pre',
     configResolved(config) {
-      root = config.root.replace(/\\/g, '/').replace(/\/?$/, '/')
+      root = config.root.replace(/\\/gu, '/').replace(/\/?$/u, '/')
     },
     buildStart() {
       warnings.length = 0
     },
     transform(code, id) {
-      const file = id.split('?')[0]!.replace(/\\/g, '/')
-      if (!/\.css$/.test(file) || /\/node_modules\/|\/renderers\/(?:kit|sdk)\//.test(file)) return null
+      const file = id.split('?')[0]!.replace(/\\/gu, '/')
+      if (!/\.css$/u.test(file) || /\/node_modules\/|\/renderers\/(?:kit|sdk)\//u.test(file)) return null
       const name = file.startsWith(root) ? file.slice(root.length) : file
       const lint = lintRendererStyles(code, name)
       if (lint.errors.length) this.error(`Renderer styles use properties that aren't theme tokens:\n${lint.errors.join('\n')}`)
@@ -439,7 +439,7 @@ export function rendererStyleLintPlugin(): Plugin {
  * ```
  */
 export function rendererConfig(options: RendererBuildOptions): UserConfig {
-  if (!/^[a-z0-9][a-z0-9-]{0,63}$/.test(options.name)) throw new Error('Renderer name must be a lowercase identifier')
+  if (!/^[a-z0-9][a-z0-9-]{0,63}$/u.test(options.name)) throw new Error('Renderer name must be a lowercase identifier')
   if (!options.view === !options.entry) {
     throw new Error(
       options.view

@@ -39,8 +39,8 @@ const browserPackages = ['packages/schemas', 'packages/machine', 'packages/rende
 const executionPackages = new Set(['@githubnext/projections-typescript-support', '@githubnext/projections-cli'])
 // Nothing here may mention a developer's machine or an agent's session state.
 const privateReferences = [
-  [/\/Users\/(?!me\/)[\w.-]+|\/home\/(?!dev\b|me\b|runner\b)[\w.-]+\/|[A-Z]:\\Users\\(?!me\\)/, 'a machine-specific home directory'],
-  [/copilot-worktrees|session-state|\.copilot\//, 'agent session state'],
+  [/\/Users\/(?!me\/)[\w.-]+|\/home\/(?!dev\b|me\b|runner\b)[\w.-]+\/|[A-Z]:\\Users\\(?!me\\)/u, 'a machine-specific home directory'],
+  [/copilot-worktrees|session-state|\.copilot\//u, 'agent session state'],
 ]
 // Files that name these only to assert they are absent.
 const referenceChecks = ['tools/scripts/check-boundaries.mjs']
@@ -61,7 +61,7 @@ const textFiles = new Set(['.md', '.json', '.yml', '.yaml', '.toml', '.rs', '.ht
 // First-party components get no privileges: built-in extractors, comparators and
 // renderers depend on the public SDKs third parties use, never on the runner,
 // CLI, host or runtime that runs them.
-const projectionsPackage = /^@githubnext\/projections-/
+const projectionsPackage = /^@githubnext\/projections-/u
 const rendererPackages = {
   // Package: allowed Projections production dependencies; development
   // dependencies may also use the public Engine and renderer testing tools.
@@ -83,7 +83,7 @@ const rendererDevelopment = [
   '@githubnext/projections-renderer-kit',
   '@githubnext/projections-schemas',
 ]
-const rendererComparator = /^@githubnext\/projections-comparator-/
+const rendererComparator = /^@githubnext\/projections-comparator-/u
 const rendererSources = ['packages/renderers/*/src/', 'examples/renderers/*/src/']
 const rendererForbidden = [
   '@githubnext/projections-host',
@@ -112,17 +112,17 @@ const workspaceDirectories = [...workspaces.values()].sort((a, b) => b.length - 
 const workspaceOf = path => workspaceDirectories.find(directory => path === directory || path.startsWith(`${directory}/`))
 // The renderers' and the kit's browser suites sit beside their code but run in the renderer harness
 // (packages/renderers/harness/playwright.config.ts), so they import what the harness declares.
-const harnessSuites = /^packages\/renderers\/[^/]+\/browser\//
+const harnessSuites = /^packages\/renderers\/[^/]+\/browser\//u
 /** The first-party package an import specifier names, if any. */
 const firstParty = specifier => {
   const name = specifier.startsWith('@') ? specifier.split('/').slice(0, 2).join('/') : specifier.split('/')[0]
   return workspaces.has(name) ? name : undefined
 }
 /** Paths inside a workspace that it ships: other workspaces' files are reached through their packages, never by path. */
-const shipped = /^(?:src|build)\//
+const shipped = /^(?:src|build)\//u
 
 const scripts = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']
-const builtins = new Set(builtinModules.map(name => name.replace(/^node:/, '')))
+const builtins = new Set(builtinModules.map(name => name.replace(/^node:/u, '')))
 const failures = []
 let modules = 0
 let files = 0
@@ -132,7 +132,7 @@ const pattern = glob =>
   new RegExp(
     `^${glob
       .split('*')
-      .map(part => part.replace(/[.+?^${}()|[\]\\/]/g, '\\$&'))
+      .map(part => part.replace(/[.+?^${}()|[\]\\/]/gu, '\\$&'))
       .join('[^/]+')}${glob.endsWith('/') ? '' : '$'}`,
   )
 const matches = (path, globs) => globs.some(glob => pattern(glob).test(path))
@@ -150,7 +150,7 @@ function owner(path, manifest) {
 }
 /** A relative reference escapes when every plausible base directory resolves it outside the public root. */
 function checkReference(path, reference, bases, label = 'path') {
-  if (!/^\.\.(?:[\\/]|$)/.test(reference)) return
+  if (!/^\.\.(?:[\\/]|$)/u.test(reference)) return
   if (bases.every(base => escapes(resolve(base, reference)))) {
     failures.push(`${posix(path)}: ${label} escapes the public root: ${reference}`)
   }
@@ -203,7 +203,7 @@ function importProblem(path, sourcePath, name, {from, runners, declared}) {
     }
     return undefined
   }
-  if (name.startsWith('/') || /^[a-zA-Z]:[\\/]/.test(name) || name.startsWith('file:')) {
+  if (name.startsWith('/') || /^[a-zA-Z]:[\\/]/u.test(name) || name.startsWith('file:')) {
     return `${sourcePath}: absolute local import is not portable: ${name}`
   }
   if (matches(sourcePath, rendererSources) && rendererForbidden.includes(name.split('/').slice(0, 2).join('/'))) {
@@ -272,9 +272,9 @@ function inspectScript(path, text) {
 function inspectRust(path, text) {
   const crate = owner(path, 'Cargo.toml')
   for (const line of text.split('\n')) {
-    for (const match of line.matchAll(/"((?:\/?\.\.\/)[^"]*)"/g)) {
-      const reference = match[1].replace(/^\//, '')
-      const fileRelative = /(?:include(?:_str|_bytes)?!\s*\(|#\[path\s*=)\s*$/.test(line.slice(0, match.index))
+    for (const match of line.matchAll(/"(\/?\.\.\/[^"]*)"/gu)) {
+      const reference = match[1].replace(/^\//u, '')
+      const fileRelative = /(?:include(?:_str|_bytes)?!\s*\(|#\[path\s*=)\s*$/u.test(line.slice(0, match.index))
       checkReference(path, reference, [fileRelative ? dirname(path) : crate])
     }
   }
@@ -296,7 +296,7 @@ function inspectManifest(path, text) {
       }
       const scope = forbiddenScope(dependency)
       if (scope) failures.push(`${posix(path)}: forbidden dependency ${dependency}; ${scope[1]}`)
-      const local = /^(?:file|link):(.*)$/.exec(String(version))?.[1]
+      const local = /^(?:file|link):(.*)$/u.exec(String(version))?.[1]
       if (local !== undefined && (isAbsolute(local) || escapes(resolve(directory, local)))) {
         failures.push(`${posix(path)}: ${dependency} uses a local package outside the public root: ${version}`)
       }
@@ -382,15 +382,15 @@ function crateDependencies(text) {
   const dependencies = []
   let section
   for (const line of text.split('\n')) {
-    const header = /^\s*\[([^\]]+)\]\s*$/.exec(line)
+    const header = /^\s*\[([^\]]+)\]\s*$/u.exec(line)
     if (header) {
       const name = header[1].trim()
-      const table = /(?:^|\.)((?:dev-|build-)?dependencies)(?:\.(.+))?$/.exec(name)
-      section = table ? {development: table[1] === 'dev-dependencies', crate: table[2]?.replace(/["']/g, '')} : undefined
+      const table = /(?:^|\.)((?:dev-|build-)?dependencies)(?:\.(.+))?$/u.exec(name)
+      section = table ? {development: table[1] === 'dev-dependencies', crate: table[2]?.replace(/["']/gu, '')} : undefined
       if (section?.crate) dependencies.push([section.crate, section.development])
       continue
     }
-    const entry = /^\s*([A-Za-z0-9_-]+)\s*(?:\.|=)/.exec(line)
+    const entry = /^\s*([\w-]+)\s*(?:\.|=)/u.exec(line)
     if (section && !section.crate && entry) dependencies.push([entry[1], section.development])
   }
   return dependencies.filter(([name]) => name.startsWith('projections-'))
@@ -411,15 +411,15 @@ function checkCrate(path, text) {
 
 function inspectToml(path, text) {
   checkCrate(path, text)
-  for (const match of text.matchAll(/\bpath\s*=\s*"([^"]+)"/g)) {
+  for (const match of text.matchAll(/\bpath\s*=\s*"([^"]+)"/gu)) {
     if (isAbsolute(match[1])) failures.push(`${posix(path)}: Cargo path is absolute: ${match[1]}`)
     else if (escapes(resolve(dirname(path), match[1]))) failures.push(`${posix(path)}: Cargo path escapes the public root: ${match[1]}`)
   }
 }
 
 function inspectMarkdown(path, text) {
-  for (const match of text.matchAll(/\]\(([^)\s#]+)(?:#[^)]*)?\)/g)) {
-    if (!/^[a-z][a-z0-9+.-]*:/i.test(match[1])) checkReference(path, match[1], [dirname(path)], 'link')
+  for (const match of text.matchAll(/\]\(([^)\s#]+)(?:#[^)]*)?\)/gu)) {
+    if (!/^[a-z][a-z0-9+.-]*:/iu.test(match[1])) checkReference(path, match[1], [dirname(path)], 'link')
   }
 }
 
@@ -459,7 +459,7 @@ async function visit(directory) {
         ? inspectRust
         : entry.name === 'package.json'
           ? inspectManifest
-          : /^tsconfig.*\.json$/.test(entry.name)
+          : /^tsconfig.*\.json$/u.test(entry.name)
             ? inspectTsconfig
             : entry.name === 'Cargo.toml'
               ? inspectToml

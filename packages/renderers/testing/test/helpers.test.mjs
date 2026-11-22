@@ -190,7 +190,7 @@ test('checks run per declared comparison mode', async () => {
     {checks: ['diff-clipping']},
   )
   assert.equal(clipped[0].status, 'fail')
-  assert.match(clipped[0].details[0], /10×0px/)
+  assert.match(clipped[0].details[0], /10×0px/u)
 })
 
 test('a zoomable renderer opens fitted in a fixed frame, or at the 8 px text floor on its start; its smallest text is reported', async () => {
@@ -222,11 +222,11 @@ test('a zoomable renderer opens fitted in a fixed frame, or at the 8 px text flo
   assert.equal(fitted.result.status, 'pass')
   assert.ok(
     fitted.result.details.some(detail =>
-      /full width \(1280×650\), the diff: fitted, 3 entities in view, smallest text 9\.8px/.test(detail),
+      /full width \(1280×650\), the diff: fitted, 3 entities in view, smallest text 9\.8px/u.test(detail),
     ),
     fitted.result.details.join('\n'),
   )
-  assert.ok(fitted.result.details.some(detail => /390px \(390×700\), side by side at After \(progress 1\): fitted.*4\.2px/.test(detail)))
+  assert.ok(fitted.result.details.some(detail => /390px \(390×700\), side by side at After \(progress 1\): fitted.*4\.2px/u.test(detail)))
   // Each presentation in a frame of fixed size: the diff, then the first progress mode, at full and phone width.
   assert.deepEqual(
     fitted.loads.map(load => [load.comparisonMode, load.width, load.height]),
@@ -244,21 +244,24 @@ test('a zoomable renderer opens fitted in a fixed frame, or at the 8 px text flo
   const floored = await run(['diff'], load => [canvas(load, {zoom: 2, scrolls: true, smallestText: 8, outside})])
   assert.equal(floored.result.status, 'pass', floored.result.details.join('\n'))
   assert.ok(
-    floored.result.details.some(detail => /at the 8px floor \(zoom 2, fitted text would be 4px\), opens on its top-left/.test(detail)),
+    floored.result.details.some(detail => /at the 8px floor \(zoom 2, fitted text would be 4px\), opens on its top-left/u.test(detail)),
   )
   // Opened zoomed further than the floor (the former 11 px floor), below it, where the fit was readable, or away
   // from its start: fails, naming the fix.
   const zoomed = await run(['diff'], load => [canvas(load, {zoom: 1.4, scrolls: true, smallestText: 11})])
   assert.equal(zoomed.result.status, 'fail')
-  assert.match(zoomed.result.details[0], /opens zoomed \(1\.4\) further than the 8px floor \(smallest text 11px\)/)
+  assert.match(zoomed.result.details[0], /opens zoomed \(1\.4\) further than the 8px floor \(smallest text 11px\)/u)
   const small = await run(['diff'], load => [canvas(load, {zoom: 1.4, scrolls: true, smallestText: 7, outside})])
-  assert.match(small.result.details[0], /with smallest text 7px, below the 8px floor, and not everything fits/)
+  assert.match(small.result.details[0], /with smallest text 7px, below the 8px floor, and not everything fits/u)
   const readable = await run(['diff'], load => [canvas(load, {zoom: 1.2, scrolls: true, smallestText: 10})])
-  assert.match(readable.result.details[0], /although fitted its smallest text would be 8\.33px, at least the 8px floor; open fitted/)
+  assert.match(readable.result.details[0], /although fitted its smallest text would be 8\.33px, at least the 8px floor; open fitted/u)
   const away = await run(['diff'], load => [
     canvas(load, {zoom: 2, scrolls: true, smallestText: 8, outside, start: {element: 'g.graph-node', corner: [-200, 300], inView: false}}),
   ])
-  assert.match(away.result.details[0], /opens at the 8px floor scrolled away from the start of its content: g\.graph-node at \[-200, 300\]/)
+  assert.match(
+    away.result.details[0],
+    /opens at the 8px floor scrolled away from the start of its content: g\.graph-node at \[-200, 300\]/u,
+  )
   // Its top row's middle in view, but a card cut off at the left edge (a row too wide to centre): fails.
   const leftCut = await run(['diff'], load => [
     canvas(load, {
@@ -273,7 +276,7 @@ test('a zoomable renderer opens fitted in a fixed frame, or at the 8 px text flo
   assert.equal(leftCut.result.status, 'fail')
   assert.match(
     leftCut.result.details[0],
-    /with an entity cut off at the left or top edge of the visible canvas \[0, 0, 1280, 650\], for example g\.graph-node\[data-entity-id="vscode"\]/,
+    /with an entity cut off at the left or top edge of the visible canvas \[0, 0, 1280, 650\], for example g\.graph-node\[data-entity-id="vscode"\]/u,
   )
   // A diff that doesn't fit may open on its changes instead of its start: zoomed past the floor only to fit them all.
   const start = {element: 'g.graph-node', corner: [-200, 300], inView: false}
@@ -281,10 +284,10 @@ test('a zoomable renderer opens fitted in a fixed frame, or at the 8 px text flo
     run(['diff'], load => [canvas(load, {zoom: 2, scrolls: true, smallestText, outside, start, changes: {count, inView, whole}})])
   const onChanges = await changes(3, 3, 3, 9.6)
   assert.equal(onChanges.result.status, 'pass', onChanges.result.details.join('\n'))
-  assert.ok(onChanges.result.details.some(detail => /on its changes \(zoom 2\), 3 of 3 wholly in view/.test(detail)))
+  assert.ok(onChanges.result.details.some(detail => /on its changes \(zoom 2\), 3 of 3 wholly in view/u.test(detail)))
   assert.equal((await changes(3, 1, 1, 8)).result.status, 'pass')
-  assert.match((await changes(3, 1, 1, 12)).result.details[0], /further than the 8px floor \(smallest text 12px\) with 2 of its 3 changes/)
-  assert.match((await changes(3, 0, 0, 8)).result.details[0], /with none of its 3 changes in view/)
+  assert.match((await changes(3, 1, 1, 12)).result.details[0], /further than the 8px floor \(smallest text 12px\) with 2 of its 3 changes/u)
+  assert.match((await changes(3, 0, 0, 8)).result.details[0], /with none of its 3 changes in view/u)
   // Below the floor but fitted, everything in view: passes (the phone frame above, at 4.2 px).
   const cut = await run(['diff'], load =>
     load.width ? [canvas(load, {outside: ['g.graph-node[data-entity-id="a"] at [400, 10, 520, 90]']})] : [canvas(load)],
@@ -293,7 +296,7 @@ test('a zoomable renderer opens fitted in a fixed frame, or at the 8 px text flo
   assert.deepEqual(cut.result.details.length, 1)
   assert.match(
     cut.result.details[0],
-    /^At 390px \(390×700\), the diff, 1 of 3 entities are outside the visible canvas \[0, 0, 390, 700\], for example g\.graph-node/,
+    /^At 390px \(390×700\), the diff, 1 of 3 entities are outside the visible canvas \[0, 0, 390, 700\], for example g\.graph-node/u,
   )
 })
 
@@ -305,8 +308,8 @@ test('the relationships check expects a drawn relationship between drawn entitie
   const run = async options => (await runChecks(fakeDriver(undefined, options).driver, linked, {checks: ['relationships']}))[0]
   const missing = await run({drawn: ['a', 'b', 'c']})
   assert.equal(missing.status, 'fail')
-  assert.match(missing.details[0], /calls:a->b/)
-  assert.match(missing.details[0], /drawsRelationships: false/)
+  assert.match(missing.details[0], /calls:a->b/u)
+  assert.match(missing.details[0], /drawsRelationships: false/u)
   assert.equal((await run({drawn: ['a', 'b', 'c', 'calls:a->b']})).status, 'pass')
   // Nothing to expect when an endpoint isn't drawn, or when the renderer declares it draws none.
   assert.equal((await run({drawn: ['a', 'c']})).status, 'skip')
@@ -331,7 +334,7 @@ test('the relationships check expects only the relationships the presentation dr
   // A kind it draws between drawn entities must still be marked.
   const missing = await run(['a', 'b', 'c', 'bundles:a->b'], {relationships: 'depends-on'})
   assert.equal(missing.status, 'fail')
-  assert.match(missing.details[0], /depends-on:a->c/)
+  assert.match(missing.details[0], /depends-on:a->c/u)
   // No relationship of that kind between drawn entities: nothing to expect.
   assert.equal((await run(['a', 'b'], {relationships: 'depends-on'})).status, 'skip')
   // `all`, or no option, expects every kind; relationships turned off expect none.
@@ -410,22 +413,22 @@ test('the styling checks hold colors, type and spacing to the theme, in both col
     ['fail', 'fail', 'fail'],
   )
   const palette = by.palette.details.join('\n')
-  assert.match(palette, /span\.part3 color is #3366cc in light, #3366cc in dark, not a theme color/)
-  assert.match(palette, /span\.part4 color is #888888 in light, #888888 in dark/)
-  assert.doesNotMatch(palette, /part[0-2]\b|part10/)
+  assert.match(palette, /span\.part3 color is #3366cc in light, #3366cc in dark, not a theme color/u)
+  assert.match(palette, /span\.part4 color is #888888 in light, #888888 in dark/u)
+  assert.doesNotMatch(palette, /part[0-2]\b|part10/u)
   // Measured in diff mode at full and phone width, each in light and dark: reported once per element and value.
   assert.equal(by.palette.details.filter(line => line.includes('part3')).length, 1)
   const type = by['type-scale'].details.join('\n')
-  assert.match(type, /span\.part11 \("tiny"\) is 10px, below the 11px floor/)
-  assert.match(type, /span\.part12 \("odd"\) is 15px, not on the type scale \(11, 12, 13, 14 px\)/)
-  assert.match(type, /span\.part12 \("odd"\) is set in serif/)
-  assert.match(type, /span\.part12 \("odd"\) has font-weight 500/)
-  assert.doesNotMatch(type, /part13|part[0-4] /)
+  assert.match(type, /span\.part11 \("tiny"\) is 10px, below the 11px floor/u)
+  assert.match(type, /span\.part12 \("odd"\) is 15px, not on the type scale \(11, 12, 13, 14 px\)/u)
+  assert.match(type, /span\.part12 \("odd"\) is set in serif/u)
+  assert.match(type, /span\.part12 \("odd"\) has font-weight 500/u)
+  assert.doesNotMatch(type, /part13|part[0-4] /u)
   const spacing = by.spacing.details.join('\n')
-  assert.match(spacing, /span\.part14 padding-top, padding-bottom are 5px, off the space scale \(0, 1, 2, 4, 8 px\)/)
-  assert.match(spacing, /span\.part14 border-top-right-radius is 3px, not a radius token/)
-  assert.match(spacing, /span\.part14 border-left-width is 3px, not a border-width token/)
-  assert.doesNotMatch(spacing, /margin-left|padding-left|top-left|bottom-left|border-top-width/)
+  assert.match(spacing, /span\.part14 padding-top, padding-bottom are 5px, off the space scale \(0, 1, 2, 4, 8 px\)/u)
+  assert.match(spacing, /span\.part14 border-top-right-radius is 3px, not a radius token/u)
+  assert.match(spacing, /span\.part14 border-left-width is 3px, not a border-width token/u)
+  assert.doesNotMatch(spacing, /margin-left|padding-left|top-left|bottom-left|border-top-width/u)
 })
 
 test('stage-surface passes a field on the stage or transparent and names whatever paints a lighter page', async () => {
@@ -460,9 +463,9 @@ test('stage-surface passes a field on the stage or transparent and names whateve
   assert.equal(failing.details.length, 2)
   assert.match(
     failing.details[0],
-    /In diff mode \(light\), the field at its left side \(2, 2\) is #fbfaf8, painted by div\.fp-stage, not the stage \(#efeee9\)/,
+    /In diff mode \(light\), the field at its left side \(2, 2\) is #fbfaf8, painted by div\.fp-stage, not the stage \(#efeee9\)/u,
   )
-  assert.match(failing.details[1], /In diff mode \(dark\), .* is #101012/)
+  assert.match(failing.details[1], /In diff mode \(dark\), .* is #101012/u)
 })
 
 test('stage-insets passes equal insets, names uneven ones and skips fitted drawings and stages without cards', async () => {
@@ -480,19 +483,19 @@ test('stage-insets passes equal insets, names uneven ones and skips fitted drawi
   assert.equal(failing.details.length, 2)
   assert.match(
     failing.details[0],
-    /^At full width, the cards on the stage \(section\.group and 1 more\) are 8px from the frame's top, 12px from its right, 60px from the content's end and 12px from its left/,
+    /^At full width, the cards on the stage \(section\.group and 1 more\) are 8px from the frame's top, 12px from its right, 60px from the content's end and 12px from its left/u,
   )
-  assert.match(failing.details[1], /^At 390px/)
+  assert.match(failing.details[1], /^At 390px/u)
   const [fitted] = await runChecks(insetDriver({cards: 0, fitted: 'div.canvas'}), subject, {checks: ['stage-insets']})
   assert.equal(fitted.status, 'skip')
-  assert.match(fitted.details[0], /centres a fitted drawing \(div\.canvas\)/)
+  assert.match(fitted.details[0], /centres a fitted drawing \(div\.canvas\)/u)
   const overlaid = {cards: 1, first: 'div.panel', overlaid: 30, insets: {top: 30, right: 8, bottom: 8, left: 8}}
   const [clear] = await runChecks(insetDriver(overlaid), subject, {checks: ['stage-insets']})
   assert.equal(clear.status, 'pass')
   const under = {...overlaid, insets: {top: 8, right: 8, bottom: 8, left: 8}}
   const [covered] = await runChecks(insetDriver(under), subject, {checks: ['stage-insets']})
   assert.equal(covered.status, 'fail')
-  assert.match(covered.details[0], /the host overlays the top 30px: stage-inset-top/)
+  assert.match(covered.details[0], /the host overlays the top 30px: stage-inset-top/u)
   const [bare] = await runChecks(insetDriver({cards: 0}), subject, {checks: ['stage-insets']})
   assert.equal(bare.status, 'skip')
 })
@@ -522,9 +525,9 @@ test('a summary the renderer sends must count what the documents have, per kind'
     {kind: 'ghost', noun: {singular: 'ghost', plural: 'ghosts'}, count: 1},
   ])
   assert.equal(wrong.status, 'fail')
-  assert.match(wrong.details.join('\n'), /a total of 3 for "items" \(kind item\); the documents have 2/)
-  assert.match(wrong.details.join('\n'), /reports 0 added for "items" \(kind item\); the documents have 1/)
-  assert.match(wrong.details.join('\n'), /counts "ghosts" \(kind ghost\), which neither document has/)
+  assert.match(wrong.details.join('\n'), /a total of 3 for "items" \(kind item\); the documents have 2/u)
+  assert.match(wrong.details.join('\n'), /reports 0 added for "items" \(kind item\); the documents have 1/u)
+  assert.match(wrong.details.join('\n'), /counts "ghosts" \(kind ghost\), which neither document has/u)
   const fact = {type: 'fact', id: 'new', noun: {singular: 'new item', plural: 'new items'}, count: 1}
   assert.equal(
     (
@@ -537,12 +540,12 @@ test('a summary the renderer sends must count what the documents have, per kind'
   )
   const ghost = await run([{...fact, ids: ['a', 'ghost']}])
   assert.equal(ghost.status, 'fail')
-  assert.match(ghost.details.join('\n'), /fact "new" names 1 item neither document has: ghost/)
+  assert.match(ghost.details.join('\n'), /fact "new" names 1 item neither document has: ghost/u)
   // A fact's changes are part of what it counts.
   assert.equal((await run([{...fact, id: 'measure', count: 10, added: 4, removed: 6}])).status, 'pass')
   const over = await run([{...fact, count: 1, added: 2}])
   assert.equal(over.status, 'fail')
-  assert.match(over.details.join('\n'), /fact "new" reports 2 added of a count of 1; what was added is part of the count/)
+  assert.match(over.details.join('\n'), /fact "new" reports 2 added of a count of 1; what was added is part of the count/u)
 })
 
 test("one extraction's facts have no changes, and the summary is the same at every progress", async () => {
@@ -551,7 +554,7 @@ test("one extraction's facts have no changes, and the summary is the same at eve
   driver.state = () => ({selections: [], summary: [{type: 'fact', id: 'rules', noun, count: 1, added: 1}]})
   const [single] = await runChecks(driver, {mode: 'extraction', extraction: extraction(['a'])}, {checks: ['summary']})
   assert.equal(single.status, 'fail')
-  assert.match(single.details.join('\n'), /fact "rules" reports added counts for one extraction, which has no changes/)
+  assert.match(single.details.join('\n'), /fact "rules" reports added counts for one extraction, which has no changes/u)
   // A summary that follows the progress fails: the bar describes the whole comparison.
   const scrubbed = fakeDriver(undefined)
   let progress = 0
@@ -563,7 +566,7 @@ test("one extraction's facts have no changes, and the summary is the same at eve
   scrubbed.driver.state = () => ({selections: [], summary: [{type: 'fact', id: 'rules', noun, count: progress < 1 ? 0 : 1}]})
   const [moving] = await runChecks(scrubbed.driver, subject, {checks: ['summary']})
   assert.equal(moving.status, 'fail')
-  assert.match(moving.details.join('\n'), /The summary changes while scrubbing/)
+  assert.match(moving.details.join('\n'), /The summary changes while scrubbing/u)
 })
 
 test('nested-accents fails a change color inside another, and lets an item keep its own emphasis', async () => {
@@ -622,13 +625,13 @@ test('link-routes reports a link drawn across cards, and skips a renderer that r
     checks: ['link-routes'],
   })
   assert.equal(crossing.status, 'fail')
-  assert.match(crossing.details[0], /^In the diff, no route around the cards exists for orders->payments: it is drawn across cache, audit/)
+  assert.match(crossing.details[0], /^In the diff, no route around the cards exists for orders->payments: it is drawn across cache, audit/u)
   const [none] = await runChecks(routesDriver({count: 0, crossing: []}), subject, {checks: ['link-routes']})
   assert.equal(none.status, 'skip')
   // A probe without the routes call skips, rather than failing the run.
   const [unmeasured] = await runChecks(routesDriver(undefined), subject, {checks: ['link-routes']})
   assert.equal(unmeasured.status, 'skip')
-  assert.match(unmeasured.details.join('\n'), /doesn't measure link routes/)
+  assert.match(unmeasured.details.join('\n'), /doesn't measure link routes/u)
 })
 
 test('nested-accents measures the animation in animated mode, after the diff', async () => {
@@ -665,8 +668,8 @@ test('a stage request the page never answers fails, naming it, the scenario and 
   await assert.rejects(
     bounded(record, 'measure(settle)', new Promise(() => {}), 50),
     error =>
-      /didn't answer measure\(settle\) for graph\/npm-express-5 within 0\.05 s/.test(error.message) &&
-      /status ready, renderer graph, diff, progress 1, painted 1, asked for 1217px; it last answered state/.test(error.message),
+      /didn't answer measure\(settle\) for graph\/npm-express-5 within 0\.05 s/u.test(error.message) &&
+      /status ready, renderer graph, diff, progress 1, painted 1, asked for 1217px; it last answered state/u.test(error.message),
   )
 })
 

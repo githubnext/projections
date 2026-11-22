@@ -91,7 +91,7 @@ try {
     if (version.startsWith('7.')) {
       const native = await runHelper('typescript-public-api', request('typescript-public-api', repository), checkout)
       assert.equal(native.status, 1)
-      assert.match(native.stderr, /add @typescript\/typescript6/)
+      assert.match(native.stderr, /add @typescript\/typescript6/u)
       // The API package re-exports `@typescript/old`, an npm alias of typescript@6.
       await install(checkout, '@typescript/typescript6', 'latest')
       await install(checkout, 'typescript', '6.0.3', '@typescript/old')
@@ -115,7 +115,7 @@ try {
     {node: await node('18.20.8')},
   )
   assert.equal(unsupported.status, 1)
-  assert.match(unsupported.stderr, /requires Node\.js 20 or newer/)
+  assert.match(unsupported.stderr, /requires Node\.js 20 or newer/u)
   results.push('node 18.20.8: rejected explicitly')
   console.log(results.join('\n'))
 } finally {

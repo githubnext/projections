@@ -11,7 +11,7 @@ export interface Doc {
 
 /** Markdown outside dependencies, build output and test fixtures. */
 export function loadDocs(root: string): Doc[] {
-  return walk(root, '.', path => path.endsWith('.md') && !/(^|\/)(fixtures|snapshots|golden|notices)\//.test(path)).map(path => {
+  return walk(root, '.', path => path.endsWith('.md') && !/(?:^|\/)(?:fixtures|snapshots|golden|notices)\//u.test(path)).map(path => {
     const text = readText(root, path) ?? ''
     return {path, title: title(text) ?? path, description: parseFrontMatter(text).data.description, text}
   })
@@ -98,7 +98,7 @@ function snippet(line: string, wanted: string[], width = 160): string {
 
 /** Finds a document by path (exact, or a unique suffix), else by title (exact, then a unique substring). */
 export function findDoc(docs: readonly Doc[], target: string): {doc?: Doc; candidates: Doc[]} {
-  const normalized = target.replace(/^\.\//, '').toLowerCase()
+  const normalized = target.replace(/^\.\//u, '').toLowerCase()
   const exactPath = docs.find(doc => doc.path.toLowerCase() === normalized || doc.path.toLowerCase() === `${normalized}.md`)
   if (exactPath) return {doc: exactPath, candidates: []}
   const suffix = docs.filter(

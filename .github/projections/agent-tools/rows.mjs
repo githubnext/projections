@@ -54,7 +54,7 @@ function facts(schema) {
     types: Array.isArray(schema.type) ? [...schema.type] : [schema.type ?? 'any'],
     ...(Array.isArray(schema.enum) ? {values: schema.enum.map(String)} : {}),
     limits: {...(min === undefined ? {} : {min}), ...(max === undefined ? {} : {max})},
-    range: limitsText(schema).replace(/^ \((.*)\)$/, '$1') || 'no limit',
+    range: limitsText(schema).replace(/^ \((.*)\)$/u, '$1') || 'no limit',
   }
 }
 

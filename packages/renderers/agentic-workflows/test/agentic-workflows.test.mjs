@@ -186,13 +186,13 @@ test('cards and the matrix draw the comparison, and an empty revision says so', 
     assert.ok(cards.includes(text), text)
   }
   const matrix = renderToStaticMarkup(createElement(AgenticWorkflowsView, props(model, init, {controls: {view: 'matrix'}})))
-  assert.match(matrix, /data-cell="removed"/)
-  assert.match(plain(matrix), /Capabilities/)
+  assert.match(matrix, /data-cell="removed"/u)
+  assert.match(plain(matrix), /Capabilities/u)
   const empty = {protocolVersion: 0, schema: 'architecture/v0', vocabularies: ['agentic-workflows/v0'], entities: [], relationships: []}
   const none = renderToStaticMarkup(
     createElement(AgenticWorkflowsView, props(extractionModel(empty), {mode: 'extraction', extraction: empty})),
   )
-  assert.match(plain(none), /No agentic workflows/)
+  assert.match(plain(none), /No agentic workflows/u)
 })
 
 test('a card says what changed beyond its entries: engine, strict mode, lock, defaults and no permissions', async () => {
@@ -240,16 +240,16 @@ test('a card says what changed beyond its entries: engine, strict mode, lock, de
   const init = {mode: 'comparison', comparisonMode: 'diff', comparison, before: old, after: now}
   const markup = renderToStaticMarkup(createElement(AgenticWorkflowsView, props(model, init)))
   // A named workflow still shows its path; the meta line reads old → new.
-  assert.match(plain(markup), /\.github\/workflows\/a\.md/)
-  const meta = plain(markup.match(/<p class="aw-meta">.*?<\/p>/)[0])
+  assert.match(plain(markup), /\.github\/workflows\/a\.md/u)
+  const meta = plain(markup.match(/<p class="aw-meta">.*?<\/p>/u)[0])
   for (const text of ['was copilot, now claude', 'was strict mode on, now strict mode off', 'was Lock current, now Lock stale']) {
-    assert.ok(meta.replace(/→/g, '').includes(text), `${text} in ${meta}`)
+    assert.ok(meta.replace(/→/gu, '').includes(text), `${text} in ${meta}`)
   }
   // Side by side, an entry changed in place takes its pane's hue while highlighted.
   const pane = progress =>
     renderToStaticMarkup(
       createElement(AgenticWorkflowsView, props(model, {...init, comparisonMode: 'side-by-side'}, {diff: false, progress})),
     )
-  assert.match(pane(0), /data-change="removed"[^>]*>(?:(?!<\/li>).)*timeout/)
-  assert.match(pane(1), /data-change="added"[^>]*>(?:(?!<\/li>).)*timeout/)
+  assert.match(pane(0), /data-change="removed"[^>]*>(?:(?!<\/li>).)*timeout/u)
+  assert.match(pane(1), /data-change="added"[^>]*>(?:(?!<\/li>).)*timeout/u)
 })

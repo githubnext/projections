@@ -44,11 +44,11 @@ const segments = (pointer: string) =>
   pointer
     .split('/')
     .slice(1)
-    .map(segment => segment.replace(/~1/g, '/').replace(/~0/g, '~'))
-const escape = (segment: string) => segment.replace(/~/g, '~0').replace(/\//g, '~1')
+    .map(segment => segment.replace(/~1/gu, '/').replace(/~0/gu, '~'))
+const escape = (segment: string) => segment.replace(/~/gu, '~0').replace(/\//gu, '~1')
 
 function child(value: unknown, key: string): unknown {
-  if (Array.isArray(value)) return /^(0|[1-9][0-9]*)$/.test(key) ? value[Number(key)] : undefined
+  if (Array.isArray(value)) return /^(?:0|[1-9]\d*)$/u.test(key) ? value[Number(key)] : undefined
   if (value !== null && typeof value === 'object' && Object.hasOwn(value, key)) return (value as Record<string, unknown>)[key]
   return undefined
 }
@@ -108,10 +108,10 @@ const hashed = (value: string | undefined) => value === undefined || value.start
 
 /** A basis part's change in words: `the input`, or `` `context` `` for a part without a word of its own. */
 function partWords(part: string, before: BasisValue | undefined, after: BasisValue | undefined): string {
-  const name = ['input', 'prompt', 'model'].includes(part) ? `the ${part}` : `\`${part.replace(/[\x60\\]/g, '\\$&')}\``
+  const name = ['input', 'prompt', 'model'].includes(part) ? `the ${part}` : `\`${part.replace(/[\x60\\]/gu, '\\$&')}\``
   const [old, next] = [before?.[part], after?.[part]]
   if (old !== undefined && next !== undefined && !hashed(old) && !hashed(next)) {
-    const code = (text: string) => `\`${text.replace(/[\x60\\]/g, '\\$&')}\``
+    const code = (text: string) => `\`${text.replace(/[\x60\\]/gu, '\\$&')}\``
     return `${name} (${code(old)} → ${code(next)})`
   }
   return name

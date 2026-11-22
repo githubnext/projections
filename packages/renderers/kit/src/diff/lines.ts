@@ -67,7 +67,7 @@ export function fieldLines(
       return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
     }
     return leafChanges(of(before), of(after), '')
-      .filter(change => !exclude.has(change.key.split(/[.[]/)[0]!))
+      .filter(change => !exclude.has(change.key.split(/[.[]/u)[0]!))
       .map(change => ({key: change.key, before: formatValue(change.before), after: formatValue(change.after)}))
   }
   const fields = options.fields ?? [...new Set([...Object.keys(before.data ?? {}), ...Object.keys(after.data ?? {})])].sort()

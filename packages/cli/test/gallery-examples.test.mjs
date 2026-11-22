@@ -29,7 +29,7 @@ const cli = (cwd, args) =>
 /** The script's `images` list: a plain literal, evaluated without running the script. */
 async function images() {
   const source = await readFile(path.join(root, 'tools/scripts/readme-images.mjs'), 'utf8')
-  const literal = source.match(/^const images = (\[[\s\S]*?^\])$/m)
+  const literal = source.match(/^const images = (\[[\s\S]+?^\])$/mu)
   assert.ok(literal, 'readme-images.mjs declares `const images = [...]`')
   return vm.runInNewContext(`(${literal[1]})`)
 }

@@ -282,12 +282,12 @@ test("a pipeline's shared prerequisites join and split at one point", async () =
 
 test('comparison layouts keep each relationship around the cards at Before, at After and while holding between steps', async () => {
   for (const graph of (await scenarioGraphs()).filter(graph => graph.name.endsWith(' before'))) {
-    const after = (await scenarioGraphs()).find(other => other.name === graph.name.replace(/ before$/, ' after'))
+    const after = (await scenarioGraphs()).find(other => other.name === graph.name.replace(/ before$/u, ' after'))
     const model = comparisonModel(graph.extraction, after.extraction, await compare(graph.extraction, after.extraction))
     const transition = await createGraphTransition(model, scheduleSteps(model), graph.options)
     for (const [index, layout] of transition.layouts.entries()) {
       const edges = [...layout.routes.keys()].map(id => {
-        const relationship = model.relationships.find(row => row.id === id.replace(/:(before|after)$/, ''))
+        const relationship = model.relationships.find(row => row.id === id.replace(/:(before|after)$/u, ''))
         const side = id.endsWith(':before') ? relationship.before : (relationship.after ?? relationship.before)
         const rows = id.endsWith(':before') ? model.entityRow.before : relationship.after ? model.entityRow.after : model.entityRow.before
         return {id, from: rows.get(side.from), to: rows.get(side.to)}
@@ -308,7 +308,7 @@ test('extractions lay out once and never move', async () => {
 test('while scrubbing, no visible relationship passes through a visible card, in either direction', async () => {
   const graphs = await scenarioGraphs()
   for (const graph of graphs.filter(graph => graph.name.endsWith(' before'))) {
-    const after = graphs.find(other => other.name === graph.name.replace(/ before$/, ' after'))
+    const after = graphs.find(other => other.name === graph.name.replace(/ before$/u, ' after'))
     for (const [from, to] of [
       [graph.extraction, after.extraction],
       [after.extraction, graph.extraction],
@@ -888,7 +888,7 @@ test('every arrowhead points into its target card, and its shaft arrives the sam
       const box = cardBox(to)
       const normal = inwardNormal(arrow.tip, box)
       // Head: from the middle of its flat base to its tip (its inner outline's corners are a corner radius inside).
-      const [tip] = [...arrow.head.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(match => ({
+      const [tip] = [...arrow.head.matchAll(/(-?[\d.]+),(-?[\d.]+)/gu)].map(match => ({
         x: Number(match[1]),
         y: Number(match[2]),
       }))
@@ -896,7 +896,7 @@ test('every arrowhead points into its target card, and its shaft arrives the sam
       const length = Math.hypot(tip.x - base.x, tip.y - base.y)
       const head = ((tip.x - base.x) * normal.x + (tip.y - base.y) * normal.y) / length
       // Shaft: its final tangent, at the base of the head.
-      const numbers = [...arrow.d.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
+      const numbers = [...arrow.d.matchAll(/(-?[\d.]+),(-?[\d.]+)/gu)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
       const [control, end] = numbers.slice(-2)
       const tangent = Math.hypot(end.x - control.x, end.y - control.y)
       const shaft = ((end.x - control.x) * normal.x + (end.y - control.y) * normal.y) / tangent
@@ -919,7 +919,7 @@ test('every arrowhead points into its target card, and its shaft arrives the sam
       check((await createGraphTransition(model, [], graph.options))(1), graph.name)
       continue
     }
-    const after = graphs.find(other => other.name === graph.name.replace(/ before$/, ' after'))
+    const after = graphs.find(other => other.name === graph.name.replace(/ before$/u, ' after'))
     for (const [from, to, direction] of [
       [graph.extraction, after.extraction, 'forward'],
       [after.extraction, graph.extraction, 'reverse'],
@@ -936,7 +936,7 @@ test('layout moves start and stop softly and span most of their step', async () 
   const {motionWindow, stepWindows} = await import('../dist/index.js')
   const graphs = await scenarioGraphs()
   for (const graph of graphs.filter(graph => graph.name.endsWith(' before'))) {
-    const after = graphs.find(other => other.name === graph.name.replace(/ before$/, ' after'))
+    const after = graphs.find(other => other.name === graph.name.replace(/ before$/u, ' after'))
     const model = comparisonModel(graph.extraction, after.extraction, await compare(graph.extraction, after.extraction))
     const schedule = scheduleSteps(model)
     const transition = await createGraphTransition(model, schedule, graph.options)

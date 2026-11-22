@@ -23,13 +23,13 @@ export function mentionsPath(text: string): boolean {
   return pathStart.test(text) || nestedPath(text) || fileName(text)
 }
 
-const pathStart = /(?:^|[\s("'\x60])(?:\/|~\/|\.{1,2}\/|[A-Za-z]:\\)/
-const fileExtension = /^(?:json|ya?ml|[cm]?[jt]sx?|py|go|rs|cs|java|rb|toml|lock|md|html|css|sh)$/
-const wordCharacter = /\w/
+const pathStart = /(?:^|[\s("'\x60])(?:\/|~\/|\.{1,2}\/|[A-Za-z]:\\)/u
+const fileExtension = /^(?:json|ya?ml|[cm]?[jt]sx?|py|go|rs|cs|java|rb|toml|lock|md|html|css|sh)$/u
+const wordCharacter = /\w/u
 
 /** `a/b/`: two segments of word characters, dots and hyphens, each followed by a slash. */
 function nestedPath(text: string): boolean {
-  for (const run of text.split(/[^\w./-]+/)) {
+  for (const run of text.split(/[^\w./-]+/u)) {
     const segments = run.split('/')
     // The last segment has no slash after it.
     for (let index = 0; index + 2 < segments.length; index++) if (segments[index] && segments[index + 1]) return true

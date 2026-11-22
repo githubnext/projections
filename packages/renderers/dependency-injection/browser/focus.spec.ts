@@ -136,7 +136,7 @@ test("a link's origin dot shows its ring color where later links leave the same 
     return [...context.getImageData(0, 0, 1, 1).data.slice(0, 3)]
   }, shot.toString('base64'))
   const expected = fill
-    .match(/\d+(\.\d+)?/g)!
+    .match(/\d+(?:\.\d+)?/gu)!
     .slice(0, 3)
     .map(Number)
   expect(

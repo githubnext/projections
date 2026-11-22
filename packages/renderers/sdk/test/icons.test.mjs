@@ -30,19 +30,19 @@ test('every icon in the vocabulary is a theme token with a valid default in both
 })
 
 test('icons.css draws every name in the vocabulary from its token, and nothing else', () => {
-  const drawn = [...css.matchAll(/\[data-icon=['"]([a-z-]+)['"]\] \{\s*--projections-icon: var\(--projections-icon-([a-z-]+)\);/g)]
+  const drawn = [...css.matchAll(/\[data-icon=['"]([a-z-]+)['"]\] \{\s*--projections-icon: var\(--projections-icon-([a-z-]+)\);/gu)]
   assert.deepEqual(
     drawn.map(([, name, token]) => [name, token]),
     iconNames.map(name => [name, name]),
   )
-  assert.match(css, /mask: var\(--projections-icon\) center \/ contain no-repeat/)
-  assert.match(css, /background-color: currentColor/)
+  assert.match(css, /mask: var\(--projections-icon\) center \/ contain no-repeat/u)
+  assert.match(css, /background-color: currentColor/u)
 })
 
 test('icons.css draws exactly the badge icons as badges, breaking beside the change kinds, each glyph drawn for its disc at one stroke', () => {
-  const badges = /:is\(([^)]*)\)\s*\{\s*--projections-icon-badge-default/.exec(css)?.[1] ?? ''
+  const badges = /:is\(([^)]*)\)\s*\{\s*--projections-icon-badge-default/u.exec(css)?.[1] ?? ''
   assert.deepEqual(
-    [...badges.matchAll(/\[data-icon='([a-z-]+)'\]/g)].map(([, name]) => name),
+    [...badges.matchAll(/\[data-icon='([a-z-]+)'\]/gu)].map(([, name]) => name),
     [...badgeIconNames],
   )
   assert.ok(badgeIconNames.includes('breaking'))
@@ -51,18 +51,18 @@ test('icons.css draws exactly the badge icons as badges, breaking beside the cha
   // the same, once, for every badge. The browser suite measures the cut-outs' strokes and centres in pixels.
   const strokes = badgeIconNames.map(name => {
     const svg = svgOf(tokens[iconToken(name)])
-    assert.match(svg, /^<svg [^>]*viewBox="0 0 24 24"/, name)
-    assert.doesNotMatch(svg, /transform|scale|fill="#000"/, name)
-    assert.equal(svg.match(/stroke-width=/g)?.length, 1, name)
-    return /stroke-width="([\d.]+)"/.exec(svg)?.[1]
+    assert.match(svg, /^<svg [^>]*viewBox="0 0 24 24"/u, name)
+    assert.doesNotMatch(svg, /transform|scale|fill="#000"/u, name)
+    assert.equal(svg.match(/stroke-width=/gu)?.length, 1, name)
+    return /stroke-width="([\d.]+)"/u.exec(svg)?.[1]
   })
   assert.deepEqual(new Set(strokes), new Set(['2.75']))
 })
 
 test('the arrow badges are one arrow turned in quarter turns, and redeploy is a ring concentric with the disc', () => {
   const tokens = defaultThemeTokens('light')
-  const paths = name => [...svgOf(tokens[iconToken(name)]).matchAll(/ d="([^"]+)"/g)].map(([, d]) => d)
-  const points = d => [...d.matchAll(/(-?[\d.]+) (-?[\d.]+)/g)].map(([, x, y]) => [Number(x), Number(y)])
+  const paths = name => [...svgOf(tokens[iconToken(name)]).matchAll(/ d="([^"]+)"/gu)].map(([, d]) => d)
+  const points = d => [...d.matchAll(/(-?[\d.]+) (-?[\d.]+)/gu)].map(([, x, y]) => [Number(x), Number(y)])
   const turned = (name, quarterTurns) =>
     paths(name).map(d =>
       points(d).map(([x, y]) => {
@@ -76,7 +76,7 @@ test('the arrow badges are one arrow turned in quarter turns, and redeploy is a 
   assert.deepEqual(turned('upgraded', 3), moved)
   // Its arc's endpoints at its radius from (12, 12).
   const [ring] = paths('redeploy')
-  const [, x0, y0, radius, x1, y1] = /^M([\d.]+) ([\d.]+)A([\d.]+) [\d.]+ 0 1 1 ([\d.]+) ([\d.]+)$/.exec(ring).map(Number)
+  const [, x0, y0, radius, x1, y1] = /^M([\d.]+) ([\d.]+)A([\d.]+) [\d.]+ 0 1 1 ([\d.]+) ([\d.]+)$/u.exec(ring).map(Number)
   for (const [x, y] of [
     [x0, y0],
     [x1, y1],
@@ -87,7 +87,7 @@ test('the arrow badges are one arrow turned in quarter turns, and redeploy is a 
 
 test('outside a frame, an icon masks as icons.css draws it: a badge is its disc with the glyph cut out', () => {
   // The disc is the one icons.css defaults to.
-  const disc = /--projections-icon-badge-default: url\('([^']*)'\)/.exec(css)?.[1]
+  const disc = /--projections-icon-badge-default: url\('([^']*)'\)/u.exec(css)?.[1]
   // A name the theme lacks masks with an empty layer, so it draws nothing.
   const empty = 'linear-gradient(transparent, transparent)'
   assert.equal(`url("${disc}")`, badgeDiscValue)

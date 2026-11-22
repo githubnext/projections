@@ -11,7 +11,7 @@ import {readText} from './repo.ts'
 export const unreleasedVersion = '0.0.0'
 
 /** A release version: `MAJOR.MINOR.PATCH`, optionally with a prerelease (`0.2.0-beta.1`). */
-const versionPattern = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/
+const versionPattern = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u
 
 export interface VersionProblem {
   file: string
@@ -33,14 +33,14 @@ export function tagVersion(tag: string): string | undefined {
 export const lineOf = (text: string, index: number) => text.slice(0, index).split('\n').length
 
 /** `text` as a regular expression that matches it literally. */
-const regexLiteral = (text: string) => text.replace(/[\\^$.*+?()[\]{}|/-]/g, '\\$&')
+const regexLiteral = (text: string) => text.replace(/[\\^$.*+?()[\]{}|/-]/gu, '\\$&')
 
 /** The body of the TOML table `[name]`: from its header to the next header. */
 export function table(text: string, name: string): {start: number; body: string} | undefined {
   const header = new RegExp(`^\\[${regexLiteral(name)}\\][ \\t]*$`, 'm').exec(text)
   if (!header) return undefined
   const start = header.index + header[0].length
-  const next = /^\[/m.exec(text.slice(start))
+  const next = /^\[/mu.exec(text.slice(start))
   return {start, body: text.slice(start, next ? start + next.index : undefined)}
 }
 
@@ -48,8 +48,8 @@ export function table(text: string, name: string): {start: number; body: string}
 export function tableVersion(text: string, name: string): {value: string; index: number} | 'inherited' | undefined {
   const found = table(text, name)
   if (!found) return undefined
-  if (/^version\.workspace\s*=\s*true\s*$/m.test(found.body)) return 'inherited'
-  const match = /^version\s*=\s*"([^"]*)"/m.exec(found.body)
+  if (/^version\.workspace\s*=\s*true\s*$/mu.test(found.body)) return 'inherited'
+  const match = /^version\s*=\s*"([^"]*)"/mu.exec(found.body)
   return match ? {value: match[1]!, index: found.start + match.index} : undefined
 }
 
@@ -74,20 +74,20 @@ export const dependencyFields = ['dependencies', 'devDependencies', 'peerDepende
 
 /** Inline-table dependencies with a path and a version requirement: `name = { path = "…", version = "…" }`. */
 export const pathDependencies = (text: string) =>
-  [...text.matchAll(/^\s*([\w-]+)\s*=\s*\{[^}\n]*\bpath\s*=\s*"[^"]+"[^}\n]*\}/gm)].flatMap(match => {
-    const requirement = /\bversion\s*=\s*"([^"]*)"/.exec(match[0])
+  [...text.matchAll(/^\s*([\w-]+)\s*=\s*\{[^}\n]*\bpath\s*=\s*"[^"]+"[^}\n]*\}/gmu)].flatMap(match => {
+    const requirement = /\bversion\s*=\s*"([^"]*)"/u.exec(match[0])
     return requirement ? [{name: match[1]!, requirement: requirement[1]!, index: match.index + requirement.index}] : []
   })
 
 /** `[[package]]` entries of Cargo.lock without a source: the workspace's own crates. */
 export function lockedCrates(text: string) {
   let offset = 0
-  return text.split(/^(?=\[\[package\]\])/m).flatMap(block => {
+  return text.split(/^(?=\[\[package\]\])/mu).flatMap(block => {
     const start = offset
     offset += block.length
-    const name = /^name = "([^"]+)"$/m.exec(block)?.[1]
-    const version = /^version = "([^"]+)"$/m.exec(block)
-    if (!block.startsWith('[[package]]') || !name || !version || /^source = /m.test(block)) return []
+    const name = /^name = "([^"]+)"$/mu.exec(block)?.[1]
+    const version = /^version = "([^"]+)"$/mu.exec(block)
+    if (!block.startsWith('[[package]]') || !name || !version || /^source = /mu.test(block)) return []
     return [{name, version: version[1]!, index: start + version.index}]
   })
 }
@@ -106,7 +106,7 @@ export function readRelease(root: string): Release {
   const crates = cargoMembers(root).flatMap(path => {
     const file = `${path}/Cargo.toml`
     const text = readText(root, file) ?? ''
-    const name = /\[package\][^[]*?\bname\s*=\s*"([^"]+)"/.exec(text)?.[1]
+    const name = /\[package\][^[]*?\bname\s*=\s*"([^"]+)"/u.exec(text)?.[1]
     if (!name) return []
     const own = tableVersion(text, 'package')
     return [{path, file, name, text, version: own === 'inherited' ? version : own?.value, released: isReleased(path)}]

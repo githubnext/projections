@@ -21,7 +21,7 @@ for (const key of ['dependency-injection/orders', 'graph/service-platform', 'gra
     // its item; a click then lands only while it fades out, and on a slow runner falls through to the renderer's frame.
     await page
       .getByRole('menu', {name: 'Settings'})
-      .getByRole('menuitem', {name: /^Highlight changes/})
+      .getByRole('menuitem', {name: /^Highlight changes/u})
       .press('ArrowRight')
     await page.getByRole('menu', {name: 'Highlight changes'}).getByRole('menuitemradio', {name: 'Always'}).press('Enter')
     await expect(page.getByRole('menu', {name: 'Settings'})).toHaveCount(0)

@@ -22,7 +22,7 @@ test.use({viewport: {width: 1280, height: 800}})
 
 test('one revision: the bar sits along the bottom and counts each kind in the renderer words, with no changes', async ({page}) => {
   await open(page, 'summary-bar-extraction')
-  await expect(bar(page)).toHaveAttribute('data-sentence', /^3 workspaces · \d+ packages · \d+ dependencies/)
+  await expect(bar(page)).toHaveAttribute('data-sentence', /^3 workspaces · \d+ packages · \d+ dependencies/u)
   await expect(bar(page).locator('[data-summary-delta]')).toHaveCount(0)
   // The last thing in the view: below the stage, at the bottom (within the view's gap).
   const [root, strip] = await Promise.all([view(page).boundingBox(), bar(page).boundingBox()])
@@ -38,7 +38,7 @@ for (const theme of ['dark-modern', 'light-modern', 'dark-high-contrast'] as con
     await open(page, 'summary-bar', theme)
     await expect(bar(page)).toHaveAttribute(
       'data-sentence',
-      /workspaces.* · \d+ packages \+\d+ \u2212\d+ ~\d+ · \d+ dependencies \+\d+ \u2212\d+/,
+      /workspaces.* · \d+ packages \+\d+ \u2212\d+ ~\d+ · \d+ dependencies \+\d+ \u2212\d+/u,
     )
     const colors = await bar(page).evaluate(element => {
       const probe = (name: string) => {
@@ -63,7 +63,7 @@ for (const theme of ['dark-modern', 'light-modern', 'dark-high-contrast'] as con
     await expect(frame(page).locator('.graph-summary, .pk-diff-summary')).toHaveCount(0)
     await expect(bar(page)).toHaveAttribute(
       'data-sentence',
-      / · 18 major upgrades · 6 minor upgrades · 4 patch upgrades · 5 direct dependencies changed$/,
+      / · 18 major upgrades · 6 minor upgrades · 4 patch upgrades · 5 direct dependencies changed$/u,
     )
     // A badge icon (`upgraded`, a change kind) keeps its disc in the bar, the glyph cut out of it, as in the renderer.
     const badge = await bar(page)
@@ -71,7 +71,7 @@ for (const theme of ['dark-modern', 'light-modern', 'dark-high-contrast'] as con
       .first()
       .evaluate(element => {
         const style = getComputedStyle(element)
-        return {layers: style.maskImage.split('url(').length - 1, composite: [...new Set(style.maskComposite.split(/,\s*/))]}
+        return {layers: style.maskImage.split('url(').length - 1, composite: [...new Set(style.maskComposite.split(/,\s*/u))]}
       })
     expect(badge).toEqual({layers: 2, composite: ['exclude']})
   })
@@ -153,7 +153,7 @@ test('a figure filters the renderer to its items, and pressed again shows every 
 test('at a narrow width the figures that do not fit move into a popover', async ({page}) => {
   await page.setViewportSize({width: 340, height: 700})
   await open(page, 'summary-bar')
-  const more = bar(page).getByRole('button', {name: /^\d+ more$/})
+  const more = bar(page).getByRole('button', {name: /^\d+ more$/u})
   await expect(more).toBeVisible()
   const total = await bar(page).locator('[data-summary-measure] [data-summary-figure]').count()
   const shown = await figures(page).count()

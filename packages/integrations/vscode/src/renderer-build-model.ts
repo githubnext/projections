@@ -7,8 +7,8 @@
 import type {ProjectionDefinition} from './projections/definitions.js'
 
 const relative = (path: unknown): string | undefined =>
-  typeof path === 'string' && path && !path.startsWith('/') && !path.split(/[\\/]/).includes('..')
-    ? path.replace(/^\.\//, '').replace(/\/+$/, '')
+  typeof path === 'string' && path && !path.startsWith('/') && !path.split(/[\\/]/u).includes('..')
+    ? path.replace(/^\.\//u, '').replace(/\/+$/u, '')
     : undefined
 
 /**
@@ -47,7 +47,7 @@ export function isRendererSource(definition: ProjectionDefinition, path: string)
   const pkg = rendererPackage(definition)
   if (pkg) {
     const inside = pkg === '.' ? file : file.startsWith(`${pkg}/`) ? file.slice(pkg.length + 1) : undefined
-    if (inside !== undefined && /^(dist|node_modules)(\/|$)/.test(inside)) return false
+    if (inside !== undefined && /^(?:dist|node_modules)(?:\/|$)/u.test(inside)) return false
   }
   return rendererSources(definition).some(source => file === source || file.startsWith(`${source}/`))
 }

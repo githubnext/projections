@@ -107,7 +107,7 @@ test('the legend lists card colors then relationship kinds, every one its own co
   assert.deepEqual(facts.badges(after.entities[2]), ['jsonValue'])
   assert.equal(facts.accent(after.entities[2]).label, 'scope: internal')
   assert.equal(facts.accent(after.entities[3]), undefined, 'a card without the field has no accent')
-  assert.match(facts.relationshipColor(before.relationships[2]), /^var\(--projections-chart-\d+\)$/)
+  assert.match(facts.relationshipColor(before.relationships[2]), /^var\(--projections-chart-\d+\)$/u)
   // Nothing chosen: no badges, accents or legend.
   const none = cardFacts(model, {badges: 'none', colorBy: 'none', kinds: [], colorMode: 'light'})
   assert.deepEqual([none.badges, none.accent, none.relationshipColor, none.legend], [undefined, undefined, undefined, undefined])
@@ -170,7 +170,7 @@ test('a field naming programming languages colors cards in their GitHub colors',
   // Any other field keeps the palette.
   assert.match(
     cardFacts(model, {badges: 'none', colorBy: '/data/scope', kinds: [], colorMode: 'light'}).accent(after.entities[2]).paint,
-    /chart/,
+    /chart/u,
   )
 })
 
@@ -278,7 +278,7 @@ test("a field naming icons picks each card's icon; an unknown name draws none an
       description: undefined,
     },
   )
-  assert.match(warning.description, /"<svg onload=alert\(1\)>", "not-an-icon"/)
+  assert.match(warning.description, /"<svg onload=alert\(1\)>", "not-an-icon"/u)
   assert.deepEqual(unknownIconFacts(icons, 'none'), [])
   assert.deepEqual(unknownIconFacts(model, '/data/scope'), [
     {

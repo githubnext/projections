@@ -38,7 +38,7 @@ for (const theme of ['light-modern', 'dark-modern', 'dark-high-contrast', 'light
     expect(drag.line).toBe(drag.outline)
     await page.mouse.up()
     await page.mouse.move(5, 5)
-    await expect(page.locator('.ph-swipe-handle')).not.toHaveAttribute('data-dragging', /./)
+    await expect(page.locator('.ph-swipe-handle')).not.toHaveAttribute('data-dragging', /./u)
     await page.getByRole('slider', {name: 'Comparison divider'}).focus()
     await page.keyboard.press('ArrowLeft')
     await expect(page.locator('.ph-swipe-handle')).toHaveAttribute('data-focus-visible', 'true')

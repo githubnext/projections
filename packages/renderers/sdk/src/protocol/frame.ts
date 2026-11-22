@@ -162,10 +162,10 @@ export function rendererFragment(channel: string, hostOrigin: string, colorMode?
 
 /** Reads the channel nonce, host origin and color mode from a renderer document's URL fragment. */
 export function readRendererFragment(hash: string): {channel: string; hostOrigin: string; colorMode?: ColorMode} | undefined {
-  const params = new URLSearchParams(hash.replace(/^#/, ''))
+  const params = new URLSearchParams(hash.replace(/^#/u, ''))
   const channel = params.get('channel')
   const hostOrigin = params.get('origin')
-  if (!channel || !/^[A-Za-z0-9_-]{16,128}$/.test(channel) || !hostOrigin) return undefined
+  if (!channel || !/^[\w-]{16,128}$/u.test(channel) || !hostOrigin) return undefined
   const color = params.get('color')
   return {channel, hostOrigin, ...(color === 'light' || color === 'dark' ? {colorMode: color} : {})}
 }

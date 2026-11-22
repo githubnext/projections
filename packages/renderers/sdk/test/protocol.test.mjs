@@ -349,7 +349,7 @@ test('manifests declare the extractions they accept: domain schemas, each with a
     [{schema: 'graph/v0'}, {schema: 'graph/v0'}],
     [{schema: 'graph/v0', extra: true}],
   ]) {
-    assert.throws(() => parseRendererManifest({...manifest, accepts}), /accepts/, JSON.stringify(accepts))
+    assert.throws(() => parseRendererManifest({...manifest, accepts}), /accepts/u, JSON.stringify(accepts))
   }
   const di = manifest.accepts
   assert.equal(acceptsExtraction(undefined, {schema: 'metrics/v0'}), true)
@@ -832,7 +832,7 @@ test('annotation badge tones never use change colors, and every tone is styled',
     source.indexOf('`', source.indexOf('`', source.indexOf('const badgeStyle')) + 1),
   )
   assert.ok(style.includes('--projections-color-accent-emphasis'))
-  assert.doesNotMatch(style, /--projections-color-(added|removed|modified|moved)/)
+  assert.doesNotMatch(style, /--projections-color-(added|removed|modified|moved)/u)
   for (const tone of annotationTones.filter(tone => tone !== 'neutral')) assert.match(style, new RegExp(`data-tone="${tone}"`))
 })
 
@@ -1059,12 +1059,12 @@ test('requestDocument asks the host once per name and settles with its answer', 
   fake.deliver(envelope({type: 'document', renderer: 'minimal', error: 'minimal is not a built-in renderer'}))
   assert.equal(await graph, '<!doctype html>')
   await assert.rejects(custom, {name: 'RendererConnectionError', message: 'minimal is not a built-in renderer'})
-  await assert.rejects(client.requestDocument('../graph'), /Invalid renderer name/)
+  await assert.rejects(client.requestDocument('../graph'), /Invalid renderer name/u)
   // A refused name may be asked again; one the host never answers times out.
   const again = client.requestDocument('minimal')
   assert.equal(fake.posted.length, 4)
   fake.expire()
-  await assert.rejects(again, /did not supply the minimal renderer/)
+  await assert.rejects(again, /did not supply the minimal renderer/u)
   client.dispose()
 })
 

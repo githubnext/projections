@@ -20,7 +20,7 @@ function matches(command: Command, query: string): boolean {
   const haystack = `${command.group} ${command.label} ${command.keywords ?? ''}`.toLowerCase()
   return query
     .toLowerCase()
-    .split(/\s+/)
+    .split(/\s+/u)
     .filter(Boolean)
     .every(word => haystack.includes(word))
 }

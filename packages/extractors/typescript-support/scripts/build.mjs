@@ -29,7 +29,7 @@ const result = await build({
       name: 'repository-typescript',
       setup(context) {
         // Every compiler call goes through the repository's installation, loaded at run time.
-        context.onResolve({filter: /^typescript$/}, () => ({path: compiler}))
+        context.onResolve({filter: /^typescript$/u}, () => ({path: compiler}))
       },
     },
   ],

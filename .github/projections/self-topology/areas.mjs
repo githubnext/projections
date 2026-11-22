@@ -15,7 +15,7 @@ export function topologyEntities(cx) {
   const areaGroups = new Map()
   for (const unit of units.values()) {
     if (unit.single && path.posix.dirname(unit.single) === (unit.root || '.')) continue
-    const key = unit.root === roots[0].path ? belowContainer(unit, relativeDirectory(unit)).split(/[/#]/)[0] : unit.root
+    const key = unit.root === roots[0].path ? belowContainer(unit, relativeDirectory(unit)).split(/[/#]/u)[0] : unit.root
     if (!key) continue
     areaGroups.set(key, [...(areaGroups.get(key) ?? []), unit.id])
   }

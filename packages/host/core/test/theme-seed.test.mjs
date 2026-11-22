@@ -75,8 +75,8 @@ test('the URL form is the JSON text, round trip', () => {
   assert.deepEqual(parseThemeSeedText(url.searchParams.get('theme')).seed, JSON.parse(text))
   // A `#` left unencoded starts the fragment, and what is left isn't JSON.
   const unencoded = new URL(`http://127.0.0.1/token/?theme={"light":{"background":"#f7f6f3"}}`)
-  assert.match(parseThemeSeedText(unencoded.searchParams.get('theme')).error, /percent-encode/)
-  assert.match(parseThemeSeedText(`{"light":{"background":"${' '.repeat(5000)}"}}`).error, /longer than 4096/)
+  assert.match(parseThemeSeedText(unencoded.searchParams.get('theme')).error, /percent-encode/u)
+  assert.match(parseThemeSeedText(`{"light":{"background":"${' '.repeat(5000)}"}}`).error, /longer than 4096/u)
 })
 
 test('a font family list is read in one pass: quoted names may hold commas, and spaces and commas never backtrack', () => {
@@ -86,5 +86,5 @@ test('a font family list is read in one pass: quoted names may hold commas, and 
   const started = performance.now()
   const {error} = parseThemeSeed({light: {background: '#fff', sans: `a${' , a'.repeat(14)} ;`}})
   assert.ok(performance.now() - started < 1000, `took ${Math.round(performance.now() - started)} ms`)
-  assert.match(error, /isn't a font family list/)
+  assert.match(error, /isn't a font family list/u)
 })

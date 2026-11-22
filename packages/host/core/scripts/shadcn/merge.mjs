@@ -8,7 +8,7 @@ import {itemSource, transformItem} from './transform.mjs'
 
 /** Sets the header's release (`shadcn@x.y.z`) without touching anything else. */
 export function withVersion(source, version) {
-  return source.replace(/^(\/\/ Adapted from shadcn\/ui \(https:\/\/ui\.shadcn\.com\), style [\w-]+, shadcn@)[\w.+-]+\./m, `$1${version}.`)
+  return source.replace(/^(\/\/ Adapted from shadcn\/ui \(https:\/\/ui\.shadcn\.com\), style [\w-]+, shadcn@)[\w.+-]+\./mu, `$1${version}.`)
 }
 
 /** Runs `git merge-file` (diff3 conflict style) and returns the merged text and the number of conflicts. */

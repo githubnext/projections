@@ -46,7 +46,7 @@ export function versionProblems(root: string, tag?: string): VersionProblem[] {
         message: `${crate.name} is ${crate.version ?? 'unversioned'}; crates in ${crate.released ? 'packages/' : `${crate.path.split('/')[0]}/`} ${why}`,
       })
     }
-    if (!crate.released && !/^publish\s*=\s*false\s*$/m.test(table(crate.text, 'package')?.body ?? '')) {
+    if (!crate.released && !/^publish\s*=\s*false\s*$/mu.test(table(crate.text, 'package')?.body ?? '')) {
       problems.push({file: crate.file, message: `${crate.name} is outside packages/, so it is never released: set publish = false`})
     }
   }

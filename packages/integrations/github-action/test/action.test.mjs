@@ -43,12 +43,12 @@ test('release assets follow GitHub CLI precompiled extension names; tags come fr
   assert.equal(releaseAsset('Linux', 'X64'), 'gh-projections-linux-amd64')
   assert.equal(releaseAsset('macOS', 'ARM64'), 'gh-projections-darwin-arm64')
   assert.equal(releaseAsset('Windows', 'X64'), 'gh-projections-windows-amd64.exe')
-  assert.throws(() => releaseAsset('Linux', 'ARM'), /build-from-source/)
+  assert.throws(() => releaseAsset('Linux', 'ARM'), /build-from-source/u)
   assert.equal(releaseTag('', 'v0.2.1'), 'v0.2.1')
   assert.equal(releaseTag('', 'main'), undefined)
   assert.equal(releaseTag('latest', 'v0.2.1'), undefined)
   assert.equal(releaseTag('0.3.0', 'v0.2.1'), 'v0.3.0')
-  assert.throws(() => releaseTag('v1; rm -rf /', ''), /version must be/)
+  assert.throws(() => releaseTag('v1; rm -rf /', ''), /version must be/u)
   // uses: …@v0 and @v0.1.0; @latest, a branch or a commit SHA install the latest release.
   assert.equal(releaseTag('', 'v0'), 'v0')
   assert.equal(releaseTag('', 'v0.1.0'), 'v0.1.0')
@@ -60,8 +60,8 @@ test('release assets follow GitHub CLI precompiled extension names; tags come fr
   assert.equal(releaseTag('1', ''), 'v1')
   const sums = `${'a'.repeat(64)}  gh-projections-linux-amd64\n${'b'.repeat(64)} *gh-projections-darwin-arm64\n`
   assert.equal(expectedDigest(sums, 'gh-projections-darwin-arm64'), 'b'.repeat(64))
-  assert.throws(() => expectedDigest(sums, 'gh-projections-windows-amd64.exe'), /exactly once/)
-  assert.throws(() => expectedDigest(sums + sums, 'gh-projections-linux-amd64'), /exactly once/)
+  assert.throws(() => expectedDigest(sums, 'gh-projections-windows-amd64.exe'), /exactly once/u)
+  assert.throws(() => expectedDigest(sums + sums, 'gh-projections-linux-amd64'), /exactly once/u)
 })
 
 test('a major tag installs its newest stable release, never a prerelease, draft or later major', () => {
@@ -76,8 +76,8 @@ test('a major tag installs its newest stable release, never a prerelease, draft 
   ]
   assert.equal(newestInMajor(releases, 'v0'), 'v0.10.1')
   assert.equal(newestInMajor(releases, 'v1'), 'v1.0.0')
-  assert.throws(() => newestInMajor(releases, 'v2'), /No stable v2\.x\.y release/)
-  assert.throws(() => newestInMajor([{tagName: 'v3.0.0-rc.1', isDraft: false, isPrerelease: true}], 'v3'), /No stable/)
+  assert.throws(() => newestInMajor(releases, 'v2'), /No stable v2\.x\.y release/u)
+  assert.throws(() => newestInMajor([{tagName: 'v3.0.0-rc.1', isDraft: false, isPrerelease: true}], 'v3'), /No stable/u)
 })
 
 test('events: pull_request compares merge base to head with the base definition; push shows one commit; others are refused', () => {
@@ -136,9 +136,12 @@ test('events: pull_request compares merge base to head with the base definition;
   )
   assert.equal(workflowPath('mallory/delivery/.github/workflows/ci.yml@refs/heads/main', 'octo-org/delivery'), undefined)
   assert.deepEqual(eventSubject('push', {after: sha('d')}, 'refs/heads/main'), {kind: 'push', ref: 'refs/heads/main', revision: sha('d')})
-  assert.throws(() => eventSubject('push', {after: '0'.repeat(40)}, 'refs/heads/main'), /deleted/)
-  assert.throws(() => eventSubject('pull_request_target', {}), /secrets/)
-  assert.throws(() => eventSubject('pull_request', {pull_request: {number: 7, base: {sha: 'main'}, head: {sha: sha('b')}}}), /base or head/)
+  assert.throws(() => eventSubject('push', {after: '0'.repeat(40)}, 'refs/heads/main'), /deleted/u)
+  assert.throws(() => eventSubject('pull_request_target', {}), /secrets/u)
+  assert.throws(
+    () => eventSubject('pull_request', {pull_request: {number: 7, base: {sha: 'main'}, head: {sha: sha('b')}}}),
+    /base or head/u,
+  )
 })
 
 test('a batch splits into one verified document per projection, error items keep bounded diagnostics, and the comment summarizes them', () => {
@@ -180,31 +183,31 @@ test('a batch splits into one verified document per projection, error items keep
   assert.equal(manifest.projections[1].title, 'Feature flags')
   assert.equal(manifest.projections[1].diagnostics[0].message.length, 4096)
   assert.equal(manifest.projections[0].notices, undefined)
-  assert.throws(() => splitBatch({...batch, operation: 'show'}, options), /compare batch/)
-  assert.throws(() => splitBatch({...batch, results: [{id: '../x', status: 'changed', comparison}]}, options), /Invalid/)
+  assert.throws(() => splitBatch({...batch, operation: 'show'}, options), /compare batch/u)
+  assert.throws(() => splitBatch({...batch, results: [{id: '../x', status: 'changed', comparison}]}, options), /Invalid/u)
   assert.throws(
     () => splitBatch({...batch, results: [{id: 'a', status: 'changed', extraction: {format: 'projections.extraction'}}]}, options),
-    /no projections.comparison/,
+    /no projections.comparison/u,
   )
   assert.throws(
     () => splitBatch({...batch, results: Array.from({length: 61}, (_, index) => ({id: `p${index}`, status: 'error'}))}, options),
-    /At most 60/,
+    /At most 60/u,
   )
   const documents = new Map(
     [...files].filter(([file]) => file !== artifactManifest).map(([file, bytes]) => [file.slice(12, -5), JSON.parse(bytes)]),
   )
   const body = commentBody(manifest, documents)
   assert.ok(body.startsWith(commentMarker))
-  assert.match(body, /1 changed, 1 failed, 1 new in this pull request/)
-  assert.match(body, /<strong>Feature flags<\/strong> \(<code>flags<\/code>\): failed/)
-  assert.match(body, /- \x60TRUST_REQUIRED\x60: x{100}/)
+  assert.match(body, /1 changed, 1 failed, 1 new in this pull request/u)
+  assert.match(body, /<strong>Feature flags<\/strong> \(<code>flags<\/code>\): failed/u)
+  assert.match(body, /- \x60TRUST_REQUIRED\x60: x{100}/u)
   // A hosted view is linked only when one is configured.
-  assert.doesNotMatch(body, /https?:\/\//)
+  assert.doesNotMatch(body, /https?:\/\//u)
   assert.match(
     commentBody(manifest, documents, {hostedUrl: 'https://projections.example/'}),
-    /\[View them on projections\.example\]\(https:\/\/projections\.example\/octo-org\/delivery\/pull\/7\)/,
+    /\[View them on projections\.example\]\(https:\/\/projections\.example\/octo-org\/delivery\/pull\/7\)/u,
   )
-  assert.throws(() => commentBody(manifest, documents, {hostedUrl: 'javascript:alert(1)'}), /http\(s\) origin/)
+  assert.throws(() => commentBody(manifest, documents, {hostedUrl: 'javascript:alert(1)'}), /http\(s\) origin/u)
 })
 
 test('the summary tells each comparison in steps and changes, escapes repository text and fits the limit', () => {
@@ -275,37 +278,37 @@ test('the summary tells each comparison in steps and changes, escapes repository
   const text = summaryMarkdown(manifest, documents)
   assert.match(
     text,
-    /^### Projections\n\nCompared \x60ccccccc\x60 \(merge base\) with \x60bbbbbbb\x60 for pull request #7: 1 changed, 2 unchanged\./,
+    /^### Projections\n\nCompared \x60ccccccc\x60 \(merge base\) with \x60bbbbbbb\x60 for pull request #7: 1 changed, 2 unchanged\./u,
   )
-  assert.match(text, /\| \x60services\x60 \| Changed: 4 changes in 3 steps: 3 added, 1 removed \|/)
-  assert.match(text, /\| \x60files\x60 \| Unchanged: no changes \|/)
+  assert.match(text, /\| \x60services\x60 \| Changed: 4 changes in 3 steps: 3 added, 1 removed \|/u)
+  assert.match(text, /\| \x60files\x60 \| Unchanged: no changes \|/u)
   // Expected variation alone leaves a comparison unchanged, and is never called a rename.
-  assert.match(text, /\| \x60timings\x60 \| Unchanged: no changes to review \(1 varied within tolerance\) \|/)
+  assert.match(text, /\| \x60timings\x60 \| Unchanged: no changes to review \(1 varied within tolerance\) \|/u)
   assert.match(
     text,
-    /<details><summary><strong>Services<\/strong> \(<code>services<\/code>\): changed, 4 changes in 3 steps: 3 added, 1 removed<\/summary>/,
+    /<details><summary><strong>Services<\/strong> \(<code>services<\/code>\): changed, 4 changes in 3 steps: 3 added, 1 removed<\/summary>/u,
   )
-  assert.match(text, /^1\. \*\*Step 1 of 3\*\* \(remove\): Legacy billing retires$/m)
-  assert.match(text, /^ {3}- Removed entity \x60@\u2060octocat <img src=x>\x60 \(\x60billing\x60\)$/m)
+  assert.match(text, /^1\. \*\*Step 1 of 3\*\* \(remove\): Legacy billing retires$/mu)
+  assert.match(text, /^ {3}- Removed entity \x60@\u2060octocat <img src=x>\x60 \(\x60billing\x60\)$/mu)
   assert.match(
     text,
-    /^ {3}- Added entity \x60\x60Pay\x60ments\x60\x60 \(\x60payments\x60\): Split out of \\\*orders\\\* \\\[link\\\]\\\(https:\/\/x\.invalid\\\)$/m,
+    /^ {3}- Added entity \x60\x60Pay\x60ments\x60\x60 \(\x60payments\x60\): Split out of \\\*orders\\\* \\\[link\\\]\\\(https:\/\/x\.invalid\\\)$/mu,
   )
   assert.match(
     text,
-    /^ {3}- Added relationship \x60Orders\x60 \(\x60orders\x60\) calls \x60\x60Pay\x60ments\x60\x60 \(\x60payments\x60\)$/m,
+    /^ {3}- Added relationship \x60Orders\x60 \(\x60orders\x60\) calls \x60\x60Pay\x60ments\x60\x60 \(\x60payments\x60\)$/mu,
   )
-  assert.match(text, /^3\. \*\*Step 3 of 3\*\*$/m)
+  assert.match(text, /^3\. \*\*Step 3 of 3\*\*$/mu)
   // An unchanged projection has nothing to detail.
-  assert.doesNotMatch(text, /<strong>Files<\/strong>/)
-  assert.match(text, /\*\*Projections: Open Artifact…\*\* in VS Code, or run \x60projections pr 7\x60 in a clone\./)
-  assert.match(text, /extractors that run repository code were trusted/)
-  assert.doesNotMatch(text, /@octocat/)
+  assert.doesNotMatch(text, /<strong>Files<\/strong>/u)
+  assert.match(text, /\*\*Projections: Open Artifact…\*\* in VS Code, or run \x60projections pr 7\x60 in a clone\./u)
+  assert.match(text, /extractors that run repository code were trusted/u)
+  assert.doesNotMatch(text, /@octocat/u)
   // Details that don't fit are left out, never cut mid-way.
   const short = summaryMarkdown(manifest, documents, {limit: 900})
   assert.ok(Buffer.byteLength(short) <= 900, String(Buffer.byteLength(short)))
-  assert.match(short, /The details of 1 projection didn't fit here\./)
-  assert.match(short, /\| \x60services\x60 \| Changed/)
+  assert.match(short, /The details of 1 projection didn't fit here\./u)
+  assert.match(short, /\| \x60services\x60 \| Changed/u)
   // A push lists its extractions.
   const push = summaryMarkdown(
     {
@@ -318,10 +321,10 @@ test('the summary tells each comparison in steps and changes, escapes repository
   )
   assert.match(
     push,
-    /Extracted \x60ddddddd\x60 \(\x60refs\/heads\/main\x60\): 1 extracted\. \[View them on projections\.example\]\(https:\/\/projections\.example\/octo-org\/delivery\/commit\/d{40}\)\./,
+    /Extracted \x60ddddddd\x60 \(\x60refs\/heads\/main\x60\): 1 extracted\. \[View them on projections\.example\]\(https:\/\/projections\.example\/octo-org\/delivery\/commit\/d{40}\)\./u,
   )
-  assert.match(push, /\| \x60services\x60 \| Extracted: 3 entities, 1 relationship \|/)
-  assert.match(push, /\x60projections show --all dddddddddddd\x60/)
+  assert.match(push, /\| \x60services\x60 \| Extracted: 3 entities, 1 relationship \|/u)
+  assert.match(push, /\x60projections show --all dddddddddddd\x60/u)
 })
 
 function git(cwd, ...args) {
@@ -391,7 +394,7 @@ function collect(directory, repo, eventName, event, ref = 'refs/pull/7/merge', e
       readFileSync(outputs, 'utf8')
         .trim()
         .split('\n')
-        .map(line => line.split(/=(.*)/s).slice(0, 2)),
+        .map(line => line.split(/=(.*)/su).slice(0, 2)),
     ),
   }
 }
@@ -408,7 +411,7 @@ test('the collect script runs the real CLI on a pull request: merge base to head
   const {outputs, stdout} = collect(directory, repo, 'pull_request', {pull_request: {number: 7, base: {sha: movedBase}, head: {sha: head}}})
   assert.equal(outputs.failed, '1')
   assert.equal(outputs.projections, '2')
-  assert.match(stdout, /::error title=Projection flags::TRUST_REQUIRED/)
+  assert.match(stdout, /::error title=Projection flags::TRUST_REQUIRED/u)
   const artifact = outputs.directory
   assert.deepEqual(readdirSync(artifact).sort(), ['projections', artifactManifest])
   const manifest = JSON.parse(readFileSync(path.join(artifact, artifactManifest), 'utf8'))
@@ -438,11 +441,11 @@ test('the collect script runs the real CLI on a pull request: merge base to head
   })
   assert.equal(written.status, 0, written.stderr)
   const text = readFileSync(summary, 'utf8')
-  assert.match(text, /Compared \x60[0-9a-f]{7}\x60 \(merge base\) with \x60[0-9a-f]{7}\x60 for pull request #7: 1 changed, 1 failed\./)
-  assert.match(text, /\| \x60files\x60 \| Changed: \d+ changes? in \d+ steps?/)
-  assert.match(text, /^ {3}- Added entity .*delivery\.ts/m)
-  assert.match(text, /- \x60TRUST_REQUIRED\x60: /)
-  assert.doesNotMatch(text, /https?:\/\//)
+  assert.match(text, /Compared \x60[0-9a-f]{7}\x60 \(merge base\) with \x60[0-9a-f]{7}\x60 for pull request #7: 1 changed, 1 failed\./u)
+  assert.match(text, /\| \x60files\x60 \| Changed: \d+ changes? in \d+ steps?/u)
+  assert.match(text, /^ {3}- Added entity .*delivery\.ts/mu)
+  assert.match(text, /- \x60TRUST_REQUIRED\x60: /u)
+  assert.doesNotMatch(text, /https?:\/\//u)
 })
 
 test('the collect script shows every projection of a pushed commit', () => {
@@ -504,8 +507,8 @@ esac
     },
   })
   assert.equal(downloaded.status, 0, downloaded.stderr + downloaded.stdout)
-  assert.doesNotMatch(downloaded.stdout, /::warning/)
-  const baseArtifact = readFileSync(outputs, 'utf8').match(/^directory=(.*)$/m)[1]
+  assert.doesNotMatch(downloaded.stdout, /::warning/u)
+  const baseArtifact = readFileSync(outputs, 'utf8').match(/^directory=(.*)$/mu)[1]
   // The comparison's base side is CI's extraction, labelled imported (the CLI can't authenticate the base step's
   // download); the head is extracted in place.
   const {outputs: collected} = collect(
@@ -592,7 +595,7 @@ test('without a base artifact, the base side runs in a workspace the environment
   assert.equal(flags.status, 'unchanged', JSON.stringify(flags))
   const document = JSON.parse(readFileSync(path.join(outputs.directory, flags.path), 'utf8'))
   // A tiny repository is copied fresh; a larger one gets a reused worktree.
-  assert.match(document.before.provenance.execution.source, /^local-(workspace|materialized)$/)
+  assert.match(document.before.provenance.execution.source, /^local-(workspace|materialized)$/u)
   assert.deepEqual(
     document.before.provenance.execution.prepared.map(step => step.id),
     ['install'],
@@ -645,8 +648,8 @@ fi
   writeFileSync(log, '')
   const mismatch = install({FAKE_SUM: '0'.repeat(64)})
   assert.notEqual(mismatch.status, 0)
-  assert.match(mismatch.stderr, /\.sha256 lists 0{64}/)
-  assert.doesNotMatch(readFileSync(log, 'utf8'), /attestation/)
+  assert.match(mismatch.stderr, /\.sha256 lists 0{64}/u)
+  assert.doesNotMatch(readFileSync(log, 'utf8'), /attestation/u)
 })
 
 test('action.yml passes inputs through the environment, pins its actions and keeps tokens away from extraction', async () => {
@@ -655,7 +658,7 @@ test('action.yml passes inputs through the environment, pins its actions and kee
   assert.equal(action.runs.using, 'composite')
   for (const step of action.runs.steps) {
     if (step.run) assert.equal(step.run.includes('${{'), false, 'Expressions must enter through env, not shell text')
-    if (step.uses) assert.match(step.uses, /^actions\/(?:upload-artifact|attest)@[a-f0-9]{40}$/)
+    if (step.uses) assert.match(step.uses, /^actions\/(?:upload-artifact|attest)@[a-f0-9]{40}$/u)
   }
   // The workflow dependency lockfile locks them for CI's `uses: ./` of this action through a never-run composite action.
   const uses = file => new Set(parse(readFileSync(path.join(root, file), 'utf8')).runs.steps.flatMap(step => step.uses ?? []))
@@ -664,7 +667,7 @@ test('action.yml passes inputs through the environment, pins its actions and kee
   const attest = action.runs.steps.find(step => step.id === 'attest')
   assert.equal(action.inputs.attest.default, 'false')
   assert.equal(attest.with['subject-path'], '${{ steps.collect.outputs.manifest }}')
-  assert.match(attest.if, /github\.event\.pull_request\.head\.repo\.full_name == github\.repository/)
+  assert.match(attest.if, /github\.event\.pull_request\.head\.repo\.full_name == github\.repository/u)
   // A composite action's run steps see its ref and repository only through these expressions, not GITHUB_ACTION_*.
   const install = action.runs.steps.find(step => step.id === 'install')
   assert.equal(install.env.ACTION_REF, '${{ github.action_ref }}')
@@ -680,7 +683,7 @@ test('action.yml passes inputs through the environment, pins its actions and kee
   for (const id of ['collect', 'snapshots']) {
     const step = action.runs.steps.find(step => step.id === id)
     assert.equal(
-      Object.keys(step.env).some(name => /TOKEN/.test(name)),
+      Object.keys(step.env).some(name => /TOKEN/u.test(name)),
       false,
     )
   }
@@ -690,13 +693,13 @@ test('action.yml passes inputs through the environment, pins its actions and kee
   // The summary and comment read saved documents only, and link a hosted view only when one is configured.
   const summary = action.runs.steps.find(step => step.id === 'summary')
   assert.equal(
-    Object.keys(summary.env).some(name => /TOKEN/.test(name)),
+    Object.keys(summary.env).some(name => /TOKEN/u.test(name)),
     false,
   )
   assert.equal(action.inputs.summary.default, 'true')
   assert.equal(action.inputs.comment.default, 'false')
   assert.equal(action.inputs['hosted-url'].default, '')
-  assert.doesNotMatch(action.description, /githubnext\.com/)
+  assert.doesNotMatch(action.description, /githubnext\.com/u)
   // Snapshots go to their own artifact, so the artifact holds only the files its manifest lists.
   const upload = action.runs.steps.find(step => step.id === 'upload-snapshots')
   assert.equal(upload.with.name, '${{ inputs.artifact-name }}-snapshots')
@@ -715,8 +718,8 @@ test('action.yml passes inputs through the environment, pins its actions and kee
 test('snapshots: listed IDs, file names, what each projection renders, and where snapshots may be committed', () => {
   assert.deepEqual(snapshotIds(' files,deps\nfiles  api '), ['files', 'deps', 'api'])
   assert.deepEqual(snapshotIds(''), [])
-  assert.throws(() => snapshotIds('../x'), /invalid projection ID/)
-  assert.throws(() => snapshotIds(Array.from({length: 21}, (_, index) => `p${index}`).join(',')), /at most 20/)
+  assert.throws(() => snapshotIds('../x'), /invalid projection ID/u)
+  assert.throws(() => snapshotIds(Array.from({length: 21}, (_, index) => `p${index}`).join(',')), /at most 20/u)
   assert.equal(snapshotName('files', undefined, 'dark'), 'files.dark.png')
   assert.equal(snapshotName('files', 'before', 'light'), 'files.before.light.png')
   const manifest = {
@@ -742,7 +745,7 @@ test('snapshots: listed IDs, file names, what each projection renders, and where
     {id: 'files', path: 'p.json'},
   ])
   assert.equal(repositoryDirectory('/docs/images/'), 'docs/images')
-  for (const bad of ['', '../x', 'a/../b', '.git/hooks', 'a b']) assert.throws(() => repositoryDirectory(bad), /snapshots-path/)
+  for (const bad of ['', '../x', 'a/../b', '.git/hooks', 'a b']) assert.throws(() => repositoryDirectory(bad), /snapshots-path/u)
 
   const push = {kind: 'push', ref: 'refs/heads/main', revision: sha('d')}
   const inputs = {commit: true, path: '.github/projections/snapshots', branch: '', message: ''}
@@ -753,14 +756,14 @@ test('snapshots: listed IDs, file names, what each projection renders, and where
     expected: sha('d'),
     message: 'Update Projections snapshots',
   })
-  assert.match(snapshotTarget({...push, ref: 'refs/heads/feature'}, event, inputs, 'o/r').reason, /default branch \(main\)/)
-  assert.match(snapshotTarget(push, event, {...inputs, commit: false}, 'o/r').reason, /snapshots-commit/)
+  assert.match(snapshotTarget({...push, ref: 'refs/heads/feature'}, event, inputs, 'o/r').reason, /default branch \(main\)/u)
+  assert.match(snapshotTarget(push, event, {...inputs, commit: false}, 'o/r').reason, /snapshots-commit/u)
   const pull = {kind: 'pull-request', number: 7, base: sha('a'), head: sha('b'), mergeBase: sha('c')}
   const pullEvent = {
     repository: {default_branch: 'main'},
     pull_request: {base: {ref: 'main'}, head: {ref: 'feature', repo: {full_name: 'octo-org/delivery'}}},
   }
-  assert.match(snapshotTarget(pull, pullEvent, inputs, 'octo-org/delivery').reason, /snapshots-branch/)
+  assert.match(snapshotTarget(pull, pullEvent, inputs, 'octo-org/delivery').reason, /snapshots-branch/u)
   const branch = {...inputs, branch: 'projections-snapshots'}
   assert.deepEqual(snapshotTarget(pull, pullEvent, branch, 'octo-org/delivery'), {
     branch: 'projections-snapshots',
@@ -769,9 +772,9 @@ test('snapshots: listed IDs, file names, what each projection renders, and where
     message: 'Projections snapshots for #7',
   })
   const fork = {...pullEvent, pull_request: {...pullEvent.pull_request, head: {ref: 'feature', repo: {full_name: 'someone/delivery'}}}}
-  assert.match(snapshotTarget(pull, fork, branch, 'octo-org/delivery').reason, /forks/)
+  assert.match(snapshotTarget(pull, fork, branch, 'octo-org/delivery').reason, /forks/u)
   for (const name of ['main', 'feature', '-x', 'a..b', 'a.lock', 'a b']) {
-    assert.throws(() => snapshotTarget(pull, pullEvent, {...inputs, branch: name}, 'octo-org/delivery'), /snapshots-branch/)
+    assert.throws(() => snapshotTarget(pull, pullEvent, {...inputs, branch: name}, 'octo-org/delivery'), /snapshots-branch/u)
   }
   // Git's own blob ID.
   const bytes = Buffer.from('snapshot\n')
@@ -800,21 +803,21 @@ test('the pull request comment shows before and after snapshots, theme-aware, or
     snapshots.map(file => [file.path, `https://github.com/octo-org/delivery/raw/${sha('e')}/pull/7/${file.path}`]),
   )
   const body = commentBody(manifest, new Map(), {snapshots: {index, images, artifactUrl: 'https://example.invalid/artifact'}})
-  assert.match(body, /#### Snapshots/)
-  assert.match(body, /\| Before \| After \|/)
+  assert.match(body, /#### Snapshots/u)
+  assert.match(body, /\| Before \| After \|/u)
   assert.match(
     body,
-    /<picture><source media="\(prefers-color-scheme: dark\)" srcset="[^"]+\/pull\/7\/files\.before\.dark\.png"><img src="[^"]+\/pull\/7\/files\.before\.light\.png" alt="files before" width="420"><\/picture>/,
+    /<picture><source media="\(prefers-color-scheme: dark\)" srcset="[^"]+\/pull\/7\/files\.before\.dark\.png"><img src="[^"]+\/pull\/7\/files\.before\.light\.png" alt="files before" width="420"><\/picture>/u,
   )
   // A projection new in the pull request has no before.
-  assert.match(body, /\| — \| <picture>.*routes\.after\.light\.png.*\|/)
-  assert.doesNotMatch(body, /snapshots artifact/)
+  assert.match(body, /\| — \| <picture>.*routes\.after\.light\.png.*\|/u)
+  assert.doesNotMatch(body, /snapshots artifact/u)
   const linked = commentBody(manifest, new Map(), {snapshots: {index, artifactUrl: 'https://example.invalid/artifact'}})
   assert.match(
     linked,
-    /Snapshots of \x60files\x60, \x60routes\x60 are in the \[snapshots artifact\]\(https:\/\/example\.invalid\/artifact\)\./,
+    /Snapshots of \x60files\x60, \x60routes\x60 are in the \[snapshots artifact\]\(https:\/\/example\.invalid\/artifact\)\./u,
   )
-  assert.doesNotMatch(linked, /<picture>/)
+  assert.doesNotMatch(linked, /<picture>/u)
   assert.equal(commentBody(manifest, new Map(), {snapshots: {index}}), commentBody(manifest, new Map()))
 })
 
@@ -851,16 +854,16 @@ test('the snapshot script renders both sides of a pull request and a push, light
       readFileSync(results, 'utf8')
         .trim()
         .split('\n')
-        .map(line => line.split(/=(.*)/s).slice(0, 2)),
+        .map(line => line.split(/=(.*)/su).slice(0, 2)),
     )
     return {result, values, index: JSON.parse(readFileSync(path.join(values.directory, snapshotIndex), 'utf8'))}
   }
   const first = run(pull.outputs)
-  if (/No Chrome, Chromium or Microsoft Edge was found/.test(first.result.stdout) && !process.env.CI) {
+  if (/No Chrome, Chromium or Microsoft Edge was found/u.test(first.result.stdout) && !process.env.CI) {
     t.skip('no Chrome, Chromium or Edge is installed; set PROJECTIONS_BROWSER to run the snapshot tests')
     return
   }
-  assert.match(first.result.stdout, /::warning title=Projection snapshot flags::No snapshot: the projection failed/)
+  assert.match(first.result.stdout, /::warning title=Projection snapshot flags::No snapshot: the projection failed/u)
   assert.equal(first.values.failed, '0', first.result.stdout)
   assert.equal(first.values.count, '4')
   assert.deepEqual(
@@ -880,9 +883,9 @@ test('the snapshot script renders both sides of a pull request and a push, light
 
   const push = collect(directory, repo, 'push', {after: head}, 'refs/heads/feature')
   // Snapshots render saved documents, so no extractor runs; trust lets a custom renderer, repository code, draw them.
-  assert.doesNotMatch(first.result.stdout, /--trust/)
+  assert.doesNotMatch(first.result.stdout, /--trust/u)
   const pushed = run(push.outputs, {INPUT_SNAPSHOTS: 'files', INPUT_TRUST: 'true'})
-  assert.match(pushed.result.stdout, /^projections .* show --from .* --trust$/m)
+  assert.match(pushed.result.stdout, /^projections .* show --from .* --trust$/mu)
   assert.deepEqual(
     pushed.index.snapshots.map(file => file.path),
     ['files.light.png', 'files.dark.png'],
@@ -892,7 +895,7 @@ test('the snapshot script renders both sides of a pull request and a push, light
   const missing = run(push.outputs, {INPUT_SNAPSHOTS: 'files', INPUT_BROWSER: path.join(directory, 'no-browser')})
   assert.equal(missing.values.count, '0')
   assert.equal(missing.values.failed, '2')
-  assert.match(missing.result.stdout, /::warning title=Projection snapshot files::.*no-browser/)
+  assert.match(missing.result.stdout, /::warning title=Projection snapshot files::.*no-browser/u)
 })
 
 /** An in-memory stand-in for the parts of GitHub's Git database API that publish.mjs uses. */
@@ -912,7 +915,7 @@ async function fakeGitHub({branches = {}, fail} = {}) {
     for await (const chunk of request) chunks.push(chunk)
     const body = chunks.length ? JSON.parse(Buffer.concat(chunks)) : undefined
     const url = new URL(request.url, 'http://localhost')
-    const route = url.pathname.replace(/^\/repos\/octo-org\/delivery/, '')
+    const route = url.pathname.replace(/^\/repos\/octo-org\/delivery/u, '')
     requests.push({method: request.method, route, body, authorization: request.headers.authorization})
     const reply = (status, value) => {
       response.writeHead(status, {'content-type': 'application/json'})
@@ -920,16 +923,16 @@ async function fakeGitHub({branches = {}, fail} = {}) {
     }
     if (fail) return reply(fail)
     let match
-    if (request.method === 'GET' && (match = /^\/git\/ref\/heads\/(.+)$/.exec(route))) {
+    if (request.method === 'GET' && (match = /^\/git\/ref\/heads\/(.+)$/u.exec(route))) {
       const sha = refs.get(decodeURIComponent(match[1]))
       return sha ? reply(200, {object: {sha}}) : reply(404)
     }
-    if (request.method === 'GET' && (match = /^\/contents\/(.+)$/.exec(route))) {
+    if (request.method === 'GET' && (match = /^\/contents\/(.+)$/u.exec(route))) {
       const tree = trees.get(commits.get(url.searchParams.get('ref'))?.tree)
       const blob = tree?.get(match[1].split('/').map(decodeURIComponent).join('/'))
       return blob ? reply(200, {sha: blob}) : reply(404)
     }
-    if (request.method === 'GET' && (match = /^\/git\/commits\/(.+)$/.exec(route))) {
+    if (request.method === 'GET' && (match = /^\/git\/commits\/(.+)$/u.exec(route))) {
       return reply(200, {tree: {sha: commits.get(match[1]).tree}})
     }
     if (request.method === 'POST' && route === '/git/blobs') {
@@ -950,12 +953,12 @@ async function fakeGitHub({branches = {}, fail} = {}) {
       commits.set(sha, {tree: body.tree, parents: body.parents, message: body.message})
       return reply(201, {sha})
     }
-    if (request.method === 'PATCH' && (match = /^\/git\/refs\/heads\/(.+)$/.exec(route))) {
+    if (request.method === 'PATCH' && (match = /^\/git\/refs\/heads\/(.+)$/u.exec(route))) {
       refs.set(decodeURIComponent(match[1]), body.sha)
       return reply(200, {object: {sha: body.sha}})
     }
     if (request.method === 'POST' && route === '/git/refs') {
-      refs.set(body.ref.replace(/^refs\/heads\//, ''), body.sha)
+      refs.set(body.ref.replace(/^refs\/heads\//u, ''), body.sha)
       return reply(201, {object: {sha: body.sha}})
     }
     reply(404)
@@ -998,7 +1001,7 @@ function publish(api, directory, event, inputs) {
             .trim()
             .split('\n')
             .filter(Boolean)
-            .map(line => line.split(/=(.*)/s).slice(0, 2)),
+            .map(line => line.split(/=(.*)/su).slice(0, 2)),
         ),
       }),
     )
@@ -1041,7 +1044,7 @@ test('publish commits snapshots to the default branch only when they changed and
     assert.ok(api.requests.some(request => request.method === 'PATCH' && request.body.force === false))
     // The branch has moved on (to the snapshot commit itself): nothing is committed over it.
     const moved = await publish(api, directory, event, inputs)
-    assert.match(moved.stdout, /moved on/)
+    assert.match(moved.stdout, /moved on/u)
     assert.equal(api.refs.get('main'), commit)
     // Unchanged images make no commit.
     const again = await publish(
@@ -1053,7 +1056,7 @@ test('publish commits snapshots to the default branch only when they changed and
       event,
       inputs,
     )
-    assert.match(again.stdout, /unchanged/)
+    assert.match(again.stdout, /unchanged/u)
     assert.equal(api.refs.get('main'), commit)
     // Other branches, and runs without snapshots-commit, never commit.
     const feature = await publish(
@@ -1062,7 +1065,7 @@ test('publish commits snapshots to the default branch only when they changed and
       event,
       inputs,
     )
-    assert.match(feature.stdout, /only for pushes to the default branch/)
+    assert.match(feature.stdout, /only for pushes to the default branch/u)
     assert.equal(api.refs.get('main'), commit)
   } finally {
     api.close()
@@ -1095,7 +1098,7 @@ test('publish puts pull request snapshots on a dedicated branch for the comment,
       {...event, pull_request: {...event.pull_request, head: {ref: 'f', repo: {full_name: 'x/delivery'}}}},
       inputs,
     )
-    assert.match(fork.stdout, /forks/)
+    assert.match(fork.stdout, /forks/u)
     assert.equal(fork.outputs.images, undefined)
   } finally {
     api.close()
@@ -1105,7 +1108,7 @@ test('publish puts pull request snapshots on a dedicated branch for the comment,
     const directory = snapshotDirectory({kind: 'push', ref: 'refs/heads/main', revision: sha('d')}, [['files.light.png', 'x']])
     const result = await publish(denied, directory, {repository: {default_branch: 'main'}}, {INPUT_SNAPSHOTS_COMMIT: 'true'})
     assert.equal(result.status, 0, result.stderr)
-    assert.match(result.stdout, /::warning title=Projections snapshots::Could not commit the snapshots .*contents: write/)
+    assert.match(result.stdout, /::warning title=Projections snapshots::Could not commit the snapshots .*contents: write/u)
   } finally {
     denied.close()
   }

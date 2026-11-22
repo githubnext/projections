@@ -129,7 +129,7 @@ export const withoutTextBox = (page: Page) =>
     const fallbacks: string[] = []
     const visit = (rules: CSSRuleList) => {
       for (const rule of rules) {
-        if (rule instanceof CSSSupportsRule && /not\s*\(\s*text-box/.test(rule.conditionText)) {
+        if (rule instanceof CSSSupportsRule && /not\s*\(\s*text-box/u.test(rule.conditionText)) {
           fallbacks.push(...[...rule.cssRules].map(inner => inner.cssText))
         } else if ('cssRules' in rule) visit((rule as CSSGroupingRule).cssRules)
       }
@@ -182,7 +182,7 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
       'button, a[href], input, select, textarea, [role="button"], [role="radiogroup"], [role="radio"], [role="combobox"], [role="checkbox"], [role="switch"], [role="slider"], [role="menuitem"], [tabindex]'
     const drawn = (node: Element) => {
       const own = getComputedStyle(node)
-      const filled = !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(own.backgroundColor)
+      const filled = !/^(?:transparent|rgba\(0, 0, 0, 0\))$/u.test(own.backgroundColor)
       const bordered = ['top', 'right', 'bottom', 'left'].some(
         side => parseFloat(own.getPropertyValue(`border-${side}-width`)) > 0 && own.getPropertyValue(`border-${side}-style`) !== 'none',
       )

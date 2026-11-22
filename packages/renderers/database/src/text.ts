@@ -70,7 +70,7 @@ export const estimateText: MeasureText = (role, text) => {
   return text.length * size * (role === 'kind' || role === 'status' ? 0.6 : 0.62)
 }
 
-const separator = /[_./\-,: ]/
+const separator = /[_./\-,: ]/u
 
 /** Splits `text` before each index where `boundary(previous, current)` holds. */
 function split(text: string, boundary: (previous: string, current: string) => boolean): string[] {
@@ -99,9 +99,9 @@ export function subsegments(piece: string): string[] {
   return split(
     piece,
     (previous, current) =>
-      (/[a-z0-9]/.test(previous) && /[A-Z]/.test(current)) ||
-      (/[A-Za-z]/.test(previous) && /[0-9]/.test(current)) ||
-      (/[0-9]/.test(previous) && /[A-Za-z]/.test(current)),
+      (/[a-z0-9]/u.test(previous) && /[A-Z]/u.test(current)) ||
+      (/[A-Za-z]/u.test(previous) && /\d/u.test(current)) ||
+      (/\d/u.test(previous) && /[A-Za-z]/u.test(current)),
   )
 }
 

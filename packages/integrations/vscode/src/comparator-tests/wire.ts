@@ -86,10 +86,10 @@ export function repositoryPath(value: unknown): value is string {
     value.length <= 4096 &&
     !value.startsWith('/') &&
     !value.includes('\\') &&
-    !/^[a-zA-Z]:/.test(value) &&
+    !/^[a-zA-Z]:/u.test(value) &&
     !value.split('/').some(part => part === '' || part === '.' || part === '..') &&
     // eslint-disable-next-line no-control-regex
-    !/[\u0000-\u001f\u007f]/.test(value)
+    !/[\u0000-\u001f\u007f]/u.test(value)
   )
 }
 

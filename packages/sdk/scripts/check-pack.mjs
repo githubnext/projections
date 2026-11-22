@@ -44,7 +44,7 @@ const tar = process.platform === 'win32' ? join(process.env.SystemRoot ?? 'C:\\W
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 const npmCli = process.env.npm_execpath
 // Scratch installs use the registry this workspace uses, wherever they are.
-const registry = /^registry=(.+)$/m.exec(readFileSync(join(workspace, '.npmrc'), 'utf8'))?.[1]
+const registry = /^registry=(.+)$/mu.exec(readFileSync(join(workspace, '.npmrc'), 'utf8'))?.[1]
 // npm retries a request that fails on the network or with a 5xx, never a missing version; a few more times here.
 const env = {
   ...process.env,
@@ -69,10 +69,10 @@ try {
     step(`The tarball ${given}`)
     tarball = join(scratch, basename(given))
     copyFileSync(given, tarball)
-    const listed = execFileSync(tar, ['-tzf', tarball], {encoding: 'utf8'}).split(/\r?\n/).filter(Boolean)
+    const listed = execFileSync(tar, ['-tzf', tarball], {encoding: 'utf8'}).split(/\r?\n/u).filter(Boolean)
     files = listed
       .filter(file => !file.endsWith('/'))
-      .map(file => file.replace(/^package\//, ''))
+      .map(file => file.replace(/^package\//u, ''))
       .sort()
     console.log(`${basename(tarball)}: ${files.length} files, ${(statSync(tarball).size / 1024).toFixed(1)} kB packed`)
   } else {
@@ -90,14 +90,14 @@ try {
 
   step('Contents')
   const allowed = [
-    /^package\.json$/,
-    /^LICENSE$/,
-    /^README\.md$/,
+    /^package\.json$/u,
+    /^LICENSE$/u,
+    /^README\.md$/u,
     // Shared chunks are named after their modules, generated ones included.
-    /^dist\/[a-z-]+(\.generated)?\.(js|d\.ts)$/,
-    /^dist\/engine\/(browser|node)\.js$/,
-    /^dist\/(renderer\/icons|kit\/base|kit\/react)\.css$/,
-    /^vendor\/linguist\/(languages\.js|languages\.d\.ts|LICENSE|vendor\.json)$/,
+    /^dist\/[a-z-]+(\.generated)?\.(js|d\.ts)$/u,
+    /^dist\/engine\/(browser|node)\.js$/u,
+    /^dist\/(renderer\/icons|kit\/base|kit\/react)\.css$/u,
+    /^vendor\/linguist\/(languages\.js|languages\.d\.ts|LICENSE|vendor\.json)$/u,
   ]
   for (const file of files) if (!allowed.some(pattern => pattern.test(file))) fail(`The tarball has a file it shouldn't: ${file}`)
   for (const required of ['README.md', 'LICENSE', 'vendor/linguist/LICENSE', 'vendor/linguist/vendor.json']) {
@@ -108,18 +108,19 @@ try {
     ...Object.values(manifest.exports).flatMap(target => (typeof target === 'string' ? [target] : Object.values(target))),
     ...Object.values(manifest.imports).flatMap(target => Object.values(target)),
   ]
-  for (const target of targets) if (!files.includes(target.replace(/^\.\//, ''))) fail(`${target} is exported but not in the tarball`)
+  for (const target of targets) if (!files.includes(target.replace(/^\.\//u, ''))) fail(`${target} is exported but not in the tarball`)
   const unpacked = join(scratch, 'unpacked')
   mkdirSync(unpacked)
   execFileSync(tar, ['-xzf', tarball, '-C', unpacked])
-  const internal = /@githubnext\/projections-[a-z]/
+  const internal = /@githubnext\/projections-[a-z]/u
   const machine = [workspace, resolve(workspace, '..'), process.env.HOME].filter(path => path && path.length > 1)
   for (const file of files) {
     const text = readFileSync(join(unpacked, 'package', file), 'utf8')
     const name = internal.exec(text)
-    if (name) fail(`${file} names an internal workspace: ${text.slice(Math.max(0, name.index - 60), name.index + 60).replace(/\s+/g, ' ')}`)
+    if (name)
+      fail(`${file} names an internal workspace: ${text.slice(Math.max(0, name.index - 60), name.index + 60).replace(/\s+/gu, ' ')}`)
     for (const path of machine) if (text.includes(path)) fail(`${file} includes a path on this machine (${path})`)
-    if (/sourceMappingURL=/.test(text)) fail(`${file} references a source map`)
+    if (/sourceMappingURL=/u.test(text)) fail(`${file} references a source map`)
   }
   // Installing the package runs nothing.
   const scripts = JSON.parse(readFileSync(join(unpacked, 'package/package.json'), 'utf8')).scripts ?? {}

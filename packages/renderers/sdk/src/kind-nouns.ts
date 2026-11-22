@@ -13,7 +13,7 @@ const phrases: Readonly<Record<string, SummaryNoun>> = {
 }
 
 /** Prefixes a kind keeps hyphenated, as one word: `pre-release` → `pre-releases`, `self-hosted`. */
-const prefixHyphen = /(^|[^A-Za-z])(pre|post|non|re|co|sub|multi|self|anti|semi|cross)-(?=[a-z])/gi
+const prefixHyphen = /(^|[^A-Z])(pre|post|non|re|co|sub|multi|self|anti|semi|cross)-(?=[a-z])/giu
 /** First words that make the kind an adjective phrase: `not-patchable` → `5 not patchable`. */
 const negations = new Set(['not', 'non', 'un', 'no'])
 /** Common adjectives a kind may be, which take no plural: `24 hidden`, `3 deprecated`. */
@@ -45,15 +45,15 @@ export function adjectivalKind(words: readonly string[]): boolean {
   if (words.length > 1 && negations.has(first)) return true
   if (adjectiveLike.has(last)) return false
   if (adjectives.has(last)) return true
-  return (last.length > 4 && /[^e]ed$/.test(last)) || (last.length > 5 && /(?:able|ible|ous|less)$/.test(last))
+  return (last.length > 4 && /[^e]ed$/u.test(last)) || (last.length > 5 && /(?:able|ible|ous|less)$/u.test(last))
 }
 
 /** A word's English plural, by the simple rules: `class` → `classes`, `policy` → `policies`, `key` → `keys`. */
 export function pluralWord(word: string): string {
   if (invariant.has(word.toLowerCase())) return word
-  if (/[^aeiou]y$/i.test(word)) return `${word.slice(0, -1)}ies`
-  if (/is$/i.test(word)) return `${word.slice(0, -2)}es`
-  if (/(s|x|z|ch|sh)$/i.test(word)) return `${word}es`
+  if (/[^aeiou]y$/iu.test(word)) return `${word.slice(0, -1)}ies`
+  if (/is$/iu.test(word)) return `${word.slice(0, -2)}es`
+  if (/(?:[sxz]|ch|sh)$/iu.test(word)) return `${word}es`
   return `${word}s`
 }
 
@@ -65,17 +65,17 @@ const lowercaseNames = new Set(['npm', 'pnpm', 'npx', 'kubectl', 'systemd'])
  * first word is a name written in lowercase (`npm package` stays `npm package`; see `lowercaseNames`).
  */
 export function sentenceCase(text: string): string {
-  const first = /^[^\s\-_.:/]*/.exec(text)![0]
+  const first = /^[^\s\-_.:/]*/u.exec(text)![0]
   return lowercaseNames.has(first) ? text : text.charAt(0).toUpperCase() + text.slice(1)
 }
 
 /** A kind's words: camel case, kebab case and snake case split, capitalized words lowercased (`devDependencies` → `dev dependencies`). */
 export function kindWords(kind: string): string[] {
   return kind
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .split(/[\s\-_.:/]+/)
+    .replace(/([a-z0-9])([A-Z])/gu, '$1 $2')
+    .split(/[\s\-_.:/]+/u)
     .filter(Boolean)
-    .map(word => (/^[A-Z][a-z0-9]*$/.test(word) || /^[a-z0-9]+$/.test(word) ? word.toLowerCase() : word))
+    .map(word => (/^[A-Z][a-z0-9]*$/u.test(word) || /^[a-z0-9]+$/u.test(word) ? word.toLowerCase() : word))
 }
 
 /**
@@ -98,8 +98,8 @@ export function humanizeKind(kind: string): SummaryNoun {
   if (words.length > 1 && prepositions.has(last.toLowerCase())) return {singular: phrase, plural: phrase}
   if (invariant.has(last.toLowerCase()) || adjectivalKind(words)) return {singular: phrase, plural: phrase}
   // Already plural: make the singular.
-  if (/[^aeiou]ies$/i.test(last) && last.length > 4) return noun(`${last.slice(0, -3)}y`, last)
-  if (/(ss|x|z|ch|sh)es$/i.test(last)) return noun(last.slice(0, -2), last)
-  if (/[^su]s$/i.test(last) && !/(is|ss)$/i.test(last)) return noun(last.slice(0, -1), last)
+  if (/[^aeiou]ies$/iu.test(last) && last.length > 4) return noun(`${last.slice(0, -3)}y`, last)
+  if (/(?:ss|x|z|ch|sh)es$/iu.test(last)) return noun(last.slice(0, -2), last)
+  if (/[^su]s$/iu.test(last) && !/(?:is|ss)$/iu.test(last)) return noun(last.slice(0, -1), last)
   return noun(last, pluralWord(last))
 }

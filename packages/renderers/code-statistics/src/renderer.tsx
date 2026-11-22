@@ -58,7 +58,7 @@ export function CodeStatisticsRenderer(props: RendererProps<typeof accepts>) {
   )
   useEffect(() => declareControls(declared), [declared, declareControls])
   const motionOf = useMemo(() => (diff ? () => settled : statisticsMotion(model, schedule)), [diff, model, schedule])
-  const patternId = `stat-hatch-${useId().replace(/[^A-Za-z0-9_-]/g, '')}`
+  const patternId = `stat-hatch-${useId().replace(/[^\w-]/giu, '')}`
   const number = useMemo(() => {
     const format = new Intl.NumberFormat(locale)
     return (value: number) => format.format(value)

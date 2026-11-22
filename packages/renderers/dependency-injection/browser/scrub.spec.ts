@@ -71,7 +71,7 @@ test('painted frames follow the comparison steps and settle at every step end', 
   const lifetime = renderer.frame.locator(`[data-unit-id="${unit('IOrderRepository')}"] .di-lifetime-label`)
   await expect(lifetime).toHaveText('Singleton')
   const mark = renderer.frame.locator(`[data-unit-id="${unit('IOrderRepository')}"] .di-lifetime`)
-  await expect(mark).toHaveClass(/singleton/)
+  await expect(mark).toHaveClass(/singleton/u)
   frame = await measure()
   expect(card(frame, unit('IPriceCalculator'))).toBeUndefined()
   await renderer.seek(added)
@@ -80,7 +80,7 @@ test('painted frames follow the comparison steps and settle at every step end', 
   expect(link(frame, unit('IPriceCalculator'))?.opacity).toBe(1)
   await renderer.seek(0)
   await expect(lifetime).toHaveText('Scoped')
-  await expect(mark).toHaveClass(/scoped/)
+  await expect(mark).toHaveClass(/scoped/u)
 })
 
 test('a custom comparator order changes the painted order', async ({page}) => {
@@ -118,12 +118,12 @@ test('change emphasis follows the host highlighting and is gone at both endpoint
 test('card parts and arrows select their rows, by pointer and keyboard, and the host selection wins', async ({page}) => {
   const renderer = await openRenderer(page, {renderer: 'dependency-injection', before, after, progress: 1})
   const repository = renderer.frame.locator(`[data-unit-id="${unit('IOrderRepository')}"]`)
-  await repository.getByRole('button', {name: /^Inspect registration of IOrderRepository, Singleton/}).click()
+  await repository.getByRole('button', {name: /^Inspect registration of IOrderRepository, Singleton/u}).click()
   await expect.poll(async () => (await renderer.state()).selections.at(-1)).toBe(`${unit('IOrderRepository')}:registration:0`)
-  await expect(repository).toHaveClass(/selected/)
+  await expect(repository).toHaveClass(/selected/u)
   await renderer.select(unit('IOrderRepository'))
-  await expect(repository.getByRole('button', {name: /^Inspect contract IOrderRepository/})).toHaveAttribute('aria-pressed', 'true')
-  const arrow = renderer.frame.getByRole('button', {name: /^Inspect constructor dependency prices, Added/})
+  await expect(repository.getByRole('button', {name: /^Inspect contract IOrderRepository/u})).toHaveAttribute('aria-pressed', 'true')
+  const arrow = renderer.frame.getByRole('button', {name: /^Inspect constructor dependency prices, Added/u})
   await arrow.focus()
   await page.keyboard.press('Enter')
   await expect.poll(async () => (await renderer.state()).selections.at(-1)).toBe('dependsOn:OrderService:prices')
@@ -207,7 +207,7 @@ test('the composition opens fitted to the frame (or at the 8 px text floor), nev
   await renderer.action('zoom-fit')
   await expect.poll(async () => (await measure()).card).toBeCloseTo(layout.card, 1)
   // The legend is the host's: none in the frame, and the runtime-resolution line is in the one the renderer reports.
-  await expect(renderer.frame.getByRole('group', {name: /legend/i})).toHaveCount(0)
+  await expect(renderer.frame.getByRole('group', {name: /legend/iu})).toHaveCount(0)
   expect((await renderer.state()).legend?.items.map(item => item.label)).toContain('Resolved at runtime')
   if (review) await renderer.iframe.screenshot({path: `${review}/di-${testInfo.project.name}-dark-mid.png`})
 })

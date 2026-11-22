@@ -339,7 +339,7 @@ export function applyEnvironment(environment: RendererEnvironment, element: HTML
   // Every token of the current set is defined, using defaults for any the host omitted.
   const tokens = resolveThemeTokens(environment.theme)
   for (const [name, value] of Object.entries(tokens)) {
-    if (/^[a-z0-9-]{1,64}$/.test(name)) element.style.setProperty(`--projections-${name}`, value)
+    if (/^[a-z0-9-]{1,64}$/u.test(name)) element.style.setProperty(`--projections-${name}`, value)
   }
   // An optional layout token the host no longer sends (a pane chip gone with its mode) falls back to the renderer's own.
   for (const name of optionalThemeTokenNames) if (!(name in tokens)) element.style.removeProperty(`--projections-${name}`)

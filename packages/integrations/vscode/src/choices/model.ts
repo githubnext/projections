@@ -49,7 +49,7 @@ export function pairChoiceId(pair: Pair): string {
 
 /** The pair a `pair:<before>..<after>` identity names. */
 export const pairOf = (id: string): Pair | undefined => {
-  const match = /^pair:(.*)\.\.(.+)$/.exec(id)
+  const match = /^pair:(.*)\.\.(.+)$/u.exec(id)
   return match ? {...(match[1] ? {before: match[1]} : {}), after: match[2]!} : undefined
 }
 
@@ -65,9 +65,9 @@ export function isChoice(value: unknown): value is Choice {
   if (typeof choice?.id !== 'string') return false
   const known =
     ['now', 'uncommitted', 'branch', 'last-commit', 'release', 'custom'].includes(choice.id) ||
-    /^pr:\d+$/.test(choice.id) ||
-    /^bookmark:.+$/.test(choice.id) ||
-    /^pair:.*\.\..+$/.test(choice.id)
+    /^pr:\d+$/u.test(choice.id) ||
+    /^bookmark:.+$/u.test(choice.id) ||
+    /^pair:.*\.\..+$/u.test(choice.id)
   const pair = choice.pair as Partial<Pair> | undefined
   const pairOk = pair === undefined || (typeof pair.after === 'string' && (pair.before === undefined || typeof pair.before === 'string'))
   return known && pairOk && (choice.id === 'custom' || choice.id.startsWith('pr:') ? Boolean(pair) : true)

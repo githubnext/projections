@@ -24,7 +24,7 @@ export const paths = {
 export function catalogTools(read) {
   const text = read(paths.catalog)
   if (text === undefined) return null
-  const start = /pub fn catalog\(\) -> Vec<Tool> \{/.exec(text)
+  const start = /pub fn catalog\(\) -> Vec<Tool> \{/u.exec(text)
   if (!start) throw new Error(`${paths.catalog}: no catalog() function`)
   const open = start.index + start[0].length - 1
   const body = tokenize(balanced(text, open).inner, lineAt(text, open))
@@ -35,7 +35,7 @@ export function catalogTools(read) {
       title: tool.title,
       readOnly: tool.read_only,
       destructive: tool.destructive,
-      trust: tool.trust.replace(/^Trust::/, '').toLowerCase(),
+      trust: tool.trust.replace(/^Trust::/u, '').toLowerCase(),
       view: tool.view,
       schema: tool.input_schema,
       line: keyLines.get(tool)?.name,
@@ -46,10 +46,10 @@ export function catalogTools(read) {
 export function appTools(read) {
   const text = read(paths.app)
   if (text === undefined) return null
-  const linked = [...text.matchAll(/tool\["name"\] == "(\w+)"/g)].map(match => match[1])
+  const linked = [...text.matchAll(/tool\["name"\] == "(\w+)"/gu)].map(match => match[1])
   const module = rustModule(text, paths.app)
   const added = []
-  for (const match of text.matchAll(/tools\.push\(/g)) {
+  for (const match of text.matchAll(/tools\.push\(/gu)) {
     const open = match.index + match[0].length - 1
     const tool = module.evaluate(tokenize(balanced(text, open).inner, lineAt(text, open)))
     added.push({
@@ -62,7 +62,7 @@ export function appTools(read) {
       line: lineAt(text, open),
     })
   }
-  const uri = /const RESOURCE_URI: &str = ("[^"]*")/.exec(text)
+  const uri = /const RESOURCE_URI: &str = ("[^"]*")/u.exec(text)
   return {linked, added, view: uri ? quoted(uri[1], 0).value : undefined}
 }
 
@@ -70,7 +70,7 @@ export function appTools(read) {
 export function vscodeTools(read) {
   const text = read(paths.vscode)
   if (text === undefined) return null
-  const prefix = /toolPrefix = '([^']*)'/.exec(read(paths.vscodeTools) ?? '')?.[1] ?? 'projections_'
+  const prefix = /toolPrefix = '([^']*)'/u.exec(read(paths.vscodeTools) ?? '')?.[1] ?? 'projections_'
   const lines = text.split('\n')
   return {
     prefix,
@@ -87,15 +87,15 @@ export function vscodeTools(read) {
 export function canvasActions(read) {
   const text = read(paths.canvas)
   if (text === undefined) return null
-  const actions = /const actions = \[([^\]]*)\]/.exec(text)
+  const actions = /const actions = \[([^\]]*)\]/u.exec(text)
   if (!actions) throw new Error(`${paths.canvas}: no actions list`)
-  const project = /const projectInput = \{\s*type: '(\w+)'/.exec(text)
-  const added = project && /properties: \{\.\.\.schema\.properties, project: projectInput\}/.test(text)
+  const project = /const projectInput = \{\s*type: '(\w+)'/u.exec(text)
+  const added = project && /properties: \{\.\.\.schema\.properties, project: projectInput\}/u.test(text)
   return {
-    actions: [...actions[1].matchAll(/'(\w+)'/g)].map(match => match[1]),
+    actions: [...actions[1].matchAll(/'(\w+)'/gu)].map(match => match[1]),
     line: lineAt(text, actions.index),
     added: added ? {project: {type: project[1]}} : {},
     addedLine: project ? lineAt(text, project.index) : undefined,
-    openInput: /inputSchema: withProject\(tool\('(\w+)'\)\.inputSchema\)\}/.exec(text)?.[1],
+    openInput: /inputSchema: withProject\(tool\('(\w+)'\)\.inputSchema\)\}/u.exec(text)?.[1],
   }
 }

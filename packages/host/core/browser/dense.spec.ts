@@ -100,7 +100,7 @@ test('on desktop row 1 holds, in order, the picker, mode, scope, zoom actions, f
   await expect(row.getByRole('button', {name: 'More', exact: true})).toHaveCount(0)
   // Table and text are in Settings ("Show as"), not the row; playback has one play button and small step buttons.
   await expect(row.getByRole('tablist')).toHaveCount(0)
-  await expect(row.getByRole('group', {name: 'Comparison playback'}).getByRole('button', {name: /^(Play|Pause)/})).toHaveCount(1)
+  await expect(row.getByRole('group', {name: 'Comparison playback'}).getByRole('button', {name: /^(Play|Pause)/u})).toHaveCount(1)
   for (const name of ['Previous step', 'Next step']) {
     expect((await row.getByRole('button', {name}).boundingBox())!.width).toBeLessThanOrEqual(32)
   }
@@ -132,13 +132,13 @@ test('on a phone, row 1 keeps the pickers, mode, Settings and More; row 2 is pla
   await expect(first!.getByRole('button', {name: 'Settings', exact: true})).toBeVisible()
   await expect(first!.getByRole('button', {name: 'More', exact: true})).toBeVisible()
   const playback = second!.getByRole('group', {name: 'Comparison playback'})
-  await expect(playback.getByRole('button', {name: /^Play (forward|backward)$/})).toBeVisible()
+  await expect(playback.getByRole('button', {name: /^Play (forward|backward)$/u})).toBeVisible()
   const slider = playback.getByRole('slider', {name: 'Transition'})
   expect((await slider.boundingBox())!.width).toBeGreaterThanOrEqual(0.8 * (await second!.boundingBox())!.width)
   // More holds the actions row 1 has no room for (zoom first, Filter last); no second play control and no view switch.
   const more = await openMore(page)
   await expect(more.getByRole('button', {name: 'Zoom in', exact: true})).toBeVisible()
-  await expect(more.getByRole('button', {name: /^(Play|Pause)/})).toHaveCount(0)
+  await expect(more.getByRole('button', {name: /^(Play|Pause)/u})).toHaveCount(0)
   await expect(more.getByRole('tablist')).toHaveCount(0)
   await closeMenus(page)
   // Every action is reachable: in row 1 or in More.
@@ -237,7 +237,7 @@ test('reduced motion keeps one button, named for the endpoint it shows', async (
   await open(page, 'before=v1&after=v3', desktop)
   const playback = toolbar(page).getByRole('group', {name: 'Comparison playback'})
   await expect(playback.getByRole('button', {name: 'Show v1 · base'})).toBeVisible()
-  await expect(playback.getByRole('button', {name: /^(Play|Pause|Show)/})).toHaveCount(1)
+  await expect(playback.getByRole('button', {name: /^(Play|Pause|Show)/u})).toHaveCount(1)
   await playback.getByRole('button', {name: 'Show v1 · base'}).click()
   await expect(view(page)).toHaveAttribute('data-progress', '0')
   await expect(playback.getByRole('button', {name: 'Show v3 · latest push'})).toBeVisible()
@@ -352,7 +352,7 @@ test('Filter expands into the find field; Escape clears the query, then collapse
   await showEverything(page)
   const inMore = await openFilter(page)
   await inMore.fill('pay')
-  await expect(page.locator('.ph-table-view tbody tr[data-row-id]').first()).toContainText(/pay/i)
+  await expect(page.locator('.ph-table-view tbody tr[data-row-id]').first()).toContainText(/pay/iu)
 })
 
 test('full screen shows the view over the page; without element full screen it falls back to a fixed overlay that Escape exits', async ({

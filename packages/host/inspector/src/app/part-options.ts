@@ -72,7 +72,7 @@ export function comparatorOptions(
         label: path
           .split('/')
           .pop()!
-          .replace(/\.comparator\.ya?ml$/, ''),
+          .replace(/\.comparator\.ya?ml$/u, ''),
         origin: `Comparator file · ${path}`,
         group: 'Comparator files',
       })),

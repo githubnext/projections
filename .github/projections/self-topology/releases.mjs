@@ -14,10 +14,10 @@
 //   no npm release. Turning publishing on in the workflow (an unconditional step, a dist `publish-jobs` entry) shows it.
 
 const registries = [
-  {pattern: /\bnpm\s+publish\b(.*)$/, registry: 'npm', option: /(?:--workspace|-w)[ =](\S+)/},
-  {pattern: /\b(?:@vscode\/)?vsce\s+publish\b(.*)$/, registry: 'Marketplace', option: /(?:--packagePath|-i)[ =](\S+)/, vscode: true},
-  {pattern: /\bovsx\s+publish\b(.*)$/, registry: 'Open VSX', option: /(?:--packagePath|-i)[ =](\S+)/, vscode: true},
-  {pattern: /\bcargo\s+publish\b(.*)$/, registry: 'crates.io', option: /(?:--package|-p)[ =](\S+)/, crate: true},
+  {pattern: /\bnpm\s+publish\b(.*)$/u, registry: 'npm', option: /(?:--workspace|-w)[ =](\S+)/u},
+  {pattern: /\b(?:@vscode\/)?vsce\s+publish\b(.*)$/u, registry: 'Marketplace', option: /(?:--packagePath|-i)[ =](\S+)/u, vscode: true},
+  {pattern: /\bovsx\s+publish\b(.*)$/u, registry: 'Open VSX', option: /(?:--packagePath|-i)[ =](\S+)/u, vscode: true},
+  {pattern: /\bcargo\s+publish\b(.*)$/u, registry: 'crates.io', option: /(?:--package|-p)[ =](\S+)/u, crate: true},
 ]
 const distRegistries = {npm: 'npm', homebrew: 'Homebrew'}
 
@@ -25,50 +25,50 @@ const distRegistries = {npm: 'npm', homebrew: 'Homebrew'}
 export function actionScripts(text) {
   return text.split('\n').flatMap((line, index) => {
     const script =
-      /^\s+(?:main|pre|post):\s*['"]?([^\s'"]+)/.exec(line)?.[1] ??
-      /\bnode\s+['"]?(?:\$GITHUB_ACTION_PATH|\$\{\{\s*github\.action_path\s*\}\})\/([^\s'"]+)/.exec(line)?.[1]
+      /^\s+(?:main|pre|post):\s*['"]?([^\s'"]+)/u.exec(line)?.[1] ??
+      /\bnode\s+['"]?(?:\$GITHUB_ACTION_PATH|\$\{\{\s*github\.action_path\s*\}\})\/([^\s'"]+)/u.exec(line)?.[1]
     return script ? [{script, line: index + 1}] : []
   })
 }
 
 /** A TOML array's strings: `key = ["a", "b"]` (on one or more lines) in `text`, or undefined when absent. */
 export function tomlList(text, key) {
-  const literal = key.replace(/[\\^$.*+?()[\]{}|/-]/g, '\\$&')
+  const literal = key.replace(/[\\^$.*+?()[\]{}|/-]/gu, '\\$&')
   const match = new RegExp(`^\\s*${literal}\\s*=\\s*\\[([^\\]]*)\\]`, 'm').exec(text)
-  return match ? [...match[1].matchAll(/["']([^"']+)["']/g)].map(([, value]) => value) : undefined
+  return match ? [...match[1].matchAll(/["']([^"']+)["']/gu)].map(([, value]) => value) : undefined
 }
 
 /** The `[dist]` table of `dist-workspace.toml`, else Cargo.toml's `[workspace.metadata.dist]`; '' without either. */
 function distTable(text) {
-  const start = /^\[(?:dist|workspace\.metadata\.dist)\]\s*$/m.exec(text)
+  const start = /^\[(?:dist|workspace\.metadata\.dist)\]\s*$/mu.exec(text)
   if (!start) return ''
   const rest = text.slice(start.index + start[0].length)
-  const next = /^\[[^\]]+\]\s*$/m.exec(rest)
+  const next = /^\[[^\]]+\]\s*$/mu.exec(rest)
   return {text: next ? rest.slice(0, next.index) : rest, offset: start.index + start[0].length}
 }
 
 /** A workflow's jobs: each one's name, its lines (text and 1-based number) and its own condition. */
 export function workflowJobs(text) {
   const lines = text.split('\n')
-  const start = lines.findIndex(line => /^jobs:\s*$/.test(line))
+  const start = lines.findIndex(line => /^jobs:\s*$/u.test(line))
   if (start < 0) return []
   const jobs = []
   for (let index = start + 1; index < lines.length; index++) {
     const line = lines[index]
-    const name = /^ {2}([\w-]+):\s*$/.exec(line)?.[1]
+    const name = /^ {2}([\w-]+):\s*$/u.exec(line)?.[1]
     if (name) jobs.push({name, lines: []})
-    else if (/^\S/.test(line)) break
-    else if (jobs.length && !/^\s*#/.test(line)) jobs.at(-1).lines.push({text: line, line: index + 1})
+    else if (/^\S/u.test(line)) break
+    else if (jobs.length && !/^\s*#/u.test(line)) jobs.at(-1).lines.push({text: line, line: index + 1})
   }
-  for (const job of jobs) job.condition = job.lines.map(({text}) => /^ {4}if:\s*(.*)$/.exec(text)?.[1]).find(Boolean) ?? ''
+  for (const job of jobs) job.condition = job.lines.map(({text}) => /^ {4}if:\s*(.*)$/u.exec(text)?.[1]).find(Boolean) ?? ''
   return jobs
 }
 
-const configuration = /\b(vars|secrets)\./
+const configuration = /\b(?:vars|secrets)\./u
 /** Whether a job runs only as repository configuration says: its condition reads it, or a job it needs computes it. */
 function gated(job, jobs) {
   if (configuration.test(job.condition)) return true
-  return [...job.condition.matchAll(/\bneeds\.([\w-]+)\.outputs\b/g)].some(([, name]) =>
+  return [...job.condition.matchAll(/\bneeds\.([\w-]+)\.outputs\b/gu)].some(([, name]) =>
     jobs.find(other => other.name === name)?.lines.some(({text}) => configuration.test(text)),
   )
 }
@@ -113,17 +113,17 @@ export function releaseChannels({roots, read, files, units, owner}) {
     const artifactJobs = new Set(
       dist
         ? ['global-artifacts-jobs', 'local-artifacts-jobs'].flatMap(key =>
-            (tomlList(dist.text, key) ?? []).map(job => `${prefix}.github/workflows/${job.replace(/^\.\//, '')}.yml`),
+            (tomlList(dist.text, key) ?? []).map(job => `${prefix}.github/workflows/${job.replace(/^\.\//u, '')}.yml`),
           )
         : [],
     )
-    const workflows = files.filter(file => file.startsWith(`${prefix}.github/workflows/`) && /\.ya?ml$/.test(file))
+    const workflows = files.filter(file => file.startsWith(`${prefix}.github/workflows/`) && /\.ya?ml$/u.test(file))
     for (const workflow of workflows) {
       const jobs = workflowJobs(read(workflow))
       for (const job of jobs) {
-        if (artifactJobs.has(workflow) && job.lines.some(({text}) => /\buses:\s*actions\/upload-artifact@/.test(text))) {
+        if (artifactJobs.has(workflow) && job.lines.some(({text}) => /\buses:\s*actions\/upload-artifact@/u.test(text))) {
           for (const {text, line} of job.lines) {
-            for (const [, script] of text.matchAll(/\bnode\s+(\S*release[^\s/]*\.[cm]?js)\b/g)) {
+            for (const [, script] of text.matchAll(/\bnode\s+(\S*release[^\s/]*\.[cm]?js)\b/gu)) {
               let unit = owner(root.path, `${prefix}${script}`)
               // A release script beside a crate dist releases packages that crate's binaries.
               unit = released.find(crate => crate.directory === unit?.directory) ?? unit
@@ -132,7 +132,7 @@ export function releaseChannels({roots, read, files, units, owner}) {
           }
         }
         if (gated(job, jobs)) continue
-        const directory = job.lines.map(({text}) => /^\s+working-directory:\s*(\S+)/.exec(text)?.[1]).find(Boolean)
+        const directory = job.lines.map(({text}) => /^\s+working-directory:\s*(\S+)/u.exec(text)?.[1]).find(Boolean)
         for (const {text, line} of job.lines) {
           for (const {pattern, registry, option, vscode, crate} of registries) {
             const command = pattern.exec(text)

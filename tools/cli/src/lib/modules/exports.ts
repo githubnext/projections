@@ -20,11 +20,11 @@ export function entryPoints(root: string, unit: Unit): [string, string][] {
   const entries: [string, string][] = []
   for (const [subpath, value] of Object.entries(exports)) {
     const target = targetOf(value)
-    if (!target || !/\.(?:[cm]?js|d\.ts|tsx?)$/.test(target)) continue
+    if (!target || !/\.(?:[cm]?js|d\.ts|tsx?)$/u.test(target)) continue
     const stem = posix
       .join(unit.path, target)
-      .replace(/^(.*?)\/dist\//, '$1/src/')
-      .replace(/(?:\.d)?\.(?:[cm]?js|ts|tsx)$/, '')
+      .replace(/^(.*?)\/dist\//u, '$1/src/')
+      .replace(/(?:\.d)?\.(?:[cm]?js|ts|tsx)$/u, '')
     const source = ['.ts', '.tsx', '.mts', '.js', '.mjs'].map(extension => stem + extension).find(path => existsSync(join(root, path)))
     if (source) entries.push([subpath, source])
   }

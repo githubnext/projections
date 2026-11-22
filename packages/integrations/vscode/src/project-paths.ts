@@ -11,7 +11,7 @@
 export function inRepository(prefix: string, path: unknown): string | undefined {
   if (typeof path !== 'string' || !path || path.startsWith('/')) return undefined
   const parts = prefix.split('/').filter(Boolean)
-  for (const segment of path.split(/[\\/]/)) {
+  for (const segment of path.split(/[\\/]/u)) {
     if (segment === '' || segment === '.') continue
     if (segment !== '..') parts.push(segment)
     else if (!parts.pop()) return undefined

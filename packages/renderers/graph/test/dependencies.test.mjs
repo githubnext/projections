@@ -30,7 +30,7 @@ test('one revision shows the roots and their direct dependencies, with transitiv
   assert.ok(!view.direct.has('workspace:@shop/web'), 'a workspace member stays a root')
   assert.ok(!ids(view).includes('package:body-parser'))
   const express = row(view, 'transitive:package:express')
-  assert.match(express.after.label, /^\d+ more packages$/)
+  assert.match(express.after.label, /^\d+ more packages$/u)
   assert.equal(express.status, 'unchanged')
   // Every installed package is either a card or counted in exactly one summary.
   const external = extraction.entities.filter(entity => entity.kind === 'external-package').length
@@ -77,7 +77,7 @@ test('collapsing an expanded package hides what it showed, and expanding it agai
   const nested = dependencyView(model, [], new Set(['package:express', 'package:body-parser']))
   const inner = ids(nested).find(id => id.startsWith('package:') && !ids(express).includes(id))
   assert.ok(inner, 'an expanded package inside an expanded one shows its packages')
-  assert.match(row(nested, 'transitive:package:body-parser').after.label, /^Collapse \d+ packages?$/)
+  assert.match(row(nested, 'transitive:package:body-parser').after.label, /^Collapse \d+ packages?$/u)
   // Collapsing express hides body-parser and everything it showed, back to express's summary.
   const collapsed = dependencyView(model, [], new Set(['package:body-parser']))
   assert.deepEqual(ids(collapsed), ids(closed))

@@ -336,7 +336,7 @@ test('arrowheads: the shaft runs straight along the head axis into the middle of
   }
   // The head is an equilateral triangle: its inner outline's three sides are equal.
   const head = arrowHead({x: 0, y: 0}, {x: 0, y: 1})
-  const corners = [...head.path.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
+  const corners = [...head.path.matchAll(/(-?[\d.]+),(-?[\d.]+)/gu)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
   const sides = corners.map((point, index) => Math.hypot(point.x - corners[(index + 1) % 3].x, point.y - corners[(index + 1) % 3].y))
   for (const side of sides) assert.ok(Math.abs(side - sides[0]) < 0.02, JSON.stringify(sides))
   // Rounded by the stroke, its tip touches the target and its flat base is an arrowhead's length back.
@@ -370,7 +370,7 @@ test('arrowheads stay attached through every frame of every graph scenario, in b
           const target = nodes.get(edge.toId)
           if (target.group || nodes.get(edge.fromId).group) continue
           const drawn = drawnEdge(edge, nodes.get(edge.fromId), target)
-          const shaft = [...drawn.d.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
+          const shaft = [...drawn.d.matchAll(/(-?[\d.]+),(-?[\d.]+)/gu)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
           // The drawn path is rounded to hundredths.
           const end = shaft.at(-1),
             previous = shaft.at(-2)
@@ -432,7 +432,7 @@ test('scrubbing never slants a straight run: a route whose morph would is redraw
 
 /** A drawn shaft's control points, recovered from its path (`M` then `C` triples). */
 function shaftOf(drawn) {
-  return [...drawn.d.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
+  return [...drawn.d.matchAll(/(-?[\d.]+),(-?[\d.]+)/gu)].map(match => ({x: Number(match[1]), y: Number(match[2])}))
 }
 
 test('diff mode draws the union with the same drafted routes and touching arrowheads, every scenario', async () => {

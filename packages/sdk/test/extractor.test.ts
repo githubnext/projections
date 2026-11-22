@@ -109,15 +109,15 @@ test('an extraction fills in the protocol and sorts its items by ID, as the Engi
 test('an extraction explains what is wrong with its items', () => {
   const entity = {id: 'a', kind: 'k', label: 'A'}
   const cases: [() => unknown, RegExp][] = [
-    [() => extraction({entities: 'a' as never}), /array of objects/],
-    [() => extraction({entities: [['a']] as never}), /entities\[0\] is an array, not an object/],
-    [() => extraction({entities: [{kind: 'k'}] as never}), /entities\[0\] has no id/],
-    [() => extraction({entities: {a: {id: 'b', kind: 'k', label: 'A'}}}), /has the id "b"/],
-    [() => extraction({entities: [{id: 'a', kind: 'k'}] as never}), /entity "a" needs label/],
-    [() => extraction({relationships: [{id: 'r', kind: 'k', from: 'a'}] as never}), /relationship "r" needs to/],
-    [() => extraction({entities: [entity], relationships: [{...entity, from: 'a', to: 'a'}]}), /Two items/],
-    [() => extraction({schema: 'graph' as never}), /domain schema/],
-    [() => extraction({colour: 'red'} as never), /no field "colour"/],
+    [() => extraction({entities: 'a' as never}), /array of objects/u],
+    [() => extraction({entities: [['a']] as never}), /entities\[0\] is an array, not an object/u],
+    [() => extraction({entities: [{kind: 'k'}] as never}), /entities\[0\] has no id/u],
+    [() => extraction({entities: {a: {id: 'b', kind: 'k', label: 'A'}}}), /has the id "b"/u],
+    [() => extraction({entities: [{id: 'a', kind: 'k'}] as never}), /entity "a" needs label/u],
+    [() => extraction({relationships: [{id: 'r', kind: 'k', from: 'a'}] as never}), /relationship "r" needs to/u],
+    [() => extraction({entities: [entity], relationships: [{...entity, from: 'a', to: 'a'}]}), /Two items/u],
+    [() => extraction({schema: 'graph' as never}), /domain schema/u],
+    [() => extraction({colour: 'red'} as never), /no field "colour"/u],
   ]
   for (const [call, message] of cases) assert.throws(call, message)
 })
@@ -138,7 +138,7 @@ test('result writes one extraction to stdout, once', () => {
     entities: [{id: 'a', kind: 'k', label: 'é', data: {n: 1}}],
     relationships: [],
   })
-  assert.throws(() => run(`result(); result()`), /call it once/)
+  assert.throws(() => run(`result(); result()`), /call it once/u)
 })
 
 test('result names the item whose value JSON cannot hold', () => {

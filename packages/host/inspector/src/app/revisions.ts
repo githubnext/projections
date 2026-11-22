@@ -11,13 +11,13 @@ export function revisionKey(document: ExtractionDocument): string {
   const revision = document.provenance.revision
   return revision.kind === 'working-tree' ? workingTree : revision.commit
 }
-const shaPattern = /^[0-9a-f]{40}$|^[0-9a-f]{64}$/i
+const shaPattern = /^[0-9a-f]{40}$|^[0-9a-f]{64}$/iu
 /**
  * Whether `ref` names `commit` by its hash: in full, or abbreviated as `git rev-parse --short` gives it (7 to 39 hex
  * digits, `5c95b54e0d1b`). Shorter hex names are left as refs: a branch may well be called `cafe`.
  */
 const namesCommit = (ref: string, commit: string) =>
-  shaPattern.test(ref) || ref === commit || (/^[0-9a-f]{7,39}$/i.test(ref) && commit.toLowerCase().startsWith(ref.toLowerCase()))
+  shaPattern.test(ref) || ref === commit || (/^[0-9a-f]{7,39}$/iu.test(ref) && commit.toLowerCase().startsWith(ref.toLowerCase()))
 /** How long ago an ISO date was (`revisionAge`): `just now`, `5 minutes ago`, `2 days ago`. */
 export const age = revisionAge
 /**
@@ -51,7 +51,7 @@ function suppliedFile(document: ExtractionDocument): string | undefined {
   const limitation = document.provenance.limitations.find(text => text.startsWith(suppliedPrefix))
   if (!limitation) return 'Supplied extraction'
   const path = limitation.slice(suppliedPrefix.length).split('; ')[0] ?? ''
-  return path.split(/[\\/]/).pop() || 'Supplied extraction'
+  return path.split(/[\\/]/u).pop() || 'Supplied extraction'
 }
 
 /** The label of an extraction, for example `HEAD~1 · 1a2b3c4d`, `Working tree` or the file it was supplied in. */
@@ -98,8 +98,8 @@ export interface RowState {
 }
 
 /** How a ref reads in the Explorer and status line. */
-export const refName = (ref: string) => (ref === workingTree ? 'Working tree' : /^[0-9a-f]{40}$/i.test(ref) ? ref.slice(0, 8) : ref)
-export const symbolic = (ref: string) => ref !== workingTree && !/^[0-9a-f]{40}$/i.test(ref)
+export const refName = (ref: string) => (ref === workingTree ? 'Working tree' : /^[0-9a-f]{40}$/iu.test(ref) ? ref.slice(0, 8) : ref)
+export const symbolic = (ref: string) => ref !== workingTree && !/^[0-9a-f]{40}$/iu.test(ref)
 
 /** The shown pair's extractions as a host reads them: each side's job and the result's identity. */
 export function resultsOf(

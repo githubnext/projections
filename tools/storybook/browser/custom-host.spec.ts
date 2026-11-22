@@ -12,12 +12,12 @@ test('a custom host on the core alone plays with Space and chooses views with th
     new URL(`iframe.html?id=core-custom-host--animated&viewMode=story&globals=theme:${theme}`, process.env.PROJECTIONS_STORYBOOK_URL).href,
   )
   const toolbar = page.getByRole('toolbar', {name: 'Custom toolbar'})
-  await expect(toolbar.getByRole('button', {name: /^Play (forward|backward)$/})).toBeVisible()
+  await expect(toolbar.getByRole('button', {name: /^Play (forward|backward)$/u})).toBeVisible()
   await toolbar.focus()
   await page.keyboard.press(' ')
   await expect(toolbar.getByRole('button', {name: 'Pause'})).toBeVisible()
   await page.keyboard.press(' ')
-  await expect(toolbar.getByRole('button', {name: /^Play (forward|backward)$/})).toBeVisible()
+  await expect(toolbar.getByRole('button', {name: /^Play (forward|backward)$/u})).toBeVisible()
 
   const views = toolbar.getByRole('radiogroup', {name: 'View'})
   await views.getByRole('radio', {checked: true}).press('End')

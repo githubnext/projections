@@ -15,7 +15,7 @@ export async function readLibraries(): Promise<Libraries> {
   const directory = path.dirname(ts.getDefaultLibFilePath({}))
   const texts = new Map<string, string>()
   for (const name of await readdir(directory)) {
-    if (/^lib(?:\..+)?\.d\.ts$/.test(name)) texts.set(path.join(directory, name), await readFile(path.join(directory, name), 'utf8'))
+    if (/^lib(?:\..+)?\.d\.ts$/u.test(name)) texts.set(path.join(directory, name), await readFile(path.join(directory, name), 'utf8'))
   }
   return {directory, texts}
 }

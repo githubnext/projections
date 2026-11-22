@@ -64,8 +64,8 @@ export function folderControls(names: readonly string[]): {controls: RendererCon
   for (const name of names.slice(0, folderControlLimit)) {
     const slug =
       name
-        .replace(/^\.+/, '')
-        .replace(/[^A-Za-z0-9_.-]/g, '-')
+        .replace(/^\.+/u, '')
+        .replace(/[^\w.-]/giu, '-')
         .slice(0, 50) || 'folder'
     let id = `show.${slug}`
     for (let suffix = 2; used.has(id); suffix++) id = `show.${slug}-${suffix}`

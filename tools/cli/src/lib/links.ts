@@ -35,7 +35,7 @@ function blankCode(markdown: string): string {
   let fence: string | undefined
   const lines = markdown.replaceAll('\r\n', '\n').split('\n')
   const kept = lines.map(line => {
-    const marker = /^\s{0,3}(`{3,}|~{3,})/.exec(line)?.[1]
+    const marker = /^\s{0,3}(\x60{3,}|~{3,})/.exec(line)?.[1]
     if (fence) {
       if (marker && marker[0] === fence[0] && marker.length >= fence.length && line.trim() === marker) fence = undefined
       return blank(line)
@@ -46,7 +46,7 @@ function blankCode(markdown: string): string {
     }
     return line
   })
-  return kept.join('\n').replace(/(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g, blank)
+  return kept.join('\n').replace(/(\x60+)(?!\x60)[\s\S]*?(?<!\x60)\1(?!\x60)/g, blank)
 }
 
 export type Link = {target: string; line: number}

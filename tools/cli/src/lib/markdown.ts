@@ -57,7 +57,7 @@ export function plain(markdown: string): string {
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
     .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
   return withoutTags(text)
-    .replace(/`([^`]*)`/g, '$1')
+    .replace(/\x60([^\x60]*)\x60/g, '$1')
     .replace(/(\*\*|__)(.*?)\1/g, '$2')
     .replace(/\s+/g, ' ')
     .trim()
@@ -68,7 +68,7 @@ export function firstParagraph(markdown: string): string | undefined {
   let fenced = false
   const paragraph: string[] = []
   for (const line of parseFrontMatter(markdown).body.split('\n')) {
-    if (/^\s*(```|~~~)/.test(line)) {
+    if (/^\s*(\x60\x60\x60|~~~)/.test(line)) {
       fenced = !fenced
       if (paragraph.length) break
       continue
@@ -97,7 +97,7 @@ export function headings(markdown: string): Heading[] {
     .replaceAll('\r\n', '\n')
     .split('\n')
     .forEach((line, index) => {
-      if (/^\s*(```|~~~)/.test(line)) fenced = !fenced
+      if (/^\s*(\x60\x60\x60|~~~)/.test(line)) fenced = !fenced
       const match = !fenced && /^(#{1,6}) +(.+?)\s*#*\s*$/.exec(line)
       if (match) found.push({level: (match[1] as string).length, text: plain(match[2] as string), line: index + 1})
     })

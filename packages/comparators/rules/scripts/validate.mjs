@@ -50,13 +50,13 @@ const walkDocs = dir => {
 if (!only.length) walkDocs(join(root, 'docs'))
 for (const path of only.length ? [] : [...docs.sort(), join(root, 'packages/cli/templates/SKILL.md')]) {
   const text = readFileSync(path, 'utf8')
-  for (const match of text.matchAll(/```yaml\n(# [^\n]*\.comparator\.ya?ml\n[\s\S]*?)```/g)) {
+  for (const match of text.matchAll(/\x60\x60\x60yaml\n(# [^\n]*\.comparator\.ya?ml\n[\s\S]*?)\x60\x60\x60/g)) {
     // Excerpts (`...`) aren't whole files.
     if (!match[1].includes('\n...') && !match[1].includes(': ...')) {
       documents.push([`${path.slice(root.length)} (${match[1].split('\n')[0].slice(2)})`, match[1], true])
     }
   }
-  for (const match of text.matchAll(/```yaml\n(# [^\n]*\.comparator\.test\.ya?ml\n[\s\S]*?)```/g)) {
+  for (const match of text.matchAll(/\x60\x60\x60yaml\n(# [^\n]*\.comparator\.test\.ya?ml\n[\s\S]*?)\x60\x60\x60/g)) {
     if (!match[1].includes('\n...') && !match[1].includes(': ...')) {
       testDocuments.push([`${path.slice(root.length)} (${match[1].split('\n')[0].slice(2)})`, match[1]])
     }

@@ -23,7 +23,7 @@ export function mentionsPath(text: string): boolean {
   return pathStart.test(text) || nestedPath(text) || fileName(text)
 }
 
-const pathStart = /(?:^|[\s("'`])(?:\/|~\/|\.{1,2}\/|[A-Za-z]:\\)/
+const pathStart = /(?:^|[\s("'\x60])(?:\/|~\/|\.{1,2}\/|[A-Za-z]:\\)/
 const fileExtension = /^(?:json|ya?ml|[cm]?[jt]sx?|py|go|rs|cs|java|rb|toml|lock|md|html|css|sh)$/
 const wordCharacter = /\w/
 

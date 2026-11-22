@@ -149,5 +149,8 @@ test('enrichment changes are interpreted: a new warning and the agent configurat
   assert.deepEqual(interpretations['agent:tetragon'], ['agent-changed'])
   assert.deepEqual(interpretations[policy], ['scope-broadened', 'warning-added'])
   assert.ok(interpretations['policy:tetragon:TracingPolicyNamespaced:payments:shell-guard'].includes('warning-added'))
-  assert.match(comparison.changes.find(change => change.id === 'agent:tetragon').summary, /`policyFilter`: `true` → `false`/)
+  assert.match(
+    comparison.changes.find(change => change.id === 'agent:tetragon').summary,
+    /\x60policyFilter\x60: \x60true\x60 → \x60false\x60/,
+  )
 })

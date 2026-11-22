@@ -39,7 +39,7 @@ test("the helper requires the repository's own typescript and never falls back t
   assert.equal(result.status, 1)
   assert.equal(result.stdout, '')
   assert.match(result.stderr, /typescript-public-api uses the TypeScript 5\.x or 6\.x compiler API from the repository's own installation/)
-  assert.match(result.stderr, /Run your package manager's install .* `npm install --save-dev typescript@6`/)
+  assert.match(result.stderr, /Run your package manager's install .* \x60npm install --save-dev typescript@6\x60/)
 })
 
 test('a repository with only the native TypeScript 7 compiler is told to add the TypeScript 6 API package', async t => {
@@ -54,7 +54,7 @@ test('a repository with only the native TypeScript 7 compiler is told to add the
   const result = await runHelper('typescript-public-api', request('typescript-public-api', root), root)
   assert.equal(result.status, 1)
   assert.match(result.stderr, /@typescript\/native-preview 7\.0\.0-dev\.20261101\.1 \(TypeScript 7's native compiler\)/)
-  assert.match(result.stderr, /`pnpm add --save-dev --workspace-root @typescript\/typescript6`/)
+  assert.match(result.stderr, /\x60pnpm add --save-dev --workspace-root @typescript\/typescript6\x60/)
 })
 
 test('the revision is read from the extraction root while the compiler comes from the checkout', async t => {
@@ -121,7 +121,7 @@ test('entry points limit the program to what they reach, leaving out tests whose
   )
   assert.equal(whole.status, 1)
   assert.match(whole.stderr, /src\/index\.test\.ts:1: TS2307/)
-  assert.match(whole.stderr, /Some modules didn't resolve: install the repository's dependencies, or set `inputs\.entrypoints`/)
+  assert.match(whole.stderr, /Some modules didn't resolve: install the repository's dependencies, or set \x60inputs\.entrypoints\x60/)
 })
 
 test('typescript resolves from the configured tsconfig directory, as the package that owns it would', async t => {
@@ -196,7 +196,7 @@ test('the helper requires Node.js 20 or newer and says so', async t => {
   })
   assert.equal(result.status, 1)
   assert.equal(result.stdout, '')
-  assert.match(result.stderr, /requires Node\.js 20 or newer; `node` on PATH is v18\.20\.8/)
+  assert.match(result.stderr, /requires Node\.js 20 or newer; \x60node\x60 on PATH is v18\.20\.8/)
 })
 
 test('the helper rejects extractors that run natively and invalid invocations', async () => {

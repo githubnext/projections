@@ -335,7 +335,7 @@ test('actionable diagnostics and missing config/entrypoints fail instead of empt
   )
   await assert.rejects(
     collectTypeScript(await fixture(t, {'package.json': '{"name":"app"}', 'index.ts': 'export const x = 1;'}, 'typescript-public-api')),
-    /Cannot identify the public API. Define `package.json` `exports` or `types`/,
+    /Cannot identify the public API. Define \x60package.json\x60 \x60exports\x60 or \x60types\x60/,
   )
 })
 test('unsafe paths and symlinks leaving the repository are rejected; symlinks inside it are followed', async t => {
@@ -473,7 +473,7 @@ test('a monorepo: workspace symlinks are followed and only the selected packages
   // Selecting the duplicates themselves still fails.
   const both = structuredClone(context)
   both.input.projection.definition.inputs = {entrypoints: {'.': 'examples/one/index.ts', './two': 'examples/two/index.ts'}}
-  await assert.rejects(collectTypeScript(both), /Duplicate package name `example`/)
+  await assert.rejects(collectTypeScript(both), /Duplicate package name \x60example\x60/)
 })
 test('compiler resolution cannot follow outside-root imports or unlisted symlinked source', async t => {
   const outside = await fixture(t, {'index.ts': 'export interface Secret { value: string }'}, 'typescript-public-api')

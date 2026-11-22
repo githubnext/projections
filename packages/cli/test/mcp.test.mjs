@@ -108,7 +108,7 @@ test('projections mcp speaks MCP: initialize, list tools, call them, and write i
 
   const listed = await server.tool('list_projections')
   assert.equal(listed.isError, false)
-  assert.match(listed.text, /- services-node: Services extracted by Node\. Extractor command `node collect\.mjs`/)
+  assert.match(listed.text, /- services-node: Services extracted by Node\. Extractor command \x60node collect\.mjs\x60/)
   assert.deepEqual(
     listed.structuredContent.projections.map(projection => projection.id),
     ['services-node', 'services-python'],

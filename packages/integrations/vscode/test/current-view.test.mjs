@@ -63,7 +63,7 @@ test('the current view names the projection, its choice and revisions, mode, cou
   assert.match(text, /^The projection tab in front is "CI pipeline" \(projection ci-jobs\) in acme\.$/m)
   assert.match(
     text,
-    /^Definition: \.github\/projections\/ci-jobs\.json; extractor `github-actions-jobs`, renderer `dag`, the default comparator\.$/m,
+    /^Definition: \.github\/projections\/ci-jobs\.json; extractor \x60github-actions-jobs\x60, renderer \x60dag\x60, the default comparator\.$/m,
   )
   assert.match(text, /^Showing: Branch changes \(2 commits\)\. Before caf6ab7e \(merge base with main/m)
   assert.match(text, /→ After d698c162 \(feature\/ci/)
@@ -76,7 +76,10 @@ test('the current view names the projection, its choice and revisions, mode, cou
   assert.match(text, /^- unchanged \(declared\) job Lint \[job:lint\]\n {2}context: job Setup \[job:setup\]$/m)
   // An identity change without context is listed too.
   assert.match(text, /^- unchanged \(split\) job Format \[job:format\]$/m)
-  assert.match(text, /^- added job Unit tests \[job:unit\]\n {2}context: job Setup \[job:setup\] and 2 more \(added by rule `needs`\)$/m)
+  assert.match(
+    text,
+    /^- added job Unit tests \[job:unit\]\n {2}context: job Setup \[job:setup\] and 2 more \(added by rule \x60needs\x60\)$/m,
+  )
   assert.doesNotMatch(text, /Build/, 'unchanged items are only counted')
   assert.match(text, /^Selected: job Unit tests \[job:unit\], added\.$/m)
   assert.match(text, /^Up to date\.$/m)
@@ -181,7 +184,7 @@ test('check, open_projection, set_part and describe_part take the tab’s projec
   assert.throws(() => withTabDefaults('set_part', {renderer: 'graph'}, undefined), /Name a projection/)
   const described = withTabDefaults('describe_part', {part: 'renderer'}, tab)
   assert.deepEqual(described.input, {part: 'renderer'})
-  assert.match(described.note, /uses the renderer `dag`; pass its ID to describe it\./)
+  assert.match(described.note, /uses the renderer \x60dag\x60; pass its ID to describe it\./)
   assert.match(withTabDefaults('describe_part', {part: 'comparator'}, tab).note, /uses the default comparator; pass its ID/)
   assert.deepEqual(withTabDefaults('describe_part', {part: 'renderer', id: 'graph'}, tab), {input: {part: 'renderer', id: 'graph'}})
   assert.deepEqual(withTabDefaults('sweep', {}, tab), {input: {}})

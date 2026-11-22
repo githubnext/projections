@@ -10,7 +10,9 @@ const scriptPath = /\.(?:[cm]?js|ts)$/
 
 /** Script files a script's text names: `node scripts/x.mjs`, `new URL('../x.mjs', import.meta.url)`, 'packages/…'. */
 function scriptsNamed(root: string, text: string, from: string, directory: string): string[] {
-  const named = [...text.matchAll(/(?:^|[\s'"`(])((?:\.{1,2}\/|packages\/|tools\/|scripts\/)[\w./-]+)/g)].map(match => match[1] as string)
+  const named = [...text.matchAll(/(?:^|[\s'"\x60(])((?:\.{1,2}\/|packages\/|tools\/|scripts\/)[\w./-]+)/g)].map(
+    match => match[1] as string,
+  )
   return named
     .filter(path => scriptPath.test(path))
     .flatMap(path => [posix.normalize(posix.join(path.startsWith('.') ? from : directory, path)), posix.normalize(path)])

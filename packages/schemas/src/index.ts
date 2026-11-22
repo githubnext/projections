@@ -534,7 +534,7 @@ export function plainProse(text: string): string {
 
 /** Plain `text` as prose, its backticks and backslashes escaped so none is read as markup. */
 export function escapeProse(text: string): string {
-  return text.replace(/[\\`]/g, character => `\\${character}`)
+  return text.replace(/[\\\x60]/g, character => `\\${character}`)
 }
 
 /** `text` as an inline code span, escaped. */

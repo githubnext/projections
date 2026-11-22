@@ -152,7 +152,7 @@ test('a renderer that declares what it accepts is not given other extractions: t
   const custom = {...entry('custom', 'Flags', [{schema: 'graph/v0'}]), source: 'custom'}
   assert.match(
     resolveRenderer({bundle: 'r/dist'}, catalog, custom, {schema: 'database/v0'}).notice,
-    /^The Flags renderer presents `graph\/v0`.*built-in Database renderer instead\.$/,
+    /^The Flags renderer presents \x60graph\/v0\x60.*built-in Database renderer instead\.$/,
   )
   // Unchecked without an extraction, and a schema name alone checks only the schema.
   assert.equal(resolveRenderer('database', catalog).renderer?.name, 'database')

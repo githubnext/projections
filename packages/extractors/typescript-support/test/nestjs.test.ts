@@ -190,7 +190,7 @@ test("the repository's own @nestjs/core is required, never a bundled one", async
   await installPackages(bare, ['typescript'])
   const result = await runHelper('nestjs-di', request(root), bare)
   assert.equal(result.status, 1)
-  assert.match(result.stderr, /nestjs-di requires the repository's own `@nestjs\/core` package/)
+  assert.match(result.stderr, /nestjs-di requires the repository's own \x60@nestjs\/core\x60 package/)
 })
 
 test('an explicit root module, ECMAScript-style specifiers, path aliases, resolved optional dependencies and every framework provider', async t => {

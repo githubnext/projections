@@ -229,7 +229,7 @@ try {
       encoding: 'utf8',
       env: {PATH: process.env.PATH, LANG: 'C.UTF-8', ...isolated},
     }).stderr,
-    /No `typescript` package is installed there/,
+    /No \x60typescript\x60 package is installed there/,
   )
   await writeFile(path.join(repo, '.gitignore'), 'node_modules/\n')
   await cp(path.join(source, 'node_modules/typescript'), path.join(repo, 'node_modules/typescript'), {recursive: true})

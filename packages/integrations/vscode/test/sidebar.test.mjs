@@ -185,7 +185,7 @@ test('Recent changes: the commits that change any projection, with what each cha
   assert.equal(chosen.at(-1).selected, false)
   const tooltip = recentTooltip(found[1], 'data:image/png;base64,AAAA')
   assert.match(tooltip, /^\*\*Split billing\*\*/)
-  assert.match(tooltip, /`2222222` → `1111111` · 2026-11-01/)
+  assert.match(tooltip, /\x602222222\x60 → \x601111111\x60 · 2026-11-01/)
   assert.match(tooltip, /Changes Packages \\\(1 change\\\), Package cards \\\(2 changes\\\)\./)
   assert.match(tooltip, /!\[What it changes in Packages\]\(data:image\/png;base64,AAAA\)/)
   // Running, with nothing found yet: a progress row; done with nothing: says so.

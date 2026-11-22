@@ -100,7 +100,7 @@ export function buildInputs(root: string, unit: Unit): string[] {
     if (script === undefined) continue
     for (const [, run] of script.matchAll(/\bnpm run ([\w:.-]+)/g))
       for (const next of [`pre${run}`, run as string, `post${run}`]) if (!queue.includes(next)) queue.push(next)
-    for (const token of script.split(/[\s"'`=;&|()<>]+/)) {
+    for (const token of script.split(/[\s"'\x60=;&|()<>]+/)) {
       if (!/[./]/.test(token) || token.startsWith('-')) continue
       const path = join(directory, token)
       // What the build writes is not an input to it.

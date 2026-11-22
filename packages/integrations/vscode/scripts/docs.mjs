@@ -37,13 +37,13 @@ export function bundledName(file) {
 export function referenceSections(text, page) {
   const sections = []
   for (const section of text.split(/^## /m).slice(1)) {
-    const name = /^`([^`]+)`/.exec(section)?.[1]
+    const name = /^\x60([^\x60]+)\x60/.exec(section)?.[1]
     const linked = /See \[its page\]\(([^)\s]+)\)/.exec(section)?.[1]
     if (!name || !linked) continue
     const handles = /^- Handles: (.*)$/m.exec(section)?.[1]
     sections.push({
       name,
-      handles: handles ? [...handles.matchAll(/`([^`]+)`/g)].map(match => match[1]) : [name],
+      handles: handles ? [...handles.matchAll(/\x60([^\x60]+)\x60/g)].map(match => match[1]) : [name],
       page: posix.normalize(posix.join(posix.dirname(page), linked)),
     })
   }
@@ -86,7 +86,7 @@ export function rewriteLinks(text, file, bundled) {
       })
   // Prose between fenced code blocks (a link's text may span lines); the blocks as they are.
   return text
-    .split(/(^[ \t]*(?:```|~~~)[^\n]*\n[\s\S]*?^[ \t]*(?:```|~~~)[ \t]*$)/m)
+    .split(/(^[ \t]*(?:\x60\x60\x60|~~~)[^\n]*\n[\s\S]*?^[ \t]*(?:\x60\x60\x60|~~~)[ \t]*$)/m)
     .map((part, index) => (index % 2 ? part : links(part)))
     .join('')
 }
@@ -102,8 +102,8 @@ export function slug(text) {
 /** The text with fenced code blocks and code spans blanked out, keeping offsets. */
 const withoutCode = text =>
   text
-    .replace(/^[ \t]*(```|~~~)[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm, block => block.replace(/[^\n]/g, ' '))
-    .replace(/(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g, span => span.replace(/[^\n]/g, ' '))
+    .replace(/^[ \t]*(\x60\x60\x60|~~~)[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm, block => block.replace(/[^\n]/g, ' '))
+    .replace(/(\x60+)(?!\x60)[\s\S]*?(?<!\x60)\1(?!\x60)/g, span => span.replace(/[^\n]/g, ' '))
 
 /** The text outside HTML tags, in one pass: each `<…>` with something inside is dropped; a `<` that closes nothing stays. */
 function withoutTags(text) {
@@ -129,7 +129,7 @@ export function anchors(text) {
       .replace(/^#{1,6} +/, '')
       .replace(/[ \t]*#*[ \t]*$/, '')
     const plain = withoutTags(heading.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1'))
-      .replace(/`([^`]*)`/g, '$1')
+      .replace(/\x60([^\x60]*)\x60/g, '$1')
       .replace(/(\*\*|__)(.*?)\1/g, '$2')
       .trim()
     const base = slug(plain)

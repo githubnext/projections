@@ -109,7 +109,7 @@ module.exports = async function choices({folder, api, mergeBase, choiceName, swa
   // The status bar names it as the row does; its tooltip has the span and its size.
   assert.equal(api.status(), '$(projections-mark) Uncommitted changes')
   await until('the uncommitted files in the tooltip', async () =>
-    /`[0-9a-f]{7}` → your files\n\n\d+ files? uncommitted · \d+ files? changed/.test(api.statusBar().tooltip) ? true : undefined,
+    /\x60[0-9a-f]{7}\x60 → your files\n\n\d+ files? uncommitted · \d+ files? changed/.test(api.statusBar().tooltip) ? true : undefined,
   )
   // Back to My branch, by its identity.
   await vscode.commands.executeCommand('projections.setChoice', folder, 'branch')

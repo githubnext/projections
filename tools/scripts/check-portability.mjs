@@ -18,7 +18,7 @@ export const rules = [
   {
     name: 'posix-shell',
     files: path => script.test(path) || rust.test(path) || /(^|\/)action\.ya?ml$/.test(path),
-    pattern: /['"`]\/(?:usr\/(?:local\/)?)?bin\/[\w.-]+|Command::new\("(?:sh|bash|zsh)"\)/,
+    pattern: /['"\x60]\/(?:usr\/(?:local\/)?)?bin\/[\w.-]+|Command::new\("(?:sh|bash|zsh)"\)/,
     advice: 'Windows has no /bin/sh or /usr/bin: run the program by name with argv (no shell), or select one per platform',
   },
   {
@@ -31,7 +31,7 @@ export const rules = [
   {
     name: 'bare-launcher',
     files: path => script.test(path),
-    pattern: /\b(?:spawn|spawnSync|execFile|execFileSync)\(\s*['"`](?:(?:npm|npx|pnpm|yarn|corepack)(?:\.cmd)?|python3?|tar)['"`]/,
+    pattern: /\b(?:spawn|spawnSync|execFile|execFileSync)\(\s*['"\x60](?:(?:npm|npx|pnpm|yarn|corepack)(?:\.cmd)?|python3?|tar)['"\x60]/,
     advice:
       'npm, npx, pnpm and yarn are .cmd shims on Windows, which Node refuses to spawn without a shell (EINVAL), Windows names Python python or py, and on Windows the GNU tar of Git Bash comes first on PATH and reads C: as a remote host: run npm as node with npm_execpath, use %SystemRoot%\\System32\\tar.exe, or resolve the launcher per platform',
   },
@@ -51,14 +51,14 @@ export const rules = [
   {
     name: 'native-path-slash',
     files: path => script.test(path),
-    pattern: /\b(?:relative|resolve|dirname|join)\([^()]*\)(?:\.split\(\s*['"`]\/['"`]\s*\)|\s*\+\s*['"`]\/)/,
+    pattern: /\b(?:relative|resolve|dirname|join)\([^()]*\)(?:\.split\(\s*['"\x60]\/['"\x60]\s*\)|\s*\+\s*['"\x60]\/)/,
     advice:
       "A native path has '\\' separators on Windows: split or extend it with path.sep (or path.join), or convert it to a repository path first",
   },
   {
     name: 'file-text-lf',
     files: path => script.test(path),
-    pattern: /\breadFile(?:Sync)?\([^;]*\)[^;]*\.split\(\s*(?:'\\n'|"\\n"|`\\n`|\/\\n\/)\s*\)/,
+    pattern: /\breadFile(?:Sync)?\([^;]*\)[^;]*\.split\(\s*(?:'\\n'|"\\n"|\x60\\n\x60|\/\\n\/)\s*\)/,
     advice: 'A checkout on Windows may have CRLF line endings: split file text on /\\r?\\n/',
   },
   {

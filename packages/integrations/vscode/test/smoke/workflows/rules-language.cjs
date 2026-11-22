@@ -62,7 +62,7 @@ module.exports = async function rulesLanguage({folder}) {
   const rulesProblem = await until('the deliberate error', async () =>
     vscode.languages.getDiagnostics(rulesFile).find(item => item.source === 'projections rules'),
   )
-  assert.match(rulesProblem.message, /^Undeclared function `lists\.rnge`/)
+  assert.match(rulesProblem.message, /^Undeclared function \x60lists\.rnge\x60/)
   assert.equal(rulesProblem.severity, vscode.DiagnosticSeverity.Error)
   assert.deepEqual(
     [rulesProblem.range.start.line, rulesProblem.range.start.character, rulesProblem.range.end.character],

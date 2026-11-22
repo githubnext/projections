@@ -122,7 +122,7 @@ export function markWideTables(text) {
   let fenced = false
   for (let index = 0; index < lines.length;) {
     const line = lines[index]
-    if (/^\s*(```|~~~)/.test(line)) fenced = !fenced
+    if (/^\s*(\x60\x60\x60|~~~)/.test(line)) fenced = !fenced
     if (fenced || !line.trimStart().startsWith('|') || !delimiterRow.test(lines[index + 1] ?? '')) {
       out.push(line)
       index++

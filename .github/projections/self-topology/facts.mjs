@@ -75,12 +75,12 @@ export function firstSentence(text) {
   const paragraph = body
     .split(/\r?\n\s*\r?\n/)
     .map(block => block.trim())
-    .find(block => block && !/^(#|<|!\[|```|\||- |\* |\d+\. |>)/.test(block))
+    .find(block => block && !/^(#|<|!\[|\x60\x60\x60|\||- |\* |\d+\. |>)/.test(block))
   if (!paragraph) return undefined
   const plain = paragraph
     .replace(/\s+/g, ' ')
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/[`*_]/g, '')
+    .replace(/[\x60*_]/g, '')
   const sentence = /^(.*?[.!?])(\s|$)/.exec(plain)?.[1] ?? plain
   return sentence.trim() || undefined
 }
@@ -113,7 +113,7 @@ function mutantDirectories(text) {
  * Tokens in lines of code without comments: words, numbers and quoted strings, each one. A Rust `'` quotes one
  * character (`'a` alone is a lifetime, a word).
  */
-const quoted = /"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`|[A-Za-z_$][\w$]*|\d[\w.]*/
+const quoted = /"(?:\\.|[^"\\])*"|\x60(?:\\.|[^\x60\\])*\x60|[A-Za-z_$][\w$]*|\d[\w.]*/
 const tokenPatterns = {
   rust: new RegExp(`'(?:\\\\.|[^'\\\\])'|${quoted.source}`, 'g'),
   other: new RegExp(`'(?:\\\\.|[^'\\\\\\n])*'|${quoted.source}`, 'g'),

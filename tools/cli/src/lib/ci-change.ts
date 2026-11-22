@@ -7,7 +7,12 @@ import type {Contents} from './ci-files.ts'
 import {changedFiles} from './git.ts'
 import {git} from './repo.ts'
 
-export type ChangeSince = {base: string; commit: string; paths: string[]; contents: Contents}
+export interface ChangeSince {
+  base: string
+  commit: string
+  paths: string[]
+  contents: Contents
+}
 
 /** A file's contents at `commit` (before) and in the working tree (after). */
 export function contentsSince(root: string, commit: string): Contents {

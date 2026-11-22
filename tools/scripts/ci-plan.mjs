@@ -38,11 +38,12 @@ const labels = values.labels.split(',').filter(Boolean)
 const rules = loadCiRules(root)
 const plan = ciPlan(repoFacts(root), rules, {paths, event: values.event, labels, contents})
 // The plan, with the checks it runs, for the workflow's artifact: what a run decided and why, after the fact.
-if (values.plan)
+if (values.plan) {
   writeFileSync(
     values.plan,
     `${JSON.stringify({base: commit, event: values.event, labels, plan, checks: executions(plan, rules)}, null, 2)}\n`,
   )
+}
 
 const outputs = planOutputs(plan)
 

@@ -17,7 +17,7 @@ export type Verdict =
   /** The pull request's plan isn't available (no artifact, or no pull request). */
   | 'no plan'
 
-export type MissInput = {
+export interface MissInput {
   /** Names of the jobs that failed or timed out on main, as GitHub lists them. */
   failed: readonly string[]
   /** The merged pull request's plan: the job IDs it gates, and the checks it ran. */
@@ -26,7 +26,10 @@ export type MissInput = {
   parent?: Readonly<Record<string, string>>
 }
 
-export type Miss = {job: string; verdict: Verdict}
+export interface Miss {
+  job: string
+  verdict: Verdict
+}
 
 /** A job's ID: its name before ` (`, the matrix entry. */
 const jobId = (name: string) => name.replace(/ \(.*$/, '')

@@ -1075,8 +1075,9 @@ test("a renderer's rendered echoes the latest init's generation, which its init 
     progress: 1,
     generation,
   })
-  for (const invalid of [-1, 1.5, '1', Number.MAX_SAFE_INTEGER + 1])
+  for (const invalid of [-1, 1.5, '1', Number.MAX_SAFE_INTEGER + 1]) {
     assert.equal(parseRendererMessage(envelope({type: 'rendered', progress: 1, generation: invalid}), channel), undefined)
+  }
   const init = {type: 'init', mode: 'extraction', extraction, projection: {id: 'p', title: 'P', renderer: 'graph'}, ...environment}
   assert.equal(parseHostMessage(envelope({...init, generation: -1}), channel), undefined)
   assert.equal(parseHostMessage(envelope({...init, generation}), channel)?.generation, generation)

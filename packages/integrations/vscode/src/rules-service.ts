@@ -215,7 +215,8 @@ export class RulesService {
       worker.postMessage({id, request} satisfies WorkerRequest)
     }).then(value => {
       const error = (value as {error?: unknown} | null)?.error
-      if (typeof error === 'string') throw new TypeError(error)
+      // eslint-disable-next-line unicorn/prefer-type-error -- the string is the worker's error message, not a wrong type
+      if (typeof error === 'string') throw new Error(error)
       return value
     })
   }

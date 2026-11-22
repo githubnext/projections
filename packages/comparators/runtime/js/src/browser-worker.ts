@@ -11,12 +11,12 @@ export function run(
   return runInWorker(
     events => {
       const worker = new Worker(workerUrl ?? new URL('./worker-entry.js', import.meta.url), {type: 'module'})
-      worker.onmessage = event => events.message(event.data)
+      worker.addEventListener('message', event => events.message(event.data))
       worker.addEventListener('messageerror', () => events.error('uncloneable message'))
-      worker.onerror = event => {
+      worker.addEventListener('error', event => {
         event.preventDefault()
         events.error(event.message || 'worker error')
-      }
+      })
       return {
         post: request => worker.postMessage(request, [request.input.buffer]),
         terminate: () => worker.terminate(),

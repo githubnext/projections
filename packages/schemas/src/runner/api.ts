@@ -232,6 +232,7 @@ export function runnerApiSchema(): Record<string, unknown> {
     $defs: Object.fromEntries(
       Object.entries(runnerResponses).map(([name, {request, schema}]) => [
         name,
+        // eslint-disable-next-line unicorn/prefer-structured-clone -- the schema's JSON form, not a clone: drops TypeBox's non-JSON keys and undefined values
         {'x-request': request, ...JSON.parse(JSON.stringify(schema))},
       ]),
     ),

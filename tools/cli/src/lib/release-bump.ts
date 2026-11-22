@@ -38,7 +38,7 @@ export function setReleaseVersion(root: string, next: string): string[] {
 
   const cargo = readText(root, 'Cargo.toml') ?? ''
   const found = tableVersion(cargo, 'workspace.package')
-  if (typeof found !== 'object') throw new TypeError('Cargo.toml has no [workspace.package] version')
+  if (found === undefined || found === 'inherited') throw new Error('Cargo.toml has no [workspace.package] version')
   const versionAt = (text: string, index: number) => text.slice(0, index) + text.slice(index).replace(/"[^"]*"/, `"${next}"`)
   update(root, 'Cargo.toml', cargo, versionAt(cargo, found.index), changed)
 

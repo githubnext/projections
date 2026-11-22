@@ -73,7 +73,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     if (!listed.split(/\r?\n/).includes(`${extensionId}@${version}`)) {
       throw new Error(`VS Code lists ${JSON.stringify(listed.trim())}, not ${extensionId}@${version}`)
     }
-    const [installed] = readdirSync(extensions).filter(name => name.startsWith(`${extensionId}-${version}`))
+    const installed = readdirSync(extensions).find(name => name.startsWith(`${extensionId}-${version}`))
     if (!installed) throw new Error(`${extensions} has no ${extensionId}-${version}`)
     const manifest = JSON.parse(readFileSync(path.join(extensions, installed, 'package.json'), 'utf8'))
     if (manifest.version !== version) throw new Error(`The installed extension is ${manifest.version}, not ${version}`)

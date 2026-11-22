@@ -72,7 +72,7 @@ function embeddingSafe() {
       const buckets = new Map(order.map(name => [name, []]))
       const header = [],
         rest = []
-      for (const node of [...css.nodes]) {
+      for (const node of Array.from(css.nodes)) {
         node.remove()
         if (node.type === 'atrule' && node.name === 'layer' && node.nodes) {
           const name = node.params.trim()

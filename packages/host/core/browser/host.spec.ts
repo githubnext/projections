@@ -356,14 +356,14 @@ test('keyboard focus moves into the renderer frame and back out', async ({page, 
   // The summary bar follows the stage: Shift+Tab from its first figure, the next stop after the frame, goes back in.
   const firstAfterFrame = await page.evaluate(() => {
     const frameElement = document.querySelector('iframe.ph-frame')!
-    const focusable = [...document.querySelectorAll<HTMLElement>('button, input, select, a[href], [tabindex="0"]')].filter(
+    const first = [...document.querySelectorAll<HTMLElement>('button, input, select, a[href], [tabindex="0"]')].find(
       element =>
         frameElement.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING &&
         element.tabIndex >= 0 &&
         element.checkVisibility({visibilityProperty: true}),
     )
-    focusable[0]!.focus()
-    return Boolean(focusable[0]!.closest('[data-summary-bar]'))
+    first!.focus()
+    return Boolean(first!.closest('[data-summary-bar]'))
   })
   expect(firstAfterFrame).toBe(true)
   await page.keyboard.press(backTab)

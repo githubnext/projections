@@ -42,11 +42,11 @@ class LayoutWorker implements WorkerLike {
     try {
       const url = URL.createObjectURL(new Blob([workerSource], {type: 'text/javascript'}))
       const worker = new Worker(url)
-      worker.onmessage = event => this.receive(event)
-      worker.onerror = event => {
+      worker.addEventListener('message', event => this.receive(event))
+      worker.addEventListener('error', event => {
         event.preventDefault()
         this.fallBack()
-      }
+      })
       this.target = {onmessage: null, postMessage: message => worker.postMessage(message), terminate: () => worker.terminate()}
     } catch {
       this.target = this.inline()
@@ -56,6 +56,7 @@ class LayoutWorker implements WorkerLike {
   private inline(): WorkerLike {
     this.inDocument = true
     const worker = inlineWorker()
+    // eslint-disable-next-line unicorn/prefer-add-event-listener -- ELK's in-document stand-in has only onmessage
     worker.onmessage = event => this.receive(event)
     return worker
   }
@@ -70,7 +71,7 @@ class LayoutWorker implements WorkerLike {
     if (this.inDocument) return
     this.target.terminate?.()
     this.target = this.inline()
-    for (const message of [...this.pending.values()]) this.target.postMessage(message)
+    for (const message of Array.from(this.pending.values())) this.target.postMessage(message)
   }
 
   postMessage(message: {id?: number}) {

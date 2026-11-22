@@ -250,7 +250,6 @@ export default defineConfig(
           'prefer-array-index-of',
           'prefer-array-some',
           'prefer-at',
-          'prefer-dom-node-text-content',
           'prefer-global-this',
           'prefer-includes',
           'prefer-node-protocol',
@@ -261,12 +260,16 @@ export default defineConfig(
           'prefer-structured-clone',
           'prefer-type-error',
           'require-array-join-separator',
-          'require-post-message-target-origin',
           'text-encoding-identifier-case',
           'throw-new-error',
         ].map(rule => [`unicorn/${rule}`, 'error']),
       ),
     },
+  },
+  {
+    // innerText lays the page out to read it: shipped code reads textContent. Browser tests read what is rendered.
+    files: ['packages/**/src/**/*.{ts,tsx}'],
+    rules: {'unicorn/prefer-dom-node-text-content': 'error'},
   },
   {
     // Lifecycles are explicit state machines (docs/guides/state-machines.md). A warning here; npm run check:machines

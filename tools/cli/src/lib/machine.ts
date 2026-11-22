@@ -43,7 +43,7 @@ export function playwrightBrowsers(root: string): {name: string; revision: strin
       name: browser.name,
       revision: browser.revision,
       installed:
-        installed.some(directory => directory === `${browser.name.replaceAll('-', '_')}-${browser.revision}`) &&
+        installed.includes(`${browser.name.replaceAll('-', '_')}-${browser.revision}`) &&
         statSync(join(cache, `${browser.name.replaceAll('-', '_')}-${browser.revision}`)).isDirectory(),
     }))
 }

@@ -12,8 +12,9 @@ const scriptPath = /\.(?:[cm]?js|ts)$/
 function scriptsNamed(root: string, text: string, from: string, directory: string): string[] {
   const named = [...text.matchAll(/(?:^|[\s'"\x60(])((?:\.{1,2}\/|packages\/|tools\/|scripts\/)[\w./-]+)/g)].map(match => match[1]!)
   return named
-    .filter(path => scriptPath.test(path))
-    .flatMap(path => [posix.normalize(posix.join(path.startsWith('.') ? from : directory, path)), posix.normalize(path)])
+    .flatMap(path =>
+      scriptPath.test(path) ? [posix.normalize(posix.join(path.startsWith('.') ? from : directory, path)), posix.normalize(path)] : [],
+    )
     .filter(path => !path.startsWith('..') && existsSync(join(root, path)))
 }
 

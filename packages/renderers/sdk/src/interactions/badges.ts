@@ -141,7 +141,7 @@ export function createBadgeOverlay(options: BadgeOverlayOptions): BadgeOverlay {
   return {
     contains: node => !!overlay && !!node && overlay.contains(node),
     update() {
-      for (const [id, badge] of [...badges]) {
+      for (const [id, badge] of badges) {
         if (marks.has(id)) continue
         badge.button.remove()
         badges.delete(id)

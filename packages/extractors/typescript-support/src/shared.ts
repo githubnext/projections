@@ -23,7 +23,7 @@ export function stringInput(context: ExtractorContext, key: string, fallback?: s
 /** The directory holding the examined revision; the helper always runs on one. */
 export function repositoryRoot(context: ExtractorContext): string {
   const root = context.input.repository.root
-  if (typeof root !== 'string') throw new TypeError('The TypeScript helper needs the revision on disk (repository.root)')
+  if (root === undefined) throw new Error('The TypeScript helper needs the revision on disk (repository.root)')
   return root
 }
 

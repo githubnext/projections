@@ -57,7 +57,7 @@ test("a nested renderer's error or missing first paint fails its card, frees its
   await tick()
   assert.deepEqual(
     cards.map(card => card.started()),
-    [...new Array(concurrentLoads).fill(true), false],
+    [...Array.from({length: concurrentLoads}, () => true), false],
     'the last waits for a slot',
   )
   for (const card of cards.slice(0, concurrentLoads)) card.say(gallery.ready)

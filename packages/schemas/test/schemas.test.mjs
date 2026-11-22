@@ -524,6 +524,7 @@ test('the bookmarks schema follows what the CLI accepts: identifiers, nonempty r
     {...valid, bookmarks: [{...bookmark, title: undefined}]},
     {...valid, bookmarks: Array.from({length: 101}, (_, index) => ({...bookmark, id: `b${index}`}))},
   ]) {
+    // eslint-disable-next-line unicorn/prefer-structured-clone -- the document as a file holds it: without its undefined values
     assert.equal(validate('bookmarks', JSON.parse(JSON.stringify(invalid))), false, JSON.stringify(invalid))
   }
 })

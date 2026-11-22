@@ -89,7 +89,7 @@ export function manifestRelationships(cx) {
 
   // Pass 1: WebAssembly modules. A build file that compiles a crate for wasm32 names the module it writes.
   const wasmModules = new Map() // module file name -> unit id
-  for (const unit of [...units.values()]) {
+  for (const unit of units.values()) {
     for (const entry of unitFiles.get(unit.id)) {
       if (entry.role !== 'build' || entry.language !== 'javascript' || !read(entry.file).includes('wasm32-unknown-unknown')) continue
       const values = literals(linesOf(entry))

@@ -60,7 +60,7 @@ export function parseJson(source: string): unknown {
     if (token !== 'true' && token !== 'false' && token !== 'null') {
       const number = Number(token)
       if (!Number.isFinite(number) || (Number.isInteger(number) && !Number.isSafeInteger(number))) {
-        throw new TypeError('JSON number is nonfinite or outside the safe integer range')
+        throw new RangeError('JSON number is nonfinite or outside the safe integer range')
       }
     }
     cursor += token.length

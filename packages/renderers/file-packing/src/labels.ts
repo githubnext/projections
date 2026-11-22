@@ -10,7 +10,7 @@ export function fitText(text: string, room: number): string | undefined {
 }
 
 export const nameOf = (entity: Entity, path: string | undefined) => {
-  const base = (path ?? entity.label).split('/').filter(Boolean).at(-1)
+  const base = (path ?? entity.label).split('/').findLast(Boolean)
   return base ?? entity.label
 }
 

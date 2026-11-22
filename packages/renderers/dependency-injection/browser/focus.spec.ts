@@ -133,7 +133,7 @@ test("a link's origin dot shows its ring color where later links leave the same 
     canvas.height = image.height
     const context = canvas.getContext('2d')!
     context.drawImage(image, 0, 0)
-    return [...context.getImageData(0, 0, 1, 1).data.slice(0, 3)]
+    return Array.from(context.getImageData(0, 0, 1, 1).data.slice(0, 3))
   }, shot.toString('base64'))
   const expected = fill
     .match(/\d+(\.\d+)?/g)!

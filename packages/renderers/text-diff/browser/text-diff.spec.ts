@@ -335,9 +335,7 @@ test('at 1280 px a long line wraps, in one column, in two and in one revision, i
     const body = renderer.frame.locator('[data-entity-id="log"] .td-body').first()
     await expect(body).toHaveAttribute('data-layout', layout)
     const read = await body.evaluate(element => {
-      const line = [...element.querySelectorAll<HTMLElement>('.td-row, .td-cell')]
-        .filter(row => row.textContent!.includes('/var/spool'))
-        .at(-1)!
+      const line = [...element.querySelectorAll<HTMLElement>('.td-row, .td-cell')].findLast(row => row.textContent!.includes('/var/spool'))!
       const text = line.querySelector<HTMLElement>('.td-text')!
       const top = (selector: string) => [...line.querySelectorAll<HTMLElement>(selector)].map(item => item.getBoundingClientRect().top)
       const height = Number.parseFloat(getComputedStyle(text).lineHeight)

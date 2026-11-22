@@ -86,7 +86,7 @@ export class ProjectionTests implements vscode.Disposable {
   /** Watches every folder (the side bar holds its backend already) and lists its test files. */
   async scan(refresh: boolean): Promise<void> {
     const folders = vscode.workspace.workspaceFolders ?? []
-    for (const key of [...this.watched.keys()]) if (!folders.some(folder => folder.uri.toString() === key)) this.unwatch(key)
+    for (const key of Array.from(this.watched.keys())) if (!folders.some(folder => folder.uri.toString() === key)) this.unwatch(key)
     await Promise.all(
       folders.map(folder => {
         const fresh = !this.watched.has(folder.uri.toString())
@@ -203,7 +203,7 @@ export class ProjectionTests implements vscode.Disposable {
 
   dispose() {
     clearTimeout(this.applying)
-    for (const key of [...this.watched.keys()]) this.unwatch(key)
+    for (const key of Array.from(this.watched.keys())) this.unwatch(key)
     for (const disposable of this.disposables.splice(0)) disposable.dispose()
   }
 }

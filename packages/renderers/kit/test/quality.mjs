@@ -146,10 +146,10 @@ export function draftingIssues(route, radius) {
     if (Math.abs(part.radius - radius) > 0.5) issues.push(`arc radius ${part.radius.toFixed(1)}`)
     if (Math.abs(part.degrees - 90) < 0.5) continue
     // A small-offset S: this arc and a neighbour of the same turn, meeting directly.
-    const pair = [parts[index - 1], parts[index + 1]].find(
+    const paired = [parts[index - 1], parts[index + 1]].some(
       other => other?.kind === 'arc' && Math.abs(other.degrees - part.degrees) < 0.5 && Math.abs(other.radius - part.radius) < 0.5,
     )
-    if (!pair) issues.push(`lone ${part.degrees.toFixed(1)}° arc`)
+    if (!paired) issues.push(`lone ${part.degrees.toFixed(1)}° arc`)
   }
   return issues
 }

@@ -14,7 +14,7 @@ export function linkUnits({units, unitByPackage, unitByCrateIdent, unitFiles, li
   const packageNames = [...unitByPackage.keys()].toSorted((a, b) => b.length - a.length || byText(a, b))
   const namedPackage = specifier => packageNames.find(name => specifier === name || specifier.startsWith(`${name}/`))
 
-  for (const unit of [...units.values()]) {
+  for (const unit of units.values()) {
     for (const entry of unitFiles.get(unit.id) ?? []) {
       if (entry.role === 'test') continue
       const values = literals(linesOf(entry))
@@ -52,7 +52,7 @@ export function linkUnits({units, unitByPackage, unitByCrateIdent, unitFiles, li
   }
 
   // Pass 3: runtime boundaries in production source.
-  for (const unit of [...units.values()]) {
+  for (const unit of units.values()) {
     for (const entry of unitFiles.get(unit.id) ?? []) {
       if (entry.role !== 'source') continue
       const lines = linesOf(entry)

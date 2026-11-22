@@ -67,6 +67,7 @@ export async function createWorkerEngine(options: WorkerEngineOptions = {}): Pro
   let failure: EngineTransportError | undefined
   let initialized = false
   let digest = ''
+  const listening = new AbortController()
   let readyResolve: () => void
   let readyReject: (error: Error) => void
   const ready = new Promise<void>((resolve, reject) => {
@@ -78,9 +79,7 @@ export async function createWorkerEngine(options: WorkerEngineOptions = {}): Pro
     failure = error
     clearTimeout(startup)
     worker.terminate()
-    worker.onmessage = null
-    worker.onerror = null
-    worker.onmessageerror = null
+    listening.abort()
     readyReject(error)
     for (const request of pending.values()) {
       clearTimeout(request.timer)
@@ -92,12 +91,12 @@ export async function createWorkerEngine(options: WorkerEngineOptions = {}): Pro
     () => stop(new EngineTransportError(`Engine worker initialization timed out after ${timeoutMs} ms`)),
     timeoutMs,
   )
-  worker.onerror = event => {
+  const failed = (event: ErrorEvent) => {
     event.preventDefault()
     stop(new EngineTransportError(`Engine worker failed: ${event.message}`))
   }
-  worker.onmessageerror = () => stop(new EngineTransportError('Engine worker returned an uncloneable message'))
-  worker.onmessage = (event: MessageEvent<unknown>) => {
+  const uncloneable = () => stop(new EngineTransportError('Engine worker returned an uncloneable message'))
+  const received = (event: MessageEvent<unknown>) => {
     const message = event.data
     if (message === null || typeof message !== 'object' || !('type' in message)) {
       stop(new EngineTransportError('Engine worker returned an invalid message'))
@@ -138,6 +137,10 @@ export async function createWorkerEngine(options: WorkerEngineOptions = {}): Pro
     clearTimeout(request.timer)
     request.resolve(message.bytes)
   }
+  const {signal} = listening
+  worker.addEventListener('error', failed, {signal})
+  worker.addEventListener('messageerror', uncloneable, {signal})
+  worker.addEventListener('message', received, {signal})
   try {
     const wasm = options.wasm
     const comparator = options.comparator

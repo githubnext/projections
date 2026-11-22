@@ -159,7 +159,7 @@ for (const [name, engine] of Object.entries(engines)) {
           throw new Error('do not invoke')
         },
       },
-      new Array(2),
+      Object.assign([], {length: 2}),
       Object.assign([1], {extra: 1}),
     ]) {
       await assert.rejects(engine.normalize(state([{...node('a'), data: {value}}])), EngineError)

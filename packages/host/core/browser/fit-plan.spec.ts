@@ -14,7 +14,8 @@ test.skip(({isMobile}) => isMobile, 'A mouse press and a bar the test sizes; the
 async function setWidth(page: Page, width: number) {
   await page.locator('.fit-sized').evaluate(async (sized: HTMLElement, barWidth) => {
     sized.style.width = `${barWidth}px`
-    const bar = sized.querySelector<HTMLElement>('[data-plan]')!
+    const bar = sized.querySelector<HTMLElement>('[data-plan]')
+    if (!bar) throw new Error('The sized story has no planned bar.')
     const frame = () =>
       new Promise(resolve => {
         requestAnimationFrame(resolve)
@@ -52,7 +53,9 @@ test('focus follows a control that a new plan remounts, or the overflow it moves
   await expect.poll(() => focused(page)).toBe('apply')
 
   // Focus moved out of the bar on purpose stays out when a new plan remounts the control it left.
-  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+  })
   await setWidth(page, 400)
   await expect(bar(page)).toHaveAttribute('data-plan', 'narrow')
   expect(await focused(page)).toBeNull()
@@ -69,12 +72,13 @@ test('a press is not replanned away before its click, and the bar replans once i
 
   // As WebKit does, the press moves focus out of the bar, which releases the lock.
   await bar(page).evaluate(element => {
-    element.addEventListener('pointerdown', () => (document.activeElement as HTMLElement | null)?.blur())
+    element.addEventListener('pointerdown', () => {
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+    })
     element.addEventListener('mousedown', event => event.preventDefault())
   })
   await mark(page, 'Apply')
-  const apply = await bar(page).getByRole('button', {name: 'Apply'}).boundingBox()
-  await page.mouse.move(apply!.x + apply!.width / 2, apply!.y + apply!.height / 2)
+  await bar(page).getByRole('button', {name: 'Apply'}).hover()
   await page.mouse.down()
   // Long enough for a replan: none comes while the pointer is pressed.
   await page.evaluate(
@@ -126,8 +130,7 @@ test('a press and its release never render the bar’s owner again, even when th
   await expect(bar(page)).toHaveAttribute('data-plan', 'wide')
   // A press elsewhere and its release.
   const settled = await quietCommits(page)
-  const clicks = await page.getByText('Clicks:').boundingBox()
-  await page.mouse.move(clicks!.x + 4, clicks!.y + 4)
+  await page.getByText('Clicks:').hover({position: {x: 4, y: 4}})
   await page.mouse.down()
   await page.mouse.up()
   expect(await quietCommits(page)).toBe(settled)
@@ -139,12 +142,13 @@ test('a press and its release never render the bar’s owner again, even when th
   await setWidth(page, 800)
   await expect(bar(page)).toHaveAttribute('data-plan', 'narrow')
   await bar(page).evaluate(element => {
-    element.addEventListener('pointerdown', () => (document.activeElement as HTMLElement | null)?.blur())
+    element.addEventListener('pointerdown', () => {
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+    })
     element.addEventListener('mousedown', event => event.preventDefault())
   })
   const held = await quietCommits(page)
-  const apply = await bar(page).getByRole('button', {name: 'Apply'}).boundingBox()
-  await page.mouse.move(apply!.x + apply!.width / 2, apply!.y + apply!.height / 2)
+  await bar(page).getByRole('button', {name: 'Apply'}).hover()
   await page.mouse.down()
   expect(await quietCommits(page)).toBe(held)
   await page.mouse.up()

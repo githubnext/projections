@@ -7,7 +7,7 @@
  * specifiers, which Node loads from source.
  */
 
-import {type Pair, type SuggestedPair, samePair} from '../projections/pairs.js'
+import {type Pair, type SuggestedPair, samePair} from '../projections/pairs.ts'
 
 /**
  * A choice: its identity (`now`, `uncommitted`, `branch`, `pr:<n>`, `last-commit`, `release`, `bookmark:<id>`,

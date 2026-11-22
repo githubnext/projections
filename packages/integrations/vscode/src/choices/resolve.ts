@@ -1,7 +1,7 @@
 // What a choice shows: the pair it resolves to from what the repository says, the automatic choice before anyone picks,
 // why a choice doesn't apply here, and the choice a pair is. Like the rest of `choices/`, nothing here imports VS Code.
 
-import {type Pair, samePair} from '../projections/pairs.js'
+import {type Pair, samePair} from '../projections/pairs.ts'
 import {pairOf, type Choice, type RepositoryFacts} from './model.ts'
 
 /** The repository's latest release tag, from its suggestions. */

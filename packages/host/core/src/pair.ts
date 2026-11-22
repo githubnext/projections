@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import {customComparator, type ExtractionDocument, type ProjectionEngine} from '@githubnext/projections-schemas'
 import {ComparisonError, computeComparison} from './compare.js'
 import type {ComparatorSource, ComputedComparison, RulesRuntime} from './compare.js'
@@ -99,6 +99,9 @@ export interface ComparisonPair {
   retry(): void
 }
 
+/** The outcome while a comparison is computed: one object, so it stays the same across renders. */
+const computing: PairOutcome = {status: 'computing'}
+
 function failure(error: unknown): ComparisonError | Error {
   return error instanceof Error ? error : new Error(String(error))
 }
@@ -113,7 +116,9 @@ export function useComparisonPair(options: ComparisonPairOptions): ComparisonPai
   const {extractions, engine, renderers, customRenderer} = options
   // Callbacks are read at call time so that new function identities don't recompute the comparison.
   const callbacks = useRef(options)
-  callbacks.current = options
+  useLayoutEffect(() => {
+    callbacks.current = options
+  })
   const last = extractions.at(-1)?.key ?? ''
   const [afterState, setAfterState] = useState(options.initialAfter ?? last)
   const [beforeState, setBeforeState] = useState(options.initialBefore ?? (extractions.length > 1 ? extractions.at(-2)!.key : ''))
@@ -129,22 +134,27 @@ export function useComparisonPair(options: ComparisonPairOptions): ComparisonPai
   }, [])
   const before = extractions.find(item => item.key === beforeKey)
   const after = extractions.find(item => item.key === afterKey) ?? extractions.at(-1)
-  const [outcome, setOutcome] = useState<PairOutcome>({status: 'computing'})
   const [attempt, setAttempt] = useState(0)
   // The comparison depends on the documents alone: a choice relabelled (a new object with the same document, for
   // example as a host names its revisions again) keeps the comparison and the subject, so playback isn't reset
   // and the view isn't presented again.
   const beforeDocument = before && after && before.key !== after.key ? before.document : undefined
   const afterDocument = after?.document
+  const single = useMemo<PairOutcome | undefined>(
+    () => (afterDocument && !beforeDocument ? {status: 'single', document: afterDocument} : undefined),
+    [beforeDocument, afterDocument],
+  )
+  // What a comparison is computed from; its outcome is computing until the outcome for these arrives.
+  const inputs = useMemo(() => ({beforeDocument, afterDocument, engine, attempt}), [beforeDocument, afterDocument, engine, attempt])
+  const [computed, setComputed] = useState<{inputs: typeof inputs; outcome: PairOutcome}>()
+  const outcome = single ?? (computed?.inputs === inputs ? computed.outcome : computing)
   useEffect(() => {
     if (!afterDocument) return
     if (!beforeDocument) {
-      setOutcome({status: 'single', document: afterDocument})
       callbacks.current.onComparison?.(undefined)
       return
     }
     const abort = new AbortController()
-    setOutcome({status: 'computing'})
     const run = async () => {
       const declared = afterDocument.provenance.definition.comparator
       let comparator: ComparatorSource = {kind: 'default'}
@@ -164,16 +174,16 @@ export function useComparisonPair(options: ComparisonPairOptions): ComparisonPai
         ...(rules ? {rules} : {}),
       })
       if (abort.signal.aborted) return
-      setOutcome({status: 'compared', before: beforeDocument, after: afterDocument, result})
+      setComputed({inputs, outcome: {status: 'compared', before: beforeDocument, after: afterDocument, result}})
       callbacks.current.onComparison?.({...result, before: beforeDocument, after: afterDocument})
     }
     run().catch((error: unknown) => {
       if (abort.signal.aborted) return
-      setOutcome({status: 'failed', error: failure(error)})
+      setComputed({inputs, outcome: {status: 'failed', error: failure(error)}})
       callbacks.current.onComparison?.(undefined)
     })
     return () => abort.abort()
-  }, [beforeDocument, afterDocument, engine, attempt])
+  }, [inputs, beforeDocument, afterDocument, engine])
 
   const document = after?.document
   const resolution = useMemo<RendererResolution>(

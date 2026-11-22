@@ -100,6 +100,7 @@ export function useFitPlan<T>(
       frame: (_activity, {send}) => {
         const handle = requestAnimationFrame(() => {
           const element = bar.current
+          // eslint-disable-next-line @eslint-react/dom-no-flush-sync -- the replanned bar must render in this frame, before its layout and paint.
           if (element) flushSync(() => send({type: 'frame', width: Math.round(element.getBoundingClientRect().width)}))
         })
         return () => cancelAnimationFrame(handle)
@@ -124,7 +125,9 @@ export function useFitPlan<T>(
   const {lock, ceiling, measure = fitWidth, hysteresis = toolbarHysteresis, shiftNeeds: shift = false, carry, need, pending} = options
   const regions = options.regions ?? '[data-toolbar-region]'
   const latest = useRef({sign, find, lock, ceiling, measure, hysteresis, shift, carry, need, pending, regions})
-  latest.current = {sign, find, lock, ceiling, measure, hysteresis, shift, carry, need, pending, regions}
+  useLayoutEffect(() => {
+    latest.current = {sign, find, lock, ceiling, measure, hysteresis, shift, carry, need, pending, regions}
+  })
 
   useLayoutEffect(() => {
     const element = bar.current
@@ -203,12 +206,13 @@ export function useFitPlan<T>(
   useLayoutEffect(() => {
     const element = bar.current
     if (!element) return
-    if (state.kind === 'planning') delete element.dataset.fitSettled
-    else element.dataset.fitSettled = String(state.width)
+    if (state.kind === 'planning') element.removeAttribute('data-fit-settled')
+    else element.setAttribute('data-fit-settled', String(state.width))
   }, [bar, state.kind, state.width])
 
   // Replan when the bar or one of its regions changes size.
   const observer = useRef<ResizeObserver | undefined>(undefined)
+  const observed = useRef(new Set<Element>())
   useLayoutEffect(() => {
     const element = bar.current
     if (!element) return
@@ -231,7 +235,6 @@ export function useFitPlan<T>(
       observed.current = new Set()
     }
   }, [bar, send])
-  const observed = useRef(new Set<Element>())
   useLayoutEffect(() => {
     const resize = observer.current
     const element = bar.current

@@ -1,4 +1,5 @@
 import {CircleAlert} from 'lucide-react'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {ComparisonError} from '../compare.js'
 import {useComparisonPair} from '../pair.js'
 import type {ComparisonPairOptions} from '../pair.js'
@@ -130,8 +131,8 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
             <p className="pj:break-words">{outcome.error.message}</p>
             {outcome.error instanceof ComparisonError && outcome.error.details.length > 0 && (
               <ul className="pj:list-disc pj:pl-4 pj:text-foreground/80">
-                {outcome.error.details.map((detail, index) => (
-                  <li key={index} className="pj:break-words">
+                {keyed(outcome.error.details, detail => detail).map(([key, detail]) => (
+                  <li key={key} className="pj:break-words">
                     {detail}
                   </li>
                 ))}

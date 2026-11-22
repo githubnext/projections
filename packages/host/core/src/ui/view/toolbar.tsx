@@ -156,7 +156,7 @@ export function ViewToolbar({
         )}
         {settings}
         {!inMore('info') && info}
-        {props.actions && <div className="ph-actions pj:flex pj:items-center pj:gap-1">{props.actions}</div>}
+        {props.actions ? <div className="ph-actions pj:flex pj:items-center pj:gap-1">{props.actions}</div> : null}
         {!inMore('fullscreen') && fullscreen}
         {hasMore && (
           <ToolbarMore

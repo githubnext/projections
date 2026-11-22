@@ -30,9 +30,9 @@ export function MoreMenu({children}: {children: ReactNode}) {
       open={open}
       onOpenChange={setOpen}
     >
-      <MoreContext.Provider value={close}>
+      <MoreContext value={close}>
         <div className="pj:flex pj:min-w-0 pj:flex-col pj:gap-3">{children}</div>
-      </MoreContext.Provider>
+      </MoreContext>
     </ToolbarPopover>
   )
 }

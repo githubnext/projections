@@ -108,7 +108,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
         afterLabel={afterLabel}
         space={space}
       />
-      {props.banner && <div className="ph-banner pj:shrink-0 pj:p-2">{props.banner}</div>}
+      {props.banner ? <div className="ph-banner pj:shrink-0 pj:p-2">{props.banner}</div> : null}
       {/* About this projection shows these visibly; they stay mounted for assistive technology and embedders. */}
       <p className="ph-active pj:sr-only" aria-live="polite">
         Showing: <strong data-active-view={view}>{active}</strong>
@@ -153,7 +153,12 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
         )}
       >
         {/* Space toggles playback from the stage's chrome and from the floating playback over the table and text views. */}
-        <div ref={panel} className="ph-panel pj:relative pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1 pj:flex-col" onKeyDown={space}>
+        <div
+          ref={panel}
+          role="presentation"
+          className="ph-panel pj:relative pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1 pj:flex-col"
+          onKeyDown={space}
+        >
           {/* The stage's chrome takes focus when clicked, so Space there toggles playback like in the toolbar. */}
           {renderer && (
             <div

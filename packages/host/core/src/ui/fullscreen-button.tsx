@@ -1,4 +1,4 @@
-import {useContext} from 'react'
+import {use} from 'react'
 import type {RefObject} from 'react'
 import {Maximize2, Minimize2} from 'lucide-react'
 import {useFullscreen} from '../fullscreen.js'
@@ -24,7 +24,7 @@ export function useViewFullscreen(target: RefObject<HTMLElement | null>): Fullsc
 export function FullscreenButton({target, fullscreen}: {target: RefObject<HTMLElement | null>; fullscreen?: FullscreenState}) {
   const own = useFullscreen(target, {fallbackClass})
   const {active, toggle} = fullscreen ?? own
-  const close = useContext(MoreContext)
+  const close = use(MoreContext)
   const label = active ? 'Exit full screen' : 'Enter full screen'
   return (
     <Button

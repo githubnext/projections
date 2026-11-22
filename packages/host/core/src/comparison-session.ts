@@ -1,4 +1,4 @@
-import {useRef, useState} from 'react'
+import {useLayoutEffect, useRef, useState} from 'react'
 import type {Highlighting, PresentationDefaults} from './projection/types.js'
 import type {ComparisonMode} from './modes.js'
 import {offeredModes} from './view-model.js'
@@ -99,8 +99,11 @@ export function comparisonSessionDefaults(
  * the settings live here, above it. They start from `comparisonSessionDefaults`; each is controllable.
  */
 export function useComparisonSession(options: ComparisonSessionOptions): ComparisonSessionSettings {
+  // The committed render's options, for the handlers.
   const latest = useRef(options)
-  latest.current = options
+  useLayoutEffect(() => {
+    latest.current = options
+  })
   const [defaults] = useState(() => comparisonSessionDefaults(options))
   const [mode, setMode] = useState<ComparisonMode | undefined>(defaults.mode)
   const [swipePosition, setSwipePosition] = useState(defaults.swipePosition)
@@ -109,27 +112,16 @@ export function useComparisonSession(options: ComparisonSessionOptions): Compari
   const [search, setSearch] = useState(defaults.search)
   const [connector, setConnector] = useState(defaults.connector)
   const [loop, setLoop] = useState(defaults.loop)
-  // One handler per setting for the session's life, so views don't see new callbacks on every render. A setting the
-  // embedder controls keeps its value: the change is only requested, so a refused one isn't kept for later.
-  const [handlers] = useState(() => {
-    const changed =
-      <K extends Controlled>(key: K, set: (value: NonNullable<ComparisonSessionOptions[K]>) => void) =>
-      (value: NonNullable<ComparisonSessionOptions[K]>) => {
-        const current = latest.current
-        const notify = current[handlerOf[key]] as ((value: NonNullable<ComparisonSessionOptions[K]>) => void) | undefined
-        if (current[key] === undefined) set(value)
-        notify?.(value)
-      }
-    return {
-      onModeChange: changed('mode', setMode),
-      onSwipePositionChange: changed('swipePosition', setSwipePosition),
-      onHighlightingChange: changed('highlighting', setHighlighting),
-      onChangesOnlyChange: changed('changesOnly', setChangesOnly),
-      onSearchChange: changed('search', setSearch),
-      onConnectorChange: changed('connector', setConnector),
-      onLoopChange: changed('loop', setLoop),
-    }
-  })
+  // One handler per setting for the session's life, so views don't see new callbacks on every render.
+  const [handlers] = useState(() => ({
+    onModeChange: (value: ComparisonMode) => change(latest.current, 'mode', setMode, value),
+    onSwipePositionChange: (value: number) => change(latest.current, 'swipePosition', setSwipePosition, value),
+    onHighlightingChange: (value: Highlighting) => change(latest.current, 'highlighting', setHighlighting, value),
+    onChangesOnlyChange: (value: boolean) => change(latest.current, 'changesOnly', setChangesOnly, value),
+    onSearchChange: (value: string) => change(latest.current, 'search', setSearch, value),
+    onConnectorChange: (value: boolean) => change(latest.current, 'connector', setConnector, value),
+    onLoopChange: (value: boolean) => change(latest.current, 'loop', setLoop, value),
+  }))
   const shownMode = options.mode ?? mode
   return {
     ...(shownMode ? {mode: shownMode} : {}),
@@ -141,4 +133,19 @@ export function useComparisonSession(options: ComparisonSessionOptions): Compari
     loop: options.loop ?? loop,
     ...handlers,
   }
+}
+
+/**
+ * A setting changed in a view. One the embedder controls keeps its value: the change is only requested, so a refused
+ * one isn't kept for later.
+ */
+function change<K extends Controlled>(
+  options: ComparisonSessionOptions,
+  key: K,
+  set: (value: NonNullable<ComparisonSessionOptions[K]>) => void,
+  value: NonNullable<ComparisonSessionOptions[K]>,
+): void {
+  const notify = options[handlerOf[key]] as ((value: NonNullable<ComparisonSessionOptions[K]>) => void) | undefined
+  if (options[key] === undefined) set(value)
+  notify?.(value)
 }

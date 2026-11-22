@@ -1,5 +1,5 @@
-import {useContext, useId, useRef, useState} from 'react'
-import type {KeyboardEvent, MouseEvent} from 'react'
+import {use, useId, useRef, useState} from 'react'
+import type {ComponentProps, KeyboardEvent, MouseEvent} from 'react'
 import {
   Activity,
   Sparkle,
@@ -41,37 +41,25 @@ export const modeIcons: Record<ComparisonMode, {icon: typeof Clapperboard; name:
 /** How a `ModeSwitch` draws: icons and labels, icons with the labels as tooltips, or one dropdown button. */
 export type ModeForm = 'labels' | 'icons' | 'menu'
 
-/**
- * The "Comparison mode" radio group (arrow keys select): the renderer's `availableModes`, in its order, filtered by
- * `modes`. `form` `labels` draws icons and labels; `icons` (or `compact`) icons with the labels as tooltips and
- * accessible names; `menu` (or the `menu` flag) one dropdown button ("Comparison mode: Animated", with the mode's icon) whose
- * popover holds the labeled radio group; choosing a mode closes it. Hidden unless comparing with more than one mode.
- */
-export function ModeSwitch({
+/** The comparison modes as a segmented radio group: `vertical` in the menu, which handles its clicks and keys. */
+function ModeGroup({
   projection: p,
-  modes = p.availableModes,
-  form,
-  compact = false,
-  menu = false,
+  options,
+  shape,
+  vertical,
+  ...handlers
 }: {
   projection: ProjectionController
-  modes?: readonly ComparisonMode[]
-  form?: ModeForm | undefined
-  compact?: boolean
-  menu?: boolean
-}) {
-  const shape = form ?? (menu ? 'menu' : compact ? 'icons' : 'labels')
-  const [open, setOpen] = useState(false)
-  const arrowing = useRef(false)
-  const options = p.availableModes
-    .filter(value => modes.includes(value))
-    .flatMap(value => comparisonModes.filter(option => option.value === value))
-  if (!p.comparing || options.length < 2) return null
-  const group = (vertical: boolean) => (
+  options: readonly (typeof comparisonModes)[number][]
+  shape: ModeForm
+  vertical: boolean
+} & Pick<ComponentProps<'div'>, 'onClick' | 'onPointerDown' | 'onKeyDownCapture'>) {
+  return (
     <SegmentedControl
       aria-label="Comparison mode"
       value={p.mode}
       onValueChange={value => p.setMode(value as ComparisonMode)}
+      {...handlers}
       // In the menu the group is the menu's list: no well of its own, so it doesn't read as a box inside the popover.
       className={cn(
         'ph-mode pj:shrink-0',
@@ -100,7 +88,35 @@ export function ModeSwitch({
       })}
     </SegmentedControl>
   )
-  if (shape !== 'menu') return group(false)
+}
+
+/**
+ * The "Comparison mode" radio group (arrow keys select): the renderer's `availableModes`, in its order, filtered by
+ * `modes`. `form` `labels` draws icons and labels; `icons` (or `compact`) icons with the labels as tooltips and
+ * accessible names; `menu` (or the `menu` flag) one dropdown button ("Comparison mode: Animated", with the mode's icon) whose
+ * popover holds the labeled radio group; choosing a mode closes it. Hidden unless comparing with more than one mode.
+ */
+export function ModeSwitch({
+  projection: p,
+  modes = p.availableModes,
+  form,
+  compact = false,
+  menu = false,
+}: {
+  projection: ProjectionController
+  modes?: readonly ComparisonMode[]
+  form?: ModeForm | undefined
+  compact?: boolean
+  menu?: boolean
+}) {
+  const shape = form ?? (menu ? 'menu' : compact ? 'icons' : 'labels')
+  const [open, setOpen] = useState(false)
+  const arrowing = useRef(false)
+  const options = p.availableModes
+    .filter(value => modes.includes(value))
+    .flatMap(value => comparisonModes.filter(option => option.value === value))
+  if (!p.comparing || options.length < 2) return null
+  if (shape !== 'menu') return <ModeGroup projection={p} options={options} shape={shape} vertical={false} />
   const current = options.find(option => option.value === p.mode) ?? options[0]!
   const {icon: Icon, name: iconName} = modeIcons[current.value]
   const name = `Comparison mode: ${current.label}`
@@ -133,7 +149,11 @@ export function ModeSwitch({
         </Button>
       }
     >
-      <div
+      <ModeGroup
+        projection={p}
+        options={options}
+        shape={shape}
+        vertical
         onClick={close}
         onPointerDown={() => {
           arrowing.current = false
@@ -141,9 +161,7 @@ export function ModeSwitch({
         onKeyDownCapture={event => {
           arrowing.current = /^(Arrow|Home$|End$)/.test(event.key)
         }}
-      >
-        {group(true)}
-      </div>
+      />
     </ToolbarPopover>
   )
 }
@@ -367,9 +385,9 @@ export function ViewSwitch({
   const generated = useId()
   const prefix = idPrefix ?? generated
   const list = useRef<HTMLDivElement>(null)
-  const close = useContext(MoreContext)
+  const close = use(MoreContext)
   const label = (kind: ViewKind) => viewName(kind, rendererTitle)
-  function keys(event: KeyboardEvent<HTMLDivElement>) {
+  function keys(event: KeyboardEvent<HTMLButtonElement>) {
     const next = rovingIndex(event.key, views.indexOf(view), views.length, 'horizontal')
     if (next === undefined) return
     event.preventDefault()
@@ -383,8 +401,6 @@ export function ViewSwitch({
       ref={list}
       role="tablist"
       aria-label="Presentation"
-      onKeyDown={keys}
-      onClick={closeOn('tab', close)}
       data-slot="tabs-list"
       data-variant="default"
       className="ph-tabs pj:inline-flex pj:h-8 pj:max-w-full pj:shrink-0 pj:items-center pj:gap-0.5 pj:overflow-x-auto pj:rounded-md pj:bg-muted pj:p-0.5 pj:text-muted-foreground"
@@ -400,7 +416,11 @@ export function ViewSwitch({
             aria-controls={`${prefix}-panel`}
             aria-selected={view === kind}
             tabIndex={view === kind ? 0 : -1}
-            onClick={() => onViewChange(kind)}
+            onKeyDown={keys}
+            onClick={() => {
+              onViewChange(kind)
+              close?.()
+            }}
             data-slot="tabs-trigger"
             data-state={view === kind ? 'active' : 'inactive'}
             data-view={kind}

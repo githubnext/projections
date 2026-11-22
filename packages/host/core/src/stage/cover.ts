@@ -66,7 +66,7 @@ const sameCovers = (a: FrameCovers, b: FrameCovers) =>
  */
 export function useFrameCovers(
   container: RefObject<HTMLElement | null>,
-  frames: () => Partial<Record<Side, HTMLIFrameElement | undefined>>,
+  frames: {readonly current: Readonly<Record<Side, {readonly iframe: HTMLIFrameElement} | null>>},
   key: unknown,
   reducedMotion: boolean,
 ): FrameCovers {
@@ -86,9 +86,8 @@ export function useFrameCovers(
           return new DOMRect(rect.x, rect.y - moved, rect.width, rect.height)
         })
         .filter(rect => rect.width > 0 && rect.height > 0)
-      const current = frames()
       const of = (side: Side): FrameCover | undefined => {
-        const frame = current[side]
+        const frame = frames.current[side]?.iframe
         if (!frame?.isConnected) return undefined
         const box = frame.getBoundingClientRect()
         const rects = covering
@@ -109,7 +108,7 @@ export function useFrameCovers(
     const observer = new ResizeObserver(measure)
     observer.observe(element)
     for (const cover of element.querySelectorAll(coverSelector)) observer.observe(cover)
-    for (const frame of Object.values(frames())) if (frame) observer.observe(frame)
+    for (const frame of Object.values(frames.current)) if (frame) observer.observe(frame.iframe)
     window.addEventListener('resize', measure)
     if (!reducedMotion) {
       for (const cover of element.querySelectorAll<HTMLElement>(coverSelector)) {

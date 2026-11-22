@@ -5,6 +5,10 @@ import {Badge} from './components/badge.js'
 import {cn} from './lib/utils.js'
 import {rendererLabel} from '../view-model.js'
 import {ToolbarPopover} from './toolbar-popover.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
+
+/** The default for an optional list prop: one array, so a default never changes between renders. */
+const none: readonly never[] = []
 
 /** Limitations the extractions declare in `metadata.limitations`. */
 export function subjectLimitations(p: Pick<ProjectionController, 'subject'>): string[] {
@@ -48,7 +52,7 @@ export function ComparatorLine({comparator, className}: {comparator: {id: string
 export function InfoButton({
   projection: p,
   comparator,
-  diagnostics = [],
+  diagnostics = none,
 }: {
   projection: ProjectionController
   comparator?: {id: string; digest: string} | undefined
@@ -85,9 +89,9 @@ export function InfoButton({
         >
           <h4 className="pj:text-xs pj:font-medium">Diagnostics and limitations</h4>
           <ul className="pj:flex pj:max-h-64 pj:flex-col pj:gap-2 pj:overflow-auto pj:text-xs">
-            {diagnostics.map((diagnostic, index) => (
+            {keyed(diagnostics, diagnostic => `${diagnostic.code}:${diagnostic.path}:${diagnostic.message}`).map(([key, diagnostic]) => (
               <li
-                key={index}
+                key={key}
                 className={cn('pj:flex pj:min-w-0 pj:flex-col pj:gap-0.5', diagnostic.severity === 'error' ? 'ph-error' : 'ph-warning')}
               >
                 <span className="pj:flex pj:items-center pj:gap-1.5">
@@ -103,8 +107,8 @@ export function InfoButton({
                 <code className="pj:break-all pj:font-mono pj:text-muted-foreground">{diagnostic.path}</code>
               </li>
             ))}
-            {limitations.map((limitation, index) => (
-              <li key={`limitation-${index}`} className="ph-warning pj:flex pj:min-w-0 pj:items-baseline pj:gap-1.5">
+            {keyed(limitations, limitation => limitation).map(([key, limitation]) => (
+              <li key={`limitation-${key}`} className="ph-warning pj:flex pj:min-w-0 pj:items-baseline pj:gap-1.5">
                 <Badge variant="secondary" className="pj:px-1.5 pj:py-0 pj:text-[11px] pj:font-medium">
                   limitation
                 </Badge>

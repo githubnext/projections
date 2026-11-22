@@ -1,7 +1,7 @@
 import {useState} from 'react'
 import type {ReactNode} from 'react'
 import type {ViewSubject, Row} from '../model.js'
-import {variedWithin} from '@githubnext/projections-renderer-sdk/presentation'
+import {keyed, variedWithin} from '@githubnext/projections-renderer-sdk/presentation'
 import {describeChange, rowStatusCounts, statusLabel} from '../model.js'
 import {figuresSentence} from '../summary.js'
 import type {SummaryFigure} from '../summary.js'
@@ -285,10 +285,10 @@ export function TextView({subject, rows, progress, selectedId, onSelect, annotat
       </p>
       {summarized}
       <ol className="ph-steps pj:flex pj:flex-col pj:gap-2">
-        {comparison.steps.map((step, index) =>
+        {keyed(comparison.steps, step => step.changes[0] ?? '').map(([key, step], index) =>
           !step.changes.some(id => listed.has(id)) ? null : (
             <li
-              key={index}
+              key={key}
               value={index + 1}
               data-step={index}
               aria-current={progress > 0 && progress < 1 && index === current ? 'step' : undefined}

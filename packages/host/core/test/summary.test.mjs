@@ -215,6 +215,6 @@ test('a fact carries its changes and a description: the bar draws the changes as
   )
   assert.match(
     html,
-    /<button[^>]*aria-description="Classified by the shared rules"[^>]*title="Classified by the shared rules\nShow only the breaking changes"/,
+    /<button[^>]*aria-describedby="([^"]+)"[^>]*title="Classified by the shared rules\nShow only the breaking changes"[^>]*>.*?<span id="\1" hidden="">Classified by the shared rules<\/span><\/button>/,
   )
 })

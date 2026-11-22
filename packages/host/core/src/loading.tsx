@@ -116,11 +116,11 @@ export function LoadingStatus({label, description, reducedMotion = false, fill =
           {still ? <Hourglass /> : <Spinner />}
         </svg>
         <span className="ph-loading-label">{label}</span>
-        {description && (
+        {description ? (
           <span className="ph-loading-description" style={{fontSize: '0.875em'}}>
             {description}
           </span>
-        )}
+        ) : null}
       </span>
     </div>
   )

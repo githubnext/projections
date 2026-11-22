@@ -17,16 +17,16 @@ export interface FullscreenState {
  * fallback records the page's scroll position on entering and restores it on
  * leaving, and returns focus without scrolling.
  */
-export function useFullscreen(target: RefObject<HTMLElement | null>, {fallbackClass}: {fallbackClass: string}): FullscreenState {
+export function useFullscreen(targetRef: RefObject<HTMLElement | null>, {fallbackClass}: {fallbackClass: string}): FullscreenState {
   const [fallback, setFallback] = useState(false)
   const [native, setNative] = useState(false)
   useEffect(() => {
-    const update = () => setNative(Boolean(target.current) && document.fullscreenElement === target.current)
+    const update = () => setNative(Boolean(targetRef.current) && document.fullscreenElement === targetRef.current)
     document.addEventListener('fullscreenchange', update)
     return () => document.removeEventListener('fullscreenchange', update)
-  }, [target])
+  }, [targetRef])
   useEffect(() => {
-    const element = target.current
+    const element = targetRef.current
     if (!fallback || !element) return
     const view = element.ownerDocument.defaultView ?? window
     const scroll = {x: view.scrollX, y: view.scrollY}
@@ -48,9 +48,9 @@ export function useFullscreen(target: RefObject<HTMLElement | null>, {fallbackCl
         if (view.scrollX !== scroll.x || view.scrollY !== scroll.y) view.scrollTo(scroll.x, scroll.y)
       })
     }
-  }, [fallback, target, fallbackClass])
+  }, [fallback, targetRef, fallbackClass])
   const toggle = useCallback(() => {
-    const element = target.current
+    const element = targetRef.current
     if (!element) return
     if (fallback) {
       setFallback(false)
@@ -63,6 +63,6 @@ export function useFullscreen(target: RefObject<HTMLElement | null>, {fallbackCl
     if (document.fullscreenEnabled && typeof element.requestFullscreen === 'function') {
       element.requestFullscreen().catch(() => setFallback(true))
     } else setFallback(true)
-  }, [fallback, target])
+  }, [fallback, targetRef])
   return {active: native || fallback, kind: native ? 'native' : fallback ? 'fallback' : undefined, toggle}
 }

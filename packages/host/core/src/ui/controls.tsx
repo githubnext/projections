@@ -73,11 +73,13 @@ export function Field({
   )
 }
 
+const everyMode = comparisonModes.map(option => option.value)
+
 /** A segmented radio group choosing the comparison mode; arrow keys select, as with native radios. */
 export function ComparisonModeControl({
   mode,
   onChange,
-  modes = comparisonModes.map(option => option.value),
+  modes = everyMode,
 }: {
   mode: ComparisonMode
   onChange: (mode: ComparisonMode) => void

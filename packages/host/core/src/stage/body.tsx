@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
+import {useEffect, useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {CSSProperties, ReactNode} from 'react'
 import {connectorBetween, connectorPath, twoPaneMode} from '../modes.js'
 import type {Connector, Side} from '../modes.js'
@@ -65,21 +65,25 @@ export function StageBody({
   // The arrangement is chosen from the content's shape (the renderer's framing over the whole transition, so it holds
   // while scrubbing) and kept per comparison unless the other one fits clearly larger.
   const aspect = projection.panes.after.aspect ?? projection.panes.before.aspect
-  const arranged = useRef<{subject: unknown; arrangement: PaneArrangement | undefined}>({subject: undefined, arrangement: undefined})
-  if (arranged.current.subject !== projection.subject) arranged.current = {subject: projection.subject, arrangement: undefined}
+  const [arranged, setArranged] = useState<{subject: unknown; arrangement: PaneArrangement | undefined}>({
+    subject: projection.subject,
+    arrangement: undefined,
+  })
+  const kept = arranged.subject === projection.subject ? arranged : {subject: projection.subject, arrangement: undefined}
   const arrangement = paneArrangement({
     width,
     height: fill ? height : 0,
     aspect,
     stackBelow,
-    current: arranged.current.arrangement,
+    current: kept.arrangement,
     columnGap: columnGapOf(paneEdge),
     ...stackedGapsOf(paneEdge),
     // Chips overlay their frames, so only header bands take height from the panes.
     band: paneLabels === 'visible' ? paneGeometry.band : 0,
   })
   // Kept only once it was chosen from the content's shape, so the first real choice isn't held back by a default.
-  if (mode === 'side-by-side' && fill && aspect && height > 0 && Number.isFinite(width)) arranged.current.arrangement = arrangement
+  const chosen = mode === 'side-by-side' && fill && aspect && height > 0 && Number.isFinite(width) ? {...kept, arrangement} : kept
+  if (chosen.subject !== arranged.subject || chosen.arrangement !== arranged.arrangement) setArranged(chosen)
   const stacked = mode === 'side-by-side' && arrangement === 'stacked'
   const [layout, setLayout] = useState(0)
   const [connector, setConnector] = useState<Connector>()
@@ -117,13 +121,9 @@ export function StageBody({
   // them keeps its content clear of the cover (a fitted canvas only where it would reach it) and shows under it.
   const chips = paneLabels === 'chips'
   const utilityShown = Boolean(utility) && !twoPanes
-  const frames = useCallback(
-    () => ({before: stage.frames.current.before?.iframe, after: stage.frames.current.after?.iframe}),
-    [stage.frames],
-  )
   const covers = useFrameCovers(
     container,
-    frames,
+    stage.frames,
     // What overlays exist, where the frames are, and the stage's size: a frame that mounts after the hook subscribed is
     // only observed from the next run, which a size or status change brings.
     `${mode}-${stacked}-${chips}-${utilityShown}-${Boolean(foot)}-${layout}-${width}-${height}-${projection.panes.before.status}-${projection.panes.after.status}`,

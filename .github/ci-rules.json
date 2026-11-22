@@ -43,6 +43,7 @@
         ".considered.yaml",
         ".oxfmtrc.json",
         "eslint.config.js",
+        "eslint-suppressions.json",
         ".portability.yaml",
         "rustfmt.toml",
         ".github/actionlint.yaml",

@@ -392,11 +392,4 @@ export default defineConfig(
     plugins: {machines: machinesPlugin},
     rules: {'machines/lifecycle': 'warn'},
   },
-  {
-    // Rules this configuration turns on whose existing violations are still being fixed (docs/maintainers/linting.md#turning-on-a-rule).
-    // Each comes off this list in the change that fixes the last of them; nothing is added to it.
-    rules: Object.fromEntries(
-      ['@typescript-eslint/no-non-null-assertion', '@typescript-eslint/no-unsafe-type-assertion'].map(rule => [rule, 'off']),
-    ),
-  },
 )

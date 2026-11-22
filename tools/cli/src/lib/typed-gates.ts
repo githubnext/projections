@@ -75,7 +75,7 @@ const workspaceOf = (context: GateContext, path: string) =>
 
 /** Files every lint result depends on: the configuration, what it imports, and the compiler options. */
 const lintConfiguration =
-  /^(?:eslint\.config\.js|tsconfig\.base\.json|package(?:-lock)?\.json|tools\/scripts\/(?:lint|engine-contracts)\.mjs|tools\/scripts\/check-machines\/lifecycle-rule\.mjs)$/u
+  /^(?:eslint\.config\.js|eslint-suppressions\.json|tsconfig\.base\.json|package(?:-lock)?\.json|tools\/scripts\/(?:lint|engine-contracts)\.mjs|tools\/scripts\/check-machines\/lifecycle-rule\.mjs)$/u
 
 /**
  * The lint gate, a process per workspace as npm run lint runs it, since one process over many workspaces holds every

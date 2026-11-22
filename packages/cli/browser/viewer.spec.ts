@@ -12,6 +12,8 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {createInterface} from 'node:readline'
 
+const noop = () => undefined
+
 const cli = process.env.PROJECTIONS_CLI!
 let repository: string
 let cache: string
@@ -70,7 +72,9 @@ test.afterAll(async () => {
   // Unset when beforeAll failed before starting it.
   const running = viewer as ChildProcess | undefined
   if (running?.exitCode === null && running.signalCode === null) {
-    const exited = new Promise(resolve => running.once('exit', resolve))
+    const exited = new Promise(resolve => {
+      running.once('exit', resolve)
+    })
     running.kill()
     await exited
   }
@@ -105,8 +109,8 @@ function request(path: string, body?: unknown) {
 async function control(path: string, body?: unknown) {
   return {status: (await request(path, body)).status}
 }
-const state = async (viewer?: string) =>
-  (await (await request(viewer ? `control/state?viewer=${viewer}` : 'control/state')).json()) as ViewerState
+const state = async (viewerId?: string) =>
+  (await (await request(viewerId ? `control/state?viewer=${viewerId}` : 'control/state')).json()) as ViewerState
 const currentView = async (body: {viewer?: string} = {}) => (await (await request('control/tool/current_view', body)).json()) as CurrentView
 
 /** The page's own text, outside renderer frames, and the paths it names. */
@@ -280,9 +284,9 @@ test("where a browser blocks renderer frames from loading the viewer's URLs, the
   // Claude Code's Preview pane cancels any request from an opaque origin to a loopback address as a client block: a
   // sandboxed renderer frame's navigation to the viewer. The page's own requests still go through.
   const blocked: string[] = []
-  await page.route(/\/renderers\/.+\/index\.html$/u, (route, request) => {
-    if (!request.isNavigationRequest() || !request.frame().parentFrame()) return route.continue()
-    blocked.push(request.url())
+  await page.route(/\/renderers\/.+\/index\.html$/u, (route, routed) => {
+    if (!routed.isNavigationRequest() || !routed.frame().parentFrame()) return route.continue()
+    blocked.push(routed.url())
     return route.abort('blockedbyclient')
   })
   await openCanvas(page)
@@ -597,7 +601,9 @@ test("a theme seed in the link colors the stage and chrome in each mode it has, 
 test("a theme seed that isn't valid is ignored, and the page and the agent say so", async ({page}) => {
   await page.emulateMedia({colorScheme: 'light'})
   const warnings: string[] = []
-  page.on('console', message => void (message.type() === 'warning' && warnings.push(message.text())))
+  page.on('console', message => {
+    if (message.type() === 'warning') warnings.push(message.text())
+  })
   // A color that isn't one, which a stylesheet would take as CSS.
   await page.goto(themed({light: {background: 'white;}body{display:none'}}))
   await expect(page.locator('.pi-viewer-status')).toHaveText("This link's theme isn't valid, so the page keeps its own")
@@ -610,11 +616,13 @@ test("a theme seed that isn't valid is ignored, and the page and the agent say s
 
 test('the agent reads what a page did with its theme seed while the page is still loading the projection', async ({page}) => {
   // The page reports its theme in its first report, before the projection loads: with the definitions held, it never does.
-  let release = () => {}
-  const held = new Promise<void>(resolve => (release = resolve))
+  let release: (() => void) | undefined
+  const held = new Promise<void>(resolve => {
+    release = resolve
+  })
   await page.route(/\/api\/definitions/u, async route => {
     await held
-    await route.continue().catch(() => {})
+    await route.continue().catch(noop)
   })
   await page.goto(themed({light: {background: 'white;}body{display:none'}}))
   // This page's report: its theme, and no projection yet (an earlier test's page reported the projection loaded).
@@ -628,7 +636,7 @@ test('the agent reads what a page did with its theme seed while the page is stil
   const text = (await currentView()).content[0].text
   expect(text).toContain('No page shows it yet')
   expect(text).toContain('Theme: the page ignored the theme seed in its link')
-  release()
+  release?.()
   await page.unrouteAll({behavior: 'ignoreErrors'})
 })
 

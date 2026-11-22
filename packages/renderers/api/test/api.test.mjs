@@ -19,6 +19,8 @@ import {signatureLayout, signatureSegments, signatureTokens} from '../node_modul
 import {ApiView} from '../node_modules/.cache/test/view.js'
 import {plain} from '../../kit/test/markup.mjs'
 
+const noop = () => undefined
+
 const engine = createNativeEngine()
 const api = entities => ({protocolVersion: 0, schema: 'api/v0', entities, relationships: []})
 const declaration = (id, signature, kind = 'function') => ({id, kind, label: id, data: {signature}})
@@ -55,12 +57,12 @@ const props = (model, {comparing = true, diff = false, progress = 1, highlightin
   selectedId: null,
   hoveredId: null,
   emphasis: stepEmphasis([], progress, comparing ? highlighting : 0),
-  onSelect() {},
-  onOpen() {},
-  reportSteps() {},
+  onSelect: noop,
+  onOpen: noop,
+  reportSteps: noop,
   controls: {},
-  declareControls() {},
-  onAction: () => () => {},
+  declareControls: noop,
+  onAction: () => noop,
   options: {},
   viewport: undefined,
   reducedMotion: false,

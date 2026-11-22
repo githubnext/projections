@@ -1,4 +1,5 @@
 import {fetchedRendererDocuments, setRendererDocuments} from '@githubnext/projections-host'
+import {noop} from '../noop.js'
 
 /**
  * Lets renderer frames open their documents from this page, where a browser won't load a renderer's URL into its
@@ -8,7 +9,7 @@ import {fetchedRendererDocuments, setRendererDocuments} from '@githubnext/projec
  */
 export function openRendererDocuments(served: boolean): () => void {
   const nonce = served ? document.querySelector<HTMLScriptElement>('script[nonce]')?.nonce : undefined
-  if (!nonce) return () => {}
+  if (!nonce) return noop
   setRendererDocuments(fetchedRendererDocuments(nonce))
   return () => setRendererDocuments(undefined)
 }

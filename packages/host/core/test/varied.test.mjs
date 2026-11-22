@@ -5,6 +5,8 @@ import {renderToStaticMarkup} from 'react-dom/server'
 import {rowDetails, subjectRows, subjectVariation, useProjection, variedText} from '../dist/index.js'
 import {TextView, VariedList, VariedToggle} from '../dist/ui/index.js'
 
+const noop = () => undefined
+
 const volatile = [{kinds: ['test'], path: '/data/durationMs', tolerance: {absolute: 50, relative: 0.2}}]
 const extraction = entities => ({protocolVersion: 0, schema: 'graph/v0', volatile, entities, relationships: []})
 const testItem = (id, durationMs, status = 'passed') => ({id, kind: 'test', label: id, data: {durationMs, status}})
@@ -149,7 +151,7 @@ test('turning one filter on turns the other off', () => {
 })
 
 test('the toolbar count shows "N varied within tolerance" as a toggle, and nothing when none varied', () => {
-  const controller = {comparing: true, variation: {within: 3, beyond: 1}, variedOnly: false, setVariedOnly() {}}
+  const controller = {comparing: true, variation: {within: 3, beyond: 1}, variedOnly: false, setVariedOnly: noop}
   const markup = renderToStaticMarkup(createElement(VariedToggle, {projection: controller}))
   assert.match(markup, /<span>3 varied within tolerance<\/span>/u)
   assert.match(markup, /aria-pressed="false"/u)
@@ -163,6 +165,6 @@ test('the toolbar count shows "N varied within tolerance" as a toggle, and nothi
 })
 
 test('the text view says how many unchanged items varied within tolerance', () => {
-  const markup = renderToStaticMarkup(createElement(TextView, {subject, rows, selectedId: null, onSelect() {}, progress: 1}))
+  const markup = renderToStaticMarkup(createElement(TextView, {subject, rows, selectedId: null, onSelect: noop, progress: 1}))
   assert.match(markup, /2 changes in 1 step: 0 added, 0 removed, 2 modified\. 2 items are unchanged, 1 of them varied within tolerance\./u)
 })

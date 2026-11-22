@@ -91,7 +91,10 @@ export function runInWorker(
   signal?: AbortSignal,
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    if (signal?.aborted) return reject(cancelled(signal))
+    if (signal?.aborted) {
+      reject(cancelled(signal))
+      return
+    }
     let settled = false
     let worker: WorkerHandle | undefined
     const abort = () => finish(cancelled(signal!))

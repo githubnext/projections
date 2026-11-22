@@ -32,7 +32,7 @@ export function useCoveredPadding<P extends FitPadding>(
   const sized = size !== undefined
   useLayoutEffect(() => {
     const element = stage.current
-    if (!element || !covered) return
+    if (!element || !covered) return undefined
     const view = element.ownerDocument.defaultView
     const measure = () => {
       const rect = element.getBoundingClientRect()

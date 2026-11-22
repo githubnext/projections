@@ -10,6 +10,8 @@ import type {ChangeClassification, StatusPart} from '@githubnext/projections-ren
 import type {IconEntry, IconGroup} from './icon-vocabulary.js'
 import {IconStyles} from './icon-styles.js'
 
+const noop = () => undefined
+
 /** Text sizes, then one large size. */
 export const iconSizes = [14, 16, 24, 64] as const
 
@@ -61,11 +63,11 @@ function summaryOf(entry: IconEntry): ProjectionController {
     comparing: false,
     variation: undefined,
     summaryFilter: null,
-    setSummaryFilter: () => {},
+    setSummaryFilter: noop,
     variedOnly: false,
-    setVariedOnly: () => {},
+    setVariedOnly: noop,
     regeneratedOnly: false,
-    setRegeneratedOnly: () => {},
+    setRegeneratedOnly: noop,
     reducedMotion: true,
   }
   return state as ProjectionController

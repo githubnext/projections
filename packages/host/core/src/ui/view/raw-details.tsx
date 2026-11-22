@@ -57,7 +57,9 @@ function Properties({
               aria-pressed={selected}
               data-selected={selected || undefined}
               title={text}
-              onClick={() => p.selectTarget(selected ? target : property)}
+              onClick={() => {
+                p.selectTarget(selected ? target : property)
+              }}
             >
               <span className="pj:break-words pj:font-mono pj:font-medium">{key}</span>
               <span className="pj:line-clamp-3 pj:break-all pj:font-mono pj:text-muted-foreground">{text}</span>

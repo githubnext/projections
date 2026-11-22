@@ -42,7 +42,7 @@ export async function webviewAssets(): Promise<InspectorAssets> {
             // inherits as a Blob document requires. Its own policy (no network, no frames) still applies. A renderer
             // that nests it (`document-request`) gets the same text: its frame inherits the nesting renderer's policy.
             const html = mount.rendererDocumentHtml(await (await fetchOk(entry.url)).text(), config.nonce)
-            return {...entry, url: URL.createObjectURL(new Blob([html], {type: 'text/html'})), document: async () => html}
+            return {...entry, url: URL.createObjectURL(new Blob([html], {type: 'text/html'})), document: () => Promise.resolve(html)}
           }),
         )
       } catch (error) {

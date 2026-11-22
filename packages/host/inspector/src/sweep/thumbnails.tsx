@@ -50,7 +50,7 @@ export function ChangedCell({cell, label, queue}: {cell: SweepCell; label: strin
   const [preview, setPreview] = useState(false)
   useEffect(() => {
     const element = ref.current
-    if (!element) return
+    if (!element) return undefined
     let live = true
     const observer = new IntersectionObserver(entries => {
       if (!entries.some(entry => entry.isIntersecting)) return

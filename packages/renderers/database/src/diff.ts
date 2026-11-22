@@ -54,14 +54,14 @@ function addChangeSlots({rows, union, lines}: Analysis) {
         const kind = union.kinds.get(id) ?? 'column'
         const entity = rows.get(id) && (rows.get(id)!.after ?? rows.get(id)!.before)!
         const shown = entity ? shownValues(kind, entity, union.keyRows.get(id)) : []
-        found.forEach((line, index) =>
+        found.forEach((line, index) => {
           union.texts.rows.set(lineSlot(id, index), {
             kind: 'change',
             word: line.word,
             before: line.before,
             after: line.after !== undefined && shown.includes(line.after) ? undefined : line.after,
-          }),
-        )
+          })
+        })
         return [id, ...found.map((_, index) => lineSlot(id, index))]
       }),
     )

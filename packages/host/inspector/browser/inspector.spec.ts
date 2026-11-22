@@ -1250,7 +1250,14 @@ test('the title bar is a planned toolbar: no overlap, nothing clipped or truncat
   await expect(page.getByRole('toolbar', {name: 'Inspector'})).toBeVisible()
   for (const width of [1440, 1024, 768, 600, 480, 390]) {
     await page.setViewportSize({width, height: 800})
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await page.evaluate(
+      () =>
+        new Promise(resolve => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(resolve)
+          })
+        }),
+    )
     const at = `at ${width}px`
     const bar = await page.locator('.pi-titlebar').evaluate(header => {
       const box = (element: Element) => element.getBoundingClientRect()

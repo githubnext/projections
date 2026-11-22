@@ -34,7 +34,9 @@ export interface FactsTab {
 async function askPage(tab: FactsTab): Promise<PageView | undefined> {
   return (await Promise.race([
     tab.control({op: 'currentView'}, 5_000).catch(() => undefined),
-    new Promise<undefined>(resolve => setTimeout(resolve, 5_000)),
+    new Promise<undefined>(resolve => {
+      setTimeout(resolve, 5_000)
+    }),
   ])) as PageView | undefined
 }
 

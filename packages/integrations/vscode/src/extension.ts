@@ -242,4 +242,6 @@ export function activate(context: vscode.ExtensionContext) {
   })
 }
 
-export function deactivate() {}
+export function deactivate() {
+  // VS Code disposes what activate registered in the context's subscriptions.
+}

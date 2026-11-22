@@ -31,7 +31,7 @@ export function useOpeningReveal(root: RefObject<HTMLElement | null>, ids: Reado
   const wanted = useMemo(() => (ids ? [...ids].sort().join('\n') : ''), [ids])
   useEffect(() => {
     const element = root.current
-    if (!element || !wanted) return
+    if (!element || !wanted) return undefined
     const focused = new Set(wanted.split('\n'))
     return afterPaint(() => {
       const target = [...element.querySelectorAll('[data-entity-id]')].find(

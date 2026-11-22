@@ -23,6 +23,8 @@ import {join} from 'node:path'
 import {createInterface} from 'node:readline'
 import {CanvasError, createCanvas, joinSession} from '@github/copilot-sdk/extension'
 
+const noop = () => undefined
+
 const cli = process.env.PROJECTIONS_CLI || 'projections'
 /** The tools this canvas answers, by the names VS Code's agent and `projections mcp` use. */
 const actions = ['open_projection', 'current_view', 'screenshot', 'refresh']
@@ -59,7 +61,7 @@ function catalog(cwd) {
       resolve(tools)
     }
     child.on('error', () => done([]))
-    child.stdin.on('error', () => {})
+    child.stdin.on('error', noop)
     createInterface({input: child.stdout}).on('line', line => {
       try {
         const message = JSON.parse(line)
@@ -81,9 +83,9 @@ function catalog(cwd) {
 /** The repository a directory is in: its Git root. */
 function repository(directory) {
   const cwd = directory || process.cwd()
-  return new Promise(resolve =>
-    execFile('git', ['rev-parse', '--show-toplevel'], {cwd}, (error, stdout) => resolve(error ? cwd : stdout.trim() || cwd)),
-  )
+  return new Promise(resolve => {
+    execFile('git', ['rev-parse', '--show-toplevel'], {cwd}, (error, stdout) => resolve(error ? cwd : stdout.trim() || cwd))
+  })
 }
 
 /** The `project` input: a project directory relative to the repository's root, which the CLI takes as `--root`. */
@@ -181,7 +183,7 @@ async function alreadyShown(instanceId, input) {
   const key = JSON.stringify(input)
   if (shown[instanceId] === key) return true
   shown[instanceId] = key
-  if (file) await writeFile(file, JSON.stringify(shown)).catch(() => {})
+  if (file) await writeFile(file, JSON.stringify(shown)).catch(noop)
   return false
 }
 

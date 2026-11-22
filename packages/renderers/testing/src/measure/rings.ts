@@ -25,7 +25,9 @@ async function still(timeoutMs = 1500): Promise<void> {
   if (running.length) {
     await Promise.race([
       Promise.allSettled(running.map(animation => animation.finished)),
-      new Promise(resolve => setTimeout(resolve, timeoutMs)),
+      new Promise(resolve => {
+        setTimeout(resolve, timeoutMs)
+      }),
     ])
   }
   await settle()

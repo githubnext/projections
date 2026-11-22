@@ -18,6 +18,7 @@ export function isControlValue(control: RendererControl, value: unknown): value 
     case 'action':
       return false
   }
+  return false
 }
 
 /** Each control's value from `options`, or its default when absent or invalid. */

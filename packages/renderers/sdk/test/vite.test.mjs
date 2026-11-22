@@ -111,7 +111,11 @@ test('the development server serves an edit written straight after another, as a
     await server.listen(0)
     const served = async () => (await fetch(`${server.resolvedUrls.local[0]}src/view.js`)).text()
     assert.match(await served(), /"Payments"/u)
-    while (!server.watcher.getWatched()[dirname(view)]?.includes('view.js')) await new Promise(resolve => setTimeout(resolve, 10))
+    while (!server.watcher.getWatched()[dirname(view)]?.includes('view.js')) {
+      await new Promise(resolve => {
+        setTimeout(resolve, 10)
+      })
+    }
     const changed = () =>
       new Promise((resolve, reject) => {
         const missed = setTimeout(() => reject(new Error('The development server missed a write to the view')), 5_000)

@@ -9,6 +9,7 @@ import {plan} from './testing/run.js'
 import {TestState} from './testing/state.js'
 import type {Watched} from './testing/state.js'
 import {applyTree} from './testing/tree.js'
+import {noop} from './noop.ts'
 
 /** The projections a folder defines, by ID with their titles, and their changes (the side bar's models). */
 export interface ProjectionSource {
@@ -94,7 +95,7 @@ export class ProjectionTests implements vscode.Disposable {
       folders.map(folder => {
         const fresh = !this.watched.has(folder.uri.toString())
         this.watch(folder)
-        return fresh || refresh ? this.refresh(folder) : undefined
+        return fresh || refresh ? this.refresh(folder) : Promise.resolve()
       }),
     )
   }
@@ -120,7 +121,7 @@ export class ProjectionTests implements vscode.Disposable {
       subscribe(runner)
       this.schedule(folder)
     })
-    void watched.lease.current().then(subscribe, () => {})
+    void watched.lease.current().then(subscribe, noop)
   }
 
   private unwatch(key: string) {

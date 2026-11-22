@@ -36,6 +36,11 @@ export async function guard<T>(work: () => T | Promise<T>): Promise<T> {
   }
 }
 
-export const progress = (agent: boolean) => (agent ? undefined : (line: string) => process.stderr.write(`${line}\n`))
+export const progress = (agent: boolean) =>
+  agent
+    ? undefined
+    : (line: string) => {
+        process.stderr.write(`${line}\n`)
+      }
 
 export const next = z.array(z.string()).describe('Commands to run next')

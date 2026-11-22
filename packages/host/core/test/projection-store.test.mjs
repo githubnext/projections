@@ -4,6 +4,8 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {createProjection} from '../dist/index.js'
 
+const noop = () => undefined
+
 const extraction = entities => ({protocolVersion: 0, schema: 'graph/v0', entities, relationships: []})
 const item = (id, label = id) => ({id, kind: 'service', label, data: {}})
 const comparisonOf = (before, after, changes) => ({mode: 'comparison', before, after, comparison: {protocolVersion: 0, changes, steps: []}})
@@ -175,7 +177,7 @@ test('stopping while the first preferences are told stops watching them', () => 
   globalThis.window = {
     matchMedia: query => ({
       matches: true,
-      addEventListener: () => {},
+      addEventListener: noop,
       removeEventListener: () => removed.push(query),
     }),
   }

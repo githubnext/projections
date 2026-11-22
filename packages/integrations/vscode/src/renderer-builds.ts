@@ -15,6 +15,7 @@ import type {Runner} from './runner.js'
 import {isRendererSource, rendererPackage} from './renderer-build-model.js'
 import type {BuildPhase, BuildState} from './renderer-build-model.js'
 import {RelayTerminal} from './renderer-builds/relay-terminal.js'
+import {noop} from './noop.ts'
 
 export const rendererTaskType = 'projections-renderer'
 
@@ -106,14 +107,14 @@ export class RendererBuilds implements vscode.Disposable {
     if (known) return known
     const lease = this.host.lease(folder)
     let unsubscribe: (() => void) | undefined
-    const entry: Folder = {folder, lease, builds: new Map(), stop: () => {}}
+    const entry: Folder = {folder, lease, builds: new Map(), stop: noop}
     const subscribe = (runner: Runner) => {
       unsubscribe?.()
       unsubscribe = runner.onNotification((method, params) => {
         if (method === 'rendererBuilds') this.apply(entry, params)
       })
     }
-    void lease.current().then(subscribe, () => {})
+    void lease.current().then(subscribe, noop)
     // A replaced backend (trust granted, or it exited) starts with no builds: each open tab's renderer is asked for
     // again, and one saved while the workspace wasn't trusted builds now.
     const stopListening = lease.onDidChange(runner => {
@@ -197,14 +198,14 @@ export class RendererBuilds implements vscode.Disposable {
       folder,
       `${projection} renderer`,
       'Projections',
-      new vscode.CustomExecution(async () => terminal),
+      new vscode.CustomExecution(() => Promise.resolve(terminal)),
       ['$projections-renderer'],
     )
     task.isBackground = watches
     task.presentationOptions = {reveal: vscode.TaskRevealKind.Never, panel: vscode.TaskPanelKind.Dedicated, clear: false}
     void vscode.tasks.executeTask(task).then(
       execution => (terminal.execution = execution),
-      error => this.output.warn(`${projection}: ${error instanceof Error ? error.message : String(error)}`),
+      (error: unknown) => this.output.warn(`${projection}: ${error instanceof Error ? error.message : String(error)}`),
     )
     this.output.info(`${projection}: the backend runs npm run ${script}`)
     return terminal

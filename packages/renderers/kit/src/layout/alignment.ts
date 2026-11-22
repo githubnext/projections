@@ -78,7 +78,9 @@ export function identifyAlignment(
   for (const layer of layers) {
     if (!layer) continue
     layer.sort((a, b) => a.across - b.across || a.id - b.id)
-    layer.forEach((item, index) => (item.position = index))
+    layer.forEach((item, index) => {
+      item.position = index
+    })
   }
   for (const item of vertices) {
     item.upper.sort((a, b) => a.position - b.position)

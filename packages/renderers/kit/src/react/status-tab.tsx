@@ -35,7 +35,7 @@ export function StatusTab({change, emphasis, measure = false}: {change: StatusCh
   const drawn = `${parts.map(part => part.status).join(' ')}${varied ? ' varied' : ''}`
   useLayoutEffect(() => {
     const element = room.current
-    if (!element || measure) return
+    if (!element || measure) return undefined
     const update = () => {
       element.removeAttribute('data-flush')
       const tab = element.firstElementChild
@@ -49,7 +49,7 @@ export function StatusTab({change, emphasis, measure = false}: {change: StatusCh
       if (tab.offsetWidth + radius > pill.offsetWidth + 0.5) element.setAttribute('data-flush', '')
     }
     update()
-    if (typeof ResizeObserver === 'undefined') return
+    if (typeof ResizeObserver === 'undefined') return undefined
     // The pill resizes with its slot, and the tab with its font; a flush tab is stretched, so its parts are observed
     // for their natural widths.
     const observer = new ResizeObserver(update)

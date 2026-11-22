@@ -170,7 +170,7 @@ for (const scheme of ['light', 'dark'] as const) {
     const legend = page.locator('.ph-legend')
     await expect(legend.locator('.ph-legend-item')).toHaveCount(5)
     await installColorProbe(page)
-    const [header, divider, fill, edge] = await Promise.all(
+    const [_header, divider, fill, edge] = await Promise.all(
       ['surface-header', 'divider', 'modified-muted', 'modified-border'].map(name => tokenValue(page, name)),
     )
     // The foot draws the surface and the edge; the legend, its first row, draws neither, and the summary's rule under it.
@@ -182,7 +182,6 @@ for (const scheme of ['light', 'dark'] as const) {
     const rule = await paint(page.locator('.ph-stage-foot > .ph-summary-bar'))
     expect(rule.top).toEqual(divider)
     expect((await paint(page.locator('.ph-stage-foot'))).top).toEqual(divider)
-    void header
     const swatch = await paint(legend.locator('.ph-legend-item', {hasText: 'Changed'}).locator('.ph-legend-swatch'))
     expect(swatch.background).toEqual(fill)
     expect(swatch.top).toEqual(edge)

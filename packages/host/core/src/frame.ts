@@ -25,6 +25,7 @@ import type {RendererDocuments} from './registry.js'
 const passedOn = ['aspect', 'steps', 'open', 'hover', 'anchor', 'viewport', 'control', 'annotation', 'legend', 'summary'] as const
 type PassedOn = Extract<RendererMessage, {type: (typeof passedOn)[number]}>
 const isPassedOn = (message: RendererMessage): message is PassedOn => passedOn.some(type => type === message.type)
+const noop = () => undefined
 
 /**
  * Hosts one renderer bundle in a sandboxed frame and speaks the renderer
@@ -80,7 +81,7 @@ export class RendererFrame {
 
   constructor(options: RendererFrameOptions) {
     this.view = options.window ?? options.container.ownerDocument.defaultView ?? window
-    this.onEvent = options.onEvent ?? (() => {})
+    this.onEvent = options.onEvent ?? noop
     this.init = options.init
     this.progress = options.progress
     this.selection = options.selection ?? null

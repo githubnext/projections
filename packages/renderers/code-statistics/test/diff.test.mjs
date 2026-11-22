@@ -12,6 +12,8 @@ import {compared} from './engine.mjs'
 import {loadPair} from './fixtures.mjs'
 import {plain} from '../../kit/test/markup.mjs'
 
+const noop = () => undefined
+
 /** Diff mode as the shell presents it: one static frame at progress 1 with no schedule. */
 async function renderDiff(scenario, overrides = {}) {
   const {before, after} = loadPair(scenario)
@@ -30,12 +32,12 @@ async function renderDiff(scenario, overrides = {}) {
       schedule: [],
       rendererName: 'code-statistics',
       selectedId: null,
-      onSelect() {},
-      onOpen() {},
-      reportSteps() {},
-      declareControls() {},
+      onSelect: noop,
+      onOpen: noop,
+      reportSteps: noop,
+      declareControls: noop,
       emphasis: stepEmphasis([], 1, highlighting),
-      onAction: () => () => {},
+      onAction: () => noop,
       options: {},
       viewport: undefined,
       reducedMotion: false,

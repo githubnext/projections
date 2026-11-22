@@ -1,6 +1,8 @@
 // A bound on each request a test makes of the stage page, kept in the test process.
 import type {StageState} from '../src/types.js'
 
+const noop = () => undefined
+
 /**
  * How long one stage request may take before it fails, ms. The stage's own waits are bounded in the page (a frame's
  * arrival at its height at 60 s, a probe measurement at 10 s) and a heavy scenario loads in under 15 s on a slow
@@ -49,7 +51,7 @@ export async function bounded<T>(record: StageRecord, what: string, request: Pro
   let timer: ReturnType<typeof setTimeout> | undefined
   const expired = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
-      request.catch(() => {})
+      request.catch(noop)
       const scenario = record.scenario ? ` for ${record.scenario}` : ''
       reject(
         new Error(

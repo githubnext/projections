@@ -35,7 +35,7 @@ export function useRepository({
 
   // Startup: definitions at the working tree, and recent revisions.
   useEffect(() => {
-    if (!api) return
+    if (!api) return undefined
     const abort = new AbortController()
     setLoading(true)
     Promise.all([api.definitions(openedDefinitionRevision ?? workingTree, abort.signal), api.revisions(abort.signal, 30)])

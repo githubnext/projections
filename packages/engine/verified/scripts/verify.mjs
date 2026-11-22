@@ -18,6 +18,8 @@ import {dirname, join} from 'node:path'
 import {fileURLToPath, pathToFileURL} from 'node:url'
 import {mutationCheck} from './mutants.mjs'
 
+const noop = () => undefined
+
 const crate = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 /** The pins in verus.toml: `release`, `toolchain` and `macros`. */
@@ -115,7 +117,7 @@ export function prove(verus) {
 }
 
 /** Proves the crate and runs the mutation check. */
-export async function verify({install = false, mutants = true, verus, log = () => {}} = {}) {
+export async function verify({install = false, mutants = true, verus, log = noop} = {}) {
   const problems = consistent()
   if (problems.length) return {status: 'fail', problems}
   const executable = locate({install, verus})

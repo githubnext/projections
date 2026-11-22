@@ -2,6 +2,7 @@ import {spawn} from 'node:child_process'
 import type {ChildProcess} from 'node:child_process'
 import {createInterface} from 'node:readline'
 import {createRpcClient} from './runner/rpc.ts'
+import {noop} from './noop.ts'
 
 // The JSON-RPC client and the CLI's location and compatibility; this module starts the backend and reads its answers.
 // Its modules import each other with `.ts` specifiers, which Node loads from source (unit tests, scripts/tools.mjs).
@@ -161,7 +162,7 @@ export async function startRunner({
   const child: ChildProcess = spawn(executable, args, {cwd: repository, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true})
   const client = createRpcClient({input: child.stdout!, output: child.stdin!, log})
   // A backend that exits never answers; writing to it must not throw.
-  child.stdin!.on('error', () => {})
+  child.stdin!.on('error', noop)
   const exited = new Promise<number | null>(resolve => {
     child.once('exit', code => {
       client.close(`The Projections backend exited (${code})`)
@@ -177,7 +178,9 @@ export async function startRunner({
   const stop = () => {
     if (child.exitCode !== null || child.signalCode !== null) return
     child.stdin!.end()
-    const kill = setTimeout(() => child.kill('SIGTERM'), 3000)
+    const kill = setTimeout(() => {
+      child.kill('SIGTERM')
+    }, 3000)
     void exited.then(() => clearTimeout(kill))
   }
   try {

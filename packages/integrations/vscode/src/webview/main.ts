@@ -38,7 +38,10 @@ function inspectorHost(): InspectorHost {
         ...(column !== undefined && column !== 0 ? {column} : {}),
       }),
     revealInScm: ref => post({tag: hostTag, op: 'revealInScm', ref}),
-    copyText: async text => post({tag: hostTag, op: 'copyText', text}),
+    copyText: text => {
+      post({tag: hostTag, op: 'copyText', text})
+      return Promise.resolve()
+    },
     openExternal: url => post({tag: hostTag, op: 'openExternal', url}),
     addToCi: () => post({tag: hostTag, op: 'addToCi'}),
     theme: vscodeTheme(),
@@ -57,7 +60,9 @@ async function main() {
   const handle = async (loaded: boolean) => {
     for (let waited = 0; waited < 30_000; waited += 100) {
       if (current && (!loaded || current.summary().projection)) return current
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => {
+        setTimeout(resolve, 100)
+      })
     }
     throw new Error('The Inspector is not shown')
   }
@@ -106,7 +111,9 @@ async function main() {
       running: 'Checking recent commits…',
       empty: 'This branch has no commits to check yet.',
     },
-    onHandle: shown => (current = shown),
+    onHandle: shown => {
+      current = shown
+    },
     // A projection tab presents its projection alone on its pinned pair or the folder's; the editor's tab, title
     // actions and side bar are its shell.
     ...(config.projection
@@ -137,6 +144,6 @@ async function main() {
   })
 }
 
-void main().catch(error => {
+void main().catch((error: unknown) => {
   document.getElementById('root')!.textContent = `Could not start the Inspector: ${error instanceof Error ? error.message : String(error)}`
 })

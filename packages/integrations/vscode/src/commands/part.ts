@@ -15,7 +15,10 @@ export function partCommands(picks: QuickPicks): vscode.Disposable[] {
         const folder = vscode.workspace.getWorkspaceFolder(folderUri)
         if (!folder || !['extractor', 'comparator', 'renderer'].includes(part)) return
         const file = await definitionFile(folder, id)
-        if (!file) return void vscode.window.showWarningMessage(`Projections: no definition file defines ${id}`)
+        if (!file) {
+          void vscode.window.showWarningMessage(`Projections: no definition file defines ${id}`)
+          return
+        }
         const editor = await vscode.window.showTextDocument(file, {
           preview: true,
           ...(options?.beside ? {viewColumn: vscode.ViewColumn.Beside} : {}),

@@ -7,13 +7,15 @@ import {isDeepStrictEqual} from 'node:util'
 import {contribution} from '../src/agent-tools.ts'
 import {startRunner} from '../src/runner.ts'
 
+const noop = () => undefined
+
 const root = fileURLToPath(new URL('../', import.meta.url))
 export const cli = process.env.PROJECTIONS_CLI ?? fileURLToPath(new URL('../../../cli/dist/projections', import.meta.url))
 const manifest = `${root}package.json`
 
 /** The contributions for the CLI's tools, asked of a backend started in this checkout. */
 export async function contributions(executable = cli) {
-  const runner = await startRunner({executable, repository: root, trust: false, log: () => {}})
+  const runner = await startRunner({executable, repository: root, trust: false, log: noop})
   try {
     return (await runner.tools()).map(contribution)
   } finally {

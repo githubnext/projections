@@ -20,7 +20,10 @@ async function setWidth(page: Page, width: number) {
     const toolbar = document.querySelector<HTMLElement>('.ph-toolbar')!
     // The explorer's padding (16px each side) surrounds the toolbar.
     view.style.width = `${toolbarWidth + 32}px`
-    const frame = () => new Promise(resolve => requestAnimationFrame(resolve))
+    const frame = () =>
+      new Promise(resolve => {
+        requestAnimationFrame(resolve)
+      })
     await frame()
     // A toolbar the width doesn't change keeps its mark; one that replans clears it until it settles again.
     for (let i = 0; i < 600 && toolbar.dataset.fitSettled !== String(Math.round(toolbar.getBoundingClientRect().width)); i++) await frame()
@@ -203,7 +206,14 @@ test('with nothing at its start, the mode region leads the row at its left inset
   await page.goto(story('default-ui-projection-view--comparison'))
   await expect(page.locator('.ph[data-renderer-status="ready"]')).toBeVisible()
   const placement = async () => {
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await page.evaluate(
+      () =>
+        new Promise(resolve => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(resolve)
+          })
+        }),
+    )
     const geometry = await toolbarGeometry(page)
     return {centred: geometry.rows[0]!.centred, inset: geometry.cluster!.left - geometry.left}
   }

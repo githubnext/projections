@@ -48,7 +48,7 @@ export function CommandPalette({
   const shown = useMemo(() => commands.filter(command => !command.disabled && matches(command, query)), [commands, query])
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return undefined
     returnFocus.current = document.activeElement
     setQuery('')
     setIndex(0)

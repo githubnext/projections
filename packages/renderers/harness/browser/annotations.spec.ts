@@ -55,7 +55,11 @@ for (const key of ['dependency-injection/orders', 'graph/service-platform', 'gra
     const frame = page.frameLocator('iframe.ph-frame')
     await expect(frame.locator('[data-projections-annotation]:not([hidden])').first()).toBeVisible()
     const report = await frame.locator('body').evaluate(async () => {
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      await new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(resolve)
+        })
+      })
       const boxes = (selector: string) =>
         [...document.querySelectorAll(selector)]
           .filter(element => !(element as HTMLElement).hidden)

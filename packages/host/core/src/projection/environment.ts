@@ -3,6 +3,8 @@ import {hostTheme} from '../theme.js'
 import type {Memos} from './memo.js'
 import type {ProjectionOptions} from './types.js'
 
+const noop = () => undefined
+
 export function locale(): string {
   return typeof navigator === 'undefined' ? 'en' : navigator.language || 'en'
 }
@@ -21,7 +23,7 @@ export const noMedia: Media = {prefersDark: false, reducedMotion: false}
  * the function that stops watching. Without `matchMedia` it tells nothing.
  */
 export function watchMedia(onChange: (media: Media) => void): () => void {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return () => {}
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return noop
   const dark = window.matchMedia('(prefers-color-scheme: dark)')
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
   const update = () => onChange({prefersDark: dark.matches, reducedMotion: motion.matches})

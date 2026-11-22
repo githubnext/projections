@@ -2,6 +2,8 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {paintState} from '../dist/index.js'
 
+const noop = () => undefined
+
 const renderer = {name: 'graph', title: 'Graph', source: 'builtin', url: 'graph.html'}
 const pane = (status, rendered) => ({status, rendered, steps: [], rendererErrors: [], rejected: 0, controls: []})
 const panes = (main, before = pane('loading'), after = pane('loading')) => ({main, before, after})
@@ -38,8 +40,8 @@ test('an acknowledgement of an earlier init does not count until the frame catch
 
 test('a ProjectionView reports the renderer status and painting to its embedder', async () => {
   const {viewOptions} = await import('../dist/ui/view/options.js')
-  const onRendererStatusChange = () => {}
-  const onPainted = () => {}
+  const onRendererStatusChange = noop
+  const onPainted = noop
   const options = viewOptions({subject: undefined, projection: undefined, onRendererStatusChange, onPainted}, 'light', {})
   assert.equal(options.onRendererStatusChange, onRendererStatusChange)
   assert.equal(options.onPainted, onPainted)

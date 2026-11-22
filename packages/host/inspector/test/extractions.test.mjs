@@ -8,13 +8,18 @@ function controlledApi() {
   const request =
     method =>
     (...args) =>
-      new Promise((resolve, reject) => calls.push({method, args, resolve, reject}))
+      new Promise((resolve, reject) => {
+        calls.push({method, args, resolve, reject})
+      })
   return {api: {run: request('run'), job: request('job'), cancel: request('cancel')}, calls}
 }
 
 const job = (id, status, extraction) => ({id, status, outputs: [], diagnostics: [], notices: [], ...(extraction ? {extraction} : {})})
 const extraction = name => ({projection: {id: 'p', title: name}, entities: []})
-const settle = () => new Promise(resolve => setImmediate(resolve))
+const settle = () =>
+  new Promise(resolve => {
+    setImmediate(resolve)
+  })
 
 function coordinator() {
   const reports = []

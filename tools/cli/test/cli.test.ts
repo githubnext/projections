@@ -17,7 +17,14 @@ async function run(argv: string[]): Promise<{output: string; exit: number}> {
   let exit = 0
   const before = process.exitCode
   process.exitCode = undefined
-  await cli.serve(argv, {stdout: text => (output += text), exit: code => (exit = code)})
+  await cli.serve(argv, {
+    stdout: text => {
+      output += text
+    },
+    exit: code => {
+      exit = code
+    },
+  })
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-unnecessary-type-conversion -- serve sets it during the await
   exit ||= Number(process.exitCode ?? 0)
   process.exitCode = before

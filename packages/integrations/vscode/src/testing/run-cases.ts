@@ -62,9 +62,15 @@ export async function runCases(state: TestState, run: vscode.TestRun, entry: Cas
   try {
     const runner = await watched.lease.current()
     const response = await runner.request({method: 'POST', path: runPath, body}, signal)
-    if (response.status !== 200) return fail(refusalMessage(response.status, response.body))
+    if (response.status !== 200) {
+      fail(refusalMessage(response.status, response.body))
+      return
+    }
     const outcome = outcomes(parseResults(response.body)).get(entry.path)
-    if (!outcome) return fail(`No results for ${entry.path}`)
+    if (!outcome) {
+      fail(`No results for ${entry.path}`)
+      return
+    }
     if (outcome.written.length) run.appendOutput(`Wrote ${outcome.written.join(', ')}\r\n`)
     if (outcome.errors.length) reportErrors(state, run, entry, outcome)
     reportCases(state, run, entry, outcome)

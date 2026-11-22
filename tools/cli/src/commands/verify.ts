@@ -37,11 +37,15 @@ export async function verifyReport(
   ]
   const child = spawn(process.execPath, argv, {cwd: root, stdio: ['ignore', 'pipe', 'pipe']})
   let stdout = ''
-  child.stdout.on('data', (chunk: Buffer) => (stdout += chunk.toString()))
+  child.stdout.on('data', (chunk: Buffer) => {
+    stdout += chunk.toString()
+  })
   child.stderr.on('data', chunk => {
     for (const line of String(chunk).split('\n').filter(Boolean)) progress?.(line)
   })
-  await new Promise(resolve => child.on('close', resolve))
+  await new Promise(resolve => {
+    child.on('close', resolve)
+  })
   const report = JSON.parse(stdout.trim().split('\n').at(-1) ?? '{}') as ScriptReport
   if (report.status === 'prerequisite') throw new PrerequisiteError(report.problems?.[0] ?? 'Verus is unavailable', report.hint)
   const problems = (report.problems ?? []).map(message => ({message}))

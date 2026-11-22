@@ -6,6 +6,8 @@ import {renderToStaticMarkup} from 'react-dom/server'
 import {Group} from '../dist/react.js'
 import {plain} from './markup.mjs'
 
+const noop = () => undefined
+
 const html = (props, children = createElement('table', {className: 'body'})) => renderToStaticMarkup(createElement(Group, props, children))
 
 test('a group is a titled panel: a heading inside its header band labels the section, then its body', () => {
@@ -71,7 +73,7 @@ test('in a comparison the status states the change in proportion to emphasis, an
 })
 
 test('a group that presents an item is its unit, and its title is the button that selects it', () => {
-  const element = createElement(Group, {title: 'parcel --version', titleFont: 'code', id: 'version', selected: true, onSelect() {}}, null)
+  const element = createElement(Group, {title: 'parcel --version', titleFont: 'code', id: 'version', selected: true, onSelect: noop}, null)
   const markup = renderToStaticMarkup(element)
   assert.match(markup, /^<section class="pk-group" aria-labelledby="[^"]+" data-entity-id="version">/u)
   assert.match(

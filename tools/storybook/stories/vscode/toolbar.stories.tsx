@@ -53,7 +53,7 @@ function Cell({
   const shown = index < mounted
   useEffect(() => {
     const element = view.current
-    if (!shown || !element) return
+    if (!shown || !element) return undefined
     const check = () => {
       if (settled(element)) onSettled(index)
     }

@@ -17,6 +17,8 @@ import {createDemoRepository} from '../../test/smoke/demo-repo.mjs'
 import {chromium} from 'playwright-core'
 import {cli, command, inspectorFrame, launch} from './electron.mjs'
 
+const noop = () => undefined
+
 const output = process.argv[2] || fileURLToPath(new URL('../../../../../docs/design/images/desktop-surfaces/', import.meta.url))
 const only = process.argv[3]?.split(',')
 // feature/auth, a commit ahead of main, with an untracked package: the tab opens on My branch.
@@ -58,7 +60,9 @@ async function sideBarWidth(window, width) {
   await window.mouse.down()
   await window.mouse.move(box.x + width - 1, y, {steps: 8})
   await window.mouse.up()
-  await new Promise(resolve => setTimeout(resolve, 300))
+  await new Promise(resolve => {
+    setTimeout(resolve, 300)
+  })
 }
 /** A section's header in the Projections container, by its title's start. */
 const header = (sidebar, title) => sidebar.locator('.pane-header', {hasText: new RegExp(`^\\s*${title}`)}).first()
@@ -67,7 +71,9 @@ async function section(sidebar, title, expanded) {
   const found = header(sidebar, title)
   await found.waitFor({timeout: 30_000})
   if (((await found.getAttribute('aria-expanded')) === 'true') !== expanded) await found.click()
-  await new Promise(resolve => setTimeout(resolve, 300))
+  await new Promise(resolve => {
+    setTimeout(resolve, 300)
+  })
 }
 for (const shot of shots.filter(item => names(item).some(wanted))) {
   // The tab's skeleton: its backend held (a test-only hook in the extension), so the tab shows it until captured.
@@ -84,7 +90,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
     if (shot.skeleton) {
       const frame = await inspectorFrame(window)
       await frame.locator('[data-skeleton] .pj-skeleton-toolbar').waitFor({timeout: 30_000})
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await new Promise(resolve => {
+        setTimeout(resolve, 1500)
+      })
       if (!(await frame.locator('[data-skeleton]').count())) throw new Error('The skeleton went before the backend was held')
       await window.screenshot({path: join(output, `${shot.file}.png`)})
       console.log(shot.file)
@@ -94,7 +102,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       // VS Code's thin progress bar at the tab's top, once the load runs past 300 ms.
       const frame = await inspectorFrame(window)
       await frame.locator('[data-loading-indicator]').first().waitFor({timeout: 30_000})
-      await new Promise(resolve => setTimeout(resolve, 150))
+      await new Promise(resolve => {
+        setTimeout(resolve, 150)
+      })
       await window.screenshot({path: join(output, `${shot.file}.png`)})
       console.log(shot.file)
       continue
@@ -102,7 +112,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
     const frame = await inspectorFrame(window)
     await frame.locator('[data-host-ui="vscode"] .phv-root[data-renderer-status="ready"]').first().waitFor({timeout: 90_000})
     // The tab reports its change count to the side bar (its row's badge); the renderer settles.
-    await new Promise(resolve => setTimeout(resolve, 5000))
+    await new Promise(resolve => {
+      setTimeout(resolve, 5000)
+    })
     if (shot.sideBySide) {
       await command(window, 'Projections: Comparison Mode…')
       await window.locator('.quick-input-title', {hasText: 'Comparison Mode'}).waitFor({timeout: 10_000})
@@ -111,7 +123,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       await window.keyboard.press('Enter')
       await frame.locator('.ph-panes > .ph-pane').nth(1).waitFor({timeout: 30_000})
       await frame.locator('.phv-root[data-renderer-status="ready"]').first().waitFor({timeout: 60_000})
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      await new Promise(resolve => {
+        setTimeout(resolve, 3000)
+      })
     }
     if (shot.summaryBar) {
       // The summary bar along the tab's bottom, for a comparison (My branch) and then one revision (Current state),
@@ -129,9 +143,13 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       const comparison = await crop()
       await sidebar.locator('.monaco-list-row', {hasText: 'Current state'}).first().click()
       for (let tries = 0; tries < 120 && /[+\u2212~]\d/u.test((await bar.getAttribute('data-sentence')) ?? '+1'); tries++) {
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise(resolve => {
+          setTimeout(resolve, 500)
+        })
       }
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      await new Promise(resolve => {
+        setTimeout(resolve, 3000)
+      })
       const current = await crop()
       const browser = await chromium.launch()
       const page = await browser.newPage({deviceScaleFactor: 1})
@@ -152,7 +170,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       await section(sidebar, 'Definition', true)
       await sidebar.locator('.monaco-list-row', {hasText: 'Renderer'}).first().waitFor({timeout: 30_000})
       await window.mouse.move(900, 450)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => {
+        setTimeout(resolve, 1000)
+      })
       // From the Definition section's header to the next section's.
       const box = await sidebar.boundingBox()
       const top = (await header(sidebar, 'Definition').boundingBox()).y
@@ -180,7 +200,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
           .locator('.monaco-hover, .workbench-hover', {hasText: 'Open Documentation on GitHub'})
           .first()
           .waitFor({timeout: 10_000})
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise(resolve => {
+          setTimeout(resolve, 500)
+        })
         const box = await sidebar.boundingBox()
         const top = (await header(sidebar, 'Definition').boundingBox()).y
         const bottom = (await header(sidebar, 'Suggested').boundingBox()).y
@@ -208,11 +230,17 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
         return undefined
       }
       let preview
-      for (let tries = 0; tries < 60 && !(preview = await heading()); tries++) await new Promise(resolve => setTimeout(resolve, 500))
+      for (let tries = 0; tries < 60 && !(preview = await heading()); tries++) {
+        await new Promise(resolve => {
+          setTimeout(resolve, 500)
+        })
+      }
       if (!preview) throw new Error('The documentation preview did not render')
       await definitionRow('Renderer').click()
       await window.mouse.move(900, 450)
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await new Promise(resolve => {
+        setTimeout(resolve, 1500)
+      })
       if (wanted(shot.file)) {
         await window.screenshot({path: join(output, `${shot.file}.png`)})
         console.log(shot.file)
@@ -235,7 +263,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
         .locator('.monaco-list-row', {hasText: /Packages.*Out of date/u})
         .first()
         .waitFor({timeout: 30_000})
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => {
+        setTimeout(resolve, 1000)
+      })
     }
     const definitionPath = join(repository, '.github', 'projections', 'packages.json')
     const definition = await readFile(definitionPath, 'utf8')
@@ -249,12 +279,16 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
         .locator('.monaco-list-row', {hasText: /Packages.*edited/u})
         .first()
         .waitFor({timeout: 30_000})
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      await new Promise(resolve => {
+        setTimeout(resolve, 3000)
+      })
     }
     if (shot.edit || shot.definition || shot.sideBySide) {
       // The row's inline Refresh shows on hover.
       await row.hover()
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => {
+        setTimeout(resolve, 500)
+      })
       await window.screenshot({path: join(output, `${shot.file}.png`)})
       console.log(shot.file)
       if (shot.edit) await writeFile(web, original)
@@ -269,7 +303,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
     await sidebar.locator('.monaco-list-row', {hasText: 'Add auth package'}).first().waitFor({timeout: 180_000})
     // The current row selected, as after a click on it (it changes nothing).
     await sidebar.locator('.monaco-list-row', {hasText: 'Branch changes'}).first().click()
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => {
+      setTimeout(resolve, 2000)
+    })
     console.log(
       'Section title style:',
       await window.evaluate(() => {
@@ -278,7 +314,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       }),
     )
     await window.mouse.move(900, 450)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise(resolve => {
+      setTimeout(resolve, 500)
+    })
     if (wanted(shot.file)) {
       await window.screenshot({path: join(output, `${shot.file}.png`)})
       console.log(shot.file)
@@ -286,7 +324,9 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
     if (shot.collapsed && wanted(shot.collapsed)) {
       // Collapsed: the sections' titles are static; the status bar item names the choice.
       for (const title of ['Viewing', 'Projections', 'Definition', 'Suggested']) await section(sidebar, title, false)
-      await new Promise(resolve => setTimeout(resolve, 800))
+      await new Promise(resolve => {
+        setTimeout(resolve, 800)
+      })
       await window.screenshot({path: join(output, `${shot.collapsed}.png`)})
       console.log(shot.collapsed)
       for (const title of ['Viewing', 'Projections']) await section(sidebar, title, true)
@@ -299,12 +339,16 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       const tests = window.locator('.part.sidebar')
       await tests.locator('.monaco-list-row', {hasText: 'Packages'}).first().waitFor({timeout: 60_000})
       await tests.locator('.monaco-list-row .codicon-testing-passed-icon').first().waitFor({timeout: 180_000})
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      await new Promise(resolve => {
+        setTimeout(resolve, 3000)
+      })
       for (const label of ['Packages', 'first.comparator.test.yaml']) {
         const item = tests.locator('.monaco-list-row', {hasText: label}).first()
         if ((await item.getAttribute('aria-expanded')) === 'false') await item.locator('.monaco-tl-twistie').click()
       }
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => {
+        setTimeout(resolve, 1000)
+      })
       await window.mouse.move(900, 450)
       await window.screenshot({path: join(output, `${shot.testing}.png`)})
       console.log(shot.testing)
@@ -316,14 +360,16 @@ for (const shot of shots.filter(item => names(item).some(wanted))) {
       await window.locator('.quick-input-list .monaco-list-row', {hasText: 'first.comparator.test.yaml'}).first().waitFor()
       await window.keyboard.press('Enter')
       await window.locator('.monaco-editor [class*="codicon-testing"]').first().waitFor({timeout: 60_000})
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await new Promise(resolve => {
+        setTimeout(resolve, 1500)
+      })
       await window.mouse.move(900, 600)
       await window.screenshot({path: join(output, `${shot.gutter}.png`)})
       console.log(shot.gutter)
     }
   } catch (error) {
     // What the window showed when it failed, for debugging (not committed).
-    await window.screenshot({path: `failed-${shot.file}.png`}).catch(() => {})
+    await window.screenshot({path: `failed-${shot.file}.png`}).catch(noop)
     throw error
   } finally {
     await app.close()

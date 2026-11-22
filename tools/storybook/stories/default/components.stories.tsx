@@ -155,7 +155,15 @@ function Choices() {
         <SegmentedControlItem value="side-by-side">Side by side</SegmentedControlItem>
         <SegmentedControlItem value="swipe">Swipe</SegmentedControlItem>
       </SegmentedControl>
-      <ToggleGroup type="single" variant="outline" value={view} onValueChange={value => value && setView(value)} aria-label="View">
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        value={view}
+        onValueChange={value => {
+          if (value) setView(value)
+        }}
+        aria-label="View"
+      >
         <ToggleGroupItem value="renderer">Renderer</ToggleGroupItem>
         <ToggleGroupItem value="table">Table</ToggleGroupItem>
         <ToggleGroupItem value="text">Text</ToggleGroupItem>

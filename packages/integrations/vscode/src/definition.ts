@@ -102,6 +102,7 @@ export class DefinitionView implements vscode.TreeDataProvider<Node>, vscode.Dis
       vscode.commands.registerCommand('projections.configureComparator', () => {
         const shown = this.shown
         if (shown) return vscode.commands.executeCommand('projections.openPart', shown.folder.uri, shown.projection, 'comparator')
+        return undefined
       }),
       vscode.commands.registerCommand('projections.openPartEntry', (node?: Node) => {
         const shown = this.shown
@@ -109,6 +110,7 @@ export class DefinitionView implements vscode.TreeDataProvider<Node>, vscode.Dis
         if (shown && (part === 'extractor' || part === 'comparator' || part === 'renderer')) {
           return vscode.commands.executeCommand('projections.openPart', shown.folder.uri, shown.projection, part)
         }
+        return undefined
       }),
     )
     void vscode.commands.executeCommand('setContext', 'projections.definitionPinned', false)

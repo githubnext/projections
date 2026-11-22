@@ -58,7 +58,7 @@ export function StageNoticeSlot({children}: {children: ReactNode}) {
   useLayoutEffect(() => {
     const element = slot.current
     const workspace = element?.parentElement
-    if (!element || !workspace) return
+    if (!element || !workspace) return undefined
     let frame = 0
     const place = () => {
       frame = 0

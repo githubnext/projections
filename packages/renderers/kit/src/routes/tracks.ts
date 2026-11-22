@@ -63,7 +63,9 @@ export function routeTracks(runs: readonly TrackRun[], spacing = trackSpacing): 
     }
   }
   const groups = new Map<number, number[]>()
-  runs.forEach((_, index) => info[index] && groups.set(root(index), [...(groups.get(root(index)) ?? []), index]))
+  runs.forEach((_, index) => {
+    if (info[index]) groups.set(root(index), [...(groups.get(root(index)) ?? []), index])
+  })
   for (const group of groups.values()) {
     // Runs leaving one point the same way are one bundle on one track: a trunk.
     const bundles = new Map<string, number[]>()

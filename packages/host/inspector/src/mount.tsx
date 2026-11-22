@@ -26,6 +26,7 @@ import {SnapshotPage} from './snapshot/page.js'
 import {customRendererPrefix, snapshotSettings} from './snapshot/settings.js'
 import {markSnapshot} from './snapshot/marker.js'
 import {snapshotDocument} from './snapshot/document.js'
+import {noop} from './noop.js'
 
 export type {InspectorHost, InspectorHostTheme} from './host.js'
 export type {InspectorOpenedOn} from './index.js'
@@ -177,7 +178,7 @@ function applyAccent(element: HTMLElement, host: InspectorHost | undefined) {
     }
   }
   update()
-  return host?.theme?.subscribe(update) ?? (() => {})
+  return host?.theme?.subscribe(update) ?? noop
 }
 
 /**
@@ -198,7 +199,9 @@ export function mountInspector(element: HTMLElement, options: MountInspectorOpti
   let disposed = false
   const stops: (() => void)[] = [applyAccent(element, host)]
   let resolveHandle: (handle: InspectorHandle) => void
-  const handled = new Promise<InspectorHandle>(resolve => (resolveHandle = resolve))
+  const handled = new Promise<InspectorHandle>(resolve => {
+    resolveHandle = resolve
+  })
   const handleRef = (handle: InspectorHandle | null) => {
     if (handle) resolveHandle(handle)
     options.onHandle?.(handle)

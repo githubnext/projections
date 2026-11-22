@@ -73,7 +73,7 @@ export function useFrameCovers(
   const [covers, setCovers] = useState<FrameCovers>({})
   useLayoutEffect(() => {
     const element = container.current
-    if (!element) return
+    if (!element) return undefined
     const measure = () => {
       const top = element.getBoundingClientRect().top
       // A sticky cover is measured where it rests, at the stage's top: once stuck, it moves over the content as the

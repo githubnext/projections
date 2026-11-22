@@ -126,7 +126,7 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
           if (live) cleanups.push(result as () => void)
           else safely(result as () => void)
         } else if (result instanceof Promise) {
-          result.then(undefined, error => {
+          result.then(undefined, (error: unknown) => {
             if (live) report(error)
           })
         }
@@ -234,7 +234,9 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
     send,
     subscribe(listener) {
       listeners.add(listener)
-      return () => listeners.delete(listener)
+      return () => {
+        listeners.delete(listener)
+      }
     },
     start() {
       if (running) return

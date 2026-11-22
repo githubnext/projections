@@ -70,7 +70,9 @@ export async function anchors(inspector: InspectorHandle) {
     inspector.view()?.hover(id)
     let anchor = null
     for (let waited = 0; waited < 2000 && !anchor; waited += 100) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => {
+        setTimeout(resolve, 100)
+      })
       anchor = inspector.view()?.anchorFor(id) ?? null
     }
     found.push({id, step: step ?? null, anchor})

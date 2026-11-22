@@ -53,7 +53,9 @@ export function stackLayout(
   for (const table of orderRanks(model, later).flat()) {
     const height = cardHeight(model, table, geometry)
     tables.set(table, {x: gutter, y, width: cardWidth, height})
-    model.columns.get(table)!.forEach((column, index) => rows.set(column, index))
+    model.columns.get(table)!.forEach((column, index) => {
+      rows.set(column, index)
+    })
     y += height + schemaMetrics.tableGap
   }
   const lanes = laneAssignments(model, cardWidth, sizer, later)

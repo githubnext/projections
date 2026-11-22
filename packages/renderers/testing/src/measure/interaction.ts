@@ -102,5 +102,9 @@ export function clickBackground(): boolean {
 
 /** Resolves after two animation frames, so the latest updates are painted. */
 export function settle(): Promise<void> {
-  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+  return new Promise(resolve => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve())
+    })
+  })
 }

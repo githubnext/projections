@@ -179,7 +179,7 @@ export async function cornerReport(
   // A locator's top corners, then its bottom ones, each pair in view in turn, so a box taller than the view is measured.
   const passes: [() => Promise<CornerBox | null>, number[]][] =
     'left' in target
-      ? [[async () => target, [0, 1, 2, 3]]]
+      ? [[() => Promise.resolve(target), [0, 1, 2, 3]]]
       : [
           [() => cornerBox(target, {align: 'start', ...(frame === undefined ? {} : {frame})}), [0, 1]],
           [() => cornerBox(target, {align: 'end', ...(frame === undefined ? {} : {frame})}), [2, 3]],

@@ -57,9 +57,15 @@ export function DependencyGraph(props: RendererProps) {
   )
   const {diff, locale, selectedId} = props
   const select = (id: string | null) => {
-    if (id === null || !isTransitiveSummary(id)) return onSelect(id)
+    if (id === null || !isTransitiveSummary(id)) {
+      onSelect(id)
+      return
+    }
     const owner = summaryOwner(id)
-    if (!expanded.has(owner)) return setExpanded(new Set([...expanded, owner]))
+    if (!expanded.has(owner)) {
+      setExpanded(new Set([...expanded, owner]))
+      return
+    }
     const rest = new Set(expanded)
     rest.delete(owner)
     setExpanded(rest)

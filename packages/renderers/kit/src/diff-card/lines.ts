@@ -117,15 +117,15 @@ export function writeFields(card: CardLines, fields: readonly FieldLine[]): void
       })
       return
     }
-    wrapText(field.key, field.prose ? Math.floor(card.width / card.prose) : card.room).forEach((part, line) =>
+    wrapText(field.key, field.prose ? Math.floor(card.width / card.prose) : card.room).forEach((part, line) => {
       card.lines.push({
         x: card.left,
         y: nextLine(card, line === 0 ? (index === 0 ? m.fieldsGap : m.fieldGap) : 0),
         className: 'node-field-key',
         identifier: !field.prose,
         spans: [{text: part}],
-      }),
-    )
+      })
+    })
     writeFieldValue(card, field)
   })
   if (fields.length > m.fieldLineLimit) {

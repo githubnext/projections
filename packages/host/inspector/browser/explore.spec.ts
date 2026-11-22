@@ -93,7 +93,9 @@ test('explore proposes projections, sweeps recent merges and opens a change in t
 test('a thumbnail arriving while its cell is pressed never takes the click', async ({page, explore}) => {
   // Thumbnails wait until the cell is pressed, on its loading spinner.
   let release!: () => void
-  const held = new Promise<void>(resolve => (release = resolve))
+  const held = new Promise<void>(resolve => {
+    release = resolve
+  })
   await page.route(
     url => url.pathname === '/api/sweep/thumbnail',
     async route => {

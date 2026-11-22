@@ -10,7 +10,7 @@ export function useViewSize(view: RefObject<HTMLDivElement | null>) {
   const [stage, setStage] = useState<{width: number; height: number; padding: number}>()
   useLayoutEffect(() => {
     const element = view.current
-    if (!element) return
+    if (!element) return undefined
     const measure = () => {
       const style = getComputedStyle(element)
       const horizontal = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
@@ -24,7 +24,7 @@ export function useViewSize(view: RefObject<HTMLDivElement | null>) {
       )
     }
     measure()
-    if (typeof ResizeObserver === 'undefined') return
+    if (typeof ResizeObserver === 'undefined') return undefined
     const observer = new ResizeObserver(measure)
     observer.observe(element)
     return () => observer.disconnect()
@@ -37,7 +37,7 @@ export function useNaturalHeight(content: RefObject<HTMLDivElement | null>) {
   const [natural, setNatural] = useState<number>()
   useLayoutEffect(() => {
     const element = content.current
-    if (!element) return
+    if (!element) return undefined
     const measure = () => setNatural(element.offsetHeight)
     measure()
     const observer = new ResizeObserver(measure)

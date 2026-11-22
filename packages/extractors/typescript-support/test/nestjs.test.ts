@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import {randomUUID} from 'node:crypto'
-import {existsSync} from 'node:fs'
+import {existsSync, rmSync} from 'node:fs'
 import {cp, mkdir, rm, writeFile} from 'node:fs/promises'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -22,7 +22,10 @@ function checkout(): Promise<string> {
   prepared ??= (async () => {
     await rm(checkoutDirectory, {recursive: true, force: true})
     await installPackages(checkoutDirectory, packages)
-    process.once('exit', () => import('node:fs').then(fs => fs.rmSync(checkoutDirectory, {recursive: true, force: true})))
+    // An exit listener runs synchronously: work it starts asynchronously never finishes.
+    process.once('exit', () => {
+      rmSync(checkoutDirectory, {recursive: true, force: true})
+    })
     return checkoutDirectory
   })()
   return prepared

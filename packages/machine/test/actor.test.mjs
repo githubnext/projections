@@ -171,7 +171,9 @@ test("a runner's error or rejection is reported, and the actor keeps going", asy
   actor.send({type: 'named', run: 1, job: 'j'})
   actor.send({type: 'cancel'})
   assert.equal(actor.getState().kind, 'idle')
-  await new Promise(resolve => setImmediate(resolve))
+  await new Promise(resolve => {
+    setImmediate(resolve)
+  })
   assert.deepEqual(errors, ['create failed', 'cancel failed'])
 })
 

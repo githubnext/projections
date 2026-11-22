@@ -84,7 +84,14 @@ function Showcase({colorMode}: {colorMode: 'light' | 'dark'}) {
             <TabsContent value="graph">Graph view</TabsContent>
             <TabsContent value="table">Table view</TabsContent>
           </Tabs>
-          <ToggleGroup type="single" value={mode} onValueChange={value => value && setMode(value)} variant="outline">
+          <ToggleGroup
+            type="single"
+            value={mode}
+            onValueChange={value => {
+              if (value) setMode(value)
+            }}
+            variant="outline"
+          >
             <ToggleGroupItem value="side-by-side">Side by side</ToggleGroupItem>
             <ToggleGroupItem value="swipe">Swipe</ToggleGroupItem>
           </ToggleGroup>

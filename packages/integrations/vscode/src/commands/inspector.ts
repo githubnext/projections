@@ -1,14 +1,11 @@
 import * as vscode from 'vscode'
-import {execFile} from 'node:child_process'
-import {promisify} from 'node:util'
 import {sourceRoot} from '../backend-sources.js'
 import {InspectorPanel} from '../panels/inspector-panel.js'
 import {chooseFolder} from '../pickers.js'
 import type {ControlRequest} from '../protocol.js'
 import {defaultBranch} from '../refs.js'
 import type {Services} from '../services.js'
-
-const run = promisify(execFile)
+import {execFileOutput as run} from '../exec.ts'
 
 /**
  * The Inspector's commands: the repository's Inspector and Explore views, Compare Branch with Default, a saved
@@ -18,7 +15,7 @@ export function inspectorCommands(services: Services): vscode.Disposable[] {
   const {output} = services
   const open = async (view: 'explore' | 'inspect' = 'inspect') => {
     const folder = await chooseFolder()
-    return folder ? InspectorPanel.show(services, {kind: 'repository', folder}, view) : undefined
+    return folder ? InspectorPanel.open(services, {kind: 'repository', folder}, view) : undefined
   }
   return [
     vscode.commands.registerCommand('projections.openInspector', () => open('inspect')),
@@ -50,7 +47,7 @@ export function inspectorCommands(services: Services): vscode.Disposable[] {
             title: 'Open a saved extraction, comparison or review',
           })
         )?.[0]
-      return file ? InspectorPanel.show(services, {kind: 'document', file}).then(() => undefined) : undefined
+      return file ? InspectorPanel.open(services, {kind: 'document', file}).then(() => undefined) : undefined
     }),
     // A renderer package's (or a directory's) scenarios, with its bundle: the renderer and comparator workbench.
     vscode.commands.registerCommand('projections.openScenarios', async (uri?: vscode.Uri) => {
@@ -64,7 +61,7 @@ export function inspectorCommands(services: Services): vscode.Disposable[] {
             title: 'Open the scenarios of a renderer package or directory',
           })
         )?.[0]
-      return directory ? InspectorPanel.show(services, {kind: 'fixtures', directory}).then(() => undefined) : undefined
+      return directory ? InspectorPanel.open(services, {kind: 'fixtures', directory}).then(() => undefined) : undefined
     }),
     // For tests and other extensions: drive the open Inspector. It opens the repository's Inspector unless a panel is
     // already open (on either view); `target` drives the latest document or scenarios panel instead.
@@ -76,7 +73,7 @@ export function inspectorCommands(services: Services): vscode.Disposable[] {
       }
       const folder = await chooseFolder()
       if (!folder) return undefined
-      const panel = InspectorPanel.find(folder) ?? (await InspectorPanel.show(services, {kind: 'repository', folder}, 'inspect'))
+      const panel = InspectorPanel.find(folder) ?? (await InspectorPanel.open(services, {kind: 'repository', folder}, 'inspect'))
       return panel.control(message)
     }),
   ]

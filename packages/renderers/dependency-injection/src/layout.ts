@@ -75,7 +75,11 @@ export function layoutDiModel(model: DiModel, height: number = diMetrics.height)
 
   const indexOf = () => {
     const index = new Map<string, number>()
-    for (const layer of layers) layer.forEach((id, position) => index.set(id, position))
+    for (const layer of layers) {
+      layer.forEach((id, position) => {
+        index.set(id, position)
+      })
+    }
     return index
   }
   const barycenter = (id: string, related: Map<string, string[]>, index: Map<string, number>) => {
@@ -103,13 +107,13 @@ export function layoutDiModel(model: DiModel, height: number = diMetrics.height)
   const step = diMetrics.width + diMetrics.columnGap
   const positions = new Map<string, DiPosition>()
   for (const [depth, layer] of layers.entries()) {
-    layer.forEach((id, position) =>
+    layer.forEach((id, position) => {
       positions.set(id, {
         x: (position - (layer.length - 1) / 2) * step,
         y: depth * (height + diMetrics.rowGap),
         depth,
-      }),
-    )
+      })
+    })
   }
   for (let depth = layers.length - 2; depth >= 0; depth--) {
     const layer = layers[depth]!

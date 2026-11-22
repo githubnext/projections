@@ -1,7 +1,4 @@
-import {execFile} from 'node:child_process'
-import {promisify} from 'node:util'
-
-const run = promisify(execFile)
+import {execFileOutput as run} from './exec.ts'
 
 /** Whether `ancestor` is in `descendant`'s history (and not the same commit), in the repository at `cwd`. */
 export async function isAncestor(cwd: string, ancestor: string, descendant: string): Promise<boolean> {

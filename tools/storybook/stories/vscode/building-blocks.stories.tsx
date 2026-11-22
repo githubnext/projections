@@ -35,6 +35,8 @@ import {vscodeThemeOf, withVscodeFrame} from '../../src/vscode-frame.js'
 import {preparedLoader, sampleAnnotations, scenarioArgTypes, scenarioFixture} from '../../src/stories.js'
 import type {Loaded, ScenarioArgs} from '../../src/stories.js'
 
+const noop = () => undefined
+
 /**
  * The VS Code UI's exported building blocks, each driven by the host core's controller (`useProjection`) on a
  * scenario, for embedders composing their own view in a webview. Add a story here for each new exported control.
@@ -126,7 +128,9 @@ export const Details: Story = {
                 beforeLabel="Before"
                 afterLabel="After"
                 selection={p.selection}
-                onSelectTarget={p.selectTarget}
+                onSelectTarget={target => {
+                  p.selectTarget(target)
+                }}
                 mark={marks.get(p.selectedRow.id)}
                 annotations={annotations}
                 onAnnotationActivate={p.activateAnnotation}
@@ -233,7 +237,11 @@ function Composed({projection: p}: {projection: ProjectionController}) {
   const title = p.renderer?.title
   return (
     <div ref={root} className="ph phv-root" data-fill="" style={{height: 560}}>
-      <VscodeToolbar onKeyDown={event => handlePlaybackKey(event, p)}>
+      <VscodeToolbar
+        onKeyDown={event => {
+          handlePlaybackKey(event, p)
+        }}
+      >
         {view === 'renderer' && <ModeSwitch projection={p} />}
         <Playback projection={p} beforeLabel="Before" afterLabel="After" />
         {view === 'renderer' && <ZoomControls projection={p} />}
@@ -386,7 +394,7 @@ export const Status: Story = {
       <Notice severity="warning" title="The renderer reported a problem">
         One layout pass took longer than expected. The table and text views remain available.
       </Notice>
-      <Notice severity="error" title="The Graph renderer stopped." actions={[{label: 'Show table', onClick: () => {}}]}>
+      <Notice severity="error" title="The Graph renderer stopped." actions={[{label: 'Show table', onClick: noop}]}>
         It stopped responding. The table and text views still present this comparison.
       </Notice>
     </div>

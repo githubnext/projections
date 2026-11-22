@@ -1,8 +1,6 @@
-import {execFile} from 'node:child_process'
 import {copyFile, mkdtemp, readdir, readFile, rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
-import {promisify} from 'node:util'
 import {historyOrder} from './ancestry.js'
 import {isBackwards, sideLabel} from './labels.js'
 import type {RefFacts, RefNames, SideLabel} from './labels.js'
@@ -10,8 +8,8 @@ import type {Pair} from './projections/pairs.js'
 import type {ProjectionDefinition} from './projections/definitions.js'
 import {declaredFiles, editKey, editState, parseStatus, touchedEntries} from './edits.js'
 import type {EditState} from './edits.js'
-
-const run = promisify(execFile)
+import {execFileOutput as run} from './exec.ts'
+import {noop} from './noop.ts'
 
 /** A pair's sides as people read them, and whether it runs backwards. */
 export interface PairLabels {
@@ -93,7 +91,7 @@ export async function workingTreeTree(cwd: string): Promise<string | undefined> 
   try {
     const index = join(directory, 'index')
     const {stdout: real} = await run('git', ['rev-parse', '--path-format=absolute', '--git-path', 'index'], {cwd})
-    await copyFile(real.trim(), index).catch(() => {})
+    await copyFile(real.trim(), index).catch(noop)
     const env = {...process.env, GIT_INDEX_FILE: index}
     await run('git', ['add', '-A', '--', '.'], {cwd, env, maxBuffer: 16 * 1024 * 1024})
     const {stdout} = await run('git', ['write-tree'], {cwd, env})
@@ -203,7 +201,11 @@ export async function definitionEdits(
     if (present.length) {
       const hashed = await run('git', ['hash-object', '--no-filters', '--', ...present], options).catch(() => undefined)
       const lines = hashed?.stdout.split('\n').filter(Boolean) ?? []
-      if (lines.length === present.length) present.forEach((path, index) => hashes.set(path, lines[index]!))
+      if (lines.length === present.length) {
+        present.forEach((path, index) => {
+          hashes.set(path, lines[index]!)
+        })
+      }
     }
     for (const definition of definitions) {
       const path = paths.get(definition.id)

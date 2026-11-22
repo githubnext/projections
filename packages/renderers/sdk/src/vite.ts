@@ -327,7 +327,7 @@ export function rendererDevServerPlugin(options: Omit<RendererBuildOptions, 'out
       },
     }),
     configureServer(server) {
-      let remove = () => {}
+      let remove: (() => void) | undefined
       server.httpServer?.once('listening', () => {
         const url = server.resolvedUrls?.local[0]
         if (!url) return
@@ -337,9 +337,9 @@ export function rendererDevServerPlugin(options: Omit<RendererBuildOptions, 'out
           url,
           name: options.name,
         })
-        process.once('exit', () => remove())
+        process.once('exit', () => remove?.())
       })
-      server.httpServer?.once('close', () => remove())
+      server.httpServer?.once('close', () => remove?.())
       server.middlewares.use((request, response, next) => {
         const path = (request.url ?? '/').split('?')[0]
         if (path === '/__projections/renderer.json') {
@@ -347,7 +347,10 @@ export function rendererDevServerPlugin(options: Omit<RendererBuildOptions, 'out
           response.end(JSON.stringify(manifest()))
           return
         }
-        if (request.method !== 'GET' || (path !== '/' && path !== '/index.html')) return next()
+        if (request.method !== 'GET' || (path !== '/' && path !== '/index.html')) {
+          next()
+          return
+        }
         const host = request.headers.host ?? ''
         const origin = `http://${host}`
         if (!loopback.test(origin)) {

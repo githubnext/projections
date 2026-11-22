@@ -16,7 +16,7 @@ const index = JSON.parse(readFileSync(`${storybookDirectory}index.json`, 'utf8')
 const stories = Object.values(index.entries).filter(entry => entry.type === 'story')
 
 test('the build indexes the three UIs, the core and the harness', () => {
-  const titles = new Set(stories.map(story => story.title.split('/')[0]))
+  const titles = new Set(stories.map(story => story.title.split('/')[0] ?? ''))
   expect([...titles].sort()).toEqual(['Core', 'Default UI', 'Harness', 'VS Code UI'])
   expect(stories.length).toBeGreaterThan(80)
 })

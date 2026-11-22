@@ -1,18 +1,11 @@
 import path from 'node:path'
 import {containedPath, record, sourcePath, type ExtractorContext} from '../shared.js'
 import {compareIds} from '../values.js'
-import {code, inputs, native, sourceExtension, type Project} from './model.js'
+import {inputs, native, sourceExtension, strings, type Project} from './model.js'
 import {SourceFiles} from './files.js'
 import {createHosts, readLibraries} from './hosts.js'
 import {apiPackages} from './packages.js'
 import {buildPrograms} from './programs.js'
-
-function strings(value: unknown, label: string): string[] {
-  if (!Array.isArray(value) || !value.length || value.some(item => typeof item !== 'string' || !item.trim())) {
-    throw new Error(`${code(label)} must be a nonempty array of nonempty strings`)
-  }
-  return value as string[]
-}
 
 /** The tsconfig files `inputs.tsconfig` or `inputs.tsconfigs` select, or the root `tsconfig.json` when present. */
 function selectedConfigs(options: ReturnType<typeof inputs>, files: SourceFiles): string[] {

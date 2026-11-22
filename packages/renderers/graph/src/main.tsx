@@ -22,13 +22,13 @@ import {unknownIconFacts} from './facts.js'
  * Resources, data sources and their boundaries, in the infrastructure's words; containment is drawn as boundaries, and a
  * kind drawn only as boundaries round others is no figure either (see `boundaryNouns`).
  */
-const infrastructureNouns: SummaryNouns = {
+const infrastructureNouns = {
   resource: {singular: 'resource', plural: 'resources'},
   'data-source': {singular: 'data source', plural: 'data sources'},
   module: {singular: 'module', plural: 'modules'},
   'resource-group': {singular: 'resource group', plural: 'resource groups'},
   contains: false,
-}
+} satisfies SummaryNouns
 
 const infrastructureControls = defineControls([
   ...graphCanvasControls,

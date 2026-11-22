@@ -34,14 +34,14 @@ interface Frame {
   bar: string
 }
 const frames: Frame[] = []
-const rendererMessages: Record<string, number> = {}
+const rendererMessages = new Map<string, number>()
 
 /** What the page drew so far; `reset` starts its frames and renderer messages again. */
 export function probeReport(reset: boolean) {
-  const result = {...probe, frames: [...frames], renderer: {...rendererMessages}}
+  const result = {...probe, frames: [...frames], renderer: Object.fromEntries(rendererMessages)}
   if (reset) {
     frames.length = 0
-    for (const type of Object.keys(rendererMessages)) delete rendererMessages[type]
+    rendererMessages.clear()
   }
   return result
 }
@@ -86,7 +86,7 @@ function countRendererMessages() {
   addEventListener('message', event => {
     const data = event.data as {projections?: unknown; type?: unknown} | null
     if (event.origin === 'null' && data?.projections !== undefined && typeof data.type === 'string') {
-      rendererMessages[data.type] = (rendererMessages[data.type] ?? 0) + 1
+      rendererMessages.set(data.type, (rendererMessages.get(data.type) ?? 0) + 1)
     }
   })
 }

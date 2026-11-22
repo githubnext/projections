@@ -31,7 +31,7 @@ export function mountRenderer<const A extends readonly RendererAccepts[] | undef
   const renderer = {
     unmount() {
       if (container[mounted] !== renderer) return
-      delete container[mounted]
+      Reflect.deleteProperty(container, mounted)
       root.unmount()
     },
   }

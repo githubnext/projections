@@ -138,7 +138,7 @@ export function listItems(markdown: string): string[] {
   const items: string[] = []
   for (const line of markdown.split('\n')) {
     if (/^[-*+] /u.test(line)) items.push(line.slice(2).trim())
-    else if (/^\s+\S/u.test(line) && items.length) items[items.length - 1] += ` ${line.trim()}`
+    else if (/^\s+\S/u.test(line) && items.length) items.push(`${items.pop() ?? ''} ${line.trim()}`)
   }
   return items.map(plain)
 }

@@ -59,9 +59,9 @@ export function useParts({
   const setPart = useCallback(
     (part: PartName, value: string) => {
       setOverrides(current => {
-        const next: PartOverrides = {...current[projection]}
-        if (value === 'own') delete next[part]
-        else next[part] = value
+        const own: PartOverrides = {...current[projection]}
+        const {[part]: _dropped, ...others} = own
+        const next: PartOverrides = value === 'own' ? others : {...own, [part]: value}
         if (part === 'comparator' && value !== 'default') delete next.order
         return {...current, [projection]: next}
       })

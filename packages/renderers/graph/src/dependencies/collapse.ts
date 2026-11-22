@@ -42,8 +42,8 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
   const ownership = (shown: ReadonlySet<string>) => {
     const owner = new Map<string, string>()
     const queue = [...shown].sort((a, b) => (depth.get(a) ?? Infinity) - (depth.get(b) ?? Infinity) || compareIds(a, b))
-    for (let index = 0; index < queue.length; index += 1) {
-      const id = queue[index]!
+    // The queue grows as it is read: an array's iterator reaches the items pushed during the loop.
+    for (const id of queue) {
       const by = shown.has(id) ? id : owner.get(id)!
       for (const child of children(id)) {
         if (!shown.has(child) && !owner.has(child)) {

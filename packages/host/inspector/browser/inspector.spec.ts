@@ -63,7 +63,7 @@ const test = base.extend<{app: FixtureApp}>({
       // Extractors read the examined revision through request.repository.root.
       await writeFile(
         join(repo, 'collect.mjs'),
-        "import {readFileSync} from 'node:fs'\nconst {repository} = JSON.parse(readFileSync(0, 'utf8'))\nprocess.stdout.write(readFileSync(`${repository.root}/state.json`, 'utf8'))\nprocess.stderr.write('Extracted local graph\\n')\n",
+        "import {readFileSync} from 'node:fs'\nconst {repository} = JSON.parse(readFileSync(0, 'utf8'))\nprocess.stdout.write(readFileSync(repository.root + '/state.json', 'utf8'))\nprocess.stderr.write('Extracted local graph\\n')\n",
       )
       await writeFile(join(repo, 'slow.sh'), "printf 'Waiting for cancellation\\n' >&2\n/bin/sleep 30\n")
       await writeFile(join(repo, 'fail.sh'), "printf 'Incomplete result'\nprintf 'Deliberate extractor failure\\n' >&2\nexit 2\n")
@@ -91,13 +91,13 @@ const test = base.extend<{app: FixtureApp}>({
       )
       git('add', 'state.json')
       git('commit', '--quiet', '-m', 'After inventory worker')
-      const comparison: ComparisonDocument = JSON.parse(
+      const comparison = JSON.parse(
         execFileSync(cli(), ['-C', repo, 'compare', 'HEAD~1..HEAD', '-p', 'architecture', '--trust', '--json'], {
           encoding: 'utf8',
           env: {PATH: process.env.PATH, LANG: 'C.UTF-8'},
           maxBuffer: 8 * 1024 * 1024,
         }),
-      )
+      ) as ComparisonDocument
       const extraction = comparison.after
       const document = join(repo, 'saved-comparison.json')
       await writeFile(document, JSON.stringify(comparison))
@@ -442,7 +442,13 @@ test('Cancel pressed just as the next extraction starts cancels it, and nothing 
         find()
       })
     window.fetch = async (input, init) => {
-      if (!pressed && input === '/api/jobs' && init?.method === 'POST' && String(init.body).includes('"projectionId":"slow"')) {
+      if (
+        !pressed &&
+        input === '/api/jobs' &&
+        init?.method === 'POST' &&
+        typeof init.body === 'string' &&
+        init.body.includes('"projectionId":"slow"')
+      ) {
         pressed = true
         ;(await cancelButton()).click()
       }
@@ -807,7 +813,7 @@ test('the built-in renderer presents a saved review in a sandboxed frame', async
   const frames = page.locator('iframe.ph-frame')
   await expect(frames).toHaveCount(2)
   for (const frame of await frames.all()) await expect(frame).toHaveAttribute('sandbox', 'allow-scripts')
-  await expect(page.frameLocator('iframe.ph-frame').first().getByText('Inventory worker').first()).toBeVisible()
+  await expect(page.locator('iframe.ph-frame').first().contentFrame().getByText('Inventory worker').first()).toBeVisible()
   // Animated presents both in one frame; Home on the transition slider shows the before revision.
   await chooseMode(page, 'Animated')
   await expect(frames).toHaveCount(1)
@@ -870,8 +876,9 @@ test('renderer frames never learn the page address', async ({page, app}) => {
   await expect(page.locator('.ph[data-renderer-status="ready"]')).toBeVisible()
   expect(
     await page
-      .frameLocator('iframe.ph-frame')
+      .locator('iframe.ph-frame')
       .first()
+      .contentFrame()
       .locator('body')
       .evaluate(() => document.referrer),
   ).toBe('')

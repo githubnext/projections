@@ -75,7 +75,7 @@ define({
   states: {
     idle: {on: {start: ignore, finished: ignore, reset: ignore}},
     // @ts-expect-error A handler that reads data its state doesn't have.
-    running: {on: {start: ignore, finished: state => ({kind: 'done', result: state.result}), reset: ignore}},
+    running: {on: {start: ignore, finished: state => ({kind: 'done', result: Number(state.result)}), reset: ignore}},
     done: {on: {start: ignore, finished: ignore, reset: ignore}},
   },
 })

@@ -224,7 +224,7 @@ for (const comparisonMode of ['diff', 'animated'] as const) {
               const color = painted[index]!.reduce((best, pixel) => (near(pixel) < near(best) ? pixel : best))
               if (distance(color, probe.rgb) >= distance(color, probe.gray)) {
                 failures.push(
-                  `${sort}${sortChangesFirst ? ', changes first' : ''} at ${progress}: ${probe.what} is rgb(${color}), not rgb(${probe.rgb})`,
+                  `${sort}${sortChangesFirst ? ', changes first' : ''} at ${progress}: ${probe.what} is rgb(${color.join()}), not rgb(${probe.rgb.join()})`,
                 )
               }
             })

@@ -214,6 +214,7 @@ test('a batch splits into one verified document per projection, error items keep
     commentBody(manifest, documents, {hostedUrl: 'https://projections.example/'}),
     /\[View them on projections\.example\]\(https:\/\/projections\.example\/octo-org\/delivery\/pull\/7\)/u,
   )
+  // eslint-disable-next-line no-script-url -- The script URL is the input the test refuses.
   assert.throws(() => commentBody(manifest, documents, {hostedUrl: 'javascript:alert(1)'}), /http\(s\) origin/u)
 })
 

@@ -64,7 +64,9 @@ export function rendererFileOf(response: RunnerResponse): RendererFile {
     return {error: `The custom renderer is unavailable (${response.status}): ${bodyText(response.body).slice(0, 1024)}`}
   }
   const base64 = (response.body as {base64?: unknown} | null)?.base64
-  const encoded = typeof base64 === 'string' ? base64 : Buffer.from(String(response.body ?? '')).toString('base64')
+  const body = response.body ?? ''
+  const encoded =
+    typeof base64 === 'string' ? base64 : Buffer.from(typeof body === 'string' ? body : JSON.stringify(body)).toString('base64')
   if (Buffer.byteLength(encoded, 'base64') > maxResponseBytes) return {error: 'The custom renderer exceeds the bridge limit'}
   return {type: response.contentType, base64: encoded}
 }

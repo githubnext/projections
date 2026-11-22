@@ -408,7 +408,7 @@ export async function installReport(root: string, options: InstallOptions, progr
         act: () => {
           const path = join(project, 'package.json')
           const text = readFileSync(path, 'utf8')
-          const result = pointAtTarball(JSON.parse(text), spec, project)
+          const result = pointAtTarball(JSON.parse(text) as Parameters<typeof pointAtTarball>[0], spec, project)
           changes = result.changes
           if (changes.length) writeManifest(path, text, result.manifest)
         },

@@ -181,32 +181,28 @@ export function embedRenderer(
   const resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(sendViewport)
   resize?.observe(iframe)
   const handle = (message: RendererMessage) => {
-    switch (message.type) {
-      case 'ready':
-        if (capabilities) return
-        capabilities = message.capabilities
-        view.clearTimeout(timer)
-        if (typeof initial === 'function') init = {sizing: 'fill', ...initial(capabilities)}
-        if (typeof options.progress === 'function') progress = options.progress(capabilities)
-        readiness.resolve(capabilities)
-        if (init) send({type: 'init', ...init})
-        sendViewport()
-        if (settings) send({type: 'options', options: settings})
-        if (selection !== null) send({type: 'select', id: selection})
-        if (progress) send({type: 'progress', ...progress})
-        break
-      case 'rendered':
-      case 'error':
-        reveal()
-        break
-      case 'document-request':
-        client.requestDocument(message.renderer).then(
-          html => send({type: 'document', renderer: message.renderer, html}),
-          (error: unknown) =>
-            send({type: 'document', renderer: message.renderer, error: error instanceof Error ? error.message : String(error)}),
-        )
-        break
+    if (message.type === 'ready') {
+      if (capabilities) return
+      capabilities = message.capabilities
+      view.clearTimeout(timer)
+      if (typeof initial === 'function') init = {sizing: 'fill', ...initial(capabilities)}
+      if (typeof options.progress === 'function') progress = options.progress(capabilities)
+      readiness.resolve(capabilities)
+      if (init) send({type: 'init', ...init})
+      sendViewport()
+      if (settings) send({type: 'options', options: settings})
+      if (selection !== null) send({type: 'select', id: selection})
+      if (progress) send({type: 'progress', ...progress})
+    } else if (message.type === 'rendered' || message.type === 'error') {
+      reveal()
+    } else if (message.type === 'document-request') {
+      client.requestDocument(message.renderer).then(
+        html => send({type: 'document', renderer: message.renderer, html}),
+        (error: unknown) =>
+          send({type: 'document', renderer: message.renderer, error: error instanceof Error ? error.message : String(error)}),
+      )
     }
+    // Every message is also the embedder's, through `onMessage`.
     options.onMessage?.(message)
   }
   const received = (event: MessageEvent) => {

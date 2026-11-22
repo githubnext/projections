@@ -124,12 +124,15 @@ test('the container NestJS composes in preview mode: tokens, scopes, factories, 
   // Constructor, @Inject and property dependencies resolve across module boundaries;
   // the unprovided optional METRICS dependency resolves to nothing.
   const service = edges(state, 'dependsOn', 'implementation:OrdersModule:class:OrdersService')
-  assert.deepEqual(service.map(edge => [edge.data?.parameter, edge.to]).sort(), [
-    ['audit', 'service:OrdersModule:class:AuditLogger'],
-    ['clock', 'service:OrdersModule:symbol:clock'],
-    ['payments', 'service:PaymentsModule:class:PaymentGateway'],
-    ['repository', 'service:OrdersModule:class:OrdersRepository'],
-  ])
+  assert.deepEqual(
+    service.map(edge => [edge.data?.parameter, edge.to] as const).sort(([, a], [, b]) => a.localeCompare(b)),
+    [
+      ['audit', 'service:OrdersModule:class:AuditLogger'],
+      ['repository', 'service:OrdersModule:class:OrdersRepository'],
+      ['clock', 'service:OrdersModule:symbol:clock'],
+      ['payments', 'service:PaymentsModule:class:PaymentGateway'],
+    ],
+  )
   assert.equal(service.find(edge => edge.data?.parameter === 'audit')?.data?.injection, 'property')
   assert.ok(service.every(edge => edge.confidence === 'authoritative'))
   assert.deepEqual(

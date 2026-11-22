@@ -23,8 +23,8 @@ async function delayResizes(page: Page, delay: number): Promise<void> {
         let proxy = proxies.get(real)
         if (!proxy) {
           proxy = new Proxy(real, {
-            get: (target, key) => {
-              const value = Reflect.get(target, key, target)
+            get: (target, key): unknown => {
+              const value: unknown = Reflect.get(target, key, target)
               return typeof value === 'function' ? value.bind(target) : value
             },
             set: (target, key, value) => {

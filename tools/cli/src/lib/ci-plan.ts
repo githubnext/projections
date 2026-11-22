@@ -212,10 +212,9 @@ function shardsOf(rules: CiRules, job: string): (string | undefined)[] {
 
 /** The `changes` job's step outputs: each job's decision by ID (a matrix job's as its `matrix.include`), and the rest. */
 export function planOutputs(plan: CiPlan): Record<string, string> {
-  const jobs = Object.entries(plan.jobs).map(([name, value]) => [
-    name,
-    Array.isArray(value) ? JSON.stringify(plan.matrices[name]) : String(value),
-  ])
+  const jobs = Object.entries(plan.jobs).map(
+    ([name, value]) => [name, Array.isArray(value) ? JSON.stringify(plan.matrices[name]) : String(value)] as const,
+  )
   return {
     full: String(plan.full.length > 0),
     'docs-only': String(plan.docsOnly),

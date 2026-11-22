@@ -94,7 +94,8 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
     const candidates = (targets ?? units).filter(unit => unit.scripts.includes('test:browser'))
     if (!candidates.length) notes.push('No selected workspace has browser tests.')
     for (const unit of candidates) {
-      const script = JSON.parse(readFileSync(join(root, unit.path, 'package.json'), 'utf8')).scripts['test:browser'] as string
+      const {scripts} = JSON.parse(readFileSync(join(root, unit.path, 'package.json'), 'utf8')) as {scripts: {'test:browser': string}}
+      const script = scripts['test:browser']
       const playwright = /playwright test\s*$/u.test(script)
       runs.push({
         target: `${unit.path} (browser)`,

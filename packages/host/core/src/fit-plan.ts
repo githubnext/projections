@@ -145,7 +145,7 @@ export function useFitPlan<T>(
     if (m.plans !== plans) {
       if (carry) {
         const carried = carryNeeds(m.plans, plans, m.shown, m.needs, sign, carry)
-        m.needs = carried ?? new Map()
+        m.needs = carried ?? new Map<string, number>()
         m.stale = carried !== undefined
       }
       m.plans = plans

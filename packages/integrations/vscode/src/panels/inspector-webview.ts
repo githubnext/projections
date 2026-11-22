@@ -226,6 +226,11 @@ export class InspectorWebview {
       case 'summary':
         this.summary?.(host.summary)
         return
+      // A projection tab's own, which it takes before they reach here; a message without an op is nothing.
+      case 'restore':
+      case 'results':
+      case undefined:
+        return
       case 'pairAction':
         this.pairAction?.((host as {action?: unknown}).action)
     }
@@ -245,7 +250,9 @@ export class InspectorWebview {
         selection: new vscode.Range(row, character, row, character),
       })
     } catch (error) {
-      void vscode.window.showWarningMessage(`Projections: could not open ${relative}: ${error instanceof Error ? error.message : error}`)
+      void vscode.window.showWarningMessage(
+        `Projections: could not open ${relative}: ${error instanceof Error ? error.message : String(error)}`,
+      )
     }
   }
 

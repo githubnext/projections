@@ -108,8 +108,9 @@ export function pointAtTarball(manifest: Manifest, spec: string, directory = '.'
   }
   if (next.overrides && PACKAGE in next.overrides && !same(next.overrides[PACKAGE])) {
     changes.push(`removed overrides["${PACKAGE}"] (${JSON.stringify(next.overrides[PACKAGE])})`)
-    delete next.overrides[PACKAGE]
-    if (!Object.keys(next.overrides).length) delete next.overrides
+    const {[PACKAGE]: _removed, ...overrides} = next.overrides
+    if (Object.keys(overrides).length) next.overrides = overrides
+    else delete next.overrides
   }
   return {manifest: next, changes}
 }

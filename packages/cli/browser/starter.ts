@@ -39,16 +39,19 @@ execFileSync(cli, ['init', 'service-map', '--language', 'node', '--renderer', 'c
 export const renderer = join(repository, '.github/projections/service-map/renderer')
 // With the versions this workspace's lockfile installed rather than whatever the registry newly lists for the
 // scaffold's ranges (a release its mirror hasn't caught up with fails the install: `ETARGET No matching version`).
-const scaffold = JSON.parse(readFileSync(join(renderer, 'package.json'), 'utf8'))
-for (const field of ['dependencies', 'devDependencies']) {
-  for (const [name, range] of Object.entries<string>(scaffold[field] ?? {})) {
+const scaffold = JSON.parse(readFileSync(join(renderer, 'package.json'), 'utf8')) as Partial<
+  Record<'dependencies' | 'devDependencies', Record<string, string>>
+>
+for (const field of ['dependencies', 'devDependencies'] as const) {
+  const ranges = scaffold[field] ?? {}
+  for (const [name, range] of Object.entries(ranges)) {
     const installed = join(workspace, 'node_modules', name, 'package.json')
     if (!/^[\^~]?\d/u.test(range) || !existsSync(installed)) continue
-    const {version} = JSON.parse(readFileSync(installed, 'utf8'))
+    const {version} = JSON.parse(readFileSync(installed, 'utf8')) as {version: string}
     if (version.split('.')[0] !== range.replace(/^[\^~]/u, '').split('.')[0]) {
       throw new Error(`The scaffold asks for ${name}@${range}, but this workspace installs ${version}`)
     }
-    scaffold[field][name] = version
+    ranges[name] = version
   }
 }
 writeFileSync(join(renderer, 'package.json'), `${JSON.stringify(scaffold, null, 2)}\n`)

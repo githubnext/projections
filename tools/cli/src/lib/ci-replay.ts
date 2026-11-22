@@ -133,9 +133,9 @@ export async function loadPlanner(
 export function checkoutPlanner(root: string, ref: string): {directory: string; remove: () => void} {
   const directory = mkdtempSync(join(tmpdir(), 'ci-replay-'))
   const archive = spawnSync('git', ['archive', ref, 'tools/cli/src/lib', '.github/ci-rules.json'], {cwd: root, maxBuffer: 1 << 28})
-  if (archive.status !== 0) throw new Error(`git archive ${ref} failed: ${archive.stderr}`)
+  if (archive.status !== 0) throw new Error(`git archive ${ref} failed: ${archive.stderr.toString()}`)
   const tar = spawnSync('tar', ['-x', '-C', directory], {input: archive.stdout})
-  if (tar.status !== 0) throw new Error(`tar failed: ${tar.stderr}`)
+  if (tar.status !== 0) throw new Error(`tar failed: ${tar.stderr.toString()}`)
   return {directory, remove: () => rmSync(directory, {recursive: true, force: true})}
 }
 

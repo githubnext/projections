@@ -8,9 +8,9 @@ const badgeOrder = ['Stale', 'Approximate', 'Observed', 'Imported', 'From CI', '
  * (`environment-model.ts`'s `provenanceBadge`, so the side bar, tabs and the environment view agree): the one that
  * most qualifies it (Stale, then Approximate, Observed, Imported, From CI, Local), with each side's detail.
  */
-export function resultBadge<Badge extends {label: string; detail: string}>(
+export function resultBadge(
   stamp: ResultStamp,
-  badge: (document: unknown) => Badge | undefined,
+  badge: (document: unknown) => {label: string; detail: string} | undefined,
 ): {label: string; detail: string} | undefined {
   const found = stamp.sides.flatMap(side => {
     const earned = side.execution ? badge({provenance: {execution: side.execution}}) : undefined

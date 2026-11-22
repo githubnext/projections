@@ -213,7 +213,7 @@ The entity kinds a `compound` option lets become boundaries.
 ### `boundaryNouns`
 
 ```ts
-boundaryNouns(model: ComparisonModel<Extraction>, compound: Array<string> | false | true): Readonly<Record<string, SummaryNoun | false>> | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined }
+boundaryNouns(model: ComparisonModel<Extraction>, compound: Array<string> | false | true): Readonly<Record<string, false>>
 ```
 
 Nouns that leave grouping boundaries out of the summary: each of the boundary kinds `compound` names (see

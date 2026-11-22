@@ -54,7 +54,7 @@ function fetchTransport(base: URL, at: (path: string) => URL): InspectorTranspor
         ...(body === undefined ? {} : {headers: {'content-type': 'application/json'}, body: JSON.stringify(body)}),
       })
       if (!response.ok) throw new InspectorRequestError(requestErrorMessage(response.status, await response.text()), response.status)
-      return responseType === 'blob' ? response.blob() : response.json()
+      return responseType === 'blob' ? response.blob() : (response.json() as Promise<unknown>)
     },
   }
 }

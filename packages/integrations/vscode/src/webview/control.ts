@@ -17,7 +17,7 @@ type MessageOf<O extends Op> = Partial<Extract<ControlMessage, {op: O}>>
 type Ready = (loaded: boolean) => Promise<InspectorHandle>
 type Operation<O extends Op> = (message: MessageOf<O>, ready: Ready) => unknown
 
-const text = (value: unknown) => (value === undefined ? undefined : String(value))
+const text = (value: unknown) => (value === undefined ? undefined : typeof value === 'string' ? value : JSON.stringify(value))
 
 /** The editor's title actions on a projection tab's view: how it shows, its mode, playback, changes only and actions. */
 function runViewAction(view: View | null | undefined, {action, value}: MessageOf<'view'>) {
@@ -32,6 +32,8 @@ function runViewAction(view: View | null | undefined, {action, value}: MessageOf
       return
     case 'changesOnly':
       view.setChangesOnly(Boolean(value))
+      return
+    case undefined:
       return
     case 'runAction':
       view.runAction(String(value))

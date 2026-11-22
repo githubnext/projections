@@ -1,3 +1,6 @@
+// Whether the keyboard is a Mac's. `navigator.platform` is deprecated, but it names the system whose keyboard is in use
+// in every browser; the user agent doesn't (WebKit's says Macintosh on every system), and `userAgentData` is Chromium's.
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- see above
 export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/u.test(navigator.platform)
 /** How a shortcut is written on this platform: `⌘K` or `Ctrl+K`; with `alt`, `⌥⌘B` or `Ctrl+Alt+B`. */
 export function shortcutLabel(key: string, {alt = false}: {alt?: boolean} = {}): string {

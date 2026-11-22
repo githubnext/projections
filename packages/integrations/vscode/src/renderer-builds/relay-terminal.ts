@@ -6,7 +6,7 @@ import * as vscode from 'vscode'
  */
 export class RelayTerminal implements vscode.Pseudoterminal {
   private readonly written = new vscode.EventEmitter<string>()
-  private readonly closed = new vscode.EventEmitter<number | void>()
+  private readonly closed = new vscode.EventEmitter<number>()
   readonly onDidWrite = this.written.event
   readonly onDidClose = this.closed.event
   execution: vscode.TaskExecution | undefined

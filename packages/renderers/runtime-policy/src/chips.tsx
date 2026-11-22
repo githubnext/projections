@@ -13,7 +13,7 @@ function coverage(chip: Chip): string {
     effect === 'enforce' ? 'enforces' : effect === 'observe' ? 'observes' : effect === 'unknown' ? 'unknown effect' : 'declares no effect'
   const containers = chip.data?.containers
   if (!Array.isArray(containers) || !containers.length) return ` ${verb}`
-  return ` ${verb} on ${containers.map(name => codeSpan(String(name))).join(', ')}`
+  return ` ${verb} on ${containers.map((name: unknown) => codeSpan(typeof name === 'string' ? name : JSON.stringify(name))).join(', ')}`
 }
 
 /** A chip's subject, as prose: workloads in the extractor's words, binaries and policies as code. */

@@ -156,7 +156,7 @@ test('npm run check and tools check run the same gates: each step of the check s
   const path = await import('node:path')
   const {gates} = await import('../src/lib/gates.ts')
   const {workspaceRoot} = await import('../src/lib/repo.ts')
-  const scripts = JSON.parse(readFileSync(path.join(workspaceRoot, 'package.json'), 'utf8')).scripts as Record<string, string>
+  const {scripts} = JSON.parse(readFileSync(path.join(workspaceRoot, 'package.json'), 'utf8')) as {scripts: Record<string, string>}
   const split = (script: string): string[] =>
     script
       .split('&&')

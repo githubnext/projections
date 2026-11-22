@@ -58,7 +58,7 @@ module.exports = async function customRenderer({folder, tests, api}) {
       "  console.log('build started...')",
       "  if (readFileSync('src/main.tsx', 'utf8').includes('FAIL')) {",
       "    console.log('[vite:esbuild] Transform failed with 1 error:')",
-      '    console.log(`${process.cwd()}/src/main.tsx:1:1: ERROR: The source says FAIL`)',
+      "    console.log(process.cwd() + '/src/main.tsx:1:1: ERROR: The source says FAIL')",
       "  } else console.log('built in 5ms.')",
       '}',
       'build()',

@@ -39,6 +39,8 @@ export function readText(root: string, path: string): string | undefined {
   }
 }
 
+/** The repository's own JSON file at `path`, as the caller's `T`; undefined when there is none. */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- Callers name the file's type, as `JSON.parse(text) as T` would.
 export function readJson<T = unknown>(root: string, path: string): T | undefined {
   const text = readText(root, path)
   return text === undefined ? undefined : (JSON.parse(text) as T)

@@ -259,7 +259,7 @@ test('build: an edit to a build script or configuration outside src makes a buil
   for (const input of ['lib/scripts/css.mjs', 'lib/build/assets.mjs', 'lib/tsconfig.json', 'tsconfig.base.json', 'lib/package.json']) {
     const path = join(root, input)
     const content = readFileSync(path)
-    writeFileSync(path, `${content} `)
+    writeFileSync(path, `${content.toString()} `)
     assert.equal(staleness(root, units, lib, new Set()), 'its build inputs changed since its last build', input)
     writeFileSync(path, content)
     assert.equal(buildState(root, lib), 'current', input)

@@ -17,10 +17,13 @@ export const pairKey = (repository: string, projection: string) => `projections-
 export const recentKey = (repository: string, projection: string) => `projections-inspector-pairs:${repository}:${projection}`
 /** The projection last chosen in a repository, which the Inspector opens on again. */
 export const currentKey = (repository: string) => `projections-inspector-projection:${repository}`
-export function readJson<T>(key: string): T | undefined {
+/** The JSON stored under `key`, when it is what `valid` accepts. */
+export function readJson<T>(key: string, valid: (value: unknown) => value is T): T | undefined {
   try {
-    const value = localStorage.getItem(key)
-    return value === null ? undefined : (JSON.parse(value) as T)
+    const text = localStorage.getItem(key)
+    if (text === null) return undefined
+    const value: unknown = JSON.parse(text)
+    return valid(value) ? value : undefined
   } catch {
     return undefined
   }

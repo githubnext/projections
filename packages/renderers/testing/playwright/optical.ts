@@ -44,7 +44,7 @@ async function restyle(locator: Locator, slot: string, properties: Record<string
           const saved = JSON.parse(element.dataset[savedAs] ?? 'null') as string | null
           if (saved === null) element.removeAttribute('style')
           else element.setAttribute('style', saved)
-          delete element.dataset[savedAs]
+          Reflect.deleteProperty(element.dataset, savedAs)
         }
       }
     },

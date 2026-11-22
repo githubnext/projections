@@ -117,8 +117,9 @@ try {
   for (const file of files) {
     const text = readFileSync(join(unpacked, 'package', file), 'utf8')
     const name = internal.exec(text)
-    if (name)
+    if (name) {
       fail(`${file} names an internal workspace: ${text.slice(Math.max(0, name.index - 60), name.index + 60).replace(/\s+/gu, ' ')}`)
+    }
     for (const path of machine) if (text.includes(path)) fail(`${file} includes a path on this machine (${path})`)
     if (/sourceMappingURL=/u.test(text)) fail(`${file} references a source map`)
   }

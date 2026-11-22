@@ -78,14 +78,14 @@ export function initialState(options: ProjectionOptions, position: number): Proj
 export interface ProjectionPrimitives {
   request: RequestChange
   /** Changes the core's own settings directly. */
-  setSettings(change: (settings: Settings) => Settings): void
-  interact(event: InteractionEvent): void
-  runAction(id: string): void
+  setSettings: (change: (settings: Settings) => Settings) => void
+  interact: (event: InteractionEvent) => void
+  runAction: (id: string) => void
   /** The latest options, for callbacks. */
-  latest(): ProjectionOptions
+  latest: () => ProjectionOptions
   /** Runs an action: its writes and the handlers it calls reach listeners as one change. */
-  batched<T>(act: () => T): T
-  playback(): PlaybackController
+  batched: <T>(act: () => T) => T
+  playback: () => PlaybackController
   frames: {current: Record<Side, RendererFrame | null>}
   stage: StageHandlers
 }
@@ -109,8 +109,8 @@ export interface ShownView {
   selection: ProjectionSelection | null
   status: RendererStatus
   paint: PaintState
-  selectFrom(pane: PaneKey, id: string | null, path?: string): void
-  activateAnnotation(rowId: string): void
+  selectFrom: (pane: PaneKey, id: string | null, path?: string) => void
+  activateAnnotation: (rowId: string) => void
 }
 
 /** One read: the state it used (settled), the controller and what the core reconciles once it is shown. */

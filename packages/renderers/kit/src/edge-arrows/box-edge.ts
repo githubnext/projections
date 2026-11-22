@@ -81,8 +81,12 @@ export interface BlockedBoxEdge {
 export class NoRouteError extends Error {
   /** `NoRouteError`. */
   override name = 'NoRouteError'
-  constructor(readonly blocked: BlockedBoxEdge) {
+  /** The least-overlapping route, and the cards it crosses. */
+  readonly blocked: BlockedBoxEdge
+
+  constructor(blocked: BlockedBoxEdge) {
     super('Cannot route an arrow around the cards.')
+    this.blocked = blocked
   }
 }
 

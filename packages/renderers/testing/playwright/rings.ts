@@ -186,7 +186,7 @@ export async function ringPixelReport(
     clear,
     offset = {x: 0, y: 0},
     label = 'ring',
-  }: {ring(): Promise<void>; clear(): Promise<void>; offset?: {x: number; y: number}; label?: string},
+  }: {ring: () => Promise<void>; clear: () => Promise<void>; offset?: {x: number; y: number}; label?: string},
 ): Promise<RingPixelReport> {
   const failures: string[] = []
   if (geometry.mode === 'halo') return {lines: [], failures}

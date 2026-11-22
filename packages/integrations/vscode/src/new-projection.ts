@@ -25,14 +25,14 @@ type Pick = <Item extends vscode.QuickPickItem>(
 export interface NewProjectionHost {
   extensionPath: string
   output: vscode.LogOutputChannel
-  chooseFolder(): Promise<vscode.WorkspaceFolder | undefined>
+  chooseFolder: () => Promise<vscode.WorkspaceFolder | undefined>
   /** The extension's tracked quick pick, which tests answer. */
   pick: Pick
-  model(folder: vscode.WorkspaceFolder): FolderModel
-  withBackend<T>(folder: vscode.WorkspaceFolder, action: (runner: Runner) => Promise<T>): Promise<T>
-  openProjection(folder: vscode.Uri, id: string, options: {preview?: boolean}): Promise<void>
+  model: (folder: vscode.WorkspaceFolder) => FolderModel
+  withBackend: <T>(folder: vscode.WorkspaceFolder, action: (runner: Runner) => Promise<T>) => Promise<T>
+  openProjection: (folder: vscode.Uri, id: string, options: {preview?: boolean}) => Promise<void>
   /** Selects a projection's row in the Projections section. */
-  reveal(folder: vscode.WorkspaceFolder, id: string): Promise<void>
+  reveal: (folder: vscode.WorkspaceFolder, id: string) => Promise<void>
 }
 
 export function registerNewProjection(host: NewProjectionHost) {

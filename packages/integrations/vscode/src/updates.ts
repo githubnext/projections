@@ -8,8 +8,8 @@ import type {Pair} from './projections/pairs.js'
 import type {TabSummary} from './projections/rows.js'
 
 interface Timers {
-  set(run: () => void, ms: number): unknown
-  clear(timer: unknown): void
+  set: (run: () => void, ms: number) => unknown
+  clear: (timer: unknown) => void
 }
 const realTimers: Timers = {set: (run, ms) => setTimeout(run, ms), clear: timer => clearTimeout(timer as ReturnType<typeof setTimeout>)}
 

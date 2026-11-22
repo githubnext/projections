@@ -89,8 +89,8 @@ async function verifyExtraction(document: ExtractionDocument, engine: Projection
  * `createNativeRulesRuntime()` from `@githubnext/projections-comparator-runtime`.
  */
 export interface ArtifactRulesRuntime {
-  check(rules: Uint8Array, options?: {signal?: AbortSignal}): Promise<{digest: string}>
-  compare(rules: Uint8Array, input: unknown, options?: {signal?: AbortSignal}): Promise<unknown>
+  check: (rules: Uint8Array, options?: {signal?: AbortSignal}) => Promise<{digest: string}>
+  compare: (rules: Uint8Array, input: unknown, options?: {signal?: AbortSignal}) => Promise<unknown>
 }
 
 /**

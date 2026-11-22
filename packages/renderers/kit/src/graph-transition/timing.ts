@@ -33,13 +33,13 @@ export interface Timing {
   /** The windows of each scheduled step, in schedule order. */
   windows: StepWindows[]
   /** Progress through a row's own step at `t` (see `TransitionNode.local`). */
-  local(id: string, t: number): number
+  local: (id: string, t: number) => number
   /** A row's revision shown at `moment`: the one before its step's middle, then the one after. */
-  displayed<T>(row: EntityChange<T>, moment: number): T
+  displayed: <T>(row: EntityChange<T>, moment: number) => T
   /** Where an arriving row fades in. */
-  entering(id: string): Window | undefined
+  entering: (id: string) => Window | undefined
   /** Where a leaving row fades out. */
-  leaving(id: string): Window | undefined
+  leaving: (id: string) => Window | undefined
   /** Every relationship between included rows. */
   edgeAliases: EdgeAlias[]
 }

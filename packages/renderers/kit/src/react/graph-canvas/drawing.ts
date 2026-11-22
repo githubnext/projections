@@ -37,16 +37,16 @@ export interface Drawing {
   inset: number
   /** A plain card's border width, `--stroke`, in layout units. */
   stroke: number
-  kindOf(entity: Entity): KindLineText | undefined
-  statusOf(node: TransitionNode): StatusPart[] | undefined
+  kindOf: (entity: Entity) => KindLineText | undefined
+  statusOf: (node: TransitionNode) => StatusPart[] | undefined
   /** A card's or boundary's accessible name. */
-  label(node: TransitionNode, entity: Entity): string
+  label: (node: TransitionNode, entity: Entity) => string
   /** A change's mark in the diff: its status and emphasis. */
-  mark(change: ChangeClassification | TransitionNode, emphasis: number): object
+  mark: (change: ChangeClassification | TransitionNode, emphasis: number) => object
   /** Selects `id` on Enter or Space. */
-  select(id: string): (event: {key: string; preventDefault(): void}) => void
+  select: (id: string) => (event: {key: string; preventDefault: () => void}) => void
   /** Whether a row recedes behind the focus. */
-  receded(id: string): boolean
+  receded: (id: string) => boolean
 }
 
 export function drawing(props: LaidOutGraphProps, diff: boolean, inset: number, stroke = 1): Drawing {
@@ -76,7 +76,7 @@ export function drawing(props: LaidOutGraphProps, diff: boolean, inset: number, 
   }
   const focus = props.focus
   const receded = (id: string) => Boolean(focus && !focus.ids.has(id))
-  const select = (id: string) => (event: {key: string; preventDefault(): void}) => {
+  const select = (id: string) => (event: {key: string; preventDefault: () => void}) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       onSelect(id)

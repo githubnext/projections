@@ -48,6 +48,8 @@ export class ProjectionTab extends InspectorWebview {
   static current: ProjectionTab | undefined
   /** The projection tab that was in front last, still open: what the agent's current view falls back to. */
   static lastActive: ProjectionTab | undefined
+  readonly folder: vscode.WorkspaceFolder
+  readonly projection: string
   private failure: string | undefined
   /** Whether it follows the folder's choice or is pinned to its own, and the pair it shows. */
   private readonly following: Following
@@ -101,12 +103,14 @@ export class ProjectionTab extends InspectorWebview {
 
   constructor(
     services: Services,
-    readonly folder: vscode.WorkspaceFolder,
-    readonly projection: string,
+    folder: vscode.WorkspaceFolder,
+    projection: string,
     panel: vscode.WebviewPanel,
     firstPage?: {html: string; at: number},
   ) {
     super(services, {kind: 'repository', folder}, panel, 'inspect', firstPage)
+    this.folder = folder
+    this.projection = projection
     this.following = new Following(() => this.model, projection)
     this.freshness = new Freshness({
       folder,

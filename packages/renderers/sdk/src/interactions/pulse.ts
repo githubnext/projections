@@ -14,8 +14,8 @@ const pulseStyle = `@keyframes projections-pulse {
 
 export interface Pulse {
   /** Briefly emphasizes an item selected elsewhere, after the renderer has drawn the selection. */
-  pulse(id: string): void
-  dispose(): void
+  pulse: (id: string) => void
+  dispose: () => void
 }
 
 /** Pulses the elements `elementsOf` finds for an item in `root`, never under reduced motion. */

@@ -57,10 +57,10 @@ export function createStore() {
     get: () => snapshot,
     set,
     /** Moves focus between the pane and the menu (`paneFocusMachine`). */
-    focus(event: PaneFocusEvent) {
+    focus: (event: PaneFocusEvent) => {
       set({focus: paneFocusMachine.transition(snapshot.focus, event).state})
     },
-    subscribe(listener: () => void) {
+    subscribe: (listener: () => void) => {
       listeners.add(listener)
       return () => listeners.delete(listener)
     },

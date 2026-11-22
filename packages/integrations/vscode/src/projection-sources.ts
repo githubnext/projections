@@ -81,11 +81,15 @@ export class ProjectionSources {
   /** For tests: the items Go to Source… showed last. */
   last: string[] = []
 
-  constructor(
-    private readonly sidebar: Sidebar,
-    private readonly docs: BundledDocs,
-    private readonly picks: QuickPicks,
-  ) {}
+  private readonly sidebar: Sidebar
+  private readonly docs: BundledDocs
+  private readonly picks: QuickPicks
+
+  constructor(sidebar: Sidebar, docs: BundledDocs, picks: QuickPicks) {
+    this.sidebar = sidebar
+    this.docs = docs
+    this.picks = picks
+  }
 
   /**
    * What is behind a projection, as one model (`definitionModel`): the Definition view shows it and Go to Source…

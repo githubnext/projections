@@ -6,11 +6,11 @@ import {compose} from './compose.js'
 import {describe, slash, type NestModule, type SerializedGraph} from './model.js'
 
 interface ApplicationContext {
-  get(token: unknown, options?: unknown): unknown
-  container?: {getModules(): Map<string, NestModule>}
+  get: (token: unknown, options?: unknown) => unknown
+  container?: {getModules: () => Map<string, NestModule>}
 }
 interface NestCore {
-  NestFactory: {createApplicationContext(module: unknown, options: Record<string, unknown>): Promise<ApplicationContext>}
+  NestFactory: {createApplicationContext: (module: unknown, options: Record<string, unknown>) => Promise<ApplicationContext>}
   SerializedGraph: unknown
   ModuleRef: unknown
   ApplicationConfig: unknown

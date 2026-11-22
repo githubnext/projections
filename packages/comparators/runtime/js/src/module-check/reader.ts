@@ -20,10 +20,13 @@ const valueTypes: Record<number, string> = {
 
 export class Reader {
   offset = 0
-  constructor(
-    readonly bytes: Uint8Array,
-    readonly end = bytes.length,
-  ) {}
+  readonly bytes: Uint8Array
+  readonly end: number
+
+  constructor(bytes: Uint8Array, end = bytes.length) {
+    this.bytes = bytes
+    this.end = end
+  }
   byte(): number {
     if (this.offset >= this.end) errors.invalidModule('unexpected end of section')
     return this.bytes[this.offset++]!

@@ -11,7 +11,7 @@ import type {CheckId, CheckResult, ProbeCall, StageHighlighting, StageSeek, Stag
 export interface CheckDriver {
   /** Presents a subject with the scenario's renderer and resolves once it has painted `progress`. */
   /** Presents a subject; `comparisonMode: 'diff'` presents a comparison as one static diff, without progress. */
-  load(
+  load: (
     subject: StageSubject,
     options: {
       progress: number
@@ -25,15 +25,15 @@ export interface CheckDriver {
       /** Present in the open frame when it can (see `StageLoad.reuse`). */
       reuse?: boolean
     },
-  ): Promise<StageState>
-  seek(progress: number, options?: StageSeek): Promise<StageState>
-  select(id: string | null): void | Promise<void>
-  hover(id: string | null): void | Promise<void>
-  state(): StageState | Promise<StageState>
-  measure<T = unknown>(call: ProbeCall, args?: unknown): Promise<T>
+  ) => Promise<StageState>
+  seek: (progress: number, options?: StageSeek) => Promise<StageState>
+  select: (id: string | null) => void | Promise<void>
+  hover: (id: string | null) => void | Promise<void>
+  state: () => StageState | Promise<StageState>
+  measure: <T = unknown>(call: ProbeCall, args?: unknown) => Promise<T>
   /** The default comparison with no options. */
-  compare(before: Extraction, after: Extraction): Promise<Comparison>
-  sleep(ms: number): Promise<void>
+  compare: (before: Extraction, after: Extraction) => Promise<Comparison>
+  sleep: (ms: number) => Promise<void>
 }
 
 /** The options of `runChecks`: which checks to run, their limits, and a callback for each result as it arrives. */

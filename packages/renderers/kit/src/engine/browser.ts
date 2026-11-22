@@ -4,9 +4,9 @@ import workerSource from 'elkjs/lib/elk-worker.min.js?raw'
 
 interface WorkerLike {
   onmessage: ((event: {data: unknown}) => void) | null
-  postMessage(message: {id?: number}): void
+  postMessage: (message: {id?: number}) => void
   /** ELK's in-document stand-in has none. */
-  terminate?(): void
+  terminate?: () => void
 }
 
 /**

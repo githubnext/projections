@@ -47,9 +47,9 @@ export interface ScopeView extends ChangesScope {
    * Shows these items too, or opens these folds (`isFold`), until the host's scope changes. A canvas lays them out with
    * the rest; an open fold stays, as the way to fold its parts again.
    */
-  expand(ids: Iterable<string>): void
+  expand: (ids: Iterable<string>) => void
   /** Folds these open folds again, or stops showing items `expand` added. */
-  collapse(ids: Iterable<string>): void
+  collapse: (ids: Iterable<string>) => void
 }
 
 /**

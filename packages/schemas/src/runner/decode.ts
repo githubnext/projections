@@ -4,14 +4,17 @@ import {runnerResponses, type RunnerResponse, type RunnerResponseName} from './a
 /** A runner response that doesn't match its schema: the request it answered, and where and why it doesn't. */
 export class RunnerResponseError extends Error {
   override name = 'RunnerResponseError'
-  constructor(
-    /** The request, such as `GET /api/explore`. */
-    readonly request: string,
-    /** The JSON pointer of the value that doesn't match, `''` for the whole response. */
-    readonly pointer: string,
-    readonly reason: string,
-  ) {
+  /** The request, such as `GET /api/explore`. */
+  readonly request: string
+  /** The JSON pointer of the value that doesn't match, `''` for the whole response. */
+  readonly pointer: string
+  readonly reason: string
+
+  constructor(request: string, pointer: string, reason: string) {
     super(`The local runner's response to ${request} is invalid at ${pointer || 'its root'}: ${reason}`)
+    this.request = request
+    this.pointer = pointer
+    this.reason = reason
   }
 }
 

@@ -107,9 +107,9 @@ export interface Machine<S extends MachineState, E extends MachineEvent, F exten
   /** The definition it was made from. */
   readonly definition: MachineDefinition<S, E, F, A>
   /** The pure transition: what `event` does in `state`. Throws for a state kind or event type the definition lacks. */
-  transition(state: S, event: E): Transition<S, F>
+  transition: (state: S, event: E) => Transition<S, F>
   /** The activities `state` keeps running. */
-  activities(state: S): readonly (A | After<E>)[]
+  activities: (state: S) => readonly (A | After<E>)[]
 }
 
 interface Node {

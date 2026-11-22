@@ -17,7 +17,7 @@ import {fileURLToPath} from 'node:url'
 export interface Harness {
   /** The page, with a placeholder fragment so callers can insert a query before it. */
   url: string
-  close(): Promise<void>
+  close: () => Promise<void>
 }
 
 const client = fileURLToPath(new URL('../dist/client', import.meta.url))

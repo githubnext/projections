@@ -384,31 +384,31 @@ export interface CheckResult {
 
 /** The stage the Inspector's fixtures mode exposes as `window.projectionsStage`. */
 export interface StageApi {
-  load(request: StageLoad): Promise<StageState>
+  load: (request: StageLoad) => Promise<StageState>
   /** Loads a scenario by key (`<source>/<id>`) or unique ID, with its comparator and presentation. */
-  loadScenario(scenario: string, overrides?: Omit<Partial<StageLoad>, 'subject' | 'renderer'>): Promise<StageState>
-  seek(progress: number, options?: StageSeek): Promise<StageState>
-  select(id: string | null): void
-  setOptions(options: RendererOptions): void
+  loadScenario: (scenario: string, overrides?: Omit<Partial<StageLoad>, 'subject' | 'renderer'>) => Promise<StageState>
+  seek: (progress: number, options?: StageSeek) => Promise<StageState>
+  select: (id: string | null) => void
+  setOptions: (options: RendererOptions) => void
   /** Activates a declared action control, as a host's button would. */
-  action(id: string): void
+  action: (id: string) => void
   /** Host-side hover, as another pane or the host's table would send it. */
-  hover(id: string | null): void
+  hover: (id: string | null) => void
   /** The host's scope, summary filter and find (a `filter` message), as a host sends it once the person, or its own
    * default, chooses them. */
-  filter(payload: FilterPayload): void
-  setEnvironment(environment: StageEnvironment): void
+  filter: (payload: FilterPayload) => void
+  setEnvironment: (environment: StageEnvironment) => void
   /** Resizes the frame; `null` restores the page width. Resolves once the renderer has painted again. */
-  setWidth(width: number | null): Promise<void>
+  setWidth: (width: number | null) => Promise<void>
   /** Runs a probe measurement inside the renderer document. */
-  measure<T = unknown>(call: ProbeCall, args?: unknown): Promise<T>
-  state(): StageState
+  measure: <T = unknown>(call: ProbeCall, args?: unknown) => Promise<T>
+  state: () => StageState
   /** What the stage presents now. */
-  subject(): StageSubject
+  subject: () => StageSubject
   /** Compares two extractions with the default comparator, in this browser. */
-  compare(before: Extraction, after: Extraction, options?: DefaultComparatorOptions): Promise<Comparison>
+  compare: (before: Extraction, after: Extraction, options?: DefaultComparatorOptions) => Promise<Comparison>
   /** Scenario keys the Inspector loaded, in sidebar order, with any loading errors. */
-  scenarios(): {key: string; id: string; title: string; error?: string}[]
+  scenarios: () => {key: string; id: string; title: string; error?: string}[]
   /** Runs the built-in checks against a scenario in this stage. */
-  runChecks(scenario: string, options?: {checks?: CheckId[]}): Promise<CheckResult[]>
+  runChecks: (scenario: string, options?: {checks?: CheckId[]}) => Promise<CheckResult[]>
 }

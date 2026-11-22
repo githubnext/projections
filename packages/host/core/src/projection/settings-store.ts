@@ -102,17 +102,17 @@ export function restartedSettings(settings: Settings, options: ProjectionOptions
 /** The settings of one projection, run without a framework: read them, request changes and hear about them. */
 export interface SettingsStore {
   /** The core's own values; a new object whenever one changes. */
-  getSnapshot(): Settings
+  getSnapshot: () => Settings
   /** Calls `listener` after each change; returns the function that stops it. */
-  subscribe(listener: () => void): () => void
+  subscribe: (listener: () => void) => () => void
   /** The embedder's latest options: controlled values, their handlers and the subject. */
-  update(options: ProjectionOptions): void
+  update: (options: ProjectionOptions) => void
   /** A setting's value: the embedder's when it controls it, else the core's own. */
-  value<K extends SettingKey>(key: K): Settings[K]
+  value: <K extends SettingKey>(key: K) => Settings[K]
   /** Requests a change: kept while the setting is uncontrolled, and always reported to its `on…Change`. */
-  request<K extends keyof Settings>(key: K, next: Settings[K]): void
+  request: <K extends keyof Settings>(key: K, next: Settings[K]) => void
   /** Changes the core's own values directly, as the core does when it restarts or records what a renderer declares. */
-  set(change: (settings: Settings) => Settings): void
+  set: (change: (settings: Settings) => Settings) => void
 }
 
 /** A `SettingsStore` for a projection's options, seeded from their `initial…` values. */

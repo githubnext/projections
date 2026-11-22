@@ -8,7 +8,11 @@ export class WorkingIdentities {
   /** Whether the backend answers `GET /api/identity`; unknown until asked. */
   private supported: boolean | undefined
 
-  constructor(private readonly lease: Lease) {}
+  private readonly lease: Lease
+
+  constructor(lease: Lease) {
+    this.lease = lease
+  }
 
   /** A replaced backend is asked again. */
   reset() {

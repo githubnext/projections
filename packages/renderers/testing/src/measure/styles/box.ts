@@ -20,7 +20,7 @@ export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOM
   // Auto margins and percentages are layout, not spacing: computed values (CSS Typed OM) keep them as written,
   // where getComputedStyle reports the used length.
   const computed = (
-    element as Element & {computedStyleMap?: () => {get(property: string): {toString(): string} | undefined}}
+    element as Element & {computedStyleMap?: () => {get: (property: string) => {toString: () => string} | undefined}}
   ).computedStyleMap?.()
   const layout = (property: string) => {
     const value = computed?.get(property)?.toString() ?? ''

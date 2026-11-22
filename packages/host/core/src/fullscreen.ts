@@ -7,7 +7,7 @@ export interface FullscreenState {
   active: boolean
   /** `native` (the Fullscreen API) or `fallback` (a fixed overlay, where the API is unavailable, as on iPhone). */
   kind: 'native' | 'fallback' | undefined
-  toggle(): void
+  toggle: () => void
 }
 
 /**

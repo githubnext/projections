@@ -18,9 +18,9 @@ export interface Circle extends Placement {
 
 export interface PackingTransition {
   /** Circles at a progress, parents before children. */
-  frame(progress: number): Circle[]
+  frame: (progress: number) => Circle[]
   /** The row of the single root holding everything (drawn as the background, not a circle), and its opacity at a progress. */
-  root?: {id: string; opacity(progress: number): number}
+  root?: {id: string; opacity: (progress: number) => number}
   /** The packing of the first and last stage, for sizes and deltas. */
   first: Packing
   last: Packing

@@ -438,37 +438,37 @@ export interface ProjectionEngine {
    * Parses a whole saved document's raw JSON strictly, rejecting duplicate keys, unpaired surrogates and unsafe
    * numbers, within 64 levels and 32 MiB. Returns generic JSON, not a validated artifact.
    */
-  parseJson(json: string): Promise<Json>
+  parseJson: (json: string) => Promise<Json>
   /**
    * Validates an extraction value against its domain schema and vocabularies, then sorts its items by ID and fills
    * omitted `data` with `{}`. Rejects host values that are not plain JSON.
    */
-  normalize(extraction: unknown): Promise<Extraction>
+  normalize: (extraction: unknown) => Promise<Extraction>
   /**
    * Parses and normalizes an extractor's raw JSON output. Prefer it to `JSON.parse` and `normalize`, which can't see
    * duplicate keys or an integer already rounded.
    */
-  decode(json: string): Promise<Extraction>
+  decode: (json: string) => Promise<Extraction>
   /** Normalizes an extraction and returns its canonical bytes and digest. */
-  canonicalize(extraction: unknown): Promise<CanonicalExtraction>
+  canonicalize: (extraction: unknown) => Promise<CanonicalExtraction>
   /** Validates a comparison against both extractions and returns it normalized. */
-  validateComparison(before: unknown, after: unknown, comparison: unknown): Promise<Comparison>
+  validateComparison: (before: unknown, after: unknown, comparison: unknown) => Promise<Comparison>
   /** Compares two extractions of the same revision by ID: what varied within and beyond its declared tolerance. */
-  vary(before: unknown, after: unknown): Promise<Variation>
+  vary: (before: unknown, after: unknown) => Promise<Variation>
   /**
    * Whether two extraction documents can be compared: one projection, one definition (`presentation` aside) and one
    * definition digest. The one rule every host and the CLI apply; decide it here, never by comparing fields yourself.
    */
-  pair(before: PairingSide, after: PairingSide): Promise<DefinitionPairing>
+  pair: (before: PairingSide, after: PairingSide) => Promise<DefinitionPairing>
   /**
    * What a validated comparison asks of its reviewer: whether it's `changed` and how many changes are of each kind.
    * The one classification every host and the CLI use; read it here, never by counting `changes` yourself.
    */
-  review(comparison: Pick<Comparison, 'changes'>): Promise<ComparisonReview>
+  review: (comparison: Pick<Comparison, 'changes'>) => Promise<ComparisonReview>
   /** Runs the default comparator module and validates its result. */
-  compare(before: unknown, after: unknown, options?: DefaultComparatorOptions): Promise<Comparison>
+  compare: (before: unknown, after: unknown, options?: DefaultComparatorOptions) => Promise<Comparison>
   /** Identity of the default comparator module this engine runs. */
-  defaultComparator(): Promise<{id: 'default'; digest: string}>
+  defaultComparator: () => Promise<{id: 'default'; digest: string}>
 }
 
 /**

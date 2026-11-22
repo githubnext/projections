@@ -236,9 +236,7 @@ export default defineConfig(
     rules: Object.fromEntries(
       [
         '@typescript-eslint/await-thenable',
-        '@typescript-eslint/class-methods-use-this',
         '@typescript-eslint/consistent-return',
-        '@typescript-eslint/method-signature-style',
         '@typescript-eslint/no-base-to-string',
         '@typescript-eslint/no-confusing-void-expression',
         '@typescript-eslint/no-deprecated',
@@ -260,7 +258,6 @@ export default defineConfig(
         '@typescript-eslint/no-unsafe-member-access',
         '@typescript-eslint/no-unsafe-return',
         '@typescript-eslint/no-unsafe-type-assertion',
-        '@typescript-eslint/parameter-properties',
         '@typescript-eslint/prefer-find',
         '@typescript-eslint/prefer-for-of',
         '@typescript-eslint/prefer-nullish-coalescing',
@@ -274,7 +271,6 @@ export default defineConfig(
         '@typescript-eslint/strict-boolean-expressions',
         '@typescript-eslint/strict-void-return',
         '@typescript-eslint/switch-exhaustiveness-check',
-        '@typescript-eslint/unbound-method',
         '@typescript-eslint/use-unknown-in-catch-callback-variable',
         'array-callback-return',
         'eqeqeq',

@@ -7,8 +7,8 @@ const exportName = 'projections_rules_editor'
 
 interface Exports {
   memory: WebAssembly.Memory
-  projections_alloc(length: number): number
-  projections_rules_editor(pointer: number, length: number): bigint
+  projections_alloc: (length: number) => number
+  projections_rules_editor: (pointer: number, length: number) => bigint
 }
 
 /** Whether a compiled module has the language service. */

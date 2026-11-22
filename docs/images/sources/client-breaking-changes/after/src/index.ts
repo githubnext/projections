@@ -14,8 +14,8 @@ export interface ClientOptions {
 
 /** A client for one API. */
 export interface Client {
-  get(path: string): Promise<Response>
-  post(path: string, body: unknown): Promise<Response>
+  get: (path: string) => Promise<Response>
+  post: (path: string, body: unknown) => Promise<Response>
 }
 
 /** Creates a client for the API that `options` describes. */

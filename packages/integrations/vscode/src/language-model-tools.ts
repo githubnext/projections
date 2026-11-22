@@ -65,7 +65,7 @@ export function agentTools(
               const text = typeof answer === 'string' ? answer : answer.text
               const image = typeof answer === 'string' ? undefined : answer.image
               // VS Code before 1.104 has no data parts: the model reads the text alone.
-              const data = (vscode as {LanguageModelDataPart?: {image(data: Uint8Array, mime: string): unknown}}).LanguageModelDataPart
+              const data = (vscode as {LanguageModelDataPart?: {image: (data: Uint8Array, mime: string) => unknown}}).LanguageModelDataPart
               return new vscode.LanguageModelToolResult([
                 new vscode.LanguageModelTextPart(text),
                 ...(image && data ? [data.image(Buffer.from(image.data, 'base64'), image.mimeType)] : []),

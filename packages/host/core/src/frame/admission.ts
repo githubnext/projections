@@ -15,7 +15,10 @@ class MessageRate {
   private tokens: number = rendererLimits.messagesPerSecond
   private refilled: number
 
-  constructor(private readonly view: Window) {
+  private readonly view: Window
+
+  constructor(view: Window) {
+    this.view = view
     this.refilled = view.performance.now()
   }
 
@@ -54,11 +57,12 @@ export class MessageGate {
   /** The generation of the frame's latest `init`, which the renderer's `rendered` echoes (see `HostMessage`). */
   generation = 0
 
-  constructor(
-    view: Window,
-    private readonly frame: HTMLIFrameElement,
-    private readonly channel: string,
-  ) {
+  private readonly frame: HTMLIFrameElement
+  private readonly channel: string
+
+  constructor(view: Window, frame: HTMLIFrameElement, channel: string) {
+    this.frame = frame
+    this.channel = channel
     this.rate = new MessageRate(view)
   }
 
@@ -87,7 +91,11 @@ export class MessageGate {
 export class HeightRequests {
   private heights: {px: number; at: number}[] = []
 
-  constructor(private readonly view: Window) {}
+  private readonly view: Window
+
+  constructor(view: Window) {
+    this.view = view
+  }
 
   /** The height to apply for a request: the requested one, clamped, or the largest recent one in a feedback loop. */
   settle(px: number): number {

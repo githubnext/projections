@@ -5,8 +5,8 @@ export type ComparatorModuleOptions = {module: BufferSource; url?: never} | {url
 
 interface ComparatorExports extends WebAssembly.Exports {
   memory: WebAssembly.Memory
-  projections_alloc(length: number): number
-  projections_compare(pointer: number, length: number): bigint
+  projections_alloc: (length: number) => number
+  projections_compare: (pointer: number, length: number) => bigint
 }
 
 export async function loadComparatorBytes(options: ComparatorModuleOptions = {}): Promise<ArrayBuffer> {

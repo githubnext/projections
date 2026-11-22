@@ -18,10 +18,13 @@ export class RecentCommits {
   /** For tests: how many times recent commits were checked. */
   finds = 0
 
-  constructor(
-    private readonly host: ViewingHost,
-    private readonly changed: () => void,
-  ) {}
+  private readonly host: ViewingHost
+  private readonly changed: () => void
+
+  constructor(host: ViewingHost, changed: () => void) {
+    this.host = host
+    this.changed = changed
+  }
 
   state(model: FolderModel): Recent {
     const key = model.folder.uri.toString()

@@ -73,7 +73,7 @@ export function isPlaybackShortcut(event: KeyEventLike, keeps: readonly string[]
  * (`togglePlayback`), once per press, so a held Space doesn't flicker. Returns whether the key was the shortcut.
  */
 export function handlePlaybackShortcut(
-  event: KeyEventLike & {repeat: boolean; preventDefault(): void},
+  event: KeyEventLike & {repeat: boolean; preventDefault: () => void},
   projection: Pick<ProjectionController, 'togglePlayback'>,
   keeps?: readonly string[],
 ): boolean {

@@ -12,7 +12,7 @@ export function compilerOptions(root: string, configured: string | undefined, di
   const file = configured ?? nearest(root, directory, 'tsconfig.json')
   let options: ts.CompilerOptions = {}
   if (file) {
-    const read = ts.readConfigFile(file, ts.sys.readFile)
+    const read = ts.readConfigFile(file, name => ts.sys.readFile(name))
     if (read.error && configured) {
       throw new Error(`Cannot read ${slash(path.relative(root, file))}: ${ts.flattenDiagnosticMessageText(read.error.messageText, '\n')}`)
     }
@@ -40,7 +40,7 @@ export function compilerOptions(root: string, configured: string | undefined, di
 
 interface ModuleClass {
   _resolveFilename: (request: string, parent: unknown, isMain: boolean, options?: unknown) => string
-  _extensions: Record<string, (module: {_compile(code: string, file: string): void}, file: string) => void>
+  _extensions: Record<string, (module: {_compile: (code: string, file: string) => void}, file: string) => void>
   _nodeModulePaths: (directory: string) => string[]
   isBuiltin: (request: string) => boolean
 }
@@ -104,6 +104,7 @@ export function installLoader(root: string, checkout: string, options: ts.Compil
 
 /** Application code may print while it loads; stdout carries only the extraction. */
 export async function quietly<T>(action: () => Promise<T>): Promise<T> {
+  // eslint-disable-next-line @typescript-eslint/unbound-method -- kept to be put back, never called
   const write = process.stdout.write
   process.stdout.write = process.stderr.write.bind(process.stderr) as typeof process.stdout.write
   try {

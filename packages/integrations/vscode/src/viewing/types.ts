@@ -4,13 +4,13 @@ import type {DevelopCell, DevelopChange} from '../develop-model.js'
 import type {FolderModel} from '../folder-model.js'
 
 export interface ViewingHost {
-  request(
+  request: (
     folder: vscode.WorkspaceFolder,
     request: {method: 'GET' | 'POST'; path: string; body?: unknown},
-  ): Promise<{status: number; body: unknown}>
-  resolveCommits(cwd: string, refs: string[]): Promise<(string | undefined)[]>
+  ) => Promise<{status: number; body: unknown}>
+  resolveCommits: (cwd: string, refs: string[]) => Promise<(string | undefined)[]>
   /** The open pull request of the folder's current branch, if `gh` says there is one. */
-  pullRequest(folder: vscode.WorkspaceFolder, branch: string): Promise<number | undefined>
+  pullRequest: (folder: vscode.WorkspaceFolder, branch: string) => Promise<number | undefined>
 }
 
 export interface Sweep {

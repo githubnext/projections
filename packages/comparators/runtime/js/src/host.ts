@@ -74,13 +74,13 @@ export async function prepare(moduleBytes: Uint8Array, input: unknown, bounds: S
 
 /** A dedicated, single-use worker running `execute` for one request. */
 export interface WorkerHandle {
-  post(request: ExecuteRequest): void
-  terminate(): void
+  post: (request: ExecuteRequest) => void
+  terminate: () => void
 }
 
 export interface WorkerEvents {
-  message(data: unknown): void
-  error(message: string): void
+  message: (data: unknown) => void
+  error: (message: string) => void
 }
 
 /** Runs one request in a fresh worker, terminating it on completion, failure or deadline. */

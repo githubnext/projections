@@ -32,12 +32,12 @@ export const showAs = (() => {
   const listeners = new Set<() => void>()
   return {
     get: () => value,
-    set(next: ViewKind) {
+    set: (next: ViewKind) => {
       value = next
       keep({showAs: next})
       for (const listener of listeners) listener()
     },
-    subscribe(listener: () => void) {
+    subscribe: (listener: () => void) => {
       listeners.add(listener)
       return () => listeners.delete(listener)
     },

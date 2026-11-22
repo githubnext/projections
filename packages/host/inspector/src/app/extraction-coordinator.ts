@@ -37,11 +37,11 @@ export interface ExtractionSnapshot {
 /** What the coordinator asks of the Inspector, read when needed. */
 export interface ExtractionEvents {
   /** The projection's own definition: another projection's extractor (`runAs`) made its extraction. */
-  definition(projection: string): InspectorDefinitionList['definitions'][number] | undefined
+  definition: (projection: string) => InspectorDefinitionList['definitions'][number] | undefined
   /** Whether the ref is a side of the projection's shown pair, whose failure the main view reports. */
-  shown(projection: string, ref: string): boolean
+  shown: (projection: string, ref: string) => boolean
   /** A problem to report, and whether to open the diagnostics. */
-  report(message: string, diagnostics: boolean): void
+  report: (message: string, diagnostics: boolean) => void
 }
 
 /** A client generation: everything it started stops, and publishes nothing, once it is replaced. */

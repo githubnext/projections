@@ -29,13 +29,13 @@ export interface DefinitionTarget {
 
 export interface DefinitionHost {
   /** The active editor tab's projection, when it is a projection tab. */
-  active(): DefinitionTarget | undefined
+  active: () => DefinitionTarget | undefined
   /** An open tab of a projection, for a pinned view. */
-  find(folder: vscode.WorkspaceFolder, projection: string): DefinitionTarget | undefined
+  find: (folder: vscode.WorkspaceFolder, projection: string) => DefinitionTarget | undefined
   /** The projection's definition model (`projectionSources`), which Go to Source… lists too. */
-  sources(folder: vscode.WorkspaceFolder, id: string): Promise<DefinitionNode[]>
+  sources: (folder: vscode.WorkspaceFolder, id: string) => Promise<DefinitionNode[]>
   /** A custom renderer's build, as the extension runs it on save (`renderer-builds.ts`), for the Renderer row. */
-  rendererBuild?(folder: vscode.WorkspaceFolder, projection: string): BuildState | undefined
+  rendererBuild?: (folder: vscode.WorkspaceFolder, projection: string) => BuildState | undefined
   /** A tab opened, closed, became active or showed new results, or a renderer build changed. */
   readonly onDidChange: vscode.Event<void>
 }
@@ -71,11 +71,14 @@ export class DefinitionView implements vscode.TreeDataProvider<Node>, vscode.Dis
   private readonly disposables: vscode.Disposable[] = []
   private timer: ReturnType<typeof setTimeout> | undefined
 
-  constructor(
-    private readonly host: DefinitionHost,
-    private readonly sidebar: Sidebar,
-    private readonly output: vscode.LogOutputChannel,
-  ) {
+  private readonly host: DefinitionHost
+  private readonly sidebar: Sidebar
+  private readonly output: vscode.LogOutputChannel
+
+  constructor(host: DefinitionHost, sidebar: Sidebar, output: vscode.LogOutputChannel) {
+    this.host = host
+    this.sidebar = sidebar
+    this.output = output
     this.view = vscode.window.createTreeView('projections.definition', {treeDataProvider: this})
     const watchers = ['**/scenarios.json', '**/*.comparator.test.{yaml,yml}', '**/environment.json'].map(glob =>
       vscode.workspace.createFileSystemWatcher(glob),

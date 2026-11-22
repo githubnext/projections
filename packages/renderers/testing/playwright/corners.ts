@@ -6,6 +6,7 @@
  */
 import type {Locator, Page} from '@playwright/test'
 import {type CornerMeasure, type CornerProbe, measureCorners} from './corners/analyze.js'
+import {cornerFailures} from './corners/judge.js'
 
 export type {CornerMeasure, CornerProbe, CornerRay, CornerSide} from './corners/analyze.js'
 
@@ -171,7 +172,26 @@ function cornerProbes(
 export async function cornerReport(
   page: Page,
   target: Locator | CornerBox,
-  {label = 'box', frame}: {label?: string; frame?: number} = {},
+  {
+    label = 'box',
+    frame,
+    contrast = 40,
+    minRatio,
+    maxRatio = 1.6,
+  }: {
+    label?: string
+    frame?: number
+    /** The least contrast, as an RGB distance, between a border and its neighbours that is measured; 40 by default. */
+    contrast?: number
+    /**
+     * Holds each corner's arc, its thickness averaged around the curve, to at least this fraction of its sides' (a fill
+     * painted against the border's curve thins it there, its antialiased pixels diluting the border's, though it never
+     * crosses it) and at most `maxRatio` of them, in place of the per-angle tolerance. Unset, that tolerance applies.
+     */
+    minRatio?: number
+    /** With `minRatio`, the most a corner's arc may be against its sides', as a fraction; 1.6 by default. */
+    maxRatio?: number
+  } = {},
 ): Promise<CornerReport> {
   const scale = await page.evaluate(() => devicePixelRatio)
   const probes: CornerProbe[] = []
@@ -191,39 +211,12 @@ export async function cornerReport(
       probes.push({...probe, url: `data:image/png;base64,${buffer.toString('base64')}`})
     }
   }
-  const corners = await page.evaluate(measureCorners, [probes, scale] as [CornerProbe[], number])
-  const failing = corners.map(corner => cornerFailures(corner, scale, label))
+  const corners = await page.evaluate(measureCorners, [probes, scale, contrast] as [CornerProbe[], number, number])
+  const failing = corners.map(corner =>
+    cornerFailures(corner, scale, label, minRatio === undefined ? undefined : {min: minRatio, max: maxRatio}),
+  )
   const failures = failing.flat()
   if (!failures.length) return {corners, failures}
   const pictures = Object.fromEntries(probes.filter((_, index) => failing[index]!.length).map(probe => [probe.name, probe.url]))
   return {corners, failures, pictures}
-}
-
-/**
- * Within a quarter CSS pixel, plus half a device pixel of antialiasing, of its sides; between them where they differ
- * (a change run's strong side edge turning into a plain bottom border).
- */
-function cornerFailures(corner: CornerMeasure, scale: number, label: string): string[] {
-  const tolerance = 0.25 + 0.5 / scale
-  // A colour this far from every blend of outside, border and inside, or from the outside past the curve.
-  const stray = 60
-  const sides = corner.sides.filter((side): side is number => side !== null)
-  const failures: string[] = []
-  for (const ray of corner.rays) {
-    const at = `${label} ${corner.name} corner at ${ray.angle}°`
-    if (ray.thickness !== null && sides.length) {
-      const low = Math.min(...sides) - tolerance,
-        high = Math.max(...sides) + tolerance
-      if (ray.thickness < low || ray.thickness > high) {
-        failures.push(
-          `${at}: the border is ${ray.thickness.toFixed(2)} px around the curve but ${sides.map(side => side.toFixed(2)).join(' and ')} px on its sides`,
-        )
-      }
-    }
-    if (ray.foreign > stray) {
-      failures.push(`${at}: a colour that is neither the border nor what it edges shows in the border (a fill not concentric with it)`)
-    }
-    if (ray.outside > stray) failures.push(`${at}: paint shows outside the curve`)
-  }
-  return failures
 }

@@ -225,23 +225,33 @@ more, and divide by the drawing's own scale when it is zoomed or fitted.
 
 ## Corners in pixels
 
-`cornerReport(page, target, {label, frame})` checks a bordered box's rounded
-corners in pictures of them: the border keeps its thickness around each curve,
-within a quarter CSS px plus half a device pixel of its sides (or between them,
-where the sides differ), no third color shows in it and no paint shows outside
-the curve. That is what a filled band in a rounded container breaks when it
-isn't concentric with it: a header, footer or last changed row with square
-corners covers the inside of the border's curve, and one with the container's
-own radius pokes out past it. Nested radii are the container's less the inset.
-The `target` is a locator (an element's border box, radii and solid borders, its
-solid outline where it has no border, or an SVG `rect`'s stroked outline, read
-by `cornerBox`) or a `CornerBox` of your own. For a frame its contents draw (a
-data table's scroll box, whose heading and rows draw its lines), pass `frame`,
-the line's width; each corner is measured where its sides are painted, since a
-browser may snap a border to whole pixels, and a box taller than the view is
-scrolled for its top and then its bottom corners. Dashed outlines and corners no
-larger than their border are skipped. Take the page at a device scale of 2 or
-more; failing corners' pictures come back in `pictures`, to attach.
+`cornerReport(page, target, {label, frame, contrast, minRatio, maxRatio})`
+checks a bordered box's rounded corners in pictures of them: the border keeps
+its thickness around each curve, within a quarter CSS px plus half a device
+pixel of its sides (or between them, where the sides differ), no third color
+shows in it and no paint shows outside the curve. That is what a filled band in
+a rounded container breaks when it isn't concentric with it: a header, footer or
+last changed row with square corners covers the inside of the border's curve,
+and one with the container's own radius pokes out past it. Nested radii are the
+container's less the inset. The `target` is a locator (an element's border box,
+radii and solid borders, its solid outline where it has no border, or an SVG
+`rect`'s stroked outline, read by `cornerBox`) or a `CornerBox` of your own. For
+a frame its contents draw (a data table's scroll box, whose heading and rows
+draw its lines), pass `frame`, the line's width; each corner is measured where
+its sides are painted, since a browser may snap a border to whole pixels, and a
+box taller than the view is scrolled for its top and then its bottom corners.
+Dashed outlines and corners no larger than their border are skipped. Take the
+page at a device scale of 2 or more; failing corners' pictures come back in
+`pictures`, to attach.
+
+By default a ray reads the border only where it contrasts with what it edges by
+40 or more; pass `contrast` to read quieter borders (6 reads the divider on a
+raised surface). `minRatio` judges each corner by its arc's mean thickness
+instead of ray by ray: the arc must be at least that fraction of its thinner
+side and at most `maxRatio` (1.6 by default) of its thicker one. That catches
+the thinning a concentric fill still causes, where it dilutes the border's
+antialiased pixels: the harness `frames` spec uses
+`{contrast: 6, minRatio: 0.93}`.
 
 ## Your own assertions
 

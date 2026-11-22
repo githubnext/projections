@@ -116,64 +116,72 @@ export function DataTable<T>({
   const template = [...columns.map(track), ...(comparing ? ['max-content'] : [])].join(' ')
   const sorted = sort && columns.some(column => column.id === sort.column && isSortable(column)) ? sort : null
   return (
-    <div className="pk-table-scroll">
-      <div
-        role="table"
-        aria-label={label}
-        className="pk-table"
-        data-frozen={frozen ? '' : undefined}
-        style={{gridTemplateColumns: template}}
-      >
-        <div role="row" className="pk-table-row pk-table-head">
-          {columns.map(column => {
-            const direction = sorted?.column === column.id ? sorted.direction : undefined
-            const align = column.align ?? (column.sort === 'number' ? 'end' : 'start')
-            return (
-              <div key={column.id} role="columnheader" className="pk-table-cell pk-table-heading" data-align={align} aria-sort={direction}>
-                {onSortChange && isSortable(column) ? (
-                  <button type="button" className="pk-table-sort" onClick={() => onSortChange(nextSort(sorted, column))}>
+    <div className="pk-table-frame">
+      <div className="pk-table-scroll">
+        <div
+          role="table"
+          aria-label={label}
+          className="pk-table"
+          data-frozen={frozen ? '' : undefined}
+          style={{gridTemplateColumns: template}}
+        >
+          <div role="row" className="pk-table-row pk-table-head">
+            {columns.map(column => {
+              const direction = sorted?.column === column.id ? sorted.direction : undefined
+              const align = column.align ?? (column.sort === 'number' ? 'end' : 'start')
+              return (
+                <div
+                  key={column.id}
+                  role="columnheader"
+                  className="pk-table-cell pk-table-heading"
+                  data-align={align}
+                  aria-sort={direction}
+                >
+                  {onSortChange && isSortable(column) ? (
+                    <button type="button" className="pk-table-sort" onClick={() => onSortChange(nextSort(sorted, column))}>
+                      <span className="pk-table-text">{column.label}</span>
+                      <SortMark direction={direction} />
+                    </button>
+                  ) : (
                     <span className="pk-table-text">{column.label}</span>
-                    <SortMark direction={direction} />
-                  </button>
-                ) : (
-                  <span className="pk-table-text">{column.label}</span>
-                )}
+                  )}
+                </div>
+              )
+            })}
+            {comparing && (
+              <div role="columnheader" className="pk-table-cell pk-table-heading pk-table-status">
+                <span className="pk-table-text">Change</span>
               </div>
-            )
-          })}
-          {comparing && (
-            <div role="columnheader" className="pk-table-cell pk-table-heading pk-table-status">
-              <span className="pk-table-text">Change</span>
-            </div>
+            )}
+          </div>
+          {entries.map(entry =>
+            entry.type === 'fold' ? (
+              <div key={`fold:${entry.key}`} role="row" className="pk-table-row pk-table-fold">
+                <div role="cell" className="pk-table-fold-cell">
+                  <Fold
+                    count={entry.items.length}
+                    noun={noun}
+                    open={entry.open}
+                    onToggle={() => (entry.open ? collapse : expand)(entry.key)}
+                  />
+                </div>
+              </div>
+            ) : (
+              <Row
+                key={entry.item.id}
+                row={entry.item}
+                columns={columns}
+                comparing={comparing}
+                diff={diff}
+                progress={rowProgress ? rowProgress(entry.item) : progress}
+                emphasis={emphasis ? emphasis(entry.item) : 0}
+                selected={selectedId === entry.item.id}
+                onSelect={onSelect}
+                locale={locale}
+              />
+            ),
           )}
         </div>
-        {entries.map(entry =>
-          entry.type === 'fold' ? (
-            <div key={`fold:${entry.key}`} role="row" className="pk-table-row pk-table-fold">
-              <div role="cell" className="pk-table-fold-cell">
-                <Fold
-                  count={entry.items.length}
-                  noun={noun}
-                  open={entry.open}
-                  onToggle={() => (entry.open ? collapse : expand)(entry.key)}
-                />
-              </div>
-            </div>
-          ) : (
-            <Row
-              key={entry.item.id}
-              row={entry.item}
-              columns={columns}
-              comparing={comparing}
-              diff={diff}
-              progress={rowProgress ? rowProgress(entry.item) : progress}
-              emphasis={emphasis ? emphasis(entry.item) : 0}
-              selected={selectedId === entry.item.id}
-              onSelect={onSelect}
-              locale={locale}
-            />
-          ),
-        )}
       </div>
     </div>
   )

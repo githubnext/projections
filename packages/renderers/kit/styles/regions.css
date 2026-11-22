@@ -28,38 +28,79 @@
 /*
  * A run of rows (`pk-region-run`, in a list or table whose rows meet edge to edge): a strong left edge and a right
  * edge, with `data-run-start` and `data-run-end` adding its top and bottom. Its edges lie on the lines around it, not
- * inside them: each is drawn one stroke outside the run, over the neighbouring line (a row's, a header's, its
- * container's edge), so every boundary is one line, in the change's hue. It paints over what comes before it in the
- * document (rows above it, its container's edge); a neighbour after it paints over its edge there, so a renderer
- * gives that neighbour's line the hue, or draws the edge inside the run instead (`--pk-run-end: inset 0 calc(-1 *
- * var(--stroke)) 0 0 var(--pk-region-edge-color)`). Where two runs meet, the later one's top edge is the boundary.
- * The container must leave that stroke visible (a group's edge is; a scrolling container needs room for it). A row
- * with a line of its own on a side gives that line the hue instead (`--pk-region-line`, which fades to `--pk-line`,
- * the divider by default) and sets that side's variable to a transparent shadow.
+ * inside them: each is one stroke outside the run, over the neighbouring line (a row's, a header's, its frame's edge),
+ * so every boundary is one line, in the change's hue. They are one spread shadow (`::before`), so where the run turns a
+ * frame's corner (its radius the frame's inner radius) its edge turns with the frame's, at the frame's radius, and a
+ * clip keeps the sides it draws: `--pk-run-out-top`, `-right`, `-bottom` and `-left`, each a stroke or `0px`. A side
+ * whose line the run draws itself (its own border, in `--pk-region-line`, which fades to `--pk-line`, the divider by
+ * default) or leaves to a neighbour sets its `--pk-run-out-*` to `0px`. The edges paint above the frame's own edge and
+ * every fill (`--pk-layer-change-edge`, see the group in layout.css), in document order among runs, so where two runs
+ * meet the later one's top edge is the boundary; nothing between a run and its frame may form a stacking context.
  */
 .pk .pk-region.pk-region-run[data-change] {
   --pk-region-line: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--pk-line, var(--divider)));
-  --pk-run-left:
-    calc(-1 * var(--stroke)) 0 0 0 var(--pk-region-edge-color),
-    inset calc(var(--stroke-strong) - var(--stroke)) 0 0 0 var(--pk-region-edge-color);
-  --pk-run-right: var(--stroke) 0 0 0 var(--pk-region-edge-color);
-  --pk-run-start: 0 0 0 0 transparent;
-  --pk-run-end: 0 0 0 0 transparent;
-  box-shadow: var(--pk-run-left), var(--pk-run-right), var(--pk-run-start), var(--pk-run-end);
+  --pk-run-out-top: 0px;
+  --pk-run-out-right: var(--stroke);
+  --pk-run-out-bottom: 0px;
+  --pk-run-out-left: var(--stroke);
+  position: relative;
+  box-shadow: none;
 }
-/* The corners too: each end is two copies, shifted out at both corners, so the frame meets the lines it crosses. */
 .pk .pk-region.pk-region-run[data-change][data-run-start] {
-  --pk-run-start:
-    calc(-1 * var(--stroke)) calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
-    var(--stroke) calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
+  --pk-run-out-top: var(--stroke);
 }
 .pk .pk-region.pk-region-run[data-change][data-run-end] {
-  --pk-run-end:
-    calc(-1 * var(--stroke)) var(--stroke) 0 0 var(--pk-region-edge-color), var(--stroke) var(--stroke) 0 0 var(--pk-region-edge-color);
+  --pk-run-out-bottom: var(--stroke);
 }
 /* As specific as a run's end alone, so a renderer's own bottom edge (cells side by side, not stacked) still wins. */
 .pk .pk-region.pk-region-run[data-change][data-run-end]:where(:has(+ .pk-region-run[data-change][data-run-start])) {
-  --pk-run-end: 0 0 0 0 transparent;
+  --pk-run-out-bottom: 0px;
+}
+.pk .pk-region.pk-region-run[data-change]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: var(--pk-layer-change-edge);
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 var(--stroke) var(--pk-region-edge-color),
+    inset calc(var(--stroke-strong) - var(--stroke)) 0 0 0 var(--pk-region-edge-color);
+  clip-path: inset(
+    calc(-1 * var(--pk-run-out-top)) calc(-1 * var(--pk-run-out-right)) calc(-1 * var(--pk-run-out-bottom))
+      calc(-1 * var(--pk-run-out-left))
+  );
+  pointer-events: none;
+}
+/*
+ * While the SDK rings a run's frame, the ring is the frame's edge, and an outline paints under positioned descendants:
+ * the run sits under the frame's paint (`z-index: -1`; the SDK makes a ringed unit a stacking context), its edges with
+ * it. While it is ringed itself, its own edge gives way to its ring.
+ */
+@container pk-frame style(--projections-ringed: 1) {
+  .pk .pk-region.pk-region-run[data-change] {
+    z-index: -1;
+  }
+}
+.pk .pk-region.pk-region-run[data-change]::before {
+  --projections-ringed: inherit;
+  opacity: calc(1 - var(--projections-ringed, 0));
+}
+/*
+ * Chromium places a `clip-path` up to half a pixel from where it paints a box on a half pixel, cutting a stroke in
+ * half or leaking one where a side is off; a mask is painted with the box. WebKit's clip is exact, and it parses
+ * `no-clip` but still clips a mask to the box, so the mask is kept to engines with `overflow-clip-margin`, which it
+ * lacks.
+ */
+@supports (mask-clip: no-clip) and (overflow-clip-margin: 1px) {
+  .pk .pk-region.pk-region-run[data-change]::before {
+    clip-path: none;
+    mask-image: linear-gradient(#000 0 0);
+    mask-repeat: no-repeat;
+    mask-clip: no-clip;
+    mask-origin: border-box;
+    mask-position: calc(-1 * var(--pk-run-out-left)) calc(-1 * var(--pk-run-out-top));
+    mask-size: calc(100% + var(--pk-run-out-left) + var(--pk-run-out-right)) calc(100% + var(--pk-run-out-top) + var(--pk-run-out-bottom));
+  }
 }
 /*
  * A status tab (`StatusTab`) hangs off a pill's bottom edge: its room is reserved under every pill, and a changed pill

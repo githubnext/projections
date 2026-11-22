@@ -22,6 +22,14 @@ test('a closed generic type reads with its arguments, each without its namespace
     ['Workbench.Storage.InventoryStore', 'InventoryStore'],
     ['Workbench.IRepository`1', 'IRepository'],
     ['Workbench.Outer+Inner', 'Outer+Inner'],
+    // A nested type's arguments go to the types that declare them, in order.
+    ['Workbench.Outer`1+Inner[System.String]', 'Outer<String>+Inner'],
+    ['Workbench.Outer`1+Inner`1[System.String,Workbench.Item]', 'Outer<String>+Inner<Item>'],
+    [
+      'Workbench.Outer`1+Inner`2[[System.String, mscorlib],[Workbench.Item, Workbench],[System.Int32, mscorlib]]',
+      'Outer<String>+Inner<Item, Int32>',
+    ],
+    ['Workbench.Outer`1+Inner`1', 'Outer+Inner'],
     ['Workbench.Item[]', 'Item[]'],
   ]
   for (const [name, shown] of cases) assert.equal(shortTypeName(name), shown, name)

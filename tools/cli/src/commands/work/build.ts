@@ -55,8 +55,8 @@ export function snapshot(root: string, unit: Unit): Snapshot {
       const path = join(directory, entry.name)
       if (entry.isDirectory()) visit(path)
       else if (entry.isFile()) {
-        const {atime, mtime} = statSync(path)
-        taken.files.set(path, {hash: createHash('sha256').update(readFileSync(path)).digest('hex'), atime, mtime})
+        const stats = statSync(path)
+        taken.files.set(path, {hash: createHash('sha256').update(readFileSync(path)).digest('hex'), atime: stats.atime, mtime: stats.mtime})
       }
     }
   }

@@ -12,8 +12,8 @@ const text = readFileSync(new URL('../../../runtime-policy/runtime-policy.compar
 const rules = new TextEncoder().encode(text)
 const fixtures = new URL('../../../../extractors/tetragon-policies/tests/fixtures/credentials/', import.meta.url)
 const load = name => JSON.parse(readFileSync(new URL(name, fixtures), 'utf8'))
-const before = load('before.expected.json')
-const after = load('after.expected.json')
+const credentialsBefore = load('before.expected.json')
+const credentialsAfter = load('after.expected.json')
 const empty = {protocolVersion: 0, schema: 'graph/v0', entities: [], relationships: []}
 
 /** Runs the rules in the interpreter's Worker, as the Inspector and other browser hosts do, and has the Engine validate the comparison. */
@@ -41,7 +41,7 @@ const policy = 'policy:tetragon:TracingPolicy:protect-credentials'
 const guard = 'selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission/token-read-by-downloader'
 
 test('interprets the credentials pull request: enforcement first, then scope, then coverage', async () => {
-  const {baseline, comparison} = await run(before, after)
+  const {baseline, comparison} = await run(credentialsBefore, credentialsAfter)
   const {interpretations} = comparison.metadata.runtimePolicy
   assert.deepEqual(interpretations[guard], ['newly-enforced'])
   assert.deepEqual(interpretations[policy], ['scope-broadened'])
@@ -64,7 +64,7 @@ test('interprets the credentials pull request: enforcement first, then scope, th
 })
 
 test('the reverse comparison narrows scope and removes enforcement', async () => {
-  const {comparison} = await run(after, before)
+  const {comparison} = await run(credentialsAfter, credentialsBefore)
   const {interpretations} = comparison.metadata.runtimePolicy
   assert.deepEqual(interpretations[guard], ['enforcement-removed'])
   assert.deepEqual(interpretations[policy], ['scope-narrowed'])
@@ -72,24 +72,24 @@ test('the reverse comparison narrows scope and removes enforcement', async () =>
 })
 
 test('a switch to monitor mode reports the policy mode and the elided enforcement', async () => {
-  const monitored = structuredClone(after)
+  const monitored = structuredClone(credentialsAfter)
   for (const entity of monitored.entities) {
     if (entity.id === policy) entity.data.mode = 'monitor'
     if (entity.id === guard) entity.data.enforcement = 'elided'
   }
-  const {comparison} = await run(after, monitored)
+  const {comparison} = await run(credentialsAfter, monitored)
   const {interpretations} = comparison.metadata.runtimePolicy
   assert.deepEqual(interpretations[policy], ['mode-changed'])
   assert.deepEqual(interpretations[guard], ['enforcement-elided'])
 })
 
 test('identical extractions need no interpretation', async () => {
-  const {comparison} = await run(after, after)
+  const {comparison} = await run(credentialsAfter, credentialsAfter)
   assert.deepEqual(comparison.metadata.runtimePolicy.interpretations, {})
 })
 
 test('options are rejected', async () => {
-  await assert.rejects(run(before, after, {x: 1}), /takes none/)
+  await assert.rejects(run(credentialsBefore, credentialsAfter, {x: 1}), /takes none/)
 })
 
 const requirement = (key, operator, values = []) => ({key, operator, values})

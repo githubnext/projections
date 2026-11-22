@@ -241,8 +241,8 @@ async function openCanvas(page: Page, link = url) {
   await expect
     .poll(
       async () => {
-        const {page, state: shown} = await state()
-        return page?.view?.status === 'ok' && (!shown.mode || page.mode === shown.mode)
+        const {page: viewerPage, state: shown} = await state()
+        return viewerPage?.view?.status === 'ok' && (!shown.mode || viewerPage.mode === shown.mode)
       },
       {timeout: 30_000},
     )
@@ -307,11 +307,11 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
   await expect(chips.nth(1)).toHaveAttribute('title', subject)
   const measured = await page.evaluate(() => {
     const box = (element: Element) => element.getBoundingClientRect()
-    const header = document.querySelector('.pi-viewer-header')!
-    const frame = box(header)
-    const border = parseFloat(getComputedStyle(header).borderBottomWidth)
+    const headerElement = document.querySelector('.pi-viewer-header')!
+    const frame = box(headerElement)
+    const border = parseFloat(getComputedStyle(headerElement).borderBottomWidth)
     // Each text's glyphs (ascent to descent) against the box that clips it: negative when tops or descenders are cut.
-    const texts = [...header.querySelectorAll('.pi-viewer-text')].map(element => {
+    const texts = [...headerElement.querySelectorAll('.pi-viewer-text')].map(element => {
       const range = document.createRange()
       range.selectNodeContents(element)
       const glyphs = range.getBoundingClientRect()
@@ -319,10 +319,10 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
       return {text: element.textContent, above: glyphs.top - clip.top, below: clip.bottom - glyphs.bottom}
     })
     // The title's cap height: its box less the padding that keeps its glyphs (styles.css).
-    const title = header.querySelector('.pi-viewer-title')!
+    const title = headerElement.querySelector('.pi-viewer-title')!
     const style = getComputedStyle(title)
     const cap = {top: box(title).top + parseFloat(style.paddingTop), bottom: box(title).bottom - parseFloat(style.paddingBottom)}
-    const mark = box(header.querySelector('[data-projections-mark]')!)
+    const mark = box(headerElement.querySelector('[data-projections-mark]')!)
     return {
       texts,
       mark: {above: mark.top - frame.top, below: frame.bottom - border - mark.bottom, left: mark.left - frame.left},
@@ -333,24 +333,27 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
         left: box(title).left - frame.left,
       },
       revision: (() => {
-        const pill = header.querySelectorAll('.pi-viewer-revision')[1]!
+        const pill = headerElement.querySelectorAll('.pi-viewer-revision')[1]!
         const text = pill.querySelector('.pi-viewer-text')!
         return {truncated: text.scrollWidth > text.clientWidth, width: box(pill).width}
       })(),
       overflow: document.scrollingElement!.scrollWidth - innerWidth,
-      pills: [...header.querySelectorAll('.pi-viewer-pill')].map(pill => {
-        const style = getComputedStyle(pill)
+      pills: [...headerElement.querySelectorAll('.pi-viewer-pill')].map(pill => {
+        const pillStyle = getComputedStyle(pill)
         const text = pill.querySelector('.pi-viewer-text')!
         const textStyle = getComputedStyle(text)
         // The text's cap: its box less the padding that keeps its glyphs.
-        const cap = {top: box(text).top + parseFloat(textStyle.paddingTop), bottom: box(text).bottom - parseFloat(textStyle.paddingBottom)}
+        const textCap = {
+          top: box(text).top + parseFloat(textStyle.paddingTop),
+          bottom: box(text).bottom - parseFloat(textStyle.paddingBottom),
+        }
         return {
           height: box(pill).height,
-          border: style.borderTopWidth,
-          background: style.backgroundColor,
-          radius: parseFloat(style.borderTopLeftRadius),
-          above: cap.top - box(pill).top,
-          below: box(pill).bottom - cap.bottom,
+          border: pillStyle.borderTopWidth,
+          background: pillStyle.backgroundColor,
+          radius: parseFloat(pillStyle.borderTopLeftRadius),
+          above: textCap.top - box(pill).top,
+          below: box(pill).bottom - textCap.bottom,
         }
       }),
     }
@@ -435,11 +438,11 @@ test('the toolbar and stage lie flat, edge to edge, under the header, and the su
   const edges = () =>
     page.evaluate(() => {
       const y = (element: Element) => [element.getBoundingClientRect().top, element.getBoundingClientRect().bottom]
-      const toolbar = document.querySelector('.ph-toolbar')!
+      const toolbarElement = document.querySelector('.ph-toolbar')!
       return {
         header: y(document.querySelector('.pi-viewer-header')!),
-        toolbar: y(toolbar),
-        rows: [...toolbar.querySelectorAll(':scope > .ph-toolbar-row')].map(y),
+        toolbar: y(toolbarElement),
+        rows: [...toolbarElement.querySelectorAll(':scope > .ph-toolbar-row')].map(y),
         stage: y(document.querySelector('.ph-stage-body')!)[0]!,
         // Playback floats on the stage, in its utility area.
         playback: Boolean(document.querySelector('.ph-utility [role="group"][aria-label="Comparison playback"]')),
@@ -452,8 +455,8 @@ test('the toolbar and stage lie flat, edge to edge, under the header, and the su
       await page.setViewportSize({...canvas, width})
       const at = `${mode} at ${width}px`
       await expect.poll(async () => (await edges()).playback, at).toBe(mode === 'animated')
-      const {header, toolbar: bar, rows, stage: top} = await edges()
-      expect(header, at).toEqual([0, 35])
+      const {header: headerEdges, toolbar: bar, rows, stage: top} = await edges()
+      expect(headerEdges, at).toEqual([0, 35])
       expect(bar[0], at).toBe(35)
       for (const edge of [...bar, ...rows.flat(), top]) {
         expect(Number.isInteger(edge), `${at}: ${JSON.stringify({bar, rows, top})}`).toBe(true)

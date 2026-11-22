@@ -12,7 +12,8 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
     vscode.window.tabGroups.all
       .flatMap(group => group.tabs)
       .find(
-        tab => tab.input instanceof vscode.TabInputCustom && tab.input.viewType === 'projections.projection' && tab.label === 'Packages',
+        open =>
+          open.input instanceof vscode.TabInputCustom && open.input.viewType === 'projections.projection' && open.label === 'Packages',
       ),
   )
   assert.equal(tab.input.uri.scheme, 'projection')
@@ -75,16 +76,16 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
     assert.equal(manifest.icons['projections-mark'].default.fontCharacter, '\\E000')
   }
   {
-    const shown = api.viewing()
-    const checked = shown.rows.filter(row => row.checked)
+    const viewing = api.viewing()
+    const checked = viewing.rows.filter(row => row.checked)
     assert.deepEqual(
       checked.map(row => row.id),
       ['branch'],
     )
     assert.match(checked[0].accessibility, /, selected$/)
-    assert.ok(shown.rows.filter(row => !row.checked).every(row => !/, selected$/.test(row.accessibility ?? '')))
+    assert.ok(viewing.rows.filter(row => !row.checked).every(row => !/, selected$/.test(row.accessibility ?? '')))
     assert.deepEqual(
-      shown.rows
+      viewing.rows
         .filter(
           row =>
             (row.kind === 'choice' && ['now', 'uncommitted', 'branch'].includes(row.id)) || ['pr', 'group', 'compare'].includes(row.kind),
@@ -92,18 +93,18 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
         .map(row => row.label),
       ['Current state', 'Uncommitted changes', 'Branch changes', 'Pull request…', 'Recent changes', 'Compare two revisions…'],
     )
-    const fact = id => shown.rows.find(row => row.id === id)?.description
+    const fact = id => viewing.rows.find(row => row.id === id)?.description
     assert.deepEqual([fact('now'), fact('branch'), fact('compare')], ['', '1 commit', ''])
     assert.match(fact('uncommitted'), /^\d+ files?$/)
     assert.ok(
-      shown.rows.every(row => (row.description ?? '').length <= 20),
-      JSON.stringify(shown.rows.map(row => row.description)),
+      viewing.rows.every(row => (row.description ?? '').length <= 20),
+      JSON.stringify(viewing.rows.map(row => row.description)),
     )
-    assert.match(shown.rows.find(row => row.id === 'branch').tooltip, /What your branch changes/)
+    assert.match(viewing.rows.find(row => row.id === 'branch').tooltip, /What your branch changes/)
     // "Bookmark this" is on the current row.
     assert.match(checked[0].contextValue, /\bbookmarkable\b/)
     assert.equal(await swaps(), 0)
-    assert.ok(!JSON.stringify(shown.rows).match(/\b[Pp]airs?\b/), JSON.stringify(shown.rows))
+    assert.ok(!JSON.stringify(viewing.rows).match(/\b[Pp]airs?\b/), JSON.stringify(viewing.rows))
   }
   // Tabs have no choice control of their own: they follow the side bar's.
   await until(

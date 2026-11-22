@@ -222,8 +222,8 @@ test('a single revision presents the composition with no steps and no emphasis',
 
 test('the scoring pair rewires through an inserted unit with every frame coherent', async ({page}, testInfo) => {
   test.setTimeout(60_000)
-  const {before, after} = loadPair('scoring') as {before: Extraction; after: Extraction}
-  const renderer = await openRenderer(page, {renderer: 'dependency-injection', before, after, progress: 0})
+  const scoring = loadPair('scoring') as {before: Extraction; after: Extraction}
+  const renderer = await openRenderer(page, {renderer: 'dependency-injection', ...scoring, progress: 0})
   const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
   const viewBox = (await measure()).viewBox
   const painted = new Map<number, string>()
@@ -286,9 +286,9 @@ for (const [scenario, units] of [
 ] as const) {
   test(`the real ${scenario} composition scrubs coherently in either color mode`, async ({page}, testInfo) => {
     test.setTimeout(90_000)
-    const {before, after} = loadPair(scenario) as {before: Extraction; after: Extraction}
+    const pair = loadPair(scenario) as {before: Extraction; after: Extraction}
     for (const colorMode of ['light', 'dark'] as const) {
-      const renderer = await openRenderer(page, {renderer: 'dependency-injection', before, after, progress: 0, colorMode})
+      const renderer = await openRenderer(page, {renderer: 'dependency-injection', ...pair, progress: 0, colorMode})
       const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
       const viewBox = (await measure()).viewBox
       const ids = new Set<string>()

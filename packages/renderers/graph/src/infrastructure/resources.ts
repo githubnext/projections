@@ -78,6 +78,9 @@ export function resourceType(entity: Entity): {text: string; identifier: boolean
   return {text: entity.kind === 'data-source' ? `data.${short}` : short, identifier: true}
 }
 
+/** How plans write a value that is known only after apply. */
+const unknownValue = '(known after apply)'
+
 /** A changed resource's attribute changes (`data.values`), verbatim, for its diff card. */
 export function attributeChanges(row: EntityChange<Entity>): FieldLine[] {
   // What forces a replacement comes first, then values the plan knows, then ones known only after apply.
@@ -86,6 +89,3 @@ export function attributeChanges(row: EntityChange<Entity>): FieldLine[] {
   const rank = (line: FieldLine) => (first.has(line.key) ? 0 : line.after === unknownValue ? 2 : 1)
   return fieldLines(row, {object: 'values'}).sort((a, b) => rank(a) - rank(b))
 }
-
-/** How plans write a value that is known only after apply. */
-const unknownValue = '(known after apply)'

@@ -152,9 +152,9 @@ export function GalleryView(props: Props) {
         <div
           className="gl-card-body"
           onPointerEnter={() => setPlaying(row.id)}
-          onPointerLeave={() => setPlaying(playing => (playing === row.id ? null : playing))}
+          onPointerLeave={() => setPlaying(playingId => (playingId === row.id ? null : playingId))}
           onFocus={() => setPlaying(row.id)}
-          onBlur={() => setPlaying(playing => (playing === row.id ? null : playing))}
+          onBlur={() => setPlaying(playingId => (playingId === row.id ? null : playingId))}
         >
           <NestedStage
             key={`${row.id}:${side ?? ''}`}
@@ -181,7 +181,7 @@ export function GalleryView(props: Props) {
   return (
     <ContentView>
       <div className="gallery-view">
-        {shown.map(({document, runs}) => {
+        {shown.map(({document, runs: sectionRuns}) => {
           const entity = document ? (document.after ?? document.before)! : undefined
           const renderer = typeof entity?.data?.renderer === 'string' ? entity.data.renderer : undefined
           return (
@@ -198,9 +198,9 @@ export function GalleryView(props: Props) {
                     ...(diff && comparing && document.status !== 'unchanged' ? {mark: classifyChange(document)} : {}),
                   }
                 : {})}
-              holdsChanges={runs.some(run => run.rows.some(row => nestedComparison(scenarioOf((row.after ?? row.before)!))))}
+              holdsChanges={sectionRuns.some(run => run.rows.some(row => nestedComparison(scenarioOf((row.after ?? row.before)!))))}
             >
-              {runs.map(({group, rows}, index) => (
+              {sectionRuns.map(({group, rows}, index) => (
                 <section key={`${group ?? ''}:${index}`} className="gl-run" aria-label={group ?? entity?.label ?? 'Scenarios'}>
                   {group && <h3 className="gl-run-title">{group}</h3>}
                   <CardGrid label={group ?? entity?.label ?? 'Scenarios'}>{rows.map(card)}</CardGrid>
@@ -260,4 +260,6 @@ function RevisionChoice({
 }
 
 /** Whether a scenario's nested frame draws a comparison, in its own change colors: its card and group stay neutral. */
-const nestedComparison = (scenario: Scenario) => scenario.subject?.mode === 'comparison'
+function nestedComparison(scenario: Scenario) {
+  return scenario.subject?.mode === 'comparison'
+}

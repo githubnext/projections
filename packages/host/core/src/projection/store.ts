@@ -111,11 +111,11 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
       after: position => renderers.current.before?.scroll(position),
     },
     onSelect: {
-      main: (id, path) => shown.view.selectFrom('main', id, path),
-      before: (id, path) => shown.view.selectFrom('before', id, path),
-      after: (id, path) => shown.view.selectFrom('after', id, path),
+      main: (id, path) => shownView().selectFrom('main', id, path),
+      before: (id, path) => shownView().selectFrom('before', id, path),
+      after: (id, path) => shownView().selectFrom('after', id, path),
     },
-    onAnnotation: id => shown.view.activateAnnotation(id),
+    onAnnotation: id => shownView().activateAnnotation(id),
   }
   const derive = createDerive({
     request,
@@ -125,7 +125,7 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
     latest: () => latest,
     batched,
     // Called only by actions, once the controller below exists.
-    playback: () => controller,
+    playback,
     frames: renderers,
     stage,
   })
@@ -134,6 +134,9 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
   state = {...state, playback: {...state.playback, position}}
   /** The read last shown: what actions and playback act on. */
   let shown = derive.read(state, initial)
+  function shownView() {
+    return shown.view
+  }
   const controller = createPlaybackController(
     {position, direction: initial.direction},
     {
@@ -154,6 +157,9 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
     },
     frames,
   )
+  function playback() {
+    return controller
+  }
   controller.actor.subscribe(lifecycle => set(current => (current.playback === lifecycle ? current : {...current, playback: lifecycle})))
 
   const reported: {

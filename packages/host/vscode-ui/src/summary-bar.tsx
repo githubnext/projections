@@ -1,5 +1,5 @@
 import type {CSSProperties} from 'react'
-import {useEffect, useReducer, useRef, useState} from 'react'
+import {useRef, useState} from 'react'
 import {
   figuresSentence,
   iconMaskStyle,

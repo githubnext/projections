@@ -1,6 +1,5 @@
 // `affected`: the changed workspaces and crates, their dependants and what to regenerate.
 import {TOOLS} from '../../lib/gates.ts'
-import type {Unit} from '../../lib/packages.ts'
 import {changeSet} from './change-set.ts'
 
 export function affectedReport(root: string, since?: string) {

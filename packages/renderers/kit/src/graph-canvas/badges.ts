@@ -108,6 +108,9 @@ export function placeBadges(values: readonly CardBadge[], room: number, textScal
   return placed
 }
 
+/** The widest a badge makes a graph's cards: half again the card range's most. */
+const badgeWidthLimit = Math.round(cardWidthRange.max * 1.5)
+
 /**
  * The card width the widest single badge needs, so one badge never ends in an ellipsis: at least the card range's
  * least, and past its most when a badge needs it, up to `badgeWidthLimit`.
@@ -128,9 +131,6 @@ export function badgeCardWidth(
   if (!widest) return cardWidthRange.min
   return Math.min(badgeWidthLimit, Math.ceil((widest + 2 * cardTextMetrics.inset) / 4) * 4)
 }
-
-/** The widest a badge makes a graph's cards: half again the card range's most. */
-const badgeWidthLimit = Math.round(cardWidthRange.max * 1.5)
 
 /** Both revisions' badges in one list: the after revision's, then those only the before revision has. */
 export function unionBadges(before: readonly CardBadge[], after: readonly CardBadge[]): CardBadge[] {

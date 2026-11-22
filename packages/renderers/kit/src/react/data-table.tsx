@@ -1,5 +1,5 @@
 import {useCallback, useMemo} from 'react'
-import type {CSSProperties, ReactNode} from 'react'
+import type {ReactNode} from 'react'
 import type {ControlValue} from '@githubnext/projections-renderer-sdk/protocol'
 import {isSortable, nextSort, sortTableRows} from '../table.js'
 import {tableSortOf, tableSortValue} from '../table-controls.js'

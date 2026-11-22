@@ -87,8 +87,8 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const environment = useMemo(() => {
     const source = renderer.environment ?? init
     if (!source) return undefined
-    const {theme, reducedMotion, locale, pane, sizing} = source
-    return {theme, reducedMotion, locale, ...(pane ? {pane} : {}), ...(sizing ? {sizing} : {})}
+    const {theme, reducedMotion, locale, pane: sourcePane, sizing} = source
+    return {theme, reducedMotion, locale, ...(sourcePane ? {pane: sourcePane} : {}), ...(sizing ? {sizing} : {})}
   }, [renderer.environment, init])
   const sizing = renderer.environment ? renderer.environment.sizing : init?.sizing
   const tokens = (renderer.environment ?? init)?.theme.tokens

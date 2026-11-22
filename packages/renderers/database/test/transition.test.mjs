@@ -20,13 +20,13 @@ async function transitionOf(a, b, options = {available: 1100}, schedule = schedu
  * held), so the reverse comparison mirrors the motion, not the reading.
  */
 const unread = model => compileTimeline(model.steps).map(step => ({...step, travel: 1}))
-const name = id => id.replace(/^table:/, '')
-const table = (frame, label) => {
-  const found = frame.tables.find(candidate => name(candidate.change.id) === label)
+const tableName = id => id.replace(/^table:/, '')
+const tableCard = (frame, label) => {
+  const found = frame.tables.find(candidate => tableName(candidate.change.id) === label)
   assert.ok(found, `missing table ${label}`)
   return found
 }
-const opacityOf = (frame, label) => frame.tables.find(candidate => name(candidate.change.id) === label)?.opacity ?? 0
+const opacityOf = (frame, label) => frame.tables.find(candidate => tableName(candidate.change.id) === label)?.opacity ?? 0
 const overlaps = (a, b) =>
   a.x < b.x + b.width - 1e-6 && b.x < a.x + a.width - 1e-6 && a.y < b.y + b.height - 1e-6 && b.y < a.y + a.height - 1e-6
 const samples = (count = 400) => Array.from({length: count + 1}, (_, index) => index / count)
@@ -45,7 +45,7 @@ const content = frame => ({
 
 test('orders columns primary key, then foreign keys, then by name', async () => {
   const {transition} = await transitionOf(before, after)
-  const invoices = table(transition(1), 'Invoices')
+  const invoices = tableCard(transition(1), 'Invoices')
   const rows = [...invoices.columns].sort((a, b) => a.top - b.top)
   const order = rows.filter(row => row.kind === 'column').map(column => `${column.role ?? '-'}:${column.entity.label}`)
   assert.deepEqual(order.slice(0, 3), ['pk:Id', 'fk:CustomerId', 'fk:OrganizationId'])
@@ -71,18 +71,18 @@ test('places principals left of their dependents', async () => {
   const {transition} = await transitionOf(before, after)
   const end = transition(1)
   assert.equal(end.mode, 'columns')
-  const x = label => table(end, label).box.x
+  const x = label => tableCard(end, label).box.x
   assert.ok(x('Organizations') < x('Customers'))
   assert.equal(x('Customers'), x('Users'))
   assert.ok(x('Customers') < x('Invoices') && x('Invoices') < x('InvoiceLines'))
   const start = transition(0)
-  assert.ok(table(start, 'Customers').box.x < table(start, 'Invoices').box.x)
+  assert.ok(tableCard(start, 'Customers').box.x < tableCard(start, 'Invoices').box.x)
 })
 
 test('connects foreign-key columns to the principal key column', async () => {
   const {transition} = await transitionOf(before, after)
   const frame = transition(1)
-  const keys = frame.links.map(link => `${link.dependentColumn.replace(/^column:/, '')}->${name(link.principal)}`).sort()
+  const keys = frame.links.map(link => `${link.dependentColumn.replace(/^column:/, '')}->${tableName(link.principal)}`).sort()
   assert.deepEqual(keys, [
     'Customers.OrganizationId->Organizations',
     'InvoiceLines.InvoiceId->Invoices',
@@ -104,7 +104,7 @@ test('connects foreign-key columns to the principal key column', async () => {
 test('routes rank-skipping links around cards', async () => {
   const {transition} = await transitionOf(before, after)
   const frame = transition(1)
-  const skip = frame.links.find(link => name(link.dependent) === 'Invoices' && name(link.principal) === 'Organizations')
+  const skip = frame.links.find(link => tableName(link.dependent) === 'Invoices' && tableName(link.principal) === 'Organizations')
   assert.ok(skip.points.length > 2, 'skip link has interior waypoints')
   for (const point of skip.points.slice(1, -1)) {
     for (const card of frame.tables) {
@@ -190,8 +190,8 @@ for (const available of [1100, 980, 480]) {
         )
       } else {
         assert.deepEqual(
-          table(frame, 'Customers').box,
-          table(final, 'Customers').box,
+          tableCard(frame, 'Customers').box,
+          tableCard(final, 'Customers').box,
           `survivors settled before the arrival at ${progress}`,
         )
       }
@@ -211,15 +211,15 @@ for (const available of [1100, 980, 480]) {
       }
       if (previous) {
         for (const card of frame.tables) {
-          const before = previous.tables.find(item => item.change.id === card.change.id)
-          if (!before) continue
-          const jump = Math.hypot(card.box.x - before.box.x, card.box.y - before.box.y)
+          const previousCard = previous.tables.find(item => item.change.id === card.change.id)
+          if (!previousCard) continue
+          const jump = Math.hypot(card.box.x - previousCard.box.x, card.box.y - previousCard.box.y)
           assert.ok(jump < 40, `${card.change.id} jumps ${jump.toFixed(1)}px at ${progress}`)
         }
       }
       previous = frame
     }
-    assert.equal(table(final, 'Organizations').opacity, 1)
+    assert.equal(tableCard(final, 'Organizations').opacity, 1)
   })
 }
 
@@ -265,7 +265,7 @@ test('a column retype switches halfway through its own step', async () => {
   const {transition} = await transitionOf(after, retyped)
   const id = 'column:Invoices.Number'
   const step = transition.timeline.windows.find(entry => entry.step.entities.includes(id)).step
-  const type = progress => table(transition(progress), 'Invoices').columns.find(column => column.change.id === id).entity.data.type
+  const type = progress => tableCard(transition(progress), 'Invoices').columns.find(column => column.change.id === id).entity.data.type
   assert.equal(type(step.time - step.radius), 'character varying(32)')
   assert.equal(type(step.time - 1e-6), 'character varying(32)')
   assert.equal(type(step.time + 1e-6), 'character varying(64)')
@@ -399,7 +399,7 @@ test('Prisma and Django: keys live in their tables, single-column keys are colum
   for (const progress of [0, 1]) {
     const frame = prisma.transition(progress)
     assert.deepEqual(frame.tags, [], `nothing floats free at ${progress}`)
-    const line = table(frame, '/OrderLine')
+    const line = tableCard(frame, '/OrderLine')
     const keys = line.columns.filter(row => row.kind === 'key').map(row => `${row.key.marker} ${row.key.text}`)
     assert.ok(keys.includes('PK orderId, productId'), `the composite primary key is a row of OrderLine: ${keys}`)
     // Its columns are foreign keys too: their markers read FK and stand for the foreign-key constraints.
@@ -408,11 +408,11 @@ test('Prisma and Django: keys live in their tables, single-column keys are colum
       assert.match(column.marker.key, /foreign-key/)
     }
     // Single-column primary keys are their column's PK marker, never a row.
-    for (const card of frame.tables.filter(card => card.entity.kind === 'table')) {
+    for (const card of frame.tables.filter(candidate => candidate.entity.kind === 'table')) {
       assert.ok(!card.columns.some(row => row.kind === 'key' && row.key.text === 'id'), `${card.entity.label} has no id key row`)
     }
   }
-  const statusAt = progress => table(prisma.transition(progress), 'enum:OrderStatus'.replace(/^table:/, ''))
+  const statusAt = progress => tableCard(prisma.transition(progress), 'enum:OrderStatus'.replace(/^table:/, ''))
   assert.deepEqual(
     statusAt(0).columns.map(row => row.entity.label),
     ['PENDING', 'PAID', 'SHIPPED'],
@@ -432,11 +432,11 @@ test('Prisma and Django: keys live in their tables, single-column keys are colum
     'the status column links to its enum',
   )
   // The dropped unique on Customer.phone is a row of Customer that leaves.
-  const customer = table(prisma.transition(0), '/Customer')
+  const customer = tableCard(prisma.transition(0), '/Customer')
   assert.ok(customer.columns.some(row => row.kind === 'key' && row.key.marker === 'UK' && row.key.text === 'phone'))
 
   const django = await transitionOf(await load('django-library-before'), await load('django-library-after'))
-  const loan = table(django.transition(1), 'catalog_loan')
+  const loan = tableCard(django.transition(1), 'catalog_loan')
   const rows = loan.columns.filter(row => row.kind === 'key').map(row => [row.key.marker, row.key.text, row.key.name])
   assert.deepEqual(rows.at(-1), ['IX', 'member_id, due', 'loan_member_due'])
   assert.deepEqual(django.transition(1).tags, [])
@@ -498,7 +498,7 @@ test('a key row is tall enough for its columns and name whole on a narrow card',
       available: 260,
     },
   )
-  const loan = table(transition(1), 'catalog_loan')
+  const loan = tableCard(transition(1), 'catalog_loan')
   const named = loan.columns.find(row => row.kind === 'key' && row.key.name === 'loan_member_due')
   assert.ok(named.height > schemaMetrics.row, 'the row grows to show its name under its columns')
   // Rows stack without overlapping, and the card holds them all.
@@ -577,7 +577,7 @@ test('every link in every frame is drafted from its tables where they are: legal
 
 test("diff mode's union draws every link as a revision does: legal ports, drafted S's on tracks, nothing crossed", async () => {
   const {readFile} = await import('node:fs/promises')
-  const {linkRadius, linkRoute} = await import('../node_modules/.cache/test/link-geometry.js')
+  const {linkRoute} = await import('../node_modules/.cache/test/link-geometry.js')
   const {createDatabaseDiff} = await import('../node_modules/.cache/test/diff.js')
   const {diagonalStraights, largestDeviation, largestKink} = await import('../../kit/test/quality.mjs')
   const load = async name => JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -710,15 +710,15 @@ test('tables that reference each other still take ranks of their own, so no link
 test('where a cycle is broken depends on the graph alone, not on the order its tables and links are listed', async () => {
   const {layerDepths} = await import('../node_modules/.cache/test/schema-model.js')
   // b ⇄ c in one revision, a → b and c → a added in the other: a comparison lists one revision's links first.
-  const before = [
+  const cycleLinks = [
     {from: 'b', to: 'c'},
     {from: 'c', to: 'b'},
   ]
-  const after = [
+  const brokenLinks = [
     {from: 'a', to: 'b'},
     {from: 'c', to: 'a'},
   ]
-  const forward = layerDepths(['b', 'c', 'a'], [...before, ...after])
-  const reverse = layerDepths(['a', 'c', 'b'], [...after, ...before].reverse())
+  const forward = layerDepths(['b', 'c', 'a'], [...cycleLinks, ...brokenLinks])
+  const reverse = layerDepths(['a', 'c', 'b'], [...brokenLinks, ...cycleLinks].reverse())
   assert.deepEqual(new Map([...reverse].sort()), new Map([...forward].sort()))
 })

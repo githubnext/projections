@@ -23,11 +23,12 @@ export function evidence(project, node) {
 /** Follows import and export aliases to the declared symbol. */
 export function resolve({ts}, checker, symbol) {
   const visited = new Set()
-  while (symbol && symbol.flags & ts.SymbolFlags.Alias && !visited.has(symbol)) {
-    visited.add(symbol)
-    symbol = checker.getAliasedSymbol(symbol)
+  let target = symbol
+  while (target && target.flags & ts.SymbolFlags.Alias && !visited.has(target)) {
+    visited.add(target)
+    target = checker.getAliasedSymbol(target)
   }
-  return symbol
+  return target
 }
 
 export function symbolAt(project, checker, node) {

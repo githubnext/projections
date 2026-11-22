@@ -13,7 +13,7 @@ import {post} from './host.js'
 export function replaceSkeleton() {
   const skeleton = document.querySelector<HTMLElement>('[data-skeleton]')
   if (!skeleton) return
-  const settle = () => {
+  const settle = (watcher: MutationObserver) => {
     if (document.querySelector('.phv-toolbar')) skeleton.dataset.toolbar = ''
     if (document.querySelector('[data-summary-bar]')) skeleton.dataset.bar = ''
     // The Inspector's own status (what it's doing, such as extracting, with Cancel) takes over the skeleton's.
@@ -22,13 +22,13 @@ export function replaceSkeleton() {
     const loading = view?.getAttribute('data-renderer-status') === 'loading' || Boolean(document.querySelector('#root .phv-loading'))
     const failed = document.querySelector('.projection-failure, #root [role="alert"]')
     if (failed || (view && !loading)) {
-      observer.disconnect()
+      watcher.disconnect()
       skeleton.remove()
     }
   }
-  const observer = new MutationObserver(settle)
+  const observer = new MutationObserver((_records, self) => settle(self))
   observer.observe(document.body, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-renderer-status']})
-  settle()
+  settle(observer)
 }
 
 /** A diagnostic's location, linking to where it is in its file. */

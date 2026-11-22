@@ -5,7 +5,7 @@ import {runAt} from './runs.js'
 
 /** A route's trunk: every route leaving the same port the same way, turning at the same place. */
 function trunkOf(ctx: RoutingContext, segment: Segment): Segment[] {
-  const signOf = (segment: Segment) => Math.sign(ctx.across(segment.end!) - ctx.across(segment.start))
+  const signOf = (member: Segment) => Math.sign(ctx.across(member.end!) - ctx.across(member.start))
   return ctx
     .all()
     .filter(

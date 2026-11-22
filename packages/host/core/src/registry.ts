@@ -90,7 +90,7 @@ async function json(url: URL, fetcher: typeof fetch, signal?: AbortSignal): Prom
   return response.json()
 }
 
-function entry(manifest: RendererManifest, base: URL, source: RendererEntry['source']): RendererEntry {
+function catalogEntry(manifest: RendererManifest, base: URL, source: RendererEntry['source']): RendererEntry {
   return {
     name: manifest.name,
     title: manifest.title,
@@ -126,13 +126,13 @@ export async function loadRendererCatalog({
         .filter(name => /^[a-z0-9][a-z0-9-]{0,63}$/.test(name))
         .map(async name => parseRendererManifest(await json(new URL(`${name}/renderer.json`, root), fetcher, signal))),
     )
-    return manifests.map(manifest => entry(manifest, root, 'builtin'))
+    return manifests.map(manifest => catalogEntry(manifest, root, 'builtin'))
   }
   const catalog = (await json(new URL('index.json', root), fetcher, signal)) as Partial<RendererCatalogDocument>
   if (catalog.format !== 'projections.renderers' || catalog.version !== 0 || !Array.isArray(catalog.renderers)) {
     throw new Error('Unsupported renderer catalog')
   }
-  return catalog.renderers.map(manifest => entry(parseRendererManifest(manifest), root, 'builtin'))
+  return catalog.renderers.map(manifest => catalogEntry(parseRendererManifest(manifest), root, 'builtin'))
 }
 
 /** Describes a custom renderer bundle served at `url` (its `index.html`). */

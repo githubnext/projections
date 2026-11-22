@@ -13,7 +13,10 @@ function setup({position = 0, playingControlled = false} = {}) {
   const queued = new Map()
   let next = 0
   const frames = {
-    request: callback => (queued.set(++next, callback), next),
+    request: callback => {
+      queued.set(++next, callback)
+      return next
+    },
     cancel: handle => queued.delete(handle),
   }
   const controller = createPlaybackController(
@@ -21,13 +24,22 @@ function setup({position = 0, playingControlled = false} = {}) {
     {
       plan: () => plan,
       reducedMotion: () => view.reducedMotion,
-      requestPlaying: playing => (requests.push({playing}), (view.playing = playing)),
-      requestPosition: to => (requests.push({position: to}), (view.position = to)),
+      requestPlaying: playing => {
+        requests.push({playing})
+        view.playing = playing
+      },
+      requestPosition: to => {
+        requests.push({position: to})
+        view.position = to
+      },
     },
     frames,
   )
   /** Renders: the view's values reach the lifecycle. */
-  const render = (change = {}) => (Object.assign(view, change), controller.show({...view}))
+  const render = (change = {}) => {
+    Object.assign(view, change)
+    return controller.show({...view})
+  }
   /** Runs the frames scheduled now at `time`, then renders. */
   const frame = time => {
     const callbacks = [...queued.values()]

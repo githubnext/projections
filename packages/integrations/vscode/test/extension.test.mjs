@@ -268,7 +268,9 @@ test("a projection tab's page paints its skeleton before any script: toolbar, lo
 test('host requests from the webview are validated', () => {
   assert.equal(relativePath('src/index.ts'), 'src/index.ts')
   assert.equal(relativePath('./a\\b.ts'), 'a/b.ts')
-  for (const path of ['/etc/passwd', '../x', 'a/../../x', 'C:/x', '', 7, 'a\0b']) assert.equal(relativePath(path), undefined, String(path))
+  for (const given of ['/etc/passwd', '../x', 'a/../../x', 'C:/x', '', 7, 'a\0b']) {
+    assert.equal(relativePath(given), undefined, String(given))
+  }
   assert.equal(position(3), 3)
   assert.equal(position(0), undefined)
   assert.equal(position(1.5), undefined)
@@ -321,10 +323,13 @@ test('change subscriptions are answered from notifications, at once when behind,
   let notify
   const requests = []
   const runner = {
-    onNotification: listener => ((notify = listener), () => (notify = undefined)),
-    request: async ({path}) => {
-      requests.push(path)
-      const since = Number(new URL(path, 'http://x').searchParams.get('since'))
+    onNotification: listener => {
+      notify = listener
+      return () => (notify = undefined)
+    },
+    request: async request => {
+      requests.push(request.path)
+      const since = Number(new URL(request.path, 'http://x').searchParams.get('since'))
       return {
         status: 200,
         contentType: 'application/json',
@@ -397,8 +402,8 @@ test('custom renderer files are fetched from the backend for the webview; nothin
     base64: Buffer.from('<p>map</p>').toString('base64'),
   })
   assert.match((await bridge.rendererFile('/custom-renderers/cap/working-tree/x/index.html')).error, /unavailable \(403\).*trust/)
-  for (const path of ['/api/definitions', '/custom-renderers/../api/x', '/custom-renderers/a#b', 'http://x/custom-renderers/a', 7]) {
-    assert.equal((await bridge.rendererFile(path)).error, 'Not a custom renderer path', String(path))
+  for (const given of ['/api/definitions', '/custom-renderers/../api/x', '/custom-renderers/a#b', 'http://x/custom-renderers/a', 7]) {
+    assert.equal((await bridge.rendererFile(given)).error, 'Not a custom renderer path', String(given))
   }
   assert.equal(customRendererPath('/custom-renderers/a/b/index.html'), true)
   assert.equal(runner.seen.length, 2)

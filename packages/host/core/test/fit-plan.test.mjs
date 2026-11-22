@@ -84,7 +84,8 @@ test('a growing label replans: its plan stops fitting and a narrower one is trie
 })
 
 /** Sends events in order to the bar's lifecycle. */
-function run(state, ...events) {
+function run(start, ...events) {
+  let state = start
   for (const event of events) state = fitPlanLifecycle.transition(state, event).state
   return state
 }
@@ -166,19 +167,19 @@ test('needs carried to new plans by a key, and shifted alike when the shown plan
     {id: 'start, two rows', form: 'start'},
     {id: 'merged, two rows', form: 'merged'},
   ]
-  const needs = new Map([
+  const formNeeds = new Map([
     ['centre', 900],
     ['start', 700],
   ])
   // Each new plan takes the need of its form, so returning to the centre still needs the hysteresis.
-  const carried = carryNeeds(from, to, from[1], needs, sign, form)
+  const carried = carryNeeds(from, to, from[1], formNeeds, sign, form)
   assert.deepEqual(Object.fromEntries(carried), {
     'centre, two rows': 900,
     'centre, two rows, overflow': 900,
     'start, two rows': 700,
   })
   // Nothing carries when the shown plan's form is gone.
-  assert.equal(carryNeeds(from, to, from[2], needs, sign, form), undefined)
+  assert.equal(carryNeeds(from, to, from[2], formNeeds, sign, form), undefined)
   // The shown plan measures 40px more: every known need moves with it.
   shiftNeeds(carried, 'start, two rows', 740)
   assert.deepEqual(Object.fromEntries(carried), {

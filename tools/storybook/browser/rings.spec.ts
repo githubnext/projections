@@ -45,8 +45,8 @@ async function rendererFrame(page: Page): Promise<Frame> {
 
 /** The selected card's ring, measured in the frame: the card's edge geometry and whether its edge shape carries the ring. */
 async function ringOnCard(frame: Frame, id: string) {
-  return frame.evaluate(id => {
-    const card = document.querySelector(`.graph-node[data-entity-id="${CSS.escape(id)}"]`)!
+  return frame.evaluate(cardId => {
+    const card = document.querySelector(`.graph-node[data-entity-id="${CSS.escape(cardId)}"]`)!
     const surface = card.querySelector<SVGGraphicsElement>('.node-surface')!
     const edges = [...card.querySelectorAll<SVGGraphicsElement>('[data-projections-edge]')]
     const box = surface.getBoundingClientRect()
@@ -64,7 +64,7 @@ async function ringStarts(page: Page, frame: Frame, box: {left: number; top: num
   const offset = (await page.locator('iframe.ph-frame').first().boundingBox())!
   const shot = await page.screenshot({scale: 'device'})
   return page.evaluate(
-    async ([url, box, offset, stroke]) => {
+    async ([url, cardBox, frameOffset, ringStroke]) => {
       const image = new Image()
       image.src = url
       await image.decode()
@@ -74,25 +74,28 @@ async function ringStarts(page: Page, frame: Frame, box: {left: number; top: num
       const context = canvas.getContext('2d', {willReadFrequently: true})!
       context.drawImage(image, 0, 0)
       const scale = canvas.width / innerWidth
-      const [sr = 0, sg = 0, sb = 0] = (stroke.match(/[\d.]+/g) ?? []).map(Number)
+      const [sr = 0, sg = 0, sb = 0] = (ringStroke.match(/[\d.]+/g) ?? []).map(Number)
       // The ring's own color, give or take antialiasing against what is under its edge.
       const blue = (x: number, y: number) => {
         const [r, g, b] = context.getImageData(Math.round(x * scale), Math.round(y * scale), 1, 1).data
         return Math.abs(r! - sr) + Math.abs(g! - sg) + Math.abs(b! - sb) < 90
       }
-      const mid = {x: (box.left + box.right) / 2 + offset.x, y: (box.top + box.bottom) / 2 + offset.y}
+      const mid = {x: (cardBox.left + cardBox.right) / 2 + frameOffset.x, y: (cardBox.top + cardBox.bottom) / 2 + frameOffset.y}
       const along = (x0: number, y0: number, dx: number, dy: number) => {
         for (let t = 0; t <= 16; t += 0.25) if (blue(x0 + dx * t, y0 + dy * t)) return t - 8
         return null
       }
       // Only sides the frame shows (the stage may crop the card at its edge).
       const shown = (x: number, y: number) =>
-        x >= offset.x + 2 && x <= offset.x + offset.width - 2 && y >= offset.y + 2 && y <= offset.y + offset.height - 2
+        x >= frameOffset.x + 2 &&
+        x <= frameOffset.x + frameOffset.width - 2 &&
+        y >= frameOffset.y + 2 &&
+        y <= frameOffset.y + frameOffset.height - 2
       const sides: [string, number, number, number, number][] = [
-        ['left', box.left + offset.x - 8, mid.y, 1, 0],
-        ['right', box.right + offset.x + 8, mid.y, -1, 0],
-        ['top', mid.x, box.top + offset.y - 8, 0, 1],
-        ['bottom', mid.x, box.bottom + offset.y + 8, 0, -1],
+        ['left', cardBox.left + frameOffset.x - 8, mid.y, 1, 0],
+        ['right', cardBox.right + frameOffset.x + 8, mid.y, -1, 0],
+        ['top', mid.x, cardBox.top + frameOffset.y - 8, 0, 1],
+        ['bottom', mid.x, cardBox.bottom + frameOffset.y + 8, 0, -1],
       ]
       return Object.fromEntries(
         sides

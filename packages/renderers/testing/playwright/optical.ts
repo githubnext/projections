@@ -17,8 +17,8 @@ export interface OpticalInsets {
 }
 
 /** Paint properties hidden on the surface, for SVG shapes and HTML boxes alike; the text's own color stays. */
-const surfacePaint = ['fill', 'stroke', 'background', 'border-color', 'box-shadow', 'outline-color'] as const
-const hiddenPaint: Record<(typeof surfacePaint)[number], string> = {
+type SurfacePaint = 'fill' | 'stroke' | 'background' | 'border-color' | 'box-shadow' | 'outline-color'
+const hiddenPaint: Record<SurfacePaint, string> = {
   fill: 'transparent',
   stroke: 'transparent',
   background: 'transparent',
@@ -34,17 +34,17 @@ const hiddenPaint: Record<(typeof surfacePaint)[number], string> = {
  */
 async function restyle(locator: Locator, slot: string, properties: Record<string, string> | null): Promise<void> {
   await locator.evaluateAll(
-    (elements, [slot, properties]) => {
+    (elements, [savedAs, styles]) => {
       for (const element of elements as (HTMLElement | SVGElement)[]) {
-        if (properties) {
+        if (styles) {
           // A JSON string, or `null` for no style attribute at all.
-          element.dataset[slot] = JSON.stringify(element.getAttribute('style'))
-          for (const [name, value] of Object.entries(properties)) element.style.setProperty(name, value, 'important')
+          element.dataset[savedAs] = JSON.stringify(element.getAttribute('style'))
+          for (const [name, value] of Object.entries(styles)) element.style.setProperty(name, value, 'important')
         } else {
-          const saved = JSON.parse(element.dataset[slot] ?? 'null') as string | null
+          const saved = JSON.parse(element.dataset[savedAs] ?? 'null') as string | null
           if (saved === null) element.removeAttribute('style')
           else element.setAttribute('style', saved)
-          delete element.dataset[slot]
+          delete element.dataset[savedAs]
         }
       }
     },

@@ -127,7 +127,7 @@ test('a leaving card fades evenly through its window, and its relationships neve
   assert.ok(Math.abs(opacity(forward.transition, (start + end) / 2) - 0.5) < 0.15)
   for (const t of samples) {
     const card = opacity(forward.transition, t)
-    for (const edge of forward.transition(t).edges.filter(edge => edge.fromId === id || edge.toId === id)) {
+    for (const edge of forward.transition(t).edges.filter(candidate => candidate.fromId === id || candidate.toId === id)) {
       assert.ok(edge.opacity <= card + 1e-9, `${edge.key} outlasts its card at ${t}`)
     }
   }

@@ -32,7 +32,14 @@ import {markStatusBar, viewerTheme} from './theme.js'
 const sleep = (ms: number, signal: AbortSignal) =>
   new Promise<void>(resolve => {
     const timer = setTimeout(resolve, ms)
-    signal.addEventListener('abort', () => (clearTimeout(timer), resolve()), {once: true})
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer)
+        resolve()
+      },
+      {once: true},
+    )
   })
 
 /** The transport to the viewer's server: plain `fetch` under its base. */
@@ -98,6 +105,8 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
   const abort = new AbortController()
   let mounted: MountedInspector | undefined
   const viewer: ViewerPage = {id: page, state: undefined, handle: null, shown: undefined, applied: unapplied(-1)}
+  // Before the agent shows anything, the page is only the status line.
+  const waiting = mountWaiting(element, store, host)
 
   // The connection to the server (lifecycle.ts): the long poll, stopping and resuming, a replacing server, and the
   // reports, one at a time.
@@ -242,8 +251,6 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
     })
   }
 
-  // Before the agent shows anything, the page is only the status line.
-  const waiting = mountWaiting(element, store, host)
   const timer = setInterval(() => {
     if (!mounted) return
     disable()

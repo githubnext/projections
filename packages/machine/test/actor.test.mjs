@@ -257,14 +257,13 @@ test("a transition's effects run after the activities it ends stop, and before t
 
 test('an effect that stops the actor leaves the new state’s activities to the next start', () => {
   const started = []
-  let actor
   const phases = defineMachine()({
     states: {
       idle: {on: {go: () => emit({kind: 'busy'}, {type: 'halt'})}},
       busy: {on: {go: ignore}, activities: () => [{type: 'work', key: 'work'}]},
     },
   })
-  actor = createActor(phases, {
+  const actor = createActor(phases, {
     state: {kind: 'idle'},
     effects: {halt: () => actor.stop()},
     activities: {work: () => void started.push('work')},

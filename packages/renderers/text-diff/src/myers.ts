@@ -13,7 +13,7 @@ export function myers(a: Int32Array, b: Int32Array, maxDistance: number): DiffOp
   const v = new Int32Array(2 * limit + 3)
   const trace: Int32Array[] = []
   let distance = -1
-  search: for (let d = 0; d <= limit; d++) {
+  for (let d = 0; d <= limit && distance < 0; d++) {
     trace.push(v.slice(offset - d, offset + d + 1))
     for (let k = -d; k <= d; k += 2) {
       let x = k === -d || (k !== d && v[offset + k - 1]! < v[offset + k + 1]!) ? v[offset + k + 1]! : v[offset + k - 1]! + 1
@@ -25,7 +25,7 @@ export function myers(a: Int32Array, b: Int32Array, maxDistance: number): DiffOp
       v[offset + k] = x
       if (x >= n && y >= m) {
         distance = d
-        break search
+        break
       }
     }
   }

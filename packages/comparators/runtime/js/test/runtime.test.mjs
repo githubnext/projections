@@ -92,7 +92,7 @@ test('rejects missing and mistyped exports', async () => {
     {type: 1, body: op.i64Const(0)},
     {type: 2, body: op.i32Const(0)},
   ]
-  const build = exports => wasm({types, functions, memories: [{min: 1}], exports})
+  const build = moduleExports => wasm({types, functions, memories: [{min: 1}], exports: moduleExports})
   await rejects(
     runComparator(build(exports.slice(0, 2)), input),
     'missing-export',

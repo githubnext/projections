@@ -153,7 +153,7 @@ function fakeClock() {
         timers.push(timer)
         return timer
       },
-      clear: timer => (timers = timers.filter(item => item !== timer)),
+      clear: timer => (timers = timers.filter(pending => pending !== timer)),
     },
     /** Moves the clock to `to`, firing the timers due on the way, in order. */
     advance(to) {

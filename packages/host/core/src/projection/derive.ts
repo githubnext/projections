@@ -355,7 +355,8 @@ export function createDerive(primitives: ProjectionPrimitives) {
       },
       resolveTarget: resolve,
       activateAnnotation,
-      anchorFor: (rowId = selectedId, side) => anchorOf(interaction.anchors, primitives.frames, selection, rowId, side),
+      anchorFor: (rowId, side) =>
+        anchorOf(interaction.anchors, primitives.frames, selection, rowId === undefined ? selectedId : rowId, side),
       hover: id => interact({type: 'hovered', rowId: id}),
       setRenderer: name => {
         if (renderers.some(entry => entry.name === name)) request('rendererName', name)
@@ -363,11 +364,11 @@ export function createDerive(primitives: ProjectionPrimitives) {
       setControl: (id, next) => {
         const control = controls.find(item => item.id === id)
         if (!control || !isControlValue(control, next)) return
-        const options = latest()
-        if (options.controlValues === undefined) {
+        const current = latest()
+        if (current.controlValues === undefined) {
           primitives.setSettings(previous => ({...previous, controlValues: {...previous.controlValues, [id]: next}}))
         }
-        options.onControlChange?.(id, next)
+        current.onControlChange?.(id, next)
       },
       runAction: id => {
         if (!controls.some(control => control.id === id && control.type === 'action')) return

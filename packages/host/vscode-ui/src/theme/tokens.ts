@@ -20,6 +20,11 @@ import {fallbackFonts, vscodeMetrics, vscodeTokenMap} from './variables.js'
 /** The longest token value the renderer protocol accepts. */
 const maxValueLength = 512
 
+const black: Rgba = {r: 0, g: 0, b: 0, a: 1}
+const white: Rgba = {r: 255, g: 255, b: 255, a: 1}
+const opaque = (color: Rgba): Rgba => ({...color, a: 1})
+const over = (color: Rgba | undefined, base: Rgba) => (color ? composite(color, base) : undefined)
+
 /**
  * Resolves every renderer theme token from VS Code's `--vscode-*` variables, so renderer frames, which can't read the
  * webview's variables, follow the person's color theme: its editor surfaces, text, focus border, fonts, its git
@@ -43,17 +48,18 @@ export function vscodeThemeTokens(variables: VscodeVariables, kind: VscodeThemeK
 
   const bg = opaque(color('color-bg') ?? fallback('color-bg'))
   const extreme = colorMode === 'dark' ? white : black
-  const base = ensureContrast(color('color-fg') ?? fallback('color-fg'), [bg], hc ? 7 : 4.5, extreme, bg)
+  const foreground = ensureContrast(color('color-fg') ?? fallback('color-fg'), [bg], hc ? 7 : 4.5, extreme, bg)
   // Each step is a visible change in lightness toward the text, unless the theme draws it (high contrast: edges, not fills).
-  const step = (surface: Rgba, from: Rgba, amount: number) => (contrast(surface, from) >= 1.06 || hc ? surface : mix(base, from, amount))
+  const step = (surface: Rgba, from: Rgba, amount: number) =>
+    contrast(surface, from) >= 1.06 || hc ? surface : mix(foreground, from, amount)
   const canvas = bg
   const raised = step(opaque(over(color('color-surface-raised'), bg) ?? bg), canvas, 0.04)
   const header = step(opaque(over(color('color-surface-header'), raised) ?? raised), raised, 0.06)
   const insetBase = opaque(over(color('color-surface-inset'), bg) ?? bg)
-  const inset = contrast(insetBase, canvas) >= 1.06 || hc ? insetBase : mix(colorMode === 'dark' ? black : base, canvas, 0.04)
+  const inset = contrast(insetBase, canvas) >= 1.06 || hc ? insetBase : mix(colorMode === 'dark' ? black : foreground, canvas, 0.04)
   const surfaces = [canvas, raised, header, inset]
   // Text reads on every surface: a dim theme foreground (Solarized's) is lifted toward white (or black) just enough.
-  const fg = ensureContrast(base, surfaces, hc ? 7 : 4.5, extreme, bg)
+  const fg = ensureContrast(foreground, surfaces, hc ? 7 : 4.5, extreme, bg)
   const text = (value: Rgba | undefined, ratio: number, against: readonly Rgba[] = [bg, raised], toward: Rgba = fg) =>
     ensureContrast(value ?? fg, against, ratio, toward, bg)
   const edge = (value: Rgba | undefined, against: readonly Rgba[] = surfaces) => ensureContrast(value ?? fg, against, 3, fg, bg)
@@ -128,8 +134,3 @@ export function vscodeThemeTokens(variables: VscodeVariables, kind: VscodeThemeK
   tokens['shadow-lg'] = `0 0 12px 4px ${drop}`
   return tokens
 }
-
-const black: Rgba = {r: 0, g: 0, b: 0, a: 1}
-const white: Rgba = {r: 255, g: 255, b: 255, a: 1}
-const opaque = (color: Rgba): Rgba => ({...color, a: 1})
-const over = (color: Rgba | undefined, base: Rgba) => (color ? composite(color, base) : undefined)

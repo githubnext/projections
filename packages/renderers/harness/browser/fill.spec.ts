@@ -31,12 +31,12 @@ for (const {key, content, stage: stageSelector, fit} of cases) {
     const stage = await openStage(page, inspector, {scenario: key, progress: 0, height})
     const measure = () =>
       stage.frame.locator('.pk').evaluate(
-        (root, [contentSelector, stageSelector]) => {
+        (root, [contentSelector, areaSelector]) => {
           const box = (element: Element | null) => {
             const rect = element!.getBoundingClientRect()
             return {left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height}
           }
-          const area = root.querySelector(stageSelector!)!
+          const area = root.querySelector(areaSelector!)!
           const footer = root.querySelector('.graph-footer, .di-legend')
           const scale = Number(root.querySelector(contentSelector!)!.getAttribute('data-scale') ?? NaN)
           // The smallest drawn text in the scaled content, SVG or HTML: its font size times the scale it is drawn at
@@ -46,22 +46,22 @@ for (const {key, content, stage: stageSelector, fit} of cases) {
           for (let node = walker.nextNode(); node; node = walker.nextNode()) {
             const element = node.parentElement
             if (!element || !node.textContent?.trim() || !element.getClientRects().length) continue
-            let scale = 1
+            let textScale = 1
             if (element instanceof SVGTextContentElement) {
               const matrix = element.getScreenCTM()
               if (!matrix) continue
-              scale = Math.hypot(matrix.a, matrix.b)
+              textScale = Math.hypot(matrix.a, matrix.b)
             } else if (element instanceof HTMLElement && !element.closest('svg')) {
               if (element.offsetWidth <= 1 || element.offsetHeight <= 1) continue
               for (let above: Element | null = element; above; above = above.parentElement) {
                 const transform = getComputedStyle(above).transform
                 if (transform && transform !== 'none') {
                   const matrix = new DOMMatrix(transform)
-                  scale *= Math.hypot(matrix.a, matrix.b)
+                  textScale *= Math.hypot(matrix.a, matrix.b)
                 }
               }
             } else continue
-            smallestText = Math.min(smallestText, parseFloat(getComputedStyle(element).fontSize) * scale)
+            smallestText = Math.min(smallestText, parseFloat(getComputedStyle(element).fontSize) * textScale)
           }
           return {
             smallestText,

@@ -137,6 +137,6 @@ export const rowForm = (layout: ToolbarLayout) => `${layout.cluster}|${layout.pi
 export function locateStep(steps: readonly ToolbarLayout[], layout: ToolbarLayout): number {
   const same = steps.indexOf(layout)
   if (same >= 0) return same
-  const form = steps.findIndex(step => rowForm(step) === rowForm(layout))
+  const form = steps.findIndex(candidate => rowForm(candidate) === rowForm(layout))
   return form < 0 ? 0 : form
 }

@@ -345,13 +345,13 @@ test('arrowheads: the shaft runs straight along the head axis into the middle of
 })
 
 test('arrowheads stay attached through every frame of every graph scenario, in both directions', async () => {
-  const scenarios = [
+  const cases = [
     ['terraform', infrastructure],
     ['azure', infrastructure],
     ['platform', {compound: true}],
     ['service-platform', {}],
   ]
-  for (const [name, options] of scenarios) {
+  for (const [name, options] of cases) {
     const [before, after] = await Promise.all([fixture(`${name}-before`), fixture(`${name}-after`)])
     for (const [from, to] of [
       [before, after],
@@ -366,7 +366,9 @@ test('arrowheads stay attached through every frame of every graph scenario, in b
       for (let index = 0; index <= 200; index++) {
         const frame = transition(index / 200)
         const nodes = new Map(frame.nodes.map(node => [node.id, node]))
-        for (const edge of frame.edges.filter(edge => !edge.containment && nodes.has(edge.fromId) && nodes.has(edge.toId))) {
+        for (const edge of frame.edges.filter(
+          candidate => !candidate.containment && nodes.has(candidate.fromId) && nodes.has(candidate.toId),
+        )) {
           const target = nodes.get(edge.toId)
           if (target.group || nodes.get(edge.fromId).group) continue
           const drawn = drawnEdge(edge, nodes.get(edge.fromId), target)
@@ -396,13 +398,13 @@ test('arrowheads stay attached through every frame of every graph scenario, in b
 })
 
 test('scrubbing never slants a straight run: a route whose morph would is redrawn instead, in both directions', async () => {
-  const scenarios = [
+  const cases = [
     ['terraform', infrastructure],
     ['azure', infrastructure],
     ['platform', {compound: true}],
     ['service-platform', {}],
   ]
-  for (const [name, options] of scenarios) {
+  for (const [name, options] of cases) {
     const [before, after] = await Promise.all([fixture(`${name}-before`), fixture(`${name}-after`)])
     for (const [from, to] of [
       [before, after],

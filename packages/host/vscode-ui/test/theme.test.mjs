@@ -65,7 +65,7 @@ for (const fixture of fixtures) {
       if (!name.startsWith('icon-')) assert.ok(value.length <= 512, `${name} is short enough`)
       assert.ok(!value.includes('var('), `${name} is resolved`)
     }
-    for (const name of themeTokenNames.filter(name => name.startsWith('color-'))) color(tokens, name)
+    for (const name of themeTokenNames.filter(candidate => candidate.startsWith('color-'))) color(tokens, name)
   })
 
   test(`${fixture.name}: the theme's own colors and fonts drive the tokens where they have the contrast`, () => {

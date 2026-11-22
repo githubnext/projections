@@ -11,7 +11,6 @@ import type {FrameColumn, FrameTable, FrameTag, SchemaFrame} from './frame.js'
 import {baseType} from './types.js'
 import {analyse} from './diff-states.js'
 import type {Analysis} from './diff-states.js'
-import type {ChangeLine} from './change-lines.js'
 import {diffLinks} from './diff-links.js'
 
 /**

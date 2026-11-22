@@ -100,7 +100,7 @@ test('outside a frame, an icon masks as icons.css draws it: a badge is its disc 
     assert.equal(style.maskComposite, 'exclude', name)
     assert.equal(style.WebkitMaskComposite, 'xor', name)
   }
-  for (const name of [...iconNames.filter(name => !badgeIconNames.includes(name)), 'lock']) {
+  for (const name of [...iconNames.filter(candidate => !badgeIconNames.includes(candidate)), 'lock']) {
     const style = iconMaskStyle(name)
     assert.equal(style.maskImage, `var(--projections-icon-${name}, ${empty})`, name)
     assert.equal(style.maskComposite, undefined, name)

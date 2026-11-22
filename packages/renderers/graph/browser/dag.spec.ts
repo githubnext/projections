@@ -44,9 +44,9 @@ test("a relationship's junction dot takes its line's color while the relationshi
   })
   expect(id, 'a relationship passes the junction').not.toBe('')
   const colors = () =>
-    stage.frame.locator('svg.graph').evaluate((svg, id) => {
-      const line = svg.querySelector(`.graph-link[data-entity-id="${CSS.escape(id)}"] .graph-edge`)!
-      const ring = svg.querySelector(`.graph-link-head[data-head-of="${CSS.escape(id)}"] .graph-junction-ring`)
+    stage.frame.locator('svg.graph').evaluate((svg, linkId) => {
+      const line = svg.querySelector(`.graph-link[data-entity-id="${CSS.escape(linkId)}"] .graph-edge`)!
+      const ring = svg.querySelector(`.graph-link-head[data-head-of="${CSS.escape(linkId)}"] .graph-junction-ring`)
       return {line: getComputedStyle(line).stroke, dot: ring ? getComputedStyle(ring).fill : 'none'}
     }, id)
   const resting = await colors()

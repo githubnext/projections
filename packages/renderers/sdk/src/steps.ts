@@ -73,7 +73,7 @@ export function presentOrder(rows: {entities: readonly Row[]; relationships: rea
       if (row.after) byAfter.set(row.after.id, row.id)
       if (row.before) byBefore.set(row.before.id, row.id)
     }
-    for (const change of comparison.changes.filter(change => change.collection === collection)) {
+    for (const change of comparison.changes.filter(candidate => candidate.collection === collection)) {
       const ids = new Set<string>([change.id])
       for (const id of change.after.slice(1)) {
         const row = byAfter.get(id)

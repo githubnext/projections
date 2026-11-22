@@ -178,9 +178,9 @@ type FilterActions = Pick<
  */
 export function filterActions({variedOnly, regeneratedOnly}: FilterState, value: ValueOf, request: RequestChange): FilterActions {
   // Each value is requested only when it changes: the noise first, as it wins over the changes.
-  const set = (changes: boolean, varied: boolean, regenerated: boolean) => {
+  const set = (changes: boolean, varied: boolean, regeneratedValues: boolean) => {
     if (variedOnly !== varied) request('variedOnly', varied)
-    if (regeneratedOnly !== regenerated) request('regeneratedOnly', regenerated)
+    if (regeneratedOnly !== regeneratedValues) request('regeneratedOnly', regeneratedValues)
     if (value('changesOnly') !== changes) request('changesOnly', changes)
   }
   return {

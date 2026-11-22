@@ -28,8 +28,8 @@ export async function launch({
   })
   const user = await mkdtemp(join(tmpdir(), 'projections-vscode-user-'))
   await mkdir(join(user, 'User'), {recursive: true})
-  const settings = theme => ({
-    'workbench.colorTheme': theme,
+  const settings = colorTheme => ({
+    'workbench.colorTheme': colorTheme,
     'workbench.startupEditor': 'none',
     'workbench.tips.enabled': false,
     'window.restoreWindows': 'none',

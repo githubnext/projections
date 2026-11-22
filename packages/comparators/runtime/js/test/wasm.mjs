@@ -4,22 +4,23 @@ const encoder = new TextEncoder()
 
 export function unsigned(value) {
   const out = []
+  let rest = value
   do {
-    let byte = value & 0x7f
-    value = Math.floor(value / 128)
-    if (value) byte |= 0x80
+    let byte = rest & 0x7f
+    rest = Math.floor(rest / 128)
+    if (rest) byte |= 0x80
     out.push(byte)
-  } while (value)
+  } while (rest)
   return out
 }
 
 export function signed(value) {
-  value = BigInt(value)
+  let rest = BigInt(value)
   const out = []
   while (true) {
-    const byte = Number(value & 0x7fn)
-    value >>= 7n
-    if ((value === 0n && (byte & 0x40) === 0) || (value === -1n && (byte & 0x40) !== 0)) {
+    const byte = Number(rest & 0x7fn)
+    rest >>= 7n
+    if ((rest === 0n && (byte & 0x40) === 0) || (rest === -1n && (byte & 0x40) !== 0)) {
       out.push(byte)
       return out
     }

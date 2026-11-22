@@ -63,7 +63,7 @@ export function ArchitectureRenderer(props: RendererProps) {
   // A component selected elsewhere (the host's table, the other pane) opens the boundary that hides it.
   // Activating a card, or opening the card that hides a component, keeps that card's place on screen.
   const activate = (boundaries: readonly string[]) => {
-    const [id, card] = [...view.cards].find(([, card]) => !card.open && boundaries.includes(card.boundary)) ?? []
+    const [id, card] = [...view.cards].find(([, candidate]) => !candidate.open && boundaries.includes(candidate.boundary)) ?? []
     if (id && card) setAnchor({from: id, to: replacement(card)})
     setExpanded(new Set([...expanded, ...boundaries]))
   }

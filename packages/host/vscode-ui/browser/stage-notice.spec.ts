@@ -64,7 +64,8 @@ const pillColors = (page: Page) =>
   pill(page).evaluate(element => {
     const style = getComputedStyle(element)
     const canvas = document.createElement('canvas')
-    canvas.width = canvas.height = 1
+    canvas.width = 1
+    canvas.height = 1
     const context = canvas.getContext('2d', {willReadFrequently: true})!
     const paint = (...layers: string[]) => {
       context.clearRect(0, 0, 1, 1)
@@ -217,8 +218,8 @@ for (const mode of ['side-by-side', 'swipe'] as const) {
       if (mode === 'side-by-side' && width < 640) await expect(panes).toHaveAttribute('data-stacked')
       const bands = await page.locator('[data-pane-band]').evaluateAll(elements =>
         elements.map(element => {
-          const {left, top, right, bottom, width, height} = element.getBoundingClientRect()
-          return {left, top, right, bottom, width, height}
+          const {left, top, right, bottom, width: bandWidth, height} = element.getBoundingClientRect()
+          return {left, top, right, bottom, width: bandWidth, height}
         }),
       )
       expect(bands.length).toBe(2)

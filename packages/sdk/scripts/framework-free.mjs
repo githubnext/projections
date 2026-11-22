@@ -106,8 +106,8 @@ export default defineConfig(rendererConfig({entry: 'src/main.ts', name: 'plain',
   }
   const page = readFileSync(join(consumer, 'dist/index.html'), 'utf8')
   const notices = readFileSync(join(consumer, 'dist/THIRD_PARTY_NOTICES.txt'), 'utf8')
-  for (const name of ['react', 'react-dom', 'scheduler']) {
-    if (notices.includes(`===== ${name} `)) fail(`A renderer without React attributes ${name} in its notices`)
+  for (const framework of ['react', 'react-dom', 'scheduler']) {
+    if (notices.includes(`===== ${framework} `)) fail(`A renderer without React attributes ${framework} in its notices`)
   }
   if (/react\.(production|development)|__SECRET_INTERNALS|ReactCurrentDispatcher|react-dom/.test(page)) {
     fail('A renderer without React bundles React')

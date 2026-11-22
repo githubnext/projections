@@ -78,7 +78,7 @@ export function VscodeComparisonExplorer(props: VscodeComparisonExplorerProps) {
   const pair = useComparisonPair(props)
   // The view remounts while a new pair is computed, so the session above it keeps the settings across pairs.
   const session = useComparisonSession({...props, presentation: pair.presentation})
-  const {extractions, before, after, outcome, subject, document, resolution} = pair
+  const {after, outcome, subject, document, resolution} = pair
   if (!after || !document) {
     return (
       <div className="phv-explorer">

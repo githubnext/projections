@@ -305,9 +305,9 @@ for (const [mode, width] of [
 const compatibilityRules = new URL('../../../comparators/api-compatibility/api-compatibility.comparator.yaml', import.meta.url)
 
 test('a classified comparison states compatibility as text, lists breaking changes first and filters to them', async ({page}) => {
-  const [before, after] = [fixture('dotnet-before'), fixture('dotnet-after')]
-  const comparison = await compareWithComparator(before, after, compatibilityRules)
-  const renderer = await openRenderer(page, {renderer: 'api', before, after, comparison, comparisonMode: 'diff'})
+  const [dotnetBefore, dotnetAfter] = [fixture('dotnet-before'), fixture('dotnet-after')]
+  const comparison = await compareWithComparator(dotnetBefore, dotnetAfter, compatibilityRules)
+  const renderer = await openRenderer(page, {renderer: 'api', before: dotnetBefore, after: dotnetAfter, comparison, comparisonMode: 'diff'})
   const view = renderer.frame.locator('.api-view')
   // The levels are the host's summary bar's facts, each filtering to its changes, with the rules that classified them.
   await expect(view.locator('.api-compatibility-counts, .pk-diff-summary')).toHaveCount(0)
@@ -325,7 +325,7 @@ test('a classified comparison states compatibility as text, lists breaking chang
   const levels = () =>
     view
       .locator('[data-entity-id]')
-      .evaluateAll(rows => rows.map(row => row.querySelector('.api-compatibility')?.getAttribute('data-compatibility') ?? 'none'))
+      .evaluateAll(elements => elements.map(row => row.querySelector('.api-compatibility')?.getAttribute('data-compatibility') ?? 'none'))
   const listed = await levels()
   expect(listed.slice(0, 8)).toEqual(Array(8).fill('breaking'))
   expect(listed.slice(8)).not.toContain('breaking')

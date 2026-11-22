@@ -60,7 +60,7 @@ export interface EmbeddedRenderer {
   dispose(): void
 }
 
-function nonce(view: Window): string {
+function randomToken(view: Window): string {
   const bytes = view.crypto.getRandomValues(new Uint8Array(24))
   return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('')
 }
@@ -119,7 +119,7 @@ export function embedRenderer(
   options: EmbedOptions,
 ): EmbeddedRenderer {
   const view = container.ownerDocument.defaultView ?? window
-  const channel = nonce(view)
+  const channel = randomToken(view)
   const iframe = container.ownerDocument.createElement('iframe')
   iframe.setAttribute('sandbox', rendererSandbox)
   iframe.setAttribute('allow', '')
@@ -157,7 +157,11 @@ export function embedRenderer(
     iframe.style.opacity = ''
     iframe.dataset.revealed = 'true'
   }
-  const fail = (message: string) => {
+  const timer = view.setTimeout(
+    () => capabilities || fail(`The ${options.renderer} renderer did not become ready`),
+    rendererLimits.readyTimeoutMs + rendererLimits.documentTimeoutMs,
+  )
+  function fail(message: string) {
     if (failed || disposed) return
     failed = true
     view.clearTimeout(timer)
@@ -165,10 +169,6 @@ export function embedRenderer(
     readiness.reject(new Error(message))
     options.onFailure?.(message)
   }
-  const timer = view.setTimeout(
-    () => capabilities || fail(`The ${options.renderer} renderer did not become ready`),
-    rendererLimits.readyTimeoutMs + rendererLimits.documentTimeoutMs,
-  )
   // The frame's size, as a host reports it on load and whenever it changes.
   let size = ''
   const sendViewport = () => {

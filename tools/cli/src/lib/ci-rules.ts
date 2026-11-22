@@ -25,10 +25,10 @@ export function resolveGroups(rules: CiRules, facts: RepoFacts): Map<string, Set
   const resolve = (name: string, stack: string[]): Set<string> => {
     const done = resolved.get(name)
     if (done) return done
-    const group = rules.groups[name]
-    if (!group) throw new Error(`${RULES}: no group ${name}`)
+    const definition = rules.groups[name]
+    if (!definition) throw new Error(`${RULES}: no group ${name}`)
     if (stack.includes(name)) throw new Error(`${RULES}: group ${[...stack, name].join(' → ')} refers to itself`)
-    type Selector = (typeof group.include)[number]
+    type Selector = (typeof definition.include)[number]
     const select = (selector: Selector): string[] => {
       if (typeof selector === 'string') {
         return selector.startsWith('@')
@@ -39,8 +39,8 @@ export function resolveGroups(rules: CiRules, facts: RepoFacts): Map<string, Set
       if (selector.facts === 'coverage') return facts.coverage
       return facts.harnessRenderers.map(renderer => `packages/renderers/${renderer}`)
     }
-    const excluded = new Set((group.exclude ?? []).flatMap(select))
-    const members = new Set(group.include.flatMap(select).filter(path => !excluded.has(path)))
+    const excluded = new Set((definition.exclude ?? []).flatMap(select))
+    const members = new Set(definition.include.flatMap(select).filter(path => !excluded.has(path)))
     resolved.set(name, members)
     return members
   }

@@ -50,14 +50,14 @@ function catalog(cwd) {
       return
     }
     let finished = false
-    const done = tools => {
+    const timer = setTimeout(() => done([]), 15_000)
+    function done(tools) {
       if (finished) return
       finished = true
       clearTimeout(timer)
       child.stdin.end()
       resolve(tools)
     }
-    const timer = setTimeout(() => done([]), 15_000)
     child.on('error', () => done([]))
     child.stdin.on('error', () => {})
     createInterface({input: child.stdout}).on('line', line => {
@@ -171,6 +171,8 @@ async function call({cwd, root}, name, input) {
  * instance after a reload (to rehydrate it), and must not undo what the agent showed since by applying its first input
  * again. Keyed by instance, it says only whether that input was already shown.
  */
+// Assigned once the session is joined, which needs the canvas whose handlers read it.
+// eslint-disable-next-line prefer-const -- `const` at the assignment would put these readers before its declaration.
 let session
 const shownFile = () => (session?.workspacePath ? join(session.workspacePath, 'projections-canvas.json') : undefined)
 async function alreadyShown(instanceId, input) {

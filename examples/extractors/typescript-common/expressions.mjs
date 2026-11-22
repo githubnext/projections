@@ -9,7 +9,8 @@ export function visit({ts}, node, callback) {
   walk(node)
 }
 
-export function unwrap({ts}, node) {
+export function unwrap({ts}, expression) {
+  let node = expression
   while (
     ts.isParenthesizedExpression(node) ||
     ts.isAsExpression(node) ||
@@ -23,9 +24,9 @@ export function unwrap({ts}, node) {
 }
 
 /** Follows a constant to its initializer. */
-export function initializer(project, checker, node, seen = new Set()) {
+export function initializer(project, checker, expression, seen = new Set()) {
   const {ts} = project
-  node = unwrap(project, node)
+  const node = unwrap(project, expression)
   const symbol = symbolAt(project, checker, node)
   if (symbol && !seen.has(symbol)) {
     seen.add(symbol)
@@ -47,9 +48,9 @@ export function literal(project, checker, node) {
 }
 
 /** The expression an object literal (or spread) assigns to `key`. */
-export function property(project, checker, node, key, seen = new Set()) {
+export function property(project, checker, expression, key, seen = new Set()) {
   const {ts} = project
-  node = initializer(project, checker, node)
+  const node = initializer(project, checker, expression)
   if (seen.has(node)) return undefined
   seen.add(node)
   if (!ts.isObjectLiteralExpression(node)) return undefined

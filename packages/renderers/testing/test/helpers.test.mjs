@@ -439,8 +439,8 @@ test('stage-surface passes a field on the stage or transparent and names whateve
       },
       async measure(call) {
         if (call !== 'stageSurface') return undefined
-        const samples = ['top left', 'top right', 'left side', 'right side'].map(where => ({where, at: '2, 2', ...paint(where, colorMode)}))
-        return {stage: stage[colorMode], samples}
+        const surface = ['top left', 'top right', 'left side', 'right side'].map(where => ({where, at: '2, 2', ...paint(where, colorMode)}))
+        return {stage: stage[colorMode], samples: surface}
       },
       sleep: async () => {},
     }
@@ -567,7 +567,7 @@ test("one extraction's facts have no changes, and the summary is the same at eve
 })
 
 test('nested-accents fails a change color inside another, and lets an item keep its own emphasis', async () => {
-  const paint = (element, family, property, entity) => ({element, family, property, ...(entity ? {entity} : {})})
+  const paint = (painted, family, property, entity) => ({element: painted, family, property, ...(entity ? {entity} : {})})
   const accentDriver = nestings => ({
     async load() {
       return {status: 'ready', steps: [], capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']}}

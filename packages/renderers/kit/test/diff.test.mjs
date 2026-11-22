@@ -257,10 +257,10 @@ test('long data wraps after its separators and is never cut off', () => {
 
 test('a diff card lays out its text whole and grows to hold it', () => {
   const text = card => card.lines.map(line => line.spans.map(span => span.text).join('')).join('|')
-  const plain = diffCardText({after: {id: 'a', kind: 'service', label: 'api'}, kind: {text: 'Service'}})
-  assert.equal(text(plain), 'Service|api')
-  assert.equal(plain.height, cardHeight('service'), "a short card keeps its kind's own height")
-  assert.equal(plain.width, cardWidthRange.min, 'and the narrowest width')
+  const short = diffCardText({after: {id: 'a', kind: 'service', label: 'api'}, kind: {text: 'Service'}})
+  assert.equal(text(short), 'Service|api')
+  assert.equal(short.height, cardHeight('service'), "a short card keeps its kind's own height")
+  assert.equal(short.width, cardWidthRange.min, 'and the narrowest width')
   // A card is as wide as its longest line needs, its status footer included.
   const status = [{status: 'modified', glyph: '~', icon: 'modified', label: 'Update in place'}]
   const named = diffCardText({after: {id: 'a', kind: 'service', label: 'payments-gateway'}, kind: {text: 'Service'}, status})
@@ -272,7 +272,7 @@ test('a diff card lays out its text whole and grows to hold it', () => {
     before,
     after,
     kind: {text: 'aws_cloudwatch_metric_alarm', identifier: true},
-    detail: entity => entity.data.version,
+    detail: revision => revision.data.version,
     fields: [
       {key: 'records', before: '["shop-prod.c9x1.us-east-1.rds.amazonaws.com"]', after: '(known after apply)'},
       {key: 'ttl', before: '60', after: '300'},
@@ -305,7 +305,7 @@ test('a diff card lays out its text whole and grows to hold it', () => {
   const room = Math.floor((card.width - 32) / 7.4)
   assert.ok(card.lines.every(line => line.spans.map(span => span.text).join('').length <= room))
   assert.deepEqual(
-    diffCardText({before, after, detail: entity => entity.data.version}),
-    diffCardText({before, after, detail: entity => entity.data.version}),
+    diffCardText({before, after, detail: revision => revision.data.version}),
+    diffCardText({before, after, detail: revision => revision.data.version}),
   )
 })

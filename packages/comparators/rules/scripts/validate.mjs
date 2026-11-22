@@ -34,7 +34,8 @@ const walk = dir => {
   }
 }
 const only = process.argv.slice(2).map(dir => resolve(dir))
-for (const dir of only.length ? only : ['packages/comparators', 'examples', 'packages/cli/templates'].map(dir => join(root, dir))) walk(dir)
+const roots = only.length ? only : ['packages/comparators', 'examples', 'packages/cli/templates'].map(dir => join(root, dir))
+for (const dir of roots) walk(dir)
 const display = path => relative(only.length ? process.cwd() : root, path)
 // Repository files have their schemas checked by DollarLint; directories given as arguments don't.
 const documents = files.sort().map(path => [display(path), readFileSync(path, 'utf8'), Boolean(only.length)])
@@ -72,8 +73,8 @@ for (const [name, text] of testDocuments) {
     console.error(`invalid ${name}: ${JSON.stringify(validateTests.errors, null, 2)}`)
   }
 }
-for (const [name, text, schema] of documents) {
-  if (schema && !validate(parse(text))) {
+for (const [name, text, validated] of documents) {
+  if (validated && !validate(parse(text))) {
     failed = true
     console.error(`invalid ${name}: ${JSON.stringify(validate.errors, null, 2)}`)
     continue

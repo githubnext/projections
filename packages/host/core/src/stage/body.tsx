@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {CSSProperties, ReactNode} from 'react'
+import type {ReactNode} from 'react'
 import {connectorBetween, connectorPath, twoPaneMode} from '../modes.js'
 import type {Connector, Side} from '../modes.js'
 import {RendererPane} from '../pane.js'

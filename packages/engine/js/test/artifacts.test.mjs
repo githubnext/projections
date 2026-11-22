@@ -123,7 +123,8 @@ test('comparison documents rerun the default comparator and reject tampered clai
   await rejects({...saved, comparator: {...saved.comparator, digest: `sha256:${'0'.repeat(64)}`}}, 'ARTIFACT_COMPARATOR')
   await rejects({...saved, comparator: {...saved.comparator, id: 'tools/compare.wasm'}}, 'ARTIFACT_COMPARATOR')
   const other = structuredClone(after)
-  other.projection.id = other.provenance.definition.id = 'other'
+  other.projection.id = 'other'
+  other.provenance.definition.id = 'other'
   await rejects({...saved, after: other}, 'ARTIFACT_PROJECTION')
   const redefined = await document(after.extraction, {definitionDigest: `sha256:${'e'.repeat(64)}`})
   await rejects({...saved, after: redefined}, 'ARTIFACT_DEFINITION')

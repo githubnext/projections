@@ -19,7 +19,8 @@ const start = {
 const answer = (generation, extra = {}) => ({generation, refresh: 0, instance: 'one', projection: 'map', ...extra})
 const report = text => ({type: 'report', report: {body: {text}, text}})
 
-function run(state, ...events) {
+function run(initial, ...events) {
+  let state = initial
   const effects = []
   for (const event of events) {
     const step = viewerConnection.transition(state, event)

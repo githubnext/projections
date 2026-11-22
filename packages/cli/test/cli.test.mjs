@@ -14,7 +14,7 @@ async function cli(cwd, args, env = executionEnvironment(process.env)) {
 async function failed(promise, pattern) {
   const error = await promise.then(
     () => assert.fail('Expected the CLI to fail'),
-    error => error,
+    rejection => rejection,
   )
   assert.match(error.message, pattern)
   return error.output.stdout

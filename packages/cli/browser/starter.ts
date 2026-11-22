@@ -61,5 +61,5 @@ process.once('exit', () => vite.kill())
 export const record = join(renderer, 'node_modules/.projections/renderer-dev-server.json')
 for (let waited = 0; !existsSync(record); waited += 100) {
   if (waited > 30_000) throw new Error('The renderer development server did not start')
-  await new Promise(resolve => setTimeout(resolve, 100))
+  await new Promise(done => setTimeout(done, 100))
 }

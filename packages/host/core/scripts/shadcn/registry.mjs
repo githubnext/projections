@@ -70,7 +70,7 @@ export const tagOf = version => `shadcn@${normalizeVersion(version)}`
 /** The newest published `shadcn@x.y.z` release. */
 export async function latestRelease() {
   const releases = await github('releases?per_page=50')
-  const release = releases.find(release => /^shadcn@\d/.test(release.tag_name) && !release.prerelease && !release.draft)
+  const release = releases.find(candidate => /^shadcn@\d/.test(candidate.tag_name) && !candidate.prerelease && !candidate.draft)
   if (!release) throw new Error(`no shadcn@ release in ${repository}`)
   return normalizeVersion(release.tag_name)
 }

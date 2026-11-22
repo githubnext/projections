@@ -28,5 +28,5 @@ export async function cardWidths(rows, comparing = false) {
 /** Layout nodes of `entities`, as wide as the graph's text needs. */
 export async function sizedNodes(entities) {
   const widths = await cardWidths(entities)
-  return entities.map(entity => ({...entity, width: widths.get(entity.id)}))
+  return entities.map(node => ({...node, width: widths.get(node.id)}))
 }

@@ -45,7 +45,8 @@ test("a renderer's declared pace sets the time per step", () => {
 
 const plan = (overrides = {}) => ({stops: [0.25, 0.5, 1], travelMs: 1000, stepHoldMs: 1200, endpointHoldMs: 600, loop: true, ...overrides})
 /** Advances in 10 ms frames, like an animation loop, recording each state. */
-function run(state, ms, options) {
+function run(start, ms, options) {
+  let state = start
   const frames = []
   for (let elapsed = 0; elapsed < ms; elapsed += 10) {
     state = advancePlayback(state, 10, options)
@@ -211,10 +212,10 @@ test('looping timeline playback reflects at the ends and is symmetric', () => {
 test('pause holds keep the slider still at each hold, as before', () => {
   // `holds: 'pause'` uses `advancePlayback` on the slider position directly: it holds at a step end for the step hold.
   let state = {progress: 0.2, direction: 1, holdMs: 0}
-  const plan = {stops: [0.25], travelMs: 1000, stepHoldMs: 1200, endpointHoldMs: 600, loop: false}
+  const holdPlan = {stops: [0.25], travelMs: 1000, stepHoldMs: 1200, endpointHoldMs: 600, loop: false}
   let held = 0
   for (let frame = 0; frame < 200; frame++) {
-    state = advancePlayback(state, 10, plan)
+    state = advancePlayback(state, 10, holdPlan)
     if (state.progress === 0.25) held++
   }
   assert.ok(held >= 119 && held <= 121, String(held))
@@ -287,11 +288,11 @@ test('on the timeline, a step hold counts as that step', () => {
 })
 
 test('a recorded turn samples the timeline at a constant rate, each hold one frame, and lasts one turn', () => {
-  const timeline = {stops: [0.5], travelMs: 1000, stepHoldMs: 400, endpointHoldMs: 200}
+  const turnTimeline = {stops: [0.5], travelMs: 1000, stepHoldMs: 400, endpointHoldMs: 200}
   const frameMs = 50
-  const forward = playbackTurn(timeline, 1, frameMs)
+  const forward = playbackTurn(turnTimeline, 1, frameMs)
   const total = forward.reduce((sum, frame) => sum + frame.durationMs, 0)
-  assert.ok(Math.abs(total - timelineDuration(timeline)) < 1e-9)
+  assert.ok(Math.abs(total - timelineDuration(turnTimeline)) < 1e-9)
   // Half the endpoint hold at each end, the whole step hold in the middle, to the frame.
   const near = (frame, progress, durationMs) => {
     assert.equal(frame?.progress, progress)
@@ -306,7 +307,7 @@ test('a recorded turn samples the timeline at a constant rate, each hold one fra
   )
   for (const [index, frame] of forward.entries()) if (index) assert.ok(frame.progress > forward[index - 1].progress)
   // Backward runs from the after end to the before end through the same timeline.
-  const backward = playbackTurn(timeline, -1, frameMs)
+  const backward = playbackTurn(turnTimeline, -1, frameMs)
   near(backward[0], 1, 100)
   near(backward.at(-1), 0, 100)
   for (const [index, frame] of backward.entries()) if (index) assert.ok(frame.progress < backward[index - 1].progress)

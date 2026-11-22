@@ -80,8 +80,8 @@ test('the rules file matches its schema, and its references resolve', () => {
 })
 
 test('the committed JSON Schemas are the ones their TypeBox sources generate', () => {
-  const check = spawnSync(process.execPath, ['tools/scripts/ci-schemas.mjs', '--check'], {cwd: root, encoding: 'utf8'})
-  assert.equal(check.status, 0, check.stderr)
+  const generated = spawnSync(process.execPath, ['tools/scripts/ci-schemas.mjs', '--check'], {cwd: root, encoding: 'utf8'})
+  assert.equal(generated.status, 0, generated.stderr)
 })
 
 test('the rules checks catch references to groups, conditions and suites that do not exist', () => {

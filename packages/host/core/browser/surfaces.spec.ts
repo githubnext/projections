@@ -6,8 +6,8 @@ import {explorer} from './harness.js'
  * The default UI's chrome stacks the surface scale it shares with renderers (`--pj-surface-*`, `--pj-divider`), and
  * every tinted region has a same-hue edge, never a fill alone (docs/guides/host.md, "Theme").
  */
-const changes = ['added', 'removed', 'modified', 'moved'] as const
-const scopes = '.ph-table-view, .ph-text-view, .ph-detail-card, .ph-legend, .ph-notice, .ph-error'
+const changeKinds = ['added', 'removed', 'modified', 'moved'] as const
+const regionSelectors = '.ph-table-view, .ph-text-view, .ph-detail-card, .ph-legend, .ph-notice, .ph-error'
 
 async function open(page: Page, scheme: 'light' | 'dark', query: string) {
   await page.emulateMedia({colorScheme: scheme})
@@ -51,7 +51,7 @@ async function paint(locator: Locator) {
   })
 }
 
-const token = (page: Page, name: string) =>
+const tokenValue = (page: Page, name: string) =>
   page.evaluate(value => (window as unknown as {__pj: {token: (name: string) => number[]}}).__pj.token(value), name)
 
 /**
@@ -96,7 +96,7 @@ async function tintedRegions(page: Page) {
       }
       return {regions, unknown}
     },
-    {scopes, changes: [...changes]},
+    {scopes: regionSelectors, changes: [...changeKinds]},
   )
 }
 
@@ -106,7 +106,7 @@ for (const scheme of ['light', 'dark'] as const) {
     await expect(page.locator('.ph-table-view')).toBeVisible()
     await installColorProbe(page)
     const [canvas, raised, header, divider] = await Promise.all(
-      ['surface-canvas', 'surface-raised', 'surface-header', 'divider'].map(name => token(page, name)),
+      ['surface-canvas', 'surface-raised', 'surface-header', 'divider'].map(name => tokenValue(page, name)),
     )
     // The tokens are the renderer token set's own values (test/theme.test.mjs checks theme.css against the SDK).
     expect(new Set([canvas, raised, header].map(String)).size).toBe(3)
@@ -151,7 +151,7 @@ for (const scheme of ['light', 'dark'] as const) {
     await expect(page.locator('.ph-text-view')).toBeVisible()
     await installColorProbe(page)
     const [canvas, raised, header, divider] = await Promise.all(
-      ['surface-canvas', 'surface-raised', 'surface-header', 'divider'].map(name => token(page, name)),
+      ['surface-canvas', 'surface-raised', 'surface-header', 'divider'].map(name => tokenValue(page, name)),
     )
     expect((await paint(page.locator('.ph-scroll'))).background).toEqual(canvas)
     const step = await paint(page.locator('.ph-steps > li').first())
@@ -171,7 +171,7 @@ for (const scheme of ['light', 'dark'] as const) {
     await expect(legend.locator('.ph-legend-item')).toHaveCount(5)
     await installColorProbe(page)
     const [header, divider, fill, edge] = await Promise.all(
-      ['surface-header', 'divider', 'modified-muted', 'modified-border'].map(name => token(page, name)),
+      ['surface-header', 'divider', 'modified-muted', 'modified-border'].map(name => tokenValue(page, name)),
     )
     // The foot draws the surface and the edge; the legend, its first row, draws neither, and the summary's rule under it.
     await expect(page.locator('.ph-stage-foot > .ph-legend')).toHaveCount(1)

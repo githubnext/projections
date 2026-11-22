@@ -111,8 +111,8 @@ export function FilterButton({
     )
   }
   return field(false)
-  function field(inPopover: boolean) {
-    const full = inline || inPopover
+  function field(withinPopover: boolean) {
+    const full = inline || withinPopover
     return (
       <div className={cn('ph-filter pj:relative pj:flex pj:min-w-0 pj:items-center', full ? 'pj:w-full' : 'pj:w-56 pj:shrink-0')}>
         <Label htmlFor={`${id}-search`} className="pj:sr-only">

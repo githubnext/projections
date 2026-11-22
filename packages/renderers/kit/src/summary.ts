@@ -56,7 +56,9 @@ function boundedFacts(facts: readonly SummaryFactItem[], counted: number): Summa
   return bounded
 }
 
-const withoutIds = ({ids: _ids, ...fact}: SummaryFactItem): SummaryFactItem => fact
+function withoutIds({ids: _ids, ...fact}: SummaryFactItem): SummaryFactItem {
+  return fact
+}
 
 /**
  * Count figures worded with the definition's nouns (`presentation.kinds.<kind>.noun`, sent as

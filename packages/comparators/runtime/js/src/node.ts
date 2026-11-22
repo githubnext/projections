@@ -76,8 +76,8 @@ export function createNativeRulesRuntime(options: NativeRulesRuntimeOptions = {}
   const executable = options.executable ?? packagedRunner()
   const call = (request: unknown, signal?: AbortSignal) => runNative(executable, interpreter, request, deadlineMs, signal)
   return {
-    check: cachedChecks(async (rules, options) => {
-      const result = (await call({operation: 'check', rules: rulesSource(rules)}, options?.signal)) as {
+    check: cachedChecks(async (rules, checkOptions) => {
+      const result = (await call({operation: 'check', rules: rulesSource(rules)}, checkOptions?.signal)) as {
         digest?: unknown
         canonical?: unknown
         warnings?: unknown
@@ -91,7 +91,7 @@ export function createNativeRulesRuntime(options: NativeRulesRuntimeOptions = {}
         warnings: Array.isArray(result.warnings) ? result.warnings.map(diagnostic) : [],
       }
     }),
-    compare: (rules, input, options) => call({operation: 'compare', rules: rulesSource(rules), input}, options?.signal),
+    compare: (rules, input, compareOptions) => call({operation: 'compare', rules: rulesSource(rules), input}, compareOptions?.signal),
   }
 }
 
@@ -148,7 +148,11 @@ function runNative(executable: string, interpreter: string, request: unknown, de
     let size = 0
     let settled = false
     const abort = () => finish(cancelled(signal!))
-    const finish = (error: ComparatorRuntimeError | undefined, value?: unknown) => {
+    const timer = setTimeout(
+      () => finish(new ComparatorRuntimeError('deadline', `the rules runner exceeded its ${deadlineMs} ms deadline`)),
+      deadlineMs,
+    )
+    function finish(error: ComparatorRuntimeError | undefined, value?: unknown) {
       if (settled) return
       settled = true
       clearTimeout(timer)
@@ -158,10 +162,6 @@ function runNative(executable: string, interpreter: string, request: unknown, de
         reject(error)
       } else resolve(value)
     }
-    const timer = setTimeout(
-      () => finish(new ComparatorRuntimeError('deadline', `the rules runner exceeded its ${deadlineMs} ms deadline`)),
-      deadlineMs,
-    )
     signal?.addEventListener('abort', abort, {once: true})
     child.on('error', error => finish(new ComparatorRuntimeError('worker', `the rules runner failed to start: ${error.message}`)))
     child.stdout.on('data', (chunk: Buffer) => {

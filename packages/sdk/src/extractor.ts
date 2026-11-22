@@ -81,8 +81,8 @@ export function basis(parts: Readonly<Record<string, Json>>, {verbatim = ['model
 }
 
 /** A basis's digest: `sha256:` over its canonical JSON. With a declared path, the generation store's key. */
-export function basisDigest(basis: Basis): string {
-  return sha256(canonicalJson(basis))
+export function basisDigest(of: Basis): string {
+  return sha256(canonicalJson(of))
 }
 
 /** Earlier generated values, by declared path and basis. */
@@ -121,9 +121,9 @@ export async function generations(request: {readonly generations?: {readonly fil
   }
   return {
     size: values.size,
-    get: (path, basis) => values.get(key(path, basisDigest(basis))),
-    async generate(path, basis, produce) {
-      const stored = values.get(key(path, basisDigest(basis)))
+    get: (path, from) => values.get(key(path, basisDigest(from))),
+    async generate(path, from, produce) {
+      const stored = values.get(key(path, basisDigest(from)))
       return stored !== undefined ? (stored as never) : await produce()
     },
   }

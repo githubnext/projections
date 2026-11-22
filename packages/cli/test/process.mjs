@@ -96,7 +96,7 @@ export async function startBackend(executable, args, {cwd, env}) {
     ])
     return {
       info,
-      request: (method, path, body) => call('request', {method, path, ...(body === undefined ? {} : {body})}),
+      request: (method, requestPath, body) => call('request', {method, path: requestPath, ...(body === undefined ? {} : {body})}),
       close,
       diagnostics: () => diagnostics,
     }
@@ -107,7 +107,8 @@ export async function startBackend(executable, args, {cwd, env}) {
 }
 
 /** Polls a job through `backend` until it finishes. */
-export async function finishedJob(backend, job, {attempts = 3000, intervalMs = 20} = {}) {
+export async function finishedJob(backend, started, {attempts = 3000, intervalMs = 20} = {}) {
+  let job = started
   for (let count = 0; count < attempts && job.status === 'running'; count++) {
     await new Promise(resolve => setTimeout(resolve, intervalMs))
     job = (await backend.request('GET', `/api/jobs/${job.id}`)).body

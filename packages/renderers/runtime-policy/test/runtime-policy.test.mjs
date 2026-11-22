@@ -3,7 +3,6 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
-import {createNativeEngine} from '@githubnext/projections-engine/native'
 import {changesScope, comparisonModel, extractionModel, scopedModel, stepEmphasis} from '@githubnext/projections-renderer-kit'
 import {createRulesRuntime} from '@githubnext/projections-comparator-runtime'
 import {badgeIconNames} from '@githubnext/projections-renderer-sdk/protocol'
@@ -16,9 +15,10 @@ import {RuntimePolicyView} from '../node_modules/.cache/test/view.js'
 import {runtimePolicyContext} from '../node_modules/.cache/test/scope.js'
 import {plain} from '../../kit/test/markup.mjs'
 
-const engine = createNativeEngine()
 const runtime = createRulesRuntime()
-const rules = new Uint8Array(readFileSync(new URL('../../../comparators/runtime-policy/runtime-policy.comparator.yaml', import.meta.url)))
+const comparatorRules = new Uint8Array(
+  readFileSync(new URL('../../../comparators/runtime-policy/runtime-policy.comparator.yaml', import.meta.url)),
+)
 const fixture = name =>
   JSON.parse(readFileSync(new URL(`../../../extractors/tetragon-policies/tests/fixtures/${name}`, import.meta.url), 'utf8'))
 const before = fixture('credentials/before.expected.json')
@@ -27,7 +27,7 @@ const library = fixture('library/expected.json')
 
 async function interpreted(a = before, b = after) {
   // The runtime policy rules, run in the rules interpreter as hosts run them.
-  return runtime.compare(rules, {protocolVersion: 0, before: a, after: b, baseline: {}, options: {}})
+  return runtime.compare(comparatorRules, {protocolVersion: 0, before: a, after: b, baseline: {}, options: {}})
 }
 
 function props(model, init, overrides = {}) {
@@ -166,7 +166,7 @@ test('markup: identifiers are marked, effects are words, and status footers are 
   assert.match(single, /starts with <code class="pk-code" data-projections-identifier="">\/root\/<wbr\/>.ssh<\/code> or/)
   // Long code values wrap only after their separators, never inside a word.
   for (const code of single.match(/<code class="pk-code"[^>]*>.*?<\/code>/g)) {
-    for (const [, before] of code.matchAll(/(.)<wbr\/>/g)) assert.match(before, /[/.\-=,:]/)
+    for (const [, preceding] of code.matchAll(/(.)<wbr\/>/g)) assert.match(preceding, /[/.\-=,:]/)
   }
   assert.doesNotMatch(single, /class="rp-cell rp-status"/)
   assert.doesNotMatch(single, /class="rp-sign"/)

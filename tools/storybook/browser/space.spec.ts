@@ -51,7 +51,7 @@ for (const id of stories) {
             const bar = toolbar.getBoundingClientRect()
             const boxes = [...toolbar.querySelectorAll('button, select, input, output')]
               .map(element => element.getBoundingClientRect())
-              .filter(box => box.width > 1 && box.height > 1)
+              .filter(rect => rect.width > 1 && rect.height > 1)
             let count = 0
             for (const [index, a] of boxes.entries()) {
               if (a.left < bar.left - 0.5 || a.right > bar.right + 0.5 || a.top < bar.top - 0.5 || a.bottom > bar.bottom + 0.5) count++

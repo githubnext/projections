@@ -141,3 +141,25 @@ test("the frame-edges probe finds a stage filled over its rounded edge, and none
   })
   expect((await stages()).length).toBeGreaterThan(0)
 })
+
+// A kit frame's `::after` is its edge: a renderer's rule drawing there (a badge, a label) loses to the kit's, or moves
+// the edge. The probe finds such a rule; one that only recolors the edge is fine.
+test("the frame-edges probe finds a rule drawing in a kit frame's ::after, and lets one recolor its edge", async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'The probe reads stylesheets, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'gallery/fixture-change', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  const claimed = async () => (await stage.measure<CoveredFrame[]>('frames')).filter(found => found.rule !== undefined)
+  expect(await claimed()).toEqual([])
+  const add = (css: string) =>
+    stage.frame.locator('head').evaluate((head, text) => {
+      const style = document.createElement('style')
+      style.textContent = text
+      head.append(style)
+    }, css)
+  await add('.gl-stage::after { border-color: var(--projections-color-accent) }')
+  expect(await claimed()).toEqual([])
+  await add(".gl-stage::after { content: 'New'; background: var(--projections-color-accent) }")
+  expect((await claimed()).map(found => found.rule)).toEqual(
+    expect.arrayContaining([expect.stringMatching(/^\.gl-stage::after \{ content, background/u)]),
+  )
+})

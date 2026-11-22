@@ -26,7 +26,8 @@
  * pixels with the border), else a `clip-path`; a frame clips nothing else of its own (`overflow`). A frame's radius is
  * `--pk-frame-radius` (the theme's radius by default), and what reaches a corner takes its inner radius
  * (`--pk-group-inner-radius`, the radius less the border), so a change run there turns the corner with the frame. Its
- * border is its own: a `pk-frame` gives it one, and its overlay takes its color.
+ * border is its own: a `pk-frame` gives it one, and its overlay takes its color. Its `::after` is that overlay, so it
+ * is reserved: a renderer may recolor it, never draw in it (the `frame-edges` check fails a rule that does).
  */
 .pk :is(.pk-group, .pk-frame) {
   --pk-group-inner-radius: max(0px, calc(var(--pk-frame-radius, var(--projections-radius)) - var(--projections-border-width)));

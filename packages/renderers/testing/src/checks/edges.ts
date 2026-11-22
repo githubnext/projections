@@ -8,8 +8,10 @@ export const edgeChecks: Pick<Checks, 'frame-edges'> = {
     for (const colorMode of ['light', 'dark'] as const) {
       await driver.load(subject, {progress: 1, colorMode, ...primaryMode(subject, modes)})
       await driver.measure('settle')
-      for (const {element, fill} of await driver.measure<CoveredFrame[]>('frames')) {
-        const line = `${fill} fills a rounded corner of ${element} over its edge: draw the edge over it (the kit's \`pk-frame\`)`
+      for (const {element, fill, rule} of await driver.measure<CoveredFrame[]>('frames')) {
+        const line = rule
+          ? `\`${rule}\` draws in the \`::after\` of ${element}, a kit frame, which is its edge: draw it in an element of its own`
+          : `${fill} fills a rounded corner of ${element} over its edge: draw the edge over it (the kit's \`pk-frame\`)`
         const key = line.replaceAll(/\[data-entity-id="[^"]*"\]/gu, '')
         const found = failures.get(key)
         if (found) found.count += 1

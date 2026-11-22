@@ -589,6 +589,12 @@ test('frame-edges fails a rounded corner whose fill is painted over its edge, in
   assert.deepEqual(failing.details, [
     "p.note fills a rounded corner of div.stage over its edge: draw the edge over it (the kit's `pk-frame`) (2 like it)",
   ])
+  const [claimed] = await runChecks(frameDriver([{element: 'section.pk-group', rule: '.card::after { content }'}]), subject, {
+    checks: ['frame-edges'],
+  })
+  assert.deepEqual(claimed.details, [
+    '`.card::after { content }` draws in the `::after` of section.pk-group, a kit frame, which is its edge: draw it in an element of its own (2 like it)',
+  ])
 })
 
 test('nested-accents fails a change color inside another, and lets an item keep its own emphasis', async () => {

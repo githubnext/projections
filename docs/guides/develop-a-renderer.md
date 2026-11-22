@@ -227,7 +227,11 @@ what broke and where), or skipped:
   elements. A container that displays changes inside it stays neutral.
 - **Rounded edges drawn over their contents** — A rounded, bordered box whose
   fills reach its corners draws its border again over them (the kit's
-  `pk-frame`, or a `Group`), so its corners are never thinner than its sides.
+  `pk-frame`, or a `Group`), so its corners are never thinner than its sides. That
+  border is drawn in the frame's `::after`, so a kit frame's `::after` is
+  reserved: a rule may recolor it (its border color and opacity), but anything
+  drawn there instead loses to the kit's or moves the edge, and the check fails
+  it. Draw a badge or label in an element of its own.
 - **Legend shown once** — Render at most one legend, and omit it altogether when
   the host already draws one.
 - **No horizontal overflow at phone width** — The page must never scroll

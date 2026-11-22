@@ -296,12 +296,17 @@ export interface AccentPaint {
   entity?: string
 }
 
-/** A box whose painted contents reach its rounded corner while its edge is drawn under them (probe call `frames`). */
+/**
+ * A box whose painted contents reach its rounded corner while its edge is drawn under them, or a kit frame whose
+ * `::after` (its edge) a renderer's rule draws in (probe call `frames`).
+ */
 export interface CoveredFrame {
   /** The box, described. */
   element: string
   /** What fills its corner over its edge, described. */
-  fill: string
+  fill?: string
+  /** The rule drawing in the kit frame's `::after`: its selector and what it sets there. */
+  rule?: string
 }
 
 /** A change or accent color drawn inside another's surface (probe call `accents`). */

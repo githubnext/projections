@@ -535,6 +535,15 @@ legends, content buttons (`.pk-button`), and `[data-projections-hovered]` hover
 marks; `react.css` adds generated fields, the graph canvas, diff mode marks, and
 the layout components.
 
+A bordered, rounded container with filled contents is a kit frame: `Group`, or
+any element with the `pk-frame` class (its radius is `--pk-frame-radius`). The
+frame draws its border again in its `::after`, over everything it holds, so no
+header band, stripe or tint can thin its corners. That `::after` is reserved: a
+renderer's rule may recolor it (its border color and opacity), but a badge,
+label or fill drawn there loses to the kit's rule or moves the edge. Draw those
+in an element of their own; the `frame-edges` renderer check fails a rule that
+draws there.
+
 Cards, panels, and tables sit evenly inset from all four frame edges in every
 host via `--pk-stage-padding` (backed by the host's `stage-inset` token, or 12
 px by default). `ContentView` applies this padding automatically; custom roots

@@ -175,7 +175,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
 /** oxfmt --check lists unformatted files, one per line (with or without a leading marker). */
 export function parseFormatCheck(output: string, root: string): Problem[] {
   const problems: Problem[] = []
-  for (const raw of output.replace(ansi, '').split('\n')) {
+  for (const raw of output.replaceAll(ansi, '').split('\n')) {
     const line = raw.trim().replace(/^[✗×x!-]\s+/u, '')
     if (/^[\w@.-]+(?:\/[\w@.-]+)*\.\w+(?: \(\d+ms\))?$/u.test(line) && !/^Finished|^Checking/u.test(line)) {
       problems.push({file: normalizePath(line.replace(/ \(\d+ms\)$/u, ''), root), line: undefined, message: 'not formatted (oxfmt)'})

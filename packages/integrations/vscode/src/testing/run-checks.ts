@@ -6,15 +6,15 @@ import type {Checks, TestState, Watched} from './state.js'
 async function checkSteps(watched: Watched, projection: string, signal: AbortSignal): Promise<CheckStep[]> {
   const runner = await watched.lease.current()
   const result = await runner.callTool('check', {projections: [projection]}, signal)
-  const report = result.structuredContent as {projections?: {steps?: {[K in keyof CheckStep]?: unknown}[]}[]} | undefined
+  const report = result.structuredContent as {projections?: {steps?: Partial<CheckStep>[]}[]} | undefined
   const listed = report?.projections?.[0]?.steps
   if (!listed) throw new Error(result.content.map(part => part.text ?? '').join('\n') || 'The check reported nothing')
   return listed.map(step => {
     const said = Boolean(step.message)
     return {
-      id: String(step.id ?? ''),
-      title: String(step.title ?? step.id ?? ''),
-      status: String(step.status ?? ''),
+      id: step.id ?? '',
+      title: step.title ?? step.id ?? '',
+      status: step.status ?? '',
       ...(said ? {message: String(step.message)} : {}),
     }
   })
@@ -71,7 +71,7 @@ export async function runChecks(
       state.record(item, 'failed', [{message: text}])
       continue
     }
-    if (text) run.appendOutput(`${outcome.warning ? 'Warning: ' : ''}${item.label}: ${text.replace(/\n/gu, '\r\n')}\r\n`, undefined, item)
+    if (text) run.appendOutput(`${outcome.warning ? 'Warning: ' : ''}${item.label}: ${text.replaceAll('\n', '\r\n')}\r\n`, undefined, item)
     if (outcome.state === 'passed') run.passed(item)
     else run.skipped(item)
     state.record(item, outcome.state, text ? [{message: text}] : [])

@@ -90,7 +90,7 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
   const printed = (value: ts.Type): string =>
     checker
       .typeToString(value, undefined, ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.InTypeAlias)
-      .replace(
+      .replaceAll(
         /import\("([^"]+)"\)/gu,
         (_match, module: string) =>
           `import(${JSON.stringify(path.isAbsolute(module) ? path.basename(module).replace(/\.[cm]?[jt]sx?$/u, '') : module)})`,

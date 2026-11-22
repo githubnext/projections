@@ -1,4 +1,4 @@
-import {useEffect, useRef, type Dispatch, type SetStateAction} from 'react'
+import {useEffect, useLayoutEffect, useRef, type Dispatch, type SetStateAction} from 'react'
 import type {ControllerStore} from '../details.js'
 import type {InspectorHandle} from '../control.js'
 import type {ProjectionStatus} from '../shell/switcher.js'

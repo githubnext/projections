@@ -39,7 +39,7 @@ const vsceTargets = {
 /** The value of one top-level `[dist]` key, as single-line TOML source text. */
 function setting(toml, key) {
   const section = toml.split(/^\[/mu).find(part => part.startsWith('dist]'))
-  const joined = section.replace(
+  const joined = section.replaceAll(
     /\[[^\S\n]*\n([^\]]*)\]/gu,
     (_, items) =>
       `[${items
@@ -63,7 +63,7 @@ test('dist releases every target natively with attestations, no source tarball a
   assert.equal(setting(toml, 'install-path'), '["$PROJECTIONS_INSTALL_DIR/", "~/.projections/bin"]')
   assert.match(setting(toml, 'cargo-dist-version'), /^"\d+\.\d+\.\d+"$/u)
   const targets = [...setting(toml, 'targets').matchAll(/"([^"]+)"/gu)].map(match => match[1])
-  assert.deepEqual(targets.sort(), Object.keys(assets).sort())
+  assert.deepEqual(targets.toSorted(), Object.keys(assets).toSorted())
   const runners = toml.split('[dist.github-custom-runners]')[1].split(/^\[/mu)[0]
   for (const target of [...targets, 'global']) {
     assert.match(runners, new RegExp(`^${target} = "[\\w.-]+"$`, 'm'), `${target} needs a runner`)

@@ -63,7 +63,7 @@ for (const colorMode of ['light', 'dark'] as const) {
       const options = {label: selector, ...('frame' in rest ? {frame: rest.frame} : {})}
       const ids = await target.evaluate((element, rowSelector) => {
         const all = [...element.querySelectorAll(rowSelector)].filter(row => row.getAttribute('data-entity-id'))
-        const bottom = [...all].sort((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom)
+        const bottom = [...all].toSorted((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom)
         return [...new Set([all[0], bottom[0]].filter(row => row !== undefined).map(row => row.getAttribute('data-entity-id')!))]
       }, rows)
       expect(ids.length, 'rows to ring').toBeGreaterThan(0)

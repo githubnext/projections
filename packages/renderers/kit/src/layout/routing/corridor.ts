@@ -144,7 +144,7 @@ function shiftTurns(
       lasts.map(turn => ({jog, turn, close: attempt.crowded(jog, across(start), value) + attempt.crowded(turn, value, across(end))})),
     )
     .filter(pair => best.crossings !== 0 || pair.close < best.close)
-    .sort(
+    .toSorted(
       (a, b) => a.close - b.close || Math.abs(a.jog - first) + Math.abs(a.turn - last) - Math.abs(b.jog - first) - Math.abs(b.turn - last),
     )
   // A crossing is worth the whole search; crowding alone, the few least crowded.

@@ -59,7 +59,7 @@ export function statusItem(input: StatusInput): {text: string; tooltip: string; 
   const others = input.others ?? []
   // A commit subject could hold `$(…)`, which the status bar would draw as an icon. The icons follow the tab in front.
   const icon = running ? ` ${runningIcon(running.still)}` : front ? ` ${outOfDateIcon}` : ''
-  const text = `${markIcon} ${name.replace(/\$\(/gu, '\\$(')}${icon}`
+  const text = `${markIcon} ${name.replaceAll('$(', '\\$(')}${icon}`
   const full =
     choice.id === 'custom' || (choice.id.startsWith('pair:') && !choice.title) ? pairName(pair, labels) : choiceName(choice, facts)
   const span = pair.before

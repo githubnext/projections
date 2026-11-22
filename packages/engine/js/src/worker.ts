@@ -91,7 +91,7 @@ export async function createWorkerEngine(options: WorkerEngineOptions = {}): Pro
     }
     pending.clear()
   }
-  worker.onerror = event => {
+  const failed = (event: ErrorEvent) => {
     event.preventDefault()
     stop(new EngineTransportError(`Engine worker failed: ${event.message}`))
   }

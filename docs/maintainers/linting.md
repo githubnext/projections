@@ -48,18 +48,56 @@ to TypeScript (Node runs `.ts` directly) brings it under them.
 
 Each option allows one defined idiom and nothing else.
 
-| Rule                            | Option                                        | Why                                                                                                                                         |
-| ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `restrict-template-expressions` | `allowNumber`                                 | A number's string form is defined; objects, nullish values, `any` and booleans still fail.                                                  |
-| `no-confusing-void-expression`  | `ignoreArrowShorthand`                        | `onClick={() => setOpen(true)}` returns nothing anyone reads.                                                                               |
-| `no-floating-promises`          | node:test's `test`, `describe` and hooks      | The runner awaits them.                                                                                                                     |
-| `prefer-promise-reject-errors`  | `allowThrowingUnknown`                        | Passing on a rejection or abort reason unchanged, as `only-throw-error` allows rethrowing; `any` and non-`Error` values still fail.         |
-| `strict-boolean-expressions`    | `allowNullableString`, `allowNullableBoolean` | `if (name)` on `string \| undefined` means missing or empty on purpose. Nullable numbers (the `0` bug), objects and `any` still fail.       |
-| `no-use-before-define`          | not functions, classes or types               | Hoisted helpers below their first use are this codebase's file layout; variables still can't be read before they're declared.               |
-| `class-methods-use-this`        | not interface implementations or overrides    | The interface decides the method is an instance method.                                                                                     |
-| `curly`                         | `multi-line`                                  | Braces are required when the body is on its own line, where a second statement can hide; one-line guards (`if (!x) return`) can't hide one. |
-| `no-console`                    | shipped `src` only                            | CLIs, scripts and tests print by design.                                                                                                    |
-| `no-implicit-coercion`          | allows `!!`                                   | `!!value` narrows `value` in TypeScript; `Boolean(value)` doesn't, so its fix breaks type checking.                                         |
+| Rule                                    | Option                                        | Why                                                                                                                                             |
+| --------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `restrict-template-expressions`         | `allowNumber`                                 | A number's string form is defined; objects, nullish values, `any` and booleans still fail.                                                      |
+| `no-confusing-void-expression`          | `ignoreArrowShorthand`                        | `onClick={() => setOpen(true)}` returns nothing anyone reads.                                                                                   |
+| `no-floating-promises`                  | node:test's `test`, `describe` and hooks      | The runner awaits them.                                                                                                                         |
+| `prefer-promise-reject-errors`          | `allowThrowingUnknown`                        | Passing on a rejection or abort reason unchanged, as `only-throw-error` allows rethrowing; `any` and non-`Error` values still fail.             |
+| `strict-boolean-expressions`            | `allowNullableString`, `allowNullableBoolean` | `if (name)` on `string \| undefined` means missing or empty on purpose. Nullable numbers (the `0` bug), objects and `any` still fail.           |
+| `no-use-before-define`                  | not functions, classes or types               | Hoisted helpers below their first use are this codebase's file layout; variables still can't be read before they're declared.                   |
+| `class-methods-use-this`                | not interface implementations or overrides    | The interface decides the method is an instance method.                                                                                         |
+| `curly`                                 | `multi-line`                                  | Braces are required when the body is on its own line, where a second statement can hide; one-line guards (`if (!x) return`) can't hide one.     |
+| `no-console`                            | shipped `src` only                            | CLIs, scripts and tests print by design.                                                                                                        |
+| `no-implicit-coercion`                  | allows `!!`                                   | `!!value` narrows `value` in TypeScript; `Boolean(value)` doesn't, so its fix breaks type checking.                                             |
+| `jsx-a11y/no-noninteractive-tabindex`   | `tabpanel`, `separator` and `region` roles    | ARIA's patterns focus a tab panel, a window splitter and a scrollable region (`role="region"` with a name), whose content the keyboard scrolls. |
+| `jsx-a11y/no-autofocus`                 | `ignoreNonDOM`                                | A component's `autoFocus` prop is its own API, such as the projections pane taking focus when asked to; the DOM attribute still fails.          |
+| `jsx-a11y/control-has-associated-label` | `depth: 4`                                    | A table header's or button's text may be a few elements in (`<th><button><code>{name}</code></button></th>`).                                   |
+
+## React
+
+The React workspaces (the hosts, the renderers, the kit and SDK, Storybook) get
+three plugins, every rule an error:
+
+- `eslint-plugin-react-hooks`, its `recommended-latest` set: the Rules of Hooks,
+  `exhaustive-deps` and the React Compiler's rules. `refs` keeps `ref.current`
+  out of render, `set-state-in-effect` keeps effects from rendering twice to
+  derive state, `immutability` and `purity` keep render pure, and
+  `preserve-manual-memoization` keeps `useMemo` and `useCallback` honest. A
+  lifecycle these push out of effects and refs becomes a state machine
+  ([the guide](../guides/state-machines.md)).
+- `@eslint-react/eslint-plugin`, chosen rules that find what the React
+  Compiler's don't: `no-leaked-conditional-rendering` (a `0` rendered by
+  `count && …`), `no-unstable-context-value` and `no-unstable-default-props` (a
+  new object on every render), `no-array-index-key`,
+  `web-api-no-leaked-event-listener` and `web-api-no-leaked-timeout`,
+  `dom-no-flush-sync`, and the APIs React 19 replaces: `no-context-provider`,
+  `no-forward-ref` and `no-use-context`. Not its `naming-convention-*` rules (as
+  below), nor its `exhaustive-deps`, `set-state-in-effect` and other rules that
+  repeat `react-hooks`. The extractors are outside it: they aren't React, and
+  NestJS has a `forwardRef` of its own.
+- `eslint-plugin-jsx-a11y`, its `strict` set, on every `.tsx`, and
+  `control-has-associated-label` (off in `strict`) with `strict`'s options,
+  three tuned above: a control is a real element or has its role, keyboard
+  support and a name. Its deprecated rules (`label-has-for`, `accessible-emoji`,
+  `no-onchange`) stay off. Its peer range stops at ESLint 9 though it runs on
+  10, so an `overrides` entry in `package.json` gives it the workspace's ESLint.
+
+Lists whose items have no id of their own (text runs, lines, diagnostics) key
+them with the renderer SDK's `keyed`, not their index. A container that only
+catches what its controls bubble (a row that is a click target as wide as its
+card, Escape anywhere in a panel) is `role="presentation"`, and the controls in
+it carry the keyboard.
 
 ## Imports
 
@@ -114,8 +152,8 @@ Left out:
 - Style without a bug class: `no-plusplus`, `no-nested-ternary`,
   `no-negated-condition`, `prefer-destructuring`, `prefer-named-capture-group`.
 - `no-template-curly-in-string`, in the few tests whose strings are GitHub
-  Actions expressions (`${{ … }}`) or prose about template literals: the
-  literal `${` is what they check.
+  Actions expressions (`${{ … }}`) or prose about template literals: the literal
+  `${` is what they check.
 
 ## Rules of our own
 

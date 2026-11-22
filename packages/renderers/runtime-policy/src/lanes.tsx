@@ -1,5 +1,5 @@
 import {escapeProse, type Entity} from '@githubnext/projections-schemas'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {classifyChange, isChanged} from '@githubnext/projections-renderer-kit'
 import {Icon} from '@githubnext/projections-renderer-kit/react'
 import {effectIcon, type HookItem, type ProbeItem, type SelectorItem} from './model.js'

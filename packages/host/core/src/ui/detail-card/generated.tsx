@@ -1,10 +1,9 @@
 import {useState, type ReactNode} from 'react'
 import {Activity, Sparkle} from 'lucide-react'
-import type {WordRun} from '@githubnext/projections-renderer-sdk/presentation'
+import {type WordRun, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {generatedForm, type GeneratedField} from '../../details/generated.js'
 import {Prose} from '../prose.js'
 import {cn} from '../lib/utils.js'
-import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 const generatedToggle =
   'ph-generated-toggle pj:rounded-md pj:border pj:bg-transparent pj:px-1.5 pj:text-xs pj:text-muted-foreground pj:hover:text-foreground pj:focus-visible:outline-hidden pj:focus-visible:ring-2 pj:focus-visible:ring-ring/50 pj:aria-pressed:border-foreground/40 pj:aria-pressed:text-foreground'

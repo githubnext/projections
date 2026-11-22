@@ -2,8 +2,7 @@ import type * as vscode from 'vscode'
 import {outcomes} from '../comparator-tests/outcomes.js'
 import {parseResults, refusalMessage} from '../comparator-tests/parse.js'
 import {runPath} from '../comparator-tests/wire.js'
-import type {Cases, TestState} from './state.js'
-import {testMessage} from './state.js'
+import {type Cases, type TestState, testMessage} from './state.js'
 
 type FileOutcome = NonNullable<ReturnType<ReturnType<typeof outcomes>['get']>>
 

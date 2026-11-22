@@ -12,7 +12,6 @@ import {
   utf16Range,
   type RulesKind,
 } from './rules-service.js'
-import type {RulesKind} from './rules-service.js'
 import {noop} from './noop.ts'
 
 /** How long typing pauses before a comparator file is checked again. */

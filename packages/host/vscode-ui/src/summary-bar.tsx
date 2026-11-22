@@ -1,5 +1,4 @@
-import type {CSSProperties} from 'react'
-import {useRef, useState} from 'react'
+import {type CSSProperties, useId, useRef, useState} from 'react'
 import {
   figuresSentence,
   iconMaskStyle,

@@ -28,7 +28,7 @@ function iconLayers(name: IconName): string[] {
   const value = style.getPropertyValue('mask-image') || style.getPropertyValue('-webkit-mask-image')
   probe.remove()
   const layers = [...value.matchAll(/url\(\s*(?:"((?:[^"\\]|\\.)*)"\s*|'((?:[^'\\]|\\.)*)'\s*|([^)\s][^)]*)?)\)/gu)].map(match =>
-    (match[1] ?? match[2] ?? match[3] ?? '').replace(/\\(.)/gu, '$1').trim(),
+    (match[1] ?? match[2] ?? match[3] ?? '').replaceAll(/\\(.)/gu, '$1').trim(),
   )
   if (resolvedLayers.size > 200) resolvedLayers.clear()
   resolvedLayers.set(key, layers)

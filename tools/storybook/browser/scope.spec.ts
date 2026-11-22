@@ -191,7 +191,7 @@ async function doubledLines(frame: Frame): Promise<string[]> {
       for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/u)) {
         const color = /(?:rgba?|color)\([^)]*\)/u.exec(shadow)?.[0] ?? ''
         if (!drawn(color)) continue
-        const [x = 0, y = 0, blur = 0, spread = 0] = (shadow.replace(color, '').match(/-?[\d.]+px/gu) ?? []).map(parseFloat)
+        const [x = 0, y = 0, blur = 0, spread = 0] = (shadow.replace(color, '').match(/-?[\d.]+px/gu) ?? []).map(Number.parseFloat)
         if (!shadow.includes('inset')) {
           if (blur > 0) continue
           const [above, below] = [box.top + y - spread, box.bottom + y + spread]

@@ -40,7 +40,7 @@ async function candidates(runner: Pick<Runner, 'request'>): Promise<ExploreCandi
   const response = await runner.request({method: 'GET', path: '/api/explore'})
   if (response.status !== 200) throw new Error(`Could not list the candidates: ${refusal(response)}`)
   const list = (response.body as {candidates?: (ExploreCandidate | null)[]} | null)?.candidates
-  if (!Array.isArray(list)) throw new Error('The Projections backend returned invalid candidates')
+  if (!Array.isArray(list)) throw new TypeError('The Projections backend returned invalid candidates')
   return list.filter((candidate): candidate is ExploreCandidate => typeof candidate?.id === 'string' && !candidate.adopted)
 }
 

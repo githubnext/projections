@@ -21,11 +21,11 @@ const after = extraction('api/v0', [
 /** A declaration's signature, which every one here has. */
 function signatureOf(entity: (typeof before)['entities'][number]): string {
   const signature = entity.data?.signature
-  if (typeof signature !== 'string') throw new Error(`${entity.id} has no signature`)
+  if (typeof signature !== 'string') throw new TypeError(`${entity.id} has no signature`)
   return signature
 }
 const signatures = (document: typeof before) =>
-  document.entities.map(entity => [entity.id, signatureOf(entity)] as const).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+  document.entities.map(entity => [entity.id, signatureOf(entity)] as const).toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
 
 /** Each row as a sighted reader sees it: the status in its footer and its signature lines, with the runs marked in them. */
 function rows(root: Locator) {

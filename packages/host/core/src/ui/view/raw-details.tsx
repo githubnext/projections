@@ -218,7 +218,7 @@ function Details({
             </>
           )}
         </dl>
-        {row.varied?.length ? <VariedList varied={rowDetails(subject, row, p.rows).varied} /> : null}
+        {(row.varied?.length ?? 0) > 0 ? <VariedList varied={rowDetails(subject, row, p.rows).varied} /> : null}
         {(['before', 'after'] as const).map(side =>
           items[side].map(item => (
             <section key={`${side}-${item.id}`} className="pj:flex pj:min-w-0 pj:flex-col pj:gap-1.5 pj:border-t pj:pt-3" data-side={side}>
@@ -232,7 +232,7 @@ function Details({
               )}
               {item.confidence && <p className="pj:text-xs pj:text-muted-foreground">Confidence: {item.confidence}</p>}
               <Properties p={p} row={row} target={{kind, id: item.id, side}} data={item.data} />
-              {item.evidence?.length ? (
+              {item.evidence !== undefined && item.evidence.length > 0 ? (
                 <ul className="ph-evidence pj:flex pj:flex-col pj:gap-1">{item.evidence.map(evidence)}</ul>
               ) : (
                 <p className="pj:text-xs pj:text-muted-foreground">No source evidence.</p>
@@ -240,32 +240,10 @@ function Details({
             </section>
           )),
         )}
-      </dl>
-      {row.varied?.length !== undefined && row.varied.length > 0 ? <VariedList varied={rowDetails(subject, row, p.rows).varied} /> : null}
-      {(['before', 'after'] as const).map(side =>
-        items[side].map(item => (
-          <section key={`${side}-${item.id}`} className="pj:flex pj:min-w-0 pj:flex-col pj:gap-1.5 pj:border-t pj:pt-3" data-side={side}>
-            <h4 className="pj:break-words pj:text-xs pj:font-semibold">
-              {subject.mode === 'comparison' ? `${side === 'before' ? beforeLabel : afterLabel}: ${item.id}` : item.id}
-            </h4>
-            {'from' in item && (
-              <p className="pj:text-xs pj:text-muted-foreground">
-                {item.from} → {item.to}
-              </p>
-            )}
-            {item.confidence && <p className="pj:text-xs pj:text-muted-foreground">Confidence: {item.confidence}</p>}
-            <Properties p={p} row={row} target={{kind, id: item.id, side}} data={item.data} />
-            {item.evidence?.length !== undefined && item.evidence.length > 0 ? (
-              <ul className="ph-evidence pj:flex pj:flex-col pj:gap-1">{item.evidence.map(evidence)}</ul>
-            ) : (
-              <p className="pj:text-xs pj:text-muted-foreground">No source evidence.</p>
-            )}
-          </section>
-        )),
-      )}
-      {renderDetails && p.selection && (
-        <div className="ph-details-slot pj:flex pj:min-w-0 pj:flex-col pj:gap-2 pj:border-t pj:pt-3">{renderDetails(p.selection, p)}</div>
-      )}
+        {renderDetails && p.selection && (
+          <div className="ph-details-slot pj:flex pj:min-w-0 pj:flex-col pj:gap-2 pj:border-t pj:pt-3">{renderDetails(p.selection, p)}</div>
+        )}
+      </div>
     </aside>
   )
 }

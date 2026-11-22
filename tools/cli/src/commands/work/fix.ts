@@ -18,7 +18,7 @@ function dirtyHashes(root: string): Map<string, string> {
     const path = line
       .slice(3)
       .replace(/^.* -> /u, '')
-      .replace(/^"|"$/gu, '')
+      .replaceAll(/^"|"$/gu, '')
     if (!path) continue
     const relative = path.startsWith(prefix) ? path.slice(prefix.length) : path
     const absolute = join(root, relative)

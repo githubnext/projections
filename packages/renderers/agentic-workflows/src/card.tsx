@@ -1,8 +1,8 @@
 import {classifyChange, isChanged} from '@githubnext/projections-renderer-kit'
 import {ChangePills, EntityCard, Icon, Prose, ValueChange, type PillItem} from '@githubnext/projections-renderer-kit/react'
-import {codeSpan} from '@githubnext/projections-schemas'
 import type {ReactNode} from 'react'
 import {dataOf} from './sections.js'
+import {asText, facts, lockText} from './facts.js'
 import type {Direction, Entry, Section, Side, WorkflowItem} from './model.js'
 import type {Frame} from './frame.js'
 
@@ -85,32 +85,6 @@ function SectionRow({section, strength, frame}: {section: Section; strength: num
   )
 }
 
-const lockWords: Record<string, string> = {
-  current: 'Lock current',
-  stale: 'Lock stale',
-  missing: 'Lock missing',
-  unverified: 'Lock unverified',
-}
-
-const record = (value: unknown): Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
-/** A JSON value as text: a string as it is, anything else as JSON. */
-const shown = (value: unknown): string => (typeof value === 'string' ? value : JSON.stringify(value))
-
-/** A workflow's engine and model (text with inline code), whether strict mode is off, and its lock file's state. */
-function facts(entity: WorkflowItem['entity'] | undefined) {
-  const data = dataOf(entity)
-  const engine = record(data.engine)
-  const lock = record(data.lock).status
-  return {
-    engine: codeSpan(shown(engine.id ?? 'copilot')) + (engine.model !== undefined ? ` ${codeSpan(shown(engine.model))}` : ''),
-    strict: data.strict !== false,
-    lock: typeof lock === 'string' ? lock : undefined,
-  }
-}
-
-const lockText = (lock: string) => lockWords[lock] ?? `Lock ${lock}`
-
 /** One fact of the meta line: in the diff, a fact that changed reads old → new. */
 function Fact({was, now}: {was: ReactNode; now: ReactNode}) {
   return was === undefined ? <>{now}</> : <ValueChange layout="inline" before={was} after={now} />
@@ -182,7 +156,7 @@ export function WorkflowCard({item, frame}: {item: WorkflowItem; frame: Frame}) 
     <EntityCard
       id={item.row.id}
       label={name ?? <code className="pk-code">{item.entity.label}</code>}
-      identifier={shown(data.path ?? item.entity.label)}
+      identifier={asText(data.path ?? item.entity.label)}
       selected={frame.props.selectedId === item.row.id}
       onSelect={frame.props.onSelect}
       {...(frame.comparing ? {change: item.row, emphasis: strength} : {})}

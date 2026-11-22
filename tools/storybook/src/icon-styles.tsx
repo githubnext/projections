@@ -23,10 +23,10 @@ export function IconStyles({children}: {children: ReactNode}) {
       pending.map(
         link =>
           new Promise(settle => {
-            ;['load', 'error'].forEach(event => link.addEventListener(event, settle, {once: true}))
+            for (const event of ['load', 'error']) link.addEventListener(event, settle, {once: true, signal: abort.signal})
           }),
       ),
-    ).then(() => current && setReady(true))
+    ).then(() => !abort.signal.aborted && setReady(true))
     return () => {
       abort.abort()
       style.remove()

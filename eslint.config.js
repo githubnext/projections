@@ -1,9 +1,12 @@
 import {readFileSync, readdirSync} from 'node:fs'
 import js from '@eslint/js'
+import eslintReact from '@eslint-react/eslint-plugin'
 import {createTypeScriptImportResolver} from 'eslint-import-resolver-typescript'
 import importX from 'eslint-plugin-import-x'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import reactHooks from 'eslint-plugin-react-hooks'
 import regexp from 'eslint-plugin-regexp'
+import unicorn from 'eslint-plugin-unicorn'
 import globals from 'globals'
 import {defineConfig} from 'eslint/config'
 import tseslint from 'typescript-eslint'
@@ -330,6 +333,57 @@ export default defineConfig(
         },
       ],
     },
+  },
+  {
+    // eslint-plugin-unicorn's rules that find bugs and footguns: mutating sorts, coercing globals, lost error types, wrong
+    // DOM and promise APIs. Its stylistic rules stay off (docs/maintainers/linting.md#eslint-plugin-unicorn).
+    plugins: {unicorn},
+    rules: {
+      'unicorn/prefer-export-from': ['error', {checkUsedVariables: false}],
+      ...Object.fromEntries(
+        [
+          'consistent-assert',
+          'error-message',
+          'new-for-builtins',
+          'no-array-reverse',
+          'no-array-sort',
+          'no-await-in-promise-methods',
+          'no-instanceof-builtins',
+          'no-invalid-remove-event-listener',
+          'no-new-array',
+          'no-single-promise-in-promise-methods',
+          'no-typeof-undefined',
+          'no-unnecessary-await',
+          'no-useless-fallback-in-spread',
+          'no-useless-promise-resolve-reject',
+          'no-useless-spread',
+          'no-useless-switch-case',
+          'prefer-add-event-listener',
+          'prefer-array-find',
+          'prefer-array-flat-map',
+          'prefer-array-index-of',
+          'prefer-array-some',
+          'prefer-at',
+          'prefer-global-this',
+          'prefer-includes',
+          'prefer-node-protocol',
+          'prefer-number-properties',
+          'prefer-regexp-test',
+          'prefer-set-has',
+          'prefer-string-replace-all',
+          'prefer-structured-clone',
+          'prefer-type-error',
+          'require-array-join-separator',
+          'text-encoding-identifier-case',
+          'throw-new-error',
+        ].map(rule => [`unicorn/${rule}`, 'error']),
+      ),
+    },
+  },
+  {
+    // innerText lays the page out to read it: shipped code reads textContent. Browser tests read what is rendered.
+    files: ['packages/**/src/**/*.{ts,tsx}'],
+    rules: {'unicorn/prefer-dom-node-text-content': 'error'},
   },
   {
     // Lifecycles are explicit state machines (docs/guides/state-machines.md). A warning here; npm run check:machines

@@ -128,7 +128,7 @@ test('the container NestJS composes in preview mode: tokens, scopes, factories, 
   // the unprovided optional METRICS dependency resolves to nothing.
   const service = edges(state, 'dependsOn', 'implementation:OrdersModule:class:OrdersService')
   assert.deepEqual(
-    service.map(edge => [edge.data?.parameter, edge.to] as const).sort(([, a], [, b]) => a.localeCompare(b)),
+    service.map(edge => [edge.data?.parameter, edge.to] as const).toSorted(([, a], [, b]) => a.localeCompare(b)),
     [
       ['audit', 'service:OrdersModule:class:AuditLogger'],
       ['repository', 'service:OrdersModule:class:OrdersRepository'],

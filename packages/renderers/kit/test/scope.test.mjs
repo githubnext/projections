@@ -116,14 +116,14 @@ test('a scoped model holds only what the scope shows, and never a relationship t
   // The audit link is a change, but narrowed away (as a find would): its ends aren't shown, so it isn't kept.
   const shown = new Set(['orders.customer', 'orders>orders.customer', 'fk', 'orders', 'customers'])
   const {model: scoped} = scopedModel(schemaModel, shown)
-  assert.deepEqual(scoped.entities.map(row => row.id).sort(), ['customers', 'orders', 'orders.customer'])
+  assert.deepEqual(scoped.entities.map(row => row.id).toSorted(), ['customers', 'orders', 'orders.customer'])
   const shownIds = new Set(scoped.entities.map(row => row.id))
   for (const row of scoped.relationships) {
     const item = row.after ?? row.before
     assert.ok(shownIds.has(item.from) && shownIds.has(item.to), `${row.id} has both ends shown`)
   }
-  assert.deepEqual(scoped.relationships.map(row => row.id).sort(), ['fk', 'orders>orders.customer'])
-  assert.deepEqual(scoped.after.entities.map(item => item.id).sort(), ['customers', 'orders', 'orders.customer'])
+  assert.deepEqual(scoped.relationships.map(row => row.id).toSorted(), ['fk', 'orders>orders.customer'])
+  assert.deepEqual(scoped.after.entities.map(item => item.id).toSorted(), ['customers', 'orders', 'orders.customer'])
   // Steps keep their kept rows; one left with none is dropped.
   assert.deepEqual(
     scoped.steps.map(step => step.entities.length + step.relationships.length),
@@ -138,7 +138,7 @@ test('folded parts stand as one unchanged part of their entity, and opening a fo
   assert.ok(fold && isFold(fold.id))
   assert.equal(fold.after.label, '2 unchanged columns')
   assert.equal(fold.after.kind, 'column')
-  assert.deepEqual([...folds.get('pk-fold:orders')].sort(), ['orders.id', 'orders.total'])
+  assert.deepEqual([...folds.get('pk-fold:orders')].toSorted(), ['orders.id', 'orders.total'])
   assert.ok(folded.after.relationships.some(item => item.from === 'orders' && item.to === 'pk-fold:orders'))
   // An open fold shows its parts and stays, as the way to fold them again.
   const open = scopedModel(schemaModel, shown, 'fold', new Set(['pk-fold:orders'])).model
@@ -175,7 +175,7 @@ test("a renderer's context follows the relationships it names: a changed package
     changes: [{id: 'b', collection: 'entities', before: ['b'], after: ['b'], status: 'modified', correspondence: 'exact'}],
     steps: [{changes: ['b']}],
   })
-  assert.deepEqual([...followContext(workspaceModel, new Set(['b']), {incoming: () => true})].sort(), [
+  assert.deepEqual([...followContext(workspaceModel, new Set(['b']), {incoming: () => true})].toSorted(), [
     'a',
     'a>b',
     'workspace',

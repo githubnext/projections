@@ -65,7 +65,7 @@ export function stageLayout(
       .map(row => {
         const kind =
           moment === undefined
-            ? [row.before?.kind, row.after?.kind].filter(revisionKind => revisionKind !== undefined).sort(compareIds)[0]!
+            ? [row.before?.kind, row.after?.kind].filter(revisionKind => revisionKind !== undefined).toSorted(compareIds)[0]!
             : displayed(row, moment).kind
         const band = bands?.get(row.id) ?? 0
         const own = (moment === undefined ? heights?.get(row.id) : undefined) ?? cardHeight(kind, footer) + (options.grow?.get(row.id) ?? 0)

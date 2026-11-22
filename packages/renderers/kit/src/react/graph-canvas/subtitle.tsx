@@ -1,10 +1,9 @@
 // A card's subtitle: a few lines of human text under its label, such as what the entity is for.
 import type {Entity} from '@githubnext/projections-schemas'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {type EntityChange, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import type {TransitionNode} from '../../graph-transition.js'
 import {cardTextMetrics, proseLines, subtitleMetrics} from '../../card-text.js'
 import type {Drawing} from './drawing.js'
-import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** The width a card's subtitle may take: its text's room. */
 const subtitleRoom = (cardWidth: number) => cardWidth - 2 * cardTextMetrics.inset

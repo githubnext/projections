@@ -1,6 +1,6 @@
 // Zooming and panning a fitted stage: the zoom actions, Ctrl/⌘-wheel and pinch, the scroll anchor, the text floor the
 // view opens at and the dot grid behind the content.
-import {useEffect, useLayoutEffect, useRef, useState, type RefObject} from 'react'
+import {useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject} from 'react'
 import {openingFloorPx} from '@githubnext/projections-renderer-sdk/presentation'
 import {placedAttribute} from '../focus.js'
 import {clampZoom, dotGrid, maxZoom, openingZoom, zoomLimits, type ScrollStart, type StageZoom, type StageZoomOptions} from '../zoom.js'
@@ -47,7 +47,7 @@ export function useScrollAnchor(
     current.current = {scale, opening, start, onMove, clear}
   })
   // Places the view: at its start while it opens, else around the middle it had.
-  const place = useRef((element: HTMLElement, recentre: boolean) => {
+  const place = useCallback((element: HTMLElement, recentre: boolean) => {
     const latest = current.current
     if (!latest.scale) return
     if (latest.opening && !moved.current) {
@@ -69,7 +69,7 @@ export function useScrollAnchor(
     center.current = middle(element)
   }, [])
   useEffect(() => {
-    const element = scroller.current
+    const element = scrollerRef.current
     if (!element) return undefined
     // The view is placed here, so the shell's opening scroll (see `useOpeningReveal`) leaves it alone.
     element.setAttribute(placedAttribute, '')

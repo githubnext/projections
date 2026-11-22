@@ -43,7 +43,7 @@ export const layers = [
   ['packages/sdk', [], ['packages/schemas', 'packages/renderers/sdk', 'packages/renderers/kit', 'packages/renderers/testing']],
   ['examples/renderers/*', ['packages/sdk'], []],
   ['packages/host/core', ['packages/schemas', 'packages/machine', 'packages/renderers/sdk'], ['packages/engine/js']],
-  ['packages/host/vscode-ui', ['packages/schemas', 'packages/machine', 'packages/host/core'], ['packages/renderers/sdk']],
+  ['packages/host/vscode-ui', ['packages/schemas', 'packages/machine', 'packages/renderers/sdk', 'packages/host/core'], []],
   // The Inspector runs comparisons in the browser and hosts the renderer fixtures workbench; it bundles the built-in renderers.
   [
     'packages/host/inspector',

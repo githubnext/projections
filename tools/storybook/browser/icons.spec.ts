@@ -44,7 +44,7 @@ for (const story of stories) {
     for (const panel of await panels.all()) {
       const shown = (scope: string) =>
         panel.locator(`${scope} [data-gallery-icon]`).evaluateAll(rows => rows.map(row => row.getAttribute('data-gallery-icon') ?? ''))
-      if (story.names) expect((await shown('')).sort()).toEqual([...story.names].sort())
+      if (story.names) expect((await shown('')).toSorted()).toEqual([...story.names].toSorted())
       for (const [group, names] of Object.entries(story.groups ?? {})) expect(await shown(`[data-gallery-group="${group}"]`)).toEqual(names)
     }
     // SvgIcon resolves its layers after mounting.
@@ -117,7 +117,7 @@ async function showStory(page: Page, storyId: string, rendered: string) {
   await page.evaluate(
     id =>
       (
-        window as unknown as {__STORYBOOK_PREVIEW__: {onSetCurrentStory: (selection: object) => Promise<void>}}
+        globalThis as unknown as {__STORYBOOK_PREVIEW__: {onSetCurrentStory: (selection: object) => Promise<void>}}
       ).__STORYBOOK_PREVIEW__.onSetCurrentStory({storyId: id, viewMode: 'story'}),
     storyId,
   )

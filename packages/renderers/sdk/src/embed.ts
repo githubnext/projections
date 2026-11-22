@@ -80,12 +80,12 @@ function randomToken(view: Window): string {
  */
 export function withFragment(html: string, fragment: string): string {
   // Only ASCII is folded, so indices stay those of `html`.
-  const lower = html.replace(/[A-Z]/gu, letter => letter.toLowerCase())
+  const lower = html.replaceAll(/[A-Z]/gu, letter => letter.toLowerCase())
   let nonce: string | undefined
   for (let tag = openingTag(lower, 'script', 0); tag && !nonce; tag = openingTag(lower, 'script', tag.end)) {
     nonce = /\snonce="([\w+/=-]+)"/u.exec(html.slice(tag.start, tag.end))?.[1]
   }
-  const script = `<script${nonce ? ` nonce="${nonce}"` : ''}>location.hash=${JSON.stringify(fragment).replace(/</gu, '\\u003c')}</script>`
+  const script = `<script${nonce ? ` nonce="${nonce}"` : ''}>location.hash=${JSON.stringify(fragment).replaceAll('<', '\\u003c')}</script>`
   const head = openingTag(lower, 'head', 0)
   if (head) return `${html.slice(0, head.end)}${script}${html.slice(head.end)}`
   return `${script}${html}`
@@ -124,7 +124,7 @@ export function embedRenderer(
   container: HTMLElement,
   options: EmbedOptions,
 ): EmbeddedRenderer {
-  const view = container.ownerDocument.defaultView ?? window
+  const view = container.ownerDocument.defaultView ?? globalThis.window
   const channel = randomToken(view)
   const iframe = container.ownerDocument.createElement('iframe')
   iframe.setAttribute('sandbox', rendererSandbox)

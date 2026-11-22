@@ -49,8 +49,9 @@ function shapeSchema(shape: Shape, schema: DomainSchema): TSchema {
     case 'nullable-string':
     case 'strings':
     case 'object':
-      return primitiveSchemas[shape.type]()
+      break
   }
+  return primitiveSchemas[shape.type]()
 }
 
 /** A closed object of typed fields. */

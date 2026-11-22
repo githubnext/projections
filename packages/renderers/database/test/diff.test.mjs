@@ -313,7 +313,7 @@ for (const [what, edit] of [
     const tables = narrowed.entities
       .filter(entry => (entry.after ?? entry.before).kind === 'table')
       .map(entry => (entry.after ?? entry.before).label)
-    assert.deepEqual(tables.sort(), ['Customer', 'Order'])
+    assert.deepEqual(tables.toSorted(), ['Customer', 'Order'])
     const {frame} = createDatabaseDiff(narrowed, {available: 1300})
     const label = id => (row(narrowed, id)?.after ?? row(narrowed, id)?.before)?.label
     const references = frame.links.map(link => `${label(link.dependent)} → ${label(link.principal)}`)

@@ -81,7 +81,7 @@ export class RendererFrame {
   private readonly builtinDocuments: RendererDocuments | undefined
 
   constructor(options: RendererFrameOptions) {
-    this.view = options.window ?? options.container.ownerDocument.defaultView ?? window
+    this.view = options.window ?? options.container.ownerDocument.defaultView ?? globalThis.window
     this.onEvent = options.onEvent ?? noop
     this.init = options.init
     this.progress = options.progress

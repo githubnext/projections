@@ -253,7 +253,7 @@ export function identifierPattern(schema: unknown): RegExp {
     | undefined
   const id = document?.properties?.id
   const pattern = id?.$ref?.startsWith('#/$defs/') ? document?.$defs?.[id.$ref.slice('#/$defs/'.length)]?.pattern : id?.pattern
-  if (typeof pattern !== 'string') throw new Error('The definition schema has no projection ID pattern')
+  if (typeof pattern !== 'string') throw new TypeError('The definition schema has no projection ID pattern')
   return new RegExp(pattern, 'u')
 }
 

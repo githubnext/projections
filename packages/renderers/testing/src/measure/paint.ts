@@ -34,7 +34,7 @@ export function normalizeColors(value: string): string {
   if (!value.includes('(')) return value
   const context = canvasContext()
   if (!context) return value
-  return value.replace(/\b(?:rgba?|hsla?|color|oklab|oklch|lab|lch)\([^()]*\)/gu, color => {
+  return value.replaceAll(/\b(?:rgba?|hsla?|color|oklab|oklch|lab|lch)\([^()]*\)/gu, color => {
     // Canvas keeps `color(srgb …)` as written; spell it as rgba first.
     const srgb = /^color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\)$/u.exec(color)
     const input = srgb

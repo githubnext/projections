@@ -1,7 +1,7 @@
 // The gallery: each scenarios document as a group, each scenario as a card drawn by its own renderer, nested.
 import {useMemo, useState} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {type EntityChange, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {classifyChange, createStagedTimeline, current, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 import {
   CardGrid,
@@ -20,7 +20,6 @@ import {
 import {documentOrder, scenarioOf, subjectWords, type Scenario} from './model.js'
 import {eagerScenarios, NestedStage} from './stage.js'
 import type {accepts} from './accepts.js'
-import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 type Row = EntityChange<Entity>
 type Props = RendererProps<typeof accepts>
@@ -201,8 +200,8 @@ export function GalleryView(props: Props) {
                 : {})}
               holdsChanges={sectionRuns.some(run => run.rows.some(row => nestedComparison(scenarioOf((row.after ?? row.before)!))))}
             >
-              {sectionRuns.map(({group, rows}, index) => (
-                <section key={`${group ?? ''}:${index}`} className="gl-run" aria-label={group ?? entity?.label ?? 'Scenarios'}>
+              {keyed(sectionRuns, run => run.group ?? '').map(([key, {group, rows}]) => (
+                <section key={key} className="gl-run" aria-label={group ?? entity?.label ?? 'Scenarios'}>
                   {group && <h3 className="gl-run-title">{group}</h3>}
                   <CardGrid label={group ?? entity?.label ?? 'Scenarios'}>{rows.map(card)}</CardGrid>
                 </section>

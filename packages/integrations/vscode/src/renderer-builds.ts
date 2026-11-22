@@ -214,7 +214,7 @@ export class RendererBuilds implements vscode.Disposable {
   private async saved(uri: vscode.Uri) {
     const folder = vscode.workspace.getWorkspaceFolder(uri)
     if (!folder || uri.scheme !== 'file') return
-    const path = vscode.workspace.asRelativePath(uri, false).replace(/\\/gu, '/')
+    const path = vscode.workspace.asRelativePath(uri, false).replaceAll('\\', '/')
     for (const definition of this.host.projections(folder)) {
       if (!isRendererSource(definition, path) || !this.host.hasTab(folder, definition.id)) continue
       await this.send(folder, definition.id, 'saved')

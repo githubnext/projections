@@ -59,15 +59,7 @@ function useInView(element: React.RefObject<HTMLElement | null>, margin: string,
   const observed = !always && typeof IntersectionObserver !== 'undefined'
   useEffect(() => {
     const target = element.current
-    if (always) {
-      setInView(true)
-      return undefined
-    }
-    if (!target) return undefined
-    if (typeof IntersectionObserver === 'undefined') {
-      setInView(true)
-      return undefined
-    }
+    if (!observed || !target) return undefined
     const observer = new IntersectionObserver(entries => setInView(entries.some(entry => entry.isIntersecting)), {rootMargin: margin})
     observer.observe(target)
     return () => observer.disconnect()
@@ -156,7 +148,7 @@ export function NestedStage({
   useEffect(() => {
     const frame = nested.current
     if (!frame || !playing || !animated.current || state.status !== 'ready' || environment.reducedMotion) return undefined
-    const view = host.current?.ownerDocument.defaultView ?? window
+    const view = host.current?.ownerDocument.defaultView ?? globalThis.window
     const start = view.performance.now()
     let handle = 0
     const tick = (now: number) => {

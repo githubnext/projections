@@ -25,8 +25,8 @@ export const header = sources =>
  */
 export const cell = value =>
   String(value ?? '')
-    .replace(/\s*\n\s*/gu, ' ')
-    .replace(/\|/gu, '\\|')
+    .replaceAll(/\s*\n\s*/gu, ' ')
+    .replaceAll('|', '\\|')
     .trim()
 export const code = value => {
   const text = String(value)

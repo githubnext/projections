@@ -1,4 +1,4 @@
-import {forwardRef, type ComponentPropsWithoutRef, type ComponentRef} from 'react'
+import type {ComponentProps} from 'react'
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import {cn} from '../lib/utils.js'
 
@@ -7,10 +7,7 @@ import {cn} from '../lib/utils.js'
  * move and select like native radios and the choice can never be cleared. Styled as the Projector theme's
  * segments: a bordered muted well whose checked item is a raised, bevelled card-colored segment.
  */
-export const SegmentedControl = forwardRef<
-  ComponentRef<typeof RadioGroupPrimitive.Root>,
-  ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
->(({className, ...props}, ref) => {
+export function SegmentedControl({className, ref, ...props}: ComponentProps<typeof RadioGroupPrimitive.Root>) {
   // No orientation: every arrow key moves, as with native radios.
   return (
     <RadioGroupPrimitive.Root
@@ -29,10 +26,7 @@ export const SegmentedControl = forwardRef<
  * One segment of a `SegmentedControl`, a Radix radio item with a `value`. Moving focus to it with the keyboard selects
  * it, as arrow keys do in a native radio group.
  */
-export const SegmentedControlItem = forwardRef<
-  ComponentRef<typeof RadioGroupPrimitive.Item>,
-  ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
->(({className, children, onFocus, ...props}, ref) => {
+export function SegmentedControlItem({className, children, onFocus, ref, ...props}: ComponentProps<typeof RadioGroupPrimitive.Item>) {
   return (
     <RadioGroupPrimitive.Item
       ref={ref}

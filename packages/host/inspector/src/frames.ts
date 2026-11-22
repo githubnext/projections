@@ -18,7 +18,7 @@ export function relayRendererFrames(prefix: string, open: (url: URL) => Promise<
     set(this: HTMLIFrameElement, value: unknown) {
       const text = String(value)
       if (!text.startsWith(prefix)) {
-        set.call(this, value)
+        set.call(this, text)
         return
       }
       const url = new URL(text)

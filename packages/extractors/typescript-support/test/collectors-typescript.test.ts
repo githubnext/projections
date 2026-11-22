@@ -39,7 +39,7 @@ async function fixture(
 /** An entity's `data[name]`, which the extractor writes as a string. */
 function stringData(entity: Entity | undefined, name: string): string {
   const value = entity?.data?.[name]
-  assert(typeof value === 'string', `Expected a string ${name}`)
+  assert.ok(typeof value === 'string', `Expected a string ${name}`)
   return value
 }
 test('public API resolves barrel aliases, overloads, classes, methods, generics and internal return shapes', async t => {
@@ -81,10 +81,10 @@ test('public API resolves barrel aliases, overloads, classes, methods, generics 
     ),
     /"run"\(input: number\): number/u,
   )
-  assert(!state.entities.some(node => node.label === 'secret'))
-  assert(state.entities.every(node => typeof node.data?.signature === 'string'))
-  assert(state.entities.every(node => !!node.evidence?.[0]?.source && !path.isAbsolute(node.evidence[0].source)))
-  assert(!(await canonicalize(state)).includes(context.input.repository.root))
+  assert.ok(!state.entities.some(node => node.label === 'secret'))
+  assert.ok(state.entities.every(node => typeof node.data?.signature === 'string'))
+  assert.ok(state.entities.every(node => !!node.evidence?.[0]?.source && !path.isAbsolute(node.evidence[0].source)))
+  assert.ok(!(await canonicalize(state)).includes(context.input.repository.root))
 })
 test('moves, formatting, member/export reordering and implementation-only edits do not change API', async t => {
   const before = await fixture(t, {'index.ts': `export * from './old.js';`, 'old.ts': api}, 'typescript-public-api')
@@ -229,7 +229,7 @@ test('callable interfaces, predicates and computed members have stable, observab
     'typescript-public-api',
   )
   const state = await collectTypeScript(before)
-  assert(
+  assert.ok(
     state.entities.some(
       node => node.label === 'call' && typeof node.data?.signature === 'string' && node.data.signature.includes('(value: string): number'),
     ),
@@ -267,7 +267,7 @@ test('conditional package exports, wildcard subpaths and types are explicit stab
     state.entities
       .filter(node => node.kind !== 'member')
       .map(node => stringData(node, 'subpath'))
-      .sort(),
+      .toSorted(),
     ['.', './features/one'],
   )
 })

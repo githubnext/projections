@@ -143,14 +143,14 @@ export function isIconValue(value: string): boolean {
 
 /** An SVG document as a CSS image value, for an icon token. */
 export function svgIconValue(svg: string): string {
-  return `url("data:image/svg+xml,${encodeURIComponent(svg).replace(/[()]/gu, character => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)}")`
+  return `url("data:image/svg+xml,${encodeURIComponent(svg).replaceAll(/[()]/gu, character => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)}")`
 }
 
 function lucide(node: IconNode): string {
   const attributes = (values: Record<string, string | number | undefined>) =>
     Object.entries(values)
       .filter(([, value]) => value !== undefined)
-      .map(([key, value]) => ` ${key}="${String(value).replace(/"/gu, '&quot;')}"`)
+      .map(([key, value]) => ` ${key}="${String(value).replaceAll('"', '&quot;')}"`)
       .join('')
   const children = node.map(([tag, values]) => `<${tag}${attributes(values as Record<string, string | number | undefined>)}/>`).join('')
   return svgIconValue(

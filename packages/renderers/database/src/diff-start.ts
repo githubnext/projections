@@ -10,25 +10,22 @@ const margin = 16
  * hidden copies tags are measured from don't count, and a tag waiting for its slot counts as the tag block. The top
  * left without a change.
  */
-export function changesStart(view: RefObject<HTMLElement | null>, content: RefObject<HTMLElement | null>): ScrollStart {
-  return ({scale}) => {
-    const [scroller, drawn] = [view.current, content.current]
-    if (!scroller || !drawn || drawn.offsetWidth === 0) return {left: 0, top: 0}
-    const box = drawn.getBoundingClientRect()
-    const unit = box.width / drawn.offsetWidth
-    const marked = [...drawn.querySelectorAll('[data-change]')].filter(element => !element.closest('.database-tags-measure'))
-    const places = marked
-      .map(element => corner(element))
-      .filter(place => place !== undefined)
-      .map(place => ({x: (place.x - box.left) / unit, y: (place.y - box.top) / unit}))
-    if (!places.length) return {left: 0, top: 0}
-    const first = places.reduce((best, place) => (place.y < best.y || (place.y === best.y && place.x < best.x) ? place : best))
-    // Content that overflows the view (the only kind a start places) starts after the view's padding.
-    const style = getComputedStyle(scroller)
-    return {
-      left: Number.parseFloat(style.paddingLeft) + first.x * scale - margin,
-      top: Number.parseFloat(style.paddingTop) + first.y * scale - margin,
-    }
+export function changesStart(scroller: HTMLElement | null, drawn: HTMLElement | null, scale: number): {left: number; top: number} {
+  if (!scroller || !drawn || drawn.offsetWidth === 0) return {left: 0, top: 0}
+  const box = drawn.getBoundingClientRect()
+  const unit = box.width / drawn.offsetWidth
+  const marked = [...drawn.querySelectorAll('[data-change]')].filter(element => !element.closest('.database-tags-measure'))
+  const places = marked
+    .map(element => corner(element))
+    .filter(place => place !== undefined)
+    .map(place => ({x: (place.x - box.left) / unit, y: (place.y - box.top) / unit}))
+  if (!places.length) return {left: 0, top: 0}
+  const first = places.reduce((best, place) => (place.y < best.y || (place.y === best.y && place.x < best.x) ? place : best))
+  // Content that overflows the view (the only kind a start places) starts after the view's padding.
+  const style = getComputedStyle(scroller)
+  return {
+    left: Number.parseFloat(style.paddingLeft) + first.x * scale - margin,
+    top: Number.parseFloat(style.paddingTop) + first.y * scale - margin,
   }
 }
 

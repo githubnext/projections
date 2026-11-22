@@ -105,6 +105,7 @@ export function useFitPlan<T>(
       frame: (_activity, context) => {
         const handle = requestAnimationFrame(() => {
           const element = bar.current
+          // eslint-disable-next-line @eslint-react/dom-no-flush-sync -- the replanned bar must render in this frame, before its layout and paint.
           if (element) flushSync(() => context.send({type: 'frame', width: Math.round(element.getBoundingClientRect().width)}))
         })
         return () => cancelAnimationFrame(handle)
@@ -128,7 +129,9 @@ export function useFitPlan<T>(
   const plan = plans[index]!
   const current = {sign: signature, find: locate, ...planning(options), regions: options.regions ?? '[data-toolbar-region]'}
   const latest = useRef(current)
-  latest.current = current
+  useLayoutEffect(() => {
+    latest.current = current
+  })
 
   useLayoutEffect(() => {
     const element = bar.current

@@ -90,7 +90,7 @@ export function CardBadges({node, drawing}: {node: TransitionNode; drawing: Draw
  */
 export function CardAccentBand({node, drawing}: {node: TransitionNode; drawing: Drawing}) {
   const {props, diff, stroke} = drawing
-  const id = useId().replace(/[^\w-]/gu, '')
+  const id = useId().replaceAll(/[^\w-]/gu, '')
   if (!props.accent) return null
   const [before, after] = [node.before, node.after].map(side => (side ? props.accent!(side) : undefined))
   const [left, top, half] = [-node.width / 2, -node.height / 2, stroke / 2]

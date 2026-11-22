@@ -1,5 +1,5 @@
 import {useLayoutEffect, useRef, useState, type ReactNode} from 'react'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {ChangeStatus} from '@githubnext/projections-renderer-kit/react'
 import {defaultChrome, type MeasureText, type TextChrome, type TextRole} from './text.js'
 

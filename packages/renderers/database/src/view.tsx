@@ -1,6 +1,5 @@
 import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import {fitScale} from '@githubnext/projections-renderer-kit'
-import type {ScrollStart} from '@githubnext/projections-renderer-kit'
+import {fitScale, type ScrollStart} from '@githubnext/projections-renderer-kit'
 import {
   EmptyDomain,
   Notice,
@@ -123,9 +122,13 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
   const floor = useOpeningFloor(content, tagSource)
   // A diff opens on its first change: a schema whose changes are far down (a new tag below the tables) still shows one.
   // Another comparison in the same frame is a new start, so the view opens on its changes, not where the last one was.
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- each comparison (tagSource) starts afresh
-  const start = useMemo(() => (diff ? changesStart(view, content) : undefined), [diff, tagSource])
-  const {zoom, scale} = useStageZoom(view, props.onAction, fit, {floor, ...(start ? {start} : {})})
+  // Read from the drawing when the view is placed; each comparison (tagSource) starts afresh.
+  const start = useMemo(
+    (): ScrollStart => (diff ? ({scale}) => changesStart(view.current, content.current, scale) : topLeft),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- each comparison (tagSource) starts afresh
+    [diff, tagSource],
+  )
+  const {zoom, scale} = useStageZoom(view, props.onAction, fit, {floor, start})
   // A content-sized host gets the schema's own height; zoomed in, the height it is drawn at, up to the room the host
   // allows (its stage-max-height, else the protocol's maximum), so the stage grows into the page before it pans.
   const cap = useStageHeightCap()

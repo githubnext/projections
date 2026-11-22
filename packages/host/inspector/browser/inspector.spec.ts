@@ -426,7 +426,7 @@ test('Cancel pressed just as the next extraction starts cancels it, and nothing 
   // coordinator requests the job as soon as it is queued, before the page has drawn it, so the request waits for the
   // Cancel button the page draws for it, and is sent once that has been pressed.
   await page.addInitScript(() => {
-    const request = window.fetch.bind(window)
+    const request = globalThis.fetch.bind(globalThis)
     let pressed = false
     const cancelButton = () =>
       new Promise<HTMLButtonElement>((resolve, reject) => {
@@ -441,7 +441,7 @@ test('Cancel pressed just as the next extraction starts cancels it, and nothing 
         }
         find()
       })
-    window.fetch = async (input, init) => {
+    globalThis.fetch = async (input, init) => {
       if (
         !pressed &&
         input === '/api/jobs' &&

@@ -27,9 +27,9 @@ export function useFullscreen(targetRef: RefObject<HTMLElement | null>, {fallbac
     return () => document.removeEventListener('fullscreenchange', update)
   }, [targetRef])
   useEffect(() => {
-    const element = target.current
+    const element = targetRef.current
     if (!fallback || !element) return undefined
-    const view = element.ownerDocument.defaultView ?? window
+    const view = element.ownerDocument.defaultView ?? globalThis.window
     const scroll = {x: view.scrollX, y: view.scrollY}
     element.classList.add(fallbackClass)
     element.setAttribute('data-fullscreen', 'fallback')

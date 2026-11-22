@@ -150,7 +150,7 @@ export function toolbarInsets(toolbar: Locator, options: {wrappers: string; seco
       bottom: second ? second.getBoundingClientRect().top : inner.bottom,
     })
     if (!second) return {main}
-    const top = second.getBoundingClientRect().top + (parseFloat(getComputedStyle(second).borderTopWidth) || 0)
+    const top = second.getBoundingClientRect().top + (Number.parseFloat(getComputedStyle(second).borderTopWidth) || 0)
     return {main, playback: row(controls(second, null), {...inner, top})}
   }, options)
 }

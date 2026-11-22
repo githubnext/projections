@@ -51,7 +51,7 @@ async function paint(locator: Locator) {
 }
 
 const tokenValue = (page: Page, name: string) =>
-  page.evaluate(value => (window as unknown as {__pj: {token: (name: string) => number[]}}).__pj.token(value), name)
+  page.evaluate(value => (globalThis as unknown as {__pj: {token: (name: string) => number[]}}).__pj.token(value), name)
 
 /**
  * Every element in the chrome's views, detail card, legend and notices whose fill is a change `-muted` color (its

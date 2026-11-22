@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState, type Dispatch, type SetStateAction} from 'react'
+import {useEffect, useLayoutEffect, useRef, useState, type Dispatch, type SetStateAction} from 'react'
 import type {InspectorApi} from '../client/api.js'
 import type {InspectorRevision} from '../types.js'
 import type {Marks} from './pairs.js'
@@ -6,6 +6,7 @@ import type {InspectorAppProps} from './props.js'
 import {symbolic, workingTree} from './revisions.js'
 import type {Rows} from './use-extractions.js'
 import {bumpedRenderers, bumpedScenarios, changeSet, withoutStale, type ChangeSet} from './change-set.js'
+import {sleep} from '../sleep.js'
 
 type Versions = Record<string, number>
 
@@ -160,9 +161,7 @@ export function useLiveChanges({
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the signal can abort during the await
           if (abort.signal.aborted) return
           setWatching(false)
-          await new Promise(resolve => {
-            setTimeout(resolve, 2000)
-          })
+          await sleep(2000, abort.signal)
           continue
         }
         if (!result) return

@@ -50,7 +50,7 @@ async function stylesAt(
 class Findings {
   private readonly found = new Map<string, {line: string; count: number}>()
   add(key: string, line: string) {
-    const generic = key.replace(/\[data-entity-id="[^"]*"\]/gu, '')
+    const generic = key.replaceAll(/\[data-entity-id="[^"]*"\]/gu, '')
     const found = this.found.get(generic)
     if (found) found.count += 1
     else this.found.set(generic, {line, count: 1})
@@ -66,7 +66,14 @@ type Rgba = [number, number, number, number]
 function rgba(color: string): Rgba | undefined {
   // Normalized colors are `#rrggbb` when opaque, `rgba(…)` otherwise.
   const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?$/iu.exec(color.trim())
-  if (hex) return [parseInt(hex[1]!, 16), parseInt(hex[2]!, 16), parseInt(hex[3]!, 16), hex[4] ? parseInt(hex[4], 16) / 255 : 1]
+  if (hex) {
+    return [
+      Number.parseInt(hex[1]!, 16),
+      Number.parseInt(hex[2]!, 16),
+      Number.parseInt(hex[3]!, 16),
+      hex[4] ? Number.parseInt(hex[4], 16) / 255 : 1,
+    ]
+  }
   const match = /rgba?\(([^)]*)\)/u.exec(color)
   if (!match) return undefined
   const [r = 0, g = 0, b = 0, a = 1] = match[1]!
@@ -178,7 +185,7 @@ function paletteFailures(theme: ThemeColors, light: StyleMeasurement, dark: Styl
 function typeFailures(measured: StyleMeasurement, where: string, findings: Findings) {
   const {tokens} = measured
   const sizes = [...tokens.fontSizes, textFloor]
-  const family = (value: string) => value.toLowerCase().replace(/["'\s]/gu, '')
+  const family = (value: string) => value.toLowerCase().replaceAll(/["'\s]/gu, '')
   const families = tokens.fontFamilies.map(family)
   for (const element of measured.elements) {
     const font = element.font

@@ -11,9 +11,9 @@ const namedBulky = 2
 /** A data field's name in plain words: `testTokens` and `test_tokens` read `test tokens`. */
 export function fieldWords(field: string): string {
   return field
-    .replace(/([a-z0-9])([A-Z])/gu, '$1 $2')
-    .replace(/([A-Z]+)([A-Z][a-z])/gu, '$1 $2')
-    .replace(/[_-]+/gu, ' ')
+    .replaceAll(/([a-z0-9])([A-Z])/gu, '$1 $2')
+    .replaceAll(/([A-Z]+)([A-Z][a-z])/gu, '$1 $2')
+    .replaceAll(/[_-]+/gu, ' ')
     .trim()
     .toLowerCase()
 }

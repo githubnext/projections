@@ -46,7 +46,7 @@ export function tree(snapshot: Snapshot, settings: PackSettings): {tops: TreeNod
   const children = new Map<string, string[]>()
   for (const [child, of] of parent) (children.get(of) ?? children.set(of, []).get(of)!).push(child)
   for (const list of children.values()) list.sort(compareIds)
-  const roots = [...snapshot.active].filter(id => !parent.has(id)).sort(compareIds)
+  const roots = [...snapshot.active].filter(id => !parent.has(id)).toSorted(compareIds)
   const sole = roots.length === 1 && (children.get(roots[0]!)?.length ?? 0) > 0 ? roots[0] : undefined
   // A folder at the depth limit is drawn as one circle: its weight and its heaviest category.
   const collapse = (id: string, totals: Map<string, number>): number => {

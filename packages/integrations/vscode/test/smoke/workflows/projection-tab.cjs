@@ -50,7 +50,7 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
   assert.deepEqual([automatic.id, automatic.automatic, automatic.remembered], ['branch', true, null])
   // D6: no Compare section or its setting; the side bar's header line names the choice.
   const views = manifest.views.projections.map(view => view.id)
-  assert.ok(!views.some(id => /compare/iu.test(id)), views.join())
+  assert.ok(!views.some(id => /compare/iu.test(id)), views.join(','))
   assert.equal(manifest.configuration.properties['projections.compareStyle'], undefined)
   // Each choice says its span with real ref names, then its size.
   assert.match(api.rows()[0].header, /^Branch changes · main → your files · 1 commit \+ \d+ uncommitted$/u)
@@ -104,7 +104,7 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
     // "Bookmark this" is on the current row.
     assert.match(checked[0].contextValue, /\bbookmarkable\b/u)
     assert.equal(await swaps(), 0)
-    assert.ok(!JSON.stringify(viewing.rows).match(/\b[Pp]airs?\b/u), JSON.stringify(viewing.rows))
+    assert.ok(!/\b[Pp]airs?\b/u.test(JSON.stringify(viewing.rows)), JSON.stringify(viewing.rows))
   }
   // Tabs have no choice control of their own: they follow the side bar's.
   await until(

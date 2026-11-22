@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState, type ReactNode} from 'react'
+import {useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode} from 'react'
 import {useMachine} from '@githubnext/projections-machine/react'
 import type {
   AnchorRect,
@@ -205,8 +205,8 @@ export function RendererPane(props: RendererPaneProps) {
     })
     if (latest.current.hoveredId !== null) created.hover(latest.current.hoveredId)
     if (latest.current.selectedPath !== undefined) created.select(latest.current.selectedId, latest.current.selectedPath)
-    const annotations = latest.current.annotations
-    if (annotations !== undefined && annotations.length > 0) created.annotations(annotations)
+    const initial = latest.current.annotations
+    if (initial !== undefined && initial.length > 0) created.annotations(initial)
     frame.current = created
     callbacks.current.frameRef?.(created)
     return () => {

@@ -1,4 +1,4 @@
-import {useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties} from 'react'
+import {useId, useMemo, useRef, useState, type CSSProperties} from 'react'
 import {
   cardBorderOutset,
   changeMark,

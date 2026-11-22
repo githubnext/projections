@@ -1,5 +1,4 @@
-import {createContext, use, useSyncExternalStore} from 'react'
-import type {ReactNode} from 'react'
+import {createContext, use, useSyncExternalStore, type ReactNode} from 'react'
 import {noop} from './noop.js'
 
 /**

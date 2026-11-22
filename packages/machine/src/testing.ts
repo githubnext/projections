@@ -98,7 +98,7 @@ export function stableKey(value: unknown): string {
     if (item instanceof Set) return {'@set': [...item].map(stableKey).toSorted()}
     if (typeof item === 'function') return `@function ${item.name}`
     if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
-      return Object.fromEntries(Object.entries(item).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+      return Object.fromEntries(Object.entries(item).toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
     }
     return item
   })

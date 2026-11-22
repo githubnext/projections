@@ -11,7 +11,7 @@ export async function cli() {
     }
   }
   walk(tree)
-  const paragraphs = text => (text ?? '').trim().replace(/\n(?=\S)/gu, '\n\n')
+  const paragraphs = text => (text ?? '').trim().replaceAll(/\n(?=\S)/gu, '\n\n')
   const display = argument => {
     const values = argument.valueNames.map(name => `<${name}>`).join(' ')
     if (argument.positional) return code(argument.multiple ? `${values}...` : values)
@@ -42,8 +42,8 @@ export async function cli() {
   const anchor = command =>
     command.path
       .toLowerCase()
-      .replace(/[^a-z0-9 _-]/gu, '')
-      .replace(/ /gu, '-')
+      .replaceAll(/[^a-z0-9 _-]/gu, '')
+      .replaceAll(' ', '-')
   const page = `${header(['the CLI’s command definitions (projections __reference)'])}# CLI reference
 
 ${[

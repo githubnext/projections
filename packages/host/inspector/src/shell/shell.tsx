@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useState, type ReactNode} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState, type ReactNode} from 'react'
 import {ScopedRoot, cn} from '@githubnext/projections-host/ui/components'
 import {CommandPalette, type Command} from './palette.js'
 import {isMac, shortcutLabel} from './controls.js'

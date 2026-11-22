@@ -88,7 +88,7 @@ async function entryPoints(workspace, options) {
 function compilerOptions(workspace) {
   const config = join(root, workspace, 'tsconfig.json')
   const parsed = ts.getParsedCommandLineOfConfigFile(config, {}, {...ts.sys, onUnRecoverableConfigFileDiagnostic: noop})
-  return {...(parsed?.options ?? {}), noEmit: true, allowJs: true}
+  return {...parsed?.options, noEmit: true, allowJs: true}
 }
 
 /** The documentation comment's summary, or `undefined` when it has none; `false` when it opts out. */

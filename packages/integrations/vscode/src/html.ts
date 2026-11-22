@@ -102,7 +102,7 @@ export function skeletonHtml({
 }
 
 function escape(text: string) {
-  return text.replace(/&/gu, '&amp;').replace(/"/gu, '&quot;').replace(/</gu, '&lt;')
+  return text.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')
 }
 
 export function webviewHtml({
@@ -122,7 +122,7 @@ export function webviewHtml({
   script: string
 }): string {
   // `<` is escaped so the JSON can't end its script element.
-  const json = JSON.stringify(config).replace(/</gu, '\\u003c')
+  const json = JSON.stringify(config).replaceAll('<', '\\u003c')
   return `<!doctype html>
 <html lang="en">
 <head>

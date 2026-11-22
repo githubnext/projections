@@ -75,6 +75,7 @@ export function RendererBox({
   const term = comparing ? 'comparison' : 'extraction'
   return (
     <div
+      role="presentation"
       className="phv-box"
       hidden={view !== 'renderer'}
       onKeyDown={event => {

@@ -235,5 +235,5 @@ test('a containment relationship one revision brings has its endpoints in both',
     ),
   )
   const scope = changeContext(contextRows, {before: old, after: current}, ['x'])
-  assert.deepEqual([...scope.context].sort(), ['leaf', 'other', 'p', 'q', 'r'])
+  assert.deepEqual([...scope.context].toSorted(), ['leaf', 'other', 'p', 'q', 'r'])
 })

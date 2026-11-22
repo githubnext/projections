@@ -88,14 +88,14 @@ function docText(text, language) {
       const heading = /^#{1,6}\s(.*)$/u.exec(line)
       if (heading) return `**${heading[1].trimStart()}**`
       // Intra-doc links (rustdoc's [`Name`]) have no target on this page.
-      return line.replace(/\[(\x60[^\x60\]]+\x60)\](?![([])/gu, '$1')
+      return line.replaceAll(/\[(\x60[^\x60\]]+\x60)\](?![([])/gu, '$1')
     })
     .join('\n')
 }
 export const firstParagraph = text =>
   (text ?? '')
     .split(/\n\s*\n/u)[0]
-    .replace(/\s*\n\s*/gu, ' ')
+    .replaceAll(/\s*\n\s*/gu, ' ')
     .trim()
 
 export function apiPage({

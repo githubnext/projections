@@ -27,7 +27,7 @@ const modeNames = {'side-by-side': 'Side by side', animated: 'Animated', swipe: 
 const patternValues = pattern => {
   const alternatives = /^\^\(\?:(.*)\)\$$/u.exec(pattern)?.[1]?.split('|')
   if (!alternatives) return `matches ${code(pattern)}`
-  return alternatives.map(item => code(item.replace(/\\\.\.\+$/u, '.<key>').replace(/\\(.)/gu, '$1'))).join(' or ')
+  return alternatives.map(item => code(item.replace(/\\\.\.\+$/u, '.<key>').replaceAll(/\\(.)/gu, '$1'))).join(' or ')
 }
 
 /** Fills a page's regions from `regions` (name → Markdown); a region the page lacks, or one it has that isn't known, fails. */
@@ -52,7 +52,7 @@ export async function builtins() {
   const page = (file, from) => posix.relative(posix.dirname(from), file)
   const schemaLink = (schema, from) => {
     const name = schema.replace(/\/v\d+$/u, '')
-    const target = `${outDir}/schemas/${name.replace(/\//gu, '-')}.md`
+    const target = `${outDir}/schemas/${name.replaceAll('/', '-')}.md`
     return `[${code(schema)}](${page(target, from)})`
   }
   const rendererFor = handle => found.find(({manifest}) => manifest.handles.includes(handle))

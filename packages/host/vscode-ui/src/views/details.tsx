@@ -181,7 +181,7 @@ export function VscodeDetails({
             </>
           )}
         </dl>
-        {row.varied?.length ? <VariedList varied={rowDetails(subject, row, [row]).varied} /> : null}
+        {(row.varied?.length ?? 0) > 0 ? <VariedList varied={rowDetails(subject, row, [row]).varied} /> : null}
         {(['before', 'after'] as const).map(side =>
           items[side].map(item => (
             <section key={`${side}-${item.id}`} className="phv-details-item">
@@ -201,7 +201,7 @@ export function VscodeDetails({
                 onSelectTarget={onSelectTarget}
                 annotations={annotations}
               />
-              {item.evidence?.length ? (
+              {item.evidence !== undefined && item.evidence.length > 0 ? (
                 <ul className="phv-evidence" aria-label="Source evidence">
                   {item.evidence.map(evidence)}
                 </ul>
@@ -211,40 +211,10 @@ export function VscodeDetails({
             </section>
           )),
         )}
-      </dl>
-      {row.varied?.length !== undefined && row.varied.length > 0 ? <VariedList varied={rowDetails(subject, row, [row]).varied} /> : null}
-      {(['before', 'after'] as const).map(side =>
-        items[side].map(item => (
-          <section key={`${side}-${item.id}`} className="phv-details-item">
-            <h4 className="phv-section-title">
-              {subject.mode === 'comparison' ? `${side === 'before' ? beforeLabel : afterLabel}: ${item.id}` : item.id}
-            </h4>
-            {'from' in item && (
-              <p>
-                <code className="phv-code">{item.from}</code> → <code className="phv-code">{item.to}</code>
-              </p>
-            )}
-            {item.confidence && <p className="phv-muted">Confidence: {item.confidence}</p>}
-            <Properties
-              item={item}
-              target={{kind: row.collection === 'entities' ? 'entity' : 'relationship', id: item.id, side}}
-              selection={selection}
-              onSelectTarget={onSelectTarget}
-              annotations={annotations}
-            />
-            {item.evidence?.length !== undefined && item.evidence.length > 0 ? (
-              <ul className="phv-evidence" aria-label="Source evidence">
-                {item.evidence.map(evidence)}
-              </ul>
-            ) : (
-              <p className="phv-muted">No source evidence.</p>
-            )}
-          </section>
-        )),
-      )}
-      {children !== undefined && children !== null && children !== false && (
-        <div className="ph-details-slot phv-details-consumer">{children}</div>
-      )}
+        {children !== undefined && children !== null && children !== false && (
+          <div className="ph-details-slot phv-details-consumer">{children}</div>
+        )}
+      </div>
     </aside>
   )
 }

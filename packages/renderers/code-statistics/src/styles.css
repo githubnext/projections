@@ -358,6 +358,8 @@ button.stat-hit:hover {
 .statistics-view[data-fills] .statistics-share {
   flex: 1 1 auto;
   flex-wrap: nowrap;
+  /* A list taller than the stage starts at the top, where the scroll can reach it. */
+  align-items: safe center;
   min-height: 0;
   container: statistics-share / size;
   overflow-y: auto;

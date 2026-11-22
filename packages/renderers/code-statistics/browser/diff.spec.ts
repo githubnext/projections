@@ -123,4 +123,18 @@ test('the share chart fills a frame the host sizes, and keeps its size in a cont
   expect(fill).toMatchObject({fills: true, beside: true, clipped: 0, scrolls: false})
   expect(fill.overflow).toBeLessThanOrEqual(1)
   expect(fill.donut).toBeGreaterThan(content.donut)
+  // A stage shorter than the list: the list starts at the top, where the share area's scroll reaches it.
+  const short = await openStage(page, harnessInspector(), {
+    scenario: 'code-statistics/languages',
+    comparisonMode: 'diff',
+    options: {chart: 'share'},
+    height: 200,
+  })
+  await short.measure('settle')
+  const reach = await short.frame.locator('.statistics-share').evaluate(share => ({
+    scrolls: share.scrollHeight > share.clientHeight + 1,
+    above: share.getBoundingClientRect().top - share.querySelector('.stat-values-row')!.getBoundingClientRect().top,
+  }))
+  expect(reach.scrolls).toBe(true)
+  expect(reach.above).toBeLessThanOrEqual(0)
 })

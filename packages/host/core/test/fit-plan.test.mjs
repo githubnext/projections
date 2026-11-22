@@ -115,6 +115,8 @@ test('a resize waits for the next frame, and the bar is measured again at its wi
   assert.equal(run(observed, {type: 'observed'}), observed)
   const {locked: _, ...planned} = settled
   assert.deepEqual(run(observed, {type: 'frame', width: 400}), {...planned, kind: 'planning', width: 400, run: 1, frame: false})
+  // A frame without a width keeps it: the planning effect measures the bar and sends `resized` if it changed.
+  assert.deepEqual(run(observed, {type: 'frame'}), {...planned, kind: 'planning', width: observed.width, run: 1, frame: false})
 })
 
 test("every state of the bar's lifecycle", () => {
@@ -269,6 +271,11 @@ test('a press and its release change nothing the bar renders, so they never rend
     state = fitPlanLifecycle.transition(state, {type}).state
     assert.ok(sameView(view, state), `${type} keeps the view`)
   }
+  // Nor does holding the plan for a press when focus leaves a locked bar, and releasing it for the replan.
+  const locked = {...state, locked: true}
+  const held = [{type: 'pressed'}, {type: 'moved'}].reduce((current, event) => fitPlanLifecycle.transition(current, event).state, locked)
+  assert.equal(held.kind, 'held')
+  assert.ok(sameView(view, held))
   // What the bar shows still renders: another plan tried.
   assert.ok(!sameView(view, fitPlanLifecycle.transition(state, {type: 'tried', plan: 'narrow'}).state))
 })

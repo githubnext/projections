@@ -104,10 +104,11 @@ export function useFitPlan<T>(
         // Replanning inside the observer's callback would resize observed elements mid-delivery (a ResizeObserver loop),
         // so it waits for the next frame, and renders synchronously there, before that frame's layout and paint.
         frame: (_activity, context) => {
+          // The frame only asks to plan again: the planning effect measures the bar the caller passes now (a replaced ref
+          // included), and renders it at its new width first.
           const handle = requestAnimationFrame(() => {
-            const element = bar.current
             // eslint-disable-next-line @eslint-react/dom-no-flush-sync -- the replanned bar must render in this frame, before its layout and paint.
-            if (element) flushSync(() => context.send({type: 'frame', width: Math.round(element.getBoundingClientRect().width)}))
+            flushSync(() => context.send({type: 'frame'}))
           })
           return () => cancelAnimationFrame(handle)
         },
@@ -227,9 +228,9 @@ export function useFitPlan<T>(
   useLayoutEffect(() => {
     const element = bar.current
     if (!element) return
-    if (state.kind === 'planning') element.removeAttribute('data-fit-settled')
+    if (state.planning) element.removeAttribute('data-fit-settled')
     else element.setAttribute('data-fit-settled', String(state.width))
-  }, [bar, state.kind, state.width])
+  }, [bar, state.planning, state.width])
 
   // Replan when the bar or one of its regions changes size.
   const observer = useRef<ResizeObserver | undefined>(undefined)

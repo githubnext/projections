@@ -46,7 +46,7 @@ export type FitPlanEvent =
   /** The bar or one of its regions resized. */
   | {readonly type: 'observed'}
   /** The frame after a resize: the bar is `width` wide. */
-  | {readonly type: 'frame'; readonly width: number}
+  | {readonly type: 'frame'; readonly width?: number | undefined}
   /** Content that was still rendering (`pending`) has settled: measure again. */
   | {readonly type: 'rendered'}
   /** Focus moved in the document. */
@@ -69,10 +69,10 @@ const always = {
   resized: (state: FitPlanState, {width}: {width: number}): FitPlanState => ({...planned(state), kind: 'planning', width}),
   tried: (state: FitPlanState, {plan}: {plan: unknown}): FitPlanState => ({...planned(state), kind: 'planning', plan}),
   observed: (state: FitPlanState): FitPlanState => (state.frame ? state : {...state, frame: true}),
-  frame: (state: FitPlanState, {width}: {width: number}): FitPlanState => ({
+  frame: (state: FitPlanState, {width}: {width?: number | undefined}): FitPlanState => ({
     ...planned(state),
     kind: 'planning',
-    width,
+    width: width ?? state.width,
     run: state.run + 1,
     frame: false,
   }),
@@ -141,11 +141,20 @@ export const fitPlanLifecycle = defineMachine<FitPlanState, FitPlanEvent, never,
   },
 })
 
-/** What a planned bar renders from its state: not whether a pointer is pressed, which only defers replanning. */
-export type FitPlanView = Pick<FitPlanState, 'kind' | 'plan' | 'width' | 'run'>
+/**
+ * What a planned bar renders from its state: whether it is planning (a settled bar is marked `data-fit-settled`), the
+ * plan, the width and the run. Not whether a pointer is pressed, nor whether a settled plan is held or releasing for
+ * it, which only defer replanning.
+ */
+export interface FitPlanView {
+  readonly planning: boolean
+  readonly plan: unknown
+  readonly width: number
+  readonly run: number
+}
 
-export const fitPlanView = ({kind, plan, width, run}: FitPlanState): FitPlanView => ({kind, plan, width, run})
+export const fitPlanView = ({kind, plan, width, run}: FitPlanState): FitPlanView => ({planning: kind === 'planning', plan, width, run})
 
 /** Whether `state` renders as `view` does. */
 export const sameView = (view: FitPlanView, state: FitPlanState) =>
-  view.kind === state.kind && view.plan === state.plan && view.width === state.width && view.run === state.run
+  view.planning === (state.kind === 'planning') && view.plan === state.plan && view.width === state.width && view.run === state.run

@@ -11,10 +11,10 @@ export function layoutRuns(): number {
 /** ELK in the current thread, for Node (tests and tools); browsers use the worker engine. */
 export function createLayoutEngine(): ElkEngine {
   const engine = new elk.default({algorithms: ['layered']})
-  const layout = engine.layout.bind(engine) as (...args: unknown[]) => ReturnType<ElkEngine['layout']>
-  engine.layout = ((...args: unknown[]) => {
+  const layout = engine.layout.bind(engine)
+  engine.layout = (graph, args) => {
     runs++
-    return layout(...args)
-  }) as ElkEngine['layout']
+    return layout(graph, args)
+  }
   return engine
 }

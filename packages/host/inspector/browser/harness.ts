@@ -61,6 +61,11 @@ const types: Record<string, string> = {
   '.txt': 'text/plain; charset=utf-8',
 }
 let instances = 0
+/** The backend's answer to one call. */
+interface RunnerResponse {
+  result?: {status: number; contentType: string; body: unknown}
+  error?: {message: string}
+}
 
 /** Starts a backend (`serve --stdio` with `args`, for example `['-C', repo, '--trust']`) and routes a page origin to it. */
 export async function startHarness(context: BrowserContext, args: string[]): Promise<Harness> {
@@ -91,13 +96,10 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
   child.stderr.on('data', bytes => (diagnostics += String(bytes)))
   child.stdin.on('error', () => {})
   const exited = new Promise<void>(done => child.once('exit', () => done()))
-  const pending = new Map<
-    number,
-    (message: {result?: {status: number; contentType: string; body: unknown}; error?: {message: string}}) => void
-  >()
+  const pending = new Map<number, (message: RunnerResponse) => void>()
   const lines = createInterface({input: child.stdout})
   lines.on('line', line => {
-    const message = JSON.parse(line)
+    const message = JSON.parse(line) as RunnerResponse & {id?: unknown}
     if (typeof message.id !== 'number') return
     pending.get(message.id)?.(message)
     pending.delete(message.id)

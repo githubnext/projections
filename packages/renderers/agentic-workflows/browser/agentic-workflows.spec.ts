@@ -6,7 +6,9 @@ import {compare, compareWithComparator, openRenderer} from '@githubnext/projecti
 import type {RendererHandle} from '@githubnext/projections-renderer-harness/playwright'
 
 const fixture = (name: string): Extraction =>
-  JSON.parse(readFileSync(new URL(`../../../extractors/github-agentic-workflows/tests/fixtures/${name}`, import.meta.url), 'utf8'))
+  JSON.parse(
+    readFileSync(new URL(`../../../extractors/github-agentic-workflows/tests/fixtures/${name}`, import.meta.url), 'utf8'),
+  ) as Extraction
 const before = fixture('docs-bot/before.expected.json')
 const after = fixture('docs-bot/after.expected.json')
 const comparator = new URL('../../../comparators/agentic-workflows/agentic-workflows.comparator.yaml', import.meta.url)

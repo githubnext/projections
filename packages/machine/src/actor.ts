@@ -77,6 +77,7 @@ function timer<E extends MachineEvent>(activity: After<E>, context: ActorContext
 export function defaultReport(error: unknown) {
   const report = (globalThis as {reportError?: (error: unknown) => void}).reportError
   if (typeof report === 'function') report(error)
+  // eslint-disable-next-line no-console -- The documented fallback where the platform has no reportError.
   else console.error(error)
 }
 

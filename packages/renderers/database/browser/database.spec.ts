@@ -2,6 +2,7 @@ import {expect, test} from '@playwright/test'
 import type {FrameLocator} from '@playwright/test'
 import {openRenderer, samples} from '@githubnext/projections-renderer-harness/playwright'
 import {readFileSync} from 'node:fs'
+import type {Extraction} from '@githubnext/projections-schemas'
 import {after, before, indexes} from '../test/fixtures.mjs'
 import {arrowContacts, contactIssues} from '../../kit/browser/invariants/contacts.js'
 import {paintedScales, recordPaintedScales} from '../../kit/browser/painted-scales.js'
@@ -196,7 +197,8 @@ test('keys and indexes are rows of their own tables, single-column keys are colu
   page,
 }) => {
   const {readFile} = await import('node:fs/promises')
-  const load = async (name: string) => JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
+  const load = async (name: string) =>
+    JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8')) as Extraction
   const renderer = await openRenderer(page, {
     renderer: 'database',
     before: await load('prisma-shop-before'),
@@ -440,7 +442,7 @@ test('status appears in reserved space: nothing moves with highlighting, and eve
 
 test("a column row's status is a two-character icon cell, so names and types keep nearly all their room", async ({page}) => {
   const renderer = await openRenderer(page, {renderer: 'database', before, after, progress: 0})
-  const end = (await renderer.state()).steps.filter(value => value > 0 && value < 1)[0]!
+  const end = (await renderer.state()).steps.find(value => value > 0 && value < 1)!
   await renderer.seek(end, {highlighting: 1})
   const measured = await renderer.frame.locator('.database-view').evaluate(view =>
     [...view.querySelectorAll<HTMLElement>('.database-column')].map(row => {
@@ -491,9 +493,11 @@ test('every name, type, key and value shows whole in every scenario and mode (an
 }) => {
   test.setTimeout(240_000)
   const {readFile} = await import('node:fs/promises')
-  const read = async (path: string) => JSON.parse(await readFile(new URL(`../${path}`, import.meta.url), 'utf8'))
+  const read = async (path: string): Promise<unknown> => JSON.parse(await readFile(new URL(`../${path}`, import.meta.url), 'utf8'))
   const load = async (value: unknown) => (typeof value === 'string' ? read(value) : value)
-  const {scenarios} = (await read('scenarios.json')) as {scenarios: {id: string; before?: unknown; after?: unknown; extraction?: unknown}[]}
+  const {scenarios} = JSON.parse(await readFile(new URL('../scenarios.json', import.meta.url), 'utf8')) as {
+    scenarios: {id: string; before?: unknown; after?: unknown; extraction?: unknown}[]
+  }
   let checked = 0
   for (const scenario of scenarios)
   // 1000px is where four ranks of cards sit side by side at their narrowest, which once ellipsized names.
@@ -592,7 +596,8 @@ test('arrowheads are painted over the tables, so a tip stays whole where it meet
 
 test('a card is wide enough for its name, kind and status: the OrderStatus enum header is one line, never ellipsized', async ({page}) => {
   const {readFile} = await import('node:fs/promises')
-  const load = async (name: string) => JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
+  const load = async (name: string) =>
+    JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8')) as Extraction
   await page.setViewportSize({width: 1520, height: 1000})
   const renderer = await openRenderer(page, {
     renderer: 'database',
@@ -607,8 +612,11 @@ test('a card is wide enough for its name, kind and status: the OrderStatus enum 
   expect(await header.evaluate(element => element.getBoundingClientRect().height)).toBeLessThanOrEqual(38.5)
 })
 
-const story = (name: string) =>
-  (['before', 'after'] as const).map(side => JSON.parse(readFileSync(new URL(`../fixtures/${name}-${side}.json`, import.meta.url), 'utf8')))
+const story = (name: string): [Extraction, Extraction] => {
+  const side = (which: 'before' | 'after') =>
+    JSON.parse(readFileSync(new URL(`../fixtures/${name}-${which}.json`, import.meta.url), 'utf8')) as Extraction
+  return [side('before'), side('after')]
+}
 
 /**
  * Every link as drawn, from the renderer document: whether it leaves and

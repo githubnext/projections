@@ -63,7 +63,7 @@ export function visuallyHidden(element: Element, style: CSSStyleDeclaration): bo
   return (
     (box.width <= 1 && box.height <= 1 && style.overflow === 'hidden') ||
     style.clipPath.includes('inset(50%)') ||
-    /rect\(0(?:px)?,? 0(?:px)?,? 0(?:px)?,? 0(?:px)?\)/u.test(style.clip)
+    /rect\(0(?:px)?,? 0(?:px)?,? 0(?:px)?,? 0(?:px)?\)/u.test(style.getPropertyValue('clip'))
   )
 }
 

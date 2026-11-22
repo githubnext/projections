@@ -96,7 +96,7 @@ export function rendererSummary(init: InitPayload, nouns?: SummaryNouns, facts: 
  * the revisions) is counted whole, as the protocol counts kinds. Spread it into a renderer's nouns:
  * `{contains: false, ...boundaryNouns(model, true)}`.
  */
-export function boundaryNouns(model: ComparisonModel, compound: boolean | readonly string[]): SummaryNouns {
+export function boundaryNouns(model: ComparisonModel, compound: boolean | readonly string[]): Readonly<Record<string, false>> {
   const kinds = boundaryKinds(compound)
   const grouping = (entities: readonly LayoutNode[], relationships: readonly LayoutEdge[]) => {
     const groups = moduleGroups(entities, relationships, kinds)

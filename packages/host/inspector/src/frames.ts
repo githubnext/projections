@@ -20,7 +20,7 @@ export function relayRendererFrames(prefix: string, open: (url: URL) => Promise<
       // Until the Blob document is ready the frame loads nothing; the renderer host times out if it never is.
       void open(url).then(
         blob => set.call(this, `${blob}${url.hash}`),
-        error => console.error(`Projections: the custom renderer ${url.pathname} is unavailable`, error),
+        (error: unknown) => reportError(new Error(`Projections: the custom renderer ${url.pathname} is unavailable`, {cause: error})),
       )
     },
   })

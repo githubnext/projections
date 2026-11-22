@@ -135,7 +135,7 @@ export function buildDraft(
     body,
     labels: [FEEDBACK_LABEL],
     fields,
-    url: `https://github.com/${options.repository}/issues/new?${params}`,
+    url: `https://github.com/${options.repository}/issues/new?${params.toString()}`,
   }
 }
 

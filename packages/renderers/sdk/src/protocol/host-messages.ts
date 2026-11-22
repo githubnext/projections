@@ -15,8 +15,11 @@ type Fields = Record<string, unknown>
 
 // The engine normalizes missing `data` to `{}`; renderers receive the same.
 function withData(extraction: Record<string, unknown>): Record<string, unknown> {
-  const fill = (items: unknown) =>
-    Array.isArray(items) ? items.map(item => (record(item) && item.data === undefined ? {...item, data: {}} : item)) : items
+  const fill = (items: unknown): unknown => {
+    if (!Array.isArray(items)) return items
+    const list: unknown[] = items
+    return list.map(item => (record(item) && item.data === undefined ? {...item, data: {}} : item))
+  }
   return {...extraction, entities: fill(extraction.entities), relationships: fill(extraction.relationships)}
 }
 

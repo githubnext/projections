@@ -23,18 +23,33 @@ async function selectTarget(page: Page, text: string) {
   await page.getByRole('button', {name: 'Select target', exact: true}).click()
 }
 
-async function anchor(page: Page): Promise<{x: number; y: number; width: number; height: number; side: string} | 'none'> {
+/** A target the host reports for its selection. */
+interface Target {
+  kind: string
+  id: string
+  side: string
+}
+/** Where the host reports the selection is drawn. */
+interface Anchor {
+  x: number
+  y: number
+  width: number
+  height: number
+  side: string
+}
+
+async function anchor(page: Page): Promise<Anchor | 'none'> {
   const text = await output(page, 'Selection anchor').textContent()
-  return text === 'none' || !text ? 'none' : JSON.parse(text)
+  return text === 'none' || !text ? 'none' : (JSON.parse(text) as Anchor)
 }
 
 test('selecting an item in a renderer reports the targets it stands for', async ({page}) => {
   await open(page, 'before=v1&after=v3')
   await frame(page).locator('[data-entity-id="payments"][role="button"]').click()
   await expect(output(page, 'Host selection')).toHaveText('payments')
-  const targets = JSON.parse((await output(page, 'Host selection targets').textContent()) ?? 'null')
+  const targets = JSON.parse((await output(page, 'Host selection targets').textContent()) ?? 'null') as Target[]
   expect(targets).toContainEqual({kind: 'entity', id: 'payments', side: 'after'})
-  expect(targets.every((target: {kind: string; id: string}) => target.kind === 'entity' && target.id === 'payments')).toBe(true)
+  expect(targets.every(target => target.kind === 'entity' && target.id === 'payments')).toBe(true)
   // A single extraction has only an after side.
   await open(page, 'single&after=v3')
   await frame(page).locator('[data-entity-id="payments"][role="button"]').click()
@@ -185,11 +200,13 @@ test('relationships are selectable in a graph renderer and resolve to relationsh
   await edge.focus()
   await page.keyboard.press('Enter')
   await expect(output(page, 'Host selection')).toHaveText(id!)
-  const targets = JSON.parse((await output(page, 'Host selection targets').textContent()) ?? 'null')
+  const targets = JSON.parse((await output(page, 'Host selection targets').textContent()) ?? 'null') as Target[]
   expect(targets.length).toBeGreaterThan(0)
-  expect(targets.every((target: {kind: string}) => target.kind === 'relationship')).toBe(true)
+  expect(targets.every(target => target.kind === 'relationship')).toBe(true)
   // The host can select a relationship target back.
-  await selectTarget(page, `relationship.${targets[0].side}.${encodeURIComponent(targets[0].id)}`)
+  const [first] = targets
+  if (!first) throw new Error('The selection has no targets')
+  await selectTarget(page, `relationship.${first.side}.${encodeURIComponent(first.id)}`)
   await expect(output(page, 'Target resolution')).toContainText('"status":"present"')
   await expect(output(page, 'Host selection')).toHaveText(id!)
 })

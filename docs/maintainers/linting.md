@@ -79,6 +79,9 @@ Each option allows one defined idiom and nothing else.
   `no-misused-promises` catch the promise bugs that matter.
 - Style without a bug class: `no-plusplus`, `no-nested-ternary`,
   `no-negated-condition`, `prefer-destructuring`, `prefer-named-capture-group`.
+- `no-template-curly-in-string`, in the few tests whose strings are GitHub
+  Actions expressions (`${{ … }}`) or prose about template literals: the
+  literal `${` is what they check.
 
 ## Rules of our own
 

@@ -245,7 +245,7 @@ test('projections-tools: runs the checkout it is invoked in, in its root, with i
   symlinkSync(process.execPath, nvm)
   const child = run(pinned, ['doctor'], {NVM_DIR: join(base, 'nvm')})
   assert.equal(child.status, 0, String(child.stderr))
-  const reported = JSON.parse(String(child.stdout))
+  const reported = JSON.parse(String(child.stdout)) as {argv0: string; cwd: string; args: string[]}
   assert.equal(reported.argv0, nvm)
   assert.equal(reported.cwd, pinned)
   assert.deepEqual(reported.args, ['doctor'])
@@ -273,6 +273,8 @@ test('projections-tools: outside a checkout it runs the linked one, says so, and
   const added = run(outside, ['mcp', 'add'], {PATH: `${fakes}${delimiter}${process.env.PATH ?? ''}`})
   assert.equal(added.status, 0, String(added.stdout) + String(added.stderr))
   assert.deepEqual(readFileSync(record, 'utf8').trim().split('\n'), ['add-mcp', `${shim} --mcp`, '--name', 'projections-tools', '-y', '-g'])
-  const amp = JSON.parse(readFileSync(join(base, 'home/.config/amp/settings.json'), 'utf8'))
+  const amp = JSON.parse(readFileSync(join(base, 'home/.config/amp/settings.json'), 'utf8')) as {
+    'amp.mcpServers': Record<string, unknown>
+  }
   assert.deepEqual(amp['amp.mcpServers']['projections-tools'], {command: shim, args: ['--mcp']})
 })

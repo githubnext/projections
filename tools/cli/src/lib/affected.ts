@@ -24,7 +24,7 @@ export function kindsOf(paths: readonly string[]): ChangeKind[] {
   for (const path of paths) {
     if (/\.[cm]?[jt]sx?$/u.test(path)) kinds.add('ts')
     if (/\.rs$|(?:^|\/)Cargo\.(?:toml|lock)$|^rust-toolchain\.toml$/u.test(path)) kinds.add('rust')
-    if (/\.md$/u.test(path)) kinds.add('docs')
+    if (path.endsWith('.md')) kinds.add('docs')
     if (/\.comparator(?:\.test)?\.ya?ml$/u.test(path) || path.startsWith('packages/comparators/') || path.startsWith('packages/schemas/')) {
       kinds.add('comparators')
     }

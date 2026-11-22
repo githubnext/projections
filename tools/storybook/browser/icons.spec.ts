@@ -45,7 +45,7 @@ for (const story of stories) {
     expect(await panels.count()).toBeGreaterThanOrEqual(2)
     for (const panel of await panels.all()) {
       const shown = (scope: string) =>
-        panel.locator(`${scope} [data-gallery-icon]`).evaluateAll(rows => rows.map(row => row.getAttribute('data-gallery-icon')))
+        panel.locator(`${scope} [data-gallery-icon]`).evaluateAll(rows => rows.map(row => row.getAttribute('data-gallery-icon') ?? ''))
       if (story.names) expect((await shown('')).sort()).toEqual([...story.names].sort())
       for (const [group, names] of Object.entries(story.groups ?? {})) expect(await shown(`[data-gallery-group="${group}"]`)).toEqual(names)
     }
@@ -75,7 +75,7 @@ for (const story of stories) {
             const size = element.closest('[data-gallery-size]')?.getAttribute('data-gallery-size')
             const where = element.closest('[data-summary-figure]') ? 'summary bar' : size ? `${size}px` : 'card footer'
             const colored = where === 'summary bar' || style.backgroundColor === expected
-            return {name, where, layers: urls(style.maskImage || style.webkitMaskImage), colored}
+            return {name, where, layers: urls(style.maskImage || style.getPropertyValue('-webkit-mask-image')), colored}
           })
         const svg = [...row.querySelectorAll('.pk-svg-icon')].map(group => ({
           name,

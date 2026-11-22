@@ -14,7 +14,7 @@ for (const key of scenarioKeys(renderer)) {
 
 test('an edit updates the renderer in place, keeping the host state', async ({page, inspector}) => {
   const stage = await openStage(page, inspector, {scenario: 'renderer/split', progress: 1})
-  expect(page.frames().some(frame => frame.url().startsWith(JSON.parse(readFileSync(record, 'utf8')).url))).toBe(true)
+  expect(page.frames().some(frame => frame.url().startsWith((JSON.parse(readFileSync(record, 'utf8')) as {url: string}).url))).toBe(true)
   const label = stage.frame.locator('[data-entity-id="service:payments"] .pk-entity-card-label')
   await stage.select('service:payments')
   await expect(label).toHaveText('Payments')

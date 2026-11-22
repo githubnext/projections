@@ -1,4 +1,4 @@
-import {forwardRef, type ComponentPropsWithoutRef, type ElementRef} from 'react'
+import {forwardRef, type ComponentPropsWithoutRef, type ComponentRef} from 'react'
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import {cn} from '../lib/utils.js'
 
@@ -8,7 +8,7 @@ import {cn} from '../lib/utils.js'
  * segments: a bordered muted well whose checked item is a raised, bevelled card-colored segment.
  */
 export const SegmentedControl = forwardRef<
-  ElementRef<typeof RadioGroupPrimitive.Root>,
+  ComponentRef<typeof RadioGroupPrimitive.Root>,
   ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
 >(({className, ...props}, ref) => {
   // No orientation: every arrow key moves, as with native radios.
@@ -30,7 +30,7 @@ export const SegmentedControl = forwardRef<
  * it, as arrow keys do in a native radio group.
  */
 export const SegmentedControlItem = forwardRef<
-  ElementRef<typeof RadioGroupPrimitive.Item>,
+  ComponentRef<typeof RadioGroupPrimitive.Item>,
   ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
 >(({className, children, onFocus, ...props}, ref) => {
   return (

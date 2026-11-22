@@ -77,14 +77,37 @@ test.afterAll(async () => {
   for (const directory of [repository, cache]) rmSync(directory, {recursive: true, force: true, maxRetries: 10, retryDelay: 200})
 })
 
-async function control(path: string, body?: unknown) {
-  const response = await fetch(new URL(path, url), {
+/** A viewer's state, as the control API reports it and these tests read it. */
+interface ViewerState {
+  pages: number
+  views: {selection?: string; mode?: string}[]
+  page?: {
+    view?: {status?: string}
+    selection?: string
+    mode?: string
+    theme?: {seeded?: boolean; ignored?: string}
+    summary?: {projection?: string; failures?: unknown[]}
+  }
+  state: {mode?: string; projection?: string; chosenBy?: string}
+}
+/** The `current_view` tool's result. */
+interface CurrentView {
+  content: [{text: string}]
+  structuredContent: {mode?: string; pages?: number}
+}
+
+function request(path: string, body?: unknown) {
+  return fetch(new URL(path, url), {
     method: body === undefined ? 'GET' : 'POST',
     ...(body === undefined ? {} : {headers: {'content-type': 'application/json'}, body: JSON.stringify(body)}),
   })
-  return {status: response.status, body: await response.json()}
 }
-const state = async () => (await control('control/state')).body
+async function control(path: string, body?: unknown) {
+  return {status: (await request(path, body)).status}
+}
+const state = async (viewer?: string) =>
+  (await (await request(viewer ? `control/state?viewer=${viewer}` : 'control/state')).json()) as ViewerState
+const currentView = async (body: {viewer?: string} = {}) => (await (await request('control/tool/current_view', body)).json()) as CurrentView
 
 /** The page's own text, outside renderer frames, and the paths it names. */
 async function pathsIn(page: Page) {
@@ -124,7 +147,7 @@ test('a page framed by a document that is not a secure context still counts as o
     await page.goto('http://preview.invalid/')
     await expect(page.frameLocator('iframe').locator('.pi-viewer-header')).toContainText('Package map', {timeout: 30_000})
     expect(await page.frames()[1]!.evaluate(() => isSecureContext)).toBe(false)
-    await expect.poll(async () => (await control('control/state?viewer=framed')).body.pages, {timeout: 15_000}).toBe(1)
+    await expect.poll(async () => (await state('framed')).pages, {timeout: 15_000}).toBe(1)
   } finally {
     await browser.close()
   }
@@ -143,7 +166,7 @@ test('screenshot --page captures the viewer page, its chrome and all, without co
   const noBrowser = String(shot.stderr).includes('No Chrome, Chromium or Microsoft Edge was found')
   test.skip(noBrowser && !process.env.CI, 'no Chrome, Chromium or Edge is installed')
   expect(shot.status, String(shot.stderr)).toBe(0)
-  const result = JSON.parse(String(shot.stdout))
+  const result = JSON.parse(String(shot.stdout)) as Record<string, unknown>
   expect(result).toMatchObject({page: true, projection: 'packages', width: 900, height: 600})
   const png = readFileSync(out)
   expect(png.subarray(1, 4).toString()).toBe('PNG')
@@ -163,25 +186,23 @@ test('the page reflects what the agent shows, reports the selection and mirrors 
   // The agent shows another mode and selects an item: the page follows and says so.
   expect((await control('control/show', {mode: 'side-by-side', entity: 'workspace:b'})).status).toBe(200)
   await expect.poll(async () => (await state()).page?.selection, {timeout: 15_000}).toBe('workspace:b')
-  expect((await state()).page.mode).toBe('side-by-side')
+  expect((await state()).page?.mode).toBe('side-by-side')
 
   // A second page shows the same, and what the person does in it mirrors to the first.
   const second = await context.newPage()
   await second.goto(url)
   await expect
-    .poll(async () => (await state()).views.filter((view: {selection: string}) => view.selection === 'workspace:b').length, {
+    .poll(async () => (await state()).views.filter(view => view.selection === 'workspace:b').length, {
       timeout: 30_000,
     })
     .toBe(2)
   const modes = second.locator('.ph-toolbar').getByRole('radiogroup', {name: 'Comparison mode'}).first()
   await modes.getByRole('radio', {name: 'Swipe', exact: true}).click()
   await expect.poll(async () => (await state()).state.mode, {timeout: 10_000}).toBe('swipe')
-  await expect
-    .poll(async () => (await state()).views.map((view: {mode: string}) => view.mode), {timeout: 10_000})
-    .toEqual(['swipe', 'swipe'])
+  await expect.poll(async () => (await state()).views.map(view => view.mode), {timeout: 10_000}).toEqual(['swipe', 'swipe'])
 
   // The agent reads what the person sees and did, through the same tool VS Code's agent calls.
-  const current = (await control('control/tool/current_view', {})).body
+  const current = await currentView()
   expect(current.content[0].text).toContain('[workspace:b]')
   expect(current.structuredContent.mode).toBe('swipe')
   expect(current.structuredContent.pages).toBe(2)
@@ -553,7 +574,7 @@ test("a theme seed in the link colors the stage and chrome in each mode it has, 
   await expect.poll(painted).toEqual(light)
   // The page says it took the seed, and the agent reads it.
   await expect.poll(async () => (await state()).page?.theme).toEqual({seeded: true})
-  expect((await control('control/tool/current_view', {})).body.content[0].text).toContain('Theme: the theme seed in')
+  expect((await currentView()).content[0].text).toContain('Theme: the theme seed in')
   // The Copilot app's own theme doesn't replace a seed in the link: the seed is the more explicit.
   await page.evaluate(() => {
     const style = document.createElement('style')
@@ -584,9 +605,7 @@ test("a theme seed that isn't valid is ignored, and the page and the agent say s
   await expect(page.locator('html')).not.toHaveClass(/pi-app-theme/u)
   expect(warnings.join('\n')).toContain("theme.light.background isn't a color")
   await expect.poll(async () => (await state()).page?.theme?.ignored).toContain("isn't a color")
-  expect((await control('control/tool/current_view', {})).body.content[0].text).toContain(
-    'Theme: the page ignored the theme seed in its link',
-  )
+  expect((await currentView()).content[0].text).toContain('Theme: the page ignored the theme seed in its link')
 })
 
 test('the agent reads what a page did with its theme seed while the page is still loading the projection', async ({page}) => {
@@ -606,7 +625,7 @@ test('the agent reads what a page did with its theme seed while the page is stil
       return loaded ? 'a loaded page' : (shown?.theme?.ignored ?? 'no theme')
     })
     .toContain("isn't a color")
-  const text = (await control('control/tool/current_view', {})).body.content[0].text
+  const text = (await currentView()).content[0].text
   expect(text).toContain('No page shows it yet')
   expect(text).toContain('Theme: the page ignored the theme seed in its link')
   release()
@@ -730,11 +749,11 @@ test('a named viewer is its own page, and the person switches its projection fro
   await expect(header.locator('.pi-viewer-title')).toHaveText('Package map')
   await expect
     .poll(async () => {
-      const side = (await control('control/state?viewer=side')).body.state
+      const side = (await state('side')).state
       return [side.projection, side.chosenBy]
     })
     .toEqual(['packages', 'person'])
-  const current = (await control('control/tool/current_view', {viewer: 'side'})).body
+  const current = await currentView({viewer: 'side'})
   expect(current.content[0].text).toContain('The person chose this projection themselves')
   const main = (await state()).state
   expect([main.projection, main.chosenBy]).toEqual([before.projection, 'agent'])

@@ -89,7 +89,8 @@ function stagger(ctx: RoutingContext, a: Segment, b: Segment): boolean {
       segment[flag] = true
       build(ctx, segment)
       if (fixed()) return true
-      delete segment[flag]
+      if (flag === 'late') delete segment.late
+      else delete segment.around
       build(ctx, segment)
     }
   }

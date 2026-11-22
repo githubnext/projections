@@ -7,7 +7,7 @@ import {shortTypeName} from './type-name.js'
 export const shortName = shortTypeName
 
 export function lifetimeOf(value: unknown): Lifetime {
-  const text = String(value ?? '').toLowerCase()
+  const text = typeof value === 'string' ? value.toLowerCase() : ''
   return text === 'singleton' || text === 'scoped' || text === 'transient' ? text : 'unknown'
 }
 

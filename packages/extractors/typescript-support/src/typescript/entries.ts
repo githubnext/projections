@@ -1,6 +1,6 @@
 import path from 'node:path'
 import {glob, record} from '../shared.js'
-import {code, inputs, native, slash, type Package, type Project} from './model.js'
+import {code, inputs, native, slash, strings, type Package, type Project} from './model.js'
 
 function owner(project: Project, file: string): Package {
   const relative = slash(path.relative(project.root, file))
@@ -105,7 +105,7 @@ export function apiEntries(project: Project): Entry[] {
   }
   if (explicit !== undefined) {
     const mapping = Array.isArray(explicit)
-      ? explicit.map(file => ['.', String(file)] as const)
+      ? strings(explicit, 'inputs.entrypoints').map(file => ['.', file] as const)
       : (Object.entries(record(explicit, 'inputs.entrypoints')) as [string, string][])
     for (const [subpath, relative] of mapping) add(owner(project, path.resolve(project.root, relative)), subpath, relative)
     return entries

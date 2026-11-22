@@ -87,7 +87,7 @@ test('beside the item on wide stages: the card is next to the anchor the rendere
   await expect(anchorText).not.toHaveText('none')
   await expect
     .poll(async () => {
-      const anchor = JSON.parse((await anchorText.textContent())!)
+      const anchor = JSON.parse((await anchorText.textContent())!) as {x: number; y: number; width: number; height: number}
       const box = (await card(page).boundingBox())!
       const side = await card(page).getAttribute('data-placement')
       if (side === 'right') return Math.round(box.x - (anchor.x + anchor.width))

@@ -125,5 +125,8 @@ export function dispatch(handlers: RendererHandlers, message: HostMessage) {
         ...(message.scope === undefined ? {} : {scope: message.scope}),
       })
       break
+    case 'document':
+      // The client settles its document requests with these before dispatching; no handler takes one.
+      break
   }
 }

@@ -46,12 +46,14 @@ export function measureRenderedFrame(root = document) {
   const svg = root.querySelector('svg.di-canvas')
   const pk = root.querySelector('.pk')
   if (!svg) return {progress: Number(pk?.dataset.progress), viewBox: null, cards: [], links: [], emphasis: 0, html: ''}
+  /** @param {Element} element */
   const box = element => {
     const {x, y, width, height} = element.getBoundingClientRect()
     return {x, y, width, height}
   }
-  const cards = [...svg.querySelectorAll('.di-card')].map(card => ({
-    id: card.dataset.unitId,
+  const cards = [.../** @type {NodeListOf<SVGGElement>} */ (svg.querySelectorAll('.di-card'))].map(card => ({
+    // Every card carries its unit's ID.
+    id: /** @type {string} */ (card.dataset.unitId),
     opacity: Number(card.getAttribute('opacity')),
     box: box(card.querySelector('.di-card-surface')),
   }))

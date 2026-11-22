@@ -404,6 +404,7 @@ type Required<F> = {[K in keyof F as F[K] extends {required: true} ? K : never]:
 type UnionToIntersection<U> = (U extends unknown ? (value: U) => void : never) extends (value: infer I) => void ? I : never
 type Merge<T> = {[K in keyof T]: T[K]}
 /** No fields: the identity of field intersections. */
+// eslint-disable-next-line @typescript-eslint/no-generated-empty-object-type -- Empty on purpose: it adds no fields.
 type NoFields = Record<never, never>
 
 /** `data` with the typed fields of `fields`, and any other JSON. */

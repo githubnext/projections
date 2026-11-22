@@ -4,7 +4,8 @@ import {record} from './guards.js'
 /** Validates a `GET /api/renderers` response; the custom renderer base must be a same-origin path. */
 export function parseRendererList(value: unknown, origin: string): InspectorRendererList {
   // The runner lists `renderer.json` manifests; only their names are used here.
-  const names = record(value) && Array.isArray(value.renderers) ? value.renderers.map(item => (record(item) ? item.name : item)) : undefined
+  const names =
+    record(value) && Array.isArray(value.renderers) ? value.renderers.map((item: unknown) => (record(item) ? item.name : item)) : undefined
   if (
     !record(value) ||
     !names ||

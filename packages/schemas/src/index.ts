@@ -499,8 +499,10 @@ export function proseSpans(text: string): ProseSpan[] {
   let code = false
   for (let index = 0; index < text.length; index++) {
     const character = text[index]!
-    if (character === '\\' && (text[index + 1] === '`' || text[index + 1] === '\\')) {
-      current += text[++index]
+    const next = text[index + 1]
+    if (character === '\\' && (next === '`' || next === '\\')) {
+      current += next
+      index++
     } else if (character === '`') {
       if (code) {
         push(current, true)

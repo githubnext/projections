@@ -51,8 +51,8 @@ export function layerDepths(nodes: readonly string[], edges: readonly {from: str
   const depth = new Map<string, number>()
   const queue = nodes.filter(id => incoming.get(id) === 0)
   for (const id of queue) depth.set(id, 0)
-  for (let index = 0; index < queue.length; index++) {
-    const id = queue[index]!
+  // The queue grows as it is read: an array's iterator reaches the items pushed during the loop.
+  for (const id of queue) {
     for (const child of acyclic.get(id)!) {
       depth.set(child, Math.max(depth.get(child) ?? 0, depth.get(id)! + 1))
       incoming.set(child, incoming.get(child)! - 1)

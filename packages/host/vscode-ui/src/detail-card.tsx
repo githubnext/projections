@@ -54,9 +54,8 @@ export function DetailCard({
   annotations = true,
   sheetBelow,
 }: DetailCardProps) {
-  const card = useDetailCard(p, {container, view, ...(sheetBelow === undefined ? {} : {sheetBelow})})
+  const {row, placement, style, ref, close, select} = useDetailCard(p, {container, view, ...(sheetBelow === undefined ? {} : {sheetBelow})})
   const id = useId()
-  const row = card.row
   if (!row) return null
   const details = rowDetails(p.subject, row, p.rows)
   const comparing = p.subject.mode === 'comparison'
@@ -65,19 +64,19 @@ export function DetailCard({
   const titleId = `${id}-title`
   return (
     <aside
-      ref={card.ref}
+      ref={ref}
       className="phv-detail-card"
-      style={card.style}
+      style={style}
       aria-labelledby={titleId}
       data-detail-card={row.id}
-      data-placement={card.placement ? (card.placement.sheet ? 'sheet' : card.placement.side) : undefined}
+      data-placement={placement ? (placement.sheet ? 'sheet' : placement.side) : undefined}
     >
       <header className="phv-detail-card-header">
         <h3 id={titleId} tabIndex={-1} data-detail-card-title="" className="phv-detail-card-title">
           {row.label}
         </h3>
         {mark && <AnnotationMarker mark={mark} row={row} onActivate={p.activateAnnotation} />}
-        <ActionButton icon={uiCodicons.close} label="Close details" onClick={card.close} />
+        <ActionButton icon={uiCodicons.close} label="Close details" onClick={close} />
       </header>
       {(comparing || details.fields.length > 0) && (
         <ChangesSection
@@ -97,7 +96,7 @@ export function DetailCard({
           onOpen={onOpen}
         />
       )}
-      {details.connections.length > 0 && <ConnectionsSection id={`${id}-connections`} details={details} select={card.select} />}
+      {details.connections.length > 0 && <ConnectionsSection id={`${id}-connections`} details={details} select={select} />}
       {renderDetails && p.selection && <div className="ph-details-slot phv-detail-section">{renderDetails(p.selection, p)}</div>}
     </aside>
   )

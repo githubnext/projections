@@ -74,7 +74,7 @@ function Choice<T extends string>({
     group.current?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]?.focus()
   }
   return (
-    <div ref={group} role="radiogroup" aria-label={label} onKeyDown={keys} style={{display: 'inline-flex', gap: 2}}>
+    <div ref={group} role="radiogroup" aria-label={label} style={{display: 'inline-flex', gap: 2}}>
       {options.map((option, position) => (
         <button
           key={option.value}
@@ -84,6 +84,7 @@ function Choice<T extends string>({
           tabIndex={position === index ? 0 : -1}
           title={option.title}
           onClick={() => onChange(option.value)}
+          onKeyDown={keys}
           style={{fontWeight: option.value === value ? 700 : 400}}
         >
           {option.label}

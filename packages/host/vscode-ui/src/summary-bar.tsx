@@ -55,6 +55,7 @@ function Fact({
   measure?: boolean
 }) {
   const {pressed, next} = summaryToggle(p.summaryFilter, figure)
+  const descriptionId = useId()
   const content = (
     <>
       {figure.icon && <span aria-hidden="true" data-icon={figure.icon} style={factIcon(figure.icon)} />}
@@ -69,7 +70,7 @@ function Fact({
           type="button"
           className={'phv-summary-button phv-summary-fact'}
           aria-pressed={pressed}
-          aria-description={figure.description}
+          aria-describedby={figure.description ? descriptionId : undefined}
           title={summaryFactTitle(figure, pressed)}
           data-summary-total={figure.count}
           data-tone={figure.tone}
@@ -77,6 +78,11 @@ function Fact({
           onClick={() => p.setSummaryFilter(next)}
         >
           {content}
+          {figure.description && (
+            <span id={descriptionId} hidden>
+              {figure.description}
+            </span>
+          )}
         </button>
       ) : (
         <span className={'phv-summary-fact'} title={summaryFactTitle(figure)} data-summary-total={figure.count} data-tone={figure.tone}>

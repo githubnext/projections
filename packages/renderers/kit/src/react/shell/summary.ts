@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef} from 'react'
+import {useCallback, useEffect, useLayoutEffect, useRef} from 'react'
 import type {RendererClient} from '@githubnext/projections-renderer-sdk/client'
 import type {ControlValue, InitPayload, SummaryFactItem} from '@githubnext/projections-renderer-sdk/protocol'
 import type {SummaryNouns} from '@githubnext/projections-renderer-sdk/presentation'
@@ -54,7 +54,32 @@ export function useSummaryReport(
     },
     [options.nouns],
   )
-  summarized.current = {...(document.model ? {model: document.model} : {}), controls: document.controls}
+  // What the summary is made from, as committed, for the effect below and the renderer's `declareNouns`.
+  useLayoutEffect(() => {
+    summarized.current = {...(document.model ? {model: document.model} : {}), controls: document.controls}
+    sendSummary.current = () => {
+      if (!client || !init) return
+      const {model: current, controls: values} = summarized.current
+      if (options.facts && !current) return
+      let facts: readonly SummaryFactItem[] = []
+      if (options.facts && current && !(current instanceof Error)) {
+        try {
+          facts = options.facts({init, model: current, controls: values, rendererName: init.projection.renderer})
+        } catch (error) {
+          onError(`The renderer's summary facts failed: ${error instanceof Error ? error.message : String(error)}`)
+        }
+      }
+      try {
+        const summary = rendererSummary(init, nouns.current, facts)
+        const key = JSON.stringify(summary)
+        if (key === sentSummary.current) return
+        sentSummary.current = key
+        client.summary(summary)
+      } catch {
+        // A summary the protocol refuses leaves the host's own words.
+      }
+    }
+  })
   useEffect(() => sendSummary.current(), [client, init, document.model, document.controls])
   return declareNouns
 }

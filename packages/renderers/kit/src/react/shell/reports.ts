@@ -38,7 +38,9 @@ export function useDeclaredControls(
     if (client && declared !== initial && !(declared.length === 0 && !initial)) client.declareOptions(declared)
   }, [client, declared, initial])
   const latest = useRef(options)
-  latest.current = options
+  useLayoutEffect(() => {
+    latest.current = options
+  })
   const setControl = useCallback(
     (id: string, value: ControlValue) => {
       const shown = latest.current

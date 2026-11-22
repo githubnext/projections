@@ -3,6 +3,7 @@ import {Prose} from '../prose.js'
 import {Notice} from '../notice.js'
 import {ComparatorLine, rendererLabel, type ViewKind} from '../blocks.js'
 import type {VscodeProjectionViewProps} from './props.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * What the view says above the stage: the host's banner, which view is showing (for assistive technology), the
@@ -39,8 +40,8 @@ export function ViewNotices({
       )}
       {otherNotices.length > 0 && (
         <ul className="phv-notices" aria-label="Notices">
-          {otherNotices.map((notice, index) => (
-            <li key={index}>
+          {keyed(otherNotices, notice => notice).map(([key, notice]) => (
+            <li key={key}>
               <Notice title="Notice" hideTitle>
                 <Prose>{notice}</Prose>
               </Notice>

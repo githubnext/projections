@@ -1,6 +1,6 @@
 // A card's facts drawn: its badges, in rows under its text, and its accent band along its leading edge.
 import {useId} from 'react'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import type {TransitionNode} from '../../graph-transition.js'
 import {cardFooterHeight} from '../../layout.js'
 import {cardTextMetrics} from '../../card-text.js'
@@ -29,14 +29,14 @@ export function CardBadges({node, drawing}: {node: TransitionNode; drawing: Draw
   const room = badgeRoom(node.width)
   const group = (values: readonly CardBadge[], tone: (value: CardBadge) => string | undefined, opacity = 1, key = 'badges') => (
     <g key={key} className="node-badges" opacity={opacity}>
-      {placeBadges(values, room, props.textScale).map((badge, index) => {
+      {keyed(placeBadges(values, room, props.textScale), badge => badge.text).map(([badgeKey, badge], index) => {
         const y = top + badge.row * badgeMetrics.row
         const change = tone(values[index]!)
         const x = left + badge.x
         const icon = badge.tone === 'highlight' ? badgeMetrics.icon + badgeMetrics.iconGap : 0
         const inset = badge.tone === 'quiet' ? 0 : badgeMetrics.inset
         return (
-          <g key={index} className={`node-badge${badge.tone ? ` ${badge.tone}` : ''}${change ? ` ${change}` : ''}`}>
+          <g key={badgeKey} className={`node-badge${badge.tone ? ` ${badge.tone}` : ''}${change ? ` ${change}` : ''}`}>
             {badge.tone !== 'quiet' && <path className="node-badge-surface" d={pill(x, y, badge.width)} />}
             {icon > 0 && (
               <SvgIcon

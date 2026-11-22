@@ -173,17 +173,16 @@ function IconTable({group, SummaryBar}: {group: IconGroup; SummaryBar: SummaryBa
  * panel of a host has the same icons; the colors stay on each panel.
  */
 function RootIconTokens({theme, children}: {theme: RendererTheme; children: ReactNode}) {
-  const [ready, setReady] = useState(false)
-  useLayoutEffect(() => {
+  // Inserted as styles are, before any layout effect: the kit's `SvgIcon` reads its icon's tokens as it mounts.
+  useInsertionEffect(() => {
     const root = document.documentElement
     const icons = Object.entries(theme.tokens).filter(([name]) => name.startsWith('icon-'))
     for (const [name, value] of icons) root.style.setProperty(`--projections-${name}`, value)
-    setReady(true)
     return () => {
       for (const [name] of icons) root.style.removeProperty(`--projections-${name}`)
     }
   }, [theme])
-  return ready ? children : null
+  return children
 }
 
 /** Every icon of `groups` in each panel's theme. */

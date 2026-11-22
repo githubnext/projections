@@ -23,7 +23,7 @@ export const SegmentedControl = forwardRef<
       {...props}
     />
   )
-})
+}
 
 /**
  * One segment of a `SegmentedControl`, a Radix radio item with a `value`. Moving focus to it with the keyboard selects
@@ -60,4 +60,4 @@ export const SegmentedControlItem = forwardRef<
       {children}
     </RadioGroupPrimitive.Item>
   )
-})
+}

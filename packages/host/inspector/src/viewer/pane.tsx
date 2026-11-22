@@ -63,6 +63,7 @@ export function ViewerPane({store, onChoose}: {store: Store; onChoose: (projecti
   return (
     <div
       ref={pane}
+      role="presentation"
       className="pi-viewer-pane-slot pj:contents"
       onFocus={() => store.focus({type: 'entered', place: 'pane'})}
       onBlur={event => {

@@ -107,14 +107,16 @@ export function Overlay({
   returnFocus = true,
   onPlaced,
 }: OverlayProps) {
-  const layer = useContext(LayerContext)
+  const layer = use(LayerContext)
   const element = useRef<HTMLDivElement>(null)
   // Placed after it renders, but focusable from the start (a hidden element can't take focus).
   const [style, setStyle] = useState<CSSProperties>({opacity: 0})
   const close = useRef(onClose)
-  close.current = onClose
   const placed = useRef(onPlaced)
-  placed.current = onPlaced
+  useLayoutEffect(() => {
+    close.current = onClose
+    placed.current = onPlaced
+  })
 
   useLayoutEffect(() => {
     if (!open) return undefined
@@ -149,6 +151,7 @@ export function Overlay({
 
   if (!open) return null
   const content = (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- a dialog or menu (`role`, which the rule can't read from an expression), or with `none` the container that takes Escape and Tab from its content.
     <div
       ref={element}
       role={role === 'none' ? undefined : role}

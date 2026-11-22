@@ -39,12 +39,15 @@ export function useInspectorHandle({
   setRows: Dispatch<SetStateAction<Rows>>
 }) {
   const handleState = useRef(state)
-  handleState.current = state
   const handleActions = useRef(actions)
-  handleActions.current = actions
   // The projection the host last selected, until the Inspector shows it: a scenario asked for next is that one's.
   const selected = useRef<string>(undefined)
-  if (selected.current === state.projection) selected.current = undefined
+  // The handle reads the committed render's state and actions.
+  useLayoutEffect(() => {
+    handleState.current = state
+    handleActions.current = actions
+    if (selected.current === state.projection) selected.current = undefined
+  })
   useEffect(() => {
     if (!handleRef) return undefined
     const handle: InspectorHandle = {

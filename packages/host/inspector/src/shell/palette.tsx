@@ -47,17 +47,23 @@ export function CommandPalette({
   const id = useId()
   const shown = useMemo(() => commands.filter(command => !command.disabled && matches(command, query)), [commands, query])
 
+  // Each opening starts with an empty query.
+  const [opened, setOpened] = useState(open)
+  if (opened !== open) {
+    setOpened(open)
+    if (open) {
+      setQuery('')
+      setIndex(0)
+    }
+  }
   useEffect(() => {
     if (!open) return undefined
     returnFocus.current = document.activeElement
-    setQuery('')
-    setIndex(0)
     requestAnimationFrame(() => input.current?.focus())
     return () => {
       ;(returnFocus.current as HTMLElement | null)?.focus()
     }
   }, [open])
-  useEffect(() => setIndex(0), [query])
   useEffect(() => {
     document.getElementById(`${id}-option-${index}`)?.scrollIntoView({block: 'nearest'})
   }, [id, index])
@@ -69,10 +75,10 @@ export function CommandPalette({
     // Run after the palette closes, so commands that move focus keep it.
     setTimeout(command.run, 0)
   }
-  let group = ''
   return (
     <ScopedRoot colorMode={colorMode} className="pi-palette">
       <div
+        role="presentation"
         className="pj:fixed pj:inset-0 pj:z-[100] pj:flex pj:items-start pj:justify-center pj:bg-black/40 pj:px-3 pj:pt-[12vh]"
         onMouseDown={event => {
           if (event.target === event.currentTarget) onClose()
@@ -83,21 +89,6 @@ export function CommandPalette({
           aria-modal="true"
           aria-label="Command palette"
           className="pj:flex pj:max-h-[60vh] pj:w-full pj:max-w-xl pj:flex-col pj:overflow-hidden pj:rounded-lg pj:border pj:bg-popover pj:text-popover-foreground pj:shadow-pop pj:inset-shadow-bevel"
-          onKeyDown={event => {
-            if (event.key === 'Escape') {
-              event.preventDefault()
-              onClose()
-            } else if (event.key === 'ArrowDown') {
-              event.preventDefault()
-              setIndex(value => Math.min(shown.length - 1, value + 1))
-            } else if (event.key === 'ArrowUp') {
-              event.preventDefault()
-              setIndex(value => Math.max(0, value - 1))
-            } else if (event.key === 'Enter') {
-              event.preventDefault()
-              run(shown[index])
-            } else if (event.key === 'Tab') event.preventDefault()
-          }}
         >
           <div className="pj:flex pj:items-center pj:gap-2 pj:border-b pj:px-3">
             <Search aria-hidden="true" className="pj:h-4 pj:w-4 pj:shrink-0 pj:text-muted-foreground" />
@@ -110,33 +101,46 @@ export function CommandPalette({
               aria-label="Command"
               placeholder="Type a command"
               value={query}
-              onChange={event => setQuery(event.target.value)}
+              onChange={event => {
+                setQuery(event.target.value)
+                setIndex(0)
+              }}
+              onKeyDown={event => {
+                if (event.key === 'Escape') {
+                  event.preventDefault()
+                  onClose()
+                } else if (event.key === 'ArrowDown') {
+                  event.preventDefault()
+                  setIndex(value => Math.min(shown.length - 1, value + 1))
+                } else if (event.key === 'ArrowUp') {
+                  event.preventDefault()
+                  setIndex(value => Math.max(0, value - 1))
+                } else if (event.key === 'Enter') {
+                  event.preventDefault()
+                  run(shown[index])
+                } else if (event.key === 'Tab') event.preventDefault()
+              }}
               autoComplete="off"
               spellCheck={false}
               data-focus-ring="none"
               className="pj:h-11 pj:w-full pj:bg-transparent pj:text-sm pj:placeholder:text-muted-foreground pj:focus:outline-hidden"
             />
           </div>
-          <ul id={`${id}-list`} role="listbox" aria-label="Commands" className="pj:min-h-0 pj:flex-1 pj:overflow-y-auto pj:p-1">
+          <div id={`${id}-list`} role="listbox" aria-label="Commands" className="pj:min-h-0 pj:flex-1 pj:overflow-y-auto pj:p-1">
             {!shown.length && (
-              <li role="presentation" className="pj:px-3 pj:py-6 pj:text-center pj:text-sm pj:text-muted-foreground">
-                No matching command.
-              </li>
+              <div className="pj:px-3 pj:py-6 pj:text-center pj:text-sm pj:text-muted-foreground">No matching command.</div>
             )}
             {shown.map((command, position) => {
-              const heading = command.group !== group ? command.group : undefined
-              group = command.group
+              // A group's heading goes over its first command.
+              const heading = command.group !== (shown[position - 1]?.group ?? '') ? command.group : undefined
               return [
                 heading && (
-                  <li
-                    key={`group-${heading}`}
-                    role="presentation"
-                    className="pj:px-2 pj:pb-1 pj:pt-2 pj:text-[11px] pj:font-medium pj:text-muted-foreground"
-                  >
+                  <div key={`group-${heading}`} className="pj:px-2 pj:pb-1 pj:pt-2 pj:text-[11px] pj:font-medium pj:text-muted-foreground">
                     {heading}
-                  </li>
+                  </div>
                 ),
-                <li
+                // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus -- options are chosen with the keys through the command field, which keeps focus (`aria-activedescendant`), and with a click.
+                <div
                   key={command.id}
                   id={`${id}-option-${position}`}
                   role="option"
@@ -156,10 +160,10 @@ export function CommandPalette({
                     </kbd>
                   )}
                   {position === index && <CornerDownLeft aria-hidden="true" className="pj:h-3.5 pj:w-3.5 pj:text-muted-foreground" />}
-                </li>,
+                </div>,
               ]
             })}
-          </ul>
+          </div>
         </div>
       </div>
     </ScopedRoot>

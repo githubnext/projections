@@ -19,6 +19,9 @@ import {viewIcons, type ShowAsProps} from './view-controls.js'
 
 const noop = () => undefined
 
+/** The default for an optional list prop: one array, so a default never changes between renders. */
+const none: readonly never[] = []
+
 /** Settings' features: the renderer's declared controls only while they apply. */
 const modelFeatures = (features: VscodeProjectionFeatures | undefined) => ({
   changesOnly: on(features, 'changesOnly'),
@@ -112,7 +115,7 @@ export function SettingsMenu({
   features,
   control,
   view,
-  views = [],
+  views = none,
   onViewChange,
   rendererTitle,
 }: {

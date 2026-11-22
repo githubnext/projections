@@ -13,6 +13,7 @@ import type {Artifact} from './artifacts.js'
 import {TrustPrompt} from './cards.js'
 import {partPath} from './definitions.js'
 import {refName} from './revisions.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 const pathStart = /(?:^|[\s("'\x60])(?:\/|~\/|\.{1,2}\/|[A-Za-z]:\\)/u
 
@@ -90,8 +91,8 @@ export function ComparisonFailure({error, onRetry}: {error: ComparisonError | Er
         <p className="pj:break-words">{error.message}</p>
         {error instanceof ComparisonError && error.details.length > 0 && (
           <ul className="pj:list-disc pj:pl-4">
-            {error.details.map((detail, index) => (
-              <li key={index} className="pj:break-words">
+            {keyed(error.details, detail => detail).map(([key, detail]) => (
+              <li key={key} className="pj:break-words">
                 {detail}
               </li>
             ))}

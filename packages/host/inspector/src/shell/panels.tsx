@@ -14,6 +14,7 @@ import {
   cn,
 } from '@githubnext/projections-host/ui/components'
 import type {InspectorJob} from '../types.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 const empty = 'pj:text-xs pj:text-muted-foreground'
 /** Raw text in a recessed well (the shared `surface-inset`) with a divider edge. */
@@ -35,8 +36,8 @@ export function DiagnosticsList({diagnostics}: {diagnostics: readonly Diagnostic
   if (!diagnostics.length) return <Empty>No diagnostics.</Empty>
   return (
     <ul className="pi-diagnostics pj:flex pj:flex-col pj:divide-y pj:rounded-md pj:border pj:border-divider pj:bg-surface-raised">
-      {diagnostics.map((diagnostic, index) => (
-        <li key={index} className="pj:flex pj:min-w-0 pj:flex-col pj:gap-0.5 pj:px-3 pj:py-2 pj:text-xs">
+      {keyed(diagnostics, diagnostic => `${diagnostic.code}:${diagnostic.path}:${diagnostic.message}`).map(([key, diagnostic]) => (
+        <li key={key} className="pj:flex pj:min-w-0 pj:flex-col pj:gap-0.5 pj:px-3 pj:py-2 pj:text-xs">
           <span className="pj:flex pj:flex-wrap pj:items-center pj:gap-2">
             <Badge variant={diagnostic.severity === 'error' ? 'destructive' : 'secondary'} className="pj:px-1.5 pj:py-0 pj:text-[10px]">
               {diagnostic.severity}
@@ -65,8 +66,8 @@ export function RawOutput({jobs}: {jobs: readonly InspectorJob[]}) {
             Run {item.id}: {item.status}
           </h3>
           {item.outputs.length ? (
-            item.outputs.map((output, index) => (
-              <div key={index} className="pj:grid pj:min-w-0 pj:gap-1.5 pj:lg:grid-cols-2">
+            keyed(item.outputs, output => output.ref).map(([key, output]) => (
+              <div key={key} className="pj:grid pj:min-w-0 pj:gap-1.5 pj:lg:grid-cols-2">
                 <div className="pj:min-w-0">
                   <h4 className={empty}>{output.ref} · stdout</h4>
                   <pre className={pre}>{output.stdout || '(empty stdout)'}</pre>

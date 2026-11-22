@@ -1,4 +1,4 @@
-import {forwardRef, type ComponentProps, type CSSProperties} from 'react'
+import type {ComponentProps, CSSProperties} from 'react'
 import {cn} from '../lib/utils.js'
 
 /** The props of `Range`: a native `input`'s, without `type`. */
@@ -8,7 +8,7 @@ export type RangeProps = Omit<ComponentProps<'input'>, 'type'>
  * A native `input[type=range]` styled like shadcn/ui's Slider (track, filled range, thumb; see `.pj-range` in
  * theme.css). Native, so it keeps keyboard, form and `fill()` behavior; use `Slider` for multi-thumb ranges.
  */
-export const Range = forwardRef<HTMLInputElement, RangeProps>(({className, style, ...props}, ref) => {
+export function Range({className, style, ref, ...props}: RangeProps) {
   const min = Number(props.min ?? 0)
   const max = Number(props.max ?? 100)
   const value = Number(props.value ?? props.defaultValue ?? min)
@@ -22,4 +22,4 @@ export const Range = forwardRef<HTMLInputElement, RangeProps>(({className, style
       {...props}
     />
   )
-})
+}

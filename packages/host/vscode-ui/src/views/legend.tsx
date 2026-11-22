@@ -1,4 +1,5 @@
 import type {RendererLegend, ThemeTokenName} from '@githubnext/projections-host'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** The props of `VscodeLegend`: the renderer's legend and the tokens its swatches resolve against. */
 export interface VscodeLegendProps {
@@ -25,7 +26,7 @@ export function VscodeLegend({legend, tokens, className}: VscodeLegendProps) {
           const color = item.token ? tokens?.[item.token] : item.color
           if (!color) {
             return (
-              <li key={index} className="ph-legend-item phv-legend-item" data-shape="label">
+              <li key={key} className="ph-legend-item phv-legend-item" data-shape="label">
                 {item.label}
               </li>
             )
@@ -34,7 +35,7 @@ export function VscodeLegend({legend, tokens, className}: VscodeLegendProps) {
           const hue = item.token?.match(swatchHue)?.[1]
           const line = shape === 'line' || shape === 'dashed' || shape === 'dotted'
           return (
-            <li key={index} className="ph-legend-item phv-legend-item" data-shape={shape}>
+            <li key={key} className="ph-legend-item phv-legend-item" data-shape={shape}>
               <span
                 aria-hidden="true"
                 className="ph-legend-swatch phv-legend-swatch"

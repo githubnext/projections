@@ -28,10 +28,13 @@ export function RefField({
   const [text, setText] = useState(value ? shown(value) : '')
   const [error, setError] = useState<string>()
   const [checking, setChecking] = useState(false)
-  useEffect(() => {
+  // A new value from outside replaces what is typed.
+  const [seen, setSeen] = useState(value)
+  if (seen !== value) {
+    setSeen(value)
     setText(value ? shown(value) : '')
     setError(undefined)
-  }, [value])
+  }
   return (
     <form
       className="pi-ref pj:flex pj:min-w-0 pj:flex-1 pj:flex-col pj:gap-0.5"

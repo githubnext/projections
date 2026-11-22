@@ -3,6 +3,9 @@ import type {ProjectionController, RendererControl} from '@githubnext/projection
 import {ActionButton, VscButton, VscCheckbox, VscOption, Radio, VscRadioGroup, VscSingleSelect} from './elements.js'
 import {vscodeControlIcons} from './codicons.js'
 
+/** The default for an optional list prop: one array, so a default never changes between renders. */
+const none: readonly never[] = []
+
 export {vscodeControlIcons}
 
 /** A labeled single choice: VSCode Elements' `vscode-single-select`, VS Code's dropdown. */
@@ -209,7 +212,7 @@ export function VscodeRendererControl({
 }
 
 /** The controls the renderer declared, grouped as declared. `exclude` leaves out groups drawn elsewhere, such as `zoom`. */
-export function VscodeRendererControls({projection: p, exclude = []}: {projection: ProjectionController; exclude?: readonly string[]}) {
+export function VscodeRendererControls({projection: p, exclude = none}: {projection: ProjectionController; exclude?: readonly string[]}) {
   const shown = p.controls.filter(control => control.group === undefined || !exclude.includes(control.group))
   if (!shown.length) return null
   const groups: {key: string; controls: RendererControl[]}[] = []

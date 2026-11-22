@@ -207,8 +207,8 @@ export function useFitPlan<T>(
   useLayoutEffect(() => {
     const element = bar.current
     if (!element) return
-    if (state.kind === 'planning') delete element.dataset.fitSettled
-    else element.dataset.fitSettled = String(state.width)
+    if (state.kind === 'planning') element.removeAttribute('data-fit-settled')
+    else element.setAttribute('data-fit-settled', String(state.width))
   }, [bar, state.kind, state.width])
 
   // Replan when the bar or one of its regions changes size.

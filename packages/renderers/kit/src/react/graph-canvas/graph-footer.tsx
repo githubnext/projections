@@ -25,12 +25,11 @@ export function GraphFooter(props: {
             Inspect {shared.length} shared dependencies
           </button>
           {sharedOpen && (
-            <ul className="shared-routes-list" role="menu" aria-label="Shared dependencies">
+            <ul className="shared-routes-list" aria-label="Shared dependencies">
               {shared.map(edge => (
-                <li key={edge.key} role="none">
+                <li key={edge.key}>
                   <button
                     type="button"
-                    role="menuitem"
                     onClick={() => {
                       setSharedOpen(false)
                       onSelect(edge.id)

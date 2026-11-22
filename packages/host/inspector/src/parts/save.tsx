@@ -31,11 +31,18 @@ export function SaveToDefinition({
   const json = `${JSON.stringify(saved, null, 2)}\n`
   const parts = useMemo(() => changedParts(definition, saved), [definition, saved])
   const partsKey = JSON.stringify(parts)
+  // Each preview the open popover asks for starts afresh.
+  const [previewing, setPreviewing] = useState({open, writer, partsKey})
+  if (previewing.open !== open || previewing.writer !== writer || previewing.partsKey !== partsKey) {
+    setPreviewing({open, writer, partsKey})
+    if (open && writer) {
+      setPreview(undefined)
+      setStatus(undefined)
+    }
+  }
   useEffect(() => {
     if (!open || !writer) return undefined
     let cancelled = false
-    setPreview(undefined)
-    setStatus(undefined)
     writer
       .preview(JSON.parse(partsKey) as Record<string, unknown>)
       .then(result => !cancelled && setPreview(result))
@@ -104,9 +111,9 @@ export function SaveToDefinition({
             aria-label="Definition diff"
             className="pi-diff pj:max-h-64 pj:overflow-auto pj:rounded-sm pj:border pj:border-divider pj:bg-surface-inset pj:p-2 pj:font-mono pj:text-[11px] pj:leading-snug"
           >
-            {diff.map((line, index) => (
+            {keyed(diff, line => `${line.kind}${line.text}`).map(([key, line]) => (
               <div
-                key={index}
+                key={key}
                 data-kind={line.kind === '+' ? 'added' : line.kind === '-' ? 'removed' : 'same'}
                 className={cn(line.kind === '+' && 'pj:bg-added-muted', line.kind === '-' && 'pj:bg-removed-muted')}
               >

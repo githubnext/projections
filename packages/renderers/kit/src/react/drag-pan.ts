@@ -16,7 +16,7 @@ const keyPanStep = 40
  * drag, and with the arrow keys while the stage itself has focus; `data-pannable` marks it then. A press that moves
  * less than `dragPanThreshold` stays a click, and a focused item still scrolls into view.
  */
-export function useDragPan(scroller: RefObject<HTMLElement | null>): void {
+export function useDragPan(scrollerRef: RefObject<HTMLElement | null>): void {
   const sizing = useFrameSizing()
   const cap = useStageHeightCap()
   const active = sizing === 'content' && cap !== undefined
@@ -95,7 +95,7 @@ export function useDragPan(scroller: RefObject<HTMLElement | null>): void {
       delete element.dataset.panning
       element.removeAttribute('data-pannable')
     }
-  }, [scroller, active])
+  }, [scrollerRef, active])
 }
 
 /** A wheel over a stage that pans by dragging, which scrolls the host's page rather than the stage (not a zoom). */

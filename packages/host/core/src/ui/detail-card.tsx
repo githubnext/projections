@@ -25,27 +25,26 @@ export function DetailCard({
   annotations = true,
   sheetBelow,
 }: DetailCardProps) {
-  const card = useDetailCard(p, {container, view, ...(sheetBelow === undefined ? {} : {sheetBelow})})
+  const {row, placement, style, ref, close, select} = useDetailCard(p, {container, view, ...(sheetBelow === undefined ? {} : {sheetBelow})})
   const id = useId()
-  const row = card.row
   if (!row) return null
   const details = rowDetails(p.subject, row, p.rows)
   const comparing = p.subject.mode === 'comparison'
   const mark = annotations ? p.annotationMarks.find(item => item.id === row.id) : undefined
   const marks = annotations ? p.annotationsFor(row.id) : []
-  const sheet = card.placement?.sheet ?? false
+  const sheet = placement?.sheet ?? false
   const titleId = `${id}-title`
   return (
     <aside
-      ref={card.ref}
+      ref={ref}
       className={cn(
         'ph-detail-card pj:flex pj:w-80 pj:min-w-0 pj:flex-col pj:overflow-auto pj:overscroll-contain pj:border pj:border-divider pj:bg-surface-raised pj:text-sm pj:text-card-foreground pj:shadow-lg',
         sheet ? 'pj:rounded-t-lg' : 'pj:rounded-lg',
       )}
-      style={card.style}
+      style={style}
       aria-labelledby={titleId}
       data-detail-card={row.id}
-      data-placement={card.placement ? (sheet ? 'sheet' : card.placement.side) : undefined}
+      data-placement={placement ? (sheet ? 'sheet' : placement.side) : undefined}
     >
       <header className="ph-detail-card-header pj:sticky pj:top-0 pj:z-1 pj:flex pj:items-start pj:gap-2 pj:border-b pj:border-divider pj:bg-surface-header pj:py-1.5 pj:pr-1.5 pj:pl-3">
         <h3
@@ -57,14 +56,7 @@ export function DetailCard({
           {row.label}
         </h3>
         {mark && <AnnotationMarker mark={mark} rowLabel={row.label} onActivate={p.activateAnnotation} className="pj:mt-1" />}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="pj:h-7 pj:w-7 pj:shrink-0"
-          aria-label="Close details"
-          onClick={card.close}
-        >
+        <Button type="button" variant="ghost" size="icon" className="pj:h-7 pj:w-7 pj:shrink-0" aria-label="Close details" onClick={close}>
           <X />
         </Button>
       </header>
@@ -79,7 +71,7 @@ export function DetailCard({
           beforeLabel={beforeLabel}
         />
       )}
-      {details.connections.length > 0 && <ConnectionsSection details={details} id={id} onSelect={card.select} />}
+      {details.connections.length > 0 && <ConnectionsSection details={details} id={id} onSelect={select} />}
       {renderDetails && p.selection && <div className={cn('ph-details-slot', section)}>{renderDetails(p.selection, p)}</div>}
     </aside>
   )

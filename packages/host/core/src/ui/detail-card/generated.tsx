@@ -4,6 +4,7 @@ import type {WordRun} from '@githubnext/projections-renderer-sdk/presentation'
 import {generatedForm, type GeneratedField} from '../../details/generated.js'
 import {Prose} from '../prose.js'
 import {cn} from '../lib/utils.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 const generatedToggle =
   'ph-generated-toggle pj:rounded-md pj:border pj:bg-transparent pj:px-1.5 pj:text-xs pj:text-muted-foreground pj:hover:text-foreground pj:focus-visible:outline-hidden pj:focus-visible:ring-2 pj:focus-visible:ring-ring/50 pj:aria-pressed:border-foreground/40 pj:aria-pressed:text-foreground'
@@ -12,9 +13,14 @@ const generatedToggle =
 function Stack({active, first, second}: {active: 0 | 1; first: ReactNode; second: ReactNode}) {
   return (
     <div className="ph-generated-stack pj:grid">
-      {[first, second].map((layer, index) => (
+      {(
+        [
+          ['first', first],
+          ['second', second],
+        ] as const
+      ).map(([name, layer], index) => (
         <div
-          key={index}
+          key={name}
           className={cn('pj:col-start-1 pj:row-start-1 pj:min-w-0', active !== index && 'pj:invisible')}
           aria-hidden={active !== index || undefined}
           data-active={active === index || undefined}
@@ -30,15 +36,15 @@ function Stack({active, first, second}: {active: 0 | 1; first: ReactNode; second
 function WordDiff({runs}: {runs: WordRun[]}) {
   return (
     <p className="ph-generated-diff pj:text-xs pj:break-words pj:whitespace-pre-wrap" data-word-diff="">
-      {runs.map((run, index) =>
+      {keyed(runs, run => `${run.op}:${run.text}`).map(([key, run]) =>
         run.op === 'same' ? (
-          <span key={index}>{run.text}</span>
+          <span key={key}>{run.text}</span>
         ) : run.op === 'removed' ? (
-          <del key={index} className="pj:rounded-sm pj:bg-removed-muted">
+          <del key={key} className="pj:rounded-sm pj:bg-removed-muted">
             {run.text}
           </del>
         ) : (
-          <ins key={index} className="pj:rounded-sm pj:bg-added-muted pj:no-underline">
+          <ins key={key} className="pj:rounded-sm pj:bg-added-muted pj:no-underline">
             {run.text}
           </ins>
         ),

@@ -1,5 +1,6 @@
 import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import {fitScale} from '@githubnext/projections-renderer-kit'
+import type {ScrollStart} from '@githubnext/projections-renderer-kit'
 import {
   EmptyDomain,
   Notice,
@@ -27,6 +28,9 @@ import {useNaturalHeight, useViewSize} from './view-size.js'
 
 /** How long cards, rows and links move to a new layout of the schema. */
 const moveMs = 320
+
+/** Where a view that isn't a diff opens: its top left. */
+const topLeft: ScrollStart = {x: 0, y: 0}
 
 /**
  * The frame to draw: `frame`, or while the schema moves to a new layout of the same `document` (a new `layout`, as

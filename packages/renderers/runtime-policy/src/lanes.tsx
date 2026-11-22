@@ -130,8 +130,8 @@ function Effect({entity}: {entity: Entity | undefined}) {
 function Conditions({lines}: {lines: string[]}) {
   return (
     <span className="rp-conditions">
-      {lines.map((terms, index) => (
-        <span key={index} className="rp-condition">
+      {keyed(lines, terms => terms).map(([key, terms], index) => (
+        <span key={key} className="rp-condition">
           {index > 0 && 'and '}
           <Prose>{terms}</Prose>
         </span>

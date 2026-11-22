@@ -130,7 +130,9 @@ export function useGraphZoom(
   // The view opens on the start of the cards drawn when it is placed (not those that only another moment of the
   // transition draws), read when it is placed, so the start never changes, nor the view moves, while scrubbing.
   const shown = useRef(drawn)
-  shown.current = drawn
+  useLayoutEffect(() => {
+    shown.current = drawn
+  })
   const start = useMemo((): ScrollStart => {
     const all = (framing?.boxes ?? []).map(box => ({
       x: box.x - box.width / 2,
@@ -170,7 +172,7 @@ export function useGraphZoom(
     [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding, drawnPadding, bands],
   )
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
-  useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
+  if (drawnScale !== zoom.scale) setDrawnScale(zoom.scale)
   return {...zoom, borders, top: drawnPadding.top, bottom: drawnPadding.y}
 }
 

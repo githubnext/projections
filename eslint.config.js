@@ -20,6 +20,15 @@ const vendored = readdirSync(`${import.meta.dirname}/${shadcn}/upstream`)
 // Workspace directories (a single trailing `/*` level is a glob, as in tools/scripts/lint.mjs).
 const {workspaces} = JSON.parse(readFileSync(`${import.meta.dirname}/package.json`, 'utf8'))
 
+// The workspaces whose source is React.
+const react = [
+  'packages/{schemas,machine,cli,integrations/vscode}/src/**/*.{ts,tsx}',
+  'packages/host/{core,vscode-ui,inspector}/src/**/*.{ts,tsx}',
+  'packages/{engine,renderers,extractors}/*/src/**/*.{ts,tsx}',
+  'examples/renderers/*/src/**/*.{ts,tsx}',
+  'tools/storybook/{src,stories,harness}/**/*.{ts,tsx}',
+]
+
 export default defineConfig(
   {
     ignores: [
@@ -226,17 +235,49 @@ export default defineConfig(
     rules: {'no-restricted-syntax': engineContractsRule},
   },
   {
-    files: [
-      'packages/{schemas,machine,cli,integrations/vscode}/src/**/*.{ts,tsx}',
-      'packages/host/{core,vscode-ui,inspector}/src/**/*.{ts,tsx}',
-      'packages/{engine,renderers,extractors}/*/src/**/*.{ts,tsx}',
-      'examples/renderers/*/src/**/*.{ts,tsx}',
-      'tools/storybook/{src,stories,harness}/**/*.{ts,tsx}',
-    ],
+    // The Rules of Hooks and the React Compiler's rules (refs, purity, immutability, set-state-in-effect…), all errors.
+    files: react,
     plugins: {'react-hooks': reactHooks},
+    rules: Object.fromEntries(Object.keys(reactHooks.configs['recommended-latest'].rules).map(rule => [rule, 'error'])),
+  },
+  {
+    // What the React Compiler's rules don't cover: leaked listeners and timers, unstable context values and default
+    // props, conditions that render `0`, index keys, and the APIs React 19 replaces (docs/maintainers/linting.md).
+    files: react,
+    // The extractors aren't React, and NestJS has a `forwardRef` of its own.
+    ignores: ['packages/extractors/**'],
+    plugins: {'@eslint-react': eslintReact},
+    rules: Object.fromEntries(
+      [
+        'no-leaked-conditional-rendering',
+        'no-unstable-context-value',
+        'no-unstable-default-props',
+        'no-array-index-key',
+        'web-api-no-leaked-event-listener',
+        'web-api-no-leaked-timeout',
+        'dom-no-flush-sync',
+        'no-context-provider',
+        'no-forward-ref',
+        'no-use-context',
+      ].map(rule => [`@eslint-react/${rule}`, 'error']),
+    ),
+  },
+  {
+    // Accessibility of the hosts' and renderers' markup: semantic elements, keyboard support for what responds to the
+    // mouse, and a name for every control.
+    files: ['**/*.tsx'],
+    ...jsxA11y.flatConfigs.strict,
     rules: {
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'error',
+      ...jsxA11y.flatConfigs.strict.rules,
+      // Its label may be text a few elements in: a table header's button's code, a heading's prose.
+      'jsx-a11y/control-has-associated-label': [
+        'error',
+        {...jsxA11y.flatConfigs.strict.rules['jsx-a11y/control-has-associated-label'][1], depth: 4},
+      ],
+      // A tab panel, a window splitter (a focusable separator) and a scrollable region take focus in the ARIA patterns.
+      'jsx-a11y/no-noninteractive-tabindex': ['error', {roles: ['tabpanel', 'separator', 'region']}],
+      // A component's `autoFocus` prop is its own API: the pane that takes focus when asked to (focus moves on purpose).
+      'jsx-a11y/no-autofocus': ['error', {ignoreNonDOM: true}],
     },
   },
   {

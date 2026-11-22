@@ -138,6 +138,7 @@ export function Splitter({
     }
   }
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- a focusable separator is a widget, the window splitter: its arrow keys move it.
     <div
       role="separator"
       aria-orientation={vertical ? 'vertical' : 'horizontal'}

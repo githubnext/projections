@@ -1,6 +1,8 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {readFile} from 'node:fs/promises'
+import {createElement} from 'react'
+import {renderToStaticMarkup} from 'react-dom/server'
 import {
   cardHeight,
   cardWidth,
@@ -15,6 +17,7 @@ import {
   sampleSpline,
   scheduleSteps,
 } from '../dist/index.js'
+import {LaidOutGraph} from '../dist/react/graph-canvas/laid-out-graph.js'
 import {cardWidths, compare, entity, extraction, relationship, sizedNodes} from './engine.mjs'
 
 const renderers = new URL('../../', import.meta.url)
@@ -968,5 +971,22 @@ test('layout moves start and stop softly and span most of their step', async () 
       assert.ok(travel(positions(start), positions(start + edge)) < total * 0.01, `${graph.name}: the move starts softly`)
       assert.ok(travel(positions(end - edge), positions(end)) < total * 0.01, `${graph.name}: the move stops softly`)
     }
+  }
+})
+
+test('a laid-out graph renders at every progress, and in the diff, without updating itself on every render', async () => {
+  const before = extraction('graph/v0', [entity('api', 'service'), entity('db', 'database')], [relationship('api->db', 'api', 'db')])
+  const after = extraction(
+    'graph/v0',
+    [entity('api', 'service'), entity('db', 'database'), entity('pay', 'service')],
+    [relationship('api->db', 'api', 'db'), relationship('pay->db', 'pay', 'db')],
+  )
+  const model = comparisonModel(before, after, await compare(before, after))
+  const transition = await createGraphTransition(model, scheduleSteps(model), {})
+  const props = {model, transition, comparing: true, onSelect: () => undefined, orientation: 'vertical', count: 3, textScale: 1}
+  for (const view of [{progress: 0}, {progress: 0.5}, {progress: 1}, {progress: 1, diff: true}]) {
+    // React stops a component that sets state in every render ("Too many re-renders").
+    const markup = renderToStaticMarkup(createElement(LaidOutGraph, {...props, selectedId: null, emphasis: () => 0, ...view}))
+    assert.match(markup, /<svg/u, JSON.stringify(view))
   }
 })

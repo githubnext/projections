@@ -1,6 +1,7 @@
 import type {CSSProperties} from 'react'
 import {resolveThemeTokens, type LegendShape} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ProjectionController} from '../projection.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** A change fill token (`color-added-muted`, `color-removed-highlight`) and the same-hue edge token it takes. */
 const changeFill = /^(color-(?:added|removed|modified|moved))-(?:muted|highlight)$/u
@@ -58,13 +59,13 @@ export function ProjectionLegend({
         </span>
       )}
       <ul style={{display: 'contents', listStyle: 'none', margin: 0, padding: 0}}>
-        {legend.items.map((item, index) => {
+        {keyed(legend.items, item => item.label).map(([key, item]) => {
           const color = item.token ? tokens[item.token] : item.color
           // An item without a swatch is a plain label, drawn as a chip.
           if (!color) {
             return (
               <li
-                key={index}
+                key={key}
                 className="ph-legend-item"
                 data-shape="label"
                 style={{
@@ -93,7 +94,7 @@ export function ProjectionLegend({
                 ...(edge ? {border: `1px solid ${tokens[`${edge[1]}-border`]}`} : {}),
               }
           return (
-            <li key={index} className="ph-legend-item" data-shape={shape} style={{display: 'inline-flex', alignItems: 'center', gap: 6}}>
+            <li key={key} className="ph-legend-item" data-shape={shape} style={{display: 'inline-flex', alignItems: 'center', gap: 6}}>
               <span aria-hidden="true" className="ph-legend-swatch" style={{flex: 'none', ...swatch}} />
               {item.label}
             </li>

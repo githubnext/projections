@@ -4,6 +4,7 @@ import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentati
 import type {TransitionNode} from '../../graph-transition.js'
 import {cardTextMetrics, proseLines, subtitleMetrics} from '../../card-text.js'
 import type {Drawing} from './drawing.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** The width a card's subtitle may take: its text's room. */
 const subtitleRoom = (cardWidth: number) => cardWidth - 2 * cardTextMetrics.inset
@@ -52,8 +53,8 @@ export function CardSubtitle({node, drawing, baseline}: {node: TransitionNode; d
   const block = (entity: Entity | undefined, opacity: number, key: string) =>
     opacity > 0.001 ? (
       <text key={key} className="node-subtitle" opacity={opacity}>
-        {lines(entity).map((line, index) => (
-          <tspan key={index} x={left} y={baseline + subtitleMetrics.gap + index * subtitleMetrics.line}>
+        {keyed(lines(entity), line => line).map(([lineKey, line], index) => (
+          <tspan key={lineKey} x={left} y={baseline + subtitleMetrics.gap + index * subtitleMetrics.line}>
             {line}
           </tspan>
         ))}

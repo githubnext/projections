@@ -31,11 +31,10 @@ import type {VscodeProjectionViewProps} from './view/props.js'
 export function VscodeProjectionView(props: VscodeProjectionViewProps) {
   const root = useRef<HTMLDivElement>(null)
   const vscode = useVscodeTheme(root)
-  const callbacks = useRef(props)
-  callbacks.current = props
-  const onSelectionChange = useMemo(
-    () => (selection: ProjectionSelection | null) => callbacks.current.onSelectionChange?.(selection?.rowId ?? null, selection),
-    [],
+  const onRowSelectionChange = props.onSelectionChange
+  const onSelectionChange = useCallback(
+    (selection: ProjectionSelection | null) => onRowSelectionChange?.(selection?.rowId ?? null, selection),
+    [onRowSelectionChange],
   )
   const projection = useProjection(projectionOptions(props, vscode, onSelectionChange))
   useImperativeHandle(props.controllerRef, () => projection, [projection])

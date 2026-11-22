@@ -49,6 +49,7 @@ import {
 } from './card.js'
 import {DependencyLine, DiLine} from './diff-lines.js'
 import {LifetimePill, useTextAdvances} from './lifetime-pill.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 const linkNouns: Record<DiDependencyChange['kind'], [string, string]> = {
   dependency: ['dependency', 'dependencies'],
@@ -359,11 +360,11 @@ function DiffCard({
       />
       {!unit.registrationId && pill && <LifetimePill box={pill} selected={false} />}
       <g className="di-card-text" aria-hidden="true" ref={text}>
-        {card.text.lines.map((line, index) => (
-          <DiLine key={index} line={line} top={top} lifetime={line.role === 'lifetime' ? unit.lifetime : undefined} />
+        {keyed(card.text.lines, line => `${line.role}:${line.spans.map(span => span.text).join('')}`).map(([key, line]) => (
+          <DiLine key={key} line={line} top={top} lifetime={line.role === 'lifetime' ? unit.lifetime : undefined} />
         ))}
-        {card.text.dependencies.map((line, index) => (
-          <DependencyLine key={index} dependencies={card.dependencies} pieces={line.pieces} y={top + line.y} emphasis={linkEmphasis} />
+        {keyed(card.text.dependencies, line => line.pieces.map(piece => piece.text).join('')).map(([key, line]) => (
+          <DependencyLine key={key} dependencies={card.dependencies} pieces={line.pieces} y={top + line.y} emphasis={linkEmphasis} />
         ))}
       </g>
     </g>
@@ -423,7 +424,7 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
   const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale, {content: bounds.height, view: fit.height})
   const start = useMemo(() => contentStart([...boxes.values()].slice(0, diUnitLimit), bounds, drawnPadding), [boxes, bounds, drawnPadding])
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
-  useLayoutEffect(() => setDrawnScale(scale), [scale])
+  if (drawnScale !== scale) setDrawnScale(scale)
 
   return (
     <div className="di-view" data-diff="">

@@ -1,5 +1,6 @@
 import {Fragment} from 'react'
 import {proseSpans} from '@githubnext/projections-schemas'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * Protocol prose (a change or step summary, a notice, a diagnostic) with its backtick-delimited inline code drawn as
@@ -8,13 +9,13 @@ import {proseSpans} from '@githubnext/projections-schemas'
 export function Prose({children}: {children: string}) {
   return (
     <>
-      {proseSpans(children).map((span, index) =>
+      {keyed(proseSpans(children), span => `${span.code ? 'code' : 'text'}:${span.text}`).map(([key, span]) =>
         span.code ? (
-          <code key={index} className="phv-code">
+          <code key={key} className="phv-code">
             {span.text}
           </code>
         ) : (
-          <Fragment key={index}>{span.text}</Fragment>
+          <Fragment key={key}>{span.text}</Fragment>
         ),
       )}
     </>

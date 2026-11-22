@@ -157,53 +157,88 @@ function Details({
     <aside
       className="ph-details pj:flex pj:min-w-0 pj:flex-col pj:gap-3 pj:self-start pj:rounded-lg pj:border pj:border-divider pj:bg-surface-raised pj:p-4 pj:text-sm pj:text-card-foreground pj:shadow-xs"
       aria-labelledby={`ph-details-${row.id}`}
-      onKeyDown={event => {
-        if (event.key === 'Escape') {
-          event.stopPropagation()
-          close()
-        }
-      }}
     >
-      <header className="ph-details-header pj:-mx-4 pj:-mt-4 pj:flex pj:items-center pj:justify-between pj:gap-2 pj:rounded-t-[calc(var(--pj-radius)-1px)] pj:border-b pj:border-divider pj:bg-surface-header pj:py-1.5 pj:pr-2 pj:pl-4">
-        <div className="pj:flex pj:min-w-0 pj:items-center pj:gap-2">
-          <h3
-            tabIndex={-1}
-            id={`ph-details-${row.id}`}
-            className="pj:min-w-0 pj:break-words pj:font-semibold pj:leading-tight pj:focus-visible:outline-hidden"
+      {/* Escape closes the details from any control in them. */}
+      <div
+        role="presentation"
+        className="pj:contents"
+        onKeyDown={event => {
+          if (event.key === 'Escape') {
+            event.stopPropagation()
+            close()
+          }
+        }}
+      >
+        <header className="ph-details-header pj:-mx-4 pj:-mt-4 pj:flex pj:items-center pj:justify-between pj:gap-2 pj:rounded-t-[calc(var(--pj-radius)-1px)] pj:border-b pj:border-divider pj:bg-surface-header pj:py-1.5 pj:pr-2 pj:pl-4">
+          <div className="pj:flex pj:min-w-0 pj:items-center pj:gap-2">
+            <h3
+              tabIndex={-1}
+              id={`ph-details-${row.id}`}
+              className="pj:min-w-0 pj:break-words pj:font-semibold pj:leading-tight pj:focus-visible:outline-hidden"
+            >
+              {row.label}
+            </h3>
+            {mark && <AnnotationMarker mark={mark} rowLabel={row.label} onActivate={p.activateAnnotation} />}
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="pj:h-7 pj:w-7 pj:shrink-0"
+            aria-label="Close details"
+            onClick={close}
           >
-            {row.label}
-          </h3>
-          {mark && <AnnotationMarker mark={mark} rowLabel={row.label} onActivate={p.activateAnnotation} />}
-        </div>
-        <Button type="button" variant="ghost" size="icon" className="pj:h-7 pj:w-7 pj:shrink-0" aria-label="Close details" onClick={close}>
-          <X />
-        </Button>
-      </header>
-      <dl className="pj:grid pj:grid-cols-[auto_minmax(0,1fr)] pj:gap-x-3 pj:gap-y-1 pj:text-xs">
-        <dt className="pj:text-muted-foreground">Identity</dt>
-        <dd className="pj:break-all">
-          <code className="pj:font-mono">{row.id}</code>
-        </dd>
-        <dt className="pj:text-muted-foreground">Kind</dt>
-        <dd>{row.kind || '—'}</dd>
-        {row.status && (
-          <>
-            <dt className="pj:text-muted-foreground">Change</dt>
-            <dd className="pj:break-words">
-              <Badge variant="outline" className={cn('pj:mr-1 pj:px-1.5 pj:py-0 pj:font-medium', statusTone[row.status])}>
-                {statusLabel(row.status)}
-              </Badge>
-              {row.correspondence && row.correspondence !== 'exact' ? ` · ${row.correspondence}` : ''}
-              {row.summary ? (
-                <>
-                  {' · '}
-                  <Prose>{row.summary}</Prose>
-                </>
-              ) : (
-                ''
+            <X />
+          </Button>
+        </header>
+        <dl className="pj:grid pj:grid-cols-[auto_minmax(0,1fr)] pj:gap-x-3 pj:gap-y-1 pj:text-xs">
+          <dt className="pj:text-muted-foreground">Identity</dt>
+          <dd className="pj:break-all">
+            <code className="pj:font-mono">{row.id}</code>
+          </dd>
+          <dt className="pj:text-muted-foreground">Kind</dt>
+          <dd>{row.kind || '—'}</dd>
+          {row.status && (
+            <>
+              <dt className="pj:text-muted-foreground">Change</dt>
+              <dd className="pj:break-words">
+                <Badge variant="outline" className={cn('pj:mr-1 pj:px-1.5 pj:py-0 pj:font-medium', statusTone[row.status])}>
+                  {statusLabel(row.status)}
+                </Badge>
+                {row.correspondence && row.correspondence !== 'exact' ? ` · ${row.correspondence}` : ''}
+                {row.summary ? (
+                  <>
+                    {' · '}
+                    <Prose>{row.summary}</Prose>
+                  </>
+                ) : (
+                  ''
+                )}
+              </dd>
+            </>
+          )}
+        </dl>
+        {row.varied?.length ? <VariedList varied={rowDetails(subject, row, p.rows).varied} /> : null}
+        {(['before', 'after'] as const).map(side =>
+          items[side].map(item => (
+            <section key={`${side}-${item.id}`} className="pj:flex pj:min-w-0 pj:flex-col pj:gap-1.5 pj:border-t pj:pt-3" data-side={side}>
+              <h4 className="pj:break-words pj:text-xs pj:font-semibold">
+                {subject.mode === 'comparison' ? `${side === 'before' ? beforeLabel : afterLabel}: ${item.id}` : item.id}
+              </h4>
+              {'from' in item && (
+                <p className="pj:text-xs pj:text-muted-foreground">
+                  {item.from} → {item.to}
+                </p>
               )}
-            </dd>
-          </>
+              {item.confidence && <p className="pj:text-xs pj:text-muted-foreground">Confidence: {item.confidence}</p>}
+              <Properties p={p} row={row} target={{kind, id: item.id, side}} data={item.data} />
+              {item.evidence?.length ? (
+                <ul className="ph-evidence pj:flex pj:flex-col pj:gap-1">{item.evidence.map(evidence)}</ul>
+              ) : (
+                <p className="pj:text-xs pj:text-muted-foreground">No source evidence.</p>
+              )}
+            </section>
+          )),
         )}
       </dl>
       {row.varied?.length !== undefined && row.varied.length > 0 ? <VariedList varied={rowDetails(subject, row, p.rows).varied} /> : null}

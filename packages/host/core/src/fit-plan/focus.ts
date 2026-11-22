@@ -65,7 +65,9 @@ export function useFocusRetention(
 ) {
   const focus = useRef<{element: Element; id: string} | null>(null)
   const latest = useRef({fallbacks, focusControl})
-  latest.current = {fallbacks, focusControl}
+  useLayoutEffect(() => {
+    latest.current = {fallbacks, focusControl}
+  })
 
   useLayoutEffect(() => {
     const element = bar.current

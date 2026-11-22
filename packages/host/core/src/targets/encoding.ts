@@ -1,5 +1,4 @@
-import {isProjectionTarget} from './target.js'
-import type {ProjectionTarget} from './target.js'
+import {isProjectionTarget, type ProjectionTarget} from './target.js'
 
 /**
  * A compact, URL-safe form of a target, for deep links:

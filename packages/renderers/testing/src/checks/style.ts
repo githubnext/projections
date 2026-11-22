@@ -2,8 +2,7 @@
 import type {ComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
 import type {StageSubject, StageSurfaceMeasurement, StyledElement, StyleMeasurement, StyleTokens} from '../types.js'
 import type {CheckDriver} from './catalog.js'
-import {Passed, progressModes, limit} from './support.js'
-import type {Checks} from './support.js'
+import {Passed, progressModes, limit, type Checks} from './support.js'
 
 /** Theme tokens a smaller text may never go below; `font-size-xs` and labels are 12px, and existing kit text uses 11px. */
 const textFloor = 11

@@ -1,5 +1,4 @@
-import {useId, useState} from 'react'
-import type {ReactNode} from 'react'
+import {useId, useState, type ReactNode} from 'react'
 import type {Varied} from '@githubnext/projections-schemas'
 import {
   generatedLabel,
@@ -8,8 +7,8 @@ import {
   generatedWords,
   identifier,
   wordDiff,
+  type BasisValue,
 } from '@githubnext/projections-renderer-sdk/presentation'
-import type {BasisValue} from '@githubnext/projections-renderer-sdk/presentation'
 import {Prose} from './components.js'
 import {Icon} from './icons.js'
 

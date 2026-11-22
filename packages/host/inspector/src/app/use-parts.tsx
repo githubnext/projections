@@ -1,5 +1,4 @@
-import {useCallback, useMemo} from 'react'
-import type {Dispatch, SetStateAction} from 'react'
+import {useCallback, useMemo, type Dispatch, type SetStateAction} from 'react'
 import type {ComparisonPair, RendererEntry} from '@githubnext/projections-host'
 import {CircleAlert, CircleCheck, Radio} from 'lucide-react'
 import type {InspectorApi} from '../client/api.js'

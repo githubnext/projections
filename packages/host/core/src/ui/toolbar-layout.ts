@@ -1,8 +1,6 @@
-import {useMemo} from 'react'
-import type {RefObject} from 'react'
+import {useMemo, type RefObject} from 'react'
 import {useFitPlan} from '../fit-plan.js'
-import {signature, toolbarPlans} from './toolbar-plans.js'
-import type {ToolbarAction, ToolbarContent, ToolbarPlan} from './toolbar-plans.js'
+import {signature, toolbarPlans, type ToolbarAction, type ToolbarContent, type ToolbarPlan} from './toolbar-plans.js'
 
 export {actionCollapseOrder, toolbarPlans} from './toolbar-plans.js'
 export type {ToolbarAction, ToolbarContent, ToolbarPlan} from './toolbar-plans.js'

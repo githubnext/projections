@@ -4,8 +4,7 @@ import {arrowHeadReach} from '../arrowhead.js'
 import type {Point} from '../edge-arrows.js'
 import {routeRadius, routeTail} from '../routes/s-bend.js'
 import type {Alignment} from './alignment.js'
-import {cardWidth, cardHeight} from './model.js'
-import type {LayoutNode} from './model.js'
+import {cardWidth, cardHeight, type LayoutNode} from './model.js'
 
 /** Space between layers: room for a route's tail stub, two full turns (`routeRadius`) and its arrowhead's lead-in. */
 export const layerGap = routeTail + 2 * routeRadius + arrowHeadReach + 2

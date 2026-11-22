@@ -1,7 +1,11 @@
-import {useId} from 'react'
-import type {ReactNode, RefObject} from 'react'
-import {rowDetails, useDetailCard} from '@githubnext/projections-host'
-import type {EvidenceLink, ProjectionController, ProjectionSelection} from '@githubnext/projections-host'
+import {useId, type ReactNode, type RefObject} from 'react'
+import {
+  rowDetails,
+  useDetailCard,
+  type EvidenceLink,
+  type ProjectionController,
+  type ProjectionSelection,
+} from '@githubnext/projections-host'
 import {AnnotationMarker} from './views/row-parts.js'
 import {ActionButton} from './elements.js'
 import {uiCodicons} from './codicons.js'

@@ -1,5 +1,4 @@
-import {test, expect} from '@playwright/test'
-import type {Locator, Page} from '@playwright/test'
+import {test, expect, type Locator, type Page} from '@playwright/test'
 import {projectorPalette as shadcnPalette, projectorSurfaces} from '../src/ui/lib/tokens.js'
 import {closeMenus, inToolbar, openFilter, showAs, story} from './harness.js'
 

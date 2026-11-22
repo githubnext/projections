@@ -4,8 +4,7 @@ import {routeRadius, routeTail} from '../../routes/s-bend.js'
 import {smoothRoute} from '../../routes/smooth.js'
 import {trackSpacing} from '../../routes/tracks.js'
 import type {Spline} from '../../splines.js'
-import {routeClearance} from './context.js'
-import type {RoutingContext, Segment} from './context.js'
+import {routeClearance, type RoutingContext, type Segment} from './context.js'
 
 interface Attempt {
   route: Spline

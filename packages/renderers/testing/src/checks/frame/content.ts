@@ -1,8 +1,7 @@
 // The checks of what a renderer draws in its frame: legend, overflow, relationships, content top and identifiers.
 import type {ContentTop, IdentifierMeasurement, OverflowMeasurement} from '../../types.js'
 import type {CheckDriver} from '../catalog.js'
-import {Skip, progressModes, primaryMode, limit, label} from '../support.js'
-import type {Checks} from '../support.js'
+import {Skip, progressModes, primaryMode, limit, label, type Checks} from '../support.js'
 
 export const contentChecks: Pick<Checks, 'legend' | 'phone-overflow' | 'relationships' | 'content-top' | 'identifiers'> = {
   async legend(driver, subject, {modes}) {

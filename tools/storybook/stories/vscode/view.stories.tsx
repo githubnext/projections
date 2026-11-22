@@ -3,8 +3,15 @@ import {StageNotice, VscodeProjectionView} from '@githubnext/projections-host-vs
 import {withVscodeFrame} from '../../src/vscode-frame.js'
 import {withFill} from './fill.js'
 import type {VscodeArgs} from '../../src/vscode-render.js'
-import {mobile, preparedLoader, renderDetails, sampleAnnotations, scenarioArgTypes, scenarioFixture} from '../../src/stories.js'
-import type {Loaded} from '../../src/stories.js'
+import {
+  mobile,
+  preparedLoader,
+  renderDetails,
+  sampleAnnotations,
+  scenarioArgTypes,
+  scenarioFixture,
+  type Loaded,
+} from '../../src/stories.js'
 
 const noop = () => undefined
 

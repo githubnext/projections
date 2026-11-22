@@ -1,9 +1,12 @@
-import {languageColor, languageNamed, languageOfPath} from '@githubnext/projections-renderer-sdk/languages'
-import type {Language} from '@githubnext/projections-renderer-sdk/languages'
-import {defaultThemeTokens} from '@githubnext/projections-renderer-sdk/protocol'
-import type {ColorMode, LegendItem, RendererLegend, ThemeTokenName} from '@githubnext/projections-renderer-sdk/protocol'
-import {kindHues} from '@githubnext/projections-schemas'
-import type {KindColor} from '@githubnext/projections-schemas'
+import {languageColor, languageNamed, languageOfPath, type Language} from '@githubnext/projections-renderer-sdk/languages'
+import {
+  defaultThemeTokens,
+  type ColorMode,
+  type LegendItem,
+  type RendererLegend,
+  type ThemeTokenName,
+} from '@githubnext/projections-renderer-sdk/protocol'
+import {kindHues, type KindColor} from '@githubnext/projections-schemas'
 
 type KindTone = Exclude<KindColor, KindHue>
 type KindHue = (typeof kindHues)[number]

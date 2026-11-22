@@ -1,8 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite'
 import {withDefaultFrame} from '../../src/default-frame.js'
 import {renderExplorer} from '../../src/default-render.js'
-import {mobile, rendererStory, runtimeLoader, scenarioArgTypes} from '../../src/stories.js'
-import type {ScenarioArgs} from '../../src/stories.js'
+import {mobile, rendererStory, runtimeLoader, scenarioArgTypes, type ScenarioArgs} from '../../src/stories.js'
 
 /** Every renderer bundle in the default UI, on its own scenarios (choose another with the `scenario` control). */
 const meta = {

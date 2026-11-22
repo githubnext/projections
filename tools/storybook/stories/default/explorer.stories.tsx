@@ -1,8 +1,7 @@
 import type {Decorator, Meta, StoryObj} from '@storybook/react-vite'
 import {withDefaultFrame} from '../../src/default-frame.js'
 import {renderExplorer} from '../../src/default-render.js'
-import {mobile, runtimeLoader, scenarioArgTypes} from '../../src/stories.js'
-import type {ScenarioArgs} from '../../src/stories.js'
+import {mobile, runtimeLoader, scenarioArgTypes, type ScenarioArgs} from '../../src/stories.js'
 
 /**
  * `ComparisonExplorer`, the default UI's pair picker and view: choose two saved extractions of a renderer

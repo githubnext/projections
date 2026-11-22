@@ -1,11 +1,9 @@
 // Playback without a framework: `playbackLifecycle` run by an actor, with the runners it needs (the position and playing
 // requests, and a frame loop) and the reconciliation that turns what the view shows into events. `usePlaybackControl`
 // runs it in a component; the projection store will run it directly.
-import {createActor} from '@githubnext/projections-machine'
-import type {Actor} from '@githubnext/projections-machine'
+import {createActor, type Actor} from '@githubnext/projections-machine'
 import type {ComparisonMode} from '../modes.js'
-import {playbackLifecycle} from './playback-lifecycle.js'
-import type {PlaybackEvent, PlaybackLifecycle, PlaybackRun} from './playback-lifecycle.js'
+import {playbackLifecycle, type PlaybackEvent, type PlaybackLifecycle, type PlaybackRun} from './playback-lifecycle.js'
 
 /** What playback reads of the host each time it acts, and the requests it makes of it. */
 export interface PlaybackHost {

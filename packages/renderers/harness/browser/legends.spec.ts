@@ -1,7 +1,6 @@
 import {expect, test} from '@playwright/test'
 import {languageColor, languageNamed} from '@githubnext/projections-renderer-sdk/languages'
-import {openStage} from '@githubnext/projections-renderer-testing/playwright'
-import type {StageHandle} from '@githubnext/projections-renderer-testing/playwright'
+import {openStage, type StageHandle} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 
 /**

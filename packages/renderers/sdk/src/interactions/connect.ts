@@ -6,11 +6,17 @@ import {documentRings, ringFocusAttribute, ringHoverAttribute, ringSelectedAttri
 import {createAnchorReporter} from './anchors.js'
 import {annotatedAttribute, filteredAttribute, hoveredAttribute} from './attributes.js'
 import {createBadgeOverlay} from './badges.js'
-import {annotatedRects, elementsOf as entityElements, entityOf as entityAt, itemRect, markFiltered, markHovered} from './entities.js'
-import type {Entities} from './entities.js'
+import {
+  annotatedRects,
+  elementsOf as entityElements,
+  entityOf as entityAt,
+  itemRect,
+  markFiltered,
+  markHovered,
+  type Entities,
+} from './entities.js'
 import {createPulse} from './pulse.js'
-import {applyScroll, reveal, scrollKey, scrollTarget} from './scroll.js'
-import type {AppliedScrolls} from './scroll.js'
+import {applyScroll, reveal, scrollKey, scrollTarget, type AppliedScrolls} from './scroll.js'
 
 /** How `connectInteractions` finds entities and reports badge selections. */
 export interface InteractionOptions {

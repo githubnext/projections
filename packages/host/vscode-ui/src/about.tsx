@@ -3,8 +3,7 @@ import type {Diagnostic} from '@githubnext/projections-schemas'
 import {Prose} from './prose.js'
 import {uiCodicons} from './codicons.js'
 import {rendererLabel} from './features.js'
-import {ToolbarPopover} from './toolbar-popover.js'
-import type {PopoverControl} from './toolbar-popover.js'
+import {ToolbarPopover, type PopoverControl} from './toolbar-popover.js'
 
 /** The sentence for the comparator that produced a comparison, with VS Code's workspace trust codicon. */
 export function ComparatorLine({comparator, className}: {comparator: {id: string; digest: string}; className?: string}) {

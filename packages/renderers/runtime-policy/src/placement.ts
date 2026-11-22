@@ -1,8 +1,6 @@
 import {compareIds} from '@githubnext/projections-renderer-kit'
-import {placed} from './links.js'
-import type {Context} from './links.js'
-import {collator} from './model.js'
-import type {Chip, ChipChange, HookItem, Item, ProbeItem, Revision} from './model.js'
+import {placed, type Context} from './links.js'
+import {collator, type Chip, type ChipChange, type HookItem, type Item, type ProbeItem, type Revision} from './model.js'
 
 /** An item's chips: the subjects its relationships reach, each arriving, leaving or staying. */
 export function chipsOf({model, side, sides, items}: Context, item: Item, source: 'chips' | 'coveredBy' = 'chips'): Chip[] {

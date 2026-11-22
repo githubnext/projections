@@ -1,6 +1,5 @@
 // How a route turns: its largest turn and its inflections.
-import {sampleSpline} from '../splines.js'
-import type {Spline} from '../splines.js'
+import {sampleSpline, type Spline} from '../splines.js'
 
 /** Consecutive same-way turns of a route followed as fine samples, in radians (signed). */
 function turnRuns(route: Spline): number[] {

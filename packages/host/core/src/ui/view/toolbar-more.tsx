@@ -1,7 +1,15 @@
 import type {ReactNode} from 'react'
 import type {ProjectionController} from '../../projection.js'
-import {FilterButton, MoreMenu, MoreSection, PlaybackExtras, RegeneratedToggle, VariedToggle, ZoomControls} from '../blocks.js'
-import type {ViewKind} from '../blocks.js'
+import {
+  FilterButton,
+  MoreMenu,
+  MoreSection,
+  PlaybackExtras,
+  RegeneratedToggle,
+  VariedToggle,
+  ZoomControls,
+  type ViewKind,
+} from '../blocks.js'
 import {cn} from '../lib/utils.js'
 
 /**

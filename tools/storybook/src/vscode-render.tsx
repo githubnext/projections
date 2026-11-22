@@ -1,11 +1,9 @@
 // Story renderers for the VS Code UI's prebuilt views, shared by its story files.
 import type {StoryContext} from '@storybook/react-vite'
-import {VscodeComparisonExplorer} from '@githubnext/projections-host-vscode'
-import type {VscodeProjectionFeatures} from '@githubnext/projections-host-vscode'
+import {VscodeComparisonExplorer, type VscodeProjectionFeatures} from '@githubnext/projections-host-vscode'
 import {extractionChoices} from './fixtures.js'
 import {loadComparator, rules} from './runtime.js'
-import {renderDetails, sampleAnnotations, scenarioFixture} from './stories.js'
-import type {Loaded, ScenarioArgs} from './stories.js'
+import {renderDetails, sampleAnnotations, scenarioFixture, type Loaded, type ScenarioArgs} from './stories.js'
 
 export interface VscodeArgs extends ScenarioArgs {
   /** Features to turn off or restrict (`VscodeProjectionFeatures`); every feature defaults on. */

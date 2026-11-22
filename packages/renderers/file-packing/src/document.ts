@@ -1,15 +1,33 @@
 import type {Entity} from '@githubnext/projections-schemas'
-import {categoryPalette, describeChange, isChanged, kindColorToken, plainCategory} from '@githubnext/projections-renderer-kit'
+import {
+  categoryPalette,
+  describeChange,
+  isChanged,
+  kindColorToken,
+  plainCategory,
+  type Category,
+  type ComparisonModel,
+  type EmphasisOf,
+  type Palette,
+} from '@githubnext/projections-renderer-kit'
 import type {RendererProjection} from '@githubnext/projections-renderer-sdk/protocol'
-import type {Category, ComparisonModel, EmphasisOf, Palette} from '@githubnext/projections-renderer-kit'
-import {categoryOf, excluded, flagsOf, formatDelta, formatSize, hasLineCounts, pathOf, weightOf} from './files.js'
-import type {CategoryMode, SizeMeasure} from './files.js'
+import {
+  categoryOf,
+  excluded,
+  flagsOf,
+  formatDelta,
+  formatSize,
+  hasLineCounts,
+  pathOf,
+  weightOf,
+  type CategoryMode,
+  type SizeMeasure,
+} from './files.js'
 import {rowPaths, unionSnapshot} from './snapshots.js'
 import type {Circle} from './transition.js'
 import type {Packing} from './pack/packing.js'
 import type {Drawn, DrawnFlag} from './circles.js'
-import type {Decoration} from './labels.js'
-import {nameOf} from './labels.js'
+import {type Decoration, nameOf} from './labels.js'
 
 /** What the renderer reads from the whole document once: paths, the root, whether it is a repository, and its depth. */
 export function packingDocument(model: ComparisonModel) {

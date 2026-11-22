@@ -1,7 +1,6 @@
 import {useRef} from 'react'
 import {flushSync} from 'react-dom'
-import {rovingIndex, scopeChoice, scopeHiddenText} from '@githubnext/projections-host'
-import type {ProjectionController} from '@githubnext/projections-host'
+import {rovingIndex, scopeChoice, scopeHiddenText, type ProjectionController} from '@githubnext/projections-host'
 
 /**
  * The scope, beside the mode switch and like it a radio group (arrows move and choose, the checked one is in the tab

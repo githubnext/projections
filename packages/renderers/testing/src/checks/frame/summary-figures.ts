@@ -1,6 +1,5 @@
 // A summary's figures, checked against the documents: a count per kind, and the renderer's own facts.
-import {summaryDeltas} from '@githubnext/projections-renderer-sdk/presentation'
-import type {SummaryCount} from '@githubnext/projections-renderer-sdk/presentation'
+import {summaryDeltas, type SummaryCount} from '@githubnext/projections-renderer-sdk/presentation'
 import type {SummaryCountItem, SummaryFactItem} from '@githubnext/projections-renderer-sdk/protocol'
 import type {StageSubject} from '../../types.js'
 

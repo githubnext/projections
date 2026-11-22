@@ -4,8 +4,7 @@ import type {GraphLayout} from '../layout.js'
 import {arrowHeadReach} from '../arrowhead.js'
 import {smoothstep} from '../motion.js'
 import {gappedBend} from '../routes/s-bend.js'
-import {interpolateSpline, lineSpline} from '../splines.js'
-import type {Spline} from '../splines.js'
+import {interpolateSpline, lineSpline, type Spline} from '../splines.js'
 
 export function interpolate(a: number, b: number, progress: number): number {
   return a + (b - a) * progress

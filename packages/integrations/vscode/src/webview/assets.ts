@@ -2,8 +2,7 @@
 // custom renderer bundles fetched through the extension, each with this page's nonce on its scripts.
 import * as mount from '@githubnext/projections-inspector/mount'
 import type {InspectorAssets} from '@githubnext/projections-inspector/mount'
-import {hostTag, rendererTag} from '../protocol.js'
-import type {RendererReply} from '../protocol.js'
+import {hostTag, rendererTag, type RendererReply} from '../protocol.js'
 import {config, fromExtension, post} from './host.js'
 
 async function fetchOk(url: string): Promise<Response> {

@@ -1,7 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite'
 import {VscodeThemeFrame, vscodeThemeOf} from '../../src/vscode-frame.js'
-import {renderVscodeExplorer} from '../../src/vscode-render.js'
-import type {VscodeArgs} from '../../src/vscode-render.js'
+import {renderVscodeExplorer, type VscodeArgs} from '../../src/vscode-render.js'
 import {runtimeLoader, scenarioArgTypes} from '../../src/stories.js'
 import './themes.css'
 

@@ -1,12 +1,15 @@
 // The icon stories' gallery: each icon drawn by the renderer kit (`Icon`, and `SvgIcon` in an SVG card's status line) and
 // by the host's summary bar, at text sizes and large, in panels that each carry one host theme's real tokens.
-import {Fragment, useLayoutEffect, useMemo, useState} from 'react'
-import type {CSSProperties, ReactNode} from 'react'
-import {themeStyle} from '@githubnext/projections-host'
-import type {ProjectionController, RendererTheme, SummaryFactTone, SummaryFigure} from '@githubnext/projections-host'
-import {svgStatusWidth} from '@githubnext/projections-renderer-kit'
+import {Fragment, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode} from 'react'
+import {
+  themeStyle,
+  type ProjectionController,
+  type RendererTheme,
+  type SummaryFactTone,
+  type SummaryFigure,
+} from '@githubnext/projections-host'
+import {svgStatusWidth, type ChangeClassification, type StatusPart} from '@githubnext/projections-renderer-kit'
 import {Icon, SvgChangeStatus} from '@githubnext/projections-renderer-kit/react'
-import type {ChangeClassification, StatusPart} from '@githubnext/projections-renderer-kit'
 import type {IconEntry, IconGroup} from './icon-vocabulary.js'
 import {IconStyles} from './icon-styles.js'
 

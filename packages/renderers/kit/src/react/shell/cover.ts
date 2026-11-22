@@ -1,6 +1,5 @@
 import {useMemo} from 'react'
-import {parseStageCover} from '../../fit.js'
-import type {CoverRect} from '../../fit.js'
+import {parseStageCover, type CoverRect} from '../../fit.js'
 
 /**
  * The host's `stage-cover` token as rectangles (`parseStageCover`), kept while the token is unchanged. A new cover is

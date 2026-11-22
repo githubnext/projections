@@ -1,10 +1,8 @@
 // Runs the checks against one subject.
 import type {ComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
 import type {CheckResult, StageState, StageSubject} from '../types.js'
-import {checkTitles, allChecks} from './catalog.js'
-import type {CheckDriver, CheckOptions} from './catalog.js'
-import {Skip, Passed, progressModes} from './support.js'
-import type {Settings, Checks} from './support.js'
+import {checkTitles, allChecks, type CheckDriver, type CheckOptions} from './catalog.js'
+import {Skip, Passed, progressModes, type Settings, type Checks} from './support.js'
 import {styleChecks} from './style.js'
 import {comparisonChecks} from './comparison.js'
 import {frameChecks} from './frame.js'

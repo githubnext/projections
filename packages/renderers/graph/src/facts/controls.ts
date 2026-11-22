@@ -2,8 +2,7 @@
 import type {Relationship} from '@githubnext/projections-schemas'
 import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
 import type {RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
-import {fieldLimit, fieldPointer} from './fields.js'
-import type {FactFields} from './fields.js'
+import {fieldLimit, fieldPointer, type FactFields} from './fields.js'
 
 /** A relationship drawn under the **Relationships** control's value: `all`, or one kind (containment is always drawn). */
 export function relationshipShown(relationship: Relationship, shown: string): boolean {

@@ -1,6 +1,5 @@
 import type {Comparison, Entity, Extraction, Relationship} from '@githubnext/projections-schemas'
-import {rendererLimits} from './protocol.js'
-import type {SummaryCountItem, SummaryNoun} from './protocol.js'
+import {rendererLimits, type SummaryCountItem, type SummaryNoun} from './protocol.js'
 import {humanizeKind} from './kind-nouns.js'
 
 export {adjectivalKind, humanizeKind, kindWords, pluralWord, sentenceCase} from './kind-nouns.js'

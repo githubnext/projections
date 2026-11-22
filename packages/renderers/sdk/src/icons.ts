@@ -29,8 +29,8 @@ import {
   SlidersHorizontal,
   SquareTerminal,
   TriangleAlert,
+  type IconNode,
 } from 'lucide'
-import type {IconNode} from 'lucide'
 import {partIconSvgs} from './part-icons.generated.js'
 
 /**

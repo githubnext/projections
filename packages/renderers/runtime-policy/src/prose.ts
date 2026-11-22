@@ -1,7 +1,5 @@
-import {codeSpan, escapeProse, plainProse} from '@githubnext/projections-schemas'
-import type {Entity} from '@githubnext/projections-schemas'
-import {proseOf, text} from './model.js'
-import type {Chip} from './model.js'
+import {codeSpan, escapeProse, plainProse, type Entity} from '@githubnext/projections-schemas'
+import {proseOf, text, type Chip} from './model.js'
 
 /** What a rule does, as prose: its actions in words, or its effect when it has none, and whether monitor mode elides it. */
 export function effectProse(entity: Entity | undefined): string {

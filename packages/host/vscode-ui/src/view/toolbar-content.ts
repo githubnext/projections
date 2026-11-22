@@ -1,6 +1,5 @@
 import type {RefObject} from 'react'
-import {viewControls} from '@githubnext/projections-host'
-import type {ComparisonMode, FullscreenState, ProjectionController} from '@githubnext/projections-host'
+import {viewControls, type ComparisonMode, type FullscreenState, type ProjectionController} from '@githubnext/projections-host'
 import type {VscodeProjectionFeatures, ViewKind} from '../blocks.js'
 import type {ToolbarAction, ToolbarLayout} from '../layout/steps.js'
 import {featureOn} from './options.js'

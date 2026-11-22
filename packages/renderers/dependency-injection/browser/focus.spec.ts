@@ -1,5 +1,4 @@
-import {expect, test} from '@playwright/test'
-import type {Locator} from '@playwright/test'
+import {expect, test, type Locator} from '@playwright/test'
 import {openRenderer} from '@githubnext/projections-renderer-harness/playwright'
 import type {Extraction} from '@githubnext/projections-schemas'
 import {loadFixture} from '../test/fixtures.mjs'

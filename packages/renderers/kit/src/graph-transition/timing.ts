@@ -2,11 +2,9 @@
 import type {Entity, Relationship} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ComparisonModel} from '../model.js'
-import type {ScheduledStep} from '../timeline.js'
-import {stepProgress} from '../timeline.js'
+import {type ScheduledStep, stepProgress} from '../timeline.js'
 import {unitProgress} from '../motion.js'
-import {stepWindows, unscheduledWindow} from '../stages.js'
-import type {StepWindows, Window} from '../stages.js'
+import {stepWindows, unscheduledWindow, type StepWindows, type Window} from '../stages.js'
 
 /** A relationship's endpoints, as entity row IDs. */
 export interface Ends {

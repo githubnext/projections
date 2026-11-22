@@ -2,8 +2,7 @@
 import {trackSpacing} from '../../routes/tracks.js'
 import {straightRuns} from '../geometry.js'
 import type {RoutingContext, Segment} from './context.js'
-import {fitsBands, moveRun, runAt} from './runs.js'
-import type {Run} from './runs.js'
+import {fitsBands, moveRun, runAt, type Run} from './runs.js'
 
 /** A run another trunk's runs keep a track away from. */
 interface Neighbour {

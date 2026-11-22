@@ -1,9 +1,8 @@
 // A bar's planned layout, headless: the bar's UI owns its plans, how they are measured and its policy; this owns the
 // measurement cache, the observation, the settled marker, the interaction lock and focus retention.
 
-import {useEffect, useLayoutEffect, useRef} from 'react'
+import {useEffect, useLayoutEffect, useRef, type RefObject} from 'react'
 import {useMachine} from '@githubnext/projections-machine/react'
-import type {RefObject} from 'react'
 import {flushSync} from 'react-dom'
 import {chooseFitPlan, toolbarHysteresis} from './fit-plan/choose.js'
 import {fitWidth} from './fit-plan/fit-width.js'

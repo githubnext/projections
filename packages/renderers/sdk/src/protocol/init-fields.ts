@@ -1,8 +1,6 @@
 // Validating the optional presentation fields of a host's `init`: the definition's kinds and the opening focus.
-import {kindColors} from '@githubnext/projections-schemas'
-import type {KindColor} from '@githubnext/projections-schemas'
-import {rendererLimits} from './frame.js'
-import type {RendererKind} from './frame.js'
+import {kindColors, type KindColor} from '@githubnext/projections-schemas'
+import {rendererLimits, type RendererKind} from './frame.js'
 import {label, record} from './validation.js'
 
 /** A definition's kind presentation, keeping only well-formed entries (see `RendererProjection.kinds`). */

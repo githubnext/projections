@@ -1,12 +1,10 @@
-import {expect, test} from '@playwright/test'
-import type {FrameLocator} from '@playwright/test'
+import {expect, test, type FrameLocator} from '@playwright/test'
 import {languageColor, languageNamed} from '@githubnext/projections-renderer-sdk/languages'
 import {openStage} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector, openRenderer, samples} from '@githubnext/projections-renderer-harness/playwright'
 import {weightedFiles} from '../../kit/browser/fixtures.js'
-import {measureFrame} from '../../kit/browser/invariants/frame.js'
+import {measureFrame, type FrameMeasurement} from '../../kit/browser/invariants/frame.js'
 import {scrubFailures} from '../../kit/browser/invariants/scrub.js'
-import type {FrameMeasurement} from '../../kit/browser/invariants/frame.js'
 import {scrubSuite, selectionSuite} from '../../kit/browser/suite.js'
 
 scrubSuite([weightedFiles()])

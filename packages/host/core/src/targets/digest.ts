@@ -1,8 +1,7 @@
 import type {Entity, Extraction, ProjectionEngine, Relationship} from '@githubnext/projections-schemas'
 import {sha256} from '../compare.js'
 import {readPointer} from './pointer.js'
-import {collectionOf} from './target.js'
-import type {ProjectionTarget} from './target.js'
+import {collectionOf, type ProjectionTarget} from './target.js'
 
 /** RFC 8785 (JSON Canonicalization Scheme) text of a JSON value. */
 function canonicalJson(value: unknown): string {

@@ -1,6 +1,5 @@
 // The checks of a comparison's endpoints: neutral at progress 0 and 1, with no status text.
-import {Skip, progressModes, limit, samples, label} from '../support.js'
-import type {Checks} from '../support.js'
+import {Skip, progressModes, limit, samples, label, type Checks} from '../support.js'
 import {difference, looks} from './support.js'
 import {statusWords} from './status.js'
 

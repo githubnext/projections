@@ -1,5 +1,4 @@
-import {summaryChange} from '@githubnext/projections-renderer-kit'
-import type {SummaryFactContext, SummaryFactItem, SummaryNouns} from '@githubnext/projections-renderer-kit'
+import {summaryChange, type SummaryFactContext, type SummaryFactItem, type SummaryNouns} from '@githubnext/projections-renderer-kit'
 import {findingLabels, interpretationsOf, isEnforcing} from './model.js'
 
 const noun = (singular: string, plural: string) => ({singular, plural})

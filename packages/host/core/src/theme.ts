@@ -1,5 +1,4 @@
-import {defaultThemeTokens, themeTokenSetVersion} from '@githubnext/projections-renderer-sdk/protocol'
-import type {ColorMode, RendererTheme} from '@githubnext/projections-renderer-sdk/protocol'
+import {defaultThemeTokens, themeTokenSetVersion, type ColorMode, type RendererTheme} from '@githubnext/projections-renderer-sdk/protocol'
 
 /**
  * The host's default theme for a color mode: every token of the current

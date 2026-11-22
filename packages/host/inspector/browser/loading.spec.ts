@@ -1,5 +1,4 @@
-import {test as base, expect} from '@playwright/test'
-import type {Locator} from '@playwright/test'
+import {test as base, expect, type Locator} from '@playwright/test'
 import {copyFile, mkdtemp, rm, writeFile} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join, resolve} from 'node:path'

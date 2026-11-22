@@ -1,5 +1,4 @@
-import {expect, test} from '@playwright/test'
-import type {FrameLocator} from '@playwright/test'
+import {expect, test, type FrameLocator} from '@playwright/test'
 import {extraction, openRenderer} from '@githubnext/projections-renderer-harness/playwright'
 import {after, before, notesAfter, notesBefore, reportAfter, reportBefore} from './fixtures.ts'
 

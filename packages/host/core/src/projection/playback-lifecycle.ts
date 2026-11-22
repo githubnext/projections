@@ -3,10 +3,16 @@
 // (whether it plays, the slider position, a controlled direction, reduced motion, the mode, the subject) arrives as
 // events when it changes. Playing and the position are requests (effects) the core or the embedder applies: an
 // embedder may control both, so playing starts when it is shown, and a playback the embedder started is one too.
-import {defineMachine, emit} from '@githubnext/projections-machine'
-import type {Step} from '@githubnext/projections-machine'
-import {advancePlayback, advanceTimeline, startPlayback, timelineDuration} from '../playback.js'
-import type {PlaybackPlan, PlaybackState, PlaybackTimeline} from '../playback.js'
+import {defineMachine, emit, type Step} from '@githubnext/projections-machine'
+import {
+  advancePlayback,
+  advanceTimeline,
+  startPlayback,
+  timelineDuration,
+  type PlaybackPlan,
+  type PlaybackState,
+  type PlaybackTimeline,
+} from '../playback.js'
 
 /** What playback moves through: the plan, the timeline when holds are on it, and the speed. */
 export type PlaybackRun = PlaybackPlan & {readonly timeline: PlaybackTimeline | undefined; readonly speed: number}

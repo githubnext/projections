@@ -1,6 +1,5 @@
 import type {InspectorWorkspaceChanges} from '../types.js'
-import {workingTree} from './revisions.js'
-import type {RowState} from './revisions.js'
+import {workingTree, type RowState} from './revisions.js'
 
 type Versions = Record<string, number>
 type Rows = Record<string, Record<string, RowState>>

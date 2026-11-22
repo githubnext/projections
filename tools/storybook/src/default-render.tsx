@@ -4,8 +4,7 @@ import {ComparisonExplorer} from '@githubnext/projections-host/ui'
 import {themeOf} from './theme.js'
 import {extractionChoices} from './fixtures.js'
 import {loadComparator, rules} from './runtime.js'
-import {renderDetails, sampleAnnotations, scenarioFixture} from './stories.js'
-import type {Loaded, ScenarioArgs} from './stories.js'
+import {renderDetails, sampleAnnotations, scenarioFixture, type Loaded, type ScenarioArgs} from './stories.js'
 
 /** `ComparisonExplorer` on the scenario's saved extractions, compared from before to after. */
 export function renderExplorer(args: ScenarioArgs, {globals, loaded}: Pick<StoryContext, 'globals' | 'loaded'>) {

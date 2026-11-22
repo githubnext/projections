@@ -1,6 +1,5 @@
 import * as vscode from 'vscode'
-import {launch, sourceKey, withBackend} from './backend-sources.js'
-import type {PanelSource} from './backend-sources.js'
+import {launch, sourceKey, withBackend, type PanelSource} from './backend-sources.js'
 import {BackendPool} from './backends.js'
 import {pairCommands} from './commands/pair.js'
 import {partCommands} from './commands/part.js'

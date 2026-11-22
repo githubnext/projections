@@ -1,7 +1,6 @@
 // The markers a host's `annotations` message asks a renderer to draw.
 import {rendererLimits} from './frame.js'
-import {annotationTones} from './messages.js'
-import type {AnnotationMark, AnnotationTone, HostMessage} from './messages.js'
+import {annotationTones, type AnnotationMark, type AnnotationTone, type HostMessage} from './messages.js'
 import {keys, record, text} from './validation.js'
 
 type Fields = Record<string, unknown>

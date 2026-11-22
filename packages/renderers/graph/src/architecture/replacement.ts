@@ -1,6 +1,5 @@
 // What stands in a boundary card's place once the person activates it, which the next view keeps where the card was.
-import {collapsePrefix, restPrefix, summaryPrefix} from './collapse.js'
-import type {BoundaryCard} from './collapse.js'
+import {collapsePrefix, restPrefix, summaryPrefix, type BoundaryCard} from './collapse.js'
 
 /**
  * What stands in a boundary card's place once it is activated: the boundary a summary card expands into, the card that

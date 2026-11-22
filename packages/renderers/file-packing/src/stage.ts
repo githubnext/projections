@@ -1,5 +1,4 @@
-import {useLayoutEffect, useState} from 'react'
-import type {RefObject} from 'react'
+import {useLayoutEffect, useState, type RefObject} from 'react'
 import {useFrameFill} from '@githubnext/projections-renderer-kit/react'
 
 /** The smallest area packed, CSS px. */

@@ -1,7 +1,13 @@
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {createStagedTimeline, statusParts, unitProgress} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, ScheduledStep, StagedTimeline} from '@githubnext/projections-renderer-kit'
+import {
+  createStagedTimeline,
+  statusParts,
+  unitProgress,
+  type ComparisonModel,
+  type ScheduledStep,
+  type StagedTimeline,
+} from '@githubnext/projections-renderer-kit'
 import {layoutStates} from './layout.js'
 import type {MeasureText, TextArea, TextChrome, TextRole} from './text.js'
 import type {SchemaLayout, SchemaModel} from './schema.js'
@@ -9,9 +15,8 @@ import {fader} from './fading.js'
 import type {SchemaFrame} from './frame.js'
 import {selfLoopRoom, stageLinkShapes} from './links.js'
 import {fades, stagedModels, tagOrder} from './stages.js'
-import {frameTables, frameTags} from './interpolate.js'
+import {frameTables, frameTags, type Placed, type Staged} from './interpolate.js'
 import {frameLinks} from './interpolate-links.js'
-import type {Placed, Staged} from './interpolate.js'
 
 export interface DatabaseTransition {
   (progress: number): SchemaFrame

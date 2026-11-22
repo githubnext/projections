@@ -1,7 +1,6 @@
 import type {FieldLine} from '../diff/lines.js'
 import {wrapText} from '../wrap.js'
-import {diffCardMetrics} from './metrics.js'
-import type {DiffCardLine, DiffCardSpan} from './metrics.js'
+import {diffCardMetrics, type DiffCardLine, type DiffCardSpan} from './metrics.js'
 
 /** A diff card's text as it is laid out, line by line: each line's baseline follows the one before. */
 export interface CardLines {

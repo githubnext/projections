@@ -1,7 +1,6 @@
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, StagedTimeline, StepWindows} from '@githubnext/projections-renderer-kit'
+import {compareIds, type ComparisonModel, type StagedTimeline, type StepWindows} from '@githubnext/projections-renderer-kit'
 import {buildModel} from './schema-model.js'
 import type {SchemaLayout, SchemaModel, SchemaState} from './schema.js'
 import {fader} from './fading.js'

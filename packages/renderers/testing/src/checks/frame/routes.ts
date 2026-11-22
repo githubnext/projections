@@ -1,7 +1,6 @@
 // The check that routed links go around the cards, or report the ones that can't.
 import type {RouteMeasurement} from '../../types.js'
-import {Skip, limit, primaryMode} from '../support.js'
-import type {Checks} from '../support.js'
+import {Skip, limit, primaryMode, type Checks} from '../support.js'
 
 export const routeChecks: Pick<Checks, 'link-routes'> = {
   async 'link-routes'(driver, subject, {modes}) {

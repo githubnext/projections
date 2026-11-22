@@ -1,5 +1,4 @@
-import {test, expect} from '@playwright/test'
-import type {Locator, Page} from '@playwright/test'
+import {test, expect, type Locator, type Page} from '@playwright/test'
 
 /**
  * Measuring text centred by its cap height, not its line box (packages/host/vscode-ui/README.md): in pixels at 2× on a

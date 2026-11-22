@@ -1,7 +1,6 @@
 import {plainProse} from '@githubnext/projections-schemas'
 import type {SummaryFactContext, SummaryFactItem, SummaryNoun, SummaryNouns} from '@githubnext/projections-renderer-kit'
-import {compatibilityLabels, compatibilityLevels, compatibilityOf} from './compatibility.js'
-import type {CompatibilityLevel} from './compatibility.js'
+import {compatibilityLabels, compatibilityLevels, compatibilityOf, type CompatibilityLevel} from './compatibility.js'
 
 const declaration: SummaryNoun = {singular: 'declaration', plural: 'declarations'}
 

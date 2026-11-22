@@ -1,5 +1,4 @@
-import {expect} from '@playwright/test'
-import type {Locator, Page} from '@playwright/test'
+import {expect, type Locator, type Page} from '@playwright/test'
 
 /**
  * The view's toolbar keeps every block inline when it has room; on phones (and narrow views) zoom, Filter, About

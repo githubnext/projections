@@ -1,5 +1,4 @@
-import {useRef} from 'react'
-import type {CSSProperties, KeyboardEvent, ReactNode} from 'react'
+import {useRef, type CSSProperties, type KeyboardEvent, type ReactNode} from 'react'
 import type {Meta, StoryObj} from '@storybook/react-vite'
 import {
   ProjectionStage,
@@ -16,11 +15,12 @@ import {
   useViewChoice,
   viewControls,
   viewLabel,
+  type ComparisonMode,
+  type ProjectionController,
+  type ViewKind,
 } from '@githubnext/projections-host'
-import type {ComparisonMode, ProjectionController, ViewKind} from '@githubnext/projections-host'
 import type {PreparedFixture} from '../../src/fixtures.js'
-import {preparedLoader, scenarioArgTypes} from '../../src/stories.js'
-import type {Loaded, ScenarioArgs} from '../../src/stories.js'
+import {preparedLoader, scenarioArgTypes, type Loaded, type ScenarioArgs} from '../../src/stories.js'
 import {themeOf} from '../../src/theme.js'
 
 /**

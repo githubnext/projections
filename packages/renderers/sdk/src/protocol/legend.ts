@@ -1,9 +1,7 @@
 // A renderer's legend, as its `legend` message posts it.
-import {themeTokenNames} from '../tokens.js'
-import type {ThemeTokenName} from '../tokens.js'
+import {themeTokenNames, type ThemeTokenName} from '../tokens.js'
 import {rendererLimits} from './frame.js'
-import {legendShapes} from './messages.js'
-import type {LegendItem, LegendShape, RendererLegend} from './messages.js'
+import {legendShapes, type LegendItem, type LegendShape, type RendererLegend} from './messages.js'
 import {cssColor, keys, record} from './validation.js'
 
 /** Validates one legend item: a label, and a swatch (`token` or `color`, never both) with an optional `shape`. */

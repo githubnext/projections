@@ -1,6 +1,5 @@
 import {expect, test} from '@playwright/test'
-import type {RingPixelReport} from '@githubnext/projections-renderer-testing/playwright'
-import {openStage, ringGeometry, ringPixelReport} from '@githubnext/projections-renderer-testing/playwright'
+import {type RingPixelReport, openStage, ringGeometry, ringPixelReport} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 import {scenarios} from './scenarios.js'
 

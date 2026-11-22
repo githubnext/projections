@@ -1,9 +1,7 @@
 import {readFileSync} from 'node:fs'
 import {fileURLToPath} from 'node:url'
-import {expect, test} from '@playwright/test'
-import type {Page} from '@playwright/test'
-import {build} from 'vite'
-import type {Rollup} from 'vite'
+import {expect, test, type Page} from '@playwright/test'
+import {build, type Rollup} from 'vite'
 import {badgeIconNames, defaultThemeTokens, iconToken} from '@githubnext/projections-renderer-sdk/protocol'
 import type {BadgeCell} from './badge-page.js'
 

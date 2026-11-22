@@ -14,8 +14,7 @@
 // One clean S: its geometry (`sTurn`) and its drawing (`sBend`, `gappedBend`), and tidying short slivers.
 import {arrowHeadReach} from '../arrowhead.js'
 import type {Point} from '../edge-arrows.js'
-import {joinSplines, lineSpline} from '../splines.js'
-import type {Spline} from '../splines.js'
+import {joinSplines, lineSpline, type Spline} from '../splines.js'
 import {add, dot} from './vector.js'
 
 /**

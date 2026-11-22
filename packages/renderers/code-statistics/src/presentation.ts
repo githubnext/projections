@@ -1,6 +1,5 @@
 import type {CSSProperties, KeyboardEvent} from 'react'
-import {changeMark, describeChange, isChanged} from '@githubnext/projections-renderer-kit'
-import type {EmphasisOf} from '@githubnext/projections-renderer-kit'
+import {changeMark, describeChange, isChanged, type EmphasisOf} from '@githubnext/projections-renderer-kit'
 import {signed} from './timeline.js'
 import type {Series} from './series.js'
 

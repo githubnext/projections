@@ -1,15 +1,9 @@
-import {rowItems} from './model.js'
-import type {Row, ViewSubject} from './model.js'
-import {changeParts, changeTags} from './details/change.js'
-import type {ChangePart} from './details/change.js'
-import {rowConnections} from './details/connections.js'
-import type {DetailConnection} from './details/connections.js'
-import {rowEvidence} from './details/evidence.js'
-import type {DetailEvidence} from './details/evidence.js'
-import {changedFields, itemFields, variedFields} from './details/fields.js'
-import type {FieldChange, VariedField} from './details/fields.js'
-import {generatedFields} from './details/generated.js'
-import type {GeneratedField} from './details/generated.js'
+import {rowItems, type Row, type ViewSubject} from './model.js'
+import {changeParts, changeTags, type ChangePart} from './details/change.js'
+import {rowConnections, type DetailConnection} from './details/connections.js'
+import {rowEvidence, type DetailEvidence} from './details/evidence.js'
+import {changedFields, itemFields, variedFields, type FieldChange, type VariedField} from './details/fields.js'
+import {generatedFields, type GeneratedField} from './details/generated.js'
 
 /** What a detail card shows for a row: what changed, where in the code, and how it connects. */
 export interface RowDetails {

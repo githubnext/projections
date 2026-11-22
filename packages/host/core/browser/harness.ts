@@ -1,5 +1,4 @@
-import {expect} from '@playwright/test'
-import type {Locator, Page} from '@playwright/test'
+import {expect, type Locator, type Page} from '@playwright/test'
 
 /**
  * The pages this suite drives are Storybook harness stories (tools/storybook/harness/), served from the static build by

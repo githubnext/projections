@@ -1,5 +1,4 @@
-import {useEffect, useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {ReactNode, RefObject} from 'react'
+import {useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject} from 'react'
 import {activeOption, stepOption} from './switcher-index.js'
 import {Button, ScopedRoot, ToolbarButton, cn} from '@githubnext/projections-host/ui/components'
 import {Check, ChevronDown, CircleAlert, CircleCheck, LoaderCircle, PanelLeft, Search, ShieldAlert} from 'lucide-react'

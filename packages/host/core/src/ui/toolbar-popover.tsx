@@ -1,5 +1,4 @@
-import {useId} from 'react'
-import type {ReactNode} from 'react'
+import {useId, type ReactNode} from 'react'
 import {Button} from './components/button.js'
 import {Popover, PopoverContent, PopoverTrigger} from './components/popover.js'
 import {cn} from './lib/utils.js'

@@ -1,6 +1,5 @@
 import {pageLines} from './page-text.ts'
-import {resolved} from './types.ts'
-import type {TabFacts, ViewSide} from './types.ts'
+import {resolved, type TabFacts, type ViewSide} from './types.ts'
 
 /** A revision as the agent reads it: a commit's first 8 characters, else the ref. */
 export function shortRevision(ref: string): string {

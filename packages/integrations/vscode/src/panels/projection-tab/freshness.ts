@@ -7,9 +7,8 @@ import type {FolderModel} from '../../folder-model.js'
 import type {TabSummary} from '../../projections/rows.js'
 import {changedFiles, checkoutLocation, workingTreeTree} from '../../refs.js'
 import {scopedTreeOf} from '../../scope.js'
-import {observation, relevantFiles, staleness} from '../../staleness.js'
+import {observation, relevantFiles, staleness, type ResultStamp, type Staleness} from '../../staleness.js'
 import {stampTree} from '../../staleness/notices.js'
-import type {ResultStamp, Staleness} from '../../staleness.js'
 
 /** Whether the shown result is out of date, and how many working-tree files changed since it. */
 export type TabStale = Staleness & {files?: number | undefined}

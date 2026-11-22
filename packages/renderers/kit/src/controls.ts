@@ -6,10 +6,9 @@ import {
   hasTestCounts,
   isCodeStatisticsMeasure,
   isCodeStatisticsScope,
+  type CodeStatisticsOptions,
 } from '@githubnext/projections-renderer-sdk/presentation'
-import type {CodeStatisticsOptions} from '@githubnext/projections-renderer-sdk/presentation'
-import {defineControls} from '@githubnext/projections-renderer-sdk/protocol'
-import type {ControlValue, RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
+import {defineControls, type ControlValue, type RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Entity} from '@githubnext/projections-schemas'
 
 /**

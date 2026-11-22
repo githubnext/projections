@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import type {Dispatch, SetStateAction} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction} from 'react'
 import type {InspectorApi} from '../client/api.js'
 import type {InspectorPairs, InspectorRevision} from '../types.js'
 import {defaultPair, isMarks, isMarksList, marking, suggestedMarks} from './pairs.js'

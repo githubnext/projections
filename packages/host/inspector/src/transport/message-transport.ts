@@ -1,8 +1,6 @@
-import {InspectorRequestError} from './contract.js'
-import type {InspectorChangeChannel, InspectorTransport} from './contract.js'
+import {InspectorRequestError, type InspectorChangeChannel, type InspectorTransport} from './contract.js'
 import {requestErrorMessage} from './errors.js'
-import {isApiPath, transportTag} from './messages.js'
-import type {TransportMessage, TransportReply} from './messages.js'
+import {isApiPath, transportTag, type TransportMessage, type TransportReply} from './messages.js'
 
 /** Why `signal` aborted: its reason, else an AbortError. */
 const abortReason = (signal: AbortSignal | undefined): unknown => signal?.reason ?? new DOMException('Aborted', 'AbortError')

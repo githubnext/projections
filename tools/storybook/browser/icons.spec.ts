@@ -1,7 +1,5 @@
-import {test as base, expect} from '@playwright/test'
-import type {Page} from '@playwright/test'
-import {badgeIconNames, iconNames} from '@githubnext/projections-renderer-sdk/protocol'
-import type {IconName} from '@githubnext/projections-renderer-sdk/protocol'
+import {test as base, expect, type Page} from '@playwright/test'
+import {badgeIconNames, iconNames, type IconName} from '@githubnext/projections-renderer-sdk/protocol'
 import {categories, findingLabels} from '../../../packages/renderers/runtime-policy/src/model.js'
 import type {Theme} from './smoke.spec.js'
 

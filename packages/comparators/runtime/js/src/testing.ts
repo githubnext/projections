@@ -4,13 +4,12 @@
  * the test's own, to exercise the sandbox's bounds. Hosts run only the rules
  * interpreter, through `createRulesRuntime`.
  */
-import {decodeOutput} from './abi.js'
+import {decodeOutput, decodeObject} from './abi.js'
 import {executeBytes} from './execute.js'
 import {prepare, settings, type RunComparatorOptions} from './host.js'
 import {nodeRulesInterpreter} from './node.js'
 import {run} from './node-worker.js'
 import {checkedRules, compareRequest, inspectRequest, type CheckedRules} from './rules.js'
-import {decodeObject} from './abi.js'
 
 export {ComparatorRuntimeError, decodeOutput, limits} from './abi.js'
 export {encodeInput} from './input.js'

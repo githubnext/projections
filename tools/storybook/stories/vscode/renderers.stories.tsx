@@ -1,7 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite'
 import {withVscodeFrame} from '../../src/vscode-frame.js'
-import {renderVscodeExplorer} from '../../src/vscode-render.js'
-import type {VscodeArgs} from '../../src/vscode-render.js'
+import {renderVscodeExplorer, type VscodeArgs} from '../../src/vscode-render.js'
 import {rendererStory, runtimeLoader, scenarioArgTypes} from '../../src/stories.js'
 
 /** Every renderer bundle in the VS Code UI, on its own scenarios (choose another with the `scenario` control). */

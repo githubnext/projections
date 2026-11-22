@@ -1,11 +1,24 @@
 import type {Entity} from '@githubnext/projections-schemas'
-import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {compareIds, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 import {attachProbes, chipsOf} from './placement.js'
-import {itemsOf, links} from './links.js'
-import type {Context} from './links.js'
-import {categories, interpretationsOf, isEnforcing, byLabel, collator, text} from './model.js'
-import type {CategoryView, HookItem, Item, PolicyItem, Revision, RuntimePolicyModel, Side, Tally, WorkloadItem} from './model.js'
+import {itemsOf, links, type Context} from './links.js'
+import {
+  categories,
+  interpretationsOf,
+  isEnforcing,
+  byLabel,
+  collator,
+  text,
+  type CategoryView,
+  type HookItem,
+  type Item,
+  type PolicyItem,
+  type Revision,
+  type RuntimePolicyModel,
+  type Side,
+  type Tally,
+  type WorkloadItem,
+} from './model.js'
 
 const known = (hook: Item) => categories.some(category => category.id === text(hook.entity.data?.category))
 

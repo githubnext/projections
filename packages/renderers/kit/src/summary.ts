@@ -1,18 +1,16 @@
-import {summaryItems} from '@githubnext/projections-renderer-sdk/presentation'
-import type {SummaryNouns} from '@githubnext/projections-renderer-sdk/presentation'
-import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import type {
-  ControlValue,
-  InitPayload,
-  RendererProjection,
-  RendererSummary,
-  SummaryCountItem,
-  SummaryFactItem,
+import {summaryItems, type SummaryNouns} from '@githubnext/projections-renderer-sdk/presentation'
+import {
+  rendererLimits,
+  type ControlValue,
+  type InitPayload,
+  type RendererProjection,
+  type RendererSummary,
+  type SummaryCountItem,
+  type SummaryFactItem,
 } from '@githubnext/projections-renderer-sdk/protocol'
 import type {ComparisonModel} from './model.js'
 import {boundaryKinds, moduleGroups} from './layout/groups.js'
-import {compareIds} from './layout/model.js'
-import type {LayoutEdge, LayoutNode} from './layout/model.js'
+import {compareIds, type LayoutEdge, type LayoutNode} from './layout/model.js'
 
 /** What a renderer's summary facts are computed from (`MountOptions.facts`): the document and its control values. */
 export interface SummaryFactContext {

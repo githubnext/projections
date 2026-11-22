@@ -1,7 +1,6 @@
 import {expect, test} from '@playwright/test'
 import {compareWithComparator, openRenderer, priorityOrderRules, samples} from '@githubnext/projections-renderer-harness/playwright'
-import {comparisonModel, scheduleSteps, ease, motionWindow, stepProgress} from '@githubnext/projections-renderer-kit'
-import type {ScheduledStep} from '@githubnext/projections-renderer-kit'
+import {comparisonModel, scheduleSteps, ease, motionWindow, stepProgress, type ScheduledStep} from '@githubnext/projections-renderer-kit'
 import type {Comparison, Extraction} from '@githubnext/projections-schemas'
 import {loadFixture, loadPair} from '../test/fixtures.mjs'
 import {checkFrameSequence, checkRenderedFrame, measureRenderedFrame} from '../test/invariants.mjs'

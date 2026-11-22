@@ -5,10 +5,8 @@ import {cardIconRoom} from '../card-icons.js'
 import {svgStatusWidth} from '../svg-status.js'
 import {cardFooterHeight, cardHeight} from '../layout.js'
 import {wrapText} from '../wrap.js'
-import {nextLine, writeDetail, writeFields, writeKindLine} from './lines.js'
-import type {CardLines, KindLine} from './lines.js'
-import {diffCardMetrics} from './metrics.js'
-import type {DiffCardInput, DiffCardText} from './metrics.js'
+import {nextLine, writeDetail, writeFields, writeKindLine, type CardLines, type KindLine} from './lines.js'
+import {diffCardMetrics, type DiffCardInput, type DiffCardText} from './metrics.js'
 
 interface Label {
   text: string

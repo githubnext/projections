@@ -1,9 +1,6 @@
-import {useLayoutEffect, useRef, useState} from 'react'
-import type {KeyboardEvent, RefObject} from 'react'
-import {Overlay} from './overlay.js'
-import type {OverlayProps} from './overlay.js'
-import {MenuBack, MenuGroups} from './menu-entry.js'
-import type {MenuItem} from './menu-entry.js'
+import {useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject} from 'react'
+import {Overlay, type OverlayProps} from './overlay.js'
+import {MenuBack, MenuGroups, type MenuItem} from './menu-entry.js'
 import {menuTarget, openingItem, show} from './keys.js'
 
 /** The props of `Menu`: its items (grouped by `MenuItem.group`), its accessible name, and the overlay's placement. */

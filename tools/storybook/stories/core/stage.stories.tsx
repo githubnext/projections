@@ -1,9 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite'
-import {comparisonModes, ProjectionStage, useProjection} from '@githubnext/projections-host'
-import type {ComparisonMode} from '@githubnext/projections-host'
+import {comparisonModes, ProjectionStage, useProjection, type ComparisonMode} from '@githubnext/projections-host'
 import type {PreparedFixture} from '../../src/fixtures.js'
-import {preparedLoader, scenarioArgTypes} from '../../src/stories.js'
-import type {Loaded, ScenarioArgs} from '../../src/stories.js'
+import {preparedLoader, scenarioArgTypes, type Loaded, type ScenarioArgs} from '../../src/stories.js'
 import {themeOf} from '../../src/theme.js'
 
 /**

@@ -3,8 +3,7 @@ import type {Extraction} from '@githubnext/projections-schemas'
 import type {ComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
 import type {EntitySample, StageSubject} from '../../types.js'
 import type {CheckDriver} from '../catalog.js'
-import {Skip, limit, samples} from '../support.js'
-import type {Checks} from '../support.js'
+import {Skip, limit, samples, type Checks} from '../support.js'
 import {changedEntities, difference, looks, touched, variedWithin} from './support.js'
 
 async function diffSamples(driver: CheckDriver, subject: StageSubject, width?: number): Promise<Map<string, EntitySample>> {

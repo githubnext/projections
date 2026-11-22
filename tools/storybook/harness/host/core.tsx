@@ -4,8 +4,15 @@ import type {ProjectionEngine} from '@githubnext/projections-schemas'
 import {createWasmEngine} from '@githubnext/projections-engine/browser'
 import engineWasm from '@githubnext/projections-engine/engine.wasm?url'
 import defaultComparatorWasm from '@githubnext/projections-engine/default-comparator.wasm?url'
-import {LoadingStatus, ProjectionStage, loadRendererCatalog, resolveRenderer, useProjection} from '@githubnext/projections-host'
-import type {RendererEntry, ViewSubject} from '@githubnext/projections-host'
+import {
+  LoadingStatus,
+  ProjectionStage,
+  loadRendererCatalog,
+  resolveRenderer,
+  useProjection,
+  type RendererEntry,
+  type ViewSubject,
+} from '@githubnext/projections-host'
 import {demonstration, laterRevision} from './fixtures.js'
 
 const params = new URLSearchParams(location.search)

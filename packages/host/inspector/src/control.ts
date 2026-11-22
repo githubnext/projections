@@ -4,6 +4,9 @@
  * pair and a selection. It grants no trust; extraction still needs the runner's `--trust` for repository code.
  */
 
+import type {ContextItems, ProjectionController} from '@githubnext/projections-host'
+
+/** The Before → After pair (or one revision) a host asks the Inspector to show (`InspectorHandle.setPair`). */
 export interface InspectorPairRequest {
   /** The Before revision; omitted to show one revision. */
   before?: string
@@ -72,8 +75,6 @@ export interface InspectorResultIdentity {
   definitionDigest?: string
   execution?: {source?: string; fidelity?: string; tree?: string; strategy?: string; scope?: unknown}
 }
-
-import type {ContextItems, ProjectionController} from '@githubnext/projections-host'
 
 /**
  * Drives a mounted Inspector from its embedding host (`MountedInspector.handle`): choose the projection and pair,

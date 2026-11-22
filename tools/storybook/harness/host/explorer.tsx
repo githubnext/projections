@@ -1,19 +1,39 @@
 // The host browser suites' harness (packages/host/core/browser/*.spec.ts): the default UI on synthetic data, configured by query parameters.
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {customComparator, domainSchemas} from '@githubnext/projections-schemas'
-import type {DomainSchema, ExtractionDocument, ProjectionEngine} from '@githubnext/projections-schemas'
+import {
+  customComparator,
+  domainSchemas,
+  type DomainSchema,
+  type ExtractionDocument,
+  type ProjectionEngine,
+} from '@githubnext/projections-schemas'
 import {createWasmEngine} from '@githubnext/projections-engine/browser'
 import {createRulesRuntime} from '@githubnext/projections-comparator-runtime/browser'
 import engineWasm from '@githubnext/projections-engine/engine.wasm?url'
 import defaultComparatorWasm from '@githubnext/projections-engine/default-comparator.wasm?url'
-import {builtinRendererDocuments, customRenderer, loadRendererCatalog} from '@githubnext/projections-host'
+import {
+  builtinRendererDocuments,
+  customRenderer,
+  loadRendererCatalog,
+  type ComparatorSource,
+  type ProjectionController,
+  type ProjectionSelection,
+  type RendererEntry,
+} from '@githubnext/projections-host'
 import {ComparisonExplorer, LoadingStatus, ScopedRoot, useColorMode} from '@githubnext/projections-host/ui'
-import type {ComparatorSource, ProjectionController, ProjectionSelection, RendererEntry} from '@githubnext/projections-host'
 import '@githubnext/projections-host/ui.css'
 import {usePageStyles} from '../page-styles.js'
 import styles from './explorer.css?inline'
-import {annotations, documents, evidenceLink, explorerOptions, explorerPadding, params, toolbarWidth} from './params.js'
-import type {RendererChoice} from './params.js'
+import {
+  annotations,
+  documents,
+  evidenceLink,
+  explorerOptions,
+  explorerPadding,
+  params,
+  toolbarWidth,
+  type RendererChoice,
+} from './params.js'
 import {DetailsSlot, TargetsPanel} from './targets.js'
 import {TourControls, useTour} from './tour.js'
 

@@ -1,6 +1,5 @@
 // Shared-prerequisite stages: several relationships that join and split at one junction.
-import {compareIds} from './model.js'
-import type {LayoutEdge} from './model.js'
+import {compareIds, type LayoutEdge} from './model.js'
 
 export interface SharedStage {
   sources: string[]

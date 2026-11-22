@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import {projectionPath, projectionQuery} from './projections/resources.js'
-import {rowPath, rowScheme} from './row-status.js'
-import type {RowStatus} from './row-status.js'
+import {rowPath, rowScheme, type RowStatus} from './row-status.js'
 
 export const projectionScheme = 'projection'
 export const projectionViewType = 'projections.projection'

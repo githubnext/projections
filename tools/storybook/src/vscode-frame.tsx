@@ -2,8 +2,7 @@
 // webview receives it (its `--vscode-*` variables and theme kind classes), with the VS Code UI's stylesheet and codicons.
 import type {CSSProperties, ReactNode} from 'react'
 import type {Decorator} from '@storybook/react-vite'
-import {ensureCodiconStylesheet} from '@githubnext/projections-host-vscode'
-import type {VscodeThemeFixture} from '@githubnext/projections-host-vscode'
+import {ensureCodiconStylesheet, type VscodeThemeFixture} from '@githubnext/projections-host-vscode'
 import '@githubnext/projections-host-vscode/styles.css'
 import {asset} from './runtime.js'
 import './frame.css'

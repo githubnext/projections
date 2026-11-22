@@ -2,8 +2,7 @@ import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {plainProse, statusParts} from '@githubnext/projections-renderer-kit'
 import {ChangeFooter, Icon, Prose} from '@githubnext/projections-renderer-kit/react'
-import {compatibilityLabels, reasonText} from './compatibility.js'
-import type {Classified, Compatibility} from './compatibility.js'
+import {compatibilityLabels, reasonText, type Classified, type Compatibility} from './compatibility.js'
 
 /** A level as its icon and word. */
 function Level({classified}: {classified: Classified}) {

@@ -1,10 +1,8 @@
 // Orthogonal polylines as chains of clean S bends.
 import {arrowHeadReach} from '../arrowhead.js'
 import type {Point} from '../edge-arrows.js'
-import {joinSplines, lineSpline} from '../splines.js'
-import type {Spline} from '../splines.js'
-import {routeRadius, sBend, tidyRoute} from './s-bend.js'
-import type {RouteOptions} from './s-bend.js'
+import {joinSplines, lineSpline, type Spline} from '../splines.js'
+import {routeRadius, sBend, tidyRoute, type RouteOptions} from './s-bend.js'
 import {add, frame} from './vector.js'
 
 /** A polyline without repeated points and with collinear runs merged. */

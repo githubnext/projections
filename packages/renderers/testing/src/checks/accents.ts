@@ -2,8 +2,7 @@
 import type {ComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
 import type {AccentPaint, NestedAccent, StageSubject} from '../types.js'
 import type {CheckDriver} from './catalog.js'
-import {limit, progressModes} from './support.js'
-import type {Checks} from './support.js'
+import {limit, progressModes, type Checks} from './support.js'
 
 /** Where the check looks: the diff, and the animation after each step (or midway through a progress mode). */
 async function presentations(

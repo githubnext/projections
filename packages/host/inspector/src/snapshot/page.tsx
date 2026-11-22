@@ -12,8 +12,12 @@ import {
   stepHoldMs,
   twoPaneMode,
   useProjection,
+  type PaneKey,
+  type RendererEntry,
+  type RendererManifest,
+  type ViewSubject,
+  type WithheldRenderer,
 } from '@githubnext/projections-host'
-import type {PaneKey, RendererEntry, RendererManifest, ViewSubject, WithheldRenderer} from '@githubnext/projections-host'
 import {revisionLabel} from '../app/revisions.js'
 import type {SnapshotDocument} from './document.js'
 import {SnapshotFrame} from './frames.js'

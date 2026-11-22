@@ -10,11 +10,11 @@ import {
   mix,
   parseColor,
   withAlpha,
+  type Rgba,
+  type ThemeTokenName,
 } from '@githubnext/projections-host'
-import type {Rgba, ThemeTokenName} from '@githubnext/projections-host'
 import {codiconTokens} from '../icons.generated.js'
-import {isHighContrast, vscodeColorMode} from './kinds.js'
-import type {VscodeThemeKind, VscodeVariables} from './kinds.js'
+import {isHighContrast, vscodeColorMode, type VscodeThemeKind, type VscodeVariables} from './kinds.js'
 import {fallbackFonts, vscodeMetrics, vscodeTokenMap} from './variables.js'
 
 /** The longest token value the renderer protocol accepts. */

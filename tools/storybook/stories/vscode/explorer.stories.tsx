@@ -1,8 +1,7 @@
 import type {Decorator, Meta, StoryObj} from '@storybook/react-vite'
 import {withVscodeFrame} from '../../src/vscode-frame.js'
 import {withFill} from './fill.js'
-import {renderVscodeExplorer} from '../../src/vscode-render.js'
-import type {VscodeArgs} from '../../src/vscode-render.js'
+import {renderVscodeExplorer, type VscodeArgs} from '../../src/vscode-render.js'
 import {mobile, runtimeLoader, scenarioArgTypes} from '../../src/stories.js'
 
 /**

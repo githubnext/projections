@@ -10,6 +10,7 @@ import {
   tokenModifiers,
   tokenTypes,
   utf16Range,
+  type RulesKind,
 } from './rules-service.js'
 import type {RulesKind} from './rules-service.js'
 import {noop} from './noop.ts'

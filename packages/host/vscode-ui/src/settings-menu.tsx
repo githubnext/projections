@@ -1,6 +1,11 @@
 import {useRef, useState} from 'react'
-import {hasSettingsModel, settingsModel} from '@githubnext/projections-host'
-import type {ProjectionController, SettingsEntry, SettingsSubmenu} from '@githubnext/projections-host'
+import {
+  hasSettingsModel,
+  settingsModel,
+  type ProjectionController,
+  type SettingsEntry,
+  type SettingsSubmenu,
+} from '@githubnext/projections-host'
 import type {VscodeToolbarButton} from '@vscode-elements/elements/dist/vscode-toolbar-button/vscode-toolbar-button.js'
 import {VscodeRendererControl, vscodeControlIcons} from './controls.js'
 import {ActionButton} from './elements.js'
@@ -8,11 +13,9 @@ import {Menu} from './overlay/menu.js'
 import {Overlay} from './overlay/overlay.js'
 import type {MenuItem} from './overlay/menu-entry.js'
 import {uiCodicons} from './codicons.js'
-import {on} from './features.js'
-import type {ViewKind, VscodeProjectionFeatures} from './features.js'
+import {on, type ViewKind, type VscodeProjectionFeatures} from './features.js'
 import type {PopoverControl} from './toolbar-popover.js'
-import {viewIcons} from './view-controls.js'
-import type {ShowAsProps} from './view-controls.js'
+import {viewIcons, type ShowAsProps} from './view-controls.js'
 
 const noop = () => undefined
 

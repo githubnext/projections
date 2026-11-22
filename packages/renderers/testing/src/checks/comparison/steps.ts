@@ -1,8 +1,7 @@
 // The checks of a comparison's steps: still holds, and emphasis scoped to the steps so far.
 import type {Comparison} from '@githubnext/projections-schemas'
 import type {EntitySample, StageSubject} from '../../types.js'
-import {Skip, limit, samples, label} from '../support.js'
-import type {Checks} from '../support.js'
+import {Skip, limit, samples, label, type Checks} from '../support.js'
 import {difference, looks, pick, touched, variedWithin} from './support.js'
 
 const round = (value: number) => Math.round(value * 1e6) / 1e6

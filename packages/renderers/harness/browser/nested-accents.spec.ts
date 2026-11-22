@@ -1,6 +1,5 @@
 import {expect, test} from '@playwright/test'
-import {openStage} from '@githubnext/projections-renderer-testing/playwright'
-import type {NestedAccent} from '@githubnext/projections-renderer-testing/playwright'
+import {openStage, type NestedAccent} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 
 /**

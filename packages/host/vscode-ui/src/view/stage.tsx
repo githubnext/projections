@@ -1,9 +1,7 @@
-import {ProjectionStage} from '@githubnext/projections-host'
-import type {PaneEdge, PaneState, ProjectionController, RendererEntry} from '@githubnext/projections-host'
+import {ProjectionStage, type PaneEdge, type PaneState, type ProjectionController, type RendererEntry} from '@githubnext/projections-host'
 import {Notice} from '../notice.js'
 import {LoadingStatus} from '../loading.js'
-import {Playback, handlePlaybackKey} from '../blocks.js'
-import type {ViewKind} from '../blocks.js'
+import {Playback, handlePlaybackKey, type ViewKind} from '../blocks.js'
 import {VscodeLegend} from '../views/legend.js'
 
 /** Pane cards (side by side, swipe) take the box's divider edge: one border, drawn inside. */

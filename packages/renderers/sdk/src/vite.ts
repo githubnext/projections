@@ -1,8 +1,15 @@
 import type {Plugin, UserConfig} from 'vite'
 import {readText, recordDevServer, resolveFile} from '../build/dev-server.mjs'
 import {bundleNotices} from '../build/notices.mjs'
-import {parseAccepts, parseComparisonModes, rendererMetaContentSecurityPolicy} from './protocol.js'
-import type {ComparisonMode, RendererAccepts, RendererCapabilities, RendererManifest} from './protocol.js'
+import {
+  parseAccepts,
+  parseComparisonModes,
+  rendererMetaContentSecurityPolicy,
+  type ComparisonMode,
+  type RendererAccepts,
+  type RendererCapabilities,
+  type RendererManifest,
+} from './protocol.js'
 import {lintRendererStyles} from './style-lint.js'
 
 /**

@@ -1,5 +1,4 @@
-import {test, expect} from '@playwright/test'
-import type {FrameLocator, Page} from '@playwright/test'
+import {test, expect, type FrameLocator, type Page} from '@playwright/test'
 import {
   chooseMode,
   chooseSetting,

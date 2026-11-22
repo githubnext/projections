@@ -1,7 +1,6 @@
 import type {AnnotationTone} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Row, ViewSubject} from '../model.js'
-import {resolveTarget} from './target.js'
-import type {TargetAnnotation} from './target.js'
+import {resolveTarget, type TargetAnnotation} from './target.js'
 
 /**
  * Combines target annotations into one marker per presented row, and lists

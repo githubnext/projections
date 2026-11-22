@@ -1,8 +1,7 @@
 import * as vscode from 'vscode'
 import {openExternal} from './docs.js'
 import {askAgent} from './new-projection/steps.js'
-import {addToCiGuide, addToCiPrompt, isAddToCiChoice} from './projections/ci.js'
-import type {AddToCiChoice} from './projections/ci.js'
+import {addToCiGuide, addToCiPrompt, isAddToCiChoice, type AddToCiChoice} from './projections/ci.js'
 
 const items: (vscode.QuickPickItem & {choice: AddToCiChoice})[] = [
   {

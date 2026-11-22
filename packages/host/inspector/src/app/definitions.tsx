@@ -1,6 +1,5 @@
 import type {ReactNode} from 'react'
-import type {Definition} from '@githubnext/projections-schemas'
-import {customComparator} from '@githubnext/projections-schemas'
+import {type Definition, customComparator} from '@githubnext/projections-schemas'
 import type {PartOverrides} from '../parts/model.js'
 import type {InspectorDefinitionList, InspectorPolicy} from '../types.js'
 

@@ -1,12 +1,11 @@
 import {useId, useRef, useState} from 'react'
-import type {ComparisonPair} from '@githubnext/projections-host'
+import {type ComparisonPair, revisionLabelName} from '@githubnext/projections-host'
 import type {VscodeToolbarButton} from '@vscode-elements/elements/dist/vscode-toolbar-button/vscode-toolbar-button.js'
 import {ActionButton, VscBadge, VscOption, VscSingleSelect} from './elements.js'
 import {Overlay} from './overlay/overlay.js'
 import {QuickPick} from './overlay/quick-pick.js'
 import {uiCodicons} from './codicons.js'
 import type {ToolbarLayout} from './layout/steps.js'
-import {revisionLabelName} from '@githubnext/projections-host'
 
 /** A pair picker's form, named as the default UI names it: two dropdowns, two with short names, or one compare action. */
 export type PairForm = 'full' | 'short' | 'merged'

@@ -1,8 +1,10 @@
 // A comparison's changes and the context needed to read them: what a viewer's Changes scope shows.
-import type {ChangeContext, ChangeStatus, Correspondence, Extraction, Relationship} from '@githubnext/projections-schemas'
+import type {ChangeContext, ChangeStatus, Correspondence} from '@githubnext/projections-schemas'
 import type {PresentedChanges} from './changes.js'
-import {structuralContext, structureOf, traverse} from './structure.js'
-import type {Structure} from './structure.js'
+import type {ContainmentSource} from './containment.js'
+import {structuralContext, structureOf, traverse, type Structure} from './structure.js'
+
+export {isContainment, type ContainmentSource} from './containment.js'
 
 /** The scopes of a comparison view: every item, the changes and their context, or the noise (items that only varied). */
 export type ViewScope = 'all' | 'changes' | 'noise'
@@ -31,44 +33,6 @@ export interface ScopeRow {
 /** Whether a row is one of a comparison's changes: its status, or its identity (a rename, split or merge), changed. */
 export function isScopeChange(row: Pick<ScopeRow, 'status' | 'correspondence'>): boolean {
   return (row.status !== undefined && row.status !== 'unchanged') || (row.correspondence !== undefined && row.correspondence !== 'exact')
-}
-
-/**
- * Containment a domain schema or vocabulary defines beyond `contains`: relationship kinds, or the entity kinds at a
- * relationship's ends whatever its own kind (a vocabulary that names its structure by its entities).
- */
-interface Containment {
-  kinds?: readonly string[]
-  ends?: readonly (readonly [from: string, to: string])[]
-}
-const containmentByName: Readonly<Record<string, Containment>> = {
-  // A table holds its columns, its primary key and its indexes.
-  'database/v0': {kinds: ['constraint', 'index']},
-  // A service holds its registrations, and a registration the implementation it produces (the vocabulary's structure is
-  // its entity kinds; docs/models/dependency-injection-model.md).
-  'dependency-injection/v0': {
-    ends: [
-      ['service', 'registration'],
-      ['registration', 'implementation'],
-    ],
-  },
-}
-
-/** The parts of an extraction `isContainment` reads. */
-export type ContainmentSource = Pick<Extraction, 'schema' | 'vocabularies' | 'entities' | 'relationships'>
-
-/**
- * Whether a relationship of an extraction means containment (`from` contains `to`): `contains` in every schema, and the
- * containment its domain schema and vocabularies define (a database table's `constraint` and `index`; a
- * dependency-injection service's registrations and a registration's implementation, by their entity kinds).
- */
-export function isContainment(extraction: ContainmentSource): (relationship: Relationship) => boolean {
-  const rules = [extraction.schema, ...(extraction.vocabularies ?? [])].flatMap(name => containmentByName[name] ?? [])
-  const kinds = new Set(['contains', ...rules.flatMap(rule => rule.kinds ?? [])])
-  const ends = new Set(rules.flatMap(rule => (rule.ends ?? []).map(([from, to]) => `${from}\n${to}`)))
-  const kindOf = ends.size ? new Map(extraction.entities.map(entity => [entity.id, entity.kind])) : undefined
-  return relationship =>
-    kinds.has(relationship.kind) || Boolean(kindOf && ends.has(`${kindOf.get(relationship.from)}\n${kindOf.get(relationship.to)}`))
 }
 
 /** What a Changes scope shows: the changes it is about and the unchanged items that give them context. */

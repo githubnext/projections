@@ -5,19 +5,15 @@ import {ArrowLeftRight, FlaskConical, GitCompareArrows, Plus, Square, X} from 'l
 import type {InspectorApi} from '../client/api.js'
 import {ChoiceButton, RefField} from '../compare.js'
 import {PartsPanel} from '../parts/panel.js'
-import {overriddenDefinition} from '../parts/model.js'
-import type {DefinitionWriter, PartOverrides, PartRow} from '../parts/model.js'
+import {overriddenDefinition, type DefinitionWriter, type PartOverrides, type PartRow} from '../parts/model.js'
 import {iconButton, shortcutLabel} from '../shell/controls.js'
-import {ExplorerSubheading} from '../shell/explorer.js'
-import type {ExplorerSection} from '../shell/explorer.js'
+import {ExplorerSubheading, type ExplorerSection} from '../shell/explorer.js'
 import type {InspectorPairs, InspectorRevision, InspectorScenario} from '../types.js'
 import type {Artifact} from './artifacts.js'
 import {errorText} from './errors.js'
-import {pairLabel, suggestedPairs} from './pairs.js'
-import type {Marks} from './pairs.js'
+import {pairLabel, suggestedPairs, type Marks} from './pairs.js'
 import {RevisionItem} from './revision-item.js'
-import {workingTree} from './revisions.js'
-import type {RevisionRow, RowState} from './revisions.js'
+import {workingTree, type RevisionRow, type RowState} from './revisions.js'
 
 /** A titled section of the Inspector's sidebar, named by `title` for assistive technology, with header `actions`. */
 export function SidebarSection({title, actions, children}: {title: string; actions?: ReactNode; children: ReactNode}) {

@@ -214,7 +214,8 @@ each file's count of each rule's violations, which ESLint lets stand while
 reporting any more. The file only shrinks. A count higher than a file's
 violations fails the lint, so the change that fixes one also lowers its count:
 `npm run lint -- --prune-suppressions`. Nothing is added to it by hand, and a
-new file never appears in it.
+new file never appears in it. ESLint writes it in its own layout, so oxfmt
+leaves it alone.
 
 Two rules are suppressed this way, each for the hand work its violations need:
 

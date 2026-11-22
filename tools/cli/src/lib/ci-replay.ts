@@ -13,27 +13,30 @@ import {git} from './repo.ts'
 
 /**
  * Runner-minutes per check: medians of the last 8 full runs on main and of pull request runs (narrowed harness jobs,
- * docs), and `browser (rest)` as its setup and build plus each suite it runs. Measured 2026-11-21; refresh them from a
- * recent run's job times when they drift. A check not listed costs nothing, and is named in the report.
+ * docs), and `browser (rest)` as its setup and build plus each suite it runs. Measured 2026-11-21; public-product and
+ * the Windows jobs 2026-11-22, from #183's warm run. Refresh them from a recent run's job times when they drift. A
+ * check not listed costs nothing, and is named in the report.
  */
 export const PRICES = {
   checks: {
     docs: 0.6,
-    // Estimates until measured: the parts of the 36.8-minute serial job they split.
-    'public-product (ubuntu-latest, checks)': 19.7,
-    'public-product (ubuntu-latest, Node)': 17.5,
-    'public-product (ubuntu-latest, Rust)': 18.7,
-    'public-product (macos-latest, Rust)': 29.5,
-    'public-product (macos-latest, Node)': 22.6,
+    'public-product (ubuntu-latest, checks)': 16.4,
+    'public-product (ubuntu-latest, Node)': 11.1,
+    'public-product (ubuntu-latest, Rust)': 15,
+    'public-product (macos-latest, Rust)': 17.9,
+    'public-product (macos-latest, Node)': 22.4,
     verus: 2,
-    windows: 33.8,
-    'windows-node': 24.8,
-    'windows-integration (browser)': 22,
-    'windows-integration (VS Code)': 16,
+    windows: 21.1,
+    'windows-node': 19.9,
+    'windows-integration (browser)': 18.6,
+    'windows-integration (VS Code)': 15,
     package: 12.7,
     'release-config': 0.4,
     coverage: 1.3,
     'actions-lock': 0.2,
+    // Checks a replayed base may still have: public-product on Linux and windows-integration before #183 split them.
+    'public-product (ubuntu-latest)': 36.8,
+    'windows-integration': 32.8,
   } as Record<string, number>,
   /** A shard of a job the workflow shards (the rules' `shards`), by job. */
   shards: {'mutants-diff': 2.1} as Record<string, number>,

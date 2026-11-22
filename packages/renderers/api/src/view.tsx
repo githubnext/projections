@@ -189,7 +189,7 @@ export function ApiView(props: RendererProps<typeof accepts>) {
   const style = compatibility ? ({'--pk-status-width': parts > 1 ? '21ch' : '11ch'} as CSSProperties) : undefined
   return (
     <div className="api-view pk-stage" data-highlighting={highlighting > 0 ? 'on' : 'off'} style={style}>
-      <div className="api-panel" data-projections-content="">
+      <div className="api-panel pk-frame" data-projections-content="">
         {compatibility && <CompatibilityNotices compatibility={compatibility} />}
         <Notice shown={drawn} total={total} noun="declarations" />
         {/* Folded wholly (a pane whose declarations are all context elsewhere), a pane still lists its folds. */}

@@ -140,6 +140,12 @@
       "title": "HTTP client surface",
       "description": "The exported declarations of one release, with their signatures.",
       "extraction": "fixtures/http-client-v2.json"
+    },
+    {
+      "id": "large-surface",
+      "title": "A large surface",
+      "description": "A synthetic surface of 600 declarations, past the 500 the renderer draws: a notice above the list says how many it shows, inside the panel's frame.",
+      "extraction": "fixtures/large-surface.json"
     }
   ]
 }

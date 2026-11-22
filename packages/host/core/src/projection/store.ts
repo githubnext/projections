@@ -25,19 +25,19 @@ import type {PaneKey, ProjectionOptions} from './types.js'
 /** The phases of a projection, for an adapter that runs them when its framework shows a read. */
 export interface ProjectionPhases {
   /** The controller for `options` and the state now, and what it used: pure, so it may be discarded. */
-  read(options: ProjectionOptions): Read
+  read: (options: ProjectionOptions) => Read
   /** A read is shown: keep what it used, and reconcile playback with it. */
-  commit(read: Read): void
+  commit: (read: Read) => void
   /** After it is shown: record what the renderers declared, and tell the embedder what changed. */
-  report(): void
+  report: () => void
   /** Counts the state's changes: a new number means a new read. */
-  version(): number
-  subscribe(listener: () => void): () => void
+  version: () => number
+  subscribe: (listener: () => void) => () => void
   /** Starts playback's frames and watching the person's preferences. Construction starts nothing. */
-  start(): void
+  start: () => void
   /** Whether it is started. */
   readonly running: boolean
-  stop(): void
+  stop: () => void
 }
 
 /** The phases of a projection whose first options are `initial`; `frames` schedules playback's animation frames. */

@@ -17,11 +17,14 @@ export type BuildStatus = {state: 'current'} | {state: Exclude<BuildState, 'curr
  * its outputs unchanged (ms; it keeps those outputs' old times, so this says they are current all the same),
  * `building`, set while a build runs and cleared only when it succeeds, and from its last successful build the
  * signature of its build inputs besides its src (`inputs`, see `inputSignature`), the files it produced (`outputs`,
- * relative to the workspace) and when it recorded them (`recorded`, ms).
+ * relative to the workspace) and when it recorded them (`recorded`, ms). `changed` is when a successful build last ran
+ * from inputs other than the build before it (ms): what depends on it may read those inputs directly (a stylesheet a
+ * renderer bundles), so it is newer than them however its own outputs came out.
  */
 export interface BuildRecord {
   checked?: number
   building?: boolean
+  changed?: number
   inputs?: string
   outputs?: string[]
   recorded?: number
@@ -120,6 +123,8 @@ export function buildInputs(root: string, unit: Unit): string[] {
       if (entry.name.startsWith('tsconfig')) tsconfigs.push(join(directory, entry.name))
     }
   }
+  // The configs followed so far: one already among the workspace's files still has its own `extends` to follow.
+  const followed = new Set(tsconfigs)
   for (const path of workspaceInputs(root, unit)) add(join(root, path))
   // Relative `extends` only: a package's tsconfig is a dependency, which the lockfile versions.
   while (tsconfigs.length) {
@@ -127,7 +132,8 @@ export function buildInputs(root: string, unit: Unit): string[] {
     const extended = /"extends"\s*:\s*("[^"]*"|\[[^\]]*\])/u.exec(readFileSync(tsconfig, 'utf8'))?.[1] ?? ''
     for (const [, name] of extended.matchAll(/"(\.{1,2}\/[^"]*)"/gu)) {
       const path = join(dirname(tsconfig), name!.endsWith('.json') ? name! : `${name}.json`)
-      if (isFile(path) && !inputs.has(posix(relative(root, path)))) {
+      if (isFile(path) && !followed.has(path)) {
+        followed.add(path)
         add(path)
         tsconfigs.push(path)
       }
@@ -162,6 +168,19 @@ export function inputSignature(root: string, inputs: readonly string[]): string 
     hash.update(`${input}\0${content.length}\0`).update(content)
   }
   return hash.digest('hex')
+}
+
+/** Whether a build ran from other inputs than the build before it; with none on record, nothing is known to change. */
+export function inputsChanged(previous: BuildRecord | undefined, inputs: string): boolean {
+  return previous?.inputs !== undefined && previous.inputs !== inputs
+}
+
+/**
+ * When a dependency last changed what a dependant reads of it: its outputs' newest time, or when a build last ran from
+ * changed inputs (`BuildRecord.changed`), which a dependant may read directly.
+ */
+export function changeTime(root: string, path: string, records = buildRecords(root)): number {
+  return Math.max(newestOutput(root, `${path}/dist`) ?? 0, records[path]?.changed ?? 0)
 }
 
 /** When a workspace's outputs were last known current: their newest time, or a later check that found them unchanged. */

@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test'
-import {openStage, type OffCentreLabel} from '@githubnext/projections-renderer-testing/playwright'
+import {openStage, type OffCentreLabel, type OffPixelChild} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 import {scenarios} from './scenarios.js'
 
@@ -93,4 +93,24 @@ test('a label of mixed prose keeps the UI font around its code', async ({page}, 
     .evaluateAll(labels => labels.map(label => getComputedStyle(label).fontFamily))
   expect(notes.length).toBeGreaterThan(0)
   expect(new Set(notes)).toEqual(new Set([fonts.ui]))
+})
+
+/**
+ * Centred on whole pixels: a label's line box is rounded up to a whole pixel and icons are even squares, so
+ * a band's icon centres at whole gaps. Undone (a 13px icon, a 19.5px line), the probe finds it off them.
+ */
+test('the centred-pixels probe finds an icon a half pixel off in its band, and none with even room', async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'One engine shows the probe works; the checks run in every one.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'runtime-policy/deployment', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  expect(await stage.measure<OffPixelChild[]>('pixels')).toEqual([])
+  await stage.frame.locator('head').evaluate(head => {
+    const style = document.createElement('style')
+    style.textContent =
+      '.pk [data-icon] { width: 1em !important; height: 1em !important } .pk .pk-label.pk-label { min-height: calc(1lh + 2 * var(--pk-label-inset, 0px)) !important; padding-block: calc((1lh - 1cap) / 2 - 0.5px + var(--pk-label-inset, 0px)) !important }'
+    head.append(style)
+  })
+  await stage.measure('settle')
+  const found = (await stage.measure<OffPixelChild[]>('pixels')).map(child => `${child.element} in ${child.holder}`)
+  expect(found).toEqual(expect.arrayContaining([expect.stringMatching(/^span\.pk-icon in header\.pk-group-header/u)]))
 })

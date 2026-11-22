@@ -307,6 +307,15 @@
 .database-glyph .pk-status-text {
   gap: 0;
 }
+/*
+ * A row's status icon is odd, its name's size (13px): a row is 32px, its top rule takes one, and an icon centres on
+ * whole pixels only in room whose leftover is even, so in the 31px under the rule an even icon would sit a half pixel
+ * off. Rows keep their 32px rhythm.
+ */
+.database-column .database-glyph .pk-icon {
+  width: calc(round(nearest, 1em, 2px) + 1px);
+  height: calc(round(nearest, 1em, 2px) + 1px);
+}
 .database-row {
   cursor: pointer;
 }

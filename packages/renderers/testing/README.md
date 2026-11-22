@@ -179,6 +179,13 @@ Build the bundle before the tests. The checks:
   number beside a wrapped line), aren't labels. The kit's `pk-label` passes it.
   A box with text in several sizes is centred on its main text, its largest
   capitals. Checked at full width in the diff (or the extraction).
+- `centred-pixels`: A painted box centred in a bar, chip or button (an icon, a
+  pill, a mark) sits at equal, whole-pixel gaps either side; a half pixel either
+  side, or one more on one side, is drawn unevenly once snapped. Room is whole
+  and even with the kit's `pk-label` (its line box is rounded up to a whole
+  pixel) and the SDK's even icons. Measured on painted HTML boxes centred within
+  a pixel in their nearest painted ancestor up to 48 px across, with up to 16 px
+  either side; a collapsed table rule counts half to each cell.
 - `link-routes`: Every link a renderer routes between cards (marked
   `data-projections-route`) goes around the cards in its way. When none can, the
   renderer draws the route that overlaps them least, marks it

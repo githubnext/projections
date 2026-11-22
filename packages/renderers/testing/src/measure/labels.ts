@@ -32,9 +32,10 @@ function surfaceOf(element: Element, root: Element): HTMLElement | undefined {
 
 /**
  * A surface's inner top and bottom: inside its borders, or in a table that collapses them, inside half of each rule
- * (which straddles the cells' edge), the one under it drawn by the cell below.
+ * (which straddles the cells' edge), the one under it drawn by the cell below, in the next row of the table (another
+ * section's first included); the table's last row has no rule under it.
  */
-function innerEdges(surface: HTMLElement, box: DOMRect, scale = 1): {top: number; bottom: number} {
+export function innerEdges(surface: HTMLElement, box: DOMRect, scale = 1): {top: number; bottom: number} {
   const style = getComputedStyle(surface)
   // Borders are laid out widths; the box is drawn, scaled.
   const width = (value: string) => px(value) * scale
@@ -43,9 +44,11 @@ function innerEdges(surface: HTMLElement, box: DOMRect, scale = 1): {top: number
   if (!(surface instanceof HTMLTableCellElement) || !table || getComputedStyle(table).borderCollapse !== 'collapse') {
     return {top: box.top + top, bottom: box.bottom - bottom}
   }
-  const next = surface.parentElement?.nextElementSibling
-  const under = next instanceof HTMLTableRowElement ? next.cells[surface.cellIndex] : undefined
-  return {top: box.top + top / 2, bottom: box.bottom - Math.max(bottom, under ? width(getComputedStyle(under).borderTopWidth) : 0) / 2}
+  const row = surface.parentElement
+  const next = row instanceof HTMLTableRowElement && table instanceof HTMLTableElement ? table.rows[row.rowIndex + 1] : undefined
+  // The next row's rule, from any of its cells: one may span the column (a section's title).
+  const under = next ? Math.max(0, ...[...next.cells].map(cell => width(getComputedStyle(cell).borderTopWidth))) : 0
+  return {top: box.top + top / 2, bottom: box.bottom - Math.max(bottom, under) / 2}
 }
 
 /**

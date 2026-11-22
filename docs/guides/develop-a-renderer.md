@@ -240,6 +240,12 @@ what broke and where), or skipped:
   It trims the text's box to its capitals and baseline and pads it back to its
   line height, so whatever centres it centres the capitals. Extra room goes in
   `--pk-label-inset`.
+- **Centred on whole pixels** — An icon, pill or mark centred in a bar, chip or
+  button has whole, equal gaps either side, never a half pixel (a 28px control
+  in a 32px row, not a 31px one). A `pk-label`'s line box is rounded up to a
+  whole pixel and icons are even squares, so a bar sized by them centres them on
+  whole pixels; size any other bar so its room around a centred box is whole and
+  even.
 - **Legend shown once** — Render at most one legend, and omit it altogether when
   the host already draws one.
 - **No horizontal overflow at phone width** — The page must never scroll

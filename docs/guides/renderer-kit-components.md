@@ -120,21 +120,52 @@ the change color owns that line.
 The kit's `pk-region-run` helper (for contiguous rows) draws its border on the
 surrounding lines, painting one stroke outside the run over a neighbor's rule, a
 header's bottom edge, or the container border. When two runs touch, the later
-run's top edge draws the shared line. Because `Group` clips to its outer edge
-(`overflow: clip` with the border width as its margin, or a `clip-path` where
-the browser lacks that margin), a run flush against the group's edge cleanly
-replaces the group's border there. Anything that reaches a group's corner uses
-the group's inner radius (`--pk-group-inner-radius`: the radius minus the border
-width), so it stays concentric with the border and never covers it. The header
-band takes it at the top, and a renderer's last row or band at the bottom (as
-runtime policy's last rows and text diff's last line do). To keep that outer
-stroke visible inside a scrolling container, extend the scroll box over the card
-edge by one border width and pad it back in (as text diff does). For rows that
-draw their own side borders (like runtime policy's bottom-bordered rows or text
-diff's After column), color that border with `--pk-region-line` (fading to
-`--pk-line`) instead of adding a second edge next to it. A changed `EntityCard`
-acting as a change region colors its own border, and a pill containing a
-`ValueChange` draws no outer frame around its two inner pills.
+run's top edge draws the shared line. Each side is a switch, `--pk-run-out-top`,
+`-right`, `-bottom` or `-left`, holding a stroke or `0px`: a renderer turns a
+side off where its row draws that line itself, or where the run's next sibling
+sits beside it rather than below (text diff's split columns turn the kit's "next
+run starts below" rule back off for that reason). Because `Group` clips to its
+outer edge (`overflow: clip` with the border width as its margin, or a
+`clip-path` where the browser lacks that margin), a run flush against the
+group's edge cleanly replaces the group's border there. Anything that reaches a
+group's corner uses the group's inner radius (`--pk-group-inner-radius`: the
+radius minus the border width), so it stays concentric with the border and never
+covers it. The header band takes it at the top, and a renderer's last row or
+band at the bottom (as runtime policy's last rows and text diff's last line do).
+To keep that outer stroke visible inside a scrolling container, extend the
+scroll box over the card edge by one border width and pad it back in (as text
+diff does). For rows that draw their own side borders (like runtime policy's
+bottom-bordered rows or text diff's After column), color that border with
+`--pk-region-line` (fading to `--pk-line`) instead of adding a second edge next
+to it. A changed `EntityCard` acting as a change region colors its own border,
+and a pill containing a `ValueChange` draws no outer frame around its two inner
+pills.
+
+## Frames: borders drawn over their contents
+
+`Group` is the kit's frame: a bordered, rounded box with filled contents. A fill
+that meets the border's curve, even one concentric with it, dilutes the border's
+antialiased pixels, so the arc comes out thinner than the sides (runtime
+policy's header band did this). So a group draws its border a second time over
+everything it holds, as an overlay on `--pk-layer-frame`, and change runs draw
+their edges above that on `--pk-layer-change-edge`, so the change color still
+wins the boundary. Two rules keep this working:
+
+- Nothing between a group and the runs inside it may form a stacking context
+  (`isolation`, a `z-index` on a positioned wrapper, `opacity` below 1,
+  `transform`, `filter`), or the runs' edges sink under the group's.
+- While the SDK rings a group, the ring is its edge: the overlay steps aside and
+  the runs inside drop under the group's paint, since an outline paints under
+  positioned descendants. The SDK publishes the state as `--projections-ringed`
+  (1 on a ringed HTML unit, never inherited). A unit with positioned rows can
+  query it with `@container style(--projections-ringed: 1)`, as runtime policy's
+  hook lanes do.
+
+`DataTable` draws its frame's top again outside its scroll box, from a box that
+never scrolls, because the scroll box's rounded clip thins any line inside it
+that follows the same curve. The harness `frames` spec checks every scenario's
+groups and tables in pixels, light and dark: each corner's arc stays within 93%
+to 160% of its sides, and no stacking context sits between a group and its runs.
 
 ## Item rings
 

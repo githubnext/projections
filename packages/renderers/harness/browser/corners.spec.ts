@@ -99,8 +99,9 @@ test("the report finds a data table's square heading poking past its frame", asy
   await stage.measure('settle')
   await stage.frame.locator('head').evaluate(head => {
     const style = document.createElement('style')
+    // Without the frame's top drawn over the table, which would hide it.
     style.textContent =
-      '.pk .pk-table > .pk-table-head, .pk .pk-table > .pk-table-head > .pk-table-cell:first-child { border-radius: 0 !important }'
+      '.pk .pk-table > .pk-table-head, .pk .pk-table > .pk-table-head > .pk-table-cell:first-child { border-radius: 0 !important } .pk .pk-table-frame::before { content: none !important } .pk .pk-table-head { border-top-color: var(--pk-table-line) !important }'
     head.append(style)
   })
   await stage.measure('settle')
@@ -115,7 +116,8 @@ test('the report finds a square header band covering its group border', async ({
   await stage.measure('settle')
   await stage.frame.locator('head').evaluate(head => {
     const style = document.createElement('style')
-    style.textContent = '.pk .pk-group-header { border-radius: 0 !important }'
+    // Without the group's edge drawn over its contents, which would hide it.
+    style.textContent = '.pk .pk-group-header { border-radius: 0 !important } .pk .pk-group::after { content: none !important }'
     head.append(style)
   })
   await stage.measure('settle')

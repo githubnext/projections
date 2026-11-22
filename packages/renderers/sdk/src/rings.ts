@@ -33,6 +33,9 @@
  * The SDK marks the host's hover and the selection on units
  * (`data-projections-ring-hover`, `data-projections-ring-selected`); the rest
  * is CSS. Renderers draw no ring, outline or selection border of their own.
+ * While ringed, an HTML unit has `--projections-ringed: 1` (0 otherwise, and
+ * never inherited), so an edge drawn over its content (the kit's frame) can
+ * give way to the ring: an outline paints under positioned descendants.
  */
 
 /** Set by the SDK on the units (and ring-with pieces) of the hovered entity. */
@@ -106,10 +109,11 @@ export function ringStylesheet(attribute = 'data-entity-id'): string {
   const filled = `[${ringEdgeAttribute}='fill']`
   // A stacking context of its own, so the outline paints above every descendant, positioned ones included.
   const outline = (width: string, style: string, color: string) =>
-    `outline: ${width} ${style} ${color} !important; outline-offset: calc(-1 * ${width}) !important; isolation: isolate;`
+    `outline: ${width} ${style} ${color} !important; outline-offset: calc(-1 * ${width}) !important; isolation: isolate; --projections-ringed: 1;`
   const stroke = (width: string, color: string, dash = 'none') =>
     `stroke: ${color} !important; stroke-width: ${width} !important; stroke-dasharray: ${dash} !important; vector-effect: non-scaling-stroke !important; stroke-opacity: 1 !important;`
   return `
+@property --projections-ringed { syntax: '<number>'; inherits: false; initial-value: 0; }
 :root {
   --pr-hover: var(--projections-color-accent, #0969da);
   --pr-selected: var(--projections-color-accent, #0969da);

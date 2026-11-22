@@ -17,7 +17,6 @@
  */
 .rp-view {
   /* The shared divider and container tokens, through one alias each. */
-  --rp-inner: calc(var(--projections-radius) - var(--projections-border-width));
   --rp-sign: 0px;
   --rp-effect: 10rem;
   --rp-side: 17rem;
@@ -65,17 +64,17 @@
   position: relative;
 }
 /*
- * A hook lane is a unit of its own, and its rows and regions reach its sides. They sit under its paint
- * (z-index -1 in the lane's stacking context), so its ring, an outline, shows above their fills: browsers paint an
- * outline under positioned descendants at z-index auto.
+ * A hook lane is a unit of its own, and its rows and regions reach its sides. At rest it forms no stacking context, so
+ * a change run's edge inside it rises above the panel's edge (the kit's frame). While the SDK rings it, it is one, and
+ * its rows sit under its paint, since an outline paints under positioned descendants: its ring is its edge then.
  */
 .rp-lane {
-  isolation: isolate;
   background: var(--raised);
 }
-.rp-lane > * {
-  position: relative;
-  z-index: -1;
+@container style(--projections-ringed: 1) {
+  .rp-lane > * {
+    z-index: -1;
+  }
 }
 /*
  * Rows sit between the quieter rule; a category's hook lanes are ruled off from each other by the divider. The line
@@ -94,15 +93,15 @@
   border-bottom-color: var(--divider);
 }
 .rp-view :is(.rp-table, .rp-lane, .rp-region, .rp-rules) > .pk-region-run[data-change][data-run-end]:not(:last-child) {
-  --pk-run-end: 0 0 0 0 transparent;
+  --pk-run-out-bottom: 0px;
   border-bottom-color: var(--pk-region-line);
 }
 /* What reaches the panel's bottom edge takes its inner corners, so a fill, edge or ring there follows the corner. */
 .rp-panel > .rp-table > :last-child,
 .rp-panel > .rp-table > .rp-lane:last-child > :last-child,
 .rp-panel > .rp-table > .rp-lane:last-child > .rp-region:last-child > .rp-rules:last-child > .rp-row:last-child {
-  border-bottom-left-radius: var(--rp-inner);
-  border-bottom-right-radius: var(--rp-inner);
+  border-bottom-left-radius: var(--pk-group-inner-radius);
+  border-bottom-right-radius: var(--pk-group-inner-radius);
 }
 
 /* Rows are compact, as text diff's lines: one spacing step above and below their text. */

@@ -191,30 +191,23 @@
   border-left: var(--projections-border-width) solid var(--divider);
 }
 /*
- * A changed line's bottom edge lies inside it, since the line under it paints later (its gutter, a hatched filler),
- * except at the body's end, where it lies on the card's edge; beside another run (a Before cell and its After cell), it
- * keeps it, and in one column the next run's top edge lands on the same pixels. A changed After line owns the line between the columns,
- * so it gives that line the change's hue rather than drawing beside it; beside a changed Before line, the After side's
- * line takes the Before line's hue.
+ * A changed After line owns the line between the columns, so it gives that line the change's hue rather than drawing
+ * beside it, and a changed Before line beside it leaves that line to it; beside an unchanged After line, the Before
+ * line's edge lies on that line, and a removed Before line gives it its hue.
  */
-.pk .td-body .td-diff .pk-region-run[data-change][data-run-end] {
-  --pk-run-end: inset 0 calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
-}
-.pk .td-diff > .pk-region-run[data-change][data-run-end]:last-child,
-.pk .td-split > .td-pair:last-child > .pk-region-run[data-change][data-run-end] {
-  --pk-run-end:
-    calc(-1 * var(--stroke)) var(--stroke) 0 0 var(--pk-region-edge-color), var(--stroke) var(--stroke) 0 0 var(--pk-region-edge-color);
-}
 .pk .td-split .td-side-after.pk-region-run[data-change] {
   border-left-color: var(--pk-region-line);
-  --pk-run-left: inset calc(var(--stroke-strong) - var(--stroke)) 0 0 0 var(--pk-region-edge-color);
+  --pk-run-out-left: 0px;
 }
-.pk .td-split .td-side-after.pk-region-run[data-change][data-run-start] {
-  --pk-run-start:
-    0 calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color), var(--stroke) calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
+.pk .td-split .td-side-before.pk-region-run[data-change]:has(+ .td-side-after.pk-region-run[data-change]) {
+  --pk-run-out-right: 0px;
 }
-.pk .td-split > .td-pair:last-child > .td-side-after.pk-region-run[data-change][data-run-end] {
-  --pk-run-end: 0 var(--stroke) 0 0 var(--pk-region-edge-color), var(--stroke) var(--stroke) 0 0 var(--pk-region-edge-color);
+/*
+ * A Before line's next sibling is its After line, beside it rather than under it, so its end keeps its bottom edge: a
+ * column holds one kind of change, so the line under a run's end is never another run's start.
+ */
+.pk .td-split .td-side-before.pk-region-run[data-change][data-run-end] {
+  --pk-run-out-bottom: var(--stroke);
 }
 .pk .td-split .td-side-before[data-change='removed'] + .td-side-after:not([data-change]) {
   border-left-color: color-mix(in srgb, var(--red-border) calc(var(--emphasis, 1) * 100%), var(--divider));

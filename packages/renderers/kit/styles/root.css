@@ -11,6 +11,9 @@ body {
 }
 
 .pk {
+  /* Paint layers inside a frame (see the group in layout.css): its edge over its fills, change edges over its edge. */
+  --pk-layer-frame: 2;
+  --pk-layer-change-edge: 3;
   --surface: var(--projections-color-bg);
   --canvas: var(--projections-color-bg-subtle);
   --recessed: var(--projections-color-bg-inset);

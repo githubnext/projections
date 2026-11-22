@@ -45,7 +45,7 @@ export interface CornerMeasure {
 }
 
 /** Measures each corner's border across its curve and on its sides; runs in a page. */
-export function measureCorners([probes, scale]: [CornerProbe[], number]): Promise<CornerMeasure[]> {
+export function measureCorners([probes, scale, minContrast = 40]: [CornerProbe[], number, number?]): Promise<CornerMeasure[]> {
   type Rgb = [number, number, number]
   interface Picture {
     width: number
@@ -98,7 +98,7 @@ export function measureCorners([probes, scale]: [CornerProbe[], number]): Promis
     return outer.off <= inner.off ? {weight: outer.t, off: outer.off} : {weight: 1 - inner.t, off: inner.off}
   }
   // Too little contrast between the border and either neighbour to tell how much of a pixel it covers.
-  const faint = 40
+  const faint = minContrast
   const step = 0.25 / scale
   return Promise.all(probes.map(async probe => ({probe, picture: await load(probe.url)}))).then(loaded =>
     loaded.map(({probe, picture}) => {

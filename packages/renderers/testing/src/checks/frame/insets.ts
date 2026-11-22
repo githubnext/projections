@@ -1,7 +1,6 @@
 // The check that cards, panels and tables sit evenly on the stage: the same inset from the frame on all four sides.
 import type {StageInsetsMeasurement} from '../../types.js'
-import {Skip, primaryMode} from '../support.js'
-import type {Checks} from '../support.js'
+import {Skip, primaryMode, type Checks} from '../support.js'
 
 /** How far apart, CSS px, the four insets may be: sub-pixel layout rounds each edge. */
 const tolerance = 1

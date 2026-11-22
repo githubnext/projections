@@ -1,9 +1,7 @@
 // How the snapshot page frames the stage, the legend and the summary bar (`SnapshotSettings.frame`).
 
-import {useLayoutEffect} from 'react'
-import type {CSSProperties, ReactNode} from 'react'
-import {ProjectionLegend, ProjectionStage, twoPaneMode} from '@githubnext/projections-host'
-import type {ProjectionController} from '@githubnext/projections-host'
+import {useLayoutEffect, type CSSProperties, type ReactNode} from 'react'
+import {ProjectionLegend, ProjectionStage, twoPaneMode, type ProjectionController} from '@githubnext/projections-host'
 import {ScopedRoot} from '@githubnext/projections-host/ui/components'
 import {SummaryBar} from '@githubnext/projections-host/ui'
 import type {SnapshotSettings} from './settings.js'

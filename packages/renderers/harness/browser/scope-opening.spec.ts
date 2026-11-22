@@ -1,5 +1,4 @@
-import {expect, test} from '@playwright/test'
-import type {Frame, Page} from '@playwright/test'
+import {expect, test, type Frame, type Page} from '@playwright/test'
 import {openStage} from '@githubnext/projections-renderer-testing/playwright'
 import type {StageSubject} from '@githubnext/projections-renderer-testing'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'

@@ -1,5 +1,4 @@
-import {test as base, expect} from '@playwright/test'
-import type {BrowserContext} from '@playwright/test'
+import {test as base, expect, type BrowserContext} from '@playwright/test'
 import {execFileSync} from 'node:child_process'
 import {copyFile, mkdir, mkdtemp, rm, writeFile} from 'node:fs/promises'
 import {tmpdir} from 'node:os'

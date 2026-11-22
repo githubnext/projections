@@ -1,5 +1,4 @@
-import {memo, useEffect} from 'react'
-import type {KeyboardEvent} from 'react'
+import {memo, useEffect, type KeyboardEvent} from 'react'
 import {classifyChange, statusParts, otherToken} from '@githubnext/projections-renderer-kit'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Circle} from './transition.js'

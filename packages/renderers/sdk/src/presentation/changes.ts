@@ -9,8 +9,7 @@ import type {
   Relationship,
   Varied,
 } from '@githubnext/projections-schemas'
-import {presentOrder} from '../steps.js'
-import type {PresentedOrder} from '../steps.js'
+import {presentOrder, type PresentedOrder} from '../steps.js'
 
 /**
  * One entity or relationship as presented: its before and after items paired

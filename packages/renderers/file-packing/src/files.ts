@@ -1,6 +1,5 @@
 import type {Entity} from '@githubnext/projections-schemas'
-import {fileCategory, plainCategory} from '@githubnext/projections-renderer-kit'
-import type {Category} from '@githubnext/projections-renderer-kit'
+import {fileCategory, plainCategory, type Category} from '@githubnext/projections-renderer-kit'
 
 /** What a file's circle is sized by: its bytes, or its lines when the extraction counts them. */
 export type SizeMeasure = 'bytes' | 'lines'

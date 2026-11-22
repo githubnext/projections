@@ -13,8 +13,7 @@ import {
 import {Compass, FilePlus2, ShieldAlert, Workflow} from 'lucide-react'
 import type {InspectorApi} from './client/api.js'
 import {copyText, useInspectorHost} from './host.js'
-import {SweepGrid} from './sweep/grid.js'
-import type {SweepLabels} from './sweep/grid.js'
+import {SweepGrid, type SweepLabels} from './sweep/grid.js'
 import type {ExploreCandidate, OnboardingWrite} from './types.js'
 
 /** A candidate's basis in words: "found `packages/a/package.json` and 3 more". */

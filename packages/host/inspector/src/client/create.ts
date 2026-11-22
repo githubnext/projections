@@ -1,8 +1,7 @@
 // The Inspector's client of its local runner: the API it calls, the validation of each response and the client (here).
 
 import type {OnboardingWrite} from '../types.js'
-import {InspectorRequestError} from '../transport.js'
-import type {InspectorChangeChannel, InspectorTransport} from '../transport.js'
+import {InspectorRequestError, type InspectorChangeChannel, type InspectorTransport} from '../transport.js'
 import type {InspectorApi} from './api.js'
 import {parseComparatorResponse} from './comparator.js'
 import {assertDefinitionList} from './definitions.js'

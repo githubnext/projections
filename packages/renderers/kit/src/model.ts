@@ -1,6 +1,10 @@
 import type {Comparison, Entity, Extraction, Relationship} from '@githubnext/projections-schemas'
-import {presentComparison} from '@githubnext/projections-renderer-sdk/presentation'
-import type {EntityChange, PresentedChanges, PresentedStep} from '@githubnext/projections-renderer-sdk/presentation'
+import {
+  presentComparison,
+  type EntityChange,
+  type PresentedChanges,
+  type PresentedStep,
+} from '@githubnext/projections-renderer-sdk/presentation'
 import type {InitPayload} from '@githubnext/projections-renderer-sdk/protocol'
 
 export type {StepKind} from '@githubnext/projections-renderer-sdk/presentation'

@@ -1,5 +1,4 @@
-import {useLayoutEffect, useRef} from 'react'
-import type {RefObject} from 'react'
+import {useLayoutEffect, useRef, type RefObject} from 'react'
 
 /**
  * Whether `control` has a popup open: `aria-expanded="true"` on it, or on the button in its open shadow root (a custom

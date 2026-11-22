@@ -1,7 +1,6 @@
 import {useRef, useState} from 'react'
 import type {Meta, StoryObj} from '@storybook/react-vite'
-import {ProjectionStage} from '@githubnext/projections-host'
-import type {ComparisonMode, ProjectionController} from '@githubnext/projections-host'
+import {ProjectionStage, type ComparisonMode, type ProjectionController} from '@githubnext/projections-host'
 import {
   ComparisonModeControl,
   DetailCard,
@@ -22,13 +21,12 @@ import {
   ViewSwitch,
   ZoomControls,
   spaceTogglesPlayback,
+  type ViewKind,
 } from '@githubnext/projections-host/ui'
-import type {ViewKind} from '@githubnext/projections-host/ui'
 import {WithProjection} from '../../src/controller.js'
 import {withDefaultFrame} from '../../src/default-frame.js'
 import {themeOf} from '../../src/theme.js'
-import {preparedLoader, sampleAnnotations, scenarioArgTypes, scenarioFixture} from '../../src/stories.js'
-import type {Loaded, ScenarioArgs} from '../../src/stories.js'
+import {preparedLoader, sampleAnnotations, scenarioArgTypes, scenarioFixture, type Loaded, type ScenarioArgs} from '../../src/stories.js'
 
 /**
  * The default UI's exported building blocks, each driven by the host core's controller (`useProjection`) on a

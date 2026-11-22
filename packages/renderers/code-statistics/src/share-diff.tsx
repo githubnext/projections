@@ -1,8 +1,7 @@
 import {ChangeStatus} from '@githubnext/projections-renderer-kit/react'
 import {DiffValue} from './diff.js'
 import {donutSlice} from './timeline.js'
-import {ring, sliceSemantics} from './presentation.js'
-import type {RowPresentation} from './presentation.js'
+import {ring, sliceSemantics, type RowPresentation} from './presentation.js'
 import type {Series} from './series.js'
 
 const percent = (amount: number, sum: number) => (sum > 0 ? Math.round((amount / sum) * 100) : 0)

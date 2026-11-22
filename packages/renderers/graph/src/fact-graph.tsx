@@ -1,8 +1,7 @@
 // The graph, DAG and architecture presentations: the staged graph canvas with the card facts a definition asks for.
 import {useEffect, useMemo} from 'react'
-import {GraphCanvas, graphCanvasControls, useLegend} from '@githubnext/projections-renderer-kit/react'
+import {GraphCanvas, graphCanvasControls, useLegend, type GraphCanvasProps} from '@githubnext/projections-renderer-kit/react'
 import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
-import type {GraphCanvasProps} from '@githubnext/projections-renderer-kit/react'
 import type {RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'

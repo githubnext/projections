@@ -1,7 +1,18 @@
 // React 19 wrappers for the VSCode Elements (@vscode-elements/elements, MIT) this UI uses: typed properties, typed
 // events, refs to the element, and the registrations they need (importing this module defines the elements once).
-import {createElement, useCallback, useEffect, useLayoutEffect, useRef} from 'react'
-import type {HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode, Ref, RefObject} from 'react'
+import {
+  createElement,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type HTMLAttributes,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+  type Ref,
+  type RefObject,
+} from 'react'
 import '@vscode-elements/elements/dist/vscode-badge/index.js'
 import '@vscode-elements/elements/dist/vscode-button/index.js'
 import '@vscode-elements/elements/dist/vscode-checkbox/index.js'

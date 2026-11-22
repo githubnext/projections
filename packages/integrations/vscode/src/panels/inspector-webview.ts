@@ -1,16 +1,24 @@
 import * as vscode from 'vscode'
 import {randomBytes} from 'node:crypto'
 import {parseTransportMessage} from '@githubnext/projections-inspector/transport'
-import {sourceRoot} from '../backend-sources.js'
-import type {PanelSource} from '../backend-sources.js'
+import {sourceRoot, type PanelSource} from '../backend-sources.js'
 import type {Lease} from '../backends.js'
 import {createActor} from '@githubnext/projections-machine'
 import {createBridge} from '../bridge.js'
 import {openExternal} from '../docs.js'
 import {webviewHtml} from '../html.js'
 import {count} from '../probe.js'
-import {controlTag, hostTag, position, relativePath, rendererTag, revision} from '../protocol.js'
-import type {ControlRequest, HostMessage, WebviewConfig} from '../protocol.js'
+import {
+  controlTag,
+  hostTag,
+  position,
+  relativePath,
+  rendererTag,
+  revision,
+  type ControlRequest,
+  type HostMessage,
+  type WebviewConfig,
+} from '../protocol.js'
 import type {Runner} from '../runner.js'
 import type {Services} from '../services.js'
 import {pageLifecycle} from './page-lifecycle.js'

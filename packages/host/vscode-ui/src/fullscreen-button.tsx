@@ -1,6 +1,5 @@
 import type {RefObject} from 'react'
-import {useFullscreen} from '@githubnext/projections-host'
-import type {FullscreenState} from '@githubnext/projections-host'
+import {useFullscreen, type FullscreenState} from '@githubnext/projections-host'
 import {ActionButton} from './elements.js'
 import {uiCodicons} from './codicons.js'
 

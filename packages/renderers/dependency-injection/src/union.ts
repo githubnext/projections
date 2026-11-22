@@ -1,11 +1,8 @@
 import type {ChangeStatus, DependencyInjectionExtraction, Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, ScheduledStep} from '@githubnext/projections-renderer-kit'
-import {layoutDiModel} from './layout.js'
-import type {DiPosition} from './layout.js'
-import {buildDiModel} from './model.js'
-import type {DiLink, DiModel, DiUnit} from './model.js'
+import {compareIds, type ComparisonModel, type ScheduledStep} from '@githubnext/projections-renderer-kit'
+import {layoutDiModel, type DiPosition} from './layout.js'
+import {buildDiModel, type DiLink, type DiModel, type DiUnit} from './model.js'
 
 /** What a unit shows of its own parts. The note is left out: it can depend on which other cards a revision has. */
 function signature(unit: DiUnit): string {

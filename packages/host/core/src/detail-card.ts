@@ -1,11 +1,9 @@
-import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react'
-import type {CSSProperties, RefObject} from 'react'
+import {useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject} from 'react'
 import type {Row} from './model.js'
 import type {ProjectionController} from './projection.js'
 import {encodeTarget} from './targets/encoding.js'
 import {useCardFocus} from './detail-card/focus.js'
-import {intersect, placeDetailCard, samePlacement} from './detail-card/placement.js'
-import type {DetailCardPlacement, PlacementRect} from './detail-card/placement.js'
+import {intersect, placeDetailCard, samePlacement, type DetailCardPlacement, type PlacementRect} from './detail-card/placement.js'
 
 /** The options of `useDetailCard`: where the card is placed and when it opens. */
 export interface DetailCardOptions {

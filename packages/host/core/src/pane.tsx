@@ -1,6 +1,5 @@
-import {useEffect, useMemo, useRef, useState} from 'react'
+import {useEffect, useMemo, useRef, useState, type ReactNode} from 'react'
 import {useMachine} from '@githubnext/projections-machine/react'
-import type {ReactNode} from 'react'
 import type {
   AnchorRect,
   AnnotationMark,

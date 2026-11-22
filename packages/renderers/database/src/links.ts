@@ -1,7 +1,14 @@
 import {compareIds, portSpacing, routeTracks, spreadPorts} from '@githubnext/projections-renderer-kit'
 import {anchorY} from './geometry.js'
-import {schemaMetrics} from './schema.js'
-import type {SchemaBox, SchemaLayout, SchemaLayoutMode, SchemaLink, SchemaModel, SchemaPoint} from './schema.js'
+import {
+  schemaMetrics,
+  type SchemaBox,
+  type SchemaLayout,
+  type SchemaLayoutMode,
+  type SchemaLink,
+  type SchemaModel,
+  type SchemaPoint,
+} from './schema.js'
 import type {FrameLink} from './frame.js'
 
 export const selfLoop = 20

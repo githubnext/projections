@@ -2,8 +2,7 @@
 // asking every 2 s) when the server doesn't answer, resumes when it answers again, and gives way to another server
 // that answers at its URL. Its reports of what it presents go one at a time, the latest waiting for the one in flight,
 // so an older report never arrives after a newer one.
-import {defineMachine, emit, ignore} from '@githubnext/projections-machine'
-import type {Step} from '@githubnext/projections-machine'
+import {defineMachine, emit, ignore, type Step} from '@githubnext/projections-machine'
 import type {ViewerState} from './state.js'
 
 /** The shown projection's custom renderer build, as the server sends it with the state. */

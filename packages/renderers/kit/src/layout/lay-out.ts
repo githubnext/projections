@@ -6,11 +6,9 @@ import {median, rootPadding} from './placement.js'
 import {routeEdges} from './routing.js'
 import {elkInput} from './elk-input.js'
 import {elkRun} from './elk-run.js'
-import {placeCards} from './elk-placement.js'
-import type {Plan} from './elk-placement.js'
-import {placeUnlinked} from './unlinked.js'
+import {placeCards, type Plan} from './elk-placement.js'
+import {placeUnlinked, type Box} from './unlinked.js'
 import {columnGrid, snapToGrid} from './grid.js'
-import type {Box} from './unlinked.js'
 
 /**
  * Lays the graph out with layer gap `gap`, in `given`'s order and alignment when given. With `enough`, it gives up on

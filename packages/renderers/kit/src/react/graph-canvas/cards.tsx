@@ -2,8 +2,7 @@
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {TransitionNode} from '../../graph-transition.js'
-import {entityKindLine, kindText} from '../../card-text.js'
-import type {KindLineText} from '../../card-text.js'
+import {entityKindLine, kindText, type KindLineText} from '../../card-text.js'
 import type {DiffCardText} from '../../diff-card/metrics.js'
 
 export function displayed(node: TransitionNode): Entity {

@@ -1,6 +1,5 @@
 import type {Pair} from '../projections/pairs.js'
-import {sameChoice} from './model.ts'
-import type {Choice, RepositoryFacts} from './model.ts'
+import {sameChoice, type Choice, type RepositoryFacts} from './model.ts'
 import {resolveChoice} from './resolve.ts'
 
 /** A pair as it compares commits: `HEAD` read as its commit, so equivalent choices compare equal. */

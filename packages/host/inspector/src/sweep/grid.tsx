@@ -16,8 +16,7 @@ import {History, LoaderCircle} from 'lucide-react'
 import type {InspectorApi} from '../client/api.js'
 import type {Sweep, SweepCell} from '../types.js'
 import {bySignal, signalCounts} from './stats.js'
-import {SweepTable} from './table.js'
-import type {Adoptable} from './table.js'
+import {SweepTable, type Adoptable} from './table.js'
 import {useThumbnailQueue} from './thumbnails.js'
 
 /** The recent-changes grid's button and empty-state copy, which a host may name in its own words. */

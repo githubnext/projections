@@ -9,8 +9,7 @@ import type {
 import type {ComparisonMode, Side} from '../modes.js'
 import type {RendererEntry} from '../registry.js'
 import {locale} from './environment.js'
-import {selector} from './memo.js'
-import type {Selector} from './memo.js'
+import {selector, type Selector} from './memo.js'
 import type {Highlighting, ProjectionOptions} from './types.js'
 
 type Kinds = NonNullable<ProjectionOptions['presentation']>['kinds']

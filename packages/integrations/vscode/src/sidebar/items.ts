@@ -1,9 +1,8 @@
 import * as vscode from 'vscode'
 import {rowUri} from '../decorations.js'
 import type {FolderModel} from '../folder-model.js'
-import {candidateReason} from '../projections/definitions.js'
+import {candidateReason, type Candidate, type InvalidDefinition, type ProjectionDefinition} from '../projections/definitions.js'
 import {rendererIcon} from '../projections/rows.js'
-import type {Candidate, InvalidDefinition, ProjectionDefinition} from '../projections/definitions.js'
 import {rowDescription, rowStatus} from '../row-status.js'
 
 export type Node =

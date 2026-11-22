@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useRef} from 'react'
-import type {RefObject} from 'react'
+import {useCallback, useEffect, useRef, type RefObject} from 'react'
 import type {Row} from '../model.js'
 import type {Side} from '../modes.js'
 import type {ProjectionController} from '../projection.js'

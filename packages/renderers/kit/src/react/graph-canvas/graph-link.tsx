@@ -2,16 +2,13 @@
 import {relationshipLabel} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Relationship} from '@githubnext/projections-schemas'
 import {arrowHeadStyle} from '../../arrowhead.js'
-import {cardBorderOutset} from '../../border.js'
-import type {BorderWidths} from '../../border.js'
-import {classifyChange, edgePaint} from '../../emphasis.js'
-import type {ChangeClassification} from '../../emphasis.js'
+import {cardBorderOutset, type BorderWidths} from '../../border.js'
+import {classifyChange, edgePaint, type ChangeClassification} from '../../emphasis.js'
 import type {TransitionEdge, TransitionNode} from '../../graph-transition.js'
 import {changeMark} from '../../diff/model.js'
 import {drawnEdge} from '../../graph-canvas/edges.js'
 import type {Point} from '../../edge-arrows.js'
-import {edgeDescription} from './drawing.js'
-import type {Drawing} from './drawing.js'
+import {edgeDescription, type Drawing} from './drawing.js'
 
 export interface DrawnLink {
   edge: TransitionEdge

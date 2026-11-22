@@ -1,8 +1,7 @@
 import type {CSSProperties} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import {rightX, textX} from './card.js'
-import {pillGap} from './geometry.js'
-import type {DiDependencyPiece, DiSpan, DiTextLine} from './geometry.js'
+import {pillGap, type DiDependencyPiece, type DiSpan, type DiTextLine} from './geometry.js'
 import type {DiDependencyChange} from './diff-model.js'
 
 /** Each line's style: the kit graph card's (`node-kind`, `node-label`, `node-detail`), and its own class for its role. */

@@ -1,8 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {readFile} from 'node:fs/promises'
-import {parseRendererMessage} from '@githubnext/projections-renderer-sdk/protocol'
-import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
+import {parseRendererMessage, rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
 import {rendererSummary, summaryChange} from '../dist/index.js'
 
 const valid = summary => parseRendererMessage({projections: 0, channel: 'c', type: 'summary', ...summary}, 'c')

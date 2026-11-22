@@ -2,11 +2,9 @@ import type {ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import {classifyChange, describeChange, isChanged, statusGlyphs, statusParts} from '@githubnext/projections-renderer-kit'
 import {Icon} from '@githubnext/projections-renderer-kit/react'
-import {interpretationIcons, interpretationText} from './model.js'
+import {interpretationIcons, interpretationText, type Item} from './model.js'
 import {warnings} from './prose.js'
-import type {Item} from './model.js'
-import {emphasisStyle, markOf, runAttributes} from './frame.js'
-import type {Frame, Run} from './frame.js'
+import {emphasisStyle, markOf, runAttributes, type Frame, type Run} from './frame.js'
 import {Prose} from './breaks.js'
 
 /**

@@ -1,7 +1,6 @@
 // The icon stories' stylesheets: the renderer kit's (with the SDK's icons.css) and the gallery's, in the document only
 // while an icon story is shown, so no other story sees the kit's page-wide rules.
-import {useLayoutEffect, useState} from 'react'
-import type {ReactNode} from 'react'
+import {useLayoutEffect, useState, type ReactNode} from 'react'
 import kitStyles from '@githubnext/projections-renderer-kit/react.css?inline'
 import galleryStyles from './icon-gallery.css?inline'
 

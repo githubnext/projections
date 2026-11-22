@@ -1,15 +1,20 @@
-import {useEffect, useMemo} from 'react'
-import type {CSSProperties, ReactNode} from 'react'
+import {useEffect, useMemo, type CSSProperties, type ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
 import {changeMark, presentedEmphasis, statusParts} from '@githubnext/projections-renderer-kit'
-import {ChangeFooter, EmptyDomain, Fold, Identifier, Notice, Prose, useFolds} from '@githubnext/projections-renderer-kit/react'
-import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
+import {
+  ChangeFooter,
+  EmptyDomain,
+  Fold,
+  Identifier,
+  Notice,
+  Prose,
+  useFolds,
+  type RendererProps,
+} from '@githubnext/projections-renderer-kit/react'
 import {changesFirst, comparisonRows, declarationLimit, limitEntries, limitScope, qualifiedNames, revisionRows} from './model.js'
-import {breakingFirst, compatibilityOf, reasonText} from './compatibility.js'
-import type {Compatibility} from './compatibility.js'
+import {breakingFirst, compatibilityOf, reasonText, type Compatibility} from './compatibility.js'
 import type {Side} from './signature.js'
 import {CompatibilityFooter, CompatibilityNotices} from './compatibility-view.js'
 import {DiffSignature, RevisionSignature} from './signature-view.js'

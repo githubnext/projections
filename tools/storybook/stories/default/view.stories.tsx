@@ -2,8 +2,16 @@ import type {Meta, StoryObj} from '@storybook/react-vite'
 import {ProjectionView} from '@githubnext/projections-host/ui'
 import {withDefaultFrame} from '../../src/default-frame.js'
 import {themeOf} from '../../src/theme.js'
-import {mobile, preparedLoader, renderDetails, sampleAnnotations, scenarioArgTypes, scenarioFixture} from '../../src/stories.js'
-import type {Loaded, ScenarioArgs} from '../../src/stories.js'
+import {
+  mobile,
+  preparedLoader,
+  renderDetails,
+  sampleAnnotations,
+  scenarioArgTypes,
+  scenarioFixture,
+  type Loaded,
+  type ScenarioArgs,
+} from '../../src/stories.js'
 
 interface ViewArgs extends ScenarioArgs {
   /** Offer only the host's table and text views, as when no renderer bundle is available. */

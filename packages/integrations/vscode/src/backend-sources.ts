@@ -1,9 +1,8 @@
 import * as vscode from 'vscode'
 import type {BackendPool} from './backends.js'
 import {workspaceArguments} from './environment-model.js'
-import {startRunner} from './runner.js'
+import {startRunner, type Runner} from './runner.js'
 import {ensureExecutable, incompatibility, resolveCli} from './runner/cli.js'
-import type {Runner} from './runner.js'
 import {scenarioRenderer, sourceArguments} from './sources.js'
 
 /**

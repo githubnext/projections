@@ -1,5 +1,4 @@
-import {useRef, useState} from 'react'
-import type {ReactNode, RefObject} from 'react'
+import {useRef, useState, type ReactNode, type RefObject} from 'react'
 import type {VscodeToolbarButton} from '@vscode-elements/elements/dist/vscode-toolbar-button/vscode-toolbar-button.js'
 import {ActionButton} from './elements.js'
 import {Overlay} from './overlay/overlay.js'

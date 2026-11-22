@@ -1,7 +1,6 @@
 // The projection views the page mounts in the Inspector: a projection tab's (with its own toolbar, or none) and the
 // Inspector panel's, both the VS Code UI's projection view without full screen, which a webview can't enter.
-import {VscodeProjectionView} from '@githubnext/projections-host-vscode'
-import type {PairForm, VscodeProjectionViewProps} from '@githubnext/projections-host-vscode'
+import {VscodeProjectionView, type PairForm, type VscodeProjectionViewProps} from '@githubnext/projections-host-vscode'
 import {createElement, useSyncExternalStore} from 'react'
 import {config, post} from './host.js'
 import {TabPairPicker, TabStaleNotice} from './tab-pair.js'

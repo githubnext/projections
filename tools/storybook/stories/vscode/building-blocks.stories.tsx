@@ -1,7 +1,6 @@
 import {useRef, useState} from 'react'
 import type {Meta, StoryObj} from '@storybook/react-vite'
-import {ProjectionStage, subjectRows} from '@githubnext/projections-host'
-import type {ProjectionController, ViewSubject} from '@githubnext/projections-host'
+import {ProjectionStage, subjectRows, type ProjectionController, type ViewSubject} from '@githubnext/projections-host'
 import {
   AnnotationMarker,
   ChangeLabel,
@@ -28,12 +27,11 @@ import {
   VscodeTextView,
   ZoomControls,
   handlePlaybackKey,
+  type ViewKind,
 } from '@githubnext/projections-host-vscode'
-import type {ViewKind} from '@githubnext/projections-host-vscode'
 import {WithProjection} from '../../src/controller.js'
 import {vscodeThemeOf, withVscodeFrame} from '../../src/vscode-frame.js'
-import {preparedLoader, sampleAnnotations, scenarioArgTypes, scenarioFixture} from '../../src/stories.js'
-import type {Loaded, ScenarioArgs} from '../../src/stories.js'
+import {preparedLoader, sampleAnnotations, scenarioArgTypes, scenarioFixture, type Loaded, type ScenarioArgs} from '../../src/stories.js'
 
 const noop = () => undefined
 

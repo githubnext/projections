@@ -1,11 +1,9 @@
 // A projection tab's reports to the extension: its summary and view (for the side bar, status bar and title actions)
 // when they change, and its new results, which the extension keeps to present again if the page is dropped while hidden.
 import type {InspectorHandle} from '@githubnext/projections-inspector/mount'
-import {hostTag} from '../protocol.js'
-import type {TabView} from '../protocol.js'
+import {hostTag, type TabView} from '../protocol.js'
 import {post} from './host.js'
-import {shownAs} from './page-view.js'
-import type {View} from './page-view.js'
+import {shownAs, type View} from './page-view.js'
 import {appliedSwitch, keep, saved, tabState} from './tab-state.js'
 import {shownChoice} from './tab-pair.js'
 import {reducedMotion} from './theme.js'

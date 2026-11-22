@@ -2,8 +2,17 @@
 // the icon a field names, a numeric field to size cards by, a card color by kind or data field, which relationship
 // kinds to draw and a color per relationship kind, each described in the host legend.
 import type {Entity, Relationship} from '@githubnext/projections-schemas'
-import {categoryPalette, languageCategory, plainCategory} from '@githubnext/projections-renderer-kit'
-import type {CardAccent, CardBadge, ComparisonModel, LegendItem, Palette, RendererLegend} from '@githubnext/projections-renderer-kit'
+import {
+  categoryPalette,
+  languageCategory,
+  plainCategory,
+  type CardAccent,
+  type CardBadge,
+  type ComparisonModel,
+  type LegendItem,
+  type Palette,
+  type RendererLegend,
+} from '@githubnext/projections-renderer-kit'
 import {badgeValues, colorValue, iconValue, numberValue, pointerField, textValue} from './facts/fields.js'
 
 export * from './facts/fields.js'

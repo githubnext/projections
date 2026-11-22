@@ -61,6 +61,39 @@ Each option allows one defined idiom and nothing else.
 | `no-console`                    | shipped `src` only                            | CLIs, scripts and tests print by design.                                                                                                    |
 | `no-implicit-coercion`          | allows `!!`                                   | `!!value` narrows `value` in TypeScript; `Boolean(value)` doesn't, so its fix breaks type checking.                                         |
 
+## Imports
+
+`eslint-plugin-import-x` checks imports between modules and packages. It
+resolves them with `eslint-import-resolver-typescript`, through each workspace's
+`tsconfig.json` (and its `browser/` and `test/` ones), as TypeScript does.
+
+| Rule                         | Option                                                        | Why                                                                                                                                                                     |
+| ---------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `no-cycle`                   | `ignoreExternal`; type-only imports don't count (its default) | A cycle of values makes one module read another before it has evaluated. Type-only imports are erased, so they can't; packages in `node_modules` aren't followed.       |
+| `no-duplicates`              | `prefer-inline`                                               | One import per module, its types inline (`import {value, type Shape}`), as `consistent-type-imports` writes them.                                                       |
+| `no-extraneous-dependencies` | development dependencies outside shipped `src`                | A workspace declares what it imports. Shipped `src` uses only dependencies and peer dependencies; tests, specs, scripts and configuration may use development ones too. |
+
+Two arrangements change what `no-extraneous-dependencies` allows. Workspaces
+that bundle their build declare what they bundle as development dependencies,
+and their `src` imports it: the SDK (`packages/sdk`) bundles the internal
+workspaces, the VS Code extension everything but `vscode` (which the VS Code
+host provides, so it is a core module here), and the TypeScript helper replaces
+`typescript` with the examined repository's own. The renderers' and the kit's
+browser suites run in the renderer harness, so they may import what it declares
+too, as `npm run check:boundaries` allows.
+
+`no-self-import`, `no-useless-path-segments`, `no-mutable-exports` and `first`
+take no options.
+
+Left out:
+
+- `no-unresolved`, `named`, `namespace`, `default`, `export` and the other rules
+  that check what an import resolves to: TypeScript reports the same, with the
+  resolution the build uses, and a script or test in JavaScript fails on its
+  first run.
+- `no-default-export`: configuration files (Vite, Playwright, tsdown, ESLint)
+  and Storybook stories must default-export.
+
 ## Rules that stay off
 
 - `explicit-function-return-type`, `explicit-module-boundary-types`: they

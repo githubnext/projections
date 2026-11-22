@@ -12,8 +12,7 @@ import type {Sidebar} from './sidebar.js'
 import {coalesce} from './updates.js'
 import {pairFileCount} from './refs.js'
 import type {Pair} from './projections/pairs.js'
-import {runningIndicator} from '@githubnext/projections-host-vscode/running'
-import type {Running} from '@githubnext/projections-host-vscode/running'
+import {runningIndicator, type Running} from '@githubnext/projections-host-vscode/running'
 
 export class StatusBar implements vscode.Disposable {
   private readonly item = vscode.window.createStatusBarItem('projections.pair', vscode.StatusBarAlignment.Left, 50)

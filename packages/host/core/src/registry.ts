@@ -1,5 +1,10 @@
-import {acceptsExtraction, describeAccepts, parseRendererManifest} from '@githubnext/projections-renderer-sdk/protocol'
-import type {RendererAccepts, RendererManifest} from '@githubnext/projections-renderer-sdk/protocol'
+import {
+  acceptsExtraction,
+  describeAccepts,
+  parseRendererManifest,
+  type RendererAccepts,
+  type RendererManifest,
+} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ExtractionDocument, RendererBundle} from '@githubnext/projections-schemas'
 import type {ComparisonMode} from './modes.js'
 

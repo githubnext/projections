@@ -1,11 +1,9 @@
-import {changeContextItems} from '@githubnext/projections-host'
-import type {ProjectionController} from '@githubnext/projections-host'
+import {changeContextItems, type ProjectionController} from '@githubnext/projections-host'
 import type {InspectorKeptResult, InspectorRunning, InspectorSummary} from '../control.js'
 import type {ProjectionStatus} from '../shell/switcher.js'
 import type {InspectorDefinitionList} from '../types.js'
 import type {Marks} from './pairs.js'
-import {resultsOf} from './revisions.js'
-import type {RowState} from './revisions.js'
+import {resultsOf, type RowState} from './revisions.js'
 import type {Rows} from './use-extractions.js'
 
 /** What the handle reads when a host calls it: the latest render's. */

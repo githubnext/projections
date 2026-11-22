@@ -1,9 +1,7 @@
 import {compareIds} from '@githubnext/projections-renderer-kit'
 import type {TextSizer} from './text.js'
-import {anchor, cardHeight, keepOrder, orderRanks, rowGeometry} from './geometry.js'
-import type {Geometry} from './geometry.js'
-import {schemaMetrics} from './schema.js'
-import type {SchemaBox, SchemaLayout, SchemaLink, SchemaModel, SchemaPoint} from './schema.js'
+import {anchor, cardHeight, keepOrder, orderRanks, rowGeometry, type Geometry} from './geometry.js'
+import {schemaMetrics, type SchemaBox, type SchemaLayout, type SchemaLink, type SchemaModel, type SchemaPoint} from './schema.js'
 
 /** A long link's slot in a rank it crosses, from the dependent's rank to the principal's. */
 type Waypoints = Map<string, {rank: number; y: number}[]>

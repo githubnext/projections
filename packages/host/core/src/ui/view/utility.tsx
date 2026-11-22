@@ -1,5 +1,4 @@
-import {useRef, useState} from 'react'
-import type {CSSProperties, ReactNode} from 'react'
+import {useRef, useState, type CSSProperties, type ReactNode} from 'react'
 import type {ProjectionController} from '../../projection.js'
 import {useSize} from '../../stage/arrangement.js'
 import {utilityInset, utilitySide} from '../../stage/utility.js'

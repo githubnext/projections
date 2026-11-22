@@ -3,10 +3,8 @@
 // canvas's width its header text is whole and its chrome lies flat, edge to edge, every control works, and a page that
 // loses its server says so and takes no input. A named viewer is a page of its own, and the person switches a page's
 // projection from its title. Where a browser won't load renderer frames' URLs, the page opens their documents itself.
-import {test, expect, chromium} from '@playwright/test'
-import type {Page} from '@playwright/test'
-import {execFileSync, spawn, spawnSync} from 'node:child_process'
-import type {ChildProcess} from 'node:child_process'
+import {test, expect, chromium, type Page} from '@playwright/test'
+import {execFileSync, spawn, spawnSync, type ChildProcess} from 'node:child_process'
 import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'

@@ -5,8 +5,7 @@ import type {InspectorDefinitionList, InspectorPolicy, InspectorScenario} from '
 import type {Artifact} from './artifacts.js'
 import {changeReason} from './definitions.js'
 import type {Marks} from './pairs.js'
-import {refName} from './revisions.js'
-import type {RowState} from './revisions.js'
+import {refName, type RowState} from './revisions.js'
 
 /** The title bar's status line: what it says (`message`, as text in `plain`), and when and why it last happened. */
 export interface Activity {

@@ -1,6 +1,5 @@
 import * as vscode from 'vscode'
-import {definitionModel, flattenSources} from './configuration-model.js'
-import type {DefinitionNode, ScenariosFile, SourceItem} from './configuration-model.js'
+import {definitionModel, flattenSources, type DefinitionNode, type ScenariosFile, type SourceItem} from './configuration-model.js'
 import {sourceParts} from './definition.js'
 import {parseScenarios, scenariosFor} from './develop-model.js'
 import type {BundledDocs} from './docs.js'

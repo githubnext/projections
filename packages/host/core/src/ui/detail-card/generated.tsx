@@ -1,9 +1,7 @@
-import {useState} from 'react'
-import type {ReactNode} from 'react'
+import {useState, type ReactNode} from 'react'
 import {Activity, Sparkle} from 'lucide-react'
 import type {WordRun} from '@githubnext/projections-renderer-sdk/presentation'
-import {generatedForm} from '../../details/generated.js'
-import type {GeneratedField} from '../../details/generated.js'
+import {generatedForm, type GeneratedField} from '../../details/generated.js'
 import {Prose} from '../prose.js'
 import {cn} from '../lib/utils.js'
 

@@ -1,7 +1,5 @@
-import {useLayoutEffect, useMemo, useState} from 'react'
-import type {RefObject} from 'react'
-import {coveredPadding, scrolledPadding} from '../fit.js'
-import type {FitPadding} from '../fit.js'
+import {useLayoutEffect, useMemo, useState, type RefObject} from 'react'
+import {coveredPadding, scrolledPadding, type FitPadding} from '../fit.js'
 import {useFrameSizing, useStageCover, useStageInsetBottom, useStageInsetTop} from './shell/frame.js'
 
 /**

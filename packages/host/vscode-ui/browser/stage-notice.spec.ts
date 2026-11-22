@@ -1,8 +1,6 @@
-import {test, expect} from '@playwright/test'
-import type {Locator, Page} from '@playwright/test'
+import {test, expect, type Locator, type Page} from '@playwright/test'
 import {capGaps, expectCentred} from './cap.js'
-import {contrast, ready, story} from './harness.js'
-import type {ThemeId} from './harness.js'
+import {contrast, ready, story, type ThemeId} from './harness.js'
 
 /**
  * The stage notice (a VS Code tab's "Out of date · N files changed" with Refresh): a pill floating over the stage's top

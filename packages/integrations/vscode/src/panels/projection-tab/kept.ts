@@ -1,8 +1,7 @@
 // The extractions a projection tab showed last, kept for its page to present again when VS Code drops the hidden tab's
 // webview and reloads it (no `retainContextWhenHidden`): nothing extracts again on its own. Only the most recent tabs
 // keep theirs.
-import {samePair} from '../../projections/pairs.js'
-import type {Pair} from '../../projections/pairs.js'
+import {samePair, type Pair} from '../../projections/pairs.js'
 import type {TabRestore} from '../../protocol.js'
 
 type Results = NonNullable<TabRestore['results']>

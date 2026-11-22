@@ -1,6 +1,5 @@
 import {useEffect, useReducer, useState} from 'react'
-import {runningIndicator} from './running.js'
-import type {Running} from './running.js'
+import {runningIndicator, type Running} from './running.js'
 
 /**
  * The job an indicator shows (`runningIndicator`): only once it has run a moment, then for at least a moment, so short

@@ -1,8 +1,6 @@
 // A live projection controller for building-block stories: the host core's `useProjection` on a prepared scenario.
-import {useMemo} from 'react'
-import type {ReactNode} from 'react'
-import {useProjection} from '@githubnext/projections-host'
-import type {AnnotationMark, ProjectionController, ProjectionOptions} from '@githubnext/projections-host'
+import {useMemo, type ReactNode} from 'react'
+import {useProjection, type AnnotationMark, type ProjectionController, type ProjectionOptions} from '@githubnext/projections-host'
 import type {PreparedFixture} from './fixtures.js'
 
 /**

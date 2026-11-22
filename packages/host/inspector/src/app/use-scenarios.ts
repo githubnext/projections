@@ -1,9 +1,7 @@
-import {useCallback, useEffect, useRef, useState} from 'react'
-import type {Dispatch, SetStateAction} from 'react'
+import {useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction} from 'react'
 import type {InspectorApi} from '../client/api.js'
 import type {InspectorPolicy, InspectorScenario, InspectorScenarioList} from '../types.js'
-import {scenarioArtifact} from './artifacts.js'
-import type {Artifact} from './artifacts.js'
+import {scenarioArtifact, type Artifact} from './artifacts.js'
 import {errorText} from './errors.js'
 import type {Marks} from './pairs.js'
 

@@ -1,8 +1,6 @@
 import * as vscode from 'vscode'
-import {testTree} from '../test-items.js'
-import type {TestNode} from '../test-items.js'
-import {range} from './state.js'
-import type {TestState, Watched} from './state.js'
+import {testTree, type TestNode} from '../test-items.js'
+import {range, type TestState, type Watched} from './state.js'
 
 /** A node's test item: the one it had (when its file is the same), so its results stay, else a new one. */
 function nodeItem(state: TestState, watched: Watched, node: TestNode, existing: vscode.TestItem | undefined, id: string, index: number) {

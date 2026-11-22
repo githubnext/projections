@@ -1,6 +1,5 @@
 import {listedChoices} from './listing.ts'
-import {pairChoiceId, sameChoice} from './model.ts'
-import type {Choice, RepositoryFacts} from './model.ts'
+import {pairChoiceId, sameChoice, type Choice, type RepositoryFacts} from './model.ts'
 import type {RecentChange} from './recent.ts'
 
 /** The state of the run over the recent commits, as the Recent changes group shows it. */

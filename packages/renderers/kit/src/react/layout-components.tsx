@@ -4,17 +4,13 @@
  * (`palette`, `type-scale`, `spacing`) without CSS of its own. Props take steps of the theme's scales, never lengths
  * or colors.
  */
-import {useId} from 'react'
-import type {CSSProperties, ElementType, ReactNode} from 'react'
+import {useId, type CSSProperties, type ElementType, type ReactNode} from 'react'
 import type {ChangeStatus as Status} from '@githubnext/projections-schemas'
-import {identifier as identifierAttributes} from '@githubnext/projections-renderer-sdk/presentation'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {token} from '@githubnext/projections-renderer-sdk/protocol'
-import type {FontSizeStep, FontWeightStep, SpaceStep} from '@githubnext/projections-renderer-sdk/protocol'
+import {identifier as identifierAttributes, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {token, type FontSizeStep, type FontWeightStep, type SpaceStep, type IconName} from '@githubnext/projections-renderer-sdk/protocol'
 import {ChangeFooter, ChangeStatus, Identifier, NameLine} from './components.js'
 import {changeMark} from '../diff/model.js'
 import {Icon} from './icons.js'
-import type {IconName} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ChangeClassification} from '../emphasis.js'
 
 interface StatusChange {

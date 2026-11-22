@@ -1,8 +1,14 @@
-import {useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {CSSProperties, ReactNode} from 'react'
+import {useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
-import {cardBorderOutset, emphasisInset, classifyChange, contentStart, describeChange, textPill} from '@githubnext/projections-renderer-kit'
-import type {ScrollStart} from '@githubnext/projections-renderer-kit'
+import {
+  cardBorderOutset,
+  emphasisInset,
+  classifyChange,
+  contentStart,
+  describeChange,
+  textPill,
+  type ScrollStart,
+} from '@githubnext/projections-renderer-kit'
 import {
   CardChangeMarks,
   cardCornerRadius,
@@ -14,14 +20,12 @@ import {
   useLegend,
   useOpeningFloor,
   useStageZoom,
+  type RendererProps,
 } from '@githubnext/projections-renderer-kit/react'
-import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
-import {unitParts} from './model.js'
-import {createDiTransition} from './transition.js'
+import {unitParts, type DiUnit} from './model.js'
+import {createDiTransition, type DiUnitFrame} from './transition.js'
 import {diCardHeight, diMetrics, selfRegistered} from './geometry.js'
 import {markSpan} from './lifetime-mark.js'
-import type {DiUnitFrame} from './transition.js'
-import type {DiUnit} from './model.js'
 import {
   LifetimeMark,
   LinkOrigins,

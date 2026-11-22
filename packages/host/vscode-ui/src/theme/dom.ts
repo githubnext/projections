@@ -1,8 +1,6 @@
-import {useLayoutEffect, useState} from 'react'
-import type {RefObject} from 'react'
+import {useLayoutEffect, useState, type RefObject} from 'react'
 import type {ThemeTokenName} from '@githubnext/projections-host'
-import {vscodeColorMode, vscodeThemeKindOf} from './kinds.js'
-import type {ColorMode, VscodeThemeKind} from './kinds.js'
+import {vscodeColorMode, vscodeThemeKindOf, type ColorMode, type VscodeThemeKind} from './kinds.js'
 import {vscodeVariableNames} from './variables.js'
 import {vscodeThemeTokens} from './tokens.js'
 

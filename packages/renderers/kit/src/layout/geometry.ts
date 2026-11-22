@@ -1,8 +1,7 @@
 // Spline geometry of routes: rounded orthogonal routes and their straight runs.
 import type {Point} from '../edge-arrows.js'
 import {routeRadius} from '../routes/s-bend.js'
-import {joinSplines, lineSpline} from '../splines.js'
-import type {Spline} from '../splines.js'
+import {joinSplines, lineSpline, type Spline} from '../splines.js'
 
 /** Largest corner radius of a rounded orthogonal route, in layout units: the same as a drafted route's turns. */
 const cornerRadius = routeRadius

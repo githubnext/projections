@@ -1,7 +1,6 @@
 // The SDK's icon vocabulary for the icon stories: every badge and every other icon, grouped by meaning as the SDK
 // describes them (icons.ts), each with the word it accompanies and the change color renderers draw it in.
-import {badgeIconNames, iconNames} from '@githubnext/projections-renderer-sdk/protocol'
-import type {IconName} from '@githubnext/projections-renderer-sdk/protocol'
+import {badgeIconNames, iconNames, type IconName} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ChangeClassification} from '@githubnext/projections-renderer-kit'
 
 export interface IconEntry {

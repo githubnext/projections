@@ -1,5 +1,4 @@
-import {test as base, expect} from '@playwright/test'
-import type {Frame, Locator, Page} from '@playwright/test'
+import {test as base, expect, type Frame, type Locator, type Page} from '@playwright/test'
 import type {Theme} from './smoke.spec.js'
 
 const test = base.extend<{theme: Theme}>({theme: ['light', {option: true}]})

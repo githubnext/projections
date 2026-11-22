@@ -5,17 +5,18 @@ import {
   variedBeyond,
   variedWithinTolerance,
 } from '@githubnext/projections-renderer-sdk/presentation'
-import type {
-  ChangeContext,
-  ChangeStatus,
-  Comparison,
-  Correspondence,
-  Entity,
-  Extraction,
-  Relationship,
-  Varied,
+import {
+  type ChangeContext,
+  type ChangeStatus,
+  type Comparison,
+  type Correspondence,
+  type Entity,
+  type Extraction,
+  type Relationship,
+  type Varied,
+  codeSpan,
+  escapeProse,
 } from '@githubnext/projections-schemas'
-import {codeSpan, escapeProse} from '@githubnext/projections-schemas'
 
 const codes = (ids: readonly string[]): string => ids.map(codeSpan).join(', ')
 

@@ -2,8 +2,7 @@
 import {useMemo, useState} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {classifyChange, createStagedTimeline, current} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {classifyChange, createStagedTimeline, current, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 import {
   CardGrid,
   ContentView,
@@ -15,10 +14,10 @@ import {
   Stack,
   Text,
   useFrameSizing,
+  type RendererProps,
+  type ViewOptions,
 } from '@githubnext/projections-renderer-kit/react'
-import type {RendererProps, ViewOptions} from '@githubnext/projections-renderer-kit/react'
-import {documentOrder, scenarioOf, subjectWords} from './model.js'
-import type {Scenario} from './model.js'
+import {documentOrder, scenarioOf, subjectWords, type Scenario} from './model.js'
 import {eagerScenarios, NestedStage} from './stage.js'
 import type {accepts} from './accepts.js'
 

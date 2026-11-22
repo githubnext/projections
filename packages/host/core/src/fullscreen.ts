@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useState} from 'react'
-import type {RefObject} from 'react'
+import {useCallback, useEffect, useState, type RefObject} from 'react'
 
 const noop = () => undefined
 

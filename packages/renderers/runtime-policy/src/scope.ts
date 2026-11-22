@@ -1,5 +1,4 @@
-import {followContext} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {followContext, type ComparisonModel} from '@githubnext/projections-renderer-kit'
 
 /** Relationships to what a policy or rule applies to, matches or excludes: drawn as chips inside it, not as rows. */
 const subjects = new Set(['applies-to', 'matches', 'excludes'])

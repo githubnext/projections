@@ -1,6 +1,5 @@
 import type {Frame, Page} from '@playwright/test'
-import {analyze} from './rings/analyze.js'
-import type {Line} from './rings/analyze.js'
+import {analyze, type Line} from './rings/analyze.js'
 import {dropFarRings, markOccludedEdges, sideFailures} from './rings/judge.js'
 
 /**

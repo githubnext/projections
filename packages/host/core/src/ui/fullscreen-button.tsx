@@ -1,8 +1,6 @@
-import {useContext} from 'react'
-import type {RefObject} from 'react'
+import {useContext, type RefObject} from 'react'
 import {Maximize2, Minimize2} from 'lucide-react'
-import {useFullscreen} from '../fullscreen.js'
-import type {FullscreenState} from '../fullscreen.js'
+import {useFullscreen, type FullscreenState} from '../fullscreen.js'
 import {Button} from './components/button.js'
 import {MoreContext} from './toolbar.js'
 

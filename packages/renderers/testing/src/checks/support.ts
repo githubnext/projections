@@ -1,6 +1,5 @@
 // What every check shares: its settings, outcomes other than failures, and waiting and sampling.
-import {defaultComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
-import type {ComparisonMode, RendererOptions} from '@githubnext/projections-renderer-sdk/protocol'
+import {defaultComparisonMode, type ComparisonMode, type RendererOptions} from '@githubnext/projections-renderer-sdk/protocol'
 import type {CheckId, EntitySample, StageSubject} from '../types.js'
 import type {CheckDriver} from './catalog.js'
 

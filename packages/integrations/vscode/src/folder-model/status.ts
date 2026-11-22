@@ -1,7 +1,5 @@
-import {samePair} from '../projections/pairs.js'
-import type {Pair} from '../projections/pairs.js'
-import {statusText} from '../projections/rows.js'
-import type {TabSummary} from '../projections/rows.js'
+import {samePair, type Pair} from '../projections/pairs.js'
+import {statusText, type TabSummary} from '../projections/rows.js'
 import type {DefinitionPolicy} from '../projections/definitions.js'
 import type {Counted} from './changes.js'
 

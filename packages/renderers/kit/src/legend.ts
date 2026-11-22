@@ -1,5 +1,4 @@
-import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import type {LegendItem, RendererLegend} from '@githubnext/projections-renderer-sdk/protocol'
+import {rendererLimits, type LegendItem, type RendererLegend} from '@githubnext/projections-renderer-sdk/protocol'
 
 const clip = (text: string) => (text.length <= rendererLimits.legendLabel ? text : `${text.slice(0, rendererLimits.legendLabel - 1)}…`)
 

@@ -1,11 +1,9 @@
 // The graph ELK lays out: cards in a stable order, positional IDs, and relationships split at shared junctions.
 import type {ElkExtendedEdge} from 'elkjs/lib/elk-api.js'
 import type {Point} from '../edge-arrows.js'
-import {compareIds} from './model.js'
-import type {LayoutEdge, GraphLayoutOptions, LayoutNode} from './model.js'
+import {compareIds, type LayoutEdge, type GraphLayoutOptions, type LayoutNode} from './model.js'
 import {boundaryKinds, moduleGroups} from './groups.js'
-import {sharedStages} from './shared-stages.js'
-import type {SharedStage} from './shared-stages.js'
+import {sharedStages, type SharedStage} from './shared-stages.js'
 
 export interface ElkInput {
   nodes: readonly LayoutNode[]

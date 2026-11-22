@@ -8,8 +8,9 @@ import {
   stepStops,
   timelinePosition,
   timelineStepPositions,
+  type Holds,
+  type PlaybackTimeline,
 } from '../playback.js'
-import type {Holds, PlaybackTimeline} from '../playback.js'
 import {unit} from './controllable.js'
 import type {Memos} from './memo.js'
 import type {PaneKey, ProjectionOptions} from './types.js'

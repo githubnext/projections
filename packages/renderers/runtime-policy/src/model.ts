@@ -1,7 +1,5 @@
-import {escapeProse} from '@githubnext/projections-schemas'
-import type {Entity, Relationship} from '@githubnext/projections-schemas'
-import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {IconName} from '@githubnext/projections-renderer-kit'
+import {escapeProse, type Entity, type Relationship} from '@githubnext/projections-schemas'
+import {compareIds, type IconName} from '@githubnext/projections-renderer-kit'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**

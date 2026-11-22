@@ -72,8 +72,8 @@ import {
   Workflow,
   Wrench,
   Zap,
+  type IconNode,
 } from 'lucide'
-import type {IconNode} from 'lucide'
 import type {Entity} from '@githubnext/projections-schemas'
 
 /** Each card icon's Lucide drawing (ISC license), by its Lucide name. */

@@ -1,6 +1,5 @@
 import type {ExtractionDocument} from '@githubnext/projections-schemas'
-import {paintState} from '@githubnext/projections-host'
-import type {PaneKey, useProjection} from '@githubnext/projections-host'
+import {paintState, type PaneKey, type useProjection} from '@githubnext/projections-host'
 import type {SnapshotSettings} from './settings.js'
 
 type Projection = ReturnType<typeof useProjection>

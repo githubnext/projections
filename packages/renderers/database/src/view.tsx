@@ -9,8 +9,8 @@ import {
   useOpeningFloor,
   useStageHeightCap,
   useStageZoom,
+  type RendererProps,
 } from '@githubnext/projections-renderer-kit/react'
-import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
 import type {accepts} from './accepts.js'
 import {createDatabaseTransition} from './transition.js'

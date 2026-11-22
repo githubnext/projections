@@ -1,6 +1,5 @@
 import type {Relationship} from '@githubnext/projections-schemas'
-import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, Stage, StagedTimeline} from '@githubnext/projections-renderer-kit'
+import {compareIds, type ComparisonModel, type Stage, type StagedTimeline} from '@githubnext/projections-renderer-kit'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Snapshot} from './pack/hierarchy.js'
 import {pathOf} from './files.js'

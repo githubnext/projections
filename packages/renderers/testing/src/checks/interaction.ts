@@ -1,7 +1,6 @@
 // The checks of selection, hover and keyboard focus.
 import type {ComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
-import {Skip, primaryMode, limit, until} from './support.js'
-import type {Checks} from './support.js'
+import {Skip, primaryMode, limit, until, type Checks} from './support.js'
 
 export const interactionChecks: Pick<Checks, 'affordances' | 'rings' | 'selection'> = {
   async affordances(driver, subject, {maxEntities, modes}) {

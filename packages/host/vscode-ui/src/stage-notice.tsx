@@ -1,5 +1,4 @@
-import {useLayoutEffect, useRef} from 'react'
-import type {ReactNode} from 'react'
+import {useLayoutEffect, useRef, type ReactNode} from 'react'
 
 /**
  * A pill floating over the stage (`VscodeProjectionView`'s `stageNotice`), for a state of the whole result rather than

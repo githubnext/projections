@@ -1,5 +1,4 @@
-import {test, expect} from '@playwright/test'
-import type {Locator, Page} from '@playwright/test'
+import {test, expect, type Locator, type Page} from '@playwright/test'
 import {chooseMode, closeMenus, expectSetting, menuItem, openSettings, story, submenuItem} from './harness.js'
 
 /*

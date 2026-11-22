@@ -1,8 +1,7 @@
 // A card's icon before its kind line (see `GraphCanvasProps.icon`), and a boundary's before its heading.
 import {createElement} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
-import {cardIconMetrics, cardIconNode, rowIcons} from '../../card-icons.js'
-import type {CardIconName} from '../../card-icons.js'
+import {cardIconMetrics, cardIconNode, rowIcons, type CardIconName} from '../../card-icons.js'
 import type {TransitionNode} from '../../graph-transition.js'
 
 /** How far a 12px line's cap height is centred above its baseline: an icon's middle sits there. */

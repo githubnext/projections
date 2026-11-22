@@ -4,8 +4,9 @@ import {
   parseThemeSeedText,
   readCopilotCanvasTheme,
   themeSeedTokens,
+  type ThemeSeed,
+  type ThemeSeedResult,
 } from '@githubnext/projections-host'
-import type {ThemeSeed, ThemeSeedResult} from '@githubnext/projections-host'
 import type {InspectorHost, InspectorHostTheme} from '../host.js'
 
 const chromeStyleId = 'pi-app-theme-chrome'

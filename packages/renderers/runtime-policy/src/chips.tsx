@@ -1,9 +1,7 @@
 import {codeSpan} from '@githubnext/projections-schemas'
-import {proseOf} from './model.js'
+import {proseOf, type Chip, type Item} from './model.js'
 import {chipPrefix} from './prose.js'
-import type {Chip, Item} from './model.js'
-import {emphasisStyle, regionOf} from './frame.js'
-import type {Frame} from './frame.js'
+import {emphasisStyle, regionOf, type Frame} from './frame.js'
 import {Prose} from './breaks.js'
 
 /** How a covering policy acts on a workload, as prose: its strongest effect, and the containers a container selector picks. */

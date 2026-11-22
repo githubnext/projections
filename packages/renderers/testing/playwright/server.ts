@@ -5,8 +5,7 @@
  * Playwright, so the `projections-renderer-workbench` command can use it.
  */
 import {spawn} from 'node:child_process'
-import {createServer} from 'node:http'
-import type {IncomingMessage, ServerResponse} from 'node:http'
+import {createServer, type IncomingMessage, type ServerResponse} from 'node:http'
 import type {AddressInfo} from 'node:net'
 import {resolve} from 'node:path'
 import {createInterface} from 'node:readline'

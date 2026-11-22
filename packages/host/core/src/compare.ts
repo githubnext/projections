@@ -1,12 +1,12 @@
-import {customComparator} from '@githubnext/projections-schemas'
-import type {
-  DefaultComparatorOptions,
-  Comparison,
-  Definition,
-  DefinitionPairing,
-  Extraction,
-  ExtractionDocument,
-  ProjectionEngine,
+import {
+  customComparator,
+  type DefaultComparatorOptions,
+  type Comparison,
+  type Definition,
+  type DefinitionPairing,
+  type Extraction,
+  type ExtractionDocument,
+  type ProjectionEngine,
 } from '@githubnext/projections-schemas'
 
 /**

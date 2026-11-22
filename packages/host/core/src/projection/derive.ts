@@ -1,45 +1,38 @@
 // The projection as a function of its state and the embedder's options: `read` derives the whole controller, and
 // `settle` the state changes a render implies (a new subject starts over; a renderer's declared controls take the
 // definition's defaults). Both are pure, so React may render and discard a read; only `commit` keeps what one used.
-import {isControlValue} from '@githubnext/projections-renderer-sdk/protocol'
-import type {AnnotationMark, SummaryItem} from '@githubnext/projections-renderer-sdk/protocol'
+import {isControlValue, type AnnotationMark, type SummaryItem} from '@githubnext/projections-renderer-sdk/protocol'
 import type {RendererFrame} from '../frame.js'
-import type {ComparisonMode, Side} from '../modes.js'
-import {twoPaneMode} from '../modes.js'
-import type {Variation, ViewSubject} from '../model.js'
-import {subjectRows, subjectVariation} from '../model.js'
-import type {PaneState} from '../pane.js'
-import {loadingPane} from '../pane.js'
-import {endpointHoldMs, holdDuration, stepHoldMs} from '../playback.js'
-import type {Holds} from '../playback.js'
+import {type ComparisonMode, type Side, twoPaneMode} from '../modes.js'
+import {type Variation, type ViewSubject, subjectRows, subjectVariation} from '../model.js'
+import {type PaneState, loadingPane} from '../pane.js'
+import {endpointHoldMs, holdDuration, stepHoldMs, type Holds} from '../playback.js'
 import {summaryFigures} from '../summary.js'
 import {placeAnnotations} from '../targets/annotations.js'
-import {resolveTarget, rowTargets} from '../targets/target.js'
-import type {ProjectionSelection, ProjectionTarget, TargetAnnotation} from '../targets/target.js'
+import {resolveTarget, rowTargets, type ProjectionSelection, type ProjectionTarget, type TargetAnnotation} from '../targets/target.js'
 import {themeStyle} from '../theme.js'
-import type {RequestChange, ValueOf} from './controllable.js'
-import {speedRange, unit} from './controllable.js'
-import {createHostEnvironment, noMedia} from './environment.js'
-import type {Media} from './environment.js'
+import {type RequestChange, type ValueOf, speedRange, unit} from './controllable.js'
+import {createHostEnvironment, noMedia, type Media} from './environment.js'
 import {createRowFilter, filterActions, filterState} from './filtering.js'
-import {initialInteraction} from './interaction.js'
-import type {Interaction, InteractionEvent} from './interaction.js'
+import {initialInteraction, type Interaction, type InteractionEvent} from './interaction.js'
 import {createMemos} from './memo.js'
-import {paintState} from './paint.js'
-import type {PaintState} from './paint.js'
+import {paintState, type PaintState} from './paint.js'
 import {createRendererPayloads} from './payloads.js'
 import type {PlaybackController} from './playback-controller.js'
-import {nextDirection} from './playback-lifecycle.js'
-import type {PlaybackLifecycle, PlaybackRun} from './playback-lifecycle.js'
-import {createPlaybackPosition} from './playback-position.js'
-import type {PlaybackPosition} from './playback-position.js'
-import {createComparisonModes, createControlValues, rendererState, seedControls, unseeded} from './renderer-state.js'
-import type {DeclaredModes, SeededControls} from './renderer-state.js'
+import {nextDirection, type PlaybackLifecycle, type PlaybackRun} from './playback-lifecycle.js'
+import {createPlaybackPosition, type PlaybackPosition} from './playback-position.js'
+import {
+  createComparisonModes,
+  createControlValues,
+  rendererState,
+  seedControls,
+  unseeded,
+  type DeclaredModes,
+  type SeededControls,
+} from './renderer-state.js'
 import {anchorOf, selectedPaths, selectedTarget, selectionOf, targetSelection} from './selection.js'
-import {initialSettings, restartedSettings, settingValue} from './settings-store.js'
-import type {Settings} from './settings-store.js'
-import {createStageBinding} from './stage-binding.js'
-import type {StageHandlers} from './stage-binding.js'
+import {initialSettings, restartedSettings, settingValue, type Settings} from './settings-store.js'
+import {createStageBinding, type StageHandlers} from './stage-binding.js'
 import type {PaneKey, ProjectionController, ProjectionOptions, RendererStatus} from './types.js'
 
 /** Everything the core holds for one projection: what the embedder's options and the renderers' reports don't say. */

@@ -1,6 +1,5 @@
 import type {InitPayload} from '@githubnext/projections-renderer-sdk/protocol'
-import {twoPaneMode} from '../modes.js'
-import type {ComparisonMode} from '../modes.js'
+import {twoPaneMode, type ComparisonMode} from '../modes.js'
 import type {PaneKey, ProjectionController, ProjectionOptions, RendererStatus} from './types.js'
 
 /**

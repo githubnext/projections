@@ -2,12 +2,20 @@
 // hover and quick input widgets), its context menu with menu roles, and a quick pick. `vscode-context-menu` has no menu
 // roles, item icons or checked items and keeps focus on its wrapper, so assistive technology can't follow it.
 
-import {createContext, useContext, useLayoutEffect, useRef, useState} from 'react'
-import type {CSSProperties, KeyboardEvent, ReactNode, RefObject} from 'react'
+import {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import {createPortal} from 'react-dom'
 import {deepActiveElement, focusControl} from '../elements.js'
-import {position} from './position.js'
-import type {Placement} from './position.js'
+import {position, type Placement} from './position.js'
 
 const LayerContext = createContext<HTMLElement | null>(null)
 /** Where overlays open: an element inside the view, so they stay visible when it is full screen. */

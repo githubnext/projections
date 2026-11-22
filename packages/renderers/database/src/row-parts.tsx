@@ -1,6 +1,5 @@
 import type {Entity} from '@githubnext/projections-schemas'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {describeChange, statusParts} from '@githubnext/projections-renderer-kit'
 import {Icon, ValueChange} from '@githubnext/projections-renderer-kit/react'
 import {Breakable} from './measure.js'

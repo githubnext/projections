@@ -7,10 +7,8 @@ import type {PartOverrides} from '../parts/model.js'
 import type {InspectorDefinitionList, InspectorRevision} from '../types.js'
 import type {Artifact} from './artifacts.js'
 import type {Marks} from './pairs.js'
-import {historyRows, overriddenDocument, presentedSides} from './presented-pair.js'
-import type {HeldPair} from './presented-pair.js'
-import {choiceLabel} from './revisions.js'
-import type {RevisionRow} from './revisions.js'
+import {historyRows, overriddenDocument, presentedSides, type HeldPair} from './presented-pair.js'
+import {choiceLabel, type RevisionRow} from './revisions.js'
 import type {Rows} from './use-extractions.js'
 
 /**

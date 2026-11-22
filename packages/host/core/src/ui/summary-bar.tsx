@@ -1,12 +1,23 @@
-import type {CSSProperties, ReactNode, RefObject} from 'react'
-import {useRef} from 'react'
+import {type CSSProperties, type ReactNode, type RefObject, useRef} from 'react'
 import {Activity, Ellipsis, Sparkle} from 'lucide-react'
-import {summaryCountText, summaryDeltas, summaryDeltaText, summaryDeltaWords} from '@githubnext/projections-renderer-sdk/presentation'
-import type {SummaryDelta} from '@githubnext/projections-renderer-sdk/presentation'
+import {
+  summaryCountText,
+  summaryDeltas,
+  summaryDeltaText,
+  summaryDeltaWords,
+  type SummaryDelta,
+} from '@githubnext/projections-renderer-sdk/presentation'
 import {iconMaskStyle} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ProjectionController} from '../projection.js'
-import {figuresSentence, summaryFactTitle, summaryFilterable, summaryToggle, summaryToggleTitle, useSummaryFit} from '../summary.js'
-import type {SummaryFigure} from '../summary.js'
+import {
+  figuresSentence,
+  summaryFactTitle,
+  summaryFilterable,
+  summaryToggle,
+  summaryToggleTitle,
+  useSummaryFit,
+  type SummaryFigure,
+} from '../summary.js'
 import {Popover, PopoverAnchor, PopoverContent, PopoverTrigger} from './components/popover.js'
 import {scopeHiddenShort, scopeHiddenText} from '../scope.js'
 import {cn} from './lib/utils.js'

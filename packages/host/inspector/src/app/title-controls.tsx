@@ -1,8 +1,7 @@
 import type {RefObject} from 'react'
 import {FileUp, LoaderCircle} from 'lucide-react'
 import {shortcutLabel} from '../shell/controls.js'
-import {TitleActivity, TitleFileButton, TitleSettings} from '../shell/title-bar.js'
-import type {PickerOption} from '../shell/title-bar.js'
+import {TitleActivity, TitleFileButton, TitleSettings, type PickerOption} from '../shell/title-bar.js'
 import type {ThemePreference} from '../shell/theme.js'
 import type {Activity} from './activity.js'
 

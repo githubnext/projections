@@ -1,6 +1,5 @@
 // `?controlled`: the page owns progress, playback, mode and the divider, as a guided tour would.
-import {useCallback, useState} from 'react'
-import type {Dispatch, SetStateAction} from 'react'
+import {useCallback, useState, type Dispatch, type SetStateAction} from 'react'
 import type {ComparisonMode} from '@githubnext/projections-host'
 
 export interface TourState {

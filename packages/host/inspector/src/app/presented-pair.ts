@@ -1,10 +1,8 @@
 import type {Definition, ExtractionDocument} from '@githubnext/projections-schemas'
-import {overriddenDefinition} from '../parts/model.js'
-import type {PartOverrides} from '../parts/model.js'
+import {overriddenDefinition, type PartOverrides} from '../parts/model.js'
 import type {InspectorDefinitionList, InspectorRevision} from '../types.js'
 import type {Marks} from './pairs.js'
-import {workingTree} from './revisions.js'
-import type {RevisionRow} from './revisions.js'
+import {workingTree, type RevisionRow} from './revisions.js'
 
 /** A pair presented whole, held while a newly chosen one extracts. */
 export interface HeldPair {

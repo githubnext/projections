@@ -1,5 +1,4 @@
-import {useEffect, useRef} from 'react'
-import type {ComponentType} from 'react'
+import {useEffect, useRef, type ComponentType} from 'react'
 import {createRoot} from 'react-dom/client'
 import type {RendererAccepts} from '@githubnext/projections-renderer-sdk/protocol'
 import {KitRenderer} from './kit-renderer.js'

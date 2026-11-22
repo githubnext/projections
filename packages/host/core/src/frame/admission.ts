@@ -1,5 +1,4 @@
-import {parseRendererMessage, rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import type {RendererMessage} from '@githubnext/projections-renderer-sdk/protocol'
+import {parseRendererMessage, rendererLimits, type RendererMessage} from '@githubnext/projections-renderer-sdk/protocol'
 
 /** A message's size as JSON, `Infinity` when it can't be serialized. */
 function size(value: unknown): number {

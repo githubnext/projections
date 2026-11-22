@@ -1,7 +1,6 @@
 // An SVG unit's ring: the stroke of its marked edge, which must be the shape that draws its visible edge.
 import {describe, px} from '../paint.js'
-import {largestClosedShape, paintSignature} from './units.js'
-import type {Neutral, RingState} from './units.js'
+import {largestClosedShape, paintSignature, type Neutral, type RingState} from './units.js'
 
 /** An SVG unit that marks no edge shape: its ring has nothing to restyle. */
 export function unmarkedEdgeFailure(unit: Element, name: string): string {

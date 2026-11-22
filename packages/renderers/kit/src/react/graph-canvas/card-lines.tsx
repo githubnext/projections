@@ -2,8 +2,16 @@
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {TransitionNode} from '../../graph-transition.js'
-import {cardTextMetrics, cardTextWidth, cutText, detailText, entityKindLine, kindNote, kindText} from '../../card-text.js'
-import type {KindLineText} from '../../card-text.js'
+import {
+  cardTextMetrics,
+  cardTextWidth,
+  cutText,
+  detailText,
+  entityKindLine,
+  kindNote,
+  kindText,
+  type KindLineText,
+} from '../../card-text.js'
 import {cardIconRoom, hasIcon} from '../../card-icons.js'
 import {KindLine} from './cards.js'
 import type {Drawing} from './drawing.js'

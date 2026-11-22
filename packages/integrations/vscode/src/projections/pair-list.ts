@@ -1,7 +1,6 @@
 import type {RefNames} from '../labels.js'
 import {record} from './definitions.ts'
-import {pairLabel} from './pairs.ts'
-import type {Pair, PairList} from './pairs.ts'
+import {pairLabel, type Pair, type PairList} from './pairs.ts'
 
 const ref = (value: unknown): string | undefined => (typeof value === 'string' && value ? value : undefined)
 

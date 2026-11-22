@@ -7,8 +7,13 @@ import type {
   ProjectionEngine,
   Relationship,
 } from '@githubnext/projections-schemas'
-import {connectInspector, openStage, samples} from '@githubnext/projections-renderer-testing/playwright'
-import type {OpenRequest as StageRequest, StageHandle} from '@githubnext/projections-renderer-testing/playwright'
+import {
+  connectInspector,
+  openStage,
+  samples,
+  type OpenRequest as StageRequest,
+  type StageHandle,
+} from '@githubnext/projections-renderer-testing/playwright'
 
 export {samples}
 export type {

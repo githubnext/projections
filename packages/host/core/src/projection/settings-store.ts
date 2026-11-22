@@ -2,8 +2,7 @@
 // requested. `useControllable` runs it in a component; `createSettingsStore` runs it anywhere.
 import type {ControlValue} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ComparisonMode} from '../modes.js'
-import {endpointHoldMs, stepHoldMs, timelinePosition} from '../playback.js'
-import type {Holds, PlaybackTimeline} from '../playback.js'
+import {endpointHoldMs, stepHoldMs, timelinePosition, type Holds, type PlaybackTimeline} from '../playback.js'
 import type {SummaryFilter} from '../summary.js'
 import type {Highlighting, ProjectionOptions} from './types.js'
 import {defaultDuration} from './timing.js'

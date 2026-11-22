@@ -1,5 +1,4 @@
-import {useId, useState} from 'react'
-import type {ReactNode} from 'react'
+import {useId, useState, type ReactNode} from 'react'
 import {cn} from '@githubnext/projections-host/ui/components'
 import {ChevronRight} from 'lucide-react'
 

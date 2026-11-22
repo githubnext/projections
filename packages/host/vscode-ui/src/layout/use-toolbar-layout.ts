@@ -1,11 +1,19 @@
 // The toolbar's priority-collapse layout: the order its regions collapse in, measured against the toolbar's width.
 
-import {useMemo, useRef} from 'react'
-import type {RefObject} from 'react'
+import {useMemo, useRef, type RefObject} from 'react'
 import {useFitPlan} from '@githubnext/projections-host'
 import {focusControl} from '../elements.js'
-import {actionCollapseOrder, locateStep, narrowToolbarWidth, rowForm, toolbarHysteresis, toolbarSteps} from './steps.js'
-import type {ToolbarAction, ToolbarContent, ToolbarLayout} from './steps.js'
+import {
+  actionCollapseOrder,
+  locateStep,
+  narrowToolbarWidth,
+  rowForm,
+  toolbarHysteresis,
+  toolbarSteps,
+  type ToolbarAction,
+  type ToolbarContent,
+  type ToolbarLayout,
+} from './steps.js'
 import {requiredWidth} from './measure.js'
 
 /** Where focus goes when its control changes form or moves into an overflow. */

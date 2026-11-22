@@ -1,7 +1,13 @@
 import {useId, useState} from 'react'
 import {Settings2} from 'lucide-react'
-import {hasSettingsModel, settingsModel} from '../settings.js'
-import type {SettingsEntry, SettingsFeatures, SettingsGroup, SettingsSubmenu} from '../settings.js'
+import {
+  hasSettingsModel,
+  settingsModel,
+  type SettingsEntry,
+  type SettingsFeatures,
+  type SettingsGroup,
+  type SettingsSubmenu,
+} from '../settings.js'
 import type {ProjectionController} from '../projection.js'
 import {RendererControl, rendererControlIcons as controlIcons} from './controls.js'
 import {Button} from './components/button.js'
@@ -23,10 +29,8 @@ import {
 } from './components/dropdown-menu.js'
 import {Popover, PopoverAnchor, PopoverContent} from './components/popover.js'
 import {cn} from './lib/utils.js'
-import {featureOn} from '../view-model.js'
-import type {ProjectionFeatures} from '../view-model.js'
-import {viewIcons} from './view-controls.js'
-import type {ShowAsOptions} from './view-controls.js'
+import {featureOn, type ProjectionFeatures} from '../view-model.js'
+import {viewIcons, type ShowAsOptions} from './view-controls.js'
 
 /** Settings' features: the renderer's declared controls only while the renderer is shown. */
 const modelFeatures = (features: ProjectionFeatures | undefined, showAs: ShowAsOptions | undefined): SettingsFeatures => ({

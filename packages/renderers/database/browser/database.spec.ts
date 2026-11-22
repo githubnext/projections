@@ -1,5 +1,4 @@
-import {expect, test} from '@playwright/test'
-import type {FrameLocator} from '@playwright/test'
+import {expect, test, type FrameLocator} from '@playwright/test'
 import {openRenderer, samples} from '@githubnext/projections-renderer-harness/playwright'
 import {readFileSync} from 'node:fs'
 import type {Extraction} from '@githubnext/projections-schemas'

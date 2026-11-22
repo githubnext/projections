@@ -1,6 +1,5 @@
 // A direct segment's run across its gap: where it is, and moving it.
-import {routeRadius, sTurn} from '../../routes/s-bend.js'
-import type {Turn} from '../../routes/s-bend.js'
+import {routeRadius, sTurn, type Turn} from '../../routes/s-bend.js'
 import type {RoutingContext, Segment} from './context.js'
 import {build} from './build.js'
 

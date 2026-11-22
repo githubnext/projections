@@ -1,6 +1,5 @@
 import * as vscode from 'vscode'
-import {checkItem, checkOutcomes, defaultChecks} from '../test-items.js'
-import type {CheckStep} from '../test-items.js'
+import {checkItem, checkOutcomes, defaultChecks, type CheckStep} from '../test-items.js'
 import type {Checks, TestState, Watched} from './state.js'
 
 /** `projections check` for one projection, through the tools layer: its steps. */

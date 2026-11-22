@@ -1,19 +1,15 @@
 import type {CSSProperties, MouseEvent, ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
-import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {changeMark, classifyChange, describeChange, isChanged, isFold} from '@githubnext/projections-renderer-kit'
-import {ChangeStatus, ValueChange} from '@githubnext/projections-renderer-kit/react'
-import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
+import {ChangeStatus, ValueChange, type RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {Breakable} from './measure.js'
 import {textMetrics} from './text.js'
 import type {ChangeLine} from './change-lines.js'
 import {baseType, columnType, declaredType} from './types.js'
 import type {FrameColumn, SchemaFrame} from './frame.js'
-import {ChangeLines, describeColumn, GlyphStatus, oneLine} from './row-parts.js'
-import type {Wrap} from './row-parts.js'
-import {placeAttributes, rowPlaces} from './row-edges.js'
-import type {RowPlace} from './row-edges.js'
+import {ChangeLines, describeColumn, GlyphStatus, oneLine, type Wrap} from './row-parts.js'
+import {placeAttributes, rowPlaces, type RowPlace} from './row-edges.js'
 
 /** What every row of one card is drawn with. */
 interface Card {

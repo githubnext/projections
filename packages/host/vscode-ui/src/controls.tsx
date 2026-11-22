@@ -1,5 +1,4 @@
-import {useId} from 'react'
-import type {CSSProperties, KeyboardEvent} from 'react'
+import {useId, type CSSProperties, type KeyboardEvent} from 'react'
 import type {ProjectionController, RendererControl} from '@githubnext/projections-host'
 import {ActionButton, VscButton, VscCheckbox, VscOption, Radio, VscRadioGroup, VscSingleSelect} from './elements.js'
 import {vscodeControlIcons} from './codicons.js'

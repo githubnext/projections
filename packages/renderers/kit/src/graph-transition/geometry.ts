@@ -1,7 +1,6 @@
 // Where a staged graph transition's layout is at a moment: settled on one layout, or moving between two.
 import type {GraphLayout} from '../layout.js'
-import type {StepWindows} from '../stages.js'
-import {moveEasing} from '../stages.js'
+import {type StepWindows, moveEasing} from '../stages.js'
 import {interpolate} from './morph.js'
 
 /**

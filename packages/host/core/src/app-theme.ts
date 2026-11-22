@@ -2,10 +2,15 @@
 // (its stage, text, rules, focus and accent) mapped onto renderer theme token overrides that keep the token set's
 // contrast. The GitHub Copilot app's canvas (copilot-canvas-theme.ts) maps its own variables onto these.
 
-import {defaultThemeTokens, optionalThemeTokenNames, rendererLimits, themeTokenNames} from '@githubnext/projections-renderer-sdk/protocol'
-import type {ColorMode, ThemeTokenName} from '@githubnext/projections-renderer-sdk/protocol'
-import {composite, contrast, ensureContrast, formatColor, mix, parseColor, withAlpha} from './color.js'
-import type {Rgba} from './color.js'
+import {
+  defaultThemeTokens,
+  optionalThemeTokenNames,
+  rendererLimits,
+  themeTokenNames,
+  type ColorMode,
+  type ThemeTokenName,
+} from '@githubnext/projections-renderer-sdk/protocol'
+import {composite, contrast, ensureContrast, formatColor, mix, parseColor, withAlpha, type Rgba} from './color.js'
 
 /**
  * An app's theme, as CSS values: colors as sRGB (`#rrggbb(aa)`, `rgb()`, `rgba()`), families as plain font lists. A

@@ -1,7 +1,6 @@
 import type {ComponentProps, ComponentType, ReactNode} from 'react'
 import type {Definition, ExtractionDocument} from '@githubnext/projections-schemas'
-import {ComparisonError} from '@githubnext/projections-host'
-import type {ComparisonPair, LoadingStatusProps, ViewSubject} from '@githubnext/projections-host'
+import {ComparisonError, type ComparisonPair, type LoadingStatusProps, type ViewSubject} from '@githubnext/projections-host'
 import type {ProjectionView} from '@githubnext/projections-host/ui'
 import {Alert, AlertDescription, AlertTitle, Button, cn} from '@githubnext/projections-host/ui/components'
 import {CircleAlert, Inbox, Square, X} from 'lucide-react'

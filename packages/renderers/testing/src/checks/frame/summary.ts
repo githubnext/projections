@@ -1,8 +1,7 @@
 // The summary check: the figures a renderer sends for the host's summary bar match the documents.
 import {summaryCounts} from '@githubnext/projections-renderer-sdk/presentation'
 import type {StageState} from '../../types.js'
-import {Skip, primaryMode, limit, label} from '../support.js'
-import type {Checks} from '../support.js'
+import {Skip, primaryMode, limit, label, type Checks} from '../support.js'
 import {countFailures, factFailures, knownIds} from './summary-figures.js'
 
 export const summaryChecks: Pick<Checks, 'summary'> = {

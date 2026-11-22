@@ -1,7 +1,6 @@
 // The viewer's state (search, filters, presentation, playback and selection) and its reducer.
 import type {ChangeStatus} from '@githubnext/projections-schemas'
-import {defaultCodeStatisticsOptions} from '../quantities.js'
-import type {CodeStatisticsOptions} from '../quantities.js'
+import {defaultCodeStatisticsOptions, type CodeStatisticsOptions} from '../quantities.js'
 import {unit} from './progress.js'
 
 /** Which view a renderer that offers several shows: its own domain view, a generic graph or a table. */

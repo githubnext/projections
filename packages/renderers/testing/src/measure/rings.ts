@@ -4,8 +4,7 @@ import {settle} from './interaction.js'
 import {edgeOf} from './rings/edges.js'
 import {htmlRingFailures} from './rings/html.js'
 import {svgRingFailures, unmarkedEdgeFailure} from './rings/svg.js'
-import {isSvg, markedEdges, otherEdges, paintSignature, ringUnitOf, ringUnits} from './rings/units.js'
-import type {Neutral, RingState} from './rings/units.js'
+import {isSvg, markedEdges, otherEdges, paintSignature, ringUnitOf, ringUnits, type Neutral, type RingState} from './rings/units.js'
 
 /*
  * Item rings. The SDK draws hover, focus and selection as styling on each

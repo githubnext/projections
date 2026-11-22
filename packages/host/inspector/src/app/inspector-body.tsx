@@ -3,8 +3,7 @@ import type {ComparisonPair, LoadingStatusProps} from '@githubnext/projections-h
 import type {InspectorInvalidDefinition, InspectorJob} from '../types.js'
 import {FailureCard, InvalidDefinitions} from './cards.js'
 import {ComparisonFailure, EmptyState, ErrorBanner, PlainMessage, PresentedView} from './page.js'
-import {refName} from './revisions.js'
-import type {RowState} from './revisions.js'
+import {refName, type RowState} from './revisions.js'
 
 interface Side {
   side: string

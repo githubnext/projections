@@ -1,8 +1,6 @@
-import {isChanged} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel, IconName, SummaryFactItem} from '@githubnext/projections-renderer-kit'
+import {isChanged, type ComparisonModel, type IconName, type SummaryFactItem} from '@githubnext/projections-renderer-kit'
 import {isRootEntity, membershipKinds, sideOf} from './kinds.js'
-import {compareVersions, versionBump, versionOf} from './versions.js'
-import type {VersionBump} from './versions.js'
+import {compareVersions, versionBump, versionOf, type VersionBump} from './versions.js'
 
 const versionBumps: readonly VersionBump[] = ['major', 'minor', 'patch', 'prerelease']
 const noun = (singular: string, plural: string) => ({singular, plural})

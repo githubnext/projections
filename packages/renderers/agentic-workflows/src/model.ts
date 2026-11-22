@@ -76,7 +76,7 @@ export interface AgenticModel {
 }
 
 const record = (value: unknown): Record<string, unknown> =>
-  value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+  typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
 
 /** The comparator's findings by change ID, or `undefined` without its metadata. Comparator metadata is untrusted. */
 export function findingsOf(metadata: unknown): Map<string, Finding[]> | undefined {

@@ -18,7 +18,7 @@ function parseLegendItem(item: unknown): LegendItem | undefined {
   return {
     label: item.label,
     ...(item.token === undefined ? {} : {token: item.token as ThemeTokenName}),
-    ...(item.color === undefined ? {} : {color: item.color as string}),
+    ...(item.color === undefined ? {} : {color: item.color}),
     ...(item.shape === undefined ? {} : {shape: item.shape as LegendShape}),
   }
 }
@@ -38,5 +38,5 @@ export function parseLegend(message: Record<string, unknown>, fields: readonly s
     if (!item) return undefined
     items.push(item)
   }
-  return {...(title === undefined ? {} : {title: title as string}), items}
+  return {...(title === undefined ? {} : {title}), items}
 }

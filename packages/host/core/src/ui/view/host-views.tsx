@@ -35,7 +35,7 @@ export function HostViews({
   const footed = summary || (scope && Boolean(scopeNoticeText(p)))
   return (
     <>
-      {floating && <UtilityArea>{floating}</UtilityArea>}
+      {Boolean(floating) && <UtilityArea>{floating}</UtilityArea>}
       <div
         className={cn('ph-scroll pj:min-w-0 pj:bg-surface-canvas pj:p-3', fill && 'pj:min-h-0 pj:flex-1 pj:overflow-auto')}
         style={footed ? {...scrollTop, paddingBottom: utilityInset + summaryFootHeight + 12} : scrollTop}

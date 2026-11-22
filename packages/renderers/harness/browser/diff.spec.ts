@@ -92,13 +92,13 @@ for (const width of [1440, 1000, 390]) {
         const svgs = [...document.querySelectorAll<SVGSVGElement>('svg')]
         for (const text of document.querySelectorAll<SVGTextElement | HTMLElement>('text, [data-entity-id] *')) {
           if (text.children.length && !(text instanceof SVGTextElement)) continue
-          if (text.textContent?.includes('…')) problems.push(`"${text.textContent.trim()}" is cut off with an ellipsis`)
+          if (text.textContent.includes('…')) problems.push(`"${text.textContent.trim()}" is cut off with an ellipsis`)
           if (
             text instanceof HTMLElement &&
             getComputedStyle(text).textOverflow === 'ellipsis' &&
             text.scrollWidth > text.clientWidth + 1
           ) {
-            problems.push(`"${text.textContent?.trim()}" is clipped`)
+            problems.push(`"${text.textContent.trim()}" is clipped`)
           }
         }
         // Card text stays inside its card.

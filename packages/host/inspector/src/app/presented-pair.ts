@@ -64,7 +64,7 @@ export function overriddenDocument(
   const next = overriddenDefinition(own, parts, all)
   const definition: Definition = {...document.provenance.definition, renderer: next.renderer}
   if (parts.comparator) {
-    if (next.comparator) definition.comparator = next.comparator
+    if (next.comparator !== undefined && next.comparator !== '') definition.comparator = next.comparator
     else delete definition.comparator
   }
   return {...document, projection: {...document.projection, renderer: next.renderer}, provenance: {...document.provenance, definition}}

@@ -58,7 +58,7 @@ export function useFitScale(
       if (fill && fill !== observedFill) watcher.observe((observedFill = fill))
       const chrome = fill ? chromeAround(element, fill) : undefined
       const previous = latest.current
-      if (previous && previous.width === width && previous.height === height && previous.chrome === chrome) return
+      if (previous?.width === width && previous.height === height && previous.chrome === chrome) return
       // A resize observed outside React renders later: the frame painted until then is drawn at the old scale.
       held.current ??= hold()
       latest.current = {width, height, chrome}

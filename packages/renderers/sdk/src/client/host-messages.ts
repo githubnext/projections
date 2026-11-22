@@ -80,8 +80,8 @@ export function dispatch(handlers: RendererHandlers, message: HostMessage) {
   switch (message.type) {
     case 'init': {
       const {type: _type, generation, ...payload} = message
-      if (generation !== undefined) generations.set(payload as InitPayload, generation)
-      handlers.init?.(payload as InitPayload)
+      if (generation !== undefined) generations.set(payload, generation)
+      handlers.init?.(payload)
       break
     }
     case 'progress':

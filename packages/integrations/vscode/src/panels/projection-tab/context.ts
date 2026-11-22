@@ -48,7 +48,7 @@ export async function setTabContext(tab: {last: TabSummary | undefined; pinned: 
     ['projections.tabPlaying', Boolean(view?.playing)],
     ['projections.tabShowAs', view?.showAs ?? ''],
     ['projections.tabChangesOnly', Boolean(view?.changesOnly)],
-    ['projections.tabZoom', view?.showAs === 'renderer' && Boolean(view?.zoom?.includes('zoom-fit'))],
+    ['projections.tabZoom', view?.showAs === 'renderer' && Boolean(view.zoom?.includes('zoom-fit'))],
     ['projections.tabPinned', Boolean(tab?.pinned)],
   ]
   await Promise.all(entries.map(([key, value]) => vscode.commands.executeCommand('setContext', key, value)))

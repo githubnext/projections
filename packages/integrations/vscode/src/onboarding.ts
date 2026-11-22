@@ -40,9 +40,9 @@ export class PreviewDocuments implements vscode.TextDocumentContentProvider {
 async function candidates(runner: Pick<Runner, 'request'>): Promise<ExploreCandidate[]> {
   const response = await runner.request({method: 'GET', path: '/api/explore'})
   if (response.status !== 200) throw new Error(`Could not list the candidates: ${refusal(response)}`)
-  const list = (response.body as {candidates?: ExploreCandidate[]} | null)?.candidates
+  const list = (response.body as {candidates?: (ExploreCandidate | null)[]} | null)?.candidates
   if (!Array.isArray(list)) throw new Error('The Projections backend returned invalid candidates')
-  return list.filter(candidate => typeof candidate?.id === 'string' && !candidate.adopted)
+  return list.filter((candidate): candidate is ExploreCandidate => typeof candidate?.id === 'string' && !candidate.adopted)
 }
 
 /**
@@ -134,7 +134,7 @@ export async function adopt(
         placeHolder: 'The projections to keep: their definitions and their best changes as bookmarks',
       },
     )
-    if (!picked?.length) return undefined
+    if (!picked || picked.length === 0) return undefined
     ids = picked.map(item => item.id)
   }
   const result = await previewAndWrite({
@@ -145,7 +145,7 @@ export async function adopt(
     body: {projections: ids, ...(args.bookmarks === undefined ? {} : {bookmarks: args.bookmarks})},
     title: `Adopt ${ids.join(', ')}`,
     detail: preview =>
-      preview.bookmarked?.length
+      preview.bookmarked?.length !== undefined && preview.bookmarked.length > 0
         ? `Bookmarks ${preview.bookmarked.length} change${preview.bookmarked.length === 1 ? '' : 's'} from the latest sweep.`
         : '',
     write: args.write !== false,

@@ -29,7 +29,7 @@ export function ProjectionLegend({
   style?: CSSProperties
 }) {
   const legend = projection.legend
-  if (!legend?.items.length) return null
+  if (!legend || legend.items.length === 0) return null
   const tokens = resolveThemeTokens(projection.theme)
   const muted = tokens['color-fg-muted']
   return (

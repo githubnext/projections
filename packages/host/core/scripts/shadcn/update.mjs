@@ -149,7 +149,7 @@ async function main() {
     throw new UsageError(`Moving to ${tagOf(release.version)} updates every vendored component`, 'Omit the component names')
   }
   const items = await Promise.all(names.map(name => fetchItem(manifest.style, name)))
-  const missing = names.filter((_, index) => items[index] == null)
+  const missing = names.filter((_, index) => items[index] === undefined || items[index] === null)
   if (missing.length) throw new UsageError(`Not in the ${manifest.style} registry: ${missing.join(', ')}`)
   const outcome = await (options.check ? check(names, items) : update(manifest, release, names, items))
   return {

@@ -60,7 +60,7 @@ export function AgenticWorkflowsView(props: RendererProps<typeof accepts>) {
         <Matrix view={view} frame={frame} />
       ) : (
         view.groups
-          .filter(group => group.workflows.length || group.row)
+          .filter(group => group.workflows.length > 0 || !!group.row)
           .map(group => <WorkflowGroup key={group.row?.id ?? group.title} group={group} frame={frame} />)
       )}
     </div>

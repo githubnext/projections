@@ -13,7 +13,8 @@ import {accentChecks} from './accents.js'
 
 /** The comparison modes a renderer declared, in preference order (the SDK's default when it declares none). */
 export function declaredModes(state: Pick<StageState, 'capabilities'>): readonly ComparisonMode[] {
-  return state.capabilities?.comparisonModes?.length ? state.capabilities.comparisonModes : progressModes
+  const modes = state.capabilities?.comparisonModes
+  return modes !== undefined && modes.length > 0 ? modes : progressModes
 }
 
 const run: Checks = {...styleChecks, ...comparisonChecks, ...interactionChecks, ...frameChecks, ...accentChecks}

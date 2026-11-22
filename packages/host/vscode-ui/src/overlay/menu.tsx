@@ -123,7 +123,7 @@ function MenuLevel({
     event.preventDefault()
     show(all[next])
   }
-  const opened = items.find(item => item.id === sub && item.submenu)
+  const opened = items.find(item => item.id === sub && !!item.submenu)
   return (
     <Overlay
       {...overlay}

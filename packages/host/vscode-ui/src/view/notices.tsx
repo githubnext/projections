@@ -22,7 +22,7 @@ export function ViewNotices({
   const otherNotices = p.notices.slice(props.rendererNotice ? 1 : 0)
   return (
     <>
-      {props.banner && <div className="phv-banner">{props.banner}</div>}
+      {Boolean(props.banner) && <div className="phv-banner">{props.banner}</div>}
       <p className="phv-visually-hidden" aria-live="polite">
         Showing: <strong data-active-view={view}>{active}</strong>
       </p>

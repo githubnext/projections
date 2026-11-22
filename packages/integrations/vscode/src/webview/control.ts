@@ -55,9 +55,9 @@ function operations(): {[O in Op]: Operation<O>} {
       if (typeof message.generation === 'number') applySwitch(message.generation)
       inspector.setPair({
         after: String(message.after),
-        ...(message.before ? {before: String(message.before)} : {}),
-        ...(message.projection ? {projection: String(message.projection)} : {}),
-        ...(message.definitionRevision ? {definitionRevision: String(message.definitionRevision)} : {}),
+        ...(message.before ? {before: message.before} : {}),
+        ...(message.projection ? {projection: message.projection} : {}),
+        ...(message.definitionRevision ? {definitionRevision: message.definitionRevision} : {}),
       })
     },
     async setDefinitionRevision(message, ready) {
@@ -96,7 +96,7 @@ function operations(): {[O in Op]: Operation<O>} {
         ...(pair.definitionRevision ? {definitionRevision: pair.definitionRevision} : {}),
       })
     },
-    elements: message => elements(String(message.selector), message.attribute ? String(message.attribute) : undefined),
+    elements: message => elements(String(message.selector), message.attribute),
     press(message) {
       press(String(message.selector), text(message.text), String(message.key))
     },
@@ -110,13 +110,13 @@ function operations(): {[O in Op]: Operation<O>} {
 export function listenForControl(ready: Ready) {
   const operation = operations()
   fromExtension(async data => {
-    const message = data as Partial<ControlMessage>
+    const message = data as Partial<ControlMessage> | null | undefined
     if (message?.tag !== controlTag || typeof message.id !== 'number') return
     const id = message.id
     try {
       const op = message.op
       if (op === undefined || !Object.hasOwn(operation, op)) throw new Error('Unknown control')
-      const result = await (operation[op] as Operation<Op>)(message as MessageOf<Op>, ready)
+      const result = await (operation[op] as Operation<Op>)(message, ready)
       post({tag: hostTag, op: 'controlResult', id, ...(result === undefined ? {} : {result})})
     } catch (error) {
       post({tag: hostTag, op: 'controlResult', id, error: error instanceof Error ? error.message : String(error)})

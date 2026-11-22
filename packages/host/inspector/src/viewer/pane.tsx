@@ -10,7 +10,8 @@ export const panePinnedKey = 'projections:pane-pinned:viewer'
 /** Whether the viewer's pane was left pinned. Storage that throws (a sandboxed frame) says it wasn't. */
 export function readPanePinned(): boolean {
   try {
-    return globalThis.localStorage?.getItem(panePinnedKey) === 'true'
+    const storage = globalThis.localStorage as Storage | undefined
+    return storage?.getItem(panePinnedKey) === 'true'
   } catch {
     return false
   }
@@ -21,8 +22,9 @@ export function setPanePinned(store: Store, pinned: boolean): void {
   store.set({pinned})
   store.focus({type: pinned ? 'pinned' : 'closed'})
   try {
-    if (pinned) globalThis.localStorage?.setItem(panePinnedKey, 'true')
-    else globalThis.localStorage?.removeItem(panePinnedKey)
+    const storage = globalThis.localStorage as Storage | undefined
+    if (pinned) storage?.setItem(panePinnedKey, 'true')
+    else storage?.removeItem(panePinnedKey)
   } catch {
     // Kept for this page only.
   }
@@ -64,7 +66,7 @@ export function ViewerPane({store, onChoose}: {store: Store; onChoose: (projecti
       className="pi-viewer-pane-slot pj:contents"
       onFocus={() => store.focus({type: 'entered', place: 'pane'})}
       onBlur={event => {
-        if (!pane.current?.contains(event.relatedTarget as Node | null)) store.focus({type: 'left', place: 'pane'})
+        if (!pane.current?.contains(event.relatedTarget)) store.focus({type: 'left', place: 'pane'})
       }}
     >
       <ProjectionsPane

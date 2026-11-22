@@ -61,7 +61,7 @@ export function columnChanges(row: EntityChange<Entity>): ChangeLine[] {
  */
 export function referentialAction(value: unknown, {qualified = false}: {qualified?: boolean} = {}): string {
   if (typeof value === 'string' && value.length > 0) return value
-  const callable = value && typeof value === 'object' ? text((value as Record<string, unknown>).callable) : undefined
+  const callable = typeof value === 'object' && value !== null ? text((value as Record<string, unknown>).callable) : undefined
   if (callable) return qualified ? callable : callable.split('.').at(-1)!
   return value === undefined || value === null ? 'default' : formatValue(value)
 }

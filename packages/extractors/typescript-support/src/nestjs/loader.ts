@@ -106,7 +106,7 @@ export function installLoader(root: string, checkout: string, options: ts.Compil
 export async function quietly<T>(action: () => Promise<T>): Promise<T> {
   // eslint-disable-next-line @typescript-eslint/unbound-method -- kept to be put back, never called
   const write = process.stdout.write
-  process.stdout.write = process.stderr.write.bind(process.stderr) as typeof process.stdout.write
+  process.stdout.write = process.stderr.write.bind<typeof process.stdout.write>(process.stderr)
   try {
     return await action()
   } finally {

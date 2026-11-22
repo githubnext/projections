@@ -18,7 +18,7 @@ const selectionId = (id: unknown): id is string | null => id === null || (text(i
 function select(message: Fields): RendererMessage | undefined {
   if (!keys(message, [...envelopeKeys, 'id', 'path']) || !selectionId(message.id)) return undefined
   if (message.path !== undefined && (message.id === null || !isPropertyPath(message.path))) return undefined
-  return {type: 'select', id: message.id, ...(message.path === undefined ? {} : {path: message.path as string})}
+  return {type: 'select', id: message.id, ...(message.path === undefined ? {} : {path: message.path})}
 }
 
 function open(message: Fields): RendererMessage | undefined {

@@ -21,6 +21,6 @@ export function focusRequest(init: InitPayload | undefined, filter: FilterPayloa
  */
 export function focusedIds(model: ComparisonModel | undefined, focus: RendererFocus | undefined, diff: boolean): Set<string> | undefined {
   if (focus?.id !== undefined) return new Set([focus.id])
-  if (!model || model.mode !== 'comparison' || focus?.on === 'all' || (!focus && !diff)) return undefined
+  if (model?.mode !== 'comparison' || focus?.on === 'all' || (!focus && !diff)) return undefined
   return new Set([...model.entities, ...model.relationships].filter(isChanged).map(row => row.id))
 }

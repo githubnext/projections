@@ -60,7 +60,7 @@ export const pairOf = (id: string): Pair | undefined => {
 
 /** Whether two choices are the same choice (a custom pair or a pull request also by its pair). */
 export function sameChoice(a: Choice | undefined, b: Choice | undefined): boolean {
-  if (!a || !b || a.id !== b.id) return false
+  if (!a || a.id !== b?.id) return false
   return a.id === 'custom' ? samePair(a.pair, b.pair) : true
 }
 

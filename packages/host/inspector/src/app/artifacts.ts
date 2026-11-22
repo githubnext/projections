@@ -30,7 +30,7 @@ export function artifactChoices(document: InspectorDocument): {
     ],
     before: 'before',
     after: 'after',
-    ...(document.notices?.length ? {notices: document.notices} : {}),
+    ...(document.notices?.length !== undefined && document.notices.length > 0 ? {notices: document.notices} : {}),
   }
 }
 

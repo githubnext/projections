@@ -49,7 +49,7 @@ export function definitionOf(item: Fixture): Definition {
     title: item.title,
     extractor: 'scenario',
     renderer: item.renderer,
-    ...(item.comparator ? {comparator: item.comparator} : {}),
+    ...(item.comparator !== undefined && item.comparator !== '' ? {comparator: item.comparator} : {}),
     ...(item.presentation ? {presentation: item.presentation} : {}),
   }
 }

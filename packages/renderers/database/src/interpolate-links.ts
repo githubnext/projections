@@ -11,7 +11,7 @@ import type {Placed, Stage, Staged} from './interpolate.js'
 function linkShapeAt(staged: Staged, key: string, {from, to, mix}: Stage): {shape: LinkShape | undefined; presence: number} {
   const a = staged.shapes.get(key)?.[from],
     b = staged.shapes.get(key)?.[to]
-  if (a && b && a.signature === b.signature) {
+  if (a && a.signature === b?.signature) {
     // Drawn the same way in both stages: waypoints and tracks move with the cards.
     return {
       shape: {

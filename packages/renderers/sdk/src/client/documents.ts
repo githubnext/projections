@@ -36,7 +36,7 @@ export function documentRequests(view: Window, post: (message: RendererMessage) 
       return promise
     },
     answer(message: Answer): void {
-      documents.get(message.renderer)?.settle(message.html ?? error(message.error ?? 'No document'))
+      documents.get(message.renderer)?.settle(message.html ?? error(message.error))
     },
     dispose(): void {
       for (const {settle} of documents.values()) settle(error('The renderer was disposed'))

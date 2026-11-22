@@ -196,7 +196,7 @@ export function run(root: string, command: Command, options: {limit?: number; ec
       resolvePromise({
         command: display(command),
         exitCode: 127,
-        output: String(error.message),
+        output: error.message,
         durationMs: Date.now() - started,
         ...(error.code === 'ENOENT' ? {missing: name!} : {}),
       })
@@ -220,7 +220,7 @@ export function onPath(name: string): boolean {
   const extensions = process.platform === 'win32' ? ['.exe', '.cmd', ''] : ['']
   return (process.env.PATH ?? '')
     .split(process.platform === 'win32' ? ';' : ':')
-    .some(directory => extensions.some(extension => directory && existsSync(join(directory, `${name}${extension}`))))
+    .some(directory => extensions.some(extension => directory !== '' && existsSync(join(directory, `${name}${extension}`))))
 }
 
 /** Makes `path` relative to `root` when it is inside it; otherwise returns it unchanged. */

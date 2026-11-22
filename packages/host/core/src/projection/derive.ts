@@ -131,7 +131,7 @@ function createBasics() {
     const value: ValueOf = key => settingValue(state.settings, options, key)
     const holds: Holds = value('holds') === 'pause' ? 'pause' : 'timeline'
     const speed = speedRange(value('speed'))
-    const chosenMode = value('mode') as ComparisonMode | undefined
+    const chosenMode: ComparisonMode | undefined = value('mode')
     const renderers = options.renderers ?? []
     const rendererName = value('rendererName')
     const renderer = renderers.find(entry => entry.name === rendererName) ?? renderers[0]

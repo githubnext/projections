@@ -64,7 +64,7 @@ export function StageFoot({
   useWholePixels(foot, {width: true})
   // Mounted even while empty (hidden), so a legend that arrives later is measured and sent as a cover at once.
   const scoped = scope && !summary ? scopeNoticeText(p) : undefined
-  const empty = !summary && !scoped && !(legend && p.legend?.items.length)
+  const empty = !summary && !scoped && !(legend && p.legend?.items.length !== undefined && p.legend.items.length > 0)
   return (
     <div
       ref={room}

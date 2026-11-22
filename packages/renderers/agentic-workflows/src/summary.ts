@@ -43,7 +43,7 @@ export const agenticWorkflowsControls = defineControls([
 ])
 
 const record = (value: unknown): Record<string, unknown> =>
-  value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+  typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
 
 /**
  * The summary bar's facts: how many lock files are stale or missing (in every view, each filtering to its

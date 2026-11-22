@@ -273,10 +273,13 @@ export class ExtractionCoordinator {
     const {item} = run
     if (!this.#owns(run)) return
     const state = jobOutcome(job, item, this.#events.definition(item.projection))
-    this.#writeRow(
-      run,
-      row => ({...row, status: 'failed', ms: Date.now() - (row.started ?? Date.now()), definition: item.definition, ...state}) as RowState,
-    )
+    this.#writeRow(run, row => ({
+      ...row,
+      status: 'failed',
+      ms: Date.now() - (row.started ?? Date.now()),
+      definition: item.definition,
+      ...state,
+    }))
     if (state.status !== 'failed' || this.#events.shown(item.projection, item.ref)) return
     // A failed side of the shown pair is reported in the main view, beside the other side; others here.
     this.#events.report(`Extraction of ${item.ref} failed. Inspect diagnostics and raw output; no partial result is displayed.`, true)

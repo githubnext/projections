@@ -55,7 +55,7 @@ export const applySwitch = (generation: number) => {
 export function restore(): Promise<TabRestore | undefined> {
   return new Promise(resolve => {
     const stop = fromExtension(data => {
-      const message = data as Partial<TabRestore>
+      const message = data as Partial<TabRestore> | null | undefined
       if (message?.tag !== restoreTag) return
       finish(message as TabRestore)
     })

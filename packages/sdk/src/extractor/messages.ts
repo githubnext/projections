@@ -2,7 +2,7 @@
 // the same (packages/schemas/fixtures/extractor-helpers.json).
 
 /** `value` as JSON, for messages. */
-export const quoted = (value: unknown) => JSON.stringify(value) ?? String(value)
+export const quoted = (value: unknown) => (JSON.stringify(value) as string | undefined) ?? String(value)
 
 /** Whether `value` is a JSON object: not null, not an array. */
 export const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -16,5 +16,7 @@ export function described(value: unknown): string {
   if (value === null || value === undefined) return String(value)
   if (Array.isArray(value)) return 'an array'
   if (typeof value !== 'object') return article(typeof value)
-  return value.constructor === Object || !value.constructor ? 'an object' : article(value.constructor.name)
+  // An object made with Object.create(null) has no constructor.
+  const made = (value as {constructor?: {name: string}}).constructor
+  return made === Object || !made ? 'an object' : article(made.name)
 }

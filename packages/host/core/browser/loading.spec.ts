@@ -17,8 +17,8 @@ async function expectCentered(status: Locator, area: Locator) {
   await expect
     .poll(() =>
       status.evaluate((element, box) => {
-        const style = getComputedStyle(box!)
-        const outer = box!.getBoundingClientRect()
+        const style = getComputedStyle(box)
+        const outer = box.getBoundingClientRect()
         const top = outer.top + parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop)
         const height =
           outer.height -

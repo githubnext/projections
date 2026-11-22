@@ -81,7 +81,8 @@ export function extraction(fields: ExtractionFields = {}): Extraction {
     if (seen.has(item.id)) throw new RangeError(`Two items have the id ${quoted(item.id)}; entities and relationships share one set of IDs`)
     seen.add(item.id)
   }
-  for (const [name, value] of Object.entries(optional)) {
+  // JavaScript callers can pass anything; an undefined or null field is left out.
+  for (const [name, value] of Object.entries(optional as Record<string, unknown>)) {
     if (!optionalFields.has(name)) {
       throw new TypeError(
         `An extraction has no field ${quoted(name)}; besides its entities and relationships it may have ${[...optionalFields].join(', ')}`,

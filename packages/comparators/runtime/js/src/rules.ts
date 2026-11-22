@@ -146,7 +146,7 @@ export function compareRequest(
 
 /** Reads the interpreter's check: the checked rules' digest, or a `RulesError`. */
 export async function checkedRules(interpreter: RulesInterpreter, report: unknown): Promise<CheckedRules> {
-  const value = report as {canonical?: unknown; diagnostics?: unknown; warnings?: unknown}
+  const value = report as {canonical?: unknown; diagnostics?: unknown; warnings?: unknown} | null | undefined
   if (typeof value?.canonical === 'string') {
     return {
       canonical: value.canonical,

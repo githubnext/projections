@@ -76,7 +76,10 @@ export function sideFailures(
       'bottom-right': [2, 1],
       'bottom-left': [2, 3],
     }
-    const inward = Math.max(0, ...(sides[name as keyof typeof sides] ?? []).map(side => geometry.inward?.[side] ?? 0))
+    const inward = Math.max(
+      0,
+      ...(Object.hasOwn(sides, name) ? sides[name as keyof typeof sides] : []).map(side => geometry.inward?.[side] ?? 0),
+    )
     if (offsetFromEdge > tolerance + inward) {
       failures.push(
         `${label}: at its ${name}, the ring starts ${format(offsetFromEdge)} inside the item's edge, which stays visible outside it${where}`,
@@ -85,7 +88,7 @@ export function sideFailures(
       failures.push(`${label}: at its ${name}, the ring starts ${format(-offsetFromEdge)} outside the item's edge${where}`)
     } else if (
       !inward &&
-      !geometry.outward &&
+      (geometry.outward === undefined || geometry.outward === 0) &&
       result.edgeEnd !== null &&
       result.ringEnd !== null &&
       result.edgeEnd - result.ringEnd > tolerance

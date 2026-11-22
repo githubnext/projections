@@ -48,6 +48,8 @@ export function itemName(element: Element): string {
  * on the item's accessible name (or its ID when it has none).
  */
 export function annotationName(mark: AnnotationMark, item?: string): string {
-  const what = mark.label?.trim() || (mark.count ? `${mark.count} ${mark.count === 1 ? 'annotation' : 'annotations'}` : 'Annotation')
-  return `${what} on ${item?.trim() || mark.id}`
+  const what =
+    (mark.label?.trim() ?? '') ||
+    (mark.count !== undefined && mark.count !== 0 ? `${mark.count} ${mark.count === 1 ? 'annotation' : 'annotations'}` : 'Annotation')
+  return `${what} on ${(item?.trim() ?? '') || mark.id}`
 }

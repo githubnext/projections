@@ -28,7 +28,7 @@ function FailureCards({sides, failedSides, projectionRows, jobs, onRetry, setPan
     <>
       {failedSides.map(({side, ref}) => {
         const row = projectionRows[ref]!
-        const other = sides.find(item => item.ref !== ref && projectionRows[item.ref]?.document)
+        const other = sides.find(item => item.ref !== ref && !!projectionRows[item.ref]?.document)
         return (
           <FailureCard
             key={ref}

@@ -44,7 +44,8 @@ export function createHosts(files: SourceFiles, libraries: Libraries) {
     useCaseSensitiveFileNames: true,
     fileExists: file => lookup(file) !== undefined,
     readFile: lookup,
-    readDirectory(directory, extensions, excludes, includes, depth) {
+    // Callers outside the compiler may leave out the extensions, which then means every file.
+    readDirectory(directory, extensions: readonly string[] | undefined, excludes, includes, depth) {
       const base = path.resolve(directory)
       const compile = (patterns: readonly string[] | undefined): RegExp[] | undefined =>
         patterns?.flatMap(pattern => {
@@ -62,7 +63,7 @@ export function createHosts(files: SourceFiles, libraries: Libraries) {
           (included !== undefined || file.startsWith(`${base}${path.sep}`)) &&
           (!extensions || extensions.some(extension => file.endsWith(extension))) &&
           (depth === undefined || path.relative(base, file).split(path.sep).length <= depth + 1) &&
-          (!excluded || !excluded.some(pattern => pattern.test(slash(file)))) &&
+          !excluded?.some(pattern => pattern.test(slash(file))) &&
           (!included || included.some(pattern => pattern.test(slash(file)))),
       )
     },

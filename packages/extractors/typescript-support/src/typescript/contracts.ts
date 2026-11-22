@@ -1,6 +1,6 @@
 import ts from 'typescript'
 import type {Json} from '../types.js'
-import {typeText, type TypeText} from './text.js'
+import {signatureDeclaration, typeText, type TypeText} from './text.js'
 
 /** api/v0 contract facts without the ones that are false or empty, which mean the same as absent ones. */
 export function facts(values: Record<string, Json | undefined>): Json {
@@ -10,7 +10,7 @@ export function facts(values: Record<string, Json | undefined>): Json {
         value !== undefined &&
         value !== false &&
         !(Array.isArray(value) && !value.length) &&
-        !(value && typeof value === 'object' && !Array.isArray(value) && !Object.keys(value).length),
+        !(typeof value === 'object' && value !== null && !Array.isArray(value) && !Object.keys(value).length),
     ),
   ) as Json
 }
@@ -59,7 +59,7 @@ export function typeFacts(checker: ts.TypeChecker, text: TypeText) {
     }))
   /** One call signature's parameters and return type, for callers. */
   const signatureFact = (value: ts.Signature): Json => {
-    const declaration = value.getDeclaration()
+    const declaration = signatureDeclaration(value)
     const predicate = checker.getTypePredicateOfSignature(value)
     const generics = typeParameterFacts(declaration?.typeParameters)
     return {
@@ -69,9 +69,10 @@ export function typeFacts(checker: ts.TypeChecker, text: TypeText) {
         return {
           name: parameter.name,
           type: at ? fact(checker.getTypeOfSymbolAtLocation(parameter, at)) : textFact('unknown'),
-          optional: Boolean(
-            parameter.flags & ts.SymbolFlags.Optional || parameterDeclaration?.questionToken || parameterDeclaration?.initializer,
-          ),
+          optional:
+            (parameter.flags & ts.SymbolFlags.Optional) !== 0 ||
+            parameterDeclaration?.questionToken !== undefined ||
+            parameterDeclaration?.initializer !== undefined,
           variadic: Boolean(parameterDeclaration?.dotDotDotToken),
           passing: 'value',
         }

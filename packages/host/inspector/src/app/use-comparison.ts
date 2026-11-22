@@ -123,10 +123,11 @@ export function useComparison({
       const revision = ref === workingTree ? ref : (lists[ref]?.commit ?? ref)
       // Named for the projection, as it was scaffolded with its renderer, rather than "Custom".
       const title =
-        (source === document.projection.id
+        ((source === document.projection.id
           ? document.projection.title
-          : lists[ref]?.definitions.find(definition => definition.id === source)?.title) ||
-        document.projection.renderer.bundle.replace(/\/+$/u, '').split('/').at(-1) ||
+          : lists[ref]?.definitions.find(definition => definition.id === source)?.title) ??
+          '') ||
+        (document.projection.renderer.bundle.replace(/\/+$/u, '').split('/').at(-1) ?? '') ||
         customManifest.title
       return customRenderer(
         {...customManifest, title},

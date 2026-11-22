@@ -17,7 +17,7 @@ const texts = {
 function sides(frame: FrameLocator) {
   return frame.locator('.text-diff-view').evaluate(root =>
     [...root.querySelectorAll('.text-diff-command')].map(section => {
-      const text = (cell: Element) => cell.querySelector('.td-text')!.textContent!
+      const text = (cell: Element) => cell.querySelector('.td-text')!.textContent
       const split = section.querySelector('.td-split')
       if (split) {
         return {
@@ -45,7 +45,8 @@ function decoration(frame: FrameLocator) {
     tinted: [...root.querySelectorAll('.td-delete, .td-insert')].filter(
       line => !/^(?:transparent|rgba\(0, 0, 0, 0\)|color\(srgb [\d. ]+ \/ 0\))$/u.test(getComputedStyle(line).backgroundColor),
     ).length,
-    markers: [...root.querySelectorAll('.td-mark')].filter(mark => mark.getBoundingClientRect().width > 0.5 && mark.textContent).length,
+    markers: [...root.querySelectorAll('.td-mark')].filter(mark => mark.getBoundingClientRect().width > 0.5 && mark.textContent !== '')
+      .length,
     cells: root.querySelectorAll('header .pk-group-status').length,
     status: [...root.querySelectorAll<HTMLElement>('header .pk-group-status')].filter(cell =>
       /^(?:Added|Removed|Modified|Renamed)/u.test(cell.innerText.replace(/\s/gu, '')),
@@ -60,8 +61,8 @@ function decoration(frame: FrameLocator) {
 
 const expected = (id: string) => ({
   id,
-  before: lines(texts.before[id as keyof typeof texts.before] ?? ''),
-  after: lines(texts.after[id as keyof typeof texts.after] ?? ''),
+  before: lines((texts.before as Partial<Record<string, string>>)[id] ?? ''),
+  after: lines((texts.after as Partial<Record<string, string>>)[id] ?? ''),
 })
 
 test('the renderer declares only the diff comparison mode', async ({page}) => {
@@ -336,7 +337,7 @@ test('at 1280 px a long line wraps, in one column, in two and in one revision, i
     await expect(body).toHaveAttribute('data-layout', layout)
     const read = await body.evaluate(element => {
       const line = [...element.querySelectorAll<HTMLElement>('.td-row, .td-cell')]
-        .filter(row => row.textContent!.includes('/var/spool'))
+        .filter(row => row.textContent.includes('/var/spool'))
         .at(-1)!
       const text = line.querySelector<HTMLElement>('.td-text')!
       const top = (selector: string) => [...line.querySelectorAll<HTMLElement>(selector)].map(item => item.getBoundingClientRect().top)

@@ -66,12 +66,12 @@ const parsers: Record<string, (message: Fields) => HostMessage | undefined> = {
   select(message) {
     if (message.id !== null && typeof message.id !== 'string') return undefined
     if (message.path !== undefined && (message.id === null || !isPropertyPath(message.path))) return undefined
-    return {type: 'select', id: message.id, ...(message.path === undefined ? {} : {path: message.path as string})}
+    return {type: 'select', id: message.id, ...(message.path === undefined ? {} : {path: message.path})}
   },
   annotations: parseAnnotations,
   options(message) {
     if (!record(message.options)) return undefined
-    return {type: 'options', options: message.options as RendererOptions}
+    return {type: 'options', options: message.options}
   },
   viewport(message) {
     if (!finite(message.width) || !finite(message.height)) return undefined

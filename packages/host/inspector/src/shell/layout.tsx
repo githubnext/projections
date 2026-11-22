@@ -125,7 +125,7 @@ export function Splitter({
     const step = event.shiftKey ? 48 : 16
     const grow: Record<string, number> = vertical ? {ArrowRight: sign * step, ArrowLeft: -sign * step} : {ArrowUp: step, ArrowDown: -step}
     const delta = grow[event.key]
-    if (delta) {
+    if (delta !== undefined && delta !== 0) {
       event.preventDefault()
       onChange(value + delta)
     }
@@ -262,7 +262,7 @@ export function BottomPanel({
               className="pj:inline-flex pj:h-6 pj:shrink-0 pj:items-center pj:gap-1.5 pj:rounded-sm pj:px-2 pj:text-[11px] pj:font-medium pj:text-muted-foreground pj:transition-colors pj:hover:text-foreground pj:focus-visible:outline-hidden pj:focus-visible:ring-1 pj:focus-visible:ring-ring pj:aria-selected:bg-accent pj:aria-selected:text-foreground"
             >
               {tab.label}
-              {tab.badge ? (
+              {tab.badge !== undefined && tab.badge !== 0 ? (
                 <Badge
                   variant={tab.tone === 'destructive' ? 'destructive' : 'secondary'}
                   className="pj:h-4 pj:min-w-4 pj:justify-center pj:px-1 pj:py-0 pj:text-[10px]"

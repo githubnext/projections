@@ -54,13 +54,13 @@ export function valueText(value: unknown): string | undefined {
 /** JSON with object keys sorted, so equal values compare equal. */
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
-  if (value && typeof value === 'object') {
+  if (typeof value === 'object' && value !== null) {
     return `{${Object.keys(value)
       .sort()
       .map(key => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`)
       .join(',')}}`
   }
-  return JSON.stringify(value) ?? String(value)
+  return json(value) ?? String(value)
 }
 
 const itemFieldNames = {label: 'Name', kind: 'Kind', from: 'From', to: 'To'} as const
@@ -128,4 +128,9 @@ export function variedFields(row: Row, before: Entity | Relationship | undefined
         ...(entry.reason ? {reason: entry.reason} : {}),
       }
     })
+}
+
+/** JSON, which `JSON.stringify` doesn't give for undefined, a function or a symbol, whatever its type says. */
+function json(value: unknown): string | undefined {
+  return JSON.stringify(value)
 }

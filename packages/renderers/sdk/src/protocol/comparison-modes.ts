@@ -37,5 +37,9 @@ export function parseComparisonModes(value: unknown): ComparisonMode[] | undefin
 export function supportedComparisonModes(
   declared: {comparisonModes?: readonly ComparisonMode[] | undefined} | undefined,
 ): readonly ComparisonMode[] {
-  return orderComparisonModes(declared?.comparisonModes?.length ? declared.comparisonModes : defaultComparisonModes)
+  return orderComparisonModes(
+    declared?.comparisonModes?.length !== undefined && declared.comparisonModes.length > 0
+      ? declared.comparisonModes
+      : defaultComparisonModes,
+  )
 }

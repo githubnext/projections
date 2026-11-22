@@ -15,7 +15,7 @@ export const insetChecks: Pick<Checks, 'stage-insets'> = {
     const failures: string[] = []
     let measured = 0
     for (const width of [undefined, phoneWidth]) {
-      await driver.load(subject, {progress: 1, ...primaryMode(subject, modes), ...(width ? {width} : {})})
+      await driver.load(subject, {progress: 1, ...primaryMode(subject, modes), ...(width !== undefined && width !== 0 ? {width} : {})})
       await driver.measure('settle')
       const found = await driver.measure<StageInsetsMeasurement>('stageInsets')
       if (found.fitted) throw new Skip(`The renderer centres a fitted drawing (${found.fitted}) instead of standing cards on its stage.`)
@@ -26,12 +26,12 @@ export const insetChecks: Pick<Checks, 'stage-insets'> = {
       const sides = [right, bottom, left]
       const expectedTop = Math.max(Math.min(...sides), found.overlaid ?? 0)
       if (Math.max(...sides) - Math.min(...sides) <= tolerance && Math.abs(top - expectedTop) <= tolerance) continue
-      const where = width ? `At ${width}px` : 'At full width'
+      const where = width !== undefined && width !== 0 ? `At ${width}px` : 'At full width'
       const cards = `${found.first}${found.cards > 1 ? ` and ${found.cards - 1} more` : ''}`
       failures.push(
         `${where}, the cards on the stage (${cards}) are ${top}px from the frame's top, ${right}px from its right, ` +
           `${bottom}px from the content's end and ${left}px from its left` +
-          `${found.overlaid ? ` (the host overlays the top ${found.overlaid}px: stage-inset-top)` : ''}; ${fix}`,
+          `${found.overlaid !== undefined && found.overlaid !== 0 ? ` (the host overlays the top ${found.overlaid}px: stage-inset-top)` : ''}; ${fix}`,
       )
     }
     if (!measured) throw new Skip('The renderer stands no cards, panels or tables on its stage.')

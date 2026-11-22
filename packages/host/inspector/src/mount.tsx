@@ -206,7 +206,7 @@ export function mountInspector(element: HTMLElement, options: MountInspectorOpti
   // A host may open external links itself (an editor's browser); same-origin and non-web links are left alone.
   if (host?.openExternal) {
     const click = (event: MouseEvent) => {
-      const anchor = (event.target as Element | null)?.closest?.('a[href]')
+      const anchor = (event.target as Element | null)?.closest('a[href]')
       const url = anchor && externalUrl(anchor.getAttribute('href'), document.baseURI)
       if (!url) return
       event.preventDefault()
@@ -217,7 +217,7 @@ export function mountInspector(element: HTMLElement, options: MountInspectorOpti
   }
   if (options.viewLinksInPlace) {
     const click = (event: MouseEvent) => {
-      const href = (event.target as Element | null)?.closest?.('a[href]')?.getAttribute('href')
+      const href = (event.target as Element | null)?.closest('a[href]')?.getAttribute('href')
       const query = href?.startsWith('?') ? new URLSearchParams(href) : undefined
       const next = query?.get('view')
       if (!query || !next) return
@@ -308,9 +308,9 @@ export function mountInspector(element: HTMLElement, options: MountInspectorOpti
           {...(options.projectionView ? {projectionView: options.projectionView} : {})}
           {...(options.loadingStatus ? {loadingStatus: options.loadingStatus} : {})}
           {...(options.chrome ? {chrome: options.chrome} : {})}
-          {...(options.banner ? {banner: options.banner} : {})}
-          {...(options.aside ? {aside: options.aside} : {})}
-          {...(options.toolbarStart ? {toolbarStart: options.toolbarStart} : {})}
+          {...(options.banner !== undefined ? {banner: options.banner} : {})}
+          {...(options.aside !== undefined ? {aside: options.aside} : {})}
+          {...(options.toolbarStart !== undefined ? {toolbarStart: options.toolbarStart} : {})}
           {...(options.utilityArea ? {utilityArea: options.utilityArea} : {})}
           {...(options.refresh ? {refresh: options.refresh} : {})}
           {...(options.initialResults ? {initialResults: options.initialResults} : {})}

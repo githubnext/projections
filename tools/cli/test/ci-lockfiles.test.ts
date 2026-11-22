@@ -24,7 +24,7 @@ const npm = (overrides: Record<string, object | undefined> = {}) =>
   JSON.stringify({
     lockfileVersion: 3,
     packages: Object.fromEntries(
-      Object.entries({
+      Object.entries<object | undefined>({
         '': {workspaces: ['packages/*'], devDependencies: {eslint: '^9'}},
         'packages/a': {dependencies: {foo: '^1', '@x/b': '*'}},
         'packages/b': {dependencies: {bar: '^1'}},

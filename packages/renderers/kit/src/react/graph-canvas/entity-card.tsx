@@ -88,7 +88,7 @@ export function EntityCard({node, drawing}: {node: TransitionNode; drawing: Draw
       {expander && (
         <g className="node-expander">
           <SvgIcon
-            name={action!.expanded ? 'collapse' : 'expand'}
+            name={action.expanded ? 'collapse' : 'expand'}
             x={width / 2 - expanderMetrics.inset - expanderMetrics.size}
             y={top + expanderMetrics.inset}
             size={expanderMetrics.size}

@@ -60,7 +60,8 @@ export const featureOn = (features: ProjectionFeatures | undefined, name: Featur
 /** The modes a feature set offers, in display order. */
 export function offeredModes(features: ProjectionFeatures | undefined): readonly ComparisonMode[] {
   const all = comparisonModes.map(option => option.value)
-  const chosen = features?.modes ? all.filter(mode => (features.modes as readonly ComparisonMode[]).includes(mode)) : all
+  const modes = features?.modes
+  const chosen = modes !== undefined && modes !== false ? all.filter(mode => modes.includes(mode)) : all
   return chosen.length ? chosen : all
 }
 

@@ -55,7 +55,7 @@ export function FilePackingRenderer(props: RendererProps<typeof accepts>) {
   const include = useMemo(() => includedRows(model, doc, JSON.parse(exclusionKey) as Exclusions), [model, doc, exclusionKey])
 
   // The definition's kind colors (`presentation.kinds`); keyed by content, so a new init with the same kinds keeps the palette.
-  const kindsKey = JSON.stringify(props.init.projection?.kinds ?? {})
+  const kindsKey = JSON.stringify((props.init.projection as RendererProjection | undefined)?.kinds ?? {})
   const kinds = useMemo(() => JSON.parse(kindsKey) as NonNullable<RendererProjection['kinds']>, [kindsKey])
   const palette = useMemo(
     () => packingPalette(model, include, doc, measure, colorMode, kinds),
@@ -174,7 +174,7 @@ export function FilePackingRenderer(props: RendererProps<typeof accepts>) {
             {tip && (
               <Tooltip
                 circle={tip}
-                path={doc.paths.get(tip.id) || nameOf((tip.row.after ?? tip.row.before)!, undefined)}
+                path={(doc.paths.get(tip.id) ?? '') || nameOf((tip.row.after ?? tip.row.before)!, undefined)}
                 sizes={describeSize(tip)}
                 category={
                   tip.filled && tip.category !== undefined ? (palette.entry(tip.category)?.category.label ?? tip.category) : undefined

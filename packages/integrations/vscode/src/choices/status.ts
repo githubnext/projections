@@ -67,7 +67,9 @@ export function statusItem(input: StatusInput): {text: string; tooltip: string; 
     ? `${sideDetail(pair.before, labels?.before)} → ${sideDetail(pair.after, labels?.after)}`
     : `${sideDetail(pair.after, labels?.after)}${pair.after === 'working-tree' ? ', as they are now' : ''}`
   const size = [
-    ...(choice.id === 'uncommitted' && facts.changes ? [`${plural(facts.changes, 'file')} uncommitted`] : []),
+    ...(choice.id === 'uncommitted' && facts.changes !== undefined && facts.changes !== 0
+      ? [`${plural(facts.changes, 'file')} uncommitted`]
+      : []),
     ...(choice.id === 'branch' ? [branchDetail(facts)] : []),
     ...(pair.before && input.files !== undefined ? [`${plural(input.files, 'file')} changed`] : []),
   ]
@@ -85,7 +87,7 @@ export function statusItem(input: StatusInput): {text: string; tooltip: string; 
     ...(front
       ? [
           '',
-          `${escapeMarkdown(front.title)} is out of date${front.files ? `: ${plural(front.files, 'file')} changed since its result` : ''}. Click to refresh it.`,
+          `${escapeMarkdown(front.title)} is out of date${front.files !== undefined && front.files !== 0 ? `: ${plural(front.files, 'file')} changed since its result` : ''}. Click to refresh it.`,
         ]
       : []),
     ...(stale
@@ -110,5 +112,5 @@ export function statusItem(input: StatusInput): {text: string; tooltip: string; 
 /** The Viewing quick pick's first item while the tab in front is out of date: `$(refresh) Refresh · 19 files changed`. */
 export function refreshPickLabel(front: {files?: number | undefined} | undefined): string | undefined {
   if (!front) return undefined
-  return `$(refresh) Refresh${front.files ? ` · ${plural(front.files, 'file')} changed` : ''}`
+  return `$(refresh) Refresh${front.files !== undefined && front.files !== 0 ? ` · ${plural(front.files, 'file')} changed` : ''}`
 }

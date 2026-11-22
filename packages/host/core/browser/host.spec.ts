@@ -187,7 +187,7 @@ test('the pair picker compares any two extractions in the browser with the defau
 })
 
 test('custom comparators run sandboxed in the browser and their result is validated', async ({page}) => {
-  const steps = async () => page.locator('.ph-steps > li').evaluateAll(items => items.map(item => item.textContent ?? ''))
+  const steps = async () => page.locator('.ph-steps > li').evaluateAll(items => items.map(item => item.textContent))
   await open(page, 'before=v1&after=v3&view=text')
   await expect(page.locator('.ph-comparator')).toHaveAttribute('data-comparator', 'default')
   const defaultSteps = await steps()
@@ -339,7 +339,8 @@ test('keyboard focus moves into the renderer frame and back out', async ({page, 
     page.evaluate(() => {
       const frameElement = document.querySelector('iframe.ph-frame')!
       const focusable = [...document.querySelectorAll<HTMLElement>('button, input, select, a[href], [tabindex="0"]')].filter(
-        element => element.compareDocumentPosition(frameElement) & Node.DOCUMENT_POSITION_FOLLOWING && element.offsetParent !== null,
+        element =>
+          (element.compareDocumentPosition(frameElement) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 && element.offsetParent !== null,
       )
       focusable.at(-1)!.focus()
       return focusable.at(-1)!.outerHTML.slice(0, 60)
@@ -357,7 +358,7 @@ test('keyboard focus moves into the renderer frame and back out', async ({page, 
     const frameElement = document.querySelector('iframe.ph-frame')!
     const focusable = [...document.querySelectorAll<HTMLElement>('button, input, select, a[href], [tabindex="0"]')].filter(
       element =>
-        frameElement.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING &&
+        (frameElement.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 &&
         element.tabIndex >= 0 &&
         element.checkVisibility({visibilityProperty: true}),
     )

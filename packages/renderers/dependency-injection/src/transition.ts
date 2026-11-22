@@ -93,7 +93,7 @@ export function createDiTransition(
       return [id, (beforeUnits.has(id) ? parts.at(-1) : parts[0]) ?? id] as const
     }),
   )
-  const unitWindow = new Map(ids.map(id => [id, (stepOf.get(unitPart.get(id)!) ?? unscheduledWindow) as Window] as const))
+  const unitWindow = new Map(ids.map(id => [id, stepOf.get(unitPart.get(id)!) ?? unscheduledWindow] as const))
   // A link part that a revision alone draws (a removed or added relationship, or a rewired one's old or new route)
   // goes with the step that takes it away or brings it: the first of its own and its leaving cards' steps, or the
   // last of its own and its arriving cards'. So it fades, and is emphasized, with them.
@@ -107,7 +107,7 @@ export function createDiTransition(
       return [item.key, (item.side === 'before' ? rows[0] : rows.at(-1)) ?? item.link.id] as const
     }),
   )
-  const drawn = union.map(item => ({...item, window: (stepOf.get(linkRow.get(item.key)!) ?? unscheduledWindow) as Window}))
+  const drawn = union.map(item => ({...item, window: stepOf.get(linkRow.get(item.key)!) ?? unscheduledWindow}))
   const frame = (progress: number): DiFrame => {
     const units = ids
       .map((id): DiUnitFrame => {

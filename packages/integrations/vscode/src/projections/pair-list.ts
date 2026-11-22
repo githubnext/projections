@@ -18,10 +18,12 @@ export function parsePairs(body: unknown): PairList {
   const value = record(body) ?? {}
   const suggestions = (Array.isArray(value.suggestions) ? value.suggestions : []).flatMap(entry => {
     const pair = pairOf(entry)
-    const item = record(entry)!
-    return pair && !item.error
-      ? [{...pair, label: ref(item.label) ?? pairLabel(pair), source: ref(item.source) ?? 'suggestion', identical: item.identical === true}]
-      : []
+    const item = record(entry)
+    if (!pair || !item) return []
+    const failed = Boolean(item.error)
+    return failed
+      ? []
+      : [{...pair, label: ref(item.label) ?? pairLabel(pair), source: ref(item.source) ?? 'suggestion', identical: item.identical === true}]
   })
   const bookmarks = (Array.isArray(value.bookmarks) ? value.bookmarks : []).flatMap(entry => {
     const pair = pairOf(entry)

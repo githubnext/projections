@@ -166,7 +166,7 @@ export function VscodeDetails({
           </>
         )}
       </dl>
-      {row.varied?.length ? <VariedList varied={rowDetails(subject, row, [row]).varied} /> : null}
+      {row.varied?.length !== undefined && row.varied.length > 0 ? <VariedList varied={rowDetails(subject, row, [row]).varied} /> : null}
       {(['before', 'after'] as const).map(side =>
         items[side].map(item => (
           <section key={`${side}-${item.id}`} className="phv-details-item">
@@ -186,7 +186,7 @@ export function VscodeDetails({
               onSelectTarget={onSelectTarget}
               annotations={annotations}
             />
-            {item.evidence?.length ? (
+            {item.evidence?.length !== undefined && item.evidence.length > 0 ? (
               <ul className="phv-evidence" aria-label="Source evidence">
                 {item.evidence.map(evidence)}
               </ul>
@@ -196,7 +196,9 @@ export function VscodeDetails({
           </section>
         )),
       )}
-      {children != null && children !== false && <div className="ph-details-slot phv-details-consumer">{children}</div>}
+      {children !== undefined && children !== null && children !== false && (
+        <div className="ph-details-slot phv-details-consumer">{children}</div>
+      )}
     </aside>
   )
 }

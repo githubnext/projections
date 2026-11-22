@@ -71,7 +71,7 @@ function shownIndicators(): Element[] {
 
 /** The first paint, the empty state and the skeleton and its toolbar strip, as drawn now. */
 function sampleFirstStates() {
-  if (!probe.empty && document.body?.textContent?.includes('No extraction loaded')) probe.empty = true
+  if (!probe.empty && (document.body as HTMLElement | null)?.textContent.includes('No extraction loaded')) probe.empty = true
   probe.firstPaint ??= performance.getEntriesByName('first-contentful-paint')[0]?.startTime
   if (document.querySelector('[data-skeleton]')) probe.skeleton = true
   const strip = document.querySelector('[data-skeleton] .pj-skeleton-toolbar')

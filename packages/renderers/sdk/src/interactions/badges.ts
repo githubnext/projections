@@ -60,7 +60,8 @@ function cornerOf(element: Element | undefined): AnnotationAnchor {
 }
 
 /** The text a badge shows: its count, capped at `99+`, or nothing (a dot). */
-const countText = (mark: AnnotationMark) => (mark.count ? (mark.count > badgeCountLimit ? `${badgeCountLimit}+` : String(mark.count)) : '')
+const countText = (mark: AnnotationMark) =>
+  mark.count !== undefined && mark.count !== 0 ? (mark.count > badgeCountLimit ? `${badgeCountLimit}+` : String(mark.count)) : ''
 
 /** Shows `badge` when its item is visible at a rectangle in `annotated`; returns that rectangle. */
 function showBadge(badge: Badge, rect: AnchorRect | undefined): rect is AnchorRect {

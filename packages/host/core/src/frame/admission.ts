@@ -4,7 +4,7 @@ import type {RendererMessage} from '@githubnext/projections-renderer-sdk/protoco
 /** A message's size as JSON, `Infinity` when it can't be serialized. */
 function size(value: unknown): number {
   try {
-    return JSON.stringify(value)?.length ?? Infinity
+    return (JSON.stringify(value) as string | undefined)?.length ?? Infinity
   } catch {
     return Infinity
   }

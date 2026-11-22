@@ -25,11 +25,11 @@ test('a replay finds what a rules change runs differently, by check, and prices 
     const after = await loadPlanner(root, lib, directory)
     const result = replay(before, after, [], ['packages/renderers/database/src/styles.css', 'README.md'], root)
     assert.equal(result.files?.changed, 1)
-    const [kind] = result.files?.kinds ?? []
+    const [kind] = result.files.kinds
     assert.deepEqual(kind?.examples, ['packages/renderers/database/src/styles.css'])
-    assert.ok(kind?.added.includes('browser (packages/renderers/harness, webkit-desktop, 4/4)'))
-    assert.ok(kind?.removed.includes('browser (packages/renderers/harness, webkit-desktop (database))'))
-    assert.ok((result.files?.minutes ?? 0) > 100)
+    assert.ok(kind.added.includes('browser (packages/renderers/harness, webkit-desktop, 4/4)'))
+    assert.ok(kind.removed.includes('browser (packages/renderers/harness, webkit-desktop (database))'))
+    assert.ok(result.files.minutes > 100)
     assert.deepEqual(result.unpriced, [])
   } finally {
     rmSync(directory, {recursive: true, force: true})

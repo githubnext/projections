@@ -105,7 +105,7 @@ const centredSteps = {
 
 /** The collapse order for a toolbar's content, without steps that change nothing it holds. */
 export function toolbarSteps(content: ToolbarContent): readonly ToolbarLayout[] {
-  const actions = content.actions === true ? actionCollapseOrder : content.actions || []
+  const actions = content.actions === true ? actionCollapseOrder : content.actions === false ? [] : (content.actions ?? [])
   const seen = new Set<string>()
   const centred = content.modes && content.centre === true ? centredSteps[content.playback ? 'animated' : 'still'] : []
   return [...centred, ...(content.playback ? animatedSteps : stillSteps)]

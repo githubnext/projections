@@ -66,7 +66,7 @@ for (const colorMode of ['light', 'dark'] as const) {
         const all = [...element.querySelectorAll(rowSelector)].filter(row => row.getAttribute('data-entity-id'))
         const bottom = [...all].sort((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom)
         return [...new Set([all[0], bottom[0]].filter(row => row !== undefined).map(row => row.getAttribute('data-entity-id')!))]
-      }, rows as string)
+      }, rows)
       expect(ids.length, 'rows to ring').toBeGreaterThan(0)
       const states: [string, () => Promise<void>][] = [
         ['at rest', async () => {}],

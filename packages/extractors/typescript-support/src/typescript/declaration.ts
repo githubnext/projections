@@ -59,8 +59,8 @@ export function describeExport(
   const isType = Boolean(symbol.flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.TypeAlias))
   const declared = isType || isClass ? checker.getDeclaredTypeOfSymbol(symbol) : checker.getTypeOfSymbolAtLocation(symbol, declaration)
   const genericDeclaration = symbol.declarations!.find(
-    item => ts.isClassDeclaration(item) || ts.isInterfaceDeclaration(item) || ts.isTypeAliasDeclaration(item),
-  ) as GenericDeclaration | undefined
+    (item): item is GenericDeclaration => ts.isClassDeclaration(item) || ts.isInterfaceDeclaration(item) || ts.isTypeAliasDeclaration(item),
+  )
   const generics = render.typeParameters(genericDeclaration?.typeParameters, new Set())
   const structured = Boolean(symbol.flags & (ts.SymbolFlags.Class | ts.SymbolFlags.Interface))
   const heritage = heritageText(checker, render, genericDeclaration)

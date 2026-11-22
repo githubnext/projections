@@ -8,7 +8,7 @@ import type {Checks} from '../support.js'
 import {changedEntities, difference, looks, touched, variedWithin} from './support.js'
 
 async function diffSamples(driver: CheckDriver, subject: StageSubject, width?: number): Promise<Map<string, EntitySample>> {
-  await driver.load(subject, {progress: 1, comparisonMode: 'diff', ...(width ? {width} : {})})
+  await driver.load(subject, {progress: 1, comparisonMode: 'diff', ...(width !== undefined && width !== 0 ? {width} : {})})
   return samples(driver)
 }
 
@@ -88,9 +88,10 @@ export const diffChecks: Pick<Checks, 'diff-changes' | 'diff-neutral' | 'diff-cl
     requireDiff(subject, modes)
     const failures: string[] = []
     for (const width of [undefined, phoneWidth]) {
-      await driver.load(subject, {progress: 1, comparisonMode: 'diff', ...(width ? {width} : {})})
+      await driver.load(subject, {progress: 1, comparisonMode: 'diff', ...(width !== undefined && width !== 0 ? {width} : {})})
       await driver.measure('settle')
-      for (const clipped of await driver.measure<string[]>('clipping')) failures.push(`${width ? `At ${width}px, ` : ''}${clipped}.`)
+      const where = width !== undefined && width !== 0 ? `At ${width}px, ` : ''
+      for (const clipped of await driver.measure<string[]>('clipping')) failures.push(`${where}${clipped}.`)
     }
     return failures.slice(0, limit)
   },

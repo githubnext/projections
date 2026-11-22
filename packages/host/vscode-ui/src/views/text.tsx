@@ -17,11 +17,12 @@ export function VscodeTextView({
   summary,
 }: VscodeBuiltInViewProps) {
   // The summary bar's sentence, word for word, so the text says what the bar says.
-  const summarized = summary?.length ? (
-    <p className="phv-lead" data-summary-sentence="">
-      Summary: {figuresSentence(summary, subject.mode === 'comparison')}.
-    </p>
-  ) : null
+  const summarized =
+    summary?.length !== undefined && summary.length > 0 ? (
+      <p className="phv-lead" data-summary-sentence="">
+        Summary: {figuresSentence(summary, subject.mode === 'comparison')}.
+      </p>
+    ) : null
   if (subject.mode === 'extraction') {
     const {extraction} = subject
     const relationships = new Map<string, Row[]>()
@@ -50,7 +51,7 @@ export function VscodeTextView({
                   {row.label === row.id ? '' : `, ${row.id}`})
                 </span>
                 <Marker row={row} marks={marks} onActivate={onAnnotationActivate} />
-                {relationships.get(row.id)?.length ? (
+                {(relationships.get(row.id)?.length ?? 0) > 0 ? (
                   <ul>
                     {relationships.get(row.id)!.map(edge => (
                       <li key={edge.id} data-item-id={edge.id}>

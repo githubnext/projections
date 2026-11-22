@@ -11,7 +11,9 @@ export type SnapshotDocument = ExtractionDocument | ComparisonDocument
  */
 export async function snapshotDocument(value: unknown, engine: ProjectionEngine): Promise<SnapshotDocument> {
   const document = value as Partial<ComparisonDocument> | null
-  const declared = document?.before?.provenance?.definition?.comparator
+  // Any JSON until loadArtifact checks it.
+  const declared = (document?.before as {provenance?: {definition?: {comparator?: unknown}}} | undefined)?.provenance?.definition
+    ?.comparator
   if (document?.format === 'projections.comparison' && customComparator(declared)) {
     const [before, after] = await Promise.all([document.before, document.after].map(side => loadArtifact(JSON.stringify(side), {engine})))
     if (

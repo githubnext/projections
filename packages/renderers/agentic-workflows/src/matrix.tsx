@@ -67,7 +67,7 @@ function Row({item, view, frame}: {item: WorkflowItem; view: AgenticModel; frame
 /** A group's heading row, spanning the table, selectable, with its change in words. */
 function GroupRow({group, span, frame}: {group: GroupView; span: number; frame: Frame}) {
   const row = group.row
-  const selected = row !== undefined && frame.props.selectedId === row.id
+  const selected = frame.props.selectedId === row?.id
   return (
     <tr className="aw-matrix-group">
       <th
@@ -136,7 +136,7 @@ export function Matrix({view, frame}: {view: AgenticModel; frame: Frame}) {
             </tr>
           </thead>
           {view.groups
-            .filter(group => group.workflows.length || group.row)
+            .filter(group => group.workflows.length > 0 || !!group.row)
             .map(group => (
               <tbody key={group.row?.id ?? group.title}>
                 {(view.groups.length > 1 || group.row) && <GroupRow group={group} span={span} frame={frame} />}

@@ -53,7 +53,7 @@ export function inkBounds([shownUrl, hiddenUrl, within]: [string, string, InkBou
       const covered = values.map(value => (value < full / 10 ? 0 : Math.min(1, value / full)))
       const first = covered.findIndex(value => value > 0)
       let last = covered.length - 1
-      while (last > first && !covered[last]) last--
+      while (last > first && (covered[last] ?? 0) === 0) last--
       // An edge pixel's uncovered part lies outside the shape.
       return [first + 1 - covered[first]!, last + covered[last]!]
     }

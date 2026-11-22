@@ -28,7 +28,7 @@ export const summaryChecks: Pick<Checks, 'summary'> = {
         failures.push(`The summary changes while scrubbing: ${first![1]} at ${label(first![0])} but ${summary} at ${label(progress)}.`)
       }
     }
-    if (!sent?.length) throw new Skip("The renderer sends no summary; hosts word the summary bar from the kinds' names.")
+    if (!sent || sent.length === 0) throw new Skip("The renderer sends no summary; hosts word the summary bar from the kinds' names.")
     const counts = summaryCounts(subject)
     const known = knownIds(subject)
     for (const item of sent) {

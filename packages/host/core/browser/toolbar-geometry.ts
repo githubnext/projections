@@ -37,9 +37,8 @@ export const toolbarGeometry = (page: Page) =>
       }
       const nameOf = (element: Element) =>
         element.getAttribute('aria-label') ??
-        (element.id ? element.ownerDocument.querySelector(`label[for="${CSS.escape(element.id)}"]`)?.textContent?.trim() : undefined) ??
-        element.textContent?.trim() ??
-        ''
+        (element.id ? element.ownerDocument.querySelector(`label[for="${CSS.escape(element.id)}"]`)?.textContent.trim() : undefined) ??
+        element.textContent.trim()
       const bar = box(toolbar)
       const rows = [...toolbar.querySelectorAll(':scope > .ph-toolbar-row')].map(row => {
         const rect = box(row)
@@ -53,14 +52,13 @@ export const toolbarGeometry = (page: Page) =>
           fill: used / rect.width,
           unused: rect.width - used,
           // A control in a collapsed form: More, the mode menu, the merged or compact pickers, or icon-only modes.
-          collapsed: Boolean(
+          collapsed:
             row.querySelector(
               'button[aria-label="More"], button[aria-label^="Comparison mode: "], button[aria-label^="Revisions: "], [data-slot="revision-trigger"]',
-            ) ||
+            ) !== null ||
             [...row.querySelectorAll('[role="radiogroup"][aria-label="Comparison mode"] [role="radio"]')].some(
-              radio => !radio.textContent?.trim(),
+              radio => !radio.textContent.trim(),
             ),
-          ),
           playbackOnly: items.length === 1 && Boolean(items[0]!.querySelector('[role="group"][aria-label="Comparison playback"]')),
           centred: row.hasAttribute('data-centred'),
         }
@@ -165,9 +163,8 @@ export const reachableNames = (page: Page) =>
       }
       const nameOf = (element: Element) =>
         element.getAttribute('aria-label') ??
-        (element.id ? element.ownerDocument.querySelector(`label[for="${CSS.escape(element.id)}"]`)?.textContent?.trim() : undefined) ??
-        element.textContent?.trim() ??
-        ''
+        (element.id ? element.ownerDocument.querySelector(`label[for="${CSS.escape(element.id)}"]`)?.textContent.trim() : undefined) ??
+        element.textContent.trim()
       // Focus left in the toolbar (say, back on a popover's button) keeps its region's form; release it and let the
       // toolbar replan before reading it, so a replan can't remount a trigger while its popover opens.
       const settle = async () => {

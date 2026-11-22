@@ -91,7 +91,7 @@ function zoomedFinding(canvas: OpeningCanvas, where: string, text: string, openi
       failure: `${where}, ${canvas.element} opens zoomed (${canvas.zoom}) further than the ${openingFloorPx}px floor (${text}); open at the floor, the least zoom whose text is readable.`,
     }
   }
-  if (opening && !canvas.start?.inView) {
+  if (opening && (canvas.start === null || canvas.start.inView === false)) {
     return {
       failure:
         `${where}, ${canvas.element} opens at the ${openingFloorPx}px floor scrolled away from the start of its content: ${canvas.start ? `${canvas.start.element} at [${canvas.start.corner.join(', ')}] is outside the visible canvas [${canvas.area.join(', ')}]` : 'no entity is drawn'}; ` +
@@ -129,13 +129,13 @@ export const openingChecks: Pick<Checks, 'opens-fitted'> = {
           ]
         : [{name: 'one revision', progress: [1]}]
     for (const width of [undefined, phoneWidth]) {
-      const height = width ? openingFrame.phoneHeight : openingFrame.height
+      const height = width !== undefined && width !== 0 ? openingFrame.phoneHeight : openingFrame.height
       for (const presentation of presentations) {
         const [first, ...rest] = presentation.progress
         await driver.load(subject, {
           progress: first!,
           height,
-          ...(width ? {width} : {}),
+          ...(width !== undefined && width !== 0 ? {width} : {}),
           ...(presentation.comparisonMode ? {comparisonMode: presentation.comparisonMode} : {}),
         })
         for (const progress of [first!, ...rest]) {
@@ -143,7 +143,7 @@ export const openingChecks: Pick<Checks, 'opens-fitted'> = {
           await driver.measure('settle')
           const measured = await driver.measure<OpeningMeasurement>('opening', relationships)
           const size = `${measured.viewport.width}×${measured.viewport.height}`
-          const where = `At ${width ? `${width}px` : 'full width'} (${size}), ${presentation.name}${presentation.progress.length > 1 ? ` at ${label(progress)}` : ''}`
+          const where = `At ${width !== undefined && width !== 0 ? `${width}px` : 'full width'} (${size}), ${presentation.name}${presentation.progress.length > 1 ? ` at ${label(progress)}` : ''}`
           for (const canvas of measured.canvases) {
             zoomable = true
             const finding = canvasFinding(canvas, where, progress === first, presentation.comparisonMode === 'diff')

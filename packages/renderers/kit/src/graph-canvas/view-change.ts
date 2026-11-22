@@ -54,7 +54,7 @@ export function morphFrames(from: GraphFrame, to: GraphFrame, mix: number): Grap
   const edges: TransitionEdge[] = [
     ...to.edges.map(edge => {
       const was = edgesBefore.get(edge.key)
-      return was && was.points.length && edge.points.length
+      return was !== undefined && was.points.length > 0 && edge.points.length > 0
         ? {...edge, points: morphRoute(was.points, edge.points, mix), opacity: interpolate(was.opacity, edge.opacity, mix)}
         : {...edge, opacity: edge.opacity * within(mix, 0.6, 1)}
     }),

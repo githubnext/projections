@@ -11,7 +11,8 @@ export const featureOn = (features: VscodeProjectionFeatures) => (name: Exclude<
 /** The initial mode: the requested one when offered, else the first offered. */
 function allowedMode(mode: ComparisonMode | undefined, features: VscodeProjectionFeatures | undefined): ComparisonMode | undefined {
   const modes = offeredModes(features)
-  return mode && modes.includes(mode) ? mode : features?.modes ? modes[0] : mode
+  const limited = features?.modes !== undefined && features.modes !== false
+  return mode && modes.includes(mode) ? mode : limited ? modes[0] : mode
 }
 
 /** The view's props that `useProjection` takes as they are, when given. */
@@ -54,7 +55,7 @@ type PassedThrough = {[Name in (typeof passedThrough)[number]]?: Exclude<VscodeP
 function given(props: VscodeProjectionViewProps): PassedThrough {
   const options: Record<string, unknown> = {}
   for (const name of passedThrough) if (props[name] !== undefined) options[name] = props[name]
-  return options as PassedThrough
+  return options
 }
 
 /**

@@ -189,7 +189,7 @@ function Compared({state}: {state: ViewerState}) {
   )
   return (
     <span className="pi-viewer-compared pj:flex pj:max-w-[55%] pj:shrink-0 pj:items-center pj:gap-1.5" aria-label={state.compared}>
-      {sides.before != null && (
+      {sides.before !== undefined && sides.before !== null && (
         <>
           {pill(sides.before, 'before')}
           <span aria-hidden="true" className="pi-viewer-text pj:shrink-0 pj:text-xs pj:text-muted-foreground">

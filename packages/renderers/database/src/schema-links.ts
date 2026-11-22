@@ -54,7 +54,7 @@ export function linksOf(state: SchemaState, {nodes, tableSet, tableOf, columnNam
           edge.from,
           edge.to,
           columnNamed(edge.from, name),
-          remote[index] === undefined ? undefined : columnNamed(edge.to, remote[index]!),
+          remote[index] === undefined ? undefined : columnNamed(edge.to, remote[index]),
         ),
       )
     }

@@ -139,7 +139,7 @@ export function useParts({
             onOrder={order =>
               setOverrides(current => {
                 const next: PartOverrides = {...current[projection], comparator: 'default', order}
-                if (!order && !ownRules && !ownDefinition.comparator) {
+                if (!order && !ownRules && (ownDefinition.comparator === undefined || ownDefinition.comparator === '')) {
                   delete next.comparator
                   delete next.order
                 }

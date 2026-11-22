@@ -119,7 +119,7 @@ export function TitleActivity({
           <span className="pj:sr-only">at {new Date(at).toLocaleTimeString()}</span>
         </>
       )}
-      {reason && <> {reason}</>}
+      {Boolean(reason) && <> {reason}</>}
     </span>
   )
 }

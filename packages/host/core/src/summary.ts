@@ -59,7 +59,7 @@ const matchesKind = (counted: SummaryCount, kind: SummaryKind) =>
  */
 export function summaryFigures(subject: ViewSubject, items?: readonly SummaryItem[]): SummaryFigure[] {
   const counts = summaryCounts(subject)
-  const named = items?.length ? items : summaryItems(subject)
+  const named = items?.length !== undefined && items.length > 0 ? items : summaryItems(subject)
   const figures = new Map<string, SummaryFigure>()
   for (const item of named) {
     if (item.type === 'fact') {

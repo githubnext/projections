@@ -52,10 +52,11 @@ export function routeEdges(
     routes.set(edge.id, route)
     const source = ctx.box(edge.from),
       target = ctx.box(edge.to)
+    const only = list.length === 1 ? list[0] : undefined
     ports.set(edge.id, {
       from: {x: route[0]!.x - source.x, y: route[0]!.y - source.y},
       to: {x: route.at(-1)!.x - target.x, y: route.at(-1)!.y - target.y},
-      ...(list.length === 1 && list[0]!.bend ? {bend: list[0]!.bend, ...(list[0]!.track ? {track: list[0]!.track} : {})} : {}),
+      ...(only?.bend ? {bend: only.bend, ...(only.track !== undefined && only.track !== 0 ? {track: only.track} : {})} : {}),
     })
   }
   routingWork.routed++

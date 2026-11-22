@@ -13,7 +13,7 @@ const sameIds = (a: readonly string[] | null | undefined, b: readonly string[] |
  */
 export function layoutFilter(previous: FilterPayload | undefined, message: FilterPayload): FilterPayload {
   const scope = message.scope === undefined ? message.ids : message.scope
-  if (previous && previous.changesOnly === message.changesOnly && sameIds(previous.scope, scope)) return previous
+  if (previous?.changesOnly === message.changesOnly && sameIds(previous.scope, scope)) return previous
   return {query: '', changesOnly: message.changesOnly, ids: scope, scope}
 }
 

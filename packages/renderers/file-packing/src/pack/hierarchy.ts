@@ -47,11 +47,11 @@ export function tree(snapshot: Snapshot, settings: PackSettings): {tops: TreeNod
   for (const [child, of] of parent) (children.get(of) ?? children.set(of, []).get(of)!).push(child)
   for (const list of children.values()) list.sort(compareIds)
   const roots = [...snapshot.active].filter(id => !parent.has(id)).sort(compareIds)
-  const sole = roots.length === 1 && children.get(roots[0]!)?.length ? roots[0] : undefined
+  const sole = roots.length === 1 && (children.get(roots[0]!)?.length ?? 0) > 0 ? roots[0] : undefined
   // A folder at the depth limit is drawn as one circle: its weight and its heaviest category.
   const collapse = (id: string, totals: Map<string, number>): number => {
     const kids = children.get(id)
-    if (!kids?.length) {
+    if (!kids || kids.length === 0) {
       const entity = snapshot.entity(id)
       const weight = settings.weight(entity)
       const category = settings.category(entity)
@@ -62,8 +62,10 @@ export function tree(snapshot: Snapshot, settings: PackSettings): {tops: TreeNod
   }
   const build = (id: string, depth: number): TreeNode => {
     const kids = children.get(id)
-    if (kids?.length && depth < settings.maxDepth) return {id, value: 0, filled: false, children: kids.map(kid => build(kid, depth + 1))}
-    if (kids?.length) {
+    if (kids !== undefined && kids.length > 0 && depth < settings.maxDepth) {
+      return {id, value: 0, filled: false, children: kids.map(kid => build(kid, depth + 1))}
+    }
+    if (kids !== undefined && kids.length > 0) {
       const totals = new Map<string, number>()
       // A weighted hierarchy's explicit internal weight is authoritative where the folder is drawn as one circle.
       const declared = settings.weight(snapshot.entity(id))

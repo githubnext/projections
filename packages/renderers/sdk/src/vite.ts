@@ -94,12 +94,10 @@ export function rendererBundlePlugin(options: Omit<RendererBuildOptions, 'entry'
       order: 'post',
       handler(_options, bundle) {
         const script = bundle['renderer.js']
-        if (!script || script.type !== 'chunk') throw new Error('The renderer build produced no renderer.js chunk')
+        if (script?.type !== 'chunk') throw new Error('The renderer build produced no renderer.js chunk')
         const style = bundle['renderer.css']
         const css =
-          style && style.type === 'asset'
-            ? String(typeof style.source === 'string' ? style.source : new TextDecoder().decode(style.source))
-            : ''
+          style?.type === 'asset' ? (typeof style.source === 'string' ? style.source : new TextDecoder().decode(style.source)) : ''
         const others = Object.keys(bundle).filter(name => !['renderer.js', 'renderer.css'].includes(name) && !name.endsWith('.map'))
         if (others.length) throw new Error(`Renderer bundles are a single document; inline these assets instead: ${others.join(', ')}`)
         const notices = bundleNotices(
@@ -287,7 +285,8 @@ export function rendererDevServerPlugin(options: Omit<RendererBuildOptions, 'out
   return {
     name: 'projections-renderer-dev-server',
     apply: 'serve',
-    config: user => ({
+    // Vite passes the configuration; a caller outside Vite (a test) may pass none.
+    config: (user: UserConfig | undefined) => ({
       server: {
         cors: {origin: [loopback, 'null']},
         // Vite's watcher (chokidar 3) drops a change to a file within 50 ms of the last change it reported, so a

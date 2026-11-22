@@ -63,7 +63,7 @@ export function paneArrangement({
   band?: number
 }): PaneArrangement {
   if (width < stackBelow) return 'stacked'
-  if (!aspect || !(height > 0) || !Number.isFinite(width)) return current ?? 'columns'
+  if (aspect === undefined || aspect === 0 || !(height > 0) || !Number.isFinite(width)) return current ?? 'columns'
   // The fitted content's width in each arrangement: its pane's width, or its pane's height times the aspect.
   const fitted = (paneWidth: number, paneHeight: number) => Math.max(0, Math.min(paneWidth, paneHeight * aspect))
   const columns = fitted((width - columnGap) / 2, height - band)

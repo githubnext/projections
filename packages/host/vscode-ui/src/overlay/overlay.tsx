@@ -41,7 +41,7 @@ function focusInitial(overlay: HTMLElement, initialFocus: RefObject<Element | nu
 }
 
 function isInShadowOf(node: Node, host: Element): boolean {
-  for (let current: Node | null = node; current; current = (current.getRootNode() as ShadowRoot).host ?? null) {
+  for (let current: Node | null = node; current; current = (current.getRootNode() as Partial<ShadowRoot>).host ?? null) {
     if (host.contains(current)) return true
     if (!(current.getRootNode() instanceof ShadowRoot)) return false
   }

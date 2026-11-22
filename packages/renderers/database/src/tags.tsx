@@ -83,8 +83,9 @@ function useSlotSizes(tags: readonly Tag[], room: RefObject<HTMLDivElement | nul
       })
     }
     measure()
-    document.fonts?.addEventListener('loadingdone', measure)
-    return () => document.fonts?.removeEventListener('loadingdone', measure)
+    const fonts = document.fonts as FontFaceSet | undefined
+    fonts?.addEventListener('loadingdone', measure)
+    return () => fonts?.removeEventListener('loadingdone', measure)
   }, [tags, room, measures])
   return sizes
 }

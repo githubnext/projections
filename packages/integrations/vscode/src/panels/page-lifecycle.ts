@@ -46,7 +46,7 @@ const reject = (controls: readonly Control[], reason: string): PageEffect[] =>
 const without = (controls: readonly Control[], id: number) => controls.filter(control => control.id !== id)
 const has = (controls: readonly Control[], id: number) => controls.some(control => control.id === id)
 const expiry = (controls: readonly Control[]) =>
-  controls.map(control => after(`control:${control.id}`, control.timeoutMs, {type: 'expired', id: control.id} as PageEvent))
+  controls.map(control => after<PageEvent>(`control:${control.id}`, control.timeoutMs, {type: 'expired', id: control.id}))
 
 /** Reasons a control fails. */
 export const failures = {

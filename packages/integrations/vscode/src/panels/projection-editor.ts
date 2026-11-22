@@ -29,7 +29,7 @@ export function projectionEditor(services: Services): vscode.CustomReadonlyEdito
         cspSource: panel.webview.cspSource,
         nonce: randomBytes(18).toString('base64url'),
         // The tab's label: the projection URI's last path segment, its title.
-        title: decodeURIComponent(document.uri.path.split('/').pop() || parsed.id),
+        title: decodeURIComponent((document.uri.path.split('/').pop() ?? '') || parsed.id),
         codicons: panel.webview
           .asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'dist', 'vscode-ui', 'codicons', 'codicon.css'))
           .toString(),
@@ -50,9 +50,7 @@ export function activeDefinitionTarget(): DefinitionTarget | undefined {
   const column = tab!.group.viewColumn
   if (input.viewType === projectionViewType) {
     const parsed = parseProjectionQuery(input.uri.query)
-    const tabs = [...ProjectionTab.tabs].filter(
-      item => parsed && item.folder.uri.toString() === parsed.folder && item.projection === parsed.id,
-    )
+    const tabs = [...ProjectionTab.tabs].filter(item => item.folder.uri.toString() === parsed?.folder && item.projection === parsed.id)
     return (tabs.find(item => item.panel.viewColumn === column) ?? tabs[0])?.definitionTarget()
   }
   return undefined
@@ -68,7 +66,7 @@ export function viewedTab(folder?: vscode.WorkspaceFolder): {tab: ProjectionTab;
   const input = active?.input
   if (input instanceof vscode.TabInputCustom && input.viewType === projectionViewType) {
     const parsed = parseProjectionQuery(input.uri.query)
-    const matching = tabs.filter(tab => parsed && tab.folder.uri.toString() === parsed.folder && tab.projection === parsed.id)
+    const matching = tabs.filter(tab => tab.folder.uri.toString() === parsed?.folder && tab.projection === parsed.id)
     const tab = matching.find(item => item.panel.viewColumn === active!.group.viewColumn) ?? matching[0]
     if (tab) return {tab, inFront: true}
   }

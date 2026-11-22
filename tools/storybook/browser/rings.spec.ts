@@ -12,7 +12,7 @@ const test = base.extend<{theme: Theme}>({theme: ['light', {option: true}]})
  * zooming in and out. Its status band shows each status with its badge (a disc with the glyph cut out), not the word
  * alone.
  */
-const story = (id: string) => new URL(`iframe.html?id=${id}&viewMode=story`, process.env.PROJECTIONS_STORYBOOK_URL!).href
+const story = (id: string) => new URL(`iframe.html?id=${id}&viewMode=story`, process.env.PROJECTIONS_STORYBOOK_URL).href
 
 /** Waits for a zoom to finish: the card's box the same on two reads a frame apart. */
 async function settled(card: Locator) {
@@ -38,7 +38,7 @@ async function settled(card: Locator) {
 async function rendererFrame(page: Page): Promise<Frame> {
   const iframe = page.locator('iframe.ph-frame').first()
   await expect(iframe).toBeVisible()
-  const frame = (await (await iframe.elementHandle())!.contentFrame())!
+  const frame = (await (await iframe.elementHandle()).contentFrame())!
   await expect(frame.locator('.graph-node[data-entity-id]').first()).toBeVisible()
   return frame
 }

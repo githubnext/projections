@@ -83,7 +83,8 @@ export function useHostTheme(): InspectorHostTheme | undefined {
 /** Copies text with the host's clipboard, else the browser's. */
 export function copyText(host: InspectorHost, text: string): Promise<void> {
   if (host.copyText) return host.copyText(text)
-  return navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject(new Error('The clipboard is unavailable'))
+  const clipboard = navigator.clipboard as Clipboard | undefined
+  return clipboard ? clipboard.writeText(text) : Promise.reject(new Error('The clipboard is unavailable'))
 }
 
 /** Whether a link is an external `http:` or `https:` URL, which a host's `openExternal` should open. */

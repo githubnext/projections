@@ -116,14 +116,14 @@ export function buildDiModel(state: Pick<DependencyInjectionExtraction, 'entitie
     const lifetime = lifetimeOf(registration?.data.lifetime)
     const declaredLifetime = registration?.data.declaredLifetime === undefined ? undefined : lifetimeOf(registration.data.declaredLifetime)
     const name = text(service.data.name)
-    const shownContract = selfRegistered ? undefined : shortName(contractType ?? service.label ?? service.id)
-    const shownImplementation = aliasOf ?? shortName(implementationType ?? contractType ?? service.label ?? service.id)
+    const shownContract = selfRegistered ? undefined : shortName(contractType ?? service.label)
+    const shownImplementation = aliasOf ?? shortName(implementationType ?? contractType ?? service.label)
     units.push({
       id: service.id,
       serviceId: service.id,
       registrationId: registration?.id,
       implementationId,
-      contract: aliasOf ? shortName(contractType ?? service.label ?? service.id) : shownContract,
+      contract: aliasOf ? shortName(contractType ?? service.label) : shownContract,
       implementation: shownImplementation,
       lifetime,
       scope: scopeOf(registration?.data.scope, lifetime),

@@ -121,7 +121,11 @@ export function shadcnSummary(result: Exclude<ScriptResult, {error: unknown}>, o
     ...(result.registry.moved.length
       ? {moved: result.registry.moved.map(change => ({sha: change.sha.slice(0, 7), message: change.message, path: change.path}))}
       : {}),
-    components: result.components.map(({name, status, conflicts}) => ({name, status, ...(conflicts ? {conflicts} : {})})),
+    components: result.components.map(({name, status, conflicts}) => ({
+      name,
+      status,
+      ...(conflicts !== undefined && conflicts !== 0 ? {conflicts} : {}),
+    })),
     written: result.written,
     problems,
     next,

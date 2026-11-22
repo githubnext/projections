@@ -63,11 +63,12 @@ const calls: Record<ProbeCall, (args: unknown) => unknown> = {
 
 addEventListener('message', event => {
   const data = event.data as {projectionsProbe?: unknown; type?: unknown} | null
-  if (event.source !== parent || !data || data.projectionsProbe !== 0 || data.type !== 'connect' || !event.ports[0]) return
+  if (event.source !== parent || data?.projectionsProbe !== 0 || data.type !== 'connect' || !event.ports[0]) return
   const port = event.ports[0]
-  port.onmessage = async ({data: request}: MessageEvent<{id: number; call: ProbeCall; args?: unknown}>) => {
+  port.onmessage = async ({data: request}: MessageEvent<{id: number; call: unknown; args?: unknown}>) => {
     try {
-      const call = calls[request.call]
+      const call =
+        typeof request.call === 'string' ? (calls as Partial<Record<string, (args: unknown) => unknown>>)[request.call] : undefined
       if (!call) throw new Error(`Unknown probe call ${String(request.call)}`)
       port.postMessage({id: request.id, result: await call(request.args)})
     } catch (error) {

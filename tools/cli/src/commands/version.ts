@@ -25,7 +25,7 @@ export function versionReport(root: string, options: {set?: string | undefined; 
   const problems = versionProblems(root, options.tag)
   const next = problems.length
     ? [`npm run tools -- version ${options.tag ? tagVersion(options.tag) : (version ?? '<version>')}  # sets every shipped manifest`]
-    : changed?.length
+    : changed?.length !== undefined && changed.length > 0
       ? ['npm ci', 'cargo check --workspace --locked', 'git commit -am "Release <version>"']
       : []
   return {

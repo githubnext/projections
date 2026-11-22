@@ -120,7 +120,7 @@ export function useCommands({
           id: 'extract.marked',
           group: 'Extraction',
           label: 'Extract Before and After again',
-          disabled: !runnable || !(marked.a || marked.b),
+          disabled: !runnable || (!marked.a && !marked.b),
           run: () => extract([marked.a, marked.b].filter((ref): ref is string => Boolean(ref))),
         },
         {id: 'extract.cancel', group: 'Extraction', label: 'Cancel the running extraction', disabled: !busy, run: () => void cancel()},

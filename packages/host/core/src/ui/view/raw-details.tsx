@@ -18,7 +18,7 @@ import type {ProjectionViewProps} from './props.js'
 
 /** A property value in one line: strings as written, everything else as JSON. */
 function propertyText(value: unknown): string {
-  return typeof value === 'string' ? value : (JSON.stringify(value) ?? String(value))
+  return typeof value === 'string' ? value : (json(value) ?? String(value))
 }
 
 /** The item's `data` properties, each selectable as a target with a property path. */
@@ -206,7 +206,7 @@ function Details({
           </>
         )}
       </dl>
-      {row.varied?.length ? <VariedList varied={rowDetails(subject, row, p.rows).varied} /> : null}
+      {row.varied?.length !== undefined && row.varied.length > 0 ? <VariedList varied={rowDetails(subject, row, p.rows).varied} /> : null}
       {(['before', 'after'] as const).map(side =>
         items[side].map(item => (
           <section key={`${side}-${item.id}`} className="pj:flex pj:min-w-0 pj:flex-col pj:gap-1.5 pj:border-t pj:pt-3" data-side={side}>
@@ -220,7 +220,7 @@ function Details({
             )}
             {item.confidence && <p className="pj:text-xs pj:text-muted-foreground">Confidence: {item.confidence}</p>}
             <Properties p={p} row={row} target={{kind, id: item.id, side}} data={item.data} />
-            {item.evidence?.length ? (
+            {item.evidence?.length !== undefined && item.evidence.length > 0 ? (
               <ul className="ph-evidence pj:flex pj:flex-col pj:gap-1">{item.evidence.map(evidence)}</ul>
             ) : (
               <p className="pj:text-xs pj:text-muted-foreground">No source evidence.</p>
@@ -233,4 +233,9 @@ function Details({
       )}
     </aside>
   )
+}
+
+/** JSON, which `JSON.stringify` doesn't give for undefined, a function or a symbol, whatever its type says. */
+function json(value: unknown): string | undefined {
+  return JSON.stringify(value)
 }

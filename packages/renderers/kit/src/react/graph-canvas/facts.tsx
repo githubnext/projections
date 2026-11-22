@@ -23,7 +23,7 @@ function pill(x: number, y: number, width: number): string {
 export function CardBadges({node, drawing}: {node: TransitionNode; drawing: Drawing}) {
   const {props, diff} = drawing
   const grow = props.badgeGrowth?.get(node.id)
-  if (!grow || !props.badges) return null
+  if (grow === undefined || grow === 0 || !props.badges) return null
   const [before, after] = [node.before, node.after].map(side => (side ? (props.badges!(side) ?? []) : []))
   const top = node.height / 2 - (props.comparing ? cardFooterHeight : 0) - grow - badgeMetrics.gap
   const left = -node.width / 2 + cardTextMetrics.inset

@@ -51,7 +51,7 @@ export function difference(a: EntitySample, b: EntitySample): string {
 export function variedWithin(subject: Extract<StageSubject, {mode: 'comparison'}>): Set<string> {
   return new Set(
     subject.comparison.changes
-      .filter(change => change.status === 'unchanged' && change.varied?.length)
+      .filter(change => change.status === 'unchanged' && (change.varied?.length ?? 0) > 0)
       .flatMap(change => [change.id, ...change.before, ...change.after]),
   )
 }

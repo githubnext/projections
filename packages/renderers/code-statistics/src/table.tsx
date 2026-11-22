@@ -8,7 +8,7 @@ import type {CodeStatisticsScope, StatisticsKey} from '@githubnext/projections-r
 import type {Entity} from '@githubnext/projections-schemas'
 import type {accepts} from './accepts.js'
 
-const name = (entity: Entity) => entity.label ?? entity.id
+const name = (entity: Entity) => entity.label
 
 /** A count column: numbers, sorted largest first on a first click. */
 function count(id: StatisticsKey, label: string, scope: CodeStatisticsScope): DataTableColumn<Entity> {

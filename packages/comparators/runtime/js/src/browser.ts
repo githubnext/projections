@@ -36,7 +36,10 @@ const rulesFile = 'rules.wasm'
  */
 export function createRulesRuntime(options: BrowserComparatorOptions = {}): RulesRuntime {
   const resolved = settings(options)
-  const url = new URL(String(options.rulesInterpreterUrl ?? new URL(rulesFile, import.meta.url)), globalThis.location?.href)
+  const url = new URL(
+    String(options.rulesInterpreterUrl ?? new URL(rulesFile, import.meta.url)),
+    (globalThis.location as Location | undefined)?.href,
+  )
   const interpreter = () =>
     loadRulesInterpreter(url.href, async () => {
       const response = await fetch(url)

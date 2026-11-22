@@ -57,7 +57,7 @@ test('dense scrubbing in the real host frame keeps every bar frame exact, stable
   // One hold point per comparison step: Ruby leaves, TypeScript and CSS resize, Python arrives.
   await expect.poll(async () => (await renderer.state()).steps.length).toBe(3)
   const {typescript: typescriptAt} = oracle(renderer.subject.mode === 'comparison' ? renderer.subject.comparison : undefined!)
-  const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
+  const measure = (): Promise<Measured> => renderer.frame.locator('body').evaluate(measureRenderedFrame)
   const first = await measure()
   const rowHeight = first.slots.find(slot => slot.id === 'language:Ruby')!.height
   expect(rowHeight).toBeGreaterThan(20)
@@ -143,7 +143,7 @@ test('the share chart scrubs deterministically and is neutral at both endpoints'
     options: {chart: 'share'},
   })
   const {total} = oracle(renderer.subject.mode === 'comparison' ? renderer.subject.comparison : undefined!)
-  const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
+  const measure = (): Promise<Measured> => renderer.frame.locator('body').evaluate(measureRenderedFrame)
   const painted = new Map<number, string>()
   await renderer.scrub(samples(50, {roundTrip: true}), async progress => {
     const frame = await measure()
@@ -237,7 +237,7 @@ test('painted rows follow the comparison steps, and a custom comparator order ch
       progress: 0,
       locale: 'en-US',
     })
-    const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
+    const measure = (): Promise<Measured> => renderer.frame.locator('body').evaluate(measureRenderedFrame)
     const [end] = (await renderer.state()).steps as [number]
     await renderer.seek(end)
     const frame = await measure()
@@ -282,9 +282,9 @@ test('a single revision fits the frame with no steps and no change decoration', 
 
 test('the gateway migration scrubs a dozen languages without jumps, remounts or recolouring', async ({page}, testInfo) => {
   test.setTimeout(60_000)
-  const gateway = loadPair('gateway') as {before: Extraction; after: Extraction}
+  const gateway = loadPair('gateway')
   const renderer = await openRenderer(page, {renderer: 'code-statistics', ...gateway, progress: 0, locale: 'en-US'})
-  const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
+  const measure = (): Promise<Measured> => renderer.frame.locator('body').evaluate(measureRenderedFrame)
   const rowHeight = Math.max(...(await measure()).slots.map(slot => slot.height))
   const forward: Measured[] = []
   await renderer.scrub(samples(80), async progress => {
@@ -317,27 +317,27 @@ test('each bar stays one continuous shape at 2% steps: gains inside it, losses f
         }
       }),
     )
-  let sawGain = false
-  let sawLoss = false
+  // Set in the scrub's callback, where TypeScript doesn't follow them.
+  const saw = {gain: false, loss: false}
   await renderer.scrub(samples(50), async progress => {
     for (const shape of await shapes()) {
       const [left, right, top, bottom] = shape.bar
       expect(shape.others, 'nothing but the bar and its lost part on a track').toBe(0)
       if (shape.gain) {
-        sawGain = true
+        saw.gain = true
         expect(shape.gain[0]).toBeGreaterThanOrEqual(left! - 0.5)
         expect(shape.gain[1]).toBeLessThanOrEqual(right! + 0.5)
         expect([shape.gain[2], shape.gain[3]]).toEqual([top, bottom])
       }
       if (shape.loss) {
-        sawLoss = true
+        saw.loss = true
         expect(Math.abs(shape.loss[0]! - right!), 'the lost part is flush with the bar').toBeLessThan(0.5)
         expect([shape.loss[2], shape.loss[3]], 'and shares its height and baseline').toEqual([top, bottom])
       }
       if (progress === 0 || progress === 1) expect(shape.gain ?? shape.loss, `plain bars at ${progress}`).toBeNull()
     }
   })
-  expect(sawGain && sawLoss, 'gains and losses both show mid-transition').toBe(true)
+  expect(saw.gain && saw.loss, 'gains and losses both show mid-transition').toBe(true)
 })
 
 test('the share donut marks change by hatching within slices, never with a separate rim', async ({page}) => {

@@ -26,7 +26,7 @@ export function useTextAdvances(
       const next = new Map(latest.current)
       let changed = false
       for (const text of texts) {
-        const content = text.dataset.label ?? text.textContent ?? ''
+        const content = text.dataset.label ?? text.textContent
         const advance = text.getComputedTextLength()
         if (!advance || next.get(content) === advance) continue
         next.set(content, advance)

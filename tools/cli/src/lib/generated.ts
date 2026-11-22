@@ -328,6 +328,6 @@ export function outputFiles(root: string, generator: Generator, files?: readonly
 /** Every file Git tracks or would track (not ignored), relative to `root`; outside Git, every file walked. */
 export function walkAll(root: string): string[] {
   const listed = git(root, ['ls-files', '--cached', '--others', '--exclude-standard', '--', '.'])
-  if (listed !== undefined) return listed.split('\n').filter(path => path && existsSync(join(root, path)))
+  if (listed !== undefined) return listed.split('\n').filter(path => path !== '' && existsSync(join(root, path)))
   return [...walk(root), ...walk(root, '.github')]
 }

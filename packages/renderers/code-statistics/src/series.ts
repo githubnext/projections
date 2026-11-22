@@ -46,7 +46,7 @@ export function amount(entity: Entity | undefined, key: StatisticsKey, scope: Co
 
 function label(change: EntityChange<Entity>, local: number): string {
   const entity = (local < 0.5 ? (change.before ?? change.after) : (change.after ?? change.before))!
-  return entity.label ?? entity.id
+  return entity.label
 }
 
 /** A row's count at this progress: an absent side counts as 0. */
@@ -81,10 +81,7 @@ export function languageSeries({tracked, motions, measure, scope, diff, palette,
       return {
         id: change.id,
         label: shownLabel,
-        previousLabel:
-          diff && change.before && change.after && (change.before.label ?? change.before.id) !== shownLabel
-            ? (change.before.label ?? change.before.id)
-            : undefined,
+        previousLabel: diff && change.before && change.after && change.before.label !== shownLabel ? change.before.label : undefined,
         before: amount(change.before, measure, scope),
         after: amount(change.after, measure, scope),
         status: change.status,
@@ -96,7 +93,7 @@ export function languageSeries({tracked, motions, measure, scope, diff, palette,
         presence: motion.opacity,
         emphasis: change.status === 'added' ? motion.mix : 1,
         color: '',
-        swatch: {token: compositionTokens[0]} as Series['swatch'],
+        swatch: {token: compositionTokens[0]},
       }
     })
     .sort(
@@ -122,8 +119,8 @@ export function compositionSeries({tracked, motions, scope}: Pick<SeriesInput, '
       label: part.label,
       before,
       after,
-      status: (before === after ? 'unchanged' : 'modified') as Status,
-      change: (before === after ? 'unchanged' : 'modified') as ChangeClassification,
+      status: before === after ? 'unchanged' : 'modified',
+      change: before === after ? 'unchanged' : 'modified',
       // Each language contributes its own step's count, so the composition follows the steps too.
       value: tracked.reduce((sum, change) => sum + interpolated(change, part.id, scope, motions.get(change.id)!), 0),
       entity: false,

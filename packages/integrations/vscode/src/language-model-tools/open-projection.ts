@@ -57,7 +57,8 @@ async function setMode(tab: ProjectionTab, mode: string): Promise<boolean> {
 /** Selects an entity once the comparison, which loads after the tab, shows it; whether it could. */
 async function selectEntity(tab: ProjectionTab, entity: string): Promise<boolean> {
   for (const end = Date.now() + 15_000; Date.now() < end;) {
-    if (await tab.control({op: 'selectEntity', entity}).catch(() => false)) return true
+    const selected = Boolean(await tab.control({op: 'selectEntity', entity}).catch(() => false))
+    if (selected) return true
     await sleep(250)
   }
   return false

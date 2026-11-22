@@ -80,8 +80,11 @@ function EvidenceLocation({
   evidenceLink: EvidenceLink | undefined
   onOpen: ((path: string, line?: number) => void) | undefined
 }) {
-  const text = `${location.path}${location.line ? `:${location.line}` : ''}`
-  const href = evidenceLink?.({path: location.path, ...(location.line ? {line: location.line} : {})}, location.side)
+  const text = `${location.path}${location.line !== undefined && location.line !== 0 ? `:${location.line}` : ''}`
+  const href = evidenceLink?.(
+    {path: location.path, ...(location.line !== undefined && location.line !== 0 ? {line: location.line} : {})},
+    location.side,
+  )
   if (href) {
     return (
       <a className="phv-link phv-evidence-link" href={href} target="_blank" rel="noreferrer noopener">
@@ -118,7 +121,10 @@ export function EvidenceSection({
     <Section id={id} heading="Where in the code">
       <ul className="phv-evidence">
         {details.evidence.map(location => (
-          <li key={`${location.side}:${location.path}${location.line ? `:${location.line}` : ''}`} data-side={location.side}>
+          <li
+            key={`${location.side}:${location.path}${location.line !== undefined && location.line !== 0 ? `:${location.line}` : ''}`}
+            data-side={location.side}
+          >
             <EvidenceLocation location={location} evidenceLink={evidenceLink} onOpen={onOpen} />
             {comparing && location.side === 'before' && <span className="phv-muted"> {beforeLabel}</span>}
           </li>

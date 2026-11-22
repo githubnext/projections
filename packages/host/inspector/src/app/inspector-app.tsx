@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react'
+import {useCallback, useMemo, useState} from 'react'
 import {LoadingStatus, ProjectionView} from '@githubnext/projections-host/ui'
 import {createControllerStore} from '../details.js'
 import {useInspectorHost} from '../host.js'
@@ -217,7 +217,7 @@ export function InspectorApp({
     .filter(state => state.status === 'done' && state.ms)
     .at(-1)?.ms
 
-  const statusOf = (id: string) => projectionStatus(marks, rows, id)
+  const statusOf = useCallback((id: string) => projectionStatus(marks, rows, id), [marks, rows])
   const running = pairRunning(Boolean(showing === 'live' && projection && (switching || statusOf(projection)?.kind === 'extracting')), pair)
   const switcherStatus = (id: string) => switcherStatusOf(statusOf(id), definitions, id)
   const switcherList = switcherModel({
@@ -242,8 +242,6 @@ export function InspectorApp({
     pair,
     policy,
     statusOf,
-    rows,
-    marks,
     usesOwnRenderer,
     rendererPolicy,
   })

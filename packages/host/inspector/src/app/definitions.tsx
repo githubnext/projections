@@ -3,6 +3,7 @@ import type {Definition} from '@githubnext/projections-schemas'
 import {customComparator} from '@githubnext/projections-schemas'
 import type {PartOverrides} from '../parts/model.js'
 import type {InspectorDefinitionList, InspectorPolicy} from '../types.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * What using a projection defined at a revision requires. A runner that
@@ -51,8 +52,8 @@ export function changeReason(
     node: (
       <>
         after{' '}
-        {parts.map((part, index) => (
-          <span key={index}>
+        {keyed(parts, part => part.plain).map(([key, part], index) => (
+          <span key={key}>
             {index ? ', ' : ''}
             {part.node}
           </span>

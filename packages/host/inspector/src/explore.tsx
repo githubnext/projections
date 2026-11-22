@@ -71,7 +71,11 @@ function AdoptPanel({
   const [busy, setBusy] = useState(false)
   const key = selected.join(',')
   // A different selection needs a new preview.
-  useEffect(() => setPreview(undefined), [key])
+  const [previewed, setPreviewed] = useState(key)
+  if (previewed !== key) {
+    setPreviewed(key)
+    setPreview(undefined)
+  }
   if (!selected.length && !result) return null
   const names = selected.map(id => titles.get(id) ?? id).join(', ')
   const act = (run: () => Promise<void>) => {

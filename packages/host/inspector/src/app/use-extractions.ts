@@ -1,13 +1,16 @@
-import {useCallback, useEffect, useRef, useState, useSyncExternalStore} from 'react'
+import {useCallback, useEffect, useLayoutEffect, useState, useSyncExternalStore} from 'react'
 import type {Dispatch, SetStateAction} from 'react'
 import type {InspectorApi} from '../client/api.js'
 import type {InspectorDefinitionList} from '../types.js'
-import {ExtractionCoordinator} from './extraction-coordinator.js'
+import {ExtractionCoordinator, type ExtractionEvents} from './extraction-coordinator.js'
 import {restoredRows} from './extraction-state.js'
 import type {Marks} from './pairs.js'
 import type {InspectorAppProps, InspectorOpenedOn} from './props.js'
 
 export type {QueuedExtraction, Rows} from './extraction-coordinator.js'
+
+/** What the coordinator reads until the first layout effect gives it the Inspector's state. */
+const unattached: ExtractionEvents = {definition: () => undefined, shown: () => false, report: () => undefined}
 
 /**
  * Extractions per projection and revision (`ExtractionCoordinator`), for as long as the Inspector is mounted: each
@@ -38,25 +41,21 @@ export function useExtractions({
   openedInitially: InspectorOpenedOn | undefined
   initialResults: InspectorAppProps['initialResults']
 }) {
-  const latest = useRef({definitions, marks, setError, setPanelRequest})
-  latest.current = {definitions, marks, setError, setPanelRequest}
-  const [coordinator] = useState(
-    () =>
-      new ExtractionCoordinator(
-        {
-          definition: id => latest.current.definitions?.definitions.find(item => item.id === id),
-          shown(id, ref) {
-            const shown = latest.current.marks[id]
-            return ref === shown?.a || ref === shown?.b
-          },
-          report(message, diagnostics) {
-            latest.current.setError(message)
-            if (diagnostics) latest.current.setPanelRequest({tab: 'diagnostics', at: Date.now()})
-          },
-        },
-        restoredRows(openedInitially, initialResults),
-      ),
-  )
+  const [coordinator] = useState(() => new ExtractionCoordinator(unattached, restoredRows(openedInitially, initialResults)))
+  // The coordinator reads the committed render's state; it runs nothing before it connects, below.
+  useLayoutEffect(() => {
+    coordinator.listen({
+      definition: id => definitions?.definitions.find(item => item.id === id),
+      shown(id, ref) {
+        const shown = marks[id]
+        return ref === shown?.a || ref === shown?.b
+      },
+      report(message, diagnostics) {
+        setError(message)
+        if (diagnostics) setPanelRequest({tab: 'diagnostics', at: Date.now()})
+      },
+    })
+  })
   useEffect(() => {
     coordinator.connect(api)
     return () => coordinator.disconnect()

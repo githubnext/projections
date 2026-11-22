@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react'
+import {useEffect, useLayoutEffect, useRef, useState} from 'react'
 import type {Dispatch, SetStateAction} from 'react'
 import type {InspectorApi} from '../client/api.js'
 import type {InspectorRevision} from '../types.js'
@@ -8,6 +8,7 @@ import {symbolic, workingTree} from './revisions.js'
 import type {Rows} from './use-extractions.js'
 import {bumpedRenderers, bumpedScenarios, changeSet, withoutStale} from './change-set.js'
 import type {ChangeSet} from './change-set.js'
+import {sleep} from '../sleep.js'
 
 type Versions = Record<string, number>
 
@@ -98,20 +99,22 @@ export function useLiveChanges({
     recompare,
     definitionRevision,
   })
-  latest.current = {
-    live,
-    runnable,
-    projection,
-    rows,
-    revisions,
-    marked,
-    extract,
-    refreshDefinitions,
-    retry,
-    manual,
-    recompare,
-    definitionRevision,
-  }
+  useLayoutEffect(() => {
+    latest.current = {
+      live,
+      runnable,
+      projection,
+      rows,
+      revisions,
+      marked,
+      extract,
+      refreshDefinitions,
+      retry,
+      manual,
+      recompare,
+      definitionRevision,
+    }
+  })
   useEffect(() => {
     if (!api) return
     const abort = new AbortController()
@@ -159,7 +162,7 @@ export function useLiveChanges({
         } catch {
           if (abort.signal.aborted) return
           setWatching(false)
-          await new Promise(resolve => setTimeout(resolve, 2000))
+          await sleep(2000, abort.signal)
           continue
         }
         if (!result) return

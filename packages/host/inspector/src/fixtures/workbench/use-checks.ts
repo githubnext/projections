@@ -84,8 +84,7 @@ export function useChecks({
   useEffect(() => {
     setChecks(previous => new Map([...previous].filter(([, value]) => value.generation === catalog.generation || value.running)))
     if (autoRun && scenario && !scenario.error) void run(scenario)
-    // Runs only when the catalog or the selection changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs only when the catalog or the selection changes.
   }, [catalog.generation, scenario?.key, autoRun])
 
   return {checks, run, checkAll, checkingAll, stageRef}

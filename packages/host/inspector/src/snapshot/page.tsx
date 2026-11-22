@@ -20,6 +20,7 @@ import {SnapshotFrame} from './frames.js'
 import {frames, markSnapshot, quiet} from './marker.js'
 import {snapshotReadiness} from './readiness.js'
 import type {SnapshotSettings} from './settings.js'
+import {sleep} from '../sleep.js'
 
 const customManifest: RendererManifest = {format: 'projections.renderer', version: 0, name: 'custom', title: 'Custom', handles: []}
 
@@ -102,32 +103,30 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
     projection.stepEnds,
     projection.baseDurationMs,
   ])
+  const readiness = snapshotReadiness({
+    projection,
+    settings,
+    comparing,
+    requested,
+    custom: Boolean(custom),
+    notice: resolution.notice,
+    panes,
+  })
+  // The first failure is the snapshot's.
+  if (!failure && typeof readiness === 'object') setFailure(readiness.failure)
   useEffect(() => {
     if (failure) {
       markSnapshot('failed', failure)
       return
     }
-    const readiness = snapshotReadiness({
-      projection,
-      settings,
-      comparing,
-      requested,
-      custom: Boolean(custom),
-      notice: resolution.notice,
-      panes,
-    })
-    if (typeof readiness === 'object') {
-      setFailure(readiness.failure)
-      return
-    }
-    if (readiness === 'waiting') return
-    let cancelled = false
+    if (readiness !== 'painted') return
+    const abort = new AbortController()
     // A quiet moment first: anything the renderer still sends (such as its legend) changes `signature` and starts over.
     void document.fonts.ready
-      .then(() => new Promise(resolve => setTimeout(resolve, quiet)))
+      .then(() => sleep(quiet, abort.signal))
       .then(() => frames(2))
       .then(() => {
-        if (cancelled) return
+        if (abort.signal.aborted) return
         const {turnFrameMs, direction = 1} = settings
         const turn =
           turnFrameMs === undefined
@@ -140,11 +139,10 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
         markSnapshot('ready', undefined, turn)
       })
     return () => {
-      cancelled = true
+      abort.abort()
       markSnapshot(undefined)
     }
-    // `signature` covers the pane and mode state read here.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `signature` covers the pane and mode state read here, whose objects are new on every render.
   }, [
     signature,
     failure,

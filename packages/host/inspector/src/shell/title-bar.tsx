@@ -1,4 +1,4 @@
-import {createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState} from 'react'
+import {createContext, use, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react'
 import type {ReactNode, RefObject} from 'react'
 import {
   Button,
@@ -51,7 +51,22 @@ interface TitleBarState {
 }
 const TitleBarContext = createContext<TitleBarState>({level: 0, place: 'bar'})
 /** The title bar's level and where the calling item renders. */
-export const useTitleBar = () => useContext(TitleBarContext)
+export const useTitleBar = () => use(TitleBarContext)
+
+/** How often the status line's relative times move on. */
+const clockMs = 5000
+const clockNow = () => Math.floor(Date.now() / clockMs) * clockMs
+const stopped = () => 0
+function subscribeClock(tick: () => void) {
+  const timer = setInterval(tick, clockMs)
+  return () => clearInterval(timer)
+}
+const subscribeNever = () => () => undefined
+
+/** The time now to the clock's 5 s while `running`, for a relative time; 0 while not. */
+function useClock(running: boolean): number {
+  return useSyncExternalStore(running ? subscribeClock : subscribeNever, running ? clockNow : stopped, running ? clockNow : stopped)
+}
 
 /** How long ago `at` was, in words that stay short: "just now", "12 s ago", "3 min ago", "2 h ago". */
 export function relativeTime(at: number, now = Date.now()): string {
@@ -89,13 +104,7 @@ export function TitleActivity({
   reason?: ReactNode
 } & Record<`data-${string}`, string | boolean | undefined>) {
   const {level, place} = useTitleBar()
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    if (at === undefined) return
-    setNow(Date.now())
-    const timer = setInterval(() => setNow(Date.now()), 5000)
-    return () => clearInterval(timer)
-  }, [at])
+  const now = useClock(at !== undefined)
   if (place !== 'bar') return null
   return (
     <span
@@ -119,7 +128,7 @@ export function TitleActivity({
           <span className="pj:sr-only">at {new Date(at).toLocaleTimeString()}</span>
         </>
       )}
-      {reason && <> {reason}</>}
+      {reason ? <> {reason}</> : null}
     </span>
   )
 }
@@ -359,6 +368,8 @@ export function TitleBar({
     middle?.setAttribute('data-fit-min', String(Math.min(centerWant, Math.max(centerMin, Math.ceil(natural)))))
   })
   const {plan: level} = useFitPlan(bar, titleLevels, {key: titleKey, lock: titleLock})
+  const inBar = useMemo<TitleBarState>(() => ({level, place: 'bar'}), [level])
+  const inMore = useMemo<TitleBarState>(() => ({level, place: 'more'}), [level])
   const [more, setMore] = useState(false)
   const toggle = (name: string, pressed: boolean, tip: string, icon: ReactNode, run: () => void) => (
     <ToolbarButton asChild>
@@ -425,7 +436,7 @@ export function TitleBar({
         <div className="pi-title-center pj:flex pj:min-w-0 pj:items-center pj:justify-center">{center}</div>
         <div className="pi-title-end pj:flex pj:min-w-0 pj:items-center pj:justify-end">
           <div data-fit="row" className="pj:flex pj:min-w-0 pj:flex-1 pj:items-center pj:justify-end pj:gap-1">
-            <TitleBarContext.Provider value={{level, place: 'bar'}}>{title}</TitleBarContext.Provider>
+            <TitleBarContext value={inBar}>{title}</TitleBarContext>
             {level >= titleLevel.overflow && (
               <Popover open={more} onOpenChange={setMore}>
                 <ToolbarButton asChild>
@@ -443,7 +454,7 @@ export function TitleBar({
                   </PopoverTrigger>
                 </ToolbarButton>
                 <PopoverContent align="end" collisionPadding={8} aria-label="More actions" className="pi-more pj:w-72 pj:gap-3 pj:p-3">
-                  <TitleBarContext.Provider value={{level, place: 'more'}}>{title}</TitleBarContext.Provider>
+                  <TitleBarContext value={inMore}>{title}</TitleBarContext>
                   {moreToggle(`${layout.panel ? 'Hide' : 'Show'} panel`, layout.panel, shortcutLabel('j'), togglePanel)}
                   {secondary && moreToggle(secondaryName, layout.secondary, shortcutLabel('b', {alt: true}), toggleSecondary)}
                   <Button

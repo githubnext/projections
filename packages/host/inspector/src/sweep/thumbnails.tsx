@@ -13,35 +13,42 @@ import {cellHref, cellSummary} from './stats.js'
 const THUMBNAIL_ATTEMPTS = 3
 
 /** Renders thumbnails one at a time, visible cells first, so a sweep never runs a browser per cell. */
-export function useThumbnailQueue(api: InspectorApi) {
-  return useMemo(() => {
-    const urls = new Map<string, Promise<string>>()
-    let tail: Promise<unknown> = Promise.resolve()
-    const thumbnail = async (cell: SweepCell): Promise<Blob> => {
-      for (let attempt = 1; ; attempt++) {
-        try {
-          return await api.sweepThumbnail(cell)
-        } catch (error) {
-          if (attempt >= THUMBNAIL_ATTEMPTS || !(error instanceof InspectorRequestError && error.status === 408)) throw error
-        }
+export class ThumbnailQueue {
+  readonly #api: InspectorApi
+  readonly #urls = new Map<string, Promise<string>>()
+  #tail: Promise<unknown> = Promise.resolve()
+
+  constructor(api: InspectorApi) {
+    this.#api = api
+  }
+
+  /** The cell's thumbnail as an object URL, once the thumbnails asked for before it are done. */
+  load(cell: SweepCell): Promise<string> {
+    const key = `${cell.projection}|${cell.before}|${cell.after}`
+    let url = this.#urls.get(key)
+    if (!url) {
+      url = this.#tail.then(() => this.#thumbnail(cell)).then(blob => URL.createObjectURL(blob))
+      this.#tail = url.catch(() => undefined)
+      this.#urls.set(key, url)
+    }
+    return url
+  }
+
+  async #thumbnail(cell: SweepCell): Promise<Blob> {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.#api.sweepThumbnail(cell)
+      } catch (error) {
+        if (attempt >= THUMBNAIL_ATTEMPTS || !(error instanceof InspectorRequestError && error.status === 408)) throw error
       }
     }
-    return {
-      load(cell: SweepCell): Promise<string> {
-        const key = `${cell.projection}|${cell.before}|${cell.after}`
-        let url = urls.get(key)
-        if (!url) {
-          url = tail.then(() => thumbnail(cell)).then(blob => URL.createObjectURL(blob))
-          tail = url.catch(() => undefined)
-          urls.set(key, url)
-        }
-        return url
-      },
-    }
-  }, [api])
+  }
 }
 
-export type ThumbnailQueue = ReturnType<typeof useThumbnailQueue>
+/** One `ThumbnailQueue` per runner. */
+export function useThumbnailQueue(api: InspectorApi): ThumbnailQueue {
+  return useMemo(() => new ThumbnailQueue(api), [api])
+}
 
 /** A changed cell: its Diff thumbnail once it scrolls into view, larger on hover or focus. */
 export function ChangedCell({cell, label, queue}: {cell: SweepCell; label: string; queue: ThumbnailQueue}) {

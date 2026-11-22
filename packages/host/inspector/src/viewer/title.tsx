@@ -55,9 +55,7 @@ export function ViewerTitle({
   const menu = onChoose && current && projections.length > 1 ? {onChoose, current} : undefined
   const hasMenu = Boolean(menu)
   // A menu that goes away (the pane pinned again as the page widens) closes, so it doesn't reopen when it comes back.
-  useEffect(() => {
-    if (!hasMenu) setOpen(false)
-  }, [hasMenu])
+  if (!hasMenu && open) setOpen(false)
   const slot = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
     if (hasMenu || !menuFocused) return
@@ -72,6 +70,7 @@ export function ViewerTitle({
     // Whether the menu holds focus, so that if it goes away with focus (which leaves it on the page) it says so.
     <div
       ref={slot}
+      role="presentation"
       className="pi-viewer-title-slot pj:contents"
       onFocus={() => {
         if (!menuFocused) onMenuFocus?.(true)

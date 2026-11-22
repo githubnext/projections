@@ -78,8 +78,7 @@ export function SweepGrid({
       (failure: unknown) => !abort.signal.aborted && setError(failure instanceof Error ? failure.message : String(failure)),
     )
     return () => abort.abort()
-    // Only on first load: later sweeps start from the button.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on first load: later sweeps start from the button.
   }, [api])
   const running = sweep?.status === 'running'
   useEffect(() => {

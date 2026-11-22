@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useState} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import type {ReactNode} from 'react'
 import {ScopedRoot, cn} from '@githubnext/projections-host/ui/components'
 import {CommandPalette} from './palette.js'
@@ -96,11 +96,13 @@ export function Shell({
     [onPanelTab, update],
   )
 
+  // Only a new request opens the panel.
+  const shownRequest = useRef<number>(undefined)
   useEffect(() => {
-    if (panelRequest) showPanel(panelRequest.tab)
-    // Only a new request opens the panel.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [panelRequest?.at])
+    if (!panelRequest || panelRequest.at === shownRequest.current) return
+    shownRequest.current = panelRequest.at
+    showPanel(panelRequest.tab)
+  }, [panelRequest, showPanel])
 
   const secondaryName = secondary ? `${layout.secondary ? 'Hide' : 'Show'} ${secondary.label.toLowerCase()} panel` : ''
   const all = useMemo<Command[]>(

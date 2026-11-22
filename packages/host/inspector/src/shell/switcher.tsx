@@ -163,7 +163,7 @@ export function SwitcherPopup({
   id,
   items,
   current,
-  trigger,
+  trigger: triggerRef,
   colorMode,
   onClose,
   onChoose,
@@ -197,21 +197,23 @@ export function SwitcherPopup({
   const [anchor, setAnchor] = useState<{top: number; center: number; start: number} | undefined>()
 
   useLayoutEffect(() => {
-    const box = trigger.current?.getBoundingClientRect()
+    const box = triggerRef.current?.getBoundingClientRect()
     if (box) setAnchor({top: box.bottom + 4, center: box.left + box.width / 2, start: box.left})
-  }, [trigger])
+  }, [triggerRef])
   useEffect(() => {
     const returnFocus = document.activeElement as HTMLElement | null
-    const button = trigger.current
+    const button = triggerRef.current
     requestAnimationFrame(() => input.current?.focus())
     return () => {
       // Back to where focus was: the trigger, or wherever ⌘P was pressed.
       ;(returnFocus && returnFocus !== document.body ? returnFocus : button)?.focus?.()
     }
-  }, [trigger])
+  }, [triggerRef])
   // Escape closes it wherever focus is (focus moves into the search a frame after it opens; a tap may leave it outside).
   const close = useRef(onClose)
-  close.current = onClose
+  useLayoutEffect(() => {
+    close.current = onClose
+  })
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return
@@ -232,6 +234,7 @@ export function SwitcherPopup({
   return (
     <ScopedRoot colorMode={colorMode} className="pi-switcher-layer">
       <div
+        role="presentation"
         className={cn('pj:fixed pj:inset-0 pj:z-[90]', sheet && 'pj:bg-black/40')}
         onMouseDown={event => {
           if (event.target === event.currentTarget) onClose()
@@ -248,24 +251,6 @@ export function SwitcherPopup({
             sheet ? 'pj:inset-x-2 pj:top-11 pj:max-h-[min(32rem,75dvh)]' : 'pj:max-h-[min(28rem,70dvh)]',
           )}
           style={sheet ? undefined : {top: anchor?.top ?? 44, left: left ?? `calc(50% - ${width / 2}px)`, width}}
-          onKeyDown={event => {
-            if (event.key === 'Escape') {
-              event.preventDefault()
-              event.stopPropagation()
-              onClose()
-            } else if (event.key === 'ArrowDown') {
-              event.preventDefault()
-              setIndex(stepOption(active, 1, count))
-            } else if (event.key === 'ArrowUp') {
-              event.preventDefault()
-              setIndex(stepOption(active, -1, count))
-            } else if (event.key === 'Enter') {
-              event.preventDefault()
-              const item = shown[active]
-              if (item) onChoose(item.id)
-              else if (onPin && active === shown.length) onPin()
-            } else if (event.key === 'Tab') event.preventDefault()
-          }}
         >
           <div className="pj:flex pj:items-center pj:gap-2 pj:border-b pj:px-3">
             <Search aria-hidden="true" className="pj:size-4 pj:shrink-0 pj:text-muted-foreground" />
@@ -283,22 +268,39 @@ export function SwitcherPopup({
                 setQuery(event.target.value)
                 setIndex(0)
               }}
+              onKeyDown={event => {
+                if (event.key === 'Escape') {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  onClose()
+                } else if (event.key === 'ArrowDown') {
+                  event.preventDefault()
+                  setIndex(stepOption(active, 1, count))
+                } else if (event.key === 'ArrowUp') {
+                  event.preventDefault()
+                  setIndex(stepOption(active, -1, count))
+                } else if (event.key === 'Enter') {
+                  event.preventDefault()
+                  const item = shown[active]
+                  if (item) onChoose(item.id)
+                  else if (onPin && active === shown.length) onPin()
+                } else if (event.key === 'Tab') event.preventDefault()
+              }}
               autoComplete="off"
               spellCheck={false}
               data-focus-ring="none"
               className="pj:h-10 pj:w-full pj:bg-transparent pj:text-sm pj:placeholder:text-muted-foreground pj:focus:outline-hidden"
             />
           </div>
-          <ul id={`${id}-list`} role="listbox" aria-label="Projections" className="pj:min-h-0 pj:flex-1 pj:overflow-y-auto pj:p-1">
+          <div id={`${id}-list`} role="listbox" aria-label="Projections" className="pj:min-h-0 pj:flex-1 pj:overflow-y-auto pj:p-1">
             {!shown.length && (
-              <li role="presentation" className="pj:px-3 pj:py-6 pj:text-center pj:text-sm pj:text-muted-foreground">
-                No matching projection.
-              </li>
+              <div className="pj:px-3 pj:py-6 pj:text-center pj:text-sm pj:text-muted-foreground">No matching projection.</div>
             )}
             {shown.map((item, position) => {
               const isCurrent = item.id === current
               return (
-                <li
+                // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus -- options are chosen with the keys through the search field, which keeps focus (`aria-activedescendant`), and with a click.
+                <div
                   key={item.id}
                   id={`${id}-option-${position}`}
                   role="option"
@@ -322,7 +324,7 @@ export function SwitcherPopup({
                     <code className="pj:truncate pj:font-mono pj:text-[11px] pj:text-muted-foreground">{item.id}</code>
                   </span>
                   <StatusDot status={item.status} label />
-                </li>
+                </div>
               )
             })}
             {onPin && (
@@ -333,7 +335,7 @@ export function SwitcherPopup({
                 onPin={onPin}
               />
             )}
-          </ul>
+          </div>
         </div>
       </div>
     </ScopedRoot>
@@ -344,8 +346,9 @@ export function SwitcherPopup({
 function PinOption({id, active, onHover, onPin}: {id: string; active: boolean; onHover: () => void; onPin: () => void}) {
   return (
     <>
-      <li role="separator" aria-hidden="true" className="pj:-mx-1 pj:my-1 pj:h-px pj:bg-border" />
-      <li
+      <div role="separator" aria-hidden="true" className="pj:-mx-1 pj:my-1 pj:h-px pj:bg-border" />
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus -- options are chosen with the keys through the search field, which keeps focus (`aria-activedescendant`), and with a click. */}
+      <div
         id={id}
         role="option"
         aria-selected={active}
@@ -359,7 +362,7 @@ function PinOption({id, active, onHover, onPin}: {id: string; active: boolean; o
       >
         <PanelLeft aria-hidden="true" className="pj:size-4 pj:shrink-0 pj:text-muted-foreground" />
         Pin projections pane
-      </li>
+      </div>
     </>
   )
 }

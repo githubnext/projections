@@ -3,6 +3,7 @@ import type {InspectorDefinitionList, InspectorJob} from '../types.js'
 import {errorText} from './errors.js'
 import {extractedKey, jobOutcome, rememberExtracted} from './extraction-state.js'
 import type {RowState} from './revisions.js'
+import {sleep} from '../sleep.js'
 
 /** Jobs whose raw output stays available. */
 const maxJobs = 20
@@ -59,19 +60,6 @@ interface Run {
   cancel: boolean
 }
 
-/** Resolves after `ms`, or as soon as `signal` aborts, leaving no timer behind. */
-function sleep(ms: number, signal: AbortSignal) {
-  return new Promise<void>(resolve => {
-    const done = () => {
-      clearTimeout(timer)
-      signal.removeEventListener('abort', done)
-      resolve()
-    }
-    const timer = setTimeout(done, ms)
-    signal.addEventListener('abort', done, {once: true})
-  })
-}
-
 /**
  * Extractions per projection and revision, without React: queued, run one at a time on the runner (it allows one
  * active job) and polled to completion, with the jobs' raw output and a cache of recent ones to present again under
@@ -96,7 +84,7 @@ export class ExtractionCoordinator {
   // again instead of extracting again. They go when they would be extracted again: on a change to what they read, or
   // when someone asks.
   readonly #extracted = new Map<string, RowState>()
-  readonly #events: ExtractionEvents
+  #events: ExtractionEvents
   #connection: Connection | undefined
   #run: Run | undefined
 
@@ -104,6 +92,11 @@ export class ExtractionCoordinator {
     this.#events = events
     this.#snapshot = {rows, jobs: [], queue: [], active: undefined}
     rememberExtracted(this.#extracted, rows)
+  }
+
+  /** Reads `events` from now on, in place of those it was given: the Inspector's state as it last rendered. */
+  listen(events: ExtractionEvents) {
+    this.#events = events
   }
 
   readonly subscribe = (listener: () => void) => {

@@ -32,3 +32,8 @@ export function writeJson(key: string, value: unknown) {
     /* storage may be unavailable */
   }
 }
+
+/** The recent pairs with `pair` first, as remembered: the five most recent, each once. */
+export function withRecent(recent: readonly Marks[] | undefined, pair: Marks): Marks[] {
+  return [pair, ...(recent ?? []).filter(item => item.a !== pair.a || item.b !== pair.b)].slice(0, 5)
+}

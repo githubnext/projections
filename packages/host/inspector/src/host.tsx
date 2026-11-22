@@ -1,4 +1,4 @@
-import {createContext, useContext, useSyncExternalStore} from 'react'
+import {createContext, use, useSyncExternalStore} from 'react'
 import type {ReactNode} from 'react'
 
 /**
@@ -56,15 +56,17 @@ export interface InspectorHost {
   revisionsNamed?: boolean
 }
 
-const HostContext = createContext<InspectorHost>({})
+/** The web's: no embedding host. */
+const webHost: InspectorHost = {}
+const HostContext = createContext<InspectorHost>(webHost)
 
 /** Supplies the embedding host's capabilities to the Inspector beneath it; `undefined` keeps its web behavior. */
 export function InspectorHostProvider({host, children}: {host: InspectorHost | undefined; children: ReactNode}) {
-  return <HostContext.Provider value={host ?? {}}>{children}</HostContext.Provider>
+  return <HostContext value={host ?? webHost}>{children}</HostContext>
 }
 
 export function useInspectorHost(): InspectorHost {
-  return useContext(HostContext)
+  return use(HostContext)
 }
 
 const noTheme = {get: () => undefined, subscribe: () => () => {}}

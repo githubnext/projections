@@ -1,4 +1,4 @@
-import {useEffect, useId, useState} from 'react'
+import {useId, useState} from 'react'
 import type {ReactNode} from 'react'
 import {Input, Label, cn} from '@githubnext/projections-host/ui/components'
 import {LoaderCircle} from 'lucide-react'
@@ -29,10 +29,13 @@ export function RefField({
   const [text, setText] = useState(value ? shown(value) : '')
   const [error, setError] = useState<string>()
   const [checking, setChecking] = useState(false)
-  useEffect(() => {
+  // A new value from outside replaces what is typed.
+  const [seen, setSeen] = useState(value)
+  if (seen !== value) {
+    setSeen(value)
     setText(value ? shown(value) : '')
     setError(undefined)
-  }, [value])
+  }
   return (
     <form
       className="pi-ref pj:flex pj:min-w-0 pj:flex-1 pj:flex-col pj:gap-0.5"
@@ -120,7 +123,7 @@ export function ChoiceButton({
       </span>
       <span className="pj:flex pj:min-w-0 pj:flex-1 pj:flex-col">
         <span className="pi-x-title pj:truncate pj:font-medium">{label}</span>
-        {detail && <span className="pi-x-detail pj:truncate pj:text-[11px] pj:text-muted-foreground">{detail}</span>}
+        {detail ? <span className="pi-x-detail pj:truncate pj:text-[11px] pj:text-muted-foreground">{detail}</span> : null}
       </span>
     </button>
   )

@@ -8,7 +8,6 @@ import type {DefinitionWriter, PartName, PartOverrides, PartRow} from '../parts/
 import type {InspectorDefinitionList, InspectorPolicy} from '../types.js'
 import {partPath} from './definitions.js'
 import {comparatorOptions, dataFields, extractorOptions, rendererOptions} from './part-options.js'
-import type {Marks} from './pairs.js'
 import {workingTree} from './revisions.js'
 import type {Rows} from './use-extractions.js'
 
@@ -30,8 +29,6 @@ export function useParts({
   pair,
   policy,
   statusOf,
-  rows,
-  marks,
   usesOwnRenderer,
   rendererPolicy,
 }: {
@@ -48,8 +45,6 @@ export function useParts({
   pair: ComparisonPair
   policy: InspectorPolicy
   statusOf: (id: string) => PartRow['status']
-  rows: Rows
-  marks: Record<string, Marks>
   usesOwnRenderer: boolean
   rendererPolicy: InspectorPolicy
 }) {
@@ -163,8 +158,6 @@ export function useParts({
         onReset: () => setPart('renderer', 'own'),
       },
     ]
-    // statusOf reads rows and marks, which change with every extraction.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     ownDefinition,
     allDefinitions,
@@ -175,8 +168,8 @@ export function useParts({
     overrides,
     projection,
     policy,
-    rows,
-    marks,
+    statusOf,
+    setOverrides,
     setPart,
     usesOwnRenderer,
     rendererPolicy,

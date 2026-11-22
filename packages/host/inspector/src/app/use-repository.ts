@@ -33,11 +33,15 @@ export function useRepository({
   // This repository's identity in this browser (`repositoryKey`), for remembering its pairs and tip.
   const [repoKey, setRepoKey] = useState('')
 
-  // Startup: definitions at the working tree, and recent revisions.
+  // Startup: definitions at the working tree, and recent revisions. Another runner loads again.
+  const [started, setStarted] = useState({api, openedInitially, openedDefinitionRevision})
+  if (started.api !== api || started.openedInitially !== openedInitially || started.openedDefinitionRevision !== openedDefinitionRevision) {
+    setStarted({api, openedInitially, openedDefinitionRevision})
+    if (api) setLoading(true)
+  }
   useEffect(() => {
     if (!api) return
     const abort = new AbortController()
-    setLoading(true)
     Promise.all([api.definitions(openedDefinitionRevision ?? workingTree, abort.signal), api.revisions(abort.signal, 30)])
       .then(([list, revisionList]) => {
         setDefinitions(list)

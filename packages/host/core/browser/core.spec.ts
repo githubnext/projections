@@ -1,5 +1,4 @@
-import {test, expect} from '@playwright/test'
-import type {Page} from '@playwright/test'
+import {test, expect, type Page} from '@playwright/test'
 import {story} from './harness.js'
 
 const pane = (page: Page, side: 'before' | 'after') => page.locator(`[data-side="${side}"] iframe.ph-frame`).contentFrame()

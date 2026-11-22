@@ -1,7 +1,12 @@
-import {useLayoutEffect, useState} from 'react'
-import type {RefObject} from 'react'
-import {summaryCounts, summaryDeltas, summaryItems, summarySentence} from '@githubnext/projections-renderer-sdk/presentation'
-import type {SummaryCount, SummaryDelta} from '@githubnext/projections-renderer-sdk/presentation'
+import {useLayoutEffect, useState, type RefObject} from 'react'
+import {
+  summaryCounts,
+  summaryDeltas,
+  summaryItems,
+  summarySentence,
+  type SummaryCount,
+  type SummaryDelta,
+} from '@githubnext/projections-renderer-sdk/presentation'
 import type {SummaryFactTone, SummaryItem, SummaryNoun} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Row, ViewSubject} from './model.js'
 

@@ -1,5 +1,4 @@
-import {describeChange, figuresSentence, rowStatusCounts, variedWithin} from '@githubnext/projections-host'
-import type {Row} from '@githubnext/projections-host'
+import {describeChange, figuresSentence, rowStatusCounts, variedWithin, type Row} from '@githubnext/projections-host'
 import {Prose} from '../prose.js'
 import {VscBadge} from '../elements.js'
 import type {VscodeBuiltInViewProps} from './props.js'

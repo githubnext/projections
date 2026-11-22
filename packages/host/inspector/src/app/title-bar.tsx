@@ -1,7 +1,6 @@
 import type {RefObject} from 'react'
 import {shortcutLabel} from '../shell/controls.js'
-import {ProjectionSwitcher} from '../shell/switcher.js'
-import type {SwitcherItem} from '../shell/switcher.js'
+import {ProjectionSwitcher, type SwitcherItem} from '../shell/switcher.js'
 import type {ThemePreference} from '../shell/theme.js'
 import type {InspectorRevision} from '../types.js'
 import {inspectorActivity} from './activity.js'

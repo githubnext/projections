@@ -1,5 +1,4 @@
-import {test, expect} from '@playwright/test'
-import type {Page} from '@playwright/test'
+import {test, expect, type Page} from '@playwright/test'
 import {expectNoFlash, frameReport, resetCreated, watchFrames} from './flash-check.js'
 import {chooseMode, explorer, pairSelect} from './harness.js'
 

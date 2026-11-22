@@ -3,8 +3,7 @@
 // that shows the viewer in its own browser pane. It is the input of the app theme (app-theme.ts), which derives the
 // rest, so it is a small, stable contract rather than the token set.
 
-import type {ColorMode, ThemeTokenName} from '@githubnext/projections-renderer-sdk/protocol'
-import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
+import {type ColorMode, type ThemeTokenName, rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
 import {appThemeTokens, fontList} from './app-theme.js'
 import {parseColor} from './color.js'
 

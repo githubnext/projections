@@ -1,9 +1,15 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {customComparator, type ExtractionDocument, type ProjectionEngine} from '@githubnext/projections-schemas'
-import {ComparisonError, computeComparison} from './compare.js'
-import type {ComparatorSource, ComputedComparison, RulesRuntime} from './compare.js'
-import {builtinRendererDocuments, compatibleRenderers, resolveRenderer} from './registry.js'
-import type {RendererDocuments, RendererEntry, RendererResolution, WithheldRenderer} from './registry.js'
+import {ComparisonError, computeComparison, type ComparatorSource, type ComputedComparison, type RulesRuntime} from './compare.js'
+import {
+  builtinRendererDocuments,
+  compatibleRenderers,
+  resolveRenderer,
+  type RendererDocuments,
+  type RendererEntry,
+  type RendererResolution,
+  type WithheldRenderer,
+} from './registry.js'
 import type {ViewSubject} from './model.js'
 import type {PresentationDefaults} from './projection.js'
 

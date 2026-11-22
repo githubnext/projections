@@ -13,14 +13,13 @@ import {
   VariedToggle,
   ZoomControls,
   handlePlaybackKey,
+  type PairForm,
 } from '../blocks.js'
-import type {PairForm} from '../blocks.js'
 import {toolbarGrid} from '../layout/grid.js'
 import {ScopeSwitch} from '../scope-switch.js'
 import {useToolbarLayout} from '../layout/use-toolbar-layout.js'
 import type {ToolbarLayout} from '../layout/steps.js'
-import {overflow, toolbarContent} from './toolbar-content.js'
-import type {ViewToolbarProps} from './toolbar-content.js'
+import {overflow, toolbarContent, type ViewToolbarProps} from './toolbar-content.js'
 
 /** The pair picker's form as the default UI names it (`PairForm`): the layout's `compact` is its `short`. */
 const pairForms: Record<ToolbarLayout['pickers'], PairForm> = {full: 'full', compact: 'short', merged: 'merged'}

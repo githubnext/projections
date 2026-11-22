@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useState} from 'react'
-import type {RefObject} from 'react'
+import {useCallback, useEffect, useState, type RefObject} from 'react'
 
 /** What `useFullscreen` returns: whether the target is full screen and how, and `toggle` to enter or leave it. */
 export interface FullscreenState {

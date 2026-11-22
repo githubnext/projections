@@ -1,8 +1,6 @@
-import {InspectorRequestError} from './contract.js'
-import type {InspectorChangeChannel, InspectorTransport} from './contract.js'
+import {InspectorRequestError, type InspectorChangeChannel, type InspectorTransport} from './contract.js'
 import {requestErrorMessage} from './errors.js'
-import {isApiPath, transportTag} from './messages.js'
-import type {TransportMessage, TransportReply} from './messages.js'
+import {isApiPath, transportTag, type TransportMessage, type TransportReply} from './messages.js'
 
 /**
  * A transport over a message channel, such as an editor webview's `postMessage` to its extension. The other end (a

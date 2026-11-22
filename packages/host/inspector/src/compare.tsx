@@ -1,5 +1,4 @@
-import {useEffect, useId, useState} from 'react'
-import type {ReactNode} from 'react'
+import {useEffect, useId, useState, type ReactNode} from 'react'
 import {Input, Label, cn} from '@githubnext/projections-host/ui/components'
 import {LoaderCircle} from 'lucide-react'
 

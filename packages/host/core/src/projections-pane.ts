@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useState} from 'react'
-import type {RefObject} from 'react'
+import {useCallback, useEffect, useState, type RefObject} from 'react'
 
 /** The narrowest a page offers the projections pane at, CSS px: narrower, a pinned pane would crush the stage. */
 export const paneMinWidth = 900

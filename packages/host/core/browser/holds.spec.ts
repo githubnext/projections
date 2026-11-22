@@ -1,5 +1,4 @@
-import {test, expect} from '@playwright/test'
-import type {Locator, Page} from '@playwright/test'
+import {test, expect, type Locator, type Page} from '@playwright/test'
 import {closeMenus, explorer, inToolbar, openSettingsSubmenu} from './harness.js'
 
 const view = (page: Page) => page.locator('.ph')

@@ -1,7 +1,6 @@
 import {useEffect, useId, useLayoutEffect, useRef, useState} from 'react'
 import {ChevronDown} from 'lucide-react'
-import {SwitcherPopup} from '../shell/switcher.js'
-import type {SwitcherItem} from '../shell/switcher.js'
+import {SwitcherPopup, type SwitcherItem} from '../shell/switcher.js'
 
 /**
  * The viewer header's title, which is also the menu of the repository's projections: choosing one shows it in this

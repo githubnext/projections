@@ -1,7 +1,6 @@
 import {useState} from 'react'
 import type {ProjectionController} from './projection/types.js'
-import {offeredViews, recoveryView, shownView} from './view-model.js'
-import type {ProjectionFeatures, ViewKind} from './view-model.js'
+import {offeredViews, recoveryView, shownView, type ProjectionFeatures, type ViewKind} from './view-model.js'
 
 /** The views a host offers, the one it shows, and how to choose another (`useViewChoice`). */
 export interface ViewChoice {

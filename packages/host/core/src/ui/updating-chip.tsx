@@ -1,6 +1,5 @@
 import {LoaderCircle} from 'lucide-react'
-import {useLayoutEffect, useRef} from 'react'
-import type {CSSProperties} from 'react'
+import {useLayoutEffect, useRef, type CSSProperties} from 'react'
 import type {ProjectionController} from '../projection.js'
 import {utilityInset, utilitySide} from '../stage/utility.js'
 import {useWholePixels} from '../stage/whole-pixels.js'

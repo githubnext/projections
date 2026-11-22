@@ -3,8 +3,7 @@
 // the options, so the default UI, the VS Code UI and custom UIs behave alike unless one chooses otherwise.
 import type {ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
 import type {RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
-import {comparisonModes} from './modes.js'
-import type {ComparisonMode} from './modes.js'
+import {comparisonModes, type ComparisonMode} from './modes.js'
 import type {ProjectionController} from './projection/types.js'
 import {nothingHiddenTitle} from './scope.js'
 import {zoomControlGroup} from './settings.js'

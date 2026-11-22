@@ -1,6 +1,5 @@
 import type {Diagnostic, ExtractionDocument} from '@githubnext/projections-schemas'
-import {formatRevisionLabel, revisionAge} from '@githubnext/projections-host'
-import type {ExtractionChoice} from '@githubnext/projections-host'
+import {formatRevisionLabel, revisionAge, type ExtractionChoice} from '@githubnext/projections-host'
 import type {InspectorResultIdentity} from '../control.js'
 import type {InspectorRevision} from '../types.js'
 

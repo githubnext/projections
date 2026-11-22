@@ -1,5 +1,4 @@
-import {useRef, useState} from 'react'
-import type {KeyboardEventHandler, RefObject} from 'react'
+import {useRef, useState, type KeyboardEventHandler, type RefObject} from 'react'
 import type {ProjectionController} from '../../projection.js'
 import type {ComparisonMode} from '../../modes.js'
 import {
@@ -19,8 +18,10 @@ import {
   featureOn,
   hasSettings,
   useViewFullscreen,
+  type ProjectionFeatures,
+  type ShowAsOptions,
+  type ViewKind,
 } from '../blocks.js'
-import type {ProjectionFeatures, ShowAsOptions, ViewKind} from '../blocks.js'
 import {useToolbarLayout, type ToolbarAction} from '../toolbar-layout.js'
 import {cn} from '../lib/utils.js'
 import type {ProjectionViewProps} from './props.js'

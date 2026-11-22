@@ -1,8 +1,7 @@
 import type {ExtractionDocument} from '@githubnext/projections-schemas'
 import type {InspectorDefinitionList, InspectorJob} from '../types.js'
 import type {InspectorAppProps, InspectorOpenedOn} from './props.js'
-import {workingTree} from './revisions.js'
-import type {RowState} from './revisions.js'
+import {workingTree, type RowState} from './revisions.js'
 
 /** How many extractions are kept to present again (`extracted`), across projections, revisions and definitions. */
 const maxExtracted = 24

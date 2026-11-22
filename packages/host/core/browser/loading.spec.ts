@@ -1,5 +1,4 @@
-import {test, expect} from '@playwright/test'
-import type {Locator, Page} from '@playwright/test'
+import {test, expect, type Locator, type Page} from '@playwright/test'
 import {explorer} from './harness.js'
 
 // Loading states are centered in the box they stand in for and fill it, so nothing moves when the content arrives.

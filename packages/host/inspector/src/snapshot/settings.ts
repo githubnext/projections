@@ -1,9 +1,7 @@
 import type {ComparisonMode} from '@githubnext/projections-host'
 import type {RendererFocus} from '@githubnext/projections-renderer-sdk/protocol'
-import {snapshotFrameSettings} from './frame-settings.js'
-import type {SnapshotFrameSettings} from './frame-settings.js'
-import {snapshotPlaybackSettings} from './playback-settings.js'
-import type {SnapshotPlaybackSettings} from './playback-settings.js'
+import {snapshotFrameSettings, type SnapshotFrameSettings} from './frame-settings.js'
+import {snapshotPlaybackSettings, type SnapshotPlaybackSettings} from './playback-settings.js'
 
 /**
  * `?view=snapshot`: the chrome-free page `projections snapshot` captures. It

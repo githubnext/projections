@@ -1,5 +1,4 @@
-import {useRef} from 'react'
-import type {CSSProperties} from 'react'
+import {useRef, type CSSProperties} from 'react'
 import type {ProjectionController} from '../../projection.js'
 import {ProjectionLegend} from '../../stage/legend.js'
 import {utilitySide} from '../../stage/utility.js'

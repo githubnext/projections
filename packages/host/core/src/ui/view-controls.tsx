@@ -1,5 +1,4 @@
-import {useContext, useId, useRef, useState} from 'react'
-import type {KeyboardEvent, MouseEvent} from 'react'
+import {useContext, useId, useRef, useState, type KeyboardEvent, type MouseEvent} from 'react'
 import {
   Activity,
   Sparkle,
@@ -14,8 +13,7 @@ import {
   Table2,
   X,
 } from 'lucide-react'
-import {comparisonModes} from '../modes.js'
-import type {ComparisonMode} from '../modes.js'
+import {comparisonModes, type ComparisonMode} from '../modes.js'
 import {zoomControlGroup} from '../settings.js'
 import type {ProjectionController} from '../projection.js'
 import {RendererControl} from './controls.js'

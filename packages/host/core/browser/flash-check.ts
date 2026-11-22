@@ -1,5 +1,4 @@
-import {expect, test} from '@playwright/test'
-import type {Page} from '@playwright/test'
+import {expect, test, type Page} from '@playwright/test'
 
 /**
  * Watches every renderer frame on every animation frame: a frame that is

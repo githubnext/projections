@@ -1,6 +1,5 @@
 import type {Row} from '../model.js'
-import {changeParts} from './change.js'
-import type {ChangePart} from './change.js'
+import {changeParts, type ChangePart} from './change.js'
 
 /**
  * A relationship of the item a card is about, or an endpoint of the relationship it is about. `rowId` is the row to

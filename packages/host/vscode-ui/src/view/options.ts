@@ -1,6 +1,5 @@
 import type {ComparisonMode, ProjectionOptions, ProjectionSelection} from '@githubnext/projections-host'
-import {offeredModes} from '../blocks.js'
-import type {VscodeProjectionFeatures} from '../blocks.js'
+import {offeredModes, type VscodeProjectionFeatures} from '../blocks.js'
 import type {VscodeTheme} from '../theme/dom.js'
 import type {VscodeProjectionViewProps} from './props.js'
 

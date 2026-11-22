@@ -1,8 +1,6 @@
-import {useId, useRef, useState} from 'react'
+import {useId, useRef, useState, type RefObject} from 'react'
 import {flushSync} from 'react-dom'
-import type {RefObject} from 'react'
-import {comparisonModes, rovingIndex, zoomControlGroup} from '@githubnext/projections-host'
-import type {ComparisonMode, ProjectionController} from '@githubnext/projections-host'
+import {comparisonModes, rovingIndex, zoomControlGroup, type ComparisonMode, type ProjectionController} from '@githubnext/projections-host'
 import type {VscodeToolbarButton} from '@vscode-elements/elements/dist/vscode-toolbar-button/vscode-toolbar-button.js'
 import {VscodeRendererControl} from './controls.js'
 import {ActionButton, VscTabHeader, VscTabs, VscTextfield, focusControl} from './elements.js'
@@ -10,8 +8,7 @@ import {Menu} from './overlay/menu.js'
 import {modeCodicons, uiCodicons} from './codicons.js'
 import type {ToolbarLayout} from './layout/steps.js'
 import type {ViewKind} from './features.js'
-import {ToolbarPopover} from './toolbar-popover.js'
-import type {PopoverControl} from './toolbar-popover.js'
+import {ToolbarPopover, type PopoverControl} from './toolbar-popover.js'
 
 /** Each mode's codicon name (`data-icon`): none is a playback glyph. */
 export const modeIconNames: Readonly<Record<ComparisonMode, string>> = modeCodicons

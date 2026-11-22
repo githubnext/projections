@@ -1,5 +1,4 @@
-import {useRef} from 'react'
-import type {CSSProperties, ReactNode} from 'react'
+import {useRef, type CSSProperties, type ReactNode} from 'react'
 import type {Side} from '../modes.js'
 import {paneGeometry} from './arrangement.js'
 import {ChipText} from './chip-text.js'

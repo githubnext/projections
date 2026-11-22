@@ -1,6 +1,5 @@
 import type {InspectorHandle, InspectorSummary} from '../control.js'
-import {echoes, pairKey, unapplied} from './page.js'
-import type {Applied, ViewerPage} from './page.js'
+import {echoes, pairKey, unapplied, type Applied, type ViewerPage} from './page.js'
 import type {ViewerState} from './state.js'
 
 type View = NonNullable<ReturnType<InspectorHandle['view']>>

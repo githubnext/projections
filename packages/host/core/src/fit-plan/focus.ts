@@ -1,5 +1,4 @@
-import {useLayoutEffect, useRef} from 'react'
-import type {RefObject} from 'react'
+import {useLayoutEffect, useRef, type RefObject} from 'react'
 
 /**
  * Keeps focus on a bar's control that changes form: it tracks the focused control's `data-focus-id`, and when that

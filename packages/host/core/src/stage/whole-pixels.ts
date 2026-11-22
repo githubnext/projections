@@ -1,5 +1,4 @@
-import {useLayoutEffect} from 'react'
-import type {RefObject} from 'react'
+import {useLayoutEffect, type RefObject} from 'react'
 
 /**
  * Keeps an element the stage floats over its frames (the utility bar, a pane chip) on whole pixels: a stage that rests

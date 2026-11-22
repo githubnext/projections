@@ -1,8 +1,7 @@
 import type {ProjectionController} from '@githubnext/projections-host'
 import {Prose} from '../prose.js'
 import {Notice} from '../notice.js'
-import {ComparatorLine, rendererLabel} from '../blocks.js'
-import type {ViewKind} from '../blocks.js'
+import {ComparatorLine, rendererLabel, type ViewKind} from '../blocks.js'
 import type {VscodeProjectionViewProps} from './props.js'
 
 /**

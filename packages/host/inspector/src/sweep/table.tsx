@@ -12,8 +12,7 @@ import {
 import {CircleAlert, ShieldAlert} from 'lucide-react'
 import type {Sweep, SweepCell, SweepChange, SweepProjection} from '../types.js'
 import {cellHref, cellSummary, changeLabel, columnStats, statsText} from './stats.js'
-import {ChangedCell} from './thumbnails.js'
-import type {ThumbnailQueue} from './thumbnails.js'
+import {ChangedCell, type ThumbnailQueue} from './thumbnails.js'
 
 /** A projection's adoption state in the grid: a candidate to adopt, adopted already, or defined by hand. */
 export interface Adoptable {

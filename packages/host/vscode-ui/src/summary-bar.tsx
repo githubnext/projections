@@ -1,5 +1,4 @@
-import type {CSSProperties} from 'react'
-import {useEffect, useReducer, useRef, useState} from 'react'
+import {type CSSProperties, useEffect, useReducer, useRef, useState} from 'react'
 import {
   figuresSentence,
   iconMaskStyle,
@@ -15,13 +14,14 @@ import {
   useSummaryFit,
   scopeHiddenShort,
   scopeHiddenText,
+  type ProjectionController,
+  type SummaryDelta,
+  type SummaryFigure,
 } from '@githubnext/projections-host'
-import type {ProjectionController, SummaryDelta, SummaryFigure} from '@githubnext/projections-host'
 import {uiCodicons} from './codicons.js'
 import {regeneratedLabel} from './view-controls.js'
 import {Overlay} from './overlay/overlay.js'
-import {runningText} from './running.js'
-import type {Running} from './running.js'
+import {runningText, type Running} from './running.js'
 
 /**
  * A fact's icon: its theme icon token drawn in the text color, a badge (`badgeIconNames`: a change kind, a planned

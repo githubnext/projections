@@ -1,7 +1,5 @@
-import {useState} from 'react'
-import type {ReactNode} from 'react'
-import {generatedForm} from '@githubnext/projections-host'
-import type {GeneratedField, VariedField} from '@githubnext/projections-host'
+import {useState, type ReactNode} from 'react'
+import {generatedForm, type GeneratedField, type VariedField} from '@githubnext/projections-host'
 import {uiCodicons} from './codicons.js'
 import {Prose} from './prose.js'
 

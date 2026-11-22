@@ -1,5 +1,4 @@
-import {useLayoutEffect, useRef} from 'react'
-import type {ReactNode} from 'react'
+import {useLayoutEffect, useRef, type ReactNode} from 'react'
 import {X} from 'lucide-react'
 import {Button} from './components/button.js'
 import {cn} from './lib/utils.js'

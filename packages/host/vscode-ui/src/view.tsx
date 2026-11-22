@@ -1,7 +1,12 @@
-import {useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react'
-import type {CSSProperties} from 'react'
-import {useFullscreen, useProjection, useViewChoice, viewControls} from '@githubnext/projections-host'
-import type {ProjectionController, ProjectionSelection} from '@githubnext/projections-host'
+import {useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties} from 'react'
+import {
+  useFullscreen,
+  useProjection,
+  useViewChoice,
+  viewControls,
+  type ProjectionController,
+  type ProjectionSelection,
+} from '@githubnext/projections-host'
 import {OverlayLayer} from './overlay/overlay.js'
 import {StageNoticeSlot} from './stage-notice.js'
 import {ScopeNotice} from './scope-switch.js'

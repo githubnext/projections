@@ -1,5 +1,4 @@
-import {useEffect, useRef, useState} from 'react'
-import type {CSSProperties, ReactNode} from 'react'
+import {useEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react'
 
 /** The height a renderer frame starts at before the renderer requests its own (`RendererFrame`). */
 export const loadingStageHeight = 480

@@ -1,5 +1,12 @@
-import {useCallback, useEffect, useRef, useState} from 'react'
-import type {KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode} from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react'
 import {Badge, cn} from '@githubnext/projections-host/ui/components'
 import {X} from 'lucide-react'
 import {iconButton, shortcutLabel} from './controls.js'

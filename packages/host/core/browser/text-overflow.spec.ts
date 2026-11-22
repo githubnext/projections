@@ -1,5 +1,4 @@
-import {test, expect} from '@playwright/test'
-import type {Page} from '@playwright/test'
+import {test, expect, type Page} from '@playwright/test'
 import {explorer, openSettings} from './harness.js'
 
 const overflow = (page: Page) => page.evaluate(() => document.scrollingElement!.scrollWidth - innerWidth)

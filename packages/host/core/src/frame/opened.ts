@@ -1,5 +1,4 @@
-import {openedDocumentWorked, pageRendererDocuments} from './documents.js'
-import type {RendererDocumentOpener} from './documents.js'
+import {openedDocumentWorked, pageRendererDocuments, type RendererDocumentOpener} from './documents.js'
 import type {FrameLifecycle} from './lifecycle.js'
 
 /**

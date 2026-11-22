@@ -4,8 +4,7 @@ import type {Definition} from '@githubnext/projections-schemas'
 import {Copy, RotateCcw, Save} from 'lucide-react'
 import {copyText, useInspectorHost} from '../host.js'
 import {lineDiff} from './line-diff.js'
-import {changedParts} from './model.js'
-import type {DefinitionWriter} from './model.js'
+import {changedParts, type DefinitionWriter} from './model.js'
 
 /**
  * Save to definition: the definition file's exact edit for the overrides, written by the local runner (behind its

@@ -1,5 +1,10 @@
-import {defaultComparisonMode, defaultComparisonModes, orderComparisonModes} from '@githubnext/projections-renderer-sdk/protocol'
-import type {AnchorRect, ComparisonMode} from '@githubnext/projections-renderer-sdk/protocol'
+import {
+  defaultComparisonMode,
+  defaultComparisonModes,
+  orderComparisonModes,
+  type AnchorRect,
+  type ComparisonMode,
+} from '@githubnext/projections-renderer-sdk/protocol'
 
 /**
  * How a comparison is presented in the renderer view: `animated` (one frame

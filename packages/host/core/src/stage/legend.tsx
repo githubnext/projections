@@ -1,6 +1,5 @@
 import type {CSSProperties} from 'react'
-import {resolveThemeTokens} from '@githubnext/projections-renderer-sdk/protocol'
-import type {LegendShape} from '@githubnext/projections-renderer-sdk/protocol'
+import {resolveThemeTokens, type LegendShape} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ProjectionController} from '../projection.js'
 
 /** A change fill token (`color-added-muted`, `color-removed-highlight`) and the same-hue edge token it takes. */

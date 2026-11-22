@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react'
-import {usePrefersReducedMotion} from '@githubnext/projections-host'
-import type {LoadingStatusProps} from '@githubnext/projections-host'
+import {usePrefersReducedMotion, type LoadingStatusProps} from '@githubnext/projections-host'
 
 /** How long a load runs before anything shows, so a fast one doesn't flash. */
 export const loadingDelay = 300

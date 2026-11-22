@@ -1,5 +1,4 @@
-import {useId} from 'react'
-import type {ReactNode} from 'react'
+import {useId, type ReactNode} from 'react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,8 +14,7 @@ import {
   ZoomOut,
 } from 'lucide-react'
 import type {ControlIcon} from '@githubnext/projections-renderer-sdk/protocol'
-import {comparisonModes} from '../modes.js'
-import type {ComparisonMode} from '../modes.js'
+import {comparisonModes, type ComparisonMode} from '../modes.js'
 import type {ProjectionController} from '../projection.js'
 import {Button} from './components/button.js'
 import {Checkbox} from './components/checkbox.js'

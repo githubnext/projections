@@ -1,7 +1,6 @@
 import {CircleAlert} from 'lucide-react'
 import {ComparisonError} from '../compare.js'
-import {useComparisonPair} from '../pair.js'
-import type {ComparisonPairOptions} from '../pair.js'
+import {useComparisonPair, type ComparisonPairOptions} from '../pair.js'
 import {LoadingStatus} from '../loading.js'
 import {ProjectionView} from './view.js'
 import type {ProjectionViewProps} from './view/props.js'
@@ -11,8 +10,7 @@ import {Button} from './components/button.js'
 import {ScopedRoot} from './components/scoped-root.js'
 import {useColorMode} from './lib/color-mode.js'
 import {cn} from './lib/utils.js'
-import {PairPicker, Toolbar} from './blocks.js'
-import type {PairForm} from './blocks.js'
+import {PairPicker, Toolbar, type PairForm} from './blocks.js'
 export type {ExtractionChoice} from '../pair.js'
 
 /**

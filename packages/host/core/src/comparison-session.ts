@@ -1,8 +1,7 @@
 import {useRef, useState} from 'react'
 import type {Highlighting, PresentationDefaults} from './projection/types.js'
 import type {ComparisonMode} from './modes.js'
-import {offeredModes} from './view-model.js'
-import type {ProjectionFeatures} from './view-model.js'
+import {offeredModes, type ProjectionFeatures} from './view-model.js'
 
 /**
  * The options of `useComparisonSession`: the definition's defaults, the features (for the modes offered), and each

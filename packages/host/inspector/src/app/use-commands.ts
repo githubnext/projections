@@ -1,13 +1,11 @@
-import {useMemo} from 'react'
-import type {Dispatch, RefObject, SetStateAction} from 'react'
+import {useMemo, type Dispatch, type RefObject, type SetStateAction} from 'react'
 import type {InspectorApi} from '../client/api.js'
 import type {InspectorHost} from '../host.js'
 import type {PartRow} from '../parts/model.js'
 import {shortcutLabel} from '../shell/controls.js'
 import type {Command} from '../shell/palette.js'
 import type {InspectorDefinitionList, InspectorRevision, InspectorScenario} from '../types.js'
-import {pairLabel} from './pairs.js'
-import type {Marks} from './pairs.js'
+import {pairLabel, type Marks} from './pairs.js'
 import {revisionOption, workingTree} from './revisions.js'
 
 /** The Inspector's commands, for the command palette and keyboard shortcuts. */

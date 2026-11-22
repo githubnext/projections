@@ -1,5 +1,4 @@
-import {useEffect} from 'react'
-import type {Dispatch, SetStateAction} from 'react'
+import {useEffect, type Dispatch, type SetStateAction} from 'react'
 import type {Marks} from './pairs.js'
 import type {RowState} from './revisions.js'
 import type {Rows} from './use-extractions.js'

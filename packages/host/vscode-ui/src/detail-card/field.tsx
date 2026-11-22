@@ -1,5 +1,11 @@
-import {sameTarget} from '@githubnext/projections-host'
-import type {FieldChange, ProjectionController, ProjectionTarget, Row, TargetAnnotation} from '@githubnext/projections-host'
+import {
+  sameTarget,
+  type FieldChange,
+  type ProjectionController,
+  type ProjectionTarget,
+  type Row,
+  type TargetAnnotation,
+} from '@githubnext/projections-host'
 import {VscBadge} from '../elements.js'
 import {ValueChange} from './value-change.js'
 

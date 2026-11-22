@@ -1,16 +1,17 @@
-import {rendererLimits, rendererProtocolVersion} from '@githubnext/projections-renderer-sdk/protocol'
-import type {
-  AnnotationMark,
-  FilterPayload,
-  HostMessage,
-  InitPayload,
-  RendererControl,
-  ProgressPayload,
-  RendererCapabilities,
-  RendererEnvironment,
-  RendererMessage,
-  RendererOptions,
-  ScrollPosition,
+import {
+  rendererLimits,
+  rendererProtocolVersion,
+  type AnnotationMark,
+  type FilterPayload,
+  type HostMessage,
+  type InitPayload,
+  type RendererControl,
+  type ProgressPayload,
+  type RendererCapabilities,
+  type RendererEnvironment,
+  type RendererMessage,
+  type RendererOptions,
+  type ScrollPosition,
 } from '@githubnext/projections-renderer-sdk/protocol'
 import {HeightRequests, MessageGate} from './frame/admission.js'
 import {ProgressFlow} from './frame/progress-flow.js'

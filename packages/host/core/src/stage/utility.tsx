@@ -1,5 +1,4 @@
-import {useLayoutEffect, useRef} from 'react'
-import type {ReactNode} from 'react'
+import {useLayoutEffect, useRef, type ReactNode} from 'react'
 import {useWholePixels} from './whole-pixels.js'
 
 /** How far the utility area sits from the stage's top, CSS px: as far as from its sides. */

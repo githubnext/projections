@@ -1,15 +1,16 @@
 import {useCallback, useMemo, useState} from 'react'
-import {ComparisonError, customRenderer, useComparisonPair} from '@githubnext/projections-host'
-import type {
-  ComparatorSource,
-  ExtractionChoice,
-  RendererEntry,
-  RendererManifest,
-  RulesRuntime,
-  WithheldRenderer,
+import {
+  ComparisonError,
+  customRenderer,
+  useComparisonPair,
+  type ComparatorSource,
+  type ExtractionChoice,
+  type RendererEntry,
+  type RendererManifest,
+  type RulesRuntime,
+  type WithheldRenderer,
 } from '@githubnext/projections-host'
-import type {ExtractionDocument, ProjectionEngine} from '@githubnext/projections-schemas'
-import {customComparator} from '@githubnext/projections-schemas'
+import {type ExtractionDocument, type ProjectionEngine, customComparator} from '@githubnext/projections-schemas'
 import {InspectorRequestError} from '../transport.js'
 import type {InspectorApi} from '../client/api.js'
 import type {PartOverrides} from '../parts/model.js'

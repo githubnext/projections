@@ -1,6 +1,16 @@
 import type {ReactNode} from 'react'
-import {propertyPath, rowDetails, rowItems, sameTarget} from '@githubnext/projections-host'
-import type {AnnotationMark, ProjectionSelection, ProjectionTarget, Row, TargetAnnotation, ViewSubject} from '@githubnext/projections-host'
+import {
+  propertyPath,
+  rowDetails,
+  rowItems,
+  sameTarget,
+  type AnnotationMark,
+  type ProjectionSelection,
+  type ProjectionTarget,
+  type Row,
+  type TargetAnnotation,
+  type ViewSubject,
+} from '@githubnext/projections-host'
 import type {Entity, Evidence, Relationship} from '@githubnext/projections-schemas'
 import {Prose} from '../prose.js'
 import {VariedList} from '../varied.js'

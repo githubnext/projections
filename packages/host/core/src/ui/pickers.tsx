@@ -1,5 +1,4 @@
-import {useEffect, useId, useRef} from 'react'
-import type {ComponentProps} from 'react'
+import {useEffect, useId, useRef, type ComponentProps} from 'react'
 import {ArrowLeftRight, ChevronDown} from 'lucide-react'
 import type {ComparisonPair} from '../pair.js'
 import {Button} from './components/button.js'

@@ -1,5 +1,4 @@
-import {useState} from 'react'
-import type {ReactNode} from 'react'
+import {useState, type ReactNode} from 'react'
 import type {Diagnostic} from '@githubnext/projections-schemas'
 import {Alert, AlertDescription, AlertTitle, Button, cn} from '@githubnext/projections-host/ui/components'
 import {CircleAlert, Copy, Lightbulb, RefreshCw, ShieldAlert, Sparkles, X} from 'lucide-react'

@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useRef, useState, useSyncExternalStore} from 'react'
-import type {Dispatch, SetStateAction} from 'react'
+import {useCallback, useEffect, useRef, useState, useSyncExternalStore, type Dispatch, type SetStateAction} from 'react'
 import type {InspectorApi} from '../client/api.js'
 import type {InspectorDefinitionList} from '../types.js'
 import {ExtractionCoordinator} from './extraction-coordinator.js'

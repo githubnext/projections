@@ -1,14 +1,16 @@
-import {changeContext, isScopeChange, regenerated, variedWithinTolerance} from '@githubnext/projections-renderer-sdk/presentation'
-import type {ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
-import {humanizeKind} from '@githubnext/projections-renderer-sdk/presentation'
-import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import type {FilterPayload, SummaryNoun} from '@githubnext/projections-renderer-sdk/protocol'
+import {
+  changeContext,
+  isScopeChange,
+  regenerated,
+  variedWithinTolerance,
+  type ViewScope,
+  humanizeKind,
+} from '@githubnext/projections-renderer-sdk/presentation'
+import {rendererLimits, type FilterPayload, type SummaryNoun} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Row, ViewSubject} from '../model.js'
-import {rowInSummary} from '../summary.js'
-import type {SummaryFigure} from '../summary.js'
+import {rowInSummary, type SummaryFigure} from '../summary.js'
 import type {RequestChange, ValueOf} from './controllable.js'
-import {selector} from './memo.js'
-import type {Selector} from './memo.js'
+import {selector, type Selector} from './memo.js'
 import type {ProjectionController} from './types.js'
 
 function matches(row: Row, query: string): boolean {

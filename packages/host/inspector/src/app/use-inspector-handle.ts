@@ -1,12 +1,10 @@
-import {useEffect, useRef} from 'react'
-import type {Dispatch, SetStateAction} from 'react'
+import {useEffect, useRef, type Dispatch, type SetStateAction} from 'react'
 import type {ControllerStore} from '../details.js'
 import type {InspectorHandle} from '../control.js'
 import type {ProjectionStatus} from '../shell/switcher.js'
 import type {Marks} from './pairs.js'
 import type {ScenarioRequest} from './use-scenarios.js'
-import {inspectorSummary, keptResults, withoutQueued} from './handle-summary.js'
-import type {HandleState} from './handle-summary.js'
+import {inspectorSummary, keptResults, withoutQueued, type HandleState} from './handle-summary.js'
 import type {QueuedExtraction, Rows} from './use-extractions.js'
 
 /** What the handle does, with the latest render's callbacks. */

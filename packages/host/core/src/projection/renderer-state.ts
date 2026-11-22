@@ -1,7 +1,11 @@
-import {controlValues, isControlValue} from '@githubnext/projections-renderer-sdk/protocol'
-import type {ControlValue, RendererCapabilities, RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
-import {clampMode, defaultComparisonModes, orderComparisonModes, twoPaneMode} from '../modes.js'
-import type {ComparisonMode} from '../modes.js'
+import {
+  controlValues,
+  isControlValue,
+  type ControlValue,
+  type RendererCapabilities,
+  type RendererControl,
+} from '@githubnext/projections-renderer-sdk/protocol'
+import {clampMode, defaultComparisonModes, orderComparisonModes, twoPaneMode, type ComparisonMode} from '../modes.js'
 import type {PaneState} from '../pane.js'
 import type {RendererEntry} from '../registry.js'
 import type {Memos} from './memo.js'

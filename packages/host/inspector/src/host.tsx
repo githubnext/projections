@@ -1,5 +1,4 @@
-import {createContext, useContext, useSyncExternalStore} from 'react'
-import type {ReactNode} from 'react'
+import {createContext, useContext, useSyncExternalStore, type ReactNode} from 'react'
 
 /**
  * The embedding host's theme: its light or dark mode and, where it has them, its accent color (any CSS color) and the

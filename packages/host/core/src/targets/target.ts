@@ -1,6 +1,5 @@
 import type {Entity, Extraction, Relationship} from '@githubnext/projections-schemas'
-import {isPropertyPath} from '@githubnext/projections-renderer-sdk/protocol'
-import type {AnnotationTone} from '@githubnext/projections-renderer-sdk/protocol'
+import {isPropertyPath, type AnnotationTone} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Row, ViewSubject} from '../model.js'
 import {readPointer} from './pointer.js'
 

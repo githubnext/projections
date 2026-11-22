@@ -1,8 +1,6 @@
-import {useEffect, useId, useMemo, useRef, useState} from 'react'
-import type {KeyboardEvent, RefObject} from 'react'
+import {useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type RefObject} from 'react'
 import {VscBadge, VscIcon, VscTextfield, focusControl} from '../elements.js'
-import {Overlay} from './overlay.js'
-import type {OverlayProps} from './overlay.js'
+import {Overlay, type OverlayProps} from './overlay.js'
 import {activateOnKey} from './keys.js'
 
 /** One choice in a quick pick. */

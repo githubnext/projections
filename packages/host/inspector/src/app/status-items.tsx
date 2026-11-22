@@ -1,5 +1,4 @@
-import {rendererProtocolVersion} from '@githubnext/projections-host'
-import type {ComparisonPair} from '@githubnext/projections-host'
+import {rendererProtocolVersion, type ComparisonPair} from '@githubnext/projections-host'
 import {StatusItem} from '../shell/status-bar.js'
 
 /** The status bar's items: the presented revisions, the comparator, the last extraction's time, the protocol and trust. */

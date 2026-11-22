@@ -6,10 +6,10 @@ import {
   variedName,
   variedValue,
   wordDiff,
+  type BasisValue,
+  type WordRun,
 } from '@githubnext/projections-renderer-sdk/presentation'
-import type {BasisValue, WordRun} from '@githubnext/projections-renderer-sdk/presentation'
-import type {Row, ViewSubject} from '../model.js'
-import type {rowItems} from '../model.js'
+import type {Row, ViewSubject, rowItems} from '../model.js'
 
 /**
  * One generated value of a detail card (a summary a language model wrote, say): its name, its values on each side,

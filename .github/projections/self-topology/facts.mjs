@@ -181,7 +181,7 @@ export function unitFacts(context) {
     const languages = [...shares]
       .map(([name, count]) => [name, code ? Math.round((count / code) * 10) * 10 : 0])
       .filter(([, share]) => share >= 10)
-      .sort(([a, x], [b, y]) => y - x || (a < b ? -1 : 1))
+      .toSorted(([a, x], [b, y]) => y - x || (a < b ? -1 : 1))
     const assurance = []
     if (unit.kind === 'rust-crate' && mutants.some(directory => directory === unit.directory)) assurance.push('mutation tested')
     const gate = unit.kind === 'rust-crate' ? gates.get(unit.data.package) : undefined
@@ -206,7 +206,7 @@ export function unitFacts(context) {
     }
   }
   const runs = whereUnitsRun(context)
-  for (const [id, places] of runs) if (places.size) facts.get(id).runs = [...places].sort()
+  for (const [id, places] of runs) if (places.size) facts.get(id).runs = [...places].toSorted()
   return facts
 }
 

@@ -92,7 +92,7 @@ export function compiledCrates(graph, crates, buildDependencies = false) {
 }
 
 /** The license files a crate package ships. */
-export const ownLicenseFiles = pkg => readdirSync(dirname(pkg.manifest_path)).filter(license).sort()
+export const ownLicenseFiles = pkg => readdirSync(dirname(pkg.manifest_path)).filter(license).toSorted()
 
 /** notices/notices.json's entries. */
 export const readNoticeManifest = (path = join(root, 'notices', 'notices.json')) => JSON.parse(readFileSync(path, 'utf8')).notices
@@ -124,7 +124,7 @@ export function crateNotices({builds, title, buildDependencies = false}) {
   }
   const manifest = readNoticeManifest()
   const text = [`${title}\n`]
-  for (const dependency of [...dependencies.values()].sort((a, b) =>
+  for (const dependency of [...dependencies.values()].toSorted((a, b) =>
     `${a.name}@${a.version}`.localeCompare(`${b.name}@${b.version}`, 'en'),
   )) {
     let directory = dirname(dependency.manifest_path)
@@ -134,7 +134,7 @@ export function crateNotices({builds, title, buildDependencies = false}) {
       if (problem) throw new Error(`Missing redistribution notice: ${problem}`)
       const entry = noticeEntry(manifest, dependency.name)
       directory = join(root, 'notices', entry.directory)
-      files = Object.keys(entry.files).sort()
+      files = Object.keys(entry.files).toSorted()
     }
     text.push(`\n===== ${dependency.name} ${dependency.version} (${dependency.license}) =====\n`)
     for (const file of files) text.push(`\n--- ${file} ---\n${readFileSync(join(directory, file), 'utf8')}`)

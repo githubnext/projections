@@ -93,7 +93,7 @@ export function loadUnits(root: string): Unit[] {
       entry.names.push(manifest.name)
       npmByName.set(manifest.name, path)
     }
-    entry.scripts = Object.keys(manifest.scripts ?? {}).sort()
+    entry.scripts = Object.keys(manifest.scripts ?? {}).toSorted()
     npmDependencies.set(path, Object.keys({...manifest.dependencies, ...manifest.devDependencies}))
   }
   const crates = cargoMembers(root)
@@ -121,8 +121,8 @@ export function loadUnits(root: string): Unit[] {
     const entry = units.get(path)!
     for (const dependency of dependencies) if (units.has(dependency) && dependency !== path) entry.dependsOn.push(dependency)
   }
-  for (const entry of units.values()) entry.dependsOn = [...new Set(entry.dependsOn)].sort()
-  return [...units.values()].sort((a, b) => a.path.localeCompare(b.path))
+  for (const entry of units.values()) entry.dependsOn = [...new Set(entry.dependsOn)].toSorted()
+  return [...units.values()].toSorted((a, b) => a.path.localeCompare(b.path))
 }
 
 /** The unit owning a path: the one whose directory is its longest prefix. */
@@ -157,7 +157,7 @@ export function dependantsOf(units: readonly Unit[], paths: Iterable<string>): s
       }
     }
   }
-  return [...seen].sort()
+  return [...seen].toSorted()
 }
 
 /** Units in dependency order (dependencies first), limited to `paths`. */
@@ -174,7 +174,7 @@ export function inDependencyOrder(units: readonly Unit[], paths: Iterable<string
     done.add(path)
     if (wanted.has(path)) ordered.push(path)
   }
-  for (const path of [...wanted].sort()) visit(path, new Set())
+  for (const path of [...wanted].toSorted()) visit(path, new Set())
   return ordered
 }
 

@@ -99,7 +99,7 @@ export function SweepGrid({
     () =>
       order === 'signal'
         ? bySignal(sweep?.projections ?? [], sweep?.cells ?? [])
-        : [...(sweep?.projections ?? [])].sort((a, b) => a.projection.localeCompare(b.projection)),
+        : (sweep?.projections ?? []).toSorted((a, b) => a.projection.localeCompare(b.projection)),
     [order, sweep],
   )
   const signals = useMemo(() => (sweep ? signalCounts(sweep) : new Map<string, number>()), [sweep])

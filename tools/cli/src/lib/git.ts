@@ -80,5 +80,5 @@ export function changedFiles(root: string, base: Base | undefined): Change[] {
   }
   const untracked = git(root, ['ls-files', '--others', '--exclude-standard', '--', '.']) ?? ''
   for (const path of untracked.split('\n')) if (path) changes.set(path, 'untracked')
-  return [...changes].map(([path, status]) => ({path, status})).sort((a, b) => a.path.localeCompare(b.path))
+  return [...changes].map(([path, status]) => ({path, status})).toSorted((a, b) => a.path.localeCompare(b.path))
 }

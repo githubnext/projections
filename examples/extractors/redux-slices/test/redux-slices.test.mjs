@@ -20,7 +20,7 @@ test('resolves renamed and barrel imports, actions, selectors and slice dependen
     state.entities
       .filter(node => node.kind === 'slice')
       .map(node => node.label)
-      .sort(),
+      .toSorted(),
     ['cart', 'checkout'],
   )
   assert.ok(state.entities.some(node => node.kind === 'selector' && node.label === 'total'))

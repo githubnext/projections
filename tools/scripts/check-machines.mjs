@@ -28,7 +28,7 @@ for (const result of await eslint.lintFiles(lifecycleFiles)) {
   counts[path] = found.length
   first[path] = found
 }
-const sorted = Object.fromEntries(Object.entries(counts).sort(([a], [b]) => (a < b ? -1 : 1)))
+const sorted = Object.fromEntries(Object.entries(counts).toSorted(([a], [b]) => (a < b ? -1 : 1)))
 const committed = JSON.parse(await readFile(baselinePath, 'utf8'))
 const raised = Object.keys(sorted).some(path => sorted[path] > (committed[path] ?? 0))
 if (update && raised) console.log('The baseline only shrinks: model these lifecycles as machines instead (docs/guides/state-machines.md)')

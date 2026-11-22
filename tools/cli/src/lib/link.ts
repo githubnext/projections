@@ -61,7 +61,7 @@ function childDirectories(directory: string): string[] {
     return readdirSync(directory, {withFileTypes: true})
       .filter(entry => entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules')
       .map(entry => join(directory, entry.name))
-      .sort()
+      .toSorted()
   } catch {
     return []
   }

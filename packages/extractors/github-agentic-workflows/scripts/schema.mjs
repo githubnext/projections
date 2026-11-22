@@ -98,7 +98,7 @@ function defaultMaxima() {
     const found = max && (resolve(max).description ?? '').match(/\(default:\s*(\d+|unlimited)\b/)
     if (found) maxima[kind] = found[1] === 'unlimited' ? 'unlimited' : Number(found[1])
   }
-  return Object.fromEntries(Object.entries(maxima).sort(([a], [b]) => (a < b ? -1 : 1)))
+  return Object.fromEntries(Object.entries(maxima).toSorted(([a], [b]) => (a < b ? -1 : 1)))
 }
 
 const table = {
@@ -110,7 +110,7 @@ const table = {
     objects.map(path => {
       const fields = fieldsOf(nodeAt(path))
       if (!fields.size) throw new Error(`The schema's ${path || 'root'} declares no fields`)
-      const names = [...fields.keys()].sort()
+      const names = [...fields.keys()].toSorted()
       return [path, {known: names, deprecated: names.filter(name => fields.get(name))}]
     }),
   ),

@@ -40,7 +40,7 @@ export function planFacts(model: ComparisonModel): SummaryFactItem[] {
   }
   const order = [...new Set(planWords.map(item => item.words))]
   return [...counts]
-    .sort(([a], [b]) => (order.indexOf(a) + 1 || order.length + 1) - (order.indexOf(b) + 1 || order.length + 1) || a.localeCompare(b))
+    .toSorted(([a], [b]) => (order.indexOf(a) + 1 || order.length + 1) - (order.indexOf(b) + 1 || order.length + 1) || a.localeCompare(b))
     .map(([words, {icon, ids}]) => ({
       type: 'fact' as const,
       id: words.replaceAll(' ', '-'),

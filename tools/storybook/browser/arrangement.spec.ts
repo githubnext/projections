@@ -68,6 +68,9 @@ for (const ui of ['default'] as const) {
       else expect(after!.left, `${story}: After is right of Before`).toBeGreaterThan(before!.left)
       chosen.push(reading.stacked ? 'stacked' : 'columns')
     }
-    expect([...new Set(chosen)].sort(), `arrangements across ${stories.join(', ')}: ${chosen.join(', ')}`).toEqual(['columns', 'stacked'])
+    expect([...new Set(chosen)].toSorted(), `arrangements across ${stories.join(', ')}: ${chosen.join(', ')}`).toEqual([
+      'columns',
+      'stacked',
+    ])
   })
 }

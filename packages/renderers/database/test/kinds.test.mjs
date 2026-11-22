@@ -99,7 +99,7 @@ test("Prisma's implicit many-to-many relations link their tables, with no arrowh
   const frame = frameOf(prisma())
   assert.deepEqual(frame.tags, [], 'nothing floats free')
   const links = frame.links.map(link => [link.type, link.dependent, link.principal, link.dependentColumn, link.principalColumn])
-  assert.deepEqual(links.sort(), [
+  assert.deepEqual(links.toSorted(), [
     ['many-to-many', 'table:/Post', 'table:/Tag', undefined, undefined],
     ['many-to-many', 'table:/User', 'table:/User', undefined, undefined],
   ])

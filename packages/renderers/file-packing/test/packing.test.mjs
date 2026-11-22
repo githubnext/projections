@@ -92,7 +92,7 @@ test('languages take their Linguist colors; data and docs take distinct palette 
   assert.equal(palette.paintOf('TypeScript'), typescript)
   for (const key of ['JSON', 'Markdown', 'YAML', '.weird']) assert.ok(palette.entry(key).slot > 0, `${key} has a palette color, not gray`)
   assert.equal(new Set(palette.ranked.map(entry => entry.paint)).size, 5)
-  assert.deepEqual(categoryPalette([...categories].reverse(), 'light').ranked, palette.ranked, 'order never matters')
+  assert.deepEqual(categoryPalette(categories.toReversed(), 'light').ranked, palette.ranked, 'order never matters')
   const dark = categoryPalette(categories, 'dark')
   for (const entry of palette.ranked) {
     assert.equal(dark.entry(entry.category.key).slot, entry.slot, `${entry.category.key} keeps its slot in dark`)
@@ -169,11 +169,11 @@ test('the before endpoint is that revision packed alone, and the after endpoint 
   }
   const last = transition.frame(1)
   assert.deepEqual(
-    last.map(circle => circle.id).sort(),
+    last.map(circle => circle.id).toSorted(),
     after.entities
       .map(entity => entity.id)
       .filter(id => id !== 'directory:.')
-      .sort(),
+      .toSorted(),
   )
   assert.deepEqual(overlaps(last), [])
   // Continuing from the before packing keeps unchanged files closer to where they were than packing the after revision alone.
@@ -234,7 +234,7 @@ test('a frame is a pure function of progress, whatever the order of seeks', asyn
   const {model, schedule} = await sample()
   const transition = createPackingTransition(model, schedule, settings, area)
   const forward = Array.from({length: 51}, (_, index) => JSON.stringify(transition.frame(index / 50)))
-  const backward = Array.from({length: 51}, (_, index) => JSON.stringify(transition.frame((50 - index) / 50))).reverse()
+  const backward = Array.from({length: 51}, (_, index) => JSON.stringify(transition.frame((50 - index) / 50))).toReversed()
   assert.deepEqual(forward, backward)
 })
 

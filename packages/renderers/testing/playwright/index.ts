@@ -259,7 +259,7 @@ export async function expectScenarioToPass(
 /** `count + 1` evenly spaced progress values from 0 to 1, optionally followed by the way back. */
 export function samples(count = 20, {roundTrip = false}: {roundTrip?: boolean} = {}): number[] {
   const forward = Array.from({length: count + 1}, (_, index) => Math.round((index / count) * 1e6) / 1e6)
-  return roundTrip ? [...forward, ...forward.slice(0, -1).reverse()] : forward
+  return roundTrip ? [...forward, ...forward.slice(0, -1).toReversed()] : forward
 }
 
 /**

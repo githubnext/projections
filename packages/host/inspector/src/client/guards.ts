@@ -2,7 +2,7 @@ export function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 export function keys(value: Record<string, unknown>): string {
-  return Object.keys(value).sort().join(',')
+  return Object.keys(value).toSorted().join(',')
 }
 export function optionalText(value: unknown): value is string | undefined {
   return value === undefined || typeof value === 'string'

@@ -36,7 +36,7 @@ function reach(before: Graph, after: Graph, root: string | undefined): LockfileR
       return false
     })
   const units = [...new Set([...before.members, ...after.members])].filter(([key]) => key !== root && hits(key)).map(([, unit]) => unit)
-  return {units: [...new Set(units)].sort(), root: root !== undefined && hits(root)}
+  return {units: [...new Set(units)].toSorted(), root: root !== undefined && hits(root)}
 }
 
 // ── npm ─────────────────────────────────────────────────────────────────────────────────────────────────────────────

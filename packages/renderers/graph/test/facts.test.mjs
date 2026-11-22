@@ -182,7 +182,7 @@ test('the Relationships control draws one kind, and containment always', () => {
   assert.deepEqual(
     withRelationships(model, 'calls')
       .relationships.map(row => (row.after ?? row.before).kind)
-      .sort(),
+      .toSorted(),
     ['calls', 'contains', 'contains'],
   )
   const controls = factControls(factFields(one), drawnKinds(one, 'architecture'))

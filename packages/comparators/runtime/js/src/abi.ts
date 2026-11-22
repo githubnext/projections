@@ -131,7 +131,7 @@ export const isObject = (value: unknown): value is Record<string, unknown> =>
 export const checkFields = (object: Record<string, unknown>, allowed: readonly string[], what: string): string | undefined => {
   // Sorted, so the first unknown field matches the Rust runtime's report.
   const unknown = Object.keys(object)
-    .sort()
+    .toSorted()
     .find(key => !allowed.includes(key))
   return unknown === undefined ? undefined : `${what} has unknown field \`${unknown}\``
 }

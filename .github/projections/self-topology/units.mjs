@@ -71,7 +71,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
         process.exit(1)
       }
       const workspaceRoot = posix(metadata.workspace_root)
-      for (const pkg of [...metadata.packages].sort((a, b) => byText(a.name, b.name))) {
+      for (const pkg of [...metadata.packages].toSorted((a, b) => byText(a.name, b.name))) {
         const directory = posix(path.relative(workspaceRoot, path.dirname(pkg.manifest_path)))
         if (isExcluded(directory)) continue
         const targets = sortedUnique(
@@ -152,7 +152,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
         ['optionalDependencies', 'depends-on', 'npm optional dependency'],
         ['devDependencies', 'dev-depends-on', 'npm dev dependency'],
       ]) {
-        for (const name of Object.keys(pkg[section] ?? {}).sort(byText)) {
+        for (const name of Object.keys(pkg[section] ?? {}).toSorted(byText)) {
           manifestDependencies.push({from: id, name, kind, via, source: manifest})
         }
       }
@@ -196,8 +196,8 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
       counts[helperLanguages[match[2]]] = (counts[helperLanguages[match[2]]] ?? 0) + 1
       helperDirectories.set(match[1], counts)
     }
-    for (const [directory, counts] of [...helperDirectories].sort(([a], [b]) => byText(a, b))) {
-      const language = Object.entries(counts).sort(([a, x], [b, y]) => y - x || byText(a, b))[0][0]
+    for (const [directory, counts] of [...helperDirectories].toSorted(([a], [b]) => byText(a, b))) {
+      const language = Object.entries(counts).toSorted(([a, x], [b, y]) => y - x || byText(a, b))[0][0]
       addUnit({
         id: `helper:${stable(directory.slice(prefix.length))}`,
         kind: 'helper',

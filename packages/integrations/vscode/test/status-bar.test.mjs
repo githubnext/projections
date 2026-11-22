@@ -158,7 +158,7 @@ function fakeClock() {
     /** Moves the clock to `to`, firing the timers due on the way, in order. */
     advance(to) {
       for (;;) {
-        const next = timers.filter(timer => timer.at <= to).sort((a, b) => a.at - b.at)[0]
+        const next = timers.filter(timer => timer.at <= to).toSorted((a, b) => a.at - b.at)[0]
         if (!next) break
         timers = timers.filter(timer => timer !== next)
         now = next.at
@@ -174,7 +174,7 @@ function shownAt(end, times) {
   const clock = fakeClock()
   const indicator = runningIndicator(() => {}, {timers: clock.timers})
   indicator.set('extracting')
-  const events = [...times.map(at => ({at, read: true})), {at: end, read: false}].sort((a, b) => a.at - b.at || a.read - b.read)
+  const events = [...times.map(at => ({at, read: true})), {at: end, read: false}].toSorted((a, b) => a.at - b.at || a.read - b.read)
   const shown = {}
   for (const event of events) {
     clock.advance(event.at)

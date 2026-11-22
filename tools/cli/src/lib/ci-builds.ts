@@ -36,14 +36,14 @@ export function buildDependencies(root: string, units: readonly Unit[], unit: Un
     }
     queue.push(...scriptsNamed(root, text, posix.dirname(file), '.'))
   }
-  return [...found].sort()
+  return [...found].toSorted()
 }
 
 /** The units with their build dependencies added to `dependsOn`. */
 export function withBuildDependencies(root: string, units: readonly Unit[]): Unit[] {
   return units.map(unit =>
     unit.kinds.includes('npm')
-      ? {...unit, dependsOn: [...new Set([...unit.dependsOn, ...buildDependencies(root, units, unit)])].sort()}
+      ? {...unit, dependsOn: [...new Set([...unit.dependsOn, ...buildDependencies(root, units, unit)])].toSorted()}
       : unit,
   )
 }

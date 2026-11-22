@@ -259,7 +259,7 @@ try {
   // ProgramFiles). The helper's embedding and size are still checked.
   const dotnetRuns = dotnetPackaged && !windows
   if (dotnetPackaged) {
-    assert.deepEqual((await readdir(dotnetHelper)).sort(), helperFiles)
+    assert.deepEqual((await readdir(dotnetHelper)).toSorted(), helperFiles)
     let bytes = 0
     for (const file of helperFiles) bytes += (await stat(path.join(dotnetHelper, file))).size
     assert.ok(bytes < 512 * 1024, `The .NET helper ships ${bytes} bytes; it must borrow Roslyn, DI and EF Core rather than bundle them`)

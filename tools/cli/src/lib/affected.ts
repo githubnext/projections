@@ -31,7 +31,7 @@ export function kindsOf(paths: readonly string[]): ChangeKind[] {
     if (/(^|\/)package(-lock)?\.json$|(^|\/)tsconfig[\w.]*\.json$|^\.npmrc$/.test(path)) kinds.add('manifests')
     if (path.startsWith('.github/')) kinds.add('workflows')
   }
-  return [...kinds].sort()
+  return [...kinds].toSorted()
 }
 
 export function affected(units: readonly Unit[], changes: readonly Change[], registry?: readonly Generator[]): Affected {
@@ -49,7 +49,7 @@ export function affected(units: readonly Unit[], changes: readonly Change[], reg
     generate: generator.generate.map(command => command.argv.join(' ')).join(' && '),
   }))
   return {
-    changed: [...changed].sort(),
+    changed: [...changed].toSorted(),
     dependants: dependantsOf(units, changed),
     unowned,
     regenerate,

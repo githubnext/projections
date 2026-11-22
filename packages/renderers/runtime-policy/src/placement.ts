@@ -23,7 +23,7 @@ export function chipsOf({model, side, sides, items}: Context, item: Item, source
       if (!chips.has(key)) chips.set(key, {key, subject, kind: relationship.kind, data: relationship.data, change})
     }
   }
-  return [...chips.values()].sort(
+  return [...chips.values()].toSorted(
     (a, b) =>
       Number(a.change === 'added') - Number(b.change === 'added') ||
       collator.compare(a.subject.entity.label, b.subject.entity.label) ||

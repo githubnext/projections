@@ -122,11 +122,11 @@ test('rows: each revision in its own ID order, and the diff lists every declarat
   const ids = rows => rows.map(row => row.id)
   assert.deepEqual(
     revisionRows(model, 'before').map(row => row.before.id),
-    [...before.entities.map(e => e.id)].sort(),
+    [...before.entities.map(e => e.id)].toSorted(),
   )
   assert.deepEqual(
     revisionRows(model, 'after').map(row => row.after.id),
-    [...after.entities.map(e => e.id)].sort(),
+    [...after.entities.map(e => e.id)].toSorted(),
   )
   assert.deepEqual(ids(comparisonRows(model)), ['added', 'greet', 'legacy', 'parse', 'stable'])
 })
@@ -134,7 +134,7 @@ test('rows: each revision in its own ID order, and the diff lists every declarat
 test('the diff renders every change with its status footer and signature diff, and unchanged rows plain', async () => {
   const model = await comparison()
   const rows = rowsOf(render(props(model, {diff: true})))
-  assert.deepEqual(Object.keys(rows).sort(), ['added', 'greet', 'legacy', 'parse', 'stable'])
+  assert.deepEqual(Object.keys(rows).toSorted(), ['added', 'greet', 'legacy', 'parse', 'stable'])
   assert.equal(statusOf(rows.added), 'Added')
   assert.match(
     rows.added,
@@ -403,8 +403,8 @@ test('under the Changes scope the limit counts the declarations drawn, changes b
   const scope = {changes: new Set(['d', 'e']), context: new Set(['a', 'c']), shown: new Set(['a', 'c', 'd', 'e'])}
   assert.equal(limitScope(scope, rows, 4), scope)
   const limited = limitScope(scope, rows, 3)
-  assert.deepEqual([...limited.shown].sort(), ['a', 'd', 'e'])
-  assert.deepEqual([...limited.changes].sort(), ['d', 'e'])
+  assert.deepEqual([...limited.shown].toSorted(), ['a', 'd', 'e'])
+  assert.deepEqual([...limited.changes].toSorted(), ['d', 'e'])
   assert.deepEqual([...limited.context], ['a'])
 })
 

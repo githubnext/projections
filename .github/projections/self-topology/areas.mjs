@@ -67,7 +67,7 @@ export function topologyEntities(cx) {
   }
 
   const entities = []
-  for (const {id, key, label, members, directory, description, icon, readme} of boundaries.sort((a, b) => byText(a.id, b.id))) {
+  for (const {id, key, label, members, directory, description, icon, readme} of boundaries.toSorted((a, b) => byText(a.id, b.id))) {
     // A boundary is sized by its members.
     const code = members.reduce((sum, member) => sum + (facts.get(member).tokens ?? 0), 0)
     // Its language is the one most of its members' code is in.
@@ -76,7 +76,7 @@ export function topologyEntities(cx) {
       const {language, tokens: count = 0} = facts.get(member)
       if (language) byLanguage.set(language, (byLanguage.get(language) ?? 0) + count)
     }
-    const language = [...byLanguage].sort(([a, x], [b, y]) => y - x || byText(a, b))[0]?.[0]
+    const language = [...byLanguage].toSorted(([a, x], [b, y]) => y - x || byText(a, b))[0]?.[0]
     // How its members are assured and where they run, so a collapsed boundary still says it.
     const union = field => sortedUnique(members.flatMap(member => facts.get(member)[field] ?? []))
     // What the members publish is theirs; that some use proved code says nothing new where the proofs are too.
@@ -120,10 +120,10 @@ export function topologyEntities(cx) {
   }
 
   const ecosystems = {'rust-crate': 'cargo', 'npm-package': 'npm', 'wasm-module': 'wasm', script: 'shell'}
-  for (const unit of [...units.values()].sort((a, b) => byText(a.id, b.id))) {
+  for (const unit of [...units.values()].toSorted((a, b) => byText(a.id, b.id))) {
     const capabilityFiles = Object.fromEntries(
       Object.entries(unit.capabilityFiles)
-        .sort(([a], [b]) => byText(a, b))
+        .toSorted(([a], [b]) => byText(a, b))
         .map(([capability, list]) => [capability, sortedUnique(list)]),
     )
     // Where a description was read is evidence, not a fact about the unit: moving a README changes nothing it says.
@@ -141,7 +141,7 @@ export function topologyEntities(cx) {
       evidence: [
         ...(unit.manifest ? [{kind: 'manifest', source: unit.manifest}] : unit.single ? [{kind: 'file', source: unit.single}] : []),
         ...(descriptionSource && descriptionSource !== unit.manifest ? [{kind: 'readme', source: descriptionSource}] : []),
-        ...unit.evidence.sort((a, b) => byText(a.kind, b.kind) || byText(a.source, b.source)),
+        ...unit.evidence.toSorted((a, b) => byText(a.kind, b.kind) || byText(a.source, b.source)),
       ],
       confidence: unit.kind === 'wasm-module' || unit.kind === 'helper' ? 'derived' : 'authoritative',
     })

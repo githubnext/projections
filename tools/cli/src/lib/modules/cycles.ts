@@ -32,11 +32,11 @@ export function cycles(graph: ReadonlyMap<string, readonly string[]>): string[][
         onStack.delete(member)
         group.push(member)
       } while (member !== node)
-      if (group.length > 1 || graph.get(node)?.includes(node)) groups.push(group.sort())
+      if (group.length > 1 || graph.get(node)?.includes(node)) groups.push(group.toSorted())
     }
   }
-  for (const node of [...graph.keys()].sort()) if (!indexes.has(node)) connect(node)
-  return groups.sort((a, b) => b.length - a.length || a[0]!.localeCompare(b[0]!))
+  for (const node of [...graph.keys()].toSorted()) if (!indexes.has(node)) connect(node)
+  return groups.toSorted((a, b) => b.length - a.length || a[0]!.localeCompare(b[0]!))
 }
 
 /** A workspace's own source modules (not tests, specs, fixtures or build output). */

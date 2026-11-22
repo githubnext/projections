@@ -164,7 +164,7 @@ export function activate(context: vscode.ExtensionContext) {
         active: activeDefinitionTarget,
         find: (folder, projection) =>
           [...ProjectionTab.tabs]
-            .reverse()
+            .toReversed()
             .find(tab => tab.folder === folder && tab.projection === projection)
             ?.definitionTarget(),
         sources: (folder, id) => sources.nodes(folder, id),

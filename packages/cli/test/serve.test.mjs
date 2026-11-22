@@ -299,7 +299,7 @@ test('serve --stdio lists every valid definition beside an invalid one, with its
   await backend.call('initialize').reply
   const definitions = await backend.request('GET', '/api/definitions?ref=working-tree')
   assert.equal(definitions.status, 200)
-  assert.deepEqual(definitions.body.definitions.map(item => item.id).sort(), ['services-node', 'services-python'])
+  assert.deepEqual(definitions.body.definitions.map(item => item.id).toSorted(), ['services-node', 'services-python'])
   assert.deepEqual(
     definitions.body.invalid.map(item => [item.id, item.path, item.diagnostics[0].location.line, item.diagnostics[0].pointer]),
     [['legacy', '.github/projections/legacy.json', 7, '/comparator/module']],

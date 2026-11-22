@@ -21,7 +21,7 @@ const inFont = name => css.includes(`.codicon-${name}:before`)
 const drawnHere = codicon => codicon.startsWith('part:')
 
 test('the VS Code host maps every renderer icon, badge icons included, to a valid codicon image', () => {
-  assert.deepEqual(Object.keys(codiconTokens).sort(), iconNames.map(iconToken).sort())
+  assert.deepEqual(Object.keys(codiconTokens).toSorted(), iconNames.map(iconToken).toSorted())
   for (const name of iconNames) assert.ok(isIconValue(codiconTokens[iconToken(name)]), name)
   for (const [name, codicon] of Object.entries(codiconNames)) {
     assert.ok(
@@ -37,11 +37,11 @@ test("every badge icon, breaking included, is the SDK's badge glyph, and every o
   for (const name of iconNames) {
     assert.equal(codiconTokens[iconToken(name)] === glyphs[iconToken(name)], badgeIconNames.includes(name), name)
   }
-  assert.deepEqual(Object.keys(codiconNames).sort(), iconNames.filter(name => !badgeIconNames.includes(name)).sort())
+  assert.deepEqual(Object.keys(codiconNames).toSorted(), iconNames.filter(name => !badgeIconNames.includes(name)).toSorted())
 })
 
 test('every codicon the UI draws is in the codicon font, and every control icon has one', () => {
-  assert.deepEqual(Object.keys(vscodeControlIcons).sort(), [...controlIcons].sort())
+  assert.deepEqual(Object.keys(vscodeControlIcons).toSorted(), controlIcons.toSorted())
   for (const name of [...Object.values(vscodeControlIcons), ...Object.values(modeCodicons), ...Object.values(uiCodicons)]) {
     assert.ok(inFont(name), `codicon-${name}`)
   }

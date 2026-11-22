@@ -94,7 +94,7 @@ test('selecting a resource brings forward what depends on it, unless the control
   await expect(renderer.frame.getByRole('status').filter({hasText: '6 resources depend on main'})).toHaveCount(1)
   const forward = await renderer.frame
     .locator('.graph-node:not(.graph-group):not(.receded)')
-    .evaluateAll(nodes => nodes.map(node => (node as SVGGElement).dataset.entityId).sort())
+    .evaluateAll(nodes => nodes.map(node => (node as SVGGElement).dataset.entityId).toSorted())
   expect(forward).toEqual(
     [
       database,
@@ -104,7 +104,7 @@ test('selecting a resource brings forward what depends on it, unless the control
       'aws_secretsmanager_secret_version.database',
       'aws_ssm_parameter.database_url',
       'module.database.aws_db_instance.replica',
-    ].sort(),
+    ].toSorted(),
   )
   await expect(renderer.frame.locator('.graph-link.receded').first()).toBeAttached()
   await renderer.setOptions({dependents: false})

@@ -78,7 +78,7 @@ export function linkPortOffsets(ends: readonly LinkEnd[]): Map<string, {from: nu
   for (const end of ends) groups.set(end.group, [...(groups.get(end.group) ?? []), end])
   const result = new Map<string, {from: number; to: number}>()
   for (const group of groups.values()) {
-    const ordered = [...group].sort((a, b) => a.approach - b.approach || compareIds(a.key, b.key) || (a.end < b.end ? -1 : 1))
+    const ordered = group.toSorted((a, b) => a.approach - b.approach || compareIds(a.key, b.key) || (a.end < b.end ? -1 : 1))
     const offsets = spreadPorts(ordered.length, Math.min(...ordered.map(end => end.room)), portSpacing, rowPortInset)
     ordered.forEach((end, index) => {
       const entry = result.get(end.key) ?? {from: 0, to: 0}

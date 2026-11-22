@@ -63,7 +63,7 @@ test('dist releases every target natively with attestations, no source tarball a
   assert.equal(setting(toml, 'install-path'), '["$PROJECTIONS_INSTALL_DIR/", "~/.projections/bin"]')
   assert.match(setting(toml, 'cargo-dist-version'), /^"\d+\.\d+\.\d+"$/)
   const targets = [...setting(toml, 'targets').matchAll(/"([^"]+)"/g)].map(match => match[1])
-  assert.deepEqual(targets.sort(), Object.keys(assets).sort())
+  assert.deepEqual(targets.toSorted(), Object.keys(assets).toSorted())
   const runners = toml.split('[dist.github-custom-runners]')[1].split(/^\[/m)[0]
   for (const target of [...targets, 'global']) {
     assert.match(runners, new RegExp(`^${target} = "[\\w.-]+"$`, 'm'), `${target} needs a runner`)
@@ -122,7 +122,7 @@ test('custom release jobs pin actions, use least privilege and name each executa
       const write = Object.entries(job.permissions)
         .filter(([, value]) => value === 'write')
         .map(([key]) => key)
-        .sort()
+        .toSorted()
       assert.deepEqual(write, [], `${file} ${name}`)
       for (const step of job.steps) {
         if (step.uses) assertLocked(file, step.uses, `${file}: ${step.uses}`)

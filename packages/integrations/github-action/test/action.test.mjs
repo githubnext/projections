@@ -175,7 +175,7 @@ test('a batch splits into one verified document per projection, error items keep
   }
   const {manifest, files} = splitBatch(batch, options)
   assert.equal(validateManifest(manifest), true, JSON.stringify(validateManifest.errors))
-  assert.deepEqual([...files.keys()].sort(), [artifactManifest, 'projections/routes.json', 'projections/services.json'])
+  assert.deepEqual([...files.keys()].toSorted(), [artifactManifest, 'projections/routes.json', 'projections/services.json'])
   assert.equal(manifest.projections[0].sha256, sha256(files.get('projections/services.json')))
   assert.equal(manifest.projections[1].title, 'Feature flags')
   assert.equal(manifest.projections[1].diagnostics[0].message.length, 4096)
@@ -410,7 +410,7 @@ test('the collect script runs the real CLI on a pull request: merge base to head
   assert.equal(outputs.projections, '2')
   assert.match(stdout, /::error title=Projection flags::TRUST_REQUIRED/)
   const artifact = outputs.directory
-  assert.deepEqual(readdirSync(artifact).sort(), ['projections', artifactManifest])
+  assert.deepEqual(readdirSync(artifact).toSorted(), ['projections', artifactManifest])
   const manifest = JSON.parse(readFileSync(path.join(artifact, artifactManifest), 'utf8'))
   assert.equal(validateManifest(manifest), true, JSON.stringify(validateManifest.errors))
   assert.deepEqual(manifest.subject, {kind: 'pull-request', number: 7, base: movedBase, head, mergeBase: base, definition: 'base'})
@@ -876,7 +876,7 @@ test('the snapshot script renders both sides of a pull request and a push, light
   assert.ok(!read('files.before.light.png').equals(read('files.after.light.png')))
   assert.ok(!read('files.after.light.png').equals(read('files.after.dark.png')))
   // The artifact directory itself is unchanged: it holds only the files its manifest lists.
-  assert.deepEqual(readdirSync(pull.outputs.directory).sort(), ['projections', artifactManifest])
+  assert.deepEqual(readdirSync(pull.outputs.directory).toSorted(), ['projections', artifactManifest])
 
   const push = collect(directory, repo, 'push', {after: head}, 'refs/heads/feature')
   // Snapshots render saved documents, so no extractor runs; trust lets a custom renderer, repository code, draw them.
@@ -1032,7 +1032,7 @@ test('publish commits snapshots to the default branch only when they changed and
     assert.notEqual(commit, revision)
     assert.deepEqual(api.commits.get(commit).parents, [revision])
     assert.equal(api.commits.get(commit).message, 'Update Projections snapshots')
-    assert.deepEqual([...api.trees.get(api.commits.get(commit).tree).keys()].sort(), [
+    assert.deepEqual([...api.trees.get(api.commits.get(commit).tree).keys()].toSorted(), [
       'docs/snapshots/files.dark.png',
       'docs/snapshots/files.light.png',
     ])

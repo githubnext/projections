@@ -37,8 +37,8 @@ const only = process.argv.slice(2).map(dir => resolve(dir))
 for (const dir of only.length ? only : ['packages/comparators', 'examples', 'packages/cli/templates'].map(dir => join(root, dir))) walk(dir)
 const display = path => relative(only.length ? process.cwd() : root, path)
 // Repository files have their schemas checked by DollarLint; directories given as arguments don't.
-const documents = files.sort().map(path => [display(path), readFileSync(path, 'utf8'), Boolean(only.length)])
-const testDocuments = only.length ? tests.sort().map(path => [display(path), readFileSync(path, 'utf8')]) : []
+const documents = files.toSorted().map(path => [display(path), readFileSync(path, 'utf8'), Boolean(only.length)])
+const testDocuments = only.length ? tests.toSorted().map(path => [display(path), readFileSync(path, 'utf8')]) : []
 const docs = []
 const walkDocs = dir => {
   for (const name of readdirSync(dir)) {
@@ -48,7 +48,7 @@ const walkDocs = dir => {
   }
 }
 if (!only.length) walkDocs(join(root, 'docs'))
-for (const path of only.length ? [] : [...docs.sort(), join(root, 'packages/cli/templates/SKILL.md')]) {
+for (const path of only.length ? [] : [...docs.toSorted(), join(root, 'packages/cli/templates/SKILL.md')]) {
   const text = readFileSync(path, 'utf8')
   for (const match of text.matchAll(/\x60\x60\x60yaml\n(# [^\n]*\.comparator\.ya?ml\n[\s\S]*?)\x60\x60\x60/g)) {
     // Excerpts (`...`) aren't whole files.

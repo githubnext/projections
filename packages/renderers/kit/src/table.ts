@@ -125,7 +125,7 @@ export function sortTableRows<T, R extends TableRow<T>>(
     })
   const sign = sort?.direction === 'descending' ? -1 : 1
   const order = new Map(rows.map((row, index) => [row.id, index]))
-  return [...rows].sort((a, b) => {
+  return rows.toSorted((a, b) => {
     if (options.changesFirst) {
       const changed = Number(isChanged(b)) - Number(isChanged(a))
       if (changed) return changed

@@ -43,7 +43,7 @@ function extraction(files) {
     entities.push({id: `directory:${directory}`, kind: 'directory', label: basename(directory), data: {path: directory}})
     relationships.push({id: `contains:directory:${directory}`, kind: 'contains', from: `directory:${parent}`, to: `directory:${directory}`})
   }
-  for (const file of [...files].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))) {
+  for (const file of [...files].toSorted((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))) {
     const parent = parentOf(file.path)
     addDirectory(parent)
     entities.push({
@@ -109,7 +109,7 @@ function refresh(current) {
   const unused = current.filter(file => !listed.has(file.path)).map(file => file.path)
   const taken = new Set()
   const replacement = new Map()
-  for (const path of stale.sort()) {
+  for (const path of stale.toSorted()) {
     const pick = unused.find(other => !taken.has(other) && topLevel(other) === topLevel(path)) ?? unused.find(other => !taken.has(other))
     if (!pick) break
     taken.add(pick)

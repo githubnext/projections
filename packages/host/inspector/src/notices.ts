@@ -105,7 +105,7 @@ export function reported(stderr: string): string | undefined {
     } else if (line && !isLocation(line) && !isNoise(line)) candidates.push({at, line})
   })
   const texts = candidates.map(candidate => candidate.line)
-  if (lines.includes('Traceback (most recent call last):')) return [...texts].reverse().find(isError) ?? texts.at(-1)
+  if (lines.includes('Traceback (most recent call last):')) return texts.toReversed().find(isError) ?? texts.at(-1)
   const first = texts[0]
   if (first === undefined || first.startsWith('Extractor ')) return first
   return texts.find(isError) ?? first

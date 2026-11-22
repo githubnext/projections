@@ -129,7 +129,7 @@ test('the diff lays out both revisions once, without overlap', async () => {
         }
         // Rows, with their change lines, stay inside their card and never share a slot.
         let bottom = schemaMetrics.header
-        for (const item of [...table.columns].sort((a, b) => a.top - b.top)) {
+        for (const item of [...table.columns].toSorted((a, b) => a.top - b.top)) {
           assert.ok(item.top >= bottom, `${id}: ${item.change.id} overlaps the row above`)
           bottom = item.top + (1 + (item.lines?.length ?? 0)) * schemaMetrics.row
         }
@@ -309,7 +309,7 @@ for (const [what, edit] of [
     const shown = new Set([...scope.shown, ...databaseContext(model, scope.changes)])
     const narrowed = scopedModel(model, shown, 'fold').model
     const tables = narrowed.entities.filter(row => (row.after ?? row.before).kind === 'table').map(row => (row.after ?? row.before).label)
-    assert.deepEqual(tables.sort(), ['Customer', 'Order'])
+    assert.deepEqual(tables.toSorted(), ['Customer', 'Order'])
     const {frame} = createDatabaseDiff(narrowed, {available: 1300})
     const label = id => (row(narrowed, id)?.after ?? row(narrowed, id)?.before)?.label
     const references = frame.links.map(link => `${label(link.dependent)} → ${label(link.principal)}`)

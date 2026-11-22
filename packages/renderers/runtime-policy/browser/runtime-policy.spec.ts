@@ -24,7 +24,7 @@ async function layout(renderer: RendererHandle) {
     }),
     overflow: document.documentElement.scrollWidth > innerWidth + 1,
   }))
-  const sorted = [...read.units].sort((a, b) => a.top - b.top)
+  const sorted = read.units.toSorted((a, b) => a.top - b.top)
   for (let index = 1; index < sorted.length; index++) {
     expect(sorted[index]!.top, `${sorted[index]!.id} overlaps ${sorted[index - 1]!.id}`).toBeGreaterThanOrEqual(
       sorted[index - 1]!.bottom - 0.5,

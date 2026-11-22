@@ -108,7 +108,7 @@ test('comparison documents rerun the default comparator and reject tampered clai
   await rejects({...saved, notices: 'one'}, 'ARTIFACT_SCHEMA')
   await rejects({...saved, notices: Array.from({length: 21}, (_, index) => `Notice ${index}`)}, 'ARTIFACT_SCHEMA')
   const objectOrder = structuredClone(saved)
-  objectOrder.comparison = Object.fromEntries(Object.entries(objectOrder.comparison).reverse())
+  objectOrder.comparison = Object.fromEntries(Object.entries(objectOrder.comparison).toReversed())
   assert.deepEqual((await loadArtifact(encode(objectOrder), {engine})).comparison, saved.comparison)
   await rejects({...saved, comparison: {...saved.comparison, changes: [], steps: []}}, 'ARTIFACT_COMPARISON')
   await rejects(

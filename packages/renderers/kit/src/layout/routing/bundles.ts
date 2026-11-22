@@ -32,7 +32,7 @@ export function separateBundles(ctx: RoutingContext, all: readonly Segment[], ru
     const run = runs.get(bundle[0]!)!
     return [run.sign > 0 ? 0 : 1, run.sign > 0 ? -across(bundle[0]!.start) : across(bundle[0]!.start)] as const
   }
-  const order = [...bundles.values()].sort((a, b) => key(a)[0] - key(b)[0] || key(a)[1] - key(b)[1] || compareIds(a[0]!.key, b[0]!.key))
+  const order = [...bundles.values()].toSorted((a, b) => key(a)[0] - key(b)[0] || key(a)[1] - key(b)[1] || compareIds(a[0]!.key, b[0]!.key))
   const mean = group.reduce((sum, segment) => sum + runs.get(segment)!.along, 0) / group.length
   const centre = highest - lowest >= need ? Math.max(lowest + need / 2, Math.min(highest - need / 2, mean)) : (lowest + highest) / 2
   const place = () => {

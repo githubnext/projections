@@ -159,7 +159,7 @@ export type CardIconName = keyof typeof cardIconNodes
  * (https://lucide.dev/icons), in name order: a fixed set for the parts of a system (`terminal`, `cpu`, `database`,
  * `globe`, `package`, `git-compare`…). A renderer bundles only these; any other name draws nothing.
  */
-export const cardIconNames = Object.keys(cardIconNodes).sort() as CardIconName[]
+export const cardIconNames = Object.keys(cardIconNodes).toSorted() as CardIconName[]
 
 /** Whether a value names a card icon (`cardIconNames`). */
 export function isCardIconName(value: unknown): value is CardIconName {

@@ -19,7 +19,7 @@ const unitId = name => `service:Orders:${name}:unkeyed`
 
 test('a registration triple composes into one unit, and the last registration wins', () => {
   const model = buildDiModel(before)
-  assert.deepEqual(model.units.map(unit => unit.implementation).sort(), [
+  assert.deepEqual(model.units.map(unit => unit.implementation).toSorted(), [
     'ConsoleLogger',
     'LegacyPricing',
     'OrderFlags',
@@ -134,18 +134,18 @@ test("a rewired dependency's old route leaves with the card it pointed to, empha
 test('units and links follow the comparison steps, with identity only from the comparison', async () => {
   const {model} = await compared(before, after)
   const {transition, ends} = staged(model)
-  const ids = frame => frame.units.map(unit => unit.id).sort()
+  const ids = frame => frame.units.map(unit => unit.id).toSorted()
   assert.deepEqual(
     ids(transition(0)),
     buildDiModel(before)
       .units.map(unit => unit.id)
-      .sort(),
+      .toSorted(),
   )
   assert.deepEqual(
     ids(transition(1)),
     buildDiModel(after)
       .units.map(unit => unit.id)
-      .sort(),
+      .toSorted(),
   )
   for (const progress of [0, 1]) for (const unit of transition(progress).units) assert.equal(unit.opacity, 1)
   // The default order removes, then restructures, then adds.
@@ -432,7 +432,7 @@ test('three containers fold into one model: Nest modules and aliases, Spring sco
     spring.links
       .filter(link => link.parameter === 'validators')
       .map(link => link.to)
-      .sort(),
+      .toSorted(),
     ['service:amountValidator', 'service:stockValidator'],
   )
   assert.ok(spring.links.some(link => link.from === 'service:reportService' && link.to === 'service:utcClock'))

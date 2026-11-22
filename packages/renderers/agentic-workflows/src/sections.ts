@@ -105,7 +105,7 @@ function permissions(data: Data): Value[] {
     return [{key: 'permissions:none', text: 'none (`permissions: {}`)'}]
   }
   return Object.entries(record(declared))
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([scope, level]) => ({key: `permission:${scope}`, text: codeSpan(`${scope}: ${text(level)}`)}))
 }
 

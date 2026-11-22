@@ -17,7 +17,7 @@ const stories = Object.values(index.entries).filter(entry => entry.type === 'sto
 
 test('the build indexes the three UIs, the core and the harness', () => {
   const titles = new Set(stories.map(story => story.title.split('/')[0]))
-  expect([...titles].sort()).toEqual(['Core', 'Default UI', 'Harness', 'VS Code UI'])
+  expect([...titles].toSorted()).toEqual(['Core', 'Default UI', 'Harness', 'VS Code UI'])
   expect(stories.length).toBeGreaterThan(80)
 })
 

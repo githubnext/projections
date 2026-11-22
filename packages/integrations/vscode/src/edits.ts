@@ -105,7 +105,7 @@ export function editKey(entries: readonly StatusEntry[], hashes: ReadonlyMap<str
   if (!entries.length) return undefined
   return entries
     .map(entry => `${entry.path}:${entry.code}:${hashes.get(entry.path) ?? ''}`)
-    .sort()
+    .toSorted()
     .join('\n')
 }
 

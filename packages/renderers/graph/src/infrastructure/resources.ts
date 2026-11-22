@@ -84,7 +84,7 @@ export function attributeChanges(row: EntityChange<Entity>): FieldLine[] {
   const forcing = row.after?.data?.replacePaths
   const first = new Set(Array.isArray(forcing) ? forcing.map(String) : [])
   const rank = (line: FieldLine) => (first.has(line.key) ? 0 : line.after === unknownValue ? 2 : 1)
-  return fieldLines(row, {object: 'values'}).sort((a, b) => rank(a) - rank(b))
+  return fieldLines(row, {object: 'values'}).toSorted((a, b) => rank(a) - rank(b))
 }
 
 /** How plans write a value that is known only after apply. */

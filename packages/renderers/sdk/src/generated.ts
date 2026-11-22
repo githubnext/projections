@@ -98,7 +98,7 @@ export function generatedPaths(
     const basis = segments(declaration.basis)
     for (const [path, bound] of expand(item, segments(declaration.path))) found.set(path, render(basis, bound))
   }
-  return [...found].map(([path, basis]) => ({path, basis})).sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
+  return [...found].map(([path, basis]) => ({path, basis})).toSorted((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
 }
 
 /** A basis value as the extraction records it: named parts. */

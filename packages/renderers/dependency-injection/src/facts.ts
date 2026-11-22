@@ -49,7 +49,7 @@ export function diFacts(model: ComparisonModel<DependencyInjectionExtraction>): 
       'changed',
     )
   }
-  const kinds = [...new Set(both.map(unit => unitKind(unit.unit)))].sort((a, b) =>
+  const kinds = [...new Set(both.map(unit => unitKind(unit.unit)))].toSorted((a, b) =>
     a === 'service' ? -1 : b === 'service' ? 1 : compareIds(a, b),
   )
   for (const kind of kinds) {

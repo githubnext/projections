@@ -20,7 +20,7 @@ test('calls, registries and decorators bind events to resolved handlers', async 
     state.entities
       .filter(node => node.kind === 'event')
       .map(node => node.label)
-      .sort(),
+      .toSorted(),
     ['created', 'deleted', 'updated'],
   )
   assert.equal(state.relationships.filter(edge => edge.kind === 'consumes').length, 3)
@@ -39,7 +39,7 @@ test('publish APIs attribute events to their enclosing publisher and warn on dyn
     state.entities
       .filter(node => node.kind === 'event')
       .map(node => node.label)
-      .sort(),
+      .toSorted(),
     ['archived', 'created'],
   )
   assert.match(JSON.stringify(state.metadata), /dynamic event/)

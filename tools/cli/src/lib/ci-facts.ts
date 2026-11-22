@@ -86,7 +86,7 @@ export function crateFileInputs(root: string, units: readonly Unit[]): FileInput
       }
     }
   }
-  return [...found.values()].sort((a, b) => a.reader.localeCompare(b.reader) || a.path.localeCompare(b.path))
+  return [...found.values()].toSorted((a, b) => a.reader.localeCompare(b.reader) || a.path.localeCompare(b.path))
 }
 
 /** The files a renderer's scenarios.json names outside its package: extractions and comparators its stories show. */
@@ -115,8 +115,10 @@ function underTestDir(root: string, units: readonly Unit[], suite: string): stri
 export function readersOf(facts: Pick<RepoFacts, 'fileInputs'>, path: string): {build: string[]; test: string[]} {
   const reads = (input: string) => path === input || path.startsWith(`${input}/`)
   const readers = facts.fileInputs.filter(input => reads(input.path))
-  const build = [...new Set(readers.filter(input => !input.test).map(input => input.reader))].sort()
-  const test = [...new Set(readers.filter(input => input.test).map(input => input.reader))].filter(reader => !build.includes(reader)).sort()
+  const build = [...new Set(readers.filter(input => !input.test).map(input => input.reader))].toSorted()
+  const test = [...new Set(readers.filter(input => input.test).map(input => input.reader))]
+    .filter(reader => !build.includes(reader))
+    .toSorted()
   return {build, test}
 }
 
@@ -127,7 +129,7 @@ export function repoFacts(root: string): RepoFacts {
   const harnessRenderers = readdirSync(renderers, {withFileTypes: true})
     .filter(entry => entry.isDirectory() && existsSync(join(renderers, entry.name, 'scenarios.json')))
     .map(entry => entry.name)
-    .sort()
+    .toSorted()
   const mutants = readText(root, '.cargo/mutants.toml') ?? ''
   const coverage = [...script('.', 'test:rust:coverage').matchAll(/-p (\S+)/g)].flatMap(match => findUnit(units, match[1]!)?.path ?? [])
   return {

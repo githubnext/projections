@@ -124,7 +124,7 @@ test('the container NestJS composes in preview mode: tokens, scopes, factories, 
   // Constructor, @Inject and property dependencies resolve across module boundaries;
   // the unprovided optional METRICS dependency resolves to nothing.
   const service = edges(state, 'dependsOn', 'implementation:OrdersModule:class:OrdersService')
-  assert.deepEqual(service.map(edge => [edge.data?.parameter, edge.to]).sort(), [
+  assert.deepEqual(service.map(edge => [edge.data?.parameter, edge.to]).toSorted(), [
     ['audit', 'service:OrdersModule:class:AuditLogger'],
     ['clock', 'service:OrdersModule:symbol:clock'],
     ['payments', 'service:PaymentsModule:class:PaymentGateway'],
@@ -281,7 +281,7 @@ export class RootModule {}
     return state.entities
       .filter(item => item.id.includes('FeatureModule'))
       .map(item => item.id)
-      .sort()
+      .toSorted()
   }
   const forward = await ids('AModule, BModule')
   assert.ok(forward.includes('service:FeatureModule@AModule:string:A_REPOSITORY'), forward.join(', '))

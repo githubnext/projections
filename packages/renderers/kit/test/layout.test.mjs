@@ -127,12 +127,12 @@ test('layout is deterministic: the same graph in any input order produces the sa
       ...graph,
       extraction: {
         ...graph.extraction,
-        entities: [...graph.extraction.entities].reverse(),
-        relationships: [...graph.extraction.relationships].reverse(),
+        entities: [...graph.extraction.entities].toReversed(),
+        relationships: [...graph.extraction.relationships].toReversed(),
       },
     }
     const [a, b] = [await layoutOf(graph), await layoutOf(shuffled)]
-    const geometry = layout => JSON.stringify([[...layout.points].sort(), [...layout.routes].sort()])
+    const geometry = layout => JSON.stringify([[...layout.points].toSorted(), [...layout.routes].toSorted()])
     assert.equal(geometry(a), geometry(b), graph.name)
   }
 })
@@ -441,15 +441,15 @@ test('cards with no relationships and nothing else make a grid, in ID order', as
       {orientation},
     )
     const cards = ids.map(id => ({id, ...box(layout, id)}))
-    const layers = [...new Set(cards.map(card => card[flowStart]))].sort((a, b) => a - b)
+    const layers = [...new Set(cards.map(card => card[flowStart]))].toSorted((a, b) => a - b)
     assert.equal(layers.length, 3, `${orientation}: √5 rounded up layers`)
-    const read = [...cards].sort((a, b) => a[flowStart] - b[flowStart] || a[acrossStart] - b[acrossStart]).map(card => card.id)
+    const read = cards.toSorted((a, b) => a[flowStart] - b[flowStart] || a[acrossStart] - b[acrossStart]).map(card => card.id)
     assert.deepEqual(read, ['a', 'b', 'c', 'd', 'e'], `${orientation}: in ID order, layer by layer`)
     if (orientation === 'vertical') {
       // On the layout's column grid, as cards ELK places are: a column apart, `columnGap` between neighbours.
       const pitch = cards[0].right - cards[0].left + columnGap
       for (const card of cards) assert.ok(Number.isInteger((card.left - 32) / pitch), `${card.id} at ${card.left}, off the ${pitch} grid`)
-      const first = cards.filter(card => card.top === layers[0]).sort((a, b) => a.left - b.left)
+      const first = cards.filter(card => card.top === layers[0]).toSorted((a, b) => a.left - b.left)
       assert.equal(first[1].left - first[0].right, columnGap, 'neighbours a column gap apart')
     }
   }
@@ -523,7 +523,7 @@ test('top to bottom, every card starts on a column line of one grid, in every la
   for (const graph of (await scenarioGraphs()).filter(graph => !graph.options.compound && !graph.options.orientation)) {
     const layout = await layoutOf(graph)
     const cards = [...layout.points.keys()].map(id => box(layout, id))
-    const widths = cards.map(card => card.right - card.left).sort((a, b) => a - b)
+    const widths = cards.map(card => card.right - card.left).toSorted((a, b) => a - b)
     const pitch = widths[Math.floor(widths.length / 2)] + columnGap
     for (const card of cards) {
       const column = (card.left - 32) / pitch

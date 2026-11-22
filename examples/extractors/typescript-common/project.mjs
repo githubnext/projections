@@ -45,7 +45,7 @@ function strings(value, label) {
 
 /** Repository files, excluding `.git` and installed packages. */
 function files(root, prefix = '', result = []) {
-  for (const entry of readdirSync(path.join(root, prefix), {withFileTypes: true}).sort((a, b) => compareIds(a.name, b.name))) {
+  for (const entry of readdirSync(path.join(root, prefix), {withFileTypes: true}).toSorted((a, b) => compareIds(a.name, b.name))) {
     if (entry.name === '.git' || entry.name === 'node_modules') continue
     const relative = prefix ? `${prefix}/${entry.name}` : entry.name
     if (entry.isDirectory()) files(root, relative, result)
@@ -130,7 +130,7 @@ function packagesOf(root, listed) {
     packages.push({name, directory})
   }
   if (!packages.some(pkg => !pkg.directory)) packages.push({name: '(root)', directory: ''})
-  return packages.sort((a, b) => b.directory.length - a.directory.length || compareIds(a.name, b.name))
+  return packages.toSorted((a, b) => b.directory.length - a.directory.length || compareIds(a.name, b.name))
 }
 
 /** The repository's own source files across the programs, each with its program's checker, sorted by path. */
@@ -149,7 +149,7 @@ function sourcesOf(root, programs) {
     }
   }
   if (!sources.length) throw new Error('No TypeScript/JavaScript sources found; provide source files or inputs.tsconfig')
-  return sources.sort((a, b) => compareIds(a.source.fileName, b.source.fileName))
+  return sources.toSorted((a, b) => compareIds(a.source.fileName, b.source.fileName))
 }
 
 /**

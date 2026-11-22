@@ -43,7 +43,7 @@ test('the union holds every entity of both revisions, each with its change and w
   const model = await rewired()
   const diff = diffModel(model)
   const byId = Object.fromEntries(diff.entities.map(item => [item.id, item]))
-  assert.deepEqual(diff.entities.map(item => [item.id, item.change]).sort(), [
+  assert.deepEqual(diff.entities.map(item => [item.id, item.change]).toSorted(), [
     ['a', 'unchanged'],
     ['b', 'modified'],
     ['c', 'unchanged'],
@@ -174,7 +174,7 @@ test('the graph diff frame is the union layout: every card at full presence, rew
   const model = await rewired()
   const transition = await createGraphTransition(model, [])
   const frame = transition.diff
-  assert.deepEqual(frame.nodes.map(node => node.id).sort(), ['a', 'b', 'c', 'new', 'old'])
+  assert.deepEqual(frame.nodes.map(node => node.id).toSorted(), ['a', 'b', 'c', 'new', 'old'])
   assert.ok(frame.nodes.every(node => node.opacity === 1 && node.local === 1))
   const keys = frame.edges.map(edge => [edge.key, edge.part ?? 'both'])
   assert.deepEqual(
@@ -297,7 +297,7 @@ test('a diff card lays out its text whole and grows to hold it', () => {
   const ys = card.lines.filter(line => line.anchor !== 'end').map(line => line.y)
   assert.deepEqual(
     ys,
-    [...ys].sort((a, b) => a - b),
+    ys.toSorted((a, b) => a - b),
   )
   assert.ok(card.height >= Math.max(...ys) + 18)
   // Long text wraps at the widest card, never past it.

@@ -27,5 +27,5 @@ export function assign(ctx: RoutingContext, target: string, ordered: readonly Se
 /** Routes into one card in the order they leave their sources, as `assign` first places their ports. */
 export function byLeaving(ctx: RoutingContext, list: readonly Segment[]): Segment[] {
   const key = (segment: Segment) => ctx.across(segment.start)
-  return [...list].sort((a, b) => key(a) - key(b) || compareIds(a.key, b.key))
+  return list.toSorted((a, b) => key(a) - key(b) || compareIds(a.key, b.key))
 }

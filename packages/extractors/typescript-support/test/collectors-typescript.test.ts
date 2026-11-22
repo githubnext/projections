@@ -231,7 +231,7 @@ test('conditional package exports, wildcard subpaths and types are explicit stab
     state.entities
       .filter(node => node.kind !== 'member')
       .map(node => node.data?.subpath)
-      .sort(),
+      .toSorted(),
     ['.', './features/one'],
   )
 })

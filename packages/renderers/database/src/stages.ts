@@ -73,7 +73,7 @@ export function fades(
       )
     }
   }
-  const linkKeys = showLinks ? [...new Set(models.flatMap(stage => stage.links.map(link => link.key)))].sort(compareIds) : []
+  const linkKeys = showLinks ? [...new Set(models.flatMap(stage => stage.links.map(link => link.key)))].toSorted(compareIds) : []
   const linkFade = new Map(
     linkKeys.map(key => [
       key,
@@ -91,8 +91,8 @@ export function tagOrder(states: readonly SchemaState[], models: readonly Schema
   const last = models.length - 1
   const tagLabel = (id: string, stage: number) => states[stage]!.entities.get(id)!.label
   const tagStages = models.map((stage, index) =>
-    [...stage.others]
-      .sort(
+    stage.others
+      .toSorted(
         (a, b) =>
           compareIds(states[index]!.entities.get(a)!.kind, states[index]!.entities.get(b)!.kind) ||
           compareIds(tagLabel(a, index), tagLabel(b, index)) ||

@@ -32,11 +32,11 @@ test('headings sort the table through the host, both ways', async ({page}) => {
   await expect(frame.getByRole('columnheader', {name: 'Files'})).toHaveAttribute('aria-sort', 'descending')
   await expect(frame.getByRole('columnheader', {name: 'Code'})).not.toHaveAttribute('aria-sort')
   const descending = await counts(frame, 1)
-  expect(descending).toEqual([...descending].sort((a, b) => b - a))
+  expect(descending).toEqual(descending.toSorted((a, b) => b - a))
   await frame.getByRole('button', {name: 'Files'}).press('Enter')
   await expect(frame.getByRole('columnheader', {name: 'Files'})).toHaveAttribute('aria-sort', 'ascending')
   const ascending = await counts(frame, 1)
-  expect(ascending).toEqual([...ascending].sort((a, b) => a - b))
+  expect(ascending).toEqual(ascending.toSorted((a, b) => a - b))
 })
 
 test('the rows keep one order for the whole transition', async ({page}) => {

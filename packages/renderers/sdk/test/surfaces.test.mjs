@@ -9,7 +9,7 @@ function contrast(a, b) {
     const linear = value => (value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
     return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
   }
-  const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+  const [high, low] = [luminance(a), luminance(b)].toSorted((x, y) => y - x)
   return (high + 0.05) / (low + 0.05)
 }
 

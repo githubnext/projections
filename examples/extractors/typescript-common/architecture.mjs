@@ -27,7 +27,7 @@ export function architecture(project, name) {
     const pkg = owner(project, at.getSourceFile().fileName)
     return put('package', [pkg.name], pkg.name, at)
   }
-  const sort = items => items.sort((a, b) => compareIds(a.id, b.id))
+  const sort = items => items.toSorted((a, b) => compareIds(a.id, b.id))
   return {
     put,
     edge,
@@ -39,7 +39,7 @@ export function architecture(project, name) {
       relationships: sort([...relationships.values()]),
       metadata: {
         analysis: 'Static TypeScript symbol resolution with explicit domain conventions',
-        limitations: ['Dynamic registrations and runtime control flow are not evaluated.', ...[...warnings].sort()],
+        limitations: ['Dynamic registrations and runtime control flow are not evaluated.', ...[...warnings].toSorted()],
       },
     }),
   }

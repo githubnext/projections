@@ -120,7 +120,7 @@ test('painted bars, hatches and counts follow the kit ease through a step, forwa
       }
     })
   const locals = [0.1, 0.25, 0.5, 0.75, 0.9]
-  for (const local of [...locals, ...[...locals].reverse()]) {
+  for (const local of [...locals, ...locals.toReversed()]) {
     await renderer.seek(motionWindow(step).time + motionWindow(step).radius * (2 * local - 1))
     const value = 1000 + 400 * ease(local)
     const frame = await painted()

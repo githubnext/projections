@@ -56,7 +56,7 @@ function listed(items: unknown, field: 'entities' | 'relationships'): Record<str
   }
   // The Engine's order: UTF-16 code units, JavaScript's own string order.
   const id = (item: Record<string, unknown>) => item.id as string
-  return list.sort((left, right) => (id(left) < id(right) ? -1 : id(left) > id(right) ? 1 : 0))
+  return list.toSorted((left, right) => (id(left) < id(right) ? -1 : id(left) > id(right) ? 1 : 0))
 }
 
 /**

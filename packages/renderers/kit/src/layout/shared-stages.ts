@@ -14,7 +14,7 @@ export function sharedStages(edges: readonly LayoutEdge[]): SharedStage[] {
   for (const edge of edges) incoming.set(edge.to, [...(incoming.get(edge.to) ?? []), edge])
   const stages = new Map<string, SharedStage>()
   for (const [target, links] of incoming) {
-    const sources = [...new Set(links.map(link => link.from))].sort(compareIds)
+    const sources = [...new Set(links.map(link => link.from))].toSorted(compareIds)
     if (sources.length < 2 || sources.length !== links.length || links.some(link => link.kind !== 'precedes')) continue
     const key = JSON.stringify(sources)
     const stage = stages.get(key) ?? {sources, targets: [], edges: []}

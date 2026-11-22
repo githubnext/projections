@@ -428,7 +428,7 @@ export class ProjectionTab extends InspectorWebview {
 
   /** The open tab of a projection, for tests driving it. */
   static find(projection: string): ProjectionTab | undefined {
-    return [...ProjectionTab.tabs].reverse().find(tab => tab.projection === projection)
+    return [...ProjectionTab.tabs].toReversed().find(tab => tab.projection === projection)
   }
 
   protected override dispose() {

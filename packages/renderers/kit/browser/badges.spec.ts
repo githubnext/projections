@@ -198,7 +198,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
           }
         }
         const middle = (profile: Map<number, number>) => {
-          const inked = [...profile].filter(([, cut]) => cut > 0.05).sort(([a], [b]) => a - b)
+          const inked = [...profile].filter(([, cut]) => cut > 0.05).toSorted(([a], [b]) => a - b)
           if (!inked.length) return NaN
           const [first, firstCut] = inked[0]!
           const [last, lastCut] = inked.at(-1)!
@@ -262,7 +262,7 @@ for (const density of densities) {
         }
         // As heavy as drawn: a CSS mask cuts each glyph at its stroke (an SVG mask's images are resampled, a little heavier in Chromium).
         const drawn = (glyphs.added!.stroke / box) * size
-        const median = [...strokes].sort((a, b) => a - b)[Math.floor(strokes.length / 2)]!
+        const median = strokes.toSorted((a, b) => a - b)[Math.floor(strokes.length / 2)]!
         if (!(median >= drawn * 0.9 && median <= drawn * (kind === 'icon' ? 1.1 : 1.25))) {
           failures.push(`${kind} at ${size}px: glyphs cut at a stroke of ${median.toFixed(2)} CSS px, drawn at ${drawn.toFixed(2)}`)
         }

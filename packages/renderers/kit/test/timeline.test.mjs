@@ -111,7 +111,7 @@ test('entities move continuously and the reverse comparison mirrors the motion e
         if (index % 10) continue
         const left = new Map(motion(t).nodes.map(node => [node.id, node]))
         const right = new Map(reverse(1 - t).nodes.map(node => [node.id, node]))
-        assert.deepEqual([...left.keys()].sort(), [...right.keys()].sort(), `${shape}: presence differs at mirrored ${t}`)
+        assert.deepEqual([...left.keys()].toSorted(), [...right.keys()].toSorted(), `${shape}: presence differs at mirrored ${t}`)
         for (const [id, node] of left) {
           const mirrored = right.get(id)
           assert.ok(Math.abs(node.opacity - mirrored.opacity) < 1e-9, `${shape}: ${id} opacity not mirrored at ${t}`)
@@ -214,14 +214,14 @@ test('endpoints show exactly one side and steps without a declared kind still an
     assert.deepEqual(
       transition(0)
         .nodes.map(node => node.id)
-        .sort(),
-      before.entities.map(item => item.id).sort(),
+        .toSorted(),
+      before.entities.map(item => item.id).toSorted(),
     )
     assert.deepEqual(
       transition(1)
         .nodes.map(node => node.id)
-        .sort(),
-      after.entities.map(item => item.id).sort(),
+        .toSorted(),
+      after.entities.map(item => item.id).toSorted(),
     )
     for (const node of [...transition(0).nodes, ...transition(1).nodes]) assert.equal(node.opacity, 1)
   }
@@ -317,7 +317,7 @@ test('a custom comparator order changes the visual order', async () => {
     ['remove', 'add'],
   )
   // As the priority-order example comparator would: the step changing new0 first.
-  const reordered = {...comparison, steps: [...comparison.steps].reverse()}
+  const reordered = {...comparison, steps: comparison.steps.toReversed()}
   for (const [candidate, first] of [
     [comparison, 'remove'],
     [reordered, 'add'],
@@ -469,7 +469,7 @@ test('compiled windows with reading leads never overlap, keep one hold between t
     const steps = Array.from({length: count}, (_, index) => ({index, lead: index % 3 !== 1, tail: index % 2 === 1}))
     const options = {lead: step => step.lead, tail: step => step.tail}
     const schedule = compileTimeline(steps, options)
-    const mirrored = compileTimeline([...steps].reverse(), options)
+    const mirrored = compileTimeline(steps.toReversed(), options)
     for (const [index, step] of schedule.entries()) {
       assert.ok(step.time - step.radius >= 0 && step.time + step.radius <= 1)
       assert.ok(steps[index].lead ? step.lead > 0 : step.lead === 0)

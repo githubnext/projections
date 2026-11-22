@@ -28,7 +28,7 @@ export function useHostFilter(message: FilterPayload | undefined): FilterPayload
  * rows before it give it context. Content in a container that places its own view (`placedAttribute`) is left alone.
  */
 export function useOpeningReveal(root: RefObject<HTMLElement | null>, ids: ReadonlySet<string> | undefined, key: unknown): void {
-  const wanted = useMemo(() => (ids ? [...ids].sort().join('\n') : ''), [ids])
+  const wanted = useMemo(() => (ids ? [...ids].toSorted().join('\n') : ''), [ids])
   useEffect(() => {
     const element = root.current
     if (!element || !wanted) return

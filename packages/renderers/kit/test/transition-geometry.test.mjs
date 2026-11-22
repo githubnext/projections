@@ -154,7 +154,7 @@ test('Before and After draw their own boundaries, even when components move betw
       const groups = transition(t)
         .nodes.filter(node => node.group)
         .map(node => node.id)
-        .sort()
+        .toSorted()
       const expected = transition(t).nodes.some(node => node.id === 'storage') ? ['application', 'storage'] : ['application']
       assert.deepEqual(groups, expected, `boundaries at ${t}`)
     }

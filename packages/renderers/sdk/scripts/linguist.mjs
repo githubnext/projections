@@ -106,7 +106,7 @@ const rank = name => {
 const byName = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
 const names = Object.keys(document)
   .filter(name => document[name].extensions?.length || document[name].filenames?.length)
-  .sort((a, b) => rank(a) - rank(b) || byName(a, b))
+  .toSorted((a, b) => rank(a) - rank(b) || byName(a, b))
 
 const backgrounds = {light: defaultThemeTokens('light')['color-bg'], dark: defaultThemeTokens('dark')['color-bg']}
 const other = {light: defaultThemeTokens('light')['color-border-emphasis'], dark: defaultThemeTokens('dark')['color-border-emphasis']}
@@ -167,7 +167,7 @@ for (const name of names) {
   for (const alias of [name.toLowerCase(), ...(document[name].aliases ?? [])]) if (!(alias in aliases)) aliases[alias] = index.get(name)
 }
 
-const sorted = object => Object.fromEntries(Object.entries(object).sort(([a], [b]) => byName(a, b)))
+const sorted = object => Object.fromEntries(Object.entries(object).toSorted(([a], [b]) => byName(a, b)))
 const lines = (value, key) =>
   `export const ${key} = {\n${Object.entries(value)
     .map(([name, position]) => `  ${JSON.stringify(name)}: ${position},`)

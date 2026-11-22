@@ -78,7 +78,7 @@ export function routeTracks(runs: readonly TrackRun[], spacing = trackSpacing): 
       const run = info[bundle[0]!]!
       return [run.sign > 0 ? 0 : 1, run.sign > 0 ? -run.leaving : run.leaving] as const
     }
-    const order = [...bundles.values()].sort((a, b) => key(a)[0] - key(b)[0] || key(a)[1] - key(b)[1] || a[0]! - b[0]!)
+    const order = [...bundles.values()].toSorted((a, b) => key(a)[0] - key(b)[0] || key(a)[1] - key(b)[1] || a[0]! - b[0]!)
     const centre = group.reduce((sum, index) => sum + info[index]!.along, 0) / group.length
     order.forEach((bundle, position) => {
       for (const index of bundle) tracks[index] = centre + (position - (order.length - 1) / 2) * spacing - info[index]!.middle

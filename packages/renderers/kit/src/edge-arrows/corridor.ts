@@ -89,12 +89,12 @@ export function corridorRoute(
   }
   // Cards the corridor runs beside: those between the two turns.
   const beside = obstacles.filter(box => box.y + box.height > first && box.y < last)
-  const edges = [...new Set(beside.flatMap(box => [box.x - clearance, box.x + box.width + clearance]))].sort((a, b) => a - b)
+  const edges = [...new Set(beside.flatMap(box => [box.x - clearance, box.x + box.width + clearance]))].toSorted((a, b) => a - b)
   const blocked = (x: number) => beside.some(box => x > box.x - clearance && x < box.x + box.width + clearance)
   const candidates = edges.length ? [edges[0]! - routeRadius, edges.at(-1)! + routeRadius] : []
   for (let index = 0; index + 1 < edges.length; index++) candidates.push((edges[index]! + edges[index + 1]!) / 2)
   const cost = (x: number) => Math.abs(x - start.x) + Math.abs(x - end.x)
-  for (const x of candidates.filter(x => !blocked(x)).sort((a, b) => cost(a) - cost(b))) {
+  for (const x of candidates.filter(x => !blocked(x)).toSorted((a, b) => cost(a) - cost(b))) {
     const course = [start, {x: start.x, y: first}, {x, y: first}, {x, y: last}, {x: end.x, y: last}, end]
     const route = smoothRoute(course, axis)
     if (!route) continue

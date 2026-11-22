@@ -49,7 +49,7 @@ const luminance = rgb => {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
 }
 const contrast = (x, y) => {
-  const [high, low] = [luminance(x), luminance(y)].sort((p, q) => q - p)
+  const [high, low] = [luminance(x), luminance(y)].toSorted((p, q) => q - p)
   return (high + 0.05) / (low + 0.05)
 }
 

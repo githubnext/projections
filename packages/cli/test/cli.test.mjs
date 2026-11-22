@@ -64,7 +64,7 @@ test('one invalid definition is reported where it is wrong, and the others still
   commit(root)
   const listed = await failed(cli(root, ['list', '--json']), /1 definition file is invalid/)
   const document = JSON.parse(listed)
-  assert.deepEqual(document.projections.map(item => item.id).sort(), ['services-node', 'services-python'])
+  assert.deepEqual(document.projections.map(item => item.id).toSorted(), ['services-node', 'services-python'])
   assert.equal(document.invalid.length, 1)
   const [invalid] = document.invalid
   assert.equal(invalid.id, 'legacy')

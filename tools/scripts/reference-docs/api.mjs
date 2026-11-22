@@ -117,7 +117,7 @@ export function apiPage({
   }
   const members = entity =>
     // Trait implementations are listed by rustdoc, not here; auto traits would fill every type's table.
-    (children.get(entity.id) ?? []).filter(child => child.kind !== 'impl').sort((a, b) => a.label.localeCompare(b.label, 'en'))
+    (children.get(entity.id) ?? []).filter(child => child.kind !== 'impl').toSorted((a, b) => a.label.localeCompare(b.label, 'en'))
   const sections = new Map()
   for (const entity of roots) {
     if (skip(entity)) continue
@@ -153,11 +153,11 @@ export function apiPage({
 ${intro}
 
 ${[...sections]
-  .sort(([a], [b]) => a.localeCompare(b, 'en'))
+  .toSorted(([a], [b]) => a.localeCompare(b, 'en'))
   .map(
     ([key, entities]) =>
       `## ${key}\n\n${entities
-        .sort((a, b) => name(a).localeCompare(name(b), 'en'))
+        .toSorted((a, b) => name(a).localeCompare(name(b), 'en'))
         .map(item)
         .join('\n\n')}`,
   )

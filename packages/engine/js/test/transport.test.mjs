@@ -92,21 +92,21 @@ test('public entrypoints and Wasm exports use the primary Engine names', async (
     ['worker', 'createWorkerEngine'],
   ]) {
     const exports = await import(`../dist/${entry}.js`)
-    assert.deepEqual(Object.keys(exports).sort(), [...shared, ...(factory ? [factory] : [])].sort())
+    assert.deepEqual(Object.keys(exports).toSorted(), [...shared, ...(factory ? [factory] : [])].toSorted())
   }
   const bytes = await readFile(new URL('../artifacts/engine.wasm', import.meta.url))
   const module = await WebAssembly.compile(bytes)
   const functions = WebAssembly.Module.exports(module)
     .filter(entry => entry.kind === 'function')
     .map(entry => entry.name)
-    .sort()
+    .toSorted()
   assert.deepEqual(functions, ['engine_alloc', 'engine_call', 'engine_free'])
   const comparator = await WebAssembly.compile(await readFile(new URL('../artifacts/default-comparator.wasm', import.meta.url)))
   assert.deepEqual(WebAssembly.Module.imports(comparator), [], 'the default comparator module has zero imports')
   assert.deepEqual(
     WebAssembly.Module.exports(comparator)
       .map(entry => `${entry.kind}:${entry.name}`)
-      .sort(),
+      .toSorted(),
     ['function:projections_alloc', 'function:projections_compare', 'memory:memory'],
   )
 })

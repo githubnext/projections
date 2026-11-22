@@ -21,7 +21,7 @@ function ordered(entries: [string, unknown][]): [string, unknown][] {
   }
   return entries
     .map((entry, index) => [entry, index] as const)
-    .sort((a, b) => rank(a[0][0]) - rank(b[0][0]) || a[1] - b[1])
+    .toSorted((a, b) => rank(a[0][0]) - rank(b[0][0]) || a[1] - b[1])
     .map(([entry]) => entry)
 }
 

@@ -37,7 +37,7 @@ export function leafChanges(a: unknown, b: unknown, path: string): {key: string;
   if (sameValue(a, b)) return []
   if (isRecord(a) && isRecord(b)) {
     return [...new Set([...Object.keys(a), ...Object.keys(b)])]
-      .sort()
+      .toSorted()
       .flatMap(key => leafChanges(a[key], b[key], path ? `${path}.${key}` : key))
   }
   if (Array.isArray(a) && Array.isArray(b) && a.length === b.length && path) {
@@ -70,7 +70,7 @@ export function fieldLines(
       .filter(change => !exclude.has(change.key.split(/[.[]/)[0]!))
       .map(change => ({key: change.key, before: formatValue(change.before), after: formatValue(change.after)}))
   }
-  const fields = options.fields ?? [...new Set([...Object.keys(before.data ?? {}), ...Object.keys(after.data ?? {})])].sort()
+  const fields = options.fields ?? [...new Set([...Object.keys(before.data ?? {}), ...Object.keys(after.data ?? {})])].toSorted()
   return fieldChanges(before, after, {fields})
     .filter(change => !exclude.has(change.key))
     .map(change => ({key: change.key, before: formatValue(change.before), after: formatValue(change.after)}))

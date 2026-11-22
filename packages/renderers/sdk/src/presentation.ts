@@ -63,7 +63,7 @@ export function relationshipLabel(
 /** Looks up entity labels in extractions, the first that has the entity winning (for example after, then before). */
 export function entityLabels(...extractions: readonly (Pick<Extraction, 'entities'> | undefined)[]): (id: string) => string | undefined {
   const labels = new Map<string, string>()
-  for (const extraction of [...extractions].reverse()) {
+  for (const extraction of extractions.toReversed()) {
     for (const entity of extraction?.entities ?? []) labels.set(entity.id, entity.label ?? entity.id)
   }
   return id => labels.get(id)

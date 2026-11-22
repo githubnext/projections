@@ -204,7 +204,7 @@ try {
           }, shot.data),
         })
       }
-      const typical = [...ink].map(item => item.ink).sort((a, b) => a - b)[Math.floor(ink.length / 2)] ?? 0
+      const typical = [...ink].map(item => item.ink).toSorted((a, b) => a - b)[Math.floor(ink.length / 2)] ?? 0
       results[index].ink = ink
       results[index].blankFrames = ink.filter(item => item.ink < typical * 0.25).length
       console.log(

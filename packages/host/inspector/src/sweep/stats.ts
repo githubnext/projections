@@ -36,7 +36,7 @@ const JUDGED_FROM = 4
 export function columnStats(projection: string, cells: readonly SweepCell[]): ColumnStats {
   const mine = cells.filter(cell => cell.projection === projection)
   const changed = mine.filter(cell => cell.status === 'changed')
-  const counts = changed.map(cell => cell.changes ?? 0).sort((a, b) => a - b)
+  const counts = changed.map(cell => cell.changes ?? 0).toSorted((a, b) => a - b)
   const middle = Math.floor(counts.length / 2)
   const median = counts.length === 0 ? 0 : counts.length % 2 ? counts[middle]! : (counts[middle - 1]! + counts[middle]!) / 2
   const judged = mine.filter(cell => cell.status !== 'failed').length
@@ -66,7 +66,7 @@ const SIGNAL_RANK: Record<ColumnStats['signal'], number> = {rare: 0, steady: 1, 
 /** Projections in signal order: structural ones first, then steady, noisy and quiet ones; skipped ones last. */
 export function bySignal(rows: readonly SweepProjection[], cells: readonly SweepCell[]): SweepProjection[] {
   const rank = (row: SweepProjection) => (row.status === 'ready' ? SIGNAL_RANK[columnStats(row.projection, cells).signal] : 5)
-  return [...rows].sort(
+  return rows.toSorted(
     (a, b) =>
       rank(a) - rank(b) ||
       columnStats(b.projection, cells).changed - columnStats(a.projection, cells).changed ||

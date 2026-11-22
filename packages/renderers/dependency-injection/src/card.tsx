@@ -142,7 +142,7 @@ export function routeLinks(
   const arrival = new Map<string, number>()
   for (const [id, list] of arrivals) {
     const box = cards.get(id)!
-    const ordered = [...list].sort((a, b) => a.from.x - b.from.x || (a.key < b.key ? -1 : 1))
+    const ordered = list.toSorted((a, b) => a.from.x - b.from.x || (a.key < b.key ? -1 : 1))
     const offsets = spreadPorts(ordered.length, box.width)
     ordered.forEach((link, index) => arrival.set(link.key, link.to.x + offsets[index]!))
   }

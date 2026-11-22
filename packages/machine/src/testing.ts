@@ -89,16 +89,16 @@ export class ExplorationError extends Error {
 }
 
 const sortedEntries = (entries: [unknown, unknown][]) =>
-  entries.map(([key, value]) => [stableKey(key), value] as const).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+  entries.map(([key, value]) => [stableKey(key), value] as const).toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
 
 /** A stable JSON of `value`: object keys sorted, Maps and Sets as sorted entries, functions as their names. */
 export function stableKey(value: unknown): string {
   return JSON.stringify(value, (_key, item: unknown) => {
     if (item instanceof Map) return {'@map': sortedEntries([...item])}
-    if (item instanceof Set) return {'@set': [...item].map(stableKey).sort()}
+    if (item instanceof Set) return {'@set': [...item].map(stableKey).toSorted()}
     if (typeof item === 'function') return `@function ${item.name}`
     if (item && typeof item === 'object' && !Array.isArray(item)) {
-      return Object.fromEntries(Object.entries(item).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+      return Object.fromEntries(Object.entries(item).toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
     }
     return item
   })
@@ -145,7 +145,7 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
   let truncated = false
   const visit = (node: Node) => {
     const id = key(node.path.state)
-    const at = `${id}\u0000${[...node.fired].sort().join('\u0000')}`
+    const at = `${id}\u0000${[...node.fired].toSorted().join('\u0000')}`
     if (seen.has(at)) return
     if (seen.size >= limit) {
       truncated = true

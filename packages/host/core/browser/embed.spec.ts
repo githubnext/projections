@@ -94,7 +94,7 @@ test('the embedding page keeps its own styles', async ({page}) => {
       .filter((rule): rule is CSSKeyframesRule => rule instanceof CSSKeyframesRule)
       .map(rule => rule.name),
   )
-  expect(keyframes.filter(name => !name.startsWith('pj-') && !name.startsWith('sb-')).sort()).toEqual(['enter', 'spin'])
+  expect(keyframes.filter(name => !name.startsWith('pj-') && !name.startsWith('sb-')).toSorted()).toEqual(['enter', 'spin'])
   expect(errors).toEqual([])
 })
 

@@ -31,7 +31,7 @@ export function useScopeView(
     if (!extra.length) return scope
     return {changes: scope.changes, context: new Set([...scope.context, ...extra]), shown: new Set([...scope.shown, ...extra])}
   }, [resolved, filter, more, renderer])
-  const key = hostScope ? [...hostScope.shown].sort().join('\n') : ''
+  const key = hostScope ? [...hostScope.shown].toSorted().join('\n') : ''
   // What the person opened since the host last changed the scope: items, and folds (which keep their place).
   const [opened, setOpened] = useState<{key: string; ids: ReadonlySet<string>}>({key, ids: none})
   const openedIds = opened.key === key ? opened.ids : none

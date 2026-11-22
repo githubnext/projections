@@ -19,7 +19,7 @@ test('Express and Fastify factories, chains and method arrays become inferred ro
     state.entities
       .filter(node => node.kind === 'route')
       .map(node => node.label)
-      .sort(),
+      .toSorted(),
     ['GET /health', 'GET /items', 'GET /orders', 'GET /users', 'POST /orders', 'PUT /items'],
   )
   assert.match(JSON.stringify(state.metadata), /mounting/)
@@ -32,7 +32,7 @@ test('CommonJS export-equals factories resolve as default imports', async () => 
     state.entities
       .filter(node => node.kind === 'route')
       .map(node => node.label)
-      .sort(),
+      .toSorted(),
     ['GET /real-commonjs', 'GET /router'],
   )
 })

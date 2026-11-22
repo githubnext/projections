@@ -5,7 +5,7 @@ import type {RingGeometry, RingLineResult} from '../rings.js'
 export function markOccludedEdges(results: RingLineResult[]): void {
   const shown = results.filter(result => result.edgeColor && result.ring !== null && result.clean && !result.hidden)
   if (shown.length >= 3) {
-    const median = [0, 1, 2].map(channel => shown.map(result => result.edgeColor![channel]!).sort((a, b) => a - b)[shown.length >> 1]!)
+    const median = [0, 1, 2].map(channel => shown.map(result => result.edgeColor![channel]!).toSorted((a, b) => a - b)[shown.length >> 1]!)
     for (const result of results) {
       if (result.edgeColor && result.edgeColor.reduce((sum, value, channel) => sum + Math.abs(value - median[channel]!), 0) > 90) {
         result.hidden = true

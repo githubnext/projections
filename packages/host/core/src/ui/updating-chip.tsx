@@ -52,7 +52,7 @@ function Chip({reducedMotion}: {reducedMotion: boolean}) {
       const covers = [...parent.querySelectorAll<HTMLElement>('[data-stage-cover]')]
         .map(cover => cover.getBoundingClientRect())
         .filter(cover => cover.width && cover.right > own.left && cover.left < own.right)
-        .sort((a, b) => a.top - b.top)
+        .toSorted((a, b) => a.top - b.top)
       let top = own.top
       for (const cover of covers) {
         if (cover.top < bottom && cover.bottom > top) {

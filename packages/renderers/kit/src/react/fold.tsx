@@ -15,7 +15,7 @@ export function useFolds<T>(
   idOf: (item: T) => string,
   scope: ChangesScope | undefined,
 ): {entries: Folded<T>[]; expand: (key: string) => void; collapse: (key: string) => void} {
-  const shownKey = scope ? [...scope.shown].sort().join('\n') : ''
+  const shownKey = scope ? [...scope.shown].toSorted().join('\n') : ''
   const [expanded, setExpanded] = useState<{key: string; folds: ReadonlySet<string>}>({key: shownKey, folds: new Set()})
   const folds = expanded.key === shownKey ? expanded.folds : new Set<string>()
   const toggle = useCallback(

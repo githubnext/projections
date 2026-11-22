@@ -40,7 +40,7 @@ export function canonicalJson(value: Json): string {
   if (Array.isArray(value)) return `[${value.map(item => canonicalJson(item as Json)).join(',')}]`
   const object = value as Readonly<Record<string, Json>>
   return `{${Object.keys(object)
-    .sort()
+    .toSorted()
     .filter(key => object[key] !== undefined)
     .map(key => `${JSON.stringify(key)}:${canonicalJson(object[key]!)}`)
     .join(',')}}`

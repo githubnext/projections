@@ -70,7 +70,7 @@ export function balancedWrap(widths: readonly number[], gap: number, available: 
     }
   }
   // Greedy line count only falls as the limit grows: binary search for the smallest candidate that keeps `count` lines.
-  const sorted = [...candidates].sort((a, b) => a - b)
+  const sorted = [...candidates].toSorted((a, b) => a - b)
   let low = 0,
     high = sorted.length - 1,
     best = greedy

@@ -11,7 +11,7 @@ export function linkUnits({units, unitByPackage, unitByCrateIdent, unitFiles, li
   const cliCrate = [...units.values()].find(
     unit => unit.kind === 'rust-crate' && unit.data.targets.includes('bin') && /(^|\/)cli$/.test(unit.directory),
   )
-  const packageNames = [...unitByPackage.keys()].sort((a, b) => b.length - a.length || byText(a, b))
+  const packageNames = [...unitByPackage.keys()].toSorted((a, b) => b.length - a.length || byText(a, b))
   const namedPackage = specifier => packageNames.find(name => specifier === name || specifier.startsWith(`${name}/`))
 
   for (const unit of [...units.values()]) {

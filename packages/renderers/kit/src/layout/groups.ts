@@ -61,10 +61,10 @@ export function moduleGroups(
   } while (changed)
   const groups = new Map(
     [...candidates]
-      .sort(compareIds)
+      .toSorted(compareIds)
       .map(id => [
         id,
-        [...new Set(edges.filter(edge => edge.from === id && edge.kind === 'contains').map(edge => edge.to))].sort(compareIds),
+        [...new Set(edges.filter(edge => edge.from === id && edge.kind === 'contains').map(edge => edge.to))].toSorted(compareIds),
       ]),
   )
   // A card contained by a card (a VM's extension) sits in the nearest boundary that contains them.

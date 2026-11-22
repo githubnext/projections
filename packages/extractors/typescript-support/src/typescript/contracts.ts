@@ -46,7 +46,7 @@ export function typeFacts(checker: ts.TypeChecker, text: TypeText) {
         const kind = primitive(item)
         return {text: type(item), ...(kind ? {primitive: kind} : {})}
       })
-      .sort((a, b) => (a.text < b.text ? -1 : a.text > b.text ? 1 : 0))
+      .toSorted((a, b) => (a.text < b.text ? -1 : a.text > b.text ? 1 : 0))
     return {text: type(value, new Set(), expand), union}
   }
   const textFact = (text: string): Json => ({text, union: [{text}]})

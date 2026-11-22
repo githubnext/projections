@@ -118,9 +118,9 @@ export function sameSummaryFilter(a: SummaryFilter | null | undefined, b: Summar
   const kinds = (filter: SummaryFilter) =>
     filter.kinds
       .map(kind => `${kind.collection ?? '*'}:${kind.kind}`)
-      .sort()
+      .toSorted()
       .join('\n')
-  const ids = (filter: SummaryFilter) => (filter.ids ? [...filter.ids].sort().join('\n') : undefined)
+  const ids = (filter: SummaryFilter) => (filter.ids ? filter.ids.toSorted().join('\n') : undefined)
   return a.status === b.status && kinds(a) === kinds(b) && ids(a) === ids(b)
 }
 

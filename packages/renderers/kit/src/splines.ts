@@ -151,7 +151,7 @@ function align(before: Spline, after: Spline): [Spline, Spline] {
   if (cached) return cached
   const a = segmentEnds(before),
     b = segmentEnds(after)
-  const cuts = [...new Set([...a, ...b].slice().sort((x, y) => x - y))].filter(
+  const cuts = [...new Set([...a, ...b].slice().toSorted((x, y) => x - y))].filter(
     (fraction, index, all) => fraction < 1 - cutTolerance && (!index || fraction - all[index - 1]! > cutTolerance),
   )
   let result: [Spline, Spline] = [splitAt(before, a, cuts), splitAt(after, b, cuts)]

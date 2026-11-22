@@ -29,7 +29,7 @@ async function workspaces() {
       continue
     }
     const parent = pattern.slice(0, -2)
-    for (const entry of (await readdir(join(root, parent), {withFileTypes: true})).sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const entry of (await readdir(join(root, parent), {withFileTypes: true})).toSorted((a, b) => a.name.localeCompare(b.name))) {
       if (entry.isDirectory() && (await exists(`${parent}/${entry.name}/package.json`))) found.push(`${parent}/${entry.name}`)
     }
   }

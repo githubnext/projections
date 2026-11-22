@@ -36,7 +36,7 @@ const change = {id: 'a', collection: 'entities', before: [], after: ['a'], statu
 const comparison = {protocolVersion: 0, changes: [change], steps: [{changes: ['a'], kind: 'add'}], order: {reverse: 'mirror'}}
 
 test('every published schema is draft 2020-12 at its URL, compiles strictly and refers only to published schemas', () => {
-  assert.deepEqual(names.sort(), [
+  assert.deepEqual(names.toSorted(), [
     'api',
     'architecture',
     'artifact',
@@ -423,7 +423,7 @@ test('every renderer package scenarios file has unique scenario IDs and referenc
   const renderers = new URL('../../renderers/', import.meta.url)
   const packages = readdirSync(renderers)
     .filter(name => existsSync(new URL(`${name}/scenarios.json`, renderers)))
-    .sort()
+    .toSorted()
   assert.ok(packages.length >= 7, packages.join(','))
   for (const name of packages) {
     const file = new URL(`${name}/scenarios.json`, renderers)

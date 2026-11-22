@@ -28,7 +28,7 @@ for (const [name, path] of await runtimeDependencies(manifest)) {
   const directory = dirname(path)
   const files = readdirSync(directory)
     .filter(file => /^licen[cs]e(-code)?(\.(md|txt))?$/i.test(file))
-    .sort()
+    .toSorted()
   sections.push('', `## ${name} ${json.version} (${json.license})`, '')
   if (!files.length) {
     const author = typeof json.author === 'string' ? json.author : json.author?.name

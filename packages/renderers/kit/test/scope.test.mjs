@@ -44,15 +44,15 @@ const model = comparisonModel(before, after, comparison)
 
 test("the Changes scope is the host's shown IDs, split into changes and context", () => {
   const scope = changesScope(model, {query: '', changesOnly: true, ids: ['tool', 'tool/viewer', 'c']})
-  assert.deepEqual([...scope.changes].sort(), ['c', 'tool/viewer'])
+  assert.deepEqual([...scope.changes].toSorted(), ['c', 'tool/viewer'])
   assert.deepEqual([...scope.context], ['tool'])
 })
 
 test("the summary filter and find narrow only what is at full strength: the host's `scope` is what is laid out", () => {
   const scope = changesScope(model, {query: '', changesOnly: true, ids: ['c'], scope: ['tool', 'tool/viewer', 'c']})
-  assert.deepEqual([...scope.shown].sort(), ['c', 'tool', 'tool/viewer'])
+  assert.deepEqual([...scope.shown].toSorted(), ['c', 'tool', 'tool/viewer'])
   // Past the limit, the scope is derived again, whatever the matches.
-  assert.deepEqual([...changesScope(model, {query: 'c', changesOnly: true, ids: ['c'], scope: null}).shown].sort(), [
+  assert.deepEqual([...changesScope(model, {query: 'c', changesOnly: true, ids: ['c'], scope: null}).shown].toSorted(), [
     'c',
     'tool',
     'tool/viewer',
@@ -61,7 +61,7 @@ test("the summary filter and find narrow only what is at full strength: the host
 
 test('past the filter ID limit the kit derives the same scope, and there is none while every item shows', () => {
   const scope = changesScope(model, {query: '', changesOnly: true, ids: null})
-  assert.deepEqual([...scope.shown].sort(), ['c', 'tool', 'tool/viewer'])
+  assert.deepEqual([...scope.shown].toSorted(), ['c', 'tool', 'tool/viewer'])
   assert.equal(changesScope(model, {query: '', changesOnly: false, ids: null}), undefined)
   assert.equal(changesScope(extractionModel(after), {query: '', changesOnly: true, ids: null}), undefined)
 })
@@ -76,8 +76,8 @@ test("a split's further parts are in the scope with the change the host names", 
   })
   assert.equal(split.entities.length, 2)
   const scope = changesScope(split, {query: '', changesOnly: true, ids: ['handler']})
-  assert.deepEqual([...scope.shown].sort(), split.entities.map(row => row.id).sort())
-  assert.deepEqual([...scope.changes].sort(), split.entities.map(row => row.id).sort())
+  assert.deepEqual([...scope.shown].toSorted(), split.entities.map(row => row.id).toSorted())
+  assert.deepEqual([...scope.changes].toSorted(), split.entities.map(row => row.id).toSorted())
 })
 
 // A schema: two tables with columns; `orders` gains a column and a key to `customers`; `audit` is unrelated.
@@ -116,14 +116,14 @@ test('a scoped model holds only what the scope shows, and never a relationship t
   // The audit link is a change, but narrowed away (as a find would): its ends aren't shown, so it isn't kept.
   const shown = new Set(['orders.customer', 'orders>orders.customer', 'fk', 'orders', 'customers'])
   const {model} = scopedModel(schemaModel, shown)
-  assert.deepEqual(model.entities.map(row => row.id).sort(), ['customers', 'orders', 'orders.customer'])
+  assert.deepEqual(model.entities.map(row => row.id).toSorted(), ['customers', 'orders', 'orders.customer'])
   const ids = new Set(model.entities.map(row => row.id))
   for (const row of model.relationships) {
     const item = row.after ?? row.before
     assert.ok(ids.has(item.from) && ids.has(item.to), `${row.id} has both ends shown`)
   }
-  assert.deepEqual(model.relationships.map(row => row.id).sort(), ['fk', 'orders>orders.customer'])
-  assert.deepEqual(model.after.entities.map(item => item.id).sort(), ['customers', 'orders', 'orders.customer'])
+  assert.deepEqual(model.relationships.map(row => row.id).toSorted(), ['fk', 'orders>orders.customer'])
+  assert.deepEqual(model.after.entities.map(item => item.id).toSorted(), ['customers', 'orders', 'orders.customer'])
   // Steps keep their kept rows; one left with none is dropped.
   assert.deepEqual(
     model.steps.map(step => step.entities.length + step.relationships.length),
@@ -138,7 +138,7 @@ test('folded parts stand as one unchanged part of their entity, and opening a fo
   assert.ok(fold && isFold(fold.id))
   assert.equal(fold.after.label, '2 unchanged columns')
   assert.equal(fold.after.kind, 'column')
-  assert.deepEqual([...folds.get('pk-fold:orders')].sort(), ['orders.id', 'orders.total'])
+  assert.deepEqual([...folds.get('pk-fold:orders')].toSorted(), ['orders.id', 'orders.total'])
   assert.ok(model.after.relationships.some(item => item.from === 'orders' && item.to === 'pk-fold:orders'))
   // An open fold shows its parts and stays, as the way to fold them again.
   const open = scopedModel(schemaModel, shown, 'fold', new Set(['pk-fold:orders'])).model
@@ -175,7 +175,7 @@ test("a renderer's context follows the relationships it names: a changed package
     changes: [{id: 'b', collection: 'entities', before: ['b'], after: ['b'], status: 'modified', correspondence: 'exact'}],
     steps: [{changes: ['b']}],
   })
-  assert.deepEqual([...followContext(model, new Set(['b']), {incoming: () => true})].sort(), ['a', 'a>b', 'workspace', 'workspace>a'])
+  assert.deepEqual([...followContext(model, new Set(['b']), {incoming: () => true})].toSorted(), ['a', 'a>b', 'workspace', 'workspace>a'])
   // Only the kinds named, and in the direction named.
   assert.deepEqual([...followContext(model, new Set(['b']), {outgoing: () => true})], [])
   assert.deepEqual([...followContext(model, new Set(['b']), {incoming: kind => kind === 'contains'})], [])

@@ -59,7 +59,7 @@ export function linksOf(state: SchemaState, {nodes, tableSet, tableOf, columnNam
       )
     }
   }
-  return {links: [...links.values()].sort((a, b) => compareIds(a.key, b.key)), foreign}
+  return {links: [...links.values()].toSorted((a, b) => compareIds(a.key, b.key)), foreign}
 }
 
 /** Each table's columns, keys first, and each key column's role and marker. */
@@ -75,9 +75,9 @@ export function columnMarkers(
   for (const table of tables) {
     // Keys first, then the other columns, and last the fold of those the Changes scope leaves out.
     const rank = (id: string) => (isFold(id) ? 3 : primary.has(id) ? 0 : foreign.has(id) ? 1 : 2)
-    const columns = [...columnsOf.get(table)!].sort(
-      (a, b) => rank(a) - rank(b) || compareIds(nodes.get(a)!.label, nodes.get(b)!.label) || compareIds(a, b),
-    )
+    const columns = columnsOf
+      .get(table)!
+      .toSorted((a, b) => rank(a) - rank(b) || compareIds(nodes.get(a)!.label, nodes.get(b)!.label) || compareIds(a, b))
     ordered.set(table, columns)
     for (const id of columns) {
       const role = primary.has(id) ? (foreign.has(id) ? 'pk-fk' : 'pk') : foreign.has(id) ? 'fk' : undefined

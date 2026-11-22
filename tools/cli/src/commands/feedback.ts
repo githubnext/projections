@@ -95,7 +95,7 @@ export function feedbackReport(root: string, options: FeedbackOptions) {
   const similar = open
     .map(issue => ({...issue, similarity: Math.round(similarity(issue.title, draft.title) * 100) / 100}))
     .filter(issue => issue.similarity >= 0.4)
-    .sort((a, b) => b.similarity - a.similarity)
+    .toSorted((a, b) => b.similarity - a.similarity)
   if (similar.length) {
     return {
       status: 'duplicate?' as const,

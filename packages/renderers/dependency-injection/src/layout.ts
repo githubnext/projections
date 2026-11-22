@@ -54,20 +54,20 @@ export function layoutDiModel(model: DiModel, height: number = diMetrics.height)
   const order = new Map<string, number>()
   const stack = ids
     .filter(id => (parents.get(id)?.length ?? 0) === 0)
-    .sort(compareIds)
-    .reverse()
+    .toSorted(compareIds)
+    .toReversed()
   const visited = new Set<string>()
   while (stack.length) {
     const id = stack.pop()!
     if (visited.has(id)) continue
     visited.add(id)
     order.set(id, order.size)
-    for (const child of [...children.get(id)!].sort(compareIds).reverse()) stack.push(child)
+    for (const child of children.get(id)!.toSorted(compareIds).toReversed()) stack.push(child)
   }
-  for (const id of [...ids].sort(compareIds)) if (!order.has(id)) order.set(id, order.size)
+  for (const id of ids.toSorted(compareIds)) if (!order.has(id)) order.set(id, order.size)
 
   const layers: string[][] = []
-  for (const id of [...ids].sort((a, b) => order.get(a)! - order.get(b)!)) {
+  for (const id of ids.toSorted((a, b) => order.get(a)! - order.get(b)!)) {
     const depth = depths.get(id) ?? 0
     ;(layers[depth] ??= []).push(id)
   }

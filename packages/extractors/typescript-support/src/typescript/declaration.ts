@@ -23,10 +23,10 @@ function heritageText(checker: ts.TypeChecker, render: Renderer, declaration: Ge
           clause =>
             `${clause.token === ts.SyntaxKind.ExtendsKeyword ? 'extends' : 'implements'} ${clause.types
               .map(type => render.type(checker.getTypeAtLocation(type)))
-              .sort()
+              .toSorted()
               .join(', ')}`,
         )
-        .sort()
+        .toSorted()
         .join(' ')
     : ''
 }
@@ -41,7 +41,7 @@ function supertypes(checker: ts.TypeChecker, render: Renderer, declaration: Gene
             type: render.type(checker.getTypeAtLocation(type)),
           })),
         )
-        .sort((a, b) => {
+        .toSorted((a, b) => {
           const [left, right] = [`${a.relation} ${a.type}`, `${b.relation} ${b.type}`]
           return left < right ? -1 : left > right ? 1 : 0
         })

@@ -25,7 +25,7 @@ export async function schemas() {
   const files = (await readdir(join(root, directory), {recursive: true}))
     .map(file => file.replaceAll('\\', '/'))
     .filter(file => /(?:^|\/)v\d+\.json$/.test(file))
-    .sort()
+    .toSorted()
   const loaded = await Promise.all(
     files.map(async file => {
       const [, path, version] = /^(.+)\/v(\d+)\.json$/.exec(file)

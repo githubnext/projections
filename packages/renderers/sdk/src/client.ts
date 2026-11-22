@@ -323,7 +323,7 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
   if (replay.length) {
     const order = (type: HostMessage['type']) => (replayed as readonly string[]).indexOf(type)
     queueMicrotask(() => {
-      for (const [, message] of replay.sort(([a], [b]) => order(a) - order(b))) if (!disposed) deliver(message)
+      for (const [, message] of replay.toSorted(([a], [b]) => order(a) - order(b))) if (!disposed) deliver(message)
     })
   }
   return client

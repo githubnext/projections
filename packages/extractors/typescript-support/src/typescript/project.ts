@@ -48,7 +48,7 @@ function selectedEntryFiles(options: ReturnType<typeof inputs>): string[] {
 
 /** Tracked sources, manifests and tsconfig files: what the compiler starts from. */
 async function loadTracked(context: ExtractorContext, files: SourceFiles): Promise<void> {
-  for (const file of [...context.files].sort()) {
+  for (const file of context.files.toSorted()) {
     if (
       (sourceExtension.test(file) || path.basename(file) === 'package.json' || /^tsconfig.*\.json$/.test(path.basename(file))) &&
       !file.split('/').includes('node_modules')
@@ -79,7 +79,7 @@ function programSources(files: SourceFiles, programs: Project['programs']): Proj
   if (!sources.length) {
     throw new Error('No TypeScript/JavaScript sources found; provide tracked source files and `inputs.tsconfig` or `inputs.entrypoints`')
   }
-  return sources.sort((a, b) => compareIds(a.source.fileName, b.source.fileName))
+  return sources.toSorted((a, b) => compareIds(a.source.fileName, b.source.fileName))
 }
 
 export async function projectFor(context: ExtractorContext): Promise<Project> {

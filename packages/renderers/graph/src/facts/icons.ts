@@ -23,7 +23,7 @@ export function unknownIconFacts(model: ComparisonModel, icon: ControlValue | un
     for (const name of unknown) names.add(name)
   }
   if (!ids.length) return []
-  const listed = [...names].sort().map(name => JSON.stringify(name.slice(0, 40)))
+  const listed = [...names].toSorted().map(name => JSON.stringify(name.slice(0, 40)))
   const shown = listed.length > 5 ? [...listed.slice(0, 5), `${listed.length - 5} more`] : listed
   return [
     {

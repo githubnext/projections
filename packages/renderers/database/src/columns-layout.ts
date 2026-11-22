@@ -76,7 +76,7 @@ function slotCrossings(placement: Placement, crossing: readonly SchemaLink[], ra
   const {waypoint} = schemaMetrics
   const passing = crossing
     .map(link => ({link, desired: previousY(placement, link, rank)}))
-    .sort((a, b) => a.desired - b.desired || compareIds(a.link.key, b.link.key))
+    .toSorted((a, b) => a.desired - b.desired || compareIds(a.link.key, b.link.key))
   for (const {link, desired} of passing) {
     occupied.sort((a, b) => a[0] - b[0])
     const half = waypoint / 2
@@ -124,7 +124,7 @@ export function columnsLayout(model: SchemaModel, cardWidth: number, sizer: Text
   for (const link of model.links) {
     const back = model.rank.get(link.principal)! > model.rank.get(link.dependent)!
     const points = (waypoints.get(link.key) ?? [])
-      .sort((a, b) => (back ? a.rank - b.rank : b.rank - a.rank))
+      .toSorted((a, b) => (back ? a.rank - b.rank : b.rank - a.rank))
       .flatMap(point => {
         const [left, right] = [
           {x: x(point.rank), y: point.y},

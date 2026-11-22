@@ -33,7 +33,7 @@ function requested(input: ToolInput, model: FolderModel): {chosen?: {id: string}
 async function openedTab(id: string, folder: vscode.WorkspaceFolder): Promise<ProjectionTab> {
   const deadline = Date.now() + 20_000
   let tab: ProjectionTab | undefined
-  while (!(tab = [...ProjectionTab.tabs].reverse().find(item => item.projection === id && item.folder === folder))) {
+  while (!(tab = [...ProjectionTab.tabs].toReversed().find(item => item.projection === id && item.folder === folder))) {
     if (Date.now() > deadline) throw new Error(`The ${id} tab didn't open`)
     await sleep(100)
   }

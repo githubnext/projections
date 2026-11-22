@@ -23,7 +23,7 @@ function color(tokens, name) {
 const same = value => formatColor(parseColor(value))
 
 test('the fixtures are the representative VS Code themes, captured with their body classes and variables', () => {
-  assert.deepEqual(fixtures.map(fixture => fixture.id).sort(), [
+  assert.deepEqual(fixtures.map(fixture => fixture.id).toSorted(), [
     'dark-2026',
     'dark-high-contrast',
     'dark-modern',
@@ -59,7 +59,7 @@ for (const fixture of fixtures) {
   const v = fixture.variables
 
   test(`${fixture.name}: every renderer token is defined, resolved and short enough for the protocol`, () => {
-    assert.deepEqual(Object.keys(tokens).sort(), [...themeTokenNames].sort())
+    assert.deepEqual(Object.keys(tokens).toSorted(), themeTokenNames.toSorted())
     for (const [name, value] of Object.entries(tokens)) {
       assert.equal(typeof value, 'string', name)
       if (!name.startsWith('icon-')) assert.ok(value.length <= 512, `${name} is short enough`)

@@ -20,7 +20,7 @@ const after = extraction('api/v0', [
   declaration('stable', 'stable(): void'),
 ])
 const signatures = (document: typeof before) =>
-  document.entities.map(entity => [entity.id, String(entity.data!.signature)] as const).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+  document.entities.map(entity => [entity.id, String(entity.data!.signature)] as const).toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
 
 /** Each row as a sighted reader sees it: the status in its footer and its signature lines, with the runs marked in them. */
 function rows(root: Locator) {
@@ -250,7 +250,7 @@ for (const [mode, width] of [
       width,
     })
     const lines = await nameLines(renderer.frame.locator('.api-view'))
-    expect(lines.map(line => line.id).sort()).toEqual([
+    expect(lines.map(line => line.id).toSorted()).toEqual([
       'ClientOptions.retries',
       'RequestConfiguration.maximumRedirectsBeforeFailing',
       'getJson',

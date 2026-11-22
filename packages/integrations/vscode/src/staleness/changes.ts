@@ -3,7 +3,7 @@ import {readsEdits, symbolic, workingTree} from './edits.ts'
 
 /** The change kinds after `since`, and whether they are complete (a gap in the generations, or `complete: false`, isn't). */
 export function changesSince(records: readonly ChangeRecord[], since: number): {kinds: Set<string>; complete: boolean} {
-  const after = records.filter(record => record.generation > since).sort((a, b) => a.generation - b.generation)
+  const after = records.filter(record => record.generation > since).toSorted((a, b) => a.generation - b.generation)
   const kinds = new Set(after.flatMap(record => record.changes))
   let complete = after.every(record => record.complete)
   // Each record covers the changes since the generation before it: a missing one is unknown.

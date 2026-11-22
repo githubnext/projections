@@ -509,6 +509,6 @@ export function artifactRuns(response, {repository, workflow}) {
     .filter(run => Number.isSafeInteger(run?.id) && run.id > 0 && (run.conclusion === undefined || run.conclusion === 'success'))
     .filter(run => ['push', 'pull_request'].includes(run.event) && same(run.repository?.full_name) && same(run.head_repository?.full_name))
     .filter(run => typeof run.path === 'string' && run.path.split('@')[0] === workflow)
-    .sort((a, b) => String(b.created_at ?? '').localeCompare(String(a.created_at ?? '')))
+    .toSorted((a, b) => String(b.created_at ?? '').localeCompare(String(a.created_at ?? '')))
     .map(run => run.id)
 }

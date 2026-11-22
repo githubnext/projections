@@ -37,7 +37,7 @@ export async function ringGeometry(frame: Frame, id: string, {focused = false}: 
           const edges = [...unit.querySelectorAll('[data-projections-edge]'), ...(unit.hasAttribute('data-projections-edge') ? [unit] : [])]
           const shape = edges
             .map(edge => ({edge, box: edge.getBoundingClientRect()}))
-            .sort((a, b) => b.box.width * b.box.height - a.box.width * a.box.height)[0]
+            .toSorted((a, b) => b.box.width * b.box.height - a.box.width * a.box.height)[0]
           if (!shape) return {left: 0, top: 0, right: 0, bottom: 0, radii: [], mode: 'halo' as const}
           const element = shape.edge as SVGGeometryElement
           const style = getComputedStyle(element)

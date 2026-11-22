@@ -46,7 +46,7 @@ export function placeCards(
       middle: (child[flow] ?? 0) + (child[depth] ?? 0) / 2,
       across: (child[across] ?? 0) + (child[direction === 'DOWN' ? 'width' : 'height'] ?? 0) / 2,
     }))
-    const starts = [...new Set(placedNodes.map(node => Math.round(node.start)))].sort((a, b) => a - b)
+    const starts = [...new Set(placedNodes.map(node => Math.round(node.start)))].toSorted((a, b) => a - b)
     const layerOf = (start: number) => starts.findIndex(value => Math.abs(value - Math.round(start)) < 1)
     const middles = starts.map(start =>
       median(placedNodes.filter(node => Math.abs(Math.round(node.start) - start) < 1).map(node => node.middle)),

@@ -39,7 +39,7 @@ function allTags(transition: Pick<DatabaseTransition, 'tagStages'>, changes: Rea
     return (change?.after ?? change?.before)?.kind ?? ''
   }
   return [...names.entries()]
-    .sort(
+    .toSorted(
       ([a, aNames], [b, bNames]) => kind(a).localeCompare(kind(b)) || aNames.at(-1)!.localeCompare(bNames.at(-1)!) || a.localeCompare(b),
     )
     .slice(0, tagLimit)

@@ -129,7 +129,7 @@ export class SourceFiles {
       const children = (await readdir(guarded, {withFileTypes: true}))
         .filter(child => child.isDirectory() || child.isSymbolicLink())
         .map(child => child.name)
-        .sort()
+        .toSorted()
       this.directoryCache.set(directory, children)
       return children.length > 0
     } catch (error) {

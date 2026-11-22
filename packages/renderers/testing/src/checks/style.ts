@@ -8,7 +8,7 @@ import type {Checks} from './support.js'
 /** Theme tokens a smaller text may never go below; `font-size-xs` and labels are 12px, and existing kit text uses 11px. */
 const textFloor = 11
 const hairlines = [1, 2]
-const listed = (values: readonly number[]) => [...new Set(values)].sort((a, b) => a - b).join(', ')
+const listed = (values: readonly number[]) => [...new Set(values)].toSorted((a, b) => a - b).join(', ')
 const near = (value: number, allowed: readonly number[], tolerance: number) => allowed.some(item => Math.abs(item - value) <= tolerance)
 const nearest = (value: number, allowed: readonly number[]) =>
   allowed.reduce((best, item) => (Math.abs(item - value) < Math.abs(best - value) ? item : best), allowed[0] ?? 0)

@@ -140,7 +140,7 @@ export function createPackingTransition(
       if (mix > 0 && mix < 1) settle(circles)
       return circles
         .filter(circle => circle.opacity > 1e-6 && circle.r > 0.05)
-        .sort((left, right) => left.depth - right.depth || compareIds(left.id, right.id))
+        .toSorted((left, right) => left.depth - right.depth || compareIds(left.id, right.id))
     },
   }
 }
@@ -167,6 +167,6 @@ export function diffPacking(
   const rows = new Map(model.entities.map(row => [row.id, row]))
   const circles = [...packing.placements]
     .map(([id, placement]) => ({...placement, id, row: rows.get(id)!, opacity: 1, local: 1}))
-    .sort((left, right) => left.depth - right.depth || compareIds(left.id, right.id))
+    .toSorted((left, right) => left.depth - right.depth || compareIds(left.id, right.id))
   return {packing, circles, before, after}
 }

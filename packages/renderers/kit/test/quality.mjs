@@ -196,7 +196,7 @@ export function crowdedRuns(routes, spacing) {
 export function portIssues(ports, middle, length, spacing, inset) {
   const issues = []
   if (!ports.length) return issues
-  const sorted = [...ports].sort((a, b) => a - b)
+  const sorted = [...ports].toSorted((a, b) => a - b)
   if (ports.some((port, index) => port !== sorted[index])) issues.push('not in the order the routes come from')
   const mean = sorted.reduce((sum, port) => sum + port, 0) / sorted.length
   if (Math.abs(mean - middle) > 0.5) issues.push(`band off centre by ${(mean - middle).toFixed(1)}`)

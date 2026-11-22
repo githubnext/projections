@@ -107,7 +107,7 @@ const workspaces = new Map(
       .map(directory => [JSON.parse(readFileSync(resolve(root, directory, 'package.json'), 'utf8')).name, directory])
   }),
 )
-const workspaceDirectories = [...workspaces.values()].sort((a, b) => b.length - a.length)
+const workspaceDirectories = [...workspaces.values()].toSorted((a, b) => b.length - a.length)
 /** The workspace directory a repository-relative path belongs to. */
 const workspaceOf = path => workspaceDirectories.find(directory => path === directory || path.startsWith(`${directory}/`))
 // The renderers' and the kit's browser suites sit beside their code but run in the renderer harness

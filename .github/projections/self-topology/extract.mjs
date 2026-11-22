@@ -70,7 +70,7 @@ linkUnits({...found, unitFiles, linesOf, relate, unitAtPath, wasmModules})
 // Where each unit ships, from what the release workflows attach and publish (see `releases.mjs`).
 for (const [id, channels] of releaseChannels({roots, read, files, units, owner: unitAtPath})) {
   const unit = units.get(id)
-  unit.meta = {...unit.meta, published: channels.map(entry => entry.channel).sort(byText)}
+  unit.meta = {...unit.meta, published: channels.map(entry => entry.channel).toSorted(byText)}
   for (const {source, line} of channels) unit.evidence.push({kind: 'release', source, ...(line ? {location: {line}} : {})})
 }
 

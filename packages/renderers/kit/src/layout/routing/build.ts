@@ -47,7 +47,7 @@ function gaps(ctx: RoutingContext, segment: Segment, start: Point, end: Point) {
   if (f0 > cursor) open.push([cursor, f0])
   return open
     .filter(([near, far]) => far - near >= 12)
-    .sort((a, b) => b[1] - b[0] - (a[1] - a[0]) || b[0] - a[0])
+    .toSorted((a, b) => b[1] - b[0] - (a[1] - a[0]) || b[0] - a[0])
     .map(([near, far]) => [near - s0, far - s0] as const)
 }
 

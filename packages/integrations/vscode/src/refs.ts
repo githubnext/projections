@@ -175,7 +175,7 @@ export async function definitionEdits(
   const paths = new Map<string, string>()
   for (const directory of ['.github/projections', '.projections']) {
     const names = await readdir(join(cwd, directory)).catch(() => [] as string[])
-    for (const name of names.filter(item => item.endsWith('.json')).sort()) {
+    for (const name of names.filter(item => item.endsWith('.json')).toSorted()) {
       try {
         const id = (JSON.parse(await readFile(join(cwd, directory, name), 'utf8')) as {id?: unknown}).id
         if (typeof id === 'string' && !paths.has(id)) paths.set(id, `${prefix}${directory}/${name}`)

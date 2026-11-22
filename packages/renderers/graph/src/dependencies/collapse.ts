@@ -16,13 +16,13 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
   const base = new Set<string>(expansion === 'all' ? ids : [...roots, ...direct, ...ids.filter(id => !depth.has(id))])
   const anchors = new Set(ids.filter(id => isChanged(rows.get(id)!)))
   for (const row of edges) if (isChanged(row)) for (const {from, to} of endpoints(row)) anchors.add(from).add(to)
-  for (const anchor of [...anchors].sort(compareIds)) {
+  for (const anchor of [...anchors].toSorted(compareIds)) {
     for (let id: string | undefined = anchor; id !== undefined && !base.has(id); id = parent.get(id)) base.add(id)
   }
   // An expanded package shows its children; an expanded child that shows, in turn, shows its own.
   const reveal = (open: ReadonlySet<string>) => {
     const shown = new Set(base)
-    const order = [...open].sort(compareIds)
+    const order = [...open].toSorted(compareIds)
     for (let grew = true; grew;) {
       grew = false
       for (const id of order) {
@@ -41,7 +41,7 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
   // Each hidden package belongs to the first shown package that pulls it in, nearest the roots first.
   const ownership = (shown: ReadonlySet<string>) => {
     const owner = new Map<string, string>()
-    const queue = [...shown].sort((a, b) => (depth.get(a) ?? Infinity) - (depth.get(b) ?? Infinity) || compareIds(a, b))
+    const queue = [...shown].toSorted((a, b) => (depth.get(a) ?? Infinity) - (depth.get(b) ?? Infinity) || compareIds(a, b))
     for (let index = 0; index < queue.length; index += 1) {
       const id = queue[index]!
       const by = shown.has(id) ? id : owner.get(id)!
@@ -66,7 +66,7 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
   // summary would, so the same card opens and closes the same packages.
   const opened = new Map<string, string[]>()
   if (expansion !== 'all') {
-    for (const by of [...expansion].sort(compareIds)) {
+    for (const by of [...expansion].toSorted(compareIds)) {
       if (!visible.has(by) || owned.has(by)) continue
       const rest = new Set(expansion)
       rest.delete(by)
@@ -86,7 +86,7 @@ export function summaryCards(
   const summaries: EntityChange<Entity>[] = []
   const summaryEdges: EntityChange<Relationship>[] = []
   const summaryOf = new Map<string, string>()
-  for (const by of [...new Set([...owned.keys(), ...opened.keys()])].sort(compareIds)) {
+  for (const by of [...new Set([...owned.keys(), ...opened.keys()])].toSorted(compareIds)) {
     const open = opened.has(by)
     const members = (open ? opened : owned).get(by)!
     const ownerRow = rows.get(by)!

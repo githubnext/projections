@@ -37,7 +37,7 @@ function replaceIcons(text) {
     ts.forEachChild(node, visit)
   }
   visit(sourceFile)
-  return {text: applyEdits(text, edits), icons: [...icons].sort()}
+  return {text: applyEdits(text, edits), icons: [...icons].toSorted()}
 }
 
 // Maps one upstream import to ours (none for the icon placeholder).

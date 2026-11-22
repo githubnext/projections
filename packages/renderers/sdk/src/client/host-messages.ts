@@ -63,11 +63,24 @@ export function resumeSession(view: Window, channel: string) {
   return {messages: session.messages, replay}
 }
 
+/** The generation of each `init` payload handed to a renderer, so a paint of it echoes its own. */
+const generations = new WeakMap<InitPayload, number>()
+
+/**
+ * What a renderer's `rendered` echoes (see `HostMessage`): the generation of the `init` it painted when it says which,
+ * else the latest `init`'s; nothing when that had none.
+ */
+export function echoedGeneration(latest: HostMessage | undefined, painted?: InitPayload): {generation?: number} {
+  const generation = painted ? generations.get(painted) : latest?.type === 'init' ? latest.generation : undefined
+  return generation === undefined ? {} : {generation}
+}
+
 /** Hands a host message to its handler, as the handler's own payload. */
 export function dispatch(handlers: RendererHandlers, message: HostMessage) {
   switch (message.type) {
     case 'init': {
-      const {type: _type, ...payload} = message
+      const {type: _type, generation, ...payload} = message
+      if (generation !== undefined) generations.set(payload as InitPayload, generation)
       handlers.init?.(payload as InitPayload)
       break
     }

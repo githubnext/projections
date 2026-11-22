@@ -144,7 +144,12 @@ export interface RendererLegend {
  * whenever the document changes, and every other message may arrive at any time after it.
  */
 export type HostMessage =
-  | ({type: 'init'} & InitPayload)
+  /**
+   * The documents to present. `generation` numbers each `init` a host sends, and the renderer's `rendered` echoes the
+   * latest it received, so a host tells an acknowledgement of an earlier document from one of this. Optional: hosts
+   * that send none get none back.
+   */
+  | ({type: 'init'; generation?: number} & InitPayload)
   | ({type: 'progress'} & ProgressPayload)
   /** The selected item, and optionally a property of it (`path`, an RFC 6901 pointer into the item). */
   | {type: 'select'; id: string | null; path?: string}
@@ -314,8 +319,11 @@ export interface ScrollPosition {
 export type RendererMessage =
   /** The renderer is listening and supports `capabilities`; the host replies with `init`. */
   | {type: 'ready'; capabilities: RendererCapabilities}
-  /** The frame for `progress` (0 to 1) has been painted. */
-  | {type: 'rendered'; progress: number}
+  /**
+   * The frame for `progress` (0 to 1) has been painted, with the `generation` of the latest `init` the renderer had
+   * received when it said so (none when that `init` had none).
+   */
+  | {type: 'rendered'; progress: number; generation?: number}
   /** The person selected an item, or a property of it (`path`), or cleared the selection (`null`). */
   | {type: 'select'; id: string | null; path?: string}
   /** The frame height the renderer wants, in CSS px; the host clamps it to `rendererLimits.minHeight`–`maxHeight`. */

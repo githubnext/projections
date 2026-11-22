@@ -79,7 +79,7 @@ export function usePaintAcknowledgement(
   useEffect(() => {
     if (!client || !init || holds.current) return
     return afterPaint(() => {
-      if (!holds.current) client.rendered(hostProgress.progress)
+      if (!holds.current) client.rendered(hostProgress.progress, init)
     })
   }, [client, init, hostProgress, released])
   return hold

@@ -15,7 +15,7 @@ import {
   rendererFragment,
   rendererLimits,
 } from '../dist/protocol.js'
-import {RendererConnectionError, connectRenderer} from '../dist/client.js'
+import {RendererConnectionError, afterPaint, connectRenderer} from '../dist/client.js'
 import {dispatch} from '../dist/client/host-messages.js'
 import {refusal} from '../dist/react.js'
 
@@ -1045,5 +1045,52 @@ test('requestDocument asks the host once per name and settles with its answer', 
   assert.equal(fake.posted.length, 4)
   fake.expire()
   await assert.rejects(again, /did not supply the minimal renderer/)
+  client.dispose()
+})
+
+test("a renderer's rendered echoes the latest init's generation, which its init handler never sees", () => {
+  const generation = 3
+  assert.deepEqual(parseRendererMessage(envelope({type: 'rendered', progress: 1, generation}), channel), {
+    type: 'rendered',
+    progress: 1,
+    generation,
+  })
+  for (const invalid of [-1, 1.5, '1', Number.MAX_SAFE_INTEGER + 1])
+    assert.equal(parseRendererMessage(envelope({type: 'rendered', progress: 1, generation: invalid}), channel), undefined)
+  const init = {type: 'init', mode: 'extraction', extraction, projection: {id: 'p', title: 'P', renderer: 'graph'}, ...environment}
+  assert.equal(parseHostMessage(envelope({...init, generation: -1}), channel), undefined)
+  assert.equal(parseHostMessage(envelope({...init, generation}), channel)?.generation, generation)
+
+  const fake = fakeWindow()
+  const received = []
+  const client = connectRenderer({init: payload => received.push(payload)}, {capabilities: {changeHighlighting: 'none'}, window: fake.view})
+  const rendered = () => parseRendererMessage(fake.posted.at(-1).data, channel)
+  // A host that numbers no init gets none back.
+  fake.deliver(envelope(init))
+  client.rendered(1)
+  assert.deepEqual(rendered(), {type: 'rendered', progress: 1})
+  fake.deliver(envelope({...init, generation}))
+  client.rendered(0.5)
+  assert.deepEqual(rendered(), {type: 'rendered', progress: 0.5, generation})
+  assert.equal('generation' in received.at(-1), false)
+  client.dispose()
+})
+
+test('a paint finished after the host sent a new init echoes the generation of the init it painted', () => {
+  const fake = fakeWindow()
+  const frames = []
+  const view = {...fake.view, requestAnimationFrame: callback => frames.push(callback), cancelAnimationFrame: () => {}}
+  const received = []
+  const client = connectRenderer({init: payload => received.push(payload)}, {capabilities: {changeHighlighting: 'none'}, window: fake.view})
+  const init = {type: 'init', mode: 'extraction', extraction, projection: {id: 'p', title: 'P', renderer: 'graph'}, ...environment}
+  fake.deliver(envelope({...init, generation: 0}))
+  const painted = received.at(-1)
+  afterPaint(() => client.rendered(1, painted), view)
+  // The host replaces the document before the paint of the first one is acknowledged.
+  fake.deliver(envelope({...init, generation: 1}))
+  while (frames.length) frames.shift()()
+  assert.deepEqual(parseRendererMessage(fake.posted.at(-1).data, channel), {type: 'rendered', progress: 1, generation: 0})
+  client.rendered(1, received.at(-1))
+  assert.deepEqual(parseRendererMessage(fake.posted.at(-1).data, channel), {type: 'rendered', progress: 1, generation: 1})
   client.dispose()
 })

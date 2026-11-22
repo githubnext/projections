@@ -8,7 +8,7 @@ import type {RendererMessage} from './messages.js'
 import {anchorRect, scrollPosition} from './positions.js'
 import {steps} from './steps-message.js'
 import {parseSummaryItems} from './summary/items.js'
-import {envelopeKeys, finite, isEnvelope, isPropertyPath, keys, rendererNamePattern, text} from './validation.js'
+import {envelopeKeys, finite, isEnvelope, isPropertyPath, keys, rendererNamePattern, text, isGeneration} from './validation.js'
 
 type Fields = Record<string, unknown>
 
@@ -42,9 +42,15 @@ const parsers: {[type: string]: (message: Fields) => RendererMessage | undefined
     return capabilities ? {type: 'ready', capabilities} : undefined
   },
   rendered(message) {
-    if (!keys(message, [...envelopeKeys, 'progress']) || !finite(message.progress) || message.progress < 0 || message.progress > 1)
+    if (
+      !keys(message, [...envelopeKeys, 'progress', 'generation']) ||
+      !finite(message.progress) ||
+      message.progress < 0 ||
+      message.progress > 1
+    )
       return undefined
-    return {type: 'rendered', progress: message.progress}
+    if (message.generation === undefined) return {type: 'rendered', progress: message.progress}
+    return isGeneration(message.generation) ? {type: 'rendered', progress: message.progress, generation: message.generation} : undefined
   },
   select,
   annotation(message) {

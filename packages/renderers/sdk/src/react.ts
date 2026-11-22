@@ -195,7 +195,7 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
   const {init, progress} = state
   useEffect(() => {
     if (!client || !acknowledge || !init) return
-    return afterPaint(() => client.rendered(progress.progress))
+    return afterPaint(() => client.rendered(progress.progress, init))
   }, [client, acknowledge, init, progress])
   const [declared] = useState(() => capabilities.controls ?? [])
   const values = useMemo(() => controlValues(declared, state.options), [declared, state.options])

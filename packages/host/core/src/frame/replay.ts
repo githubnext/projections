@@ -17,6 +17,8 @@ export const selectMessage = (id: string | null, path: string | undefined): Host
 /** What the host set for a renderer, kept so a renderer that becomes ready later gets it too. */
 export interface FrameState {
   init: InitPayload
+  /** The init's generation, which the renderer's `rendered` echoes. */
+  generation: number
   options: RendererOptions
   selection: string | null
   selectionPath: string | undefined
@@ -29,11 +31,11 @@ export interface FrameState {
  * The `init` a renderer is sent: the comparison's change `context` only to a renderer that declares the `context`
  * capability, as a renderer that checks comparisons against an older schema rejects it.
  */
-export function initMessage(init: InitPayload, capabilities: RendererCapabilities | undefined): HostMessage {
+export function initMessage(init: InitPayload, capabilities: RendererCapabilities | undefined, generation: number): HostMessage {
   if (init.mode !== 'comparison' || capabilities?.context || !init.comparison.changes.some(change => change.context))
-    return {type: 'init', ...init}
+    return {type: 'init', generation, ...init}
   const changes = init.comparison.changes.map(({context: _context, ...change}) => change)
-  return {type: 'init', ...init, comparison: {...init.comparison, changes}}
+  return {type: 'init', generation, ...init, comparison: {...init.comparison, changes}}
 }
 
 /**
@@ -41,7 +43,7 @@ export function initMessage(init: InitPayload, capabilities: RendererCapabilitie
  * while it loaded that its capabilities accept.
  */
 export function replay(state: FrameState, capabilities: RendererCapabilities): HostMessage[] {
-  const messages: HostMessage[] = [initMessage(state.init, capabilities)]
+  const messages: HostMessage[] = [initMessage(state.init, capabilities, state.generation)]
   if (Object.keys(state.options).length) messages.push({type: 'options', options: state.options})
   if (state.selection !== null) messages.push(selectMessage(state.selection, state.selectionPath))
   if (state.marks.length && capabilities.annotations) messages.push({type: 'annotations', items: state.marks})

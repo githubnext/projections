@@ -35,8 +35,9 @@ handshake by sending `ready`.
 - `init` starts the frame with either `mode: "extraction"` and `extraction`, or
   `mode: "comparison"` with `before`, `after`, and `comparison`. It also
   includes `projection {id, title, renderer}`, `theme {colorMode, tokens}`,
-  `reducedMotion`, `locale`, and optional `pane` (`before` or `after`) and
-  `sizing` (`content` or `fill`).
+  `reducedMotion`, `locale`, and optional `pane` (`before` or `after`), `sizing`
+  (`content` or `fill`) and `generation`, a number the host gives each `init` it
+  sends.
 - `progress` drives animated playback with `progress` (0–1), `highlighting`
   (0–1), and `direction` (±1).
 - `select` sets the active selection to `id` or `null`, with an optional `path`
@@ -68,7 +69,12 @@ handshake by sending `ready`.
 - `controls` replaces the declared `controls` list.
 - `control` reports that someone changed a declared control from inside the
   renderer (`id`, `value`), which the host applies as a settings change.
-- `rendered` confirms the frame painted a given `progress`.
+- `rendered` confirms the frame painted a given `progress`. When the host
+  numbered its `init` messages (`generation`), `rendered` carries the generation
+  of the document it painted, and the host drops an acknowledgement of an
+  earlier one. The SDK's client adds it: `rendered(progress, init)` echoes the
+  generation of the `init` payload it painted (the SDK's React hooks pass it),
+  or without one the latest it received.
 - `select` reports a selection change (`id` or `null`, plus optional `path` for
   renderers declaring `properties`).
 - `annotation` * fires when someone activates an item's annotation marker (`id`)

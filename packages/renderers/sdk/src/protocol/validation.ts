@@ -45,3 +45,8 @@ export const coordinate = (value: unknown): value is number => finite(value) && 
 export function isEnvelope(value: unknown, channel: string): value is Envelope & {type: string} {
   return record(value) && value.projections === rendererProtocolVersion && value.channel === channel && typeof value.type === 'string'
 }
+
+/** An `init`'s generation (`HostMessage`): a non-negative safe integer. */
+export function isGeneration(value: unknown): value is number {
+  return Number.isSafeInteger(value) && (value as number) >= 0
+}

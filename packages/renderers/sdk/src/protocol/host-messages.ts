@@ -8,7 +8,7 @@ import {focus, parseKinds} from './init-fields.js'
 import {environment} from './environment.js'
 import type {HostMessage, RendererOptions} from './messages.js'
 import {scrollPosition} from './positions.js'
-import {controlIdPattern, envelopeKeys, finite, isEnvelope, isPropertyPath, record} from './validation.js'
+import {controlIdPattern, envelopeKeys, finite, isEnvelope, isPropertyPath, record, isGeneration} from './validation.js'
 import {document} from './document-message.js'
 import {filter} from './filter-message.js'
 
@@ -36,6 +36,7 @@ function init(message: Fields): HostMessage | undefined {
   const {kinds: rawKinds, ...rest} = raw as Fields
   const kinds = parseKinds(rawKinds)
   const projection = {...rest, ...(kinds ? {kinds} : {})}
+  if (message.generation !== undefined && !isGeneration(message.generation)) return undefined
   const {projections: _projections, channel: _channel, ...fields} = message
   const payload = {...fields, projection}
   if (message.mode === 'extraction' && record(message.extraction))

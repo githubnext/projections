@@ -257,23 +257,22 @@ script compiles, and renderers under the harness's `testDir`.
 `npm run tools -- ci explain [files]` explains a plan: each file's class and
 rule, how each unit was reached, and each job and suite with its `when` traced.
 The `changes` job uploads the plan as the `ci-plan` artifact, and
-[what CI runs for what](docs/maintainers/ci-plan.md) lists each case's plan.
+[what CI runs for what](docs/maintainers/ci-plan.md) lists each case's plan. On
+`main`, `ci-miss` reports each failed job the merged pull request's plan skipped
+that passed on the parent commit: a likely gap in the rules. It only reports.
 
 To change what runs, edit the rules, run `npm run tools -- ci replay` (how
 recent pull requests' plans change, in runner-minutes), and add a case to
 `tools/cli/test/ci-plan.cases.json`; `tools test tools/cli` checks the rules,
 the workflow's gating and every case. A rules change runs everything.
 
-Everything also runs on pushes to `main`, nightly, on manual runs (**Run
-workflow** on the Projections workflow), and when a pull request carries the
-`ci:full` label (add the label, then push or re-run the workflow so the plan
-sees it).
+To run everything on a pull request, add the `ci:full` label, then push or
+re-run the workflow so the plan sees it (**Run workflow** runs everything too).
 
 `ci-ok` is the single required check. It passes when `changes` succeeds and
 every other job either passes or is skipped by the plan; any failed, cancelled,
-or timed-out job fails it.
-
-`dollarlint` runs on every change, outside the plan; see below.
+or timed-out job fails it. `dollarlint` runs on every change, outside the plan;
+see below.
 
 ### Schemas for data files
 

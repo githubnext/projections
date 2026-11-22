@@ -7,7 +7,7 @@ export function literals(lines) {
   const found = []
   lines.forEach((line, index) => {
     for (const match of line.matchAll(/'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)"|\x60((?:\\.|[^\x60\\])*)\x60/g)) {
-      found.push({value: (match[1] ?? match[2] ?? match[3]).replace(/\$\{[^}]*\}/g, '@'), line: index + 1})
+      found.push({value: (match[1] ?? match[2] ?? match[3]).replaceAll(/\$\{[^}]*\}/g, '@'), line: index + 1})
     }
   })
   return found

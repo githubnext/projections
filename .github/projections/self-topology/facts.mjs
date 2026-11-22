@@ -78,9 +78,9 @@ export function firstSentence(text) {
     .find(block => block && !/^(#|<|!\[|\x60\x60\x60|\||- |\* |\d+\. |>)/.test(block))
   if (!paragraph) return undefined
   const plain = paragraph
-    .replace(/\s+/g, ' ')
-    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/[\x60*_]/g, '')
+    .replaceAll(/\s+/g, ' ')
+    .replaceAll(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replaceAll(/[\x60*_]/g, '')
   const sentence = /^(.*?[.!?])(\s|$)/.exec(plain)?.[1] ?? plain
   return sentence.trim() || undefined
 }
@@ -145,9 +145,11 @@ export function unitFacts(context) {
     ...files.filter(file => /(^|\/)\.github\/workflows\/[^/]+\.ya?ml$/.test(file)),
   ].map(read)
   const gates = coverageGates(texts)
-  const mutants = roots.flatMap(root =>
-    mutantDirectories(read(`${root.path ? `${root.path}/` : ''}.cargo/mutants.toml`)).map(directory =>
-      root.path ? `${root.path}/${directory}` : directory,
+  const mutants = new Set(
+    roots.flatMap(root =>
+      mutantDirectories(read(`${root.path ? `${root.path}/` : ''}.cargo/mutants.toml`)).map(directory =>
+        root.path ? `${root.path}/${directory}` : directory,
+      ),
     ),
   )
 
@@ -183,7 +185,7 @@ export function unitFacts(context) {
       .filter(([, share]) => share >= 10)
       .toSorted(([a, x], [b, y]) => y - x || (a < b ? -1 : 1))
     const assurance = []
-    if (unit.kind === 'rust-crate' && mutants.some(directory => directory === unit.directory)) assurance.push('mutation tested')
+    if (unit.kind === 'rust-crate' && mutants.has(unit.directory)) assurance.push('mutation tested')
     const gate = unit.kind === 'rust-crate' ? gates.get(unit.data.package) : undefined
     if (gate) assurance.push(`${gate}% coverage gate`)
     if (properties) assurance.push('property tests')
@@ -265,8 +267,8 @@ function whereUnitsRun({units, relationships, read, roots}) {
   for (const relationship of relationships.values()) if (relationship.kind === 'compiles-to') places.get(relationship.from).add('wasm')
   // Downstream: what a unit links or loads runs where it runs. What a build bundles is shipped there, but may run
   // elsewhere (an extension bundles the CLI it spawns), so it carries nothing.
-  const carries = ['depends-on', 'loads']
-  const edges = [...relationships.values()].filter(relationship => carries.includes(relationship.kind))
+  const carries = new Set(['depends-on', 'loads'])
+  const edges = [...relationships.values()].filter(relationship => carries.has(relationship.kind))
   for (let changed = true; changed;) {
     changed = false
     for (const {from, to} of edges) {

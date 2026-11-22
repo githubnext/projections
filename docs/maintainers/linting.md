@@ -85,6 +85,49 @@ Each option allows one defined idiom and nothing else.
   reads a bare one as the start of a template string and stops counting the
   file, so its size and complexity limits would quietly not apply.
 
+## eslint-plugin-unicorn
+
+Most of `eslint-plugin-unicorn` is one author's style, so none of its presets
+are on. These of its rules are, each for a bug class:
+
+- Mutation: `no-array-sort` and `no-array-reverse` (an expression's
+  `.sort()`/`.reverse()` also changes the array it was called on; use
+  `toSorted()`/`toReversed()`, which is why every `lib` is ES2023 or later).
+- Coercion and lost types: `prefer-number-properties` (the global `isNaN` and
+  `isFinite` coerce, `Number.isNaN` and `Number.isFinite` don't),
+  `prefer-string-replace-all` (`replace` with a string replaces only the first
+  match), `require-array-join-separator`, `prefer-type-error`,
+  `throw-new-error`, `error-message`, `new-for-builtins`, `no-new-array`,
+  `no-instanceof-builtins`, `no-typeof-undefined`,
+  `text-encoding-identifier-case`, `prefer-structured-clone` (a JSON round trip
+  drops `undefined`, `Date`s, `Map`s and `Set`s).
+- Platform: `prefer-node-protocol`, `prefer-global-this`,
+  `prefer-add-event-listener` (an `onX =` assignment replaces whoever else
+  listens), `no-invalid-remove-event-listener`, and in shipped source
+  `prefer-dom-node-text-content` (`innerText` lays the page out to read it;
+  browser tests read the rendered text with it on purpose).
+- Promises: `no-unnecessary-await`, `no-await-in-promise-methods`,
+  `no-single-promise-in-promise-methods`, `no-useless-promise-resolve-reject`.
+- Clearer equivalents that remove a way to get it wrong: `prefer-set-has`,
+  `prefer-array-find`, `prefer-array-some`, `prefer-array-flat-map`,
+  `prefer-array-index-of`, `prefer-includes`, `prefer-regexp-test`, `prefer-at`,
+  `no-useless-spread`, `no-useless-fallback-in-spread`,
+  `no-useless-switch-case`, `consistent-assert`, `prefer-export-from` (with
+  `checkUsedVariables: false`, so a module that uses what it re-exports keeps
+  its import).
+
+Its stylistic rules stay off, among them `no-null` (`null` is JSON's and
+React's), `no-array-reduce`, `no-array-callback-reference`,
+`consistent-function-scoping`, `explicit-length-check`,
+`no-await-expression-member`, `prevent-abbreviations`, `filename-case`,
+`max-nested-calls` and the comment-style rules, which would rewrite the TSDoc
+that `check:tsdoc` reads.
+
+`require-post-message-target-origin` stays off too: it can't tell a window's
+`postMessage` from a worker's, a `MessagePort`'s or a VS Code webview's, and
+every call it reports here is one of those, where a second argument is a
+transfer list, not an origin. The posts to windows already name their origin.
+
 ## Turning on a rule
 
 A rule this configuration turns on whose existing violations aren't fixed yet is

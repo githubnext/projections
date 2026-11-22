@@ -17,8 +17,8 @@ const DOCS_BASE = 'https://github.com/githubnext/projections/blob/main/'
 /** A markdown file's body for an agent: without its title and prompt blocks, links absolute (GitHub source). */
 async function agentBody(file) {
   let text = await readFile(join(root, file), 'utf8')
-  text = text.replace(/^# .*\n+/, '').replace(/^\x60\x60\x60prompt[^\n]*\n[\s\S]*?^\x60\x60\x60\n+/gm, '')
-  return text.replace(/\]\((?![a-z][a-z0-9+.-]*:|#)([^)#\s]+)(#[^)\s]*)?\)/gi, (_, path, anchor = '') => {
+  text = text.replace(/^# .*\n+/, '').replaceAll(/^\x60\x60\x60prompt[^\n]*\n[\s\S]*?^\x60\x60\x60\n+/gm, '')
+  return text.replaceAll(/\]\((?![a-z][a-z0-9+.-]*:|#)([^)#\s]+)(#[^)\s]*)?\)/gi, (_, path, anchor = '') => {
     const target = posix.normalize(posix.join(posix.dirname(file), path))
     if (target.startsWith('..')) fail(`${file}: link ${path} leaves the repository`)
     return `](${DOCS_BASE}${target}${anchor})`

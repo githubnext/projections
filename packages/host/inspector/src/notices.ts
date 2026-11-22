@@ -10,7 +10,7 @@ const maxNamed = 5
 
 /** `text` as an inline code span of protocol prose. */
 function code(text: string): string {
-  return `\`${text.replace(/[\x60\\]/g, character => `\\${character}`)}\``
+  return `\`${text.replaceAll(/[\x60\\]/g, character => `\\${character}`)}\``
 }
 
 /** How notices name an extraction's revision: `the working tree`, or the commit's first eight hex digits as code. */
@@ -73,7 +73,7 @@ function isLocation(line: string): boolean {
 const isCaret = (line: string) => line.includes('^') && /^[\^~ ]+$/.test(line)
 const isNoise = (line: string) =>
   ['note: run with `RUST_BACKTRACE', 'stack backtrace:', 'Require stack:', 'Node.js v'].some(prefix => line.startsWith(prefix)) ||
-  (line.startsWith('- ') && isLocation(line.slice(2).replace(/ /g, '')))
+  (line.startsWith('- ') && isLocation(line.slice(2).replaceAll(' ', '')))
 /** `Error: …`, `TypeError: …`, `ModuleNotFoundError: …`, `error[E0425]: …` or `fatal: …`. */
 function isError(line: string): boolean {
   const head = /^(?:Uncaught )?([^\s:]+):/.exec(line)?.[1]?.toLowerCase()

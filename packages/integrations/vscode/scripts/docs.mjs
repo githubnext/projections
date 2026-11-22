@@ -74,13 +74,13 @@ export function rewriteLinks(text, file, bundled) {
   }
   const links = prose =>
     prose
-      .replace(/(!?)\[((?:[^[\]]|\[[^\]]*\])*)\]\(\s*([^)\s]+)(\s+"[^"]*")?\s*\)/g, (whole, bang, label, href, title = '') => {
+      .replaceAll(/(!?)\[((?:[^[\]]|\[[^\]]*\])*)\]\(\s*([^)\s]+)(\s+"[^"]*")?\s*\)/g, (whole, bang, label, href, title = '') => {
         const image = bang === '!' && imagePattern.test(href.split('#')[0])
         const rewritten = target(href, image)
         if (rewritten === undefined) return whole
         return image ? `[${label || posix.basename(href)}](${rewritten}${title})` : `${bang}[${label}](${rewritten}${title})`
       })
-      .replace(/^(\s*\[[^\]]+\]:\s*)(\S+)(.*)$/gm, (whole, start, href, rest) => {
+      .replaceAll(/^(\s*\[[^\]]+\]:\s*)(\S+)(.*)$/gm, (whole, start, href, rest) => {
         const rewritten = target(href, false)
         return rewritten === undefined ? whole : `${start}${rewritten}${rest}`
       })
@@ -95,15 +95,15 @@ export function rewriteLinks(text, file, bundled) {
 export function slug(text) {
   return text
     .toLowerCase()
-    .replace(/[^\p{L}\p{M}\p{N}\p{Pc} -]/gu, '')
+    .replaceAll(/[^\p{L}\p{M}\p{N}\p{Pc} -]/gu, '')
     .replaceAll(' ', '-')
 }
 
 /** The text with fenced code blocks and code spans blanked out, keeping offsets. */
 const withoutCode = text =>
   text
-    .replace(/^[ \t]*(\x60\x60\x60|~~~)[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm, block => block.replace(/[^\n]/g, ' '))
-    .replace(/(\x60+)(?!\x60)[\s\S]*?(?<!\x60)\1(?!\x60)/g, span => span.replace(/[^\n]/g, ' '))
+    .replaceAll(/^[ \t]*(\x60\x60\x60|~~~)[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm, block => block.replaceAll(/[^\n]/g, ' '))
+    .replaceAll(/(\x60+)(?!\x60)[\s\S]*?(?<!\x60)\1(?!\x60)/g, span => span.replaceAll(/[^\n]/g, ' '))
 
 /** The text outside HTML tags, in one pass: each `<…>` with something inside is dropped; a `<` that closes nothing stays. */
 function withoutTags(text) {
@@ -128,9 +128,9 @@ export function anchors(text) {
       .slice(match.index, match.index + match[0].length)
       .replace(/^#{1,6} +/, '')
       .replace(/[ \t]*#*[ \t]*$/, '')
-    const plain = withoutTags(heading.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1'))
-      .replace(/\x60([^\x60]*)\x60/g, '$1')
-      .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    const plain = withoutTags(heading.replaceAll(/!?\[([^\]]*)\]\([^)]*\)/g, '$1'))
+      .replaceAll(/\x60([^\x60]*)\x60/g, '$1')
+      .replaceAll(/(\*\*|__)(.*?)\1/g, '$2')
       .trim()
     const base = slug(plain)
     const count = seen.get(base) ?? 0

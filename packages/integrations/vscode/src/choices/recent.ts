@@ -17,7 +17,7 @@ export function shortCommit(ref: string): string {
 
 /** Markdown with what a commit subject or a name could make of it escaped. */
 export function escapeMarkdown(text: string): string {
-  return text.replace(/[\\\x60*_{}[\]()#+!<>|~]/g, '\\$&')
+  return text.replaceAll(/[\\\x60*_{}[\]()#+!<>|~]/g, '\\$&')
 }
 
 /** A commit that changes at least one projection, from a run over the recent commits. */

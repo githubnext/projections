@@ -57,13 +57,13 @@ export function withoutTags(text: string): string {
 /** Inline Markdown to plain text: links and images to their text; code spans, emphasis and HTML tags removed. */
 export function plain(markdown: string): string {
   const text = markdown
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-    .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
+    .replaceAll(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replaceAll(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replaceAll(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
   return withoutTags(text)
-    .replace(/\x60([^\x60]*)\x60/g, '$1')
-    .replace(/(\*\*|__)(.*?)\1/g, '$2')
-    .replace(/\s+/g, ' ')
+    .replaceAll(/\x60([^\x60]*)\x60/g, '$1')
+    .replaceAll(/(\*\*|__)(.*?)\1/g, '$2')
+    .replaceAll(/\s+/g, ' ')
     .trim()
 }
 

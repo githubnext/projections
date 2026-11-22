@@ -118,7 +118,7 @@ test('a graph whose scope arrives with its documents opens on the scope, never o
   await openStage(page, inspector, {...load, filter: {query: '', changesOnly: true, ids: null, scope: changesScope(subject)}})
   const frame = await rendererFrame(page)
   await expect(frame.locator('svg.graph')).toBeVisible()
-  const views = await frame.evaluate(() => window.graphViews!.splice(0))
+  const views = await frame.evaluate(() => globalThis.graphViews!.splice(0))
   expect(views.length, 'the graph was drawn').toBeGreaterThan(0)
   const labels = [...new Set(views.map(view => view.label))]
   expect(labels, 'one layout, the scope’s').toHaveLength(1)

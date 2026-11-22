@@ -13,6 +13,7 @@ export * from './presentation/progress.js'
 export * from './presentation/frame.js'
 export * from './presentation/filter.js'
 export * from './presentation/context.js'
+export * from './presentation/keys.js'
 
 /**
  * Marks an element whose text is a code identifier or symbol (a function,

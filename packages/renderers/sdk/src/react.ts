@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState} from 'react'
+import {useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react'
 import type {Extraction} from '@githubnext/projections-schemas'
 import type {RefObject} from 'react'
 import {connectInteractions} from './interactions.js'
@@ -138,29 +138,36 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
     environment: undefined,
     filter: undefined,
   })
-  const [client, setClient] = useState<RendererClient>()
-  const [failure, setFailure] = useState<string>()
-  const capabilities = useRef(options.capabilities).current
-  const accepts = useRef(options.accepts).current
+  // Its own refusal of the host's `init`, as `init` last came.
+  const [refused, setRefused] = useState<string>()
+  // The connection to the host, which the effect below makes.
+  const [connection] = useState(() => new HostConnection())
+  const connected = useSyncExternalStore(connection.subscribe, connection.get, connection.get)
+  const client = connected.client
+  const failure = connected.failure ?? refused
+  // Declared once, as the renderer connects.
+  const [capabilities] = useState(options.capabilities)
+  const [accepts] = useState(options.accepts)
   const actionRef = useRef(options.onAction)
-  actionRef.current = options.onAction
+  useLayoutEffect(() => {
+    actionRef.current = options.onAction
+  })
   const applyTheme = options.applyTheme !== false
   useEffect(() => {
-    let connected: RendererClient
     const environment = (value: RendererEnvironment) => {
       if (applyTheme) applyEnvironment(value)
       setState(previous => ({...previous, environment: value}))
     }
-    try {
-      connected = connectRenderer(
+    return connection.connect(() =>
+      connectRenderer(
         {
           init(init) {
             if (applyTheme) applyEnvironment(init)
-            const refused = refusal(accepts, init)
-            setFailure(refused)
+            const refusing = refusal(accepts, init)
+            setRefused(refusing)
             setState(previous => ({
               ...previous,
-              init: refused ? undefined : init,
+              init: refusing ? undefined : init,
               environment: {
                 theme: init.theme,
                 reducedMotion: init.reducedMotion,
@@ -183,14 +190,9 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
           filter: filter => setState(previous => ({...previous, filter})),
         },
         {capabilities},
-      )
-    } catch (error) {
-      setFailure(error instanceof Error ? error.message : String(error))
-      return
-    }
-    setClient(connected)
-    return () => connected.dispose()
-  }, [capabilities, accepts, applyTheme])
+      ),
+    )
+  }, [connection, capabilities, accepts, applyTheme])
   const acknowledge = options.acknowledge !== false
   const {init, progress} = state
   useEffect(() => {
@@ -204,6 +206,37 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
     () => ({...(state as RendererState<ExtractionAccepted<A>>), client, failure, controlValues: values}),
     [state, client, failure, values],
   )
+}
+
+/** A renderer's connection to its host, made in an effect: its client once connected, else why it couldn't connect. */
+class HostConnection {
+  #state: {client?: RendererClient | undefined; failure?: string | undefined} = {}
+  readonly #listeners = new Set<() => void>()
+
+  readonly subscribe = (listener: () => void) => {
+    this.#listeners.add(listener)
+    return () => void this.#listeners.delete(listener)
+  }
+
+  readonly get = () => this.#state
+
+  /** Connects with `connect`, and returns how to disconnect. */
+  connect(connect: () => RendererClient): () => void {
+    let client: RendererClient
+    try {
+      client = connect()
+    } catch (error) {
+      this.#set({failure: error instanceof Error ? error.message : String(error)})
+      return () => undefined
+    }
+    this.#set({client})
+    return () => client.dispose()
+  }
+
+  #set(state: {client?: RendererClient; failure?: string}) {
+    this.#state = state
+    for (const listener of this.#listeners) listener()
+  }
 }
 
 /**
@@ -223,9 +256,11 @@ export function useInteractions(
   const controller = useRef<InteractionController | null>(null)
   const attribute = options.attribute
   const select = useRef(options.select)
-  select.current = options.select
   const partOf = useRef(options.partOf)
-  partOf.current = options.partOf
+  useLayoutEffect(() => {
+    select.current = options.select
+    partOf.current = options.partOf
+  })
   useEffect(() => {
     if (!client || !root.current) return
     const created = connectInteractions(client, root.current, {

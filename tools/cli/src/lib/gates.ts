@@ -6,7 +6,7 @@ import {linkProblems} from './links.ts'
 import {inDependencyOrder, readmeProblems, type Unit} from './packages.ts'
 import {parseConsidered, parseFormatCheck, parseProblems, parseStalePages, tail, type Problem} from './problems.ts'
 import {display, run, type Command} from './repo.ts'
-import {changedFiles, fastTypecheck, lintPlan, npm, npx} from './typed-gates.ts'
+import {fastTypecheck, lintPlan, npm} from './typed-gates.ts'
 import {versionProblems} from './release-check.ts'
 import {existsSync} from 'node:fs'
 import {join} from 'node:path'
@@ -151,14 +151,10 @@ export const gates: Gate[] = [
   {
     name: 'format',
     fast: true,
-    description: 'Formatting (oxfmt --check)',
-    plan: context => {
-      if (!context.affected) return {commands: [npx('oxfmt', '--check')]}
-      const files = changedFiles(context, /\.([cm]?[jt]sx?|json|jsonc|ya?ml|css|html|toml)$/u)
-      return files.length
-        ? {commands: [npx('oxfmt', '--check', '--no-error-on-unmatched-pattern', ...files)]}
-        : {skip: 'no formattable file changed'}
-    },
+    description: 'Formatting (npm run format:check)',
+    // The whole repository, as CI checks it, even with --fast or --affected: it takes under a second, and a list of
+    // changed files can only drift from what CI checks (Markdown went unchecked when the list filtered by extension).
+    plan: () => ({commands: [npm('run', '--silent', 'format:check')]}),
     parse: parseFormatCheck,
     fix: `${TOOLS} fix --only format`,
   },

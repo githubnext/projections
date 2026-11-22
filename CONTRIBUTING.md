@@ -123,10 +123,10 @@ empty directory with no Node on PATH (pass `-- --binary FILE` to verify a
 release asset).
 
 When iterating, run the fastest checks first and widen gradually: start with
-`tools check --fast` (format, lint, `cargo check`, and typecheck of what
-changed), run `tools build <workspace>` if a test needs built output, run the
-narrowest test with `tools test <target> --filter <name>`, and only then run
-`tools check --affected`, `tools test --affected`, and full `npm run check`.
+`tools check --fast` (CI's format check, and lint, `cargo check` and typecheck
+of what changed), run `tools build <workspace>` if a test needs built output,
+run the narrowest test with `tools test <target> --filter <name>`, and only then
+run `tools check --affected`, `tools test --affected`, and full `npm run check`.
 Catching a compile error in `--fast` takes seconds instead of burning minutes—or
 waiting for a build slot on a shared machine—in a full build or test run. Keep
 strict error, cancellation, geometry, progress, and input-validation assertions

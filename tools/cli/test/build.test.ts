@@ -10,6 +10,7 @@ import type {Affected} from '../src/lib/affected.ts'
 import {buildInputs, buildState, inputSignature, recordBuild} from '../src/lib/builds.ts'
 import {gates, type GateContext} from '../src/lib/gates.ts'
 import type {Unit} from '../src/lib/packages.ts'
+import {readJson, workspaceRoot} from '../src/lib/repo.ts'
 import {recordSuccess, restoreIfUnchanged, snapshot, staleness} from '../src/commands/work/build.ts'
 import {nodeTestPattern, testPlan} from '../src/commands/work/test.ts'
 
@@ -55,6 +56,19 @@ test('--fast leaves out every gate that builds, tests or reads the whole tree', 
     gates.filter(gate => !gate.fast).map(gate => gate.name),
     ['tsdoc', 'build', 'notices', 'comparators', 'docs', 'clippy'],
   )
+})
+
+test("the format gate runs CI's format check, whatever changed and however scoped", () => {
+  const ci = ['npm run --silent format:check']
+  const units = [unit('app')]
+  // A Markdown change (and every other file oxfmt formats) is checked with --fast, as CI checks it.
+  for (const files of [['docs/guide.md'], ['packages/app/test/x.test.mjs'], []]) {
+    assert.deepEqual(argvs(plan('format', {root: '.', units, affected: affected(['app'], [], ['ts']), files, fast: true})), ci)
+  }
+  assert.deepEqual(argvs(plan('format', {root: '.', units})), ci)
+  const scripts = readJson<{scripts: Record<string, string>}>(workspaceRoot, 'package.json')?.scripts ?? {}
+  assert.equal(scripts['format:check'], 'oxfmt --check')
+  assert.match(scripts['check:no-test'] ?? '', /npm run format:check/u)
 })
 
 test('cargo check covers the changed crates with --fast, and their dependants with --affected', () => {

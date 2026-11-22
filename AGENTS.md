@@ -27,8 +27,9 @@ that runs the same commands from anywhere, using the checkout you are in.
 - Verify cheapest first, and broaden only once the narrower step passes: builds
   and test runs are slow and memory-hungry, and on a busy machine they wait for
   a slot, so don't spend one to find a type or compile error.
-  1. `tools check --fast`: format, lint, `cargo check` and typecheck of only
-     what changed, and the repository rules. It builds and tests nothing.
+  1. `tools check --fast`: lint, `cargo check` and typecheck of only what
+     changed, the format check CI runs (the whole tree, in under a second), and
+     the repository rules. It builds and tests nothing.
   2. `tools build <workspace>` when a test needs built output: that workspace
      and what it depends on, rebuilding only what is out of date. Not
      `npm run build`, which rebuilds every workspace, the release CLI and

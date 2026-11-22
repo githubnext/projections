@@ -43,10 +43,12 @@ export class ViewingView implements vscode.TreeDataProvider<Node>, vscode.Dispos
     return this.recent.finds
   }
 
-  constructor(
-    private readonly sidebar: Sidebar,
-    private readonly host: ViewingHost,
-  ) {
+  private readonly sidebar: Sidebar
+  private readonly host: ViewingHost
+
+  constructor(sidebar: Sidebar, host: ViewingHost) {
+    this.sidebar = sidebar
+    this.host = host
     this.recent = new RecentCommits(host, () => this.changed.fire(undefined))
     this.pulls = new PullRequests(host, () => this.changed.fire(undefined))
     this.view = vscode.window.createTreeView('projections.viewing', {treeDataProvider: this})

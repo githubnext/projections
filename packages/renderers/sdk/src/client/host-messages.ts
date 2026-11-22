@@ -17,27 +17,27 @@ export interface RendererHandlers {
    * The document to present and the environment, first after `ready` and again whenever the host replaces the
    * document; reset any per-document state.
    */
-  init?(message: InitPayload): void
+  init?: (message: InitPayload) => void
   /** A new position to draw; acknowledge it with `client.rendered` once painted. */
-  progress?(message: ProgressPayload): void
+  progress?: (message: ProgressPayload) => void
   /** The host's selection: an item ID or `null`, and optionally a property of it (`path`, an RFC 6901 pointer). */
-  select?(message: Of<'select'>): void
+  select?: (message: Of<'select'>) => void
   /** Markers to draw on items, replacing earlier ones (capability `annotations`). */
-  annotations?(items: AnnotationMark[]): void
+  annotations?: (items: AnnotationMark[]) => void
   /** New settings, replacing the earlier ones: declared controls' values by `id` (see `controlValues`). */
-  options?(options: RendererOptions): void
+  options?: (options: RendererOptions) => void
   /** The frame's size in CSS px, on load and whenever it changes. */
-  viewport?(message: Of<'viewport'>): void
+  viewport?: (message: Of<'viewport'>) => void
   /** A new theme, motion preference, locale, pane or sizing; `applyEnvironment` applies it to CSS. */
-  environment?(message: RendererEnvironment): void
+  environment?: (message: RendererEnvironment) => void
   /** The entity the person points at in any pane, or `null` (capability `hover`). */
-  hover?(message: Of<'hover'>): void
+  hover?: (message: Of<'hover'>) => void
   /** Scroll a container to mirror another pane (capability `scrollSync`); don't report that scroll as `viewport`. */
-  scroll?(position: ScrollPosition): void
+  scroll?: (position: ScrollPosition) => void
   /** The person activated one of the renderer's `action` controls. */
-  action?(message: Of<'action'>): void
+  action?: (message: Of<'action'>) => void
   /** The host's find and "changes only" settings changed. */
-  filter?(message: Of<'filter'>): void
+  filter?: (message: Of<'filter'>) => void
 }
 
 /** Host messages that set state, in the order a reconnecting client replays them. */

@@ -8,11 +8,11 @@ export const title = 'New projection'
 
 /** A CLI run that failed: its message, and whether the executable is missing. */
 export class CliError extends Error {
-  constructor(
-    message: string,
-    readonly missing: boolean,
-  ) {
+  readonly missing: boolean
+
+  constructor(message: string, missing: boolean) {
     super(message)
+    this.missing = missing
   }
 }
 
@@ -30,10 +30,13 @@ export class Wizard {
   shownInput: vscode.InputBox | undefined
   private pattern: RegExp | undefined
 
-  constructor(
-    readonly host: NewProjectionHost,
-    private readonly identifierPattern: () => RegExp,
-  ) {}
+  readonly host: NewProjectionHost
+  private readonly identifierPattern: () => RegExp
+
+  constructor(host: NewProjectionHost, identifierPattern: () => RegExp) {
+    this.host = host
+    this.identifierPattern = identifierPattern
+  }
 
   /** The definition schema's ID pattern, read once. */
   idPattern(): RegExp {

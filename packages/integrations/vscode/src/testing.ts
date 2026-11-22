@@ -12,7 +12,7 @@ import {applyTree} from './testing/tree.js'
 
 /** The projections a folder defines, by ID with their titles, and their changes (the side bar's models). */
 export interface ProjectionSource {
-  projections(folder: vscode.WorkspaceFolder): Promise<{id: string; title: string}[]>
+  projections: (folder: vscode.WorkspaceFolder) => Promise<{id: string; title: string}[]>
   readonly onDidChange: vscode.Event<void>
 }
 
@@ -38,11 +38,14 @@ export class ProjectionTests implements vscode.Disposable {
   private applying: ReturnType<typeof setTimeout> | undefined
   private readonly watched: Map<string, Watched>
 
-  constructor(
-    private readonly lease: (folder: vscode.WorkspaceFolder) => Lease,
-    private readonly source: ProjectionSource,
-    private readonly output: vscode.LogOutputChannel,
-  ) {
+  private readonly lease: (folder: vscode.WorkspaceFolder) => Lease
+  private readonly source: ProjectionSource
+  private readonly output: vscode.LogOutputChannel
+
+  constructor(lease: (folder: vscode.WorkspaceFolder) => Lease, source: ProjectionSource, output: vscode.LogOutputChannel) {
+    this.lease = lease
+    this.source = source
+    this.output = output
     this.controller = vscode.tests.createTestController('projections', 'Projections')
     this.state = new TestState(this.controller)
     this.watched = this.state.watched
@@ -106,7 +109,7 @@ export class ProjectionTests implements vscode.Disposable {
     if (this.watched.has(key)) return
     const watched: Watched = {folder, lease: this.lease(folder), files: [], reported: new Map()}
     this.watched.set(key, watched)
-    const subscribe = (runner: {onNotification(listener: (method: string) => void): () => void}) => {
+    const subscribe = (runner: {onNotification: (listener: (method: string) => void) => () => void}) => {
       watched.unsubscribe?.()
       watched.unsubscribe = runner.onNotification(method => {
         if (method === 'changes') this.schedule(folder)

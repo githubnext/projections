@@ -167,18 +167,18 @@ export type TextArea = 'header' | 'row' | 'pill' | 'header-pill'
 
 export interface TextSizer {
   /** The narrowest card that shows this card's header and every row's text on one line. */
-  cardNeed(card: string, rows: readonly string[]): number
+  cardNeed: (card: string, rows: readonly string[]) => number
   /** The header's height on a card `width` wide: one line when it fits, else its name wraps and the kind and status go under it. */
-  header(card: string, width: number): number
+  header: (card: string, width: number) => number
   /** The row's height on a card `width` wide, tall enough for its widest version. */
-  row(id: string, width: number): number
+  row: (id: string, width: number) => number
   /** The header's status cell: room for the status words this card shows, none for a card the comparison doesn't change. */
-  status(card: string): number
+  status: (card: string) => number
   /**
    * The lines a card `width` wide draws `text` in: one when its header or row fits on one line, else as wrapped in
    * its area (a header's name, a row's part, a value pill), exactly as the heights above count them.
    */
-  lines(role: TextRole, text: string, width: number, fits: boolean, area?: TextArea): string[]
+  lines: (role: TextRole, text: string, width: number, fits: boolean, area?: TextArea) => string[]
 }
 
 /**

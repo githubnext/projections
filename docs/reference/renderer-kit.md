@@ -1037,7 +1037,7 @@ status come only from the comparison; nothing is matched or inferred here.
 |---|---|---|
 | `counts` | `"counts": { "entities": DiffCounts; "relationships": DiffCounts }` | How many entities and relationships have each change; a rewired relationship counts once, as its row's change. |
 | `entities` | `"entities": Array<DiffEntity>` | Every entity row once, in the comparison's order. |
-| `entity` | `"entity"(id: string): DiffEntity \| undefined` | The entity on an entity row ID of the comparison. |
+| `entity` | `"entity": { (id: string): DiffEntity \| undefined }` | The entity on an entity row ID of the comparison. |
 | `relationships` | `"relationships": Array<DiffRelationship>` | Drawn relationships: one per relationship, or two for one rewired between other endpoints (its old part removed, its new part added). |
 
 ### `DiffRelationship`
@@ -2095,7 +2095,7 @@ class NoRouteError extends Error
 
 | Member | Signature | Description |
 |---|---|---|
-| `blocked` | `readonly "blocked": BlockedBoxEdge` |  |
+| `blocked` | `readonly "blocked": BlockedBoxEdge` | The least-overlapping route, and the cards it crosses. |
 | `captureStackTrace` | `static "captureStackTrace"(targetObject: object, constructorOpt?: Function \| undefined): void` |  |
 | `cause` | `"cause"?: unknown` |  |
 | `constructor` | `new (blocked: BlockedBoxEdge): NoRouteError` |  |
@@ -2158,8 +2158,8 @@ The colors `categoryPalette` assigned to a document's categories.
 
 | Member | Signature | Description |
 |---|---|---|
-| `entry` | `"entry"(key: string): PaletteEntry \| undefined` | The entry of a category key, or undefined for a key the palette wasn't given. |
-| `paintOf` | `"paintOf"(key: string): string` | The paint of a category key; "other" for an unknown one. |
+| `entry` | `"entry": { (key: string): PaletteEntry \| undefined }` | The entry of a category key, or undefined for a key the palette wasn't given. |
+| `paintOf` | `"paintOf": { (key: string): string }` | The paint of a category key; "other" for an unknown one. |
 | `ranked` | `"ranked": Array<PaletteEntry>` | Categories by weight (heaviest first), with their colors. |
 
 ### `PaletteEntry`
@@ -2680,9 +2680,9 @@ to show more of it.
 |---|---|---|
 | `all` | `"all": ComparisonModel<Extraction>` | The model of every item: what a canvas's `model` (`MountOptions.scope` `subset`) narrows. |
 | `changes` | `"changes": ReadonlySet<string>` | The change rows in scope, by row ID. |
-| `collapse` | `"collapse"(ids: Iterable<string, any, any>): void` | Folds these open folds again, or stops showing items `expand` added. |
+| `collapse` | `"collapse": { (ids: Iterable<string, any, any>): void }` | Folds these open folds again, or stops showing items `expand` added. |
 | `context` | `"context": ReadonlySet<string>` | The unchanged rows shown to read them: their relationships' endpoints and the items that contain them. |
-| `expand` | `"expand"(ids: Iterable<string, any, any>): void` | Shows these items too, or opens these folds (`isFold`), until the host's scope changes. A canvas lays them out with the rest; an open fold stays, as the way to fold its parts again. |
+| `expand` | `"expand": { (ids: Iterable<string, any, any>): void }` | Shows these items too, or opens these folds (`isFold`), until the host's scope changes. A canvas lays them out with the rest; an open fold stays, as the way to fold its parts again. |
 | `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
 
 ### `scrolledPadding`
@@ -2878,13 +2878,13 @@ A comparison's steps as stages and windows, from `createStagedTimeline`; every f
 
 | Member | Signature | Description |
 |---|---|---|
-| `at` | `"at"(progress: number): { "from": number; "mix": number; "to": number }` | The two stages a frame interpolates between, and how far. |
-| `local` | `"local"(id: string, progress: number): number` | Progress through a row's own step, 0 before it starts and 1 after it ends; always 0 for a row no step changes. |
-| `presence` | `"presence"(id: string, progress: number): number` | Opacity of an entity row: entering and leaving rows fade in their step's window. |
-| `relationships` | `"relationships"(stage: Stage): Array<{ "from": string; "row": EntityChange<Relationship>; "to": string }>` | Relationships present in a stage, resolved to entity row endpoints. |
-| `rowPresence` | `"rowPresence"(id: string, progress: number): { "opacity": number; "size": number }` | Presence of an entity row in a list: `size` is the share of its slot it occupies, `opacity` its visibility. A removal fades, then its slot closes during the step's move window; an addition's slot opens, then it fades in. Both are 1 for survivors and 0 for rows absent at this point. |
+| `at` | `"at": { (progress: number): { "from": number; "mix": number; "to": number } }` | The two stages a frame interpolates between, and how far. |
+| `local` | `"local": { (id: string, progress: number): number }` | Progress through a row's own step, 0 before it starts and 1 after it ends; always 0 for a row no step changes. |
+| `presence` | `"presence": { (id: string, progress: number): number }` | Opacity of an entity row: entering and leaving rows fade in their step's window. |
+| `relationships` | `"relationships": { (stage: Stage): Array<{ "from": string; "row": EntityChange<Relationship>; "to": string }> }` | Relationships present in a stage, resolved to entity row endpoints. |
+| `rowPresence` | `"rowPresence": { (id: string, progress: number): { "opacity": number; "size": number } }` | Presence of an entity row in a list: `size` is the share of its slot it occupies, `opacity` its visibility. A removal fades, then its slot closes during the step's move window; an addition's slot opens, then it fades in. Both are 1 for survivors and 0 for rows absent at this point. |
 | `stages` | `"stages": Array<Stage>` | `stages[0]` is the before state; `stages[k + 1]` follows step `k`. |
-| `version` | `"version"<T>(row: EntityChange<T>, stage: Stage): T` | The version of a row a stage shows. |
+| `version` | `"version": { <T>(row: EntityChange<T>, stage: Stage): T }` | The version of a row a stage shows. |
 | `windows` | `"windows": Array<StepWindows>` | Each scheduled step's windows (see `stepWindows`), in order: `windows[k]` moves `stages[k]` to `stages[k + 1]`. |
 
 ### `StageZoom`
@@ -4103,7 +4103,7 @@ How `mountRenderer` connects a renderer component to its host.
 ### `mountRenderer`
 
 ```ts
-mountRenderer<A extends Array<RendererAccepts> | undefined = undefined>(component: ComponentClass<RendererProps<NoInfer<A>>, any> | FunctionComponent<RendererProps<NoInfer<A>>>, options: MountOptions & { "accepts"?: A }): { "unmount"(): void }
+mountRenderer<A extends Array<RendererAccepts> | undefined = undefined>(component: ComponentClass<RendererProps<NoInfer<A>>, any> | FunctionComponent<RendererProps<NoInfer<A>>>, options: MountOptions & { "accepts"?: A }): { "unmount": { (): void } }
 ```
 
 Mounts a kit renderer into the bundle's `#root`, from the renderer's entry

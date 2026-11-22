@@ -7,9 +7,9 @@ import type {Node, ViewingItem} from './types.js'
 
 /** What presenting a row needs beyond the row: the branch's pull request, a recent commit's thumbnail, Last commit's changes. */
 export interface PresentContext {
-  pull(model: FolderModel): {branch: string; number?: number | undefined} | undefined
-  thumbnail(model: FolderModel, key: string): string | null | undefined
-  lastCommitChanges(model: FolderModel): string
+  pull: (model: FolderModel) => {branch: string; number?: number | undefined} | undefined
+  thumbnail: (model: FolderModel, key: string) => string | null | undefined
+  lastCommitChanges: (model: FolderModel) => string
 }
 
 type Of<Kind extends Node['kind']> = Extract<Node, {kind: Kind}>

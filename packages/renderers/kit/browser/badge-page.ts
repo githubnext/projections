@@ -16,7 +16,7 @@ export interface BadgeCell {
 
 declare global {
   interface Window {
-    showBadges(cells: BadgeCell[]): void
+    showBadges: (cells: BadgeCell[]) => void
   }
 }
 

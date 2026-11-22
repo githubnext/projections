@@ -185,8 +185,8 @@ export interface RulesServiceOptions {
 }
 
 interface Pending {
-  resolve(value: unknown): void
-  reject(error: Error): void
+  resolve: (value: unknown) => void
+  reject: (error: Error) => void
   timer: ReturnType<typeof setTimeout>
 }
 

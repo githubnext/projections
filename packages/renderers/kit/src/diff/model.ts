@@ -24,7 +24,7 @@ export interface DiffModel {
   /** How many entities and relationships have each change; a rewired relationship counts once, as its row's change. */
   counts: {entities: DiffCounts; relationships: DiffCounts}
   /** The entity on an entity row ID of the comparison. */
-  entity(id: string): DiffEntity | undefined
+  entity: (id: string) => DiffEntity | undefined
 }
 
 /** One entity of a diff view: its row, its change and, when it is on both sides, what differs. */

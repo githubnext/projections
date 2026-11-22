@@ -32,8 +32,8 @@ export interface FixturesInspector {
   /** The workbench URL. */
   url: string
   /** The URL of a page: `?view=stage`, or `?scenario=<key>` for the workbench. */
-  page(query?: Record<string, string>): string
-  close(): Promise<void>
+  page: (query?: Record<string, string>) => string
+  close: () => Promise<void>
 }
 
 interface RequestResult {
@@ -94,7 +94,7 @@ function backend(command: string, args: string[], cwd: string, env: NodeJS.Proce
   child.stderr.on('data', bytes => {
     diagnostic = (diagnostic + String(bytes)).slice(-8192)
   })
-  const pending = new Map<number, {done(value: unknown): void; fail(error: Error): void}>()
+  const pending = new Map<number, {done: (value: unknown) => void; fail: (error: Error) => void}>()
   let next = 0
   let ended: Error | undefined
   const exited = new Promise<void>(done => child.once('close', () => done()))

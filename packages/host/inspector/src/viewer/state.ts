@@ -66,7 +66,7 @@ export interface MountViewerOptions {
 
 /** A mounted viewer page: `unmount` stops its requests and removes it. */
 export interface MountedViewer {
-  unmount(): void
+  unmount: () => void
 }
 
 /**

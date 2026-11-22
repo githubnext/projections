@@ -34,8 +34,8 @@ export interface Gate {
   optional?: boolean
   /** Cheap: part of `check --fast`, which builds and tests nothing. */
   fast?: boolean
-  plan(context: GateContext): Plan
-  parse?(output: string, root: string): Problem[]
+  plan: (context: GateContext) => Plan
+  parse?: (output: string, root: string) => Problem[]
   /** The command that fixes this gate's failures, when one does. */
   fix?: string
 }

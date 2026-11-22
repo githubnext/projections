@@ -5,18 +5,18 @@ import type {ProjectionController, ProjectionOptions} from './types.js'
 /** A projection without a framework: read its controller, hear when it changes, and give it new options. */
 export interface ProjectionStore {
   /** The controller as it stands: the same object until something changes. */
-  getSnapshot(): ProjectionController
+  getSnapshot: () => ProjectionController
   /** Calls `listener` after each change; returns the function that stops it. */
-  subscribe(listener: () => void): () => void
+  subscribe: (listener: () => void) => () => void
   /** The embedder's new options: controlled values, handlers, the subject. */
-  update(options: ProjectionOptions): void
+  update: (options: ProjectionOptions) => void
   /**
    * Starts it: playback's frames, watching the person's preferences, and telling the embedder what changes. Call it
    * before acting on the controller. Construction starts nothing.
    */
-  start(): void
+  start: () => void
   /** Stops what `start` started; the state is kept, and `start` resumes it. */
-  stop(): void
+  stop: () => void
 }
 
 /** Reports an error without throwing: `reportError` where there is one, else the console. */

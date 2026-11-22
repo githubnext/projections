@@ -31,15 +31,24 @@ export class StatusBar implements vscode.Disposable {
   private runningTab: string | undefined
   private readonly disposables: vscode.Disposable[] = [this.item]
 
+  private readonly sidebar: Sidebar
+  /** The folder the Viewing view shows. */
+  private readonly folder: () => FolderModel | undefined
+  /** The Projections views (any of them visible counts as the side bar's). */
+  private readonly views: readonly vscode.TreeView<unknown>[]
+  /** What the jobs of a folder's projection tabs other than the one in front are doing. */
+  private readonly others: (folder: vscode.WorkspaceFolder) => readonly Running[]
+
   constructor(
-    private readonly sidebar: Sidebar,
-    /** The folder the Viewing view shows. */
-    private readonly folder: () => FolderModel | undefined,
-    /** The Projections views (any of them visible counts as the side bar's). */
-    private readonly views: readonly vscode.TreeView<unknown>[],
-    /** What the jobs of a folder's projection tabs other than the one in front are doing. */
-    private readonly others: (folder: vscode.WorkspaceFolder) => readonly Running[] = () => [],
+    sidebar: Sidebar,
+    folder: () => FolderModel | undefined,
+    views: readonly vscode.TreeView<unknown>[],
+    others: (folder: vscode.WorkspaceFolder) => readonly Running[] = () => [],
   ) {
+    this.sidebar = sidebar
+    this.folder = folder
+    this.views = views
+    this.others = others
     this.item.name = 'Projections viewing'
     const moved = () => this.place.request()
     this.disposables.push(

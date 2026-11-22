@@ -24,10 +24,10 @@ export interface FactsTab {
   readonly stale: TabStale | undefined
   readonly model: FolderModel
   /** The pair the tab shows: its pinned pair, else the folder's it follows. */
-  shownPair(): Pair | undefined
+  shownPair: () => Pair | undefined
   /** Whether the shown results apply the definition's edits or, by Show committed, the committed version. */
-  editsFor(pair: Pair | undefined): TabPairLabels['edits']
-  control(message: ControlRequest, timeoutMs?: number): Promise<unknown>
+  editsFor: (pair: Pair | undefined) => TabPairLabels['edits']
+  control: (message: ControlRequest, timeoutMs?: number) => Promise<unknown>
 }
 
 /** What the page presents now, unless VS Code dropped it (a hidden tab) or it doesn't answer in time. */

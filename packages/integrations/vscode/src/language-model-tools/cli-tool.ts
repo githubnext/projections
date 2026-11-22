@@ -16,19 +16,20 @@ export interface Contributed {
   tags?: string[]
 }
 
+const askedKey = (name: string, folder: vscode.WorkspaceFolder, args: ToolInput) =>
+  `${name}\n${folder.uri.toString()}\n${JSON.stringify(args)}`
+
 /** The confirm tokens of previews the person was asked about, by tool, folder and arguments. */
 export class Asked {
   private readonly tokens = new Map<string, string>()
-  private readonly key = (name: string, folder: vscode.WorkspaceFolder, args: ToolInput) =>
-    `${name}\n${folder.uri.toString()}\n${JSON.stringify(args)}`
   get(name: string, folder: vscode.WorkspaceFolder, args: ToolInput) {
-    return this.tokens.get(this.key(name, folder, args))
+    return this.tokens.get(askedKey(name, folder, args))
   }
   set(name: string, folder: vscode.WorkspaceFolder, args: ToolInput, token: string) {
-    this.tokens.set(this.key(name, folder, args), token)
+    this.tokens.set(askedKey(name, folder, args), token)
   }
   delete(name: string, folder: vscode.WorkspaceFolder, args: ToolInput) {
-    this.tokens.delete(this.key(name, folder, args))
+    this.tokens.delete(askedKey(name, folder, args))
   }
 }
 

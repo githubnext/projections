@@ -29,10 +29,12 @@ export class SourceFiles {
   private readonly checkout: string
   private readonly fromCheckout = new Map<string, boolean>()
 
-  constructor(
-    private readonly context: ExtractorContext,
-    readonly root: string,
-  ) {
+  private readonly context: ExtractorContext
+  readonly root: string
+
+  constructor(context: ExtractorContext, root: string) {
+    this.context = context
+    this.root = root
     this.checkout = context.toolchain.checkout
   }
 

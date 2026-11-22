@@ -15,16 +15,16 @@ const sameArgs = (a: readonly unknown[], b: readonly unknown[]) =>
 /** A set of memos and state committed together. */
 export interface Memos {
   /** `compute`, recomputed only when an argument differs (by `Object.is`) from the committed call's and the last one's. */
-  memo<A extends readonly unknown[], R>(compute: (...args: A) => R): (...args: A) => R
+  memo: <A extends readonly unknown[], R>(compute: (...args: A) => R) => (...args: A) => R
   /**
    * A value compared by its JSON: a copy taken when it changes, kept while it doesn't, so a value the host changes in
    * place is still a change, and nothing it holds is shared. `undefined` stays `undefined`.
    */
-  byValue<T>(): (value: T) => T
+  byValue: <T>() => (value: T) => T
   /** A value carried from one computation to the next: `read` the committed one, `write` the next. */
-  cell<T>(initial: T): {read(): T; write(value: T): void}
+  cell: <T>(initial: T) => {read: () => T; write: (value: T) => void}
   /** Keeps what the last computation used, as what later ones compare with first. */
-  commit(): void
+  commit: () => void
 }
 
 export function createMemos(): Memos {
@@ -47,7 +47,7 @@ export function createMemos(): Memos {
       const parsed = memo((key: string, missing: boolean) => (missing ? undefined : JSON.parse(key)) as T)
       return (value: T) => parsed(JSON.stringify(value ?? null), value === undefined)
     },
-    cell: <T>(initial: T): {read(): T; write(value: T): void} => {
+    cell: <T>(initial: T): {read: () => T; write: (value: T) => void} => {
       let committed = initial
       let next = initial
       commits.push(() => {
@@ -67,7 +67,7 @@ export function createMemos(): Memos {
 }
 
 /** A selector over memos: call it to compute, `commit` once what it computed is shown. */
-export type Selector<A extends readonly unknown[], R> = ((...args: A) => R) & {commit(): void}
+export type Selector<A extends readonly unknown[], R> = ((...args: A) => R) & {commit: () => void}
 
 /** A selector from `build`, given its memos. */
 export function selector<A extends readonly unknown[], R>(build: (memos: Memos) => (...args: A) => R): Selector<A, R> {

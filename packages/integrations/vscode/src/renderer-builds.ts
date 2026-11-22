@@ -20,13 +20,13 @@ export const rendererTaskType = 'projections-renderer'
 
 export interface RendererBuildHost {
   /** The folder's valid projections, as the side bar read them. */
-  projections(folder: vscode.WorkspaceFolder): readonly ProjectionDefinition[]
+  projections: (folder: vscode.WorkspaceFolder) => readonly ProjectionDefinition[]
   /** Whether a tab of the projection is open. */
-  hasTab(folder: vscode.WorkspaceFolder, projection: string): boolean
+  hasTab: (folder: vscode.WorkspaceFolder, projection: string) => boolean
   /** Tabs opened or closed. */
   readonly onDidChangeTabs: vscode.Event<void>
   /** The folder's shared backend, which runs the builds. */
-  lease(folder: vscode.WorkspaceFolder): Lease
+  lease: (folder: vscode.WorkspaceFolder) => Lease
 }
 
 /** One build as the backend reports it (`GET /api/renderer-builds`, `rendererBuilds` notifications). */
@@ -74,10 +74,12 @@ export class RendererBuilds implements vscode.Disposable {
   readonly onDidChange = this.changed.event
   private readonly disposables: vscode.Disposable[] = []
 
-  constructor(
-    private readonly host: RendererBuildHost,
-    private readonly output: vscode.LogOutputChannel,
-  ) {
+  private readonly host: RendererBuildHost
+  private readonly output: vscode.LogOutputChannel
+
+  constructor(host: RendererBuildHost, output: vscode.LogOutputChannel) {
+    this.host = host
+    this.output = output
     this.disposables.push(
       this.changed,
       vscode.workspace.onDidSaveTextDocument(document => void this.saved(document.uri)),

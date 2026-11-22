@@ -51,14 +51,23 @@ export class InspectorWebview {
   boundAt: number | undefined
   protected readonly disposables: vscode.Disposable[] = []
 
+  protected readonly services: Services
+  readonly source: PanelSource
+  readonly panel: vscode.WebviewPanel
+  protected view: 'explore' | 'inspect'
+
   /** `firstPage`: the document a projection tab's editor showed first, before its page (for tests). */
   constructor(
-    protected readonly services: Services,
-    readonly source: PanelSource,
-    readonly panel: vscode.WebviewPanel,
-    protected view: 'explore' | 'inspect',
+    services: Services,
+    source: PanelSource,
+    panel: vscode.WebviewPanel,
+    view: 'explore' | 'inspect',
     firstPage?: {html: string; at: number},
   ) {
+    this.services = services
+    this.source = source
+    this.panel = panel
+    this.view = view
     this.context = services.context
     this.output = services.output
     this.firstPage = firstPage
@@ -73,22 +82,21 @@ export class InspectorWebview {
     )
   }
 
+  // Hooks a projection tab implements; the Inspector panel has none.
   /** More configuration for the page, such as a projection tab's projection. */
-  protected pageConfig(): Partial<WebviewConfig> {
-    return {}
-  }
+  protected pageConfig?(): Partial<WebviewConfig>
 
   /** A projection tab's summary report. */
-  protected summary(_summary: unknown) {}
+  protected summary?(summary: unknown): void
 
   /** The page's `ready`, which a projection tab's carries its pinned pair. */
-  protected onReady(_message: Partial<HostMessage>) {}
+  protected onReady?(message: Partial<HostMessage>): void
 
   /** A projection tab's toolbar asked to change its pair. */
-  protected pairAction(_action: unknown) {}
+  protected pairAction?(action: unknown): void
 
   /** The page asked the backend for something (a projection tab counts its extraction jobs). */
-  protected request(_method: 'GET' | 'POST', _path: string) {}
+  protected request?(method: 'GET' | 'POST', path: string): void
 
   /**
    * Shows the page at once and binds the backend when it is ready: the page loads (its script, Workers and skeleton) in
@@ -127,7 +135,7 @@ export class InspectorWebview {
       if (this.runner === runner) this.output.warn(`The Projections backend exited (${code})`)
     })
     this.bridge = createBridge(runner, reply => void webview.postMessage(reply), {
-      onRequest: (method, path) => this.request(method, path),
+      onRequest: (method, path) => this.request?.(method, path),
     })
     this.boundAt ??= Date.now()
     const queued = this.queued
@@ -150,7 +158,7 @@ export class InspectorWebview {
       nonce: randomBytes(18).toString('base64url'),
       view,
       page,
-      ...this.pageConfig(),
+      ...this.pageConfig?.(),
     }
     count('page.load')
     webview.html = webviewHtml({
@@ -178,7 +186,7 @@ export class InspectorWebview {
         const page = typeof host.page === 'number' ? host.page : undefined
         const before = this.page.getState()
         this.page.send({type: 'ready', page})
-        if (before.kind !== 'closed' && (page === undefined || page === before.page)) this.onReady(host)
+        if (before.kind !== 'closed' && (page === undefined || page === before.page)) this.onReady?.(host)
         return
       }
       case 'controlResult':
@@ -211,10 +219,10 @@ export class InspectorWebview {
         void vscode.commands.executeCommand('projections.addToCi', 'agent')
         return
       case 'summary':
-        this.summary(host.summary)
+        this.summary?.(host.summary)
         return
       case 'pairAction':
-        this.pairAction((host as {action?: unknown}).action)
+        this.pairAction?.((host as {action?: unknown}).action)
     }
   }
 

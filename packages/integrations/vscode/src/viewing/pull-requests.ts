@@ -5,10 +5,13 @@ import type {ViewingHost} from './types.js'
 export class PullRequests {
   private readonly pulls = new Map<string, {branch: string; number?: number | undefined; at: number}>()
 
-  constructor(
-    private readonly host: ViewingHost,
-    private readonly found: () => void,
-  ) {}
+  private readonly host: ViewingHost
+  private readonly found: () => void
+
+  constructor(host: ViewingHost, found: () => void) {
+    this.host = host
+    this.found = found
+  }
 
   get(model: FolderModel) {
     return this.pulls.get(model.folder.uri.toString())

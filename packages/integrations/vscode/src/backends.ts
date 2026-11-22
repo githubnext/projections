@@ -3,11 +3,11 @@ import type {Runner} from './runner.js'
 /** A holder's use of a shared backend: the current runner, told when it is replaced, released when done. */
 export interface Lease {
   /** The backend, started if it isn't running (or was stopped, or exited). */
-  current(): Promise<Runner>
+  current: () => Promise<Runner>
   /** Called after the backend is replaced (a restart, or a new one after it exited), with the new runner. */
-  onDidChange(listener: (runner: Runner) => void): () => void
+  onDidChange: (listener: (runner: Runner) => void) => () => void
   /** Releases it; the backend stops once nothing holds it. */
-  dispose(): void
+  dispose: () => void
 }
 
 interface Entry<S> {

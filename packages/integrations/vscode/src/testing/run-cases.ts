@@ -3,6 +3,7 @@ import {outcomes} from '../comparator-tests/outcomes.js'
 import {parseResults, refusalMessage} from '../comparator-tests/parse.js'
 import {runPath} from '../comparator-tests/wire.js'
 import type {Cases, TestState} from './state.js'
+import {testMessage} from './state.js'
 
 type FileOutcome = NonNullable<ReturnType<ReturnType<typeof outcomes>['get']>>
 
@@ -12,7 +13,7 @@ function reportErrors(state: TestState, run: vscode.TestRun, entry: Cases, outco
   for (const item of parent && state.data.get(parent)?.node.kind === 'file' ? [parent] : entry.items) {
     run.errored(
       item,
-      outcome.errors.map(error => state.message(entry.folder, error)),
+      outcome.errors.map(error => testMessage(entry.folder, error)),
     )
     state.record(item, 'errored', outcome.errors)
   }
@@ -33,7 +34,7 @@ function reportCases(state: TestState, run: vscode.TestRun, entry: Cases, outcom
     else if (result.status === 'failed') {
       run.failed(
         item,
-        result.messages.map(message => state.message(entry.folder, message)),
+        result.messages.map(message => testMessage(entry.folder, message)),
         result.durationMs,
       )
     } else {

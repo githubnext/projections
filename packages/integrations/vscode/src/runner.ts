@@ -63,16 +63,16 @@ export interface Runner {
   /** Whether it was started with `--trust` (the workspace is trusted). */
   readonly trusted: boolean
   /** Sends one API request; aborting `signal` cancels it in the backend. */
-  request(request: RunnerRequest, signal?: AbortSignal): Promise<RunnerResponse>
+  request: (request: RunnerRequest, signal?: AbortSignal) => Promise<RunnerResponse>
   /** The agent tools (`tools/list`). */
-  tools(signal?: AbortSignal): Promise<ToolDescription[]>
+  tools: (signal?: AbortSignal) => Promise<ToolDescription[]>
   /** Calls an agent tool (`tools/call`); aborting `signal` cancels it in the backend. */
-  callTool(name: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<ToolResult>
+  callTool: (name: string, args: Record<string, unknown>, signal?: AbortSignal) => Promise<ToolResult>
   /** The backend's notifications, such as `changes` (`{generation, changes, complete}`). */
-  onNotification(listener: (method: string, params: unknown) => void): () => void
+  onNotification: (listener: (method: string, params: unknown) => void) => () => void
   readonly exited: Promise<number | null>
   /** Closes the backend's standard input, which stops it; it is killed if it hasn't exited after a few seconds. */
-  stop(): void
+  stop: () => void
 }
 
 /** Validates `initialize`'s result. */

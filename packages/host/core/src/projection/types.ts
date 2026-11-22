@@ -328,7 +328,7 @@ export interface ProjectionController {
   /** Annotation markers per presented row, as renderers receive them. */
   annotationMarks: readonly AnnotationMark[]
   /** The annotations on a presented row. */
-  annotationsFor(rowId: string): TargetAnnotation[]
+  annotationsFor: (rowId: string) => TargetAnnotation[]
   /** Annotations whose targets this subject doesn't present, for example on an item that was removed or renamed since. */
   unplacedAnnotations: readonly TargetAnnotation[]
   controls: readonly RendererControl[]
@@ -337,70 +337,70 @@ export interface ProjectionController {
   legend: RendererLegend | undefined
 
   /** Moves the slider to a position (0–1) and pauses. */
-  seek(position: number): void
+  seek: (position: number) => void
   /** Moves to the slider position that shows a presentation progress (a step end lands mid-hold) and pauses. */
-  seekProgress(progress: number): void
+  seekProgress: (progress: number) => void
   /** Starts playback in a direction (default forward); under reduced motion it shows that endpoint. */
-  play(direction?: 1 | -1): void
-  pause(): void
+  play: (direction?: 1 | -1) => void
+  pause: () => void
   /** Plays in a direction, or pauses when already playing that way. */
-  toggle(direction?: 1 | -1): void
+  toggle: (direction?: 1 | -1) => void
   /**
    * The one play button: pauses while playing, else plays in `nextDirection`.
    * Under reduced motion it shows the endpoint in that direction.
    */
-  togglePlayback(): void
+  togglePlayback: () => void
   /**
    * Where the play button goes: forward from the before end, backward from
    * the after end, and otherwise the last direction of travel (playback,
    * stepping or seeking), initially forward.
    */
   nextDirection: 1 | -1
-  stepForward(): void
-  stepBack(): void
+  stepForward: () => void
+  stepBack: () => void
   /** Sets the playback speed multiplier, between 0.1 and 10. */
-  setSpeed(speed: number): void
-  setLoop(loop: boolean): void
-  setHolds(holds: Holds): void
-  setMode(mode: ComparisonMode): void
-  setSwipePosition(position: number): void
-  setHighlighting(highlighting: Highlighting): void
+  setSpeed: (speed: number) => void
+  setLoop: (loop: boolean) => void
+  setHolds: (holds: Holds) => void
+  setMode: (mode: ComparisonMode) => void
+  setSwipePosition: (position: number) => void
+  setHighlighting: (highlighting: Highlighting) => void
   /** Chooses the scope (see `scope`); the summary filter and find stay, narrowing within it. */
-  setScope(scope: ViewScope): void
+  setScope: (scope: ViewScope) => void
   /** Chooses the Changes scope, or every item. */
-  setChangesOnly(changesOnly: boolean): void
+  setChangesOnly: (changesOnly: boolean) => void
   /** Shows only the items that varied within tolerance (the Noise scope), or every item again. */
-  setVariedOnly(variedOnly: boolean): void
+  setVariedOnly: (variedOnly: boolean) => void
   /** Shows only the items whose generated values were regenerated from the same inputs, or every item again. */
-  setRegeneratedOnly(regeneratedOnly: boolean): void
+  setRegeneratedOnly: (regeneratedOnly: boolean) => void
   /** Shows only a summary figure's items (`summaryFilterOf`), or every item again with `null`. */
-  setSummaryFilter(filter: SummaryFilter | null): void
-  setConnector(connector: boolean): void
-  setSearch(query: string): void
+  setSummaryFilter: (filter: SummaryFilter | null) => void
+  setConnector: (connector: boolean) => void
+  setSearch: (query: string) => void
   /** Selects a presented row by its selection ID (`null` clears the selection). */
-  select(id: string | null): void
+  select: (id: string | null) => void
   /**
    * Selects the row presenting a target in every pane and view, and reports
    * whether it is present. A target with a `path` the item lacks selects the
    * item and reports `property`. An absent target leaves the selection unchanged.
    */
-  selectTarget(target: ProjectionTarget): TargetResolution
+  selectTarget: (target: ProjectionTarget) => TargetResolution
   /** Where a target is presented, without selecting it. */
-  resolveTarget(target: ProjectionTarget): TargetResolution
+  resolveTarget: (target: ProjectionTarget) => TargetResolution
   /** Selects a row and reports that its annotation marker was activated. */
-  activateAnnotation(rowId: string): void
+  activateAnnotation: (rowId: string) => void
   /**
    * Where a row (default: the selection) is drawn, in host viewport
    * coordinates, or `null` when it isn't visible or the renderer doesn't
    * report anchors. Prefers `side`, then the selected target's side, then
    * `after`. Use `useProjectionAnchor` to follow it as it moves.
    */
-  anchorFor(rowId?: string | null, side?: Side): ProjectionAnchor | null
-  hover(id: string | null): void
-  setRenderer(name: string): void
-  setControl(id: string, value: ControlValue): void
-  runAction(id: string): void
-  openSource(path: string, line?: number): void
+  anchorFor: (rowId?: string | null, side?: Side) => ProjectionAnchor | null
+  hover: (id: string | null) => void
+  setRenderer: (name: string) => void
+  setControl: (id: string, value: ControlValue) => void
+  runAction: (id: string) => void
+  openSource: (path: string, line?: number) => void
 
   /** Wiring for `ProjectionStage`. Not a stable API. */
   stage: StageBinding

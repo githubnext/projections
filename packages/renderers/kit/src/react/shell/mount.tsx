@@ -7,7 +7,7 @@ import type {MountOptions, RendererProps} from './props.js'
 
 /** The renderer mounted in a document's `#root`, kept on the element so a re-run kit module finds it too. */
 const mounted = Symbol.for('projections.kit.mounted')
-type MountedContainer = HTMLElement & {[mounted]?: {unmount(): void}}
+type MountedContainer = HTMLElement & {[mounted]?: {unmount: () => void}}
 
 /**
  * Mounts a kit renderer into the bundle's `#root`, from the renderer's entry
@@ -19,7 +19,7 @@ type MountedContainer = HTMLElement & {[mounted]?: {unmount(): void}}
 export function mountRenderer<const A extends readonly RendererAccepts[] | undefined = undefined>(
   component: ComponentType<RendererProps<NoInfer<A>>>,
   options: MountOptions & {accepts?: A},
-): {unmount(): void} {
+): {unmount: () => void} {
   const container: MountedContainer | null = document.getElementById('root')
   if (!container) throw new Error('The renderer document has no #root element')
   container[mounted]?.unmount()

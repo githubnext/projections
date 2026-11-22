@@ -63,41 +63,41 @@ export interface RoutingContext {
   cards: ReadonlySet<string>
   axis: Point
   /** Distance along the axis (across the layers). */
-  along(point: Point): number
+  along: (point: Point) => number
   /** Distance across the axis (along the layers). */
-  across(point: Point): number
-  at(alongValue: number, acrossValue: number): Point
-  box(id: string): RouteBox
+  across: (point: Point) => number
+  at: (alongValue: number, acrossValue: number) => Point
+  box: (id: string) => RouteBox
   /** A card's extent along the axis. */
-  depth(id: string): number
+  depth: (id: string) => number
   /** A card's extent across the axis. */
-  breadth(id: string): number
+  breadth: (id: string) => number
   /** The middle of a card's out face. */
-  outPort(id: string): Point
+  outPort: (id: string) => Point
   /** Where a card's in face is along the axis. */
-  inFace(id: string): number
+  inFace: (id: string) => number
   /** Each relationship's segments. */
   segments: Map<string, Segment[]>
   /** Segments into each card. */
   incoming: Map<string, Segment[]>
   /** Every segment (one list, never to be changed). */
-  all(): readonly Segment[]
+  all: () => readonly Segment[]
   /** The segments that share an end with a segment (its own included): those into its target and out of its source. */
-  sharingAnEnd(segment: Segment): Segment[]
+  sharingAnEnd: (segment: Segment) => Segment[]
   /** Corridor routes found, by segment, and the ports they were found for (see `corridorRoute`). */
   corridors: Map<Segment, {memo: string; route: Spline | undefined}>
   /** Each route's straight runs across the layers. */
-  crossRuns(route: Spline): {along: number; low: number; high: number}[]
+  crossRuns: (route: Spline) => {along: number; low: number; high: number}[]
   /** Whether two routes cross, away from `ignore`, testing only routes whose bounds touch. */
-  quickCross(a: Spline, b: Spline, ignore: readonly Point[], radius: number): boolean
+  quickCross: (a: Spline, b: Spline, ignore: readonly Point[], radius: number) => boolean
   /** How many routes sharing an end with a segment its route crosses: moving a route must not add any. */
-  crossingsOf(segment: Segment): number
+  crossingsOf: (segment: Segment) => number
   /** Whether a route keeps `routeClearance` from every card but its own. */
-  clear(route: Spline, own: readonly string[]): boolean
+  clear: (route: Spline, own: readonly string[]) => boolean
   /** Where the next layer of cards begins after a card: the nearest card face beyond its out face. */
-  firstGap(id: string): number
+  firstGap: (id: string) => number
   /** The far face of the last layer of cards before a card: where the gap above its in face begins. */
-  previousLayer(id: string): number
+  previousLayer: (id: string) => number
   /** How much wider the layer gap must grow for parallel runs to keep full turns. */
   crowding: number
 }

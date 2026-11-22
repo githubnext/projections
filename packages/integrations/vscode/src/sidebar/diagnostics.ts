@@ -22,7 +22,11 @@ export class SidebarDiagnostics implements vscode.Disposable {
   /** Extraction diagnostics by folder and projection, on its definition file. */
   private readonly extraction = new Map<string, {uri: vscode.Uri; messages: string[]}>()
 
-  constructor(private readonly models: () => Iterable<FolderModel>) {}
+  private readonly models: () => Iterable<FolderModel>
+
+  constructor(models: () => Iterable<FolderModel>) {
+    this.models = models
+  }
 
   /** Each invalid definition file's diagnostics in Problems, at the offending field. */
   publish() {

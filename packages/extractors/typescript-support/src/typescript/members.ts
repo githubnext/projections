@@ -11,13 +11,19 @@ interface Member {
 
 /** The members of an exported class or interface, collected as `contains` children of its export. */
 export class MemberNodes {
-  constructor(
-    private readonly project: Project,
-    private readonly checker: ts.TypeChecker,
-    private readonly render: Renderer,
-    private readonly nodes: Map<string, Entity>,
-    private readonly edges: Relationship[],
-  ) {}
+  private readonly project: Project
+  private readonly checker: ts.TypeChecker
+  private readonly render: Renderer
+  private readonly nodes: Map<string, Entity>
+  private readonly edges: Relationship[]
+
+  constructor(project: Project, checker: ts.TypeChecker, render: Renderer, nodes: Map<string, Entity>, edges: Relationship[]) {
+    this.project = project
+    this.checker = checker
+    this.render = render
+    this.nodes = nodes
+    this.edges = edges
+  }
 
   /** Adds every public member of `symbol`'s declared type (and, for a class, its constructor side). */
   add(exportId: string, symbol: ts.Symbol, declaration: ts.Declaration, declared: ts.Type): void {

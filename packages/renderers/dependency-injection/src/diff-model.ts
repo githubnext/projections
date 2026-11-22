@@ -51,7 +51,7 @@ export interface DiDiff {
   runtimeResolution: boolean
   aliases: boolean
   /** The comparison's entity row with this ID, for a part's own change. */
-  row(id: string): EntityChange<Entity> | undefined
+  row: (id: string) => EntityChange<Entity> | undefined
 }
 
 /**

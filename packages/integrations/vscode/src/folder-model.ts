@@ -79,18 +79,22 @@ export class FolderModel implements vscode.Disposable {
   private readonly stopListening: () => void
   private readonly described = new Map<string, PairLabels | Promise<void>>()
 
-  constructor(
-    readonly folder: vscode.WorkspaceFolder,
-    private readonly lease: Lease,
-    private readonly output: vscode.LogOutputChannel,
-    private readonly memento: vscode.Memento,
-  ) {
+  readonly folder: vscode.WorkspaceFolder
+  private readonly lease: Lease
+  private readonly output: vscode.LogOutputChannel
+  private readonly memento: vscode.Memento
+
+  constructor(folder: vscode.WorkspaceFolder, lease: Lease, output: vscode.LogOutputChannel, memento: vscode.Memento) {
+    this.folder = folder
+    this.lease = lease
+    this.output = output
+    this.memento = memento
     this.identities = new WorkingIdentities(lease)
     // The old Pairs view's recent pairs aren't kept any more.
     if (memento.get(this.stateKey) !== undefined) void memento.update(this.stateKey, undefined)
     const choice = memento.get<unknown>(this.choiceKey)
     this.remembered = isChoice(choice) ? choice : undefined
-    const subscribe = (runner: {onNotification(listener: (method: string, params: unknown) => void): () => void}) => {
+    const subscribe = (runner: {onNotification: (listener: (method: string, params: unknown) => void) => () => void}) => {
       this.unsubscribe?.()
       this.unsubscribe = runner.onNotification((method, params) => {
         if (method !== 'changes') return

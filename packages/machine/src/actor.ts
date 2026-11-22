@@ -8,7 +8,7 @@ import type {After, Machine, MachineActivity, MachineEffect, MachineEvent, Machi
 /** What an effect or activity runner is given: how to send events, and a signal aborted when its generation ends. */
 export interface ActorContext<E> {
   /** Sends an event to the actor; dropped once this generation has ended. */
-  send(event: E): void
+  send: (event: E) => void
   /** Aborted when this generation ends: superseded, no longer listed by the state, or the actor stopped. */
   readonly signal: AbortSignal
 }
@@ -41,37 +41,37 @@ export type ActorOptions<S, E, F extends MachineEffect, A extends MachineActivit
 /** A running machine. */
 export interface Actor<S, E> {
   /** The current state. */
-  getState(): S
+  getState: () => S
   /**
    * Sends an event. Events are taken one at a time, in order: one sent while another is being handled (by an effect, a
    * listener or an activity) waits for it. Before `start` and after `stop` events wait for the next `start`.
    */
-  send(event: E): void
+  send: (event: E) => void
   /** Calls `listener` with the state after each batch of events that changed it; returns the unsubscribe function. */
-  subscribe(listener: (state: S) => void): () => void
+  subscribe: (listener: (state: S) => void) => () => void
   /** Starts the current state's activities and takes waiting events. Starting a running actor does nothing. */
-  start(): void
+  start: () => void
   /** Ends every effect and activity generation. The state is kept, and `start` resumes from it. */
-  stop(): void
+  stop: () => void
   /** Whether the actor is started. */
   readonly running: boolean
 }
 
-type Runner = (task: never, context: ActorContext<never>) => unknown
+type Runner<E> = (task: never, context: ActorContext<E>) => unknown
 
 interface Generation<E> {
   readonly context: ActorContext<E>
   /** Whether it hasn't ended: its events are taken only while it lasts, also those already waiting. */
   readonly live: boolean
   /** Takes what a runner returned: a cleanup to run at the end, or a promise whose rejection to report. */
-  settle(result: unknown): void
-  end(): void
+  settle: (result: unknown) => void
+  end: () => void
 }
 
-const timer: Runner = ((activity: After<MachineEvent>, context: ActorContext<MachineEvent>) => {
+function timer<E extends MachineEvent>(activity: After<E>, context: ActorContext<E>) {
   const id = setTimeout(() => context.send(activity.event), activity.ms)
   return () => clearTimeout(id)
-}) as Runner
+}
 
 /** Reports an error with `reportError`, else `console.error`: where an actor's errors go by default. */
 export function defaultReport(error: unknown) {
@@ -94,8 +94,8 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
   const activities = new Map<string, Generation<E>>()
   const keyed = new Map<string, Generation<E>>()
   const report = options.onError ?? defaultReport
-  const effectRunners = (options.effects ?? {}) as Record<string, Runner | undefined>
-  const activityRunners = {...options.activities, 'machine.after': timer} as Record<string, Runner | undefined>
+  const effectRunners = (options.effects ?? {}) as Record<string, Runner<E> | undefined>
+  const activityRunners = {...options.activities, 'machine.after': timer} as Record<string, Runner<E> | undefined>
 
   const generation = (): Generation<E> => {
     const controller = new AbortController()
@@ -140,14 +140,14 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
   let run = generation()
   run.end()
 
-  const invoke = (runners: Record<string, Runner | undefined>, task: {type: string}, into: Generation<E>) => {
+  const invoke = (runners: Record<string, Runner<E> | undefined>, task: {type: string}, into: Generation<E>) => {
     const runner = runners[task.type]
     if (!runner) {
       report(new TypeError(`No runner for "${task.type}"`))
       return
     }
     try {
-      into.settle(runner(task as never, into.context as ActorContext<never>))
+      into.settle(runner(task as never, into.context))
     } catch (error) {
       report(error)
     }

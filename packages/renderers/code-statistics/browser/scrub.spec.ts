@@ -42,7 +42,7 @@ function oracle(comparison: Comparison) {
 const format = (value: number) => Math.round(value).toLocaleString('en-US')
 
 /** The total the renderer states in the host's summary bar: its count, noun and change. */
-async function totalFact(renderer: {state(): Promise<{summary?: readonly unknown[]}>}) {
+async function totalFact(renderer: {state: () => Promise<{summary?: readonly unknown[]}>}) {
   const fact = ((await renderer.state()).summary ?? []).find(
     (item): item is {type: 'fact'; id: string; count: number; noun: {plural: string}; added?: number; removed?: number} =>
       (item as {type?: string}).type === 'fact' && (item as {id?: string}).id === 'total',

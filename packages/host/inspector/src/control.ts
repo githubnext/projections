@@ -81,32 +81,32 @@ import type {ContextItems, ProjectionController} from '@githubnext/projections-h
  */
 export interface InspectorHandle {
   /** Switches to a projection the runner defines; rejects an unknown one. */
-  selectProjection(id: string): void
+  selectProjection: (id: string) => void
   /** Shows a Before → After pair (or one revision). */
-  setPair(pair: InspectorPairRequest): void
+  setPair: (pair: InspectorPairRequest) => void
   /** Selects an entity, relationship or change by ID in the presented view (`null` clears it); false when it isn't shown. */
-  selectEntity(id: string | null): boolean
-  summary(): InspectorSummary
+  selectEntity: (id: string | null) => boolean
+  summary: () => InspectorSummary
   /**
    * The presented projection's controller (comparison mode, playback, selection, settings), for a host that draws
    * those controls itself, for example as an editor's title actions; `null` until a projection is presented.
    */
-  view(): ProjectionController | null
+  view: () => ProjectionController | null
   /** Extracts the shown pair again and compares it, as a host's Refresh does when it refreshes by hand. */
-  refresh(): void
+  refresh: () => void
   /** The shown pair's extractions, by ref, for a host to keep and present again later (`initialResults`). */
-  results(): Record<string, InspectorKeptResult>
+  results: () => Record<string, InspectorKeptResult>
   /**
    * Applies the projection's definition from a revision to both sides (`working-tree`: your edits; `HEAD`: the
    * committed version), as `--definition-revision` does, extracting the shown pair with it.
    */
-  setDefinitionRevision(ref: string): void
+  setDefinitionRevision: (ref: string) => void
   /** Cancels the extractions queued and running, as the Inspector's own Cancel does. */
-  cancel(): void
+  cancel: () => void
   /**
    * Shows one of the projection's renderer scenarios (its `scenarios.json`) instead of the pair; an unknown one shows the
    * pair. Asked for as the Inspector opens, or just after `selectProjection`, it is shown once that projection and its
    * scenarios have loaded.
    */
-  showScenario(id: string): void
+  showScenario: (id: string) => void
 }

@@ -22,16 +22,29 @@ export class FrameLifecycle {
   private unansweredTimer: number | undefined
   private revealTimer: number | undefined
 
+  private readonly view: Window
+  private readonly iframe: HTMLIFrameElement
+  private readonly readyTimeoutMs: number
+  private readonly onEvent: (event: RendererFrameEvent) => void
+  /** Releases everything else the frame holds, once it stops. */
+  private readonly teardown: () => void
+  /** Opens the renderer's document another way, at most once; the frame then loads it as its first document. */
+  private reopen: (() => void) | undefined
+
   constructor(
-    private readonly view: Window,
-    private readonly iframe: HTMLIFrameElement,
-    private readonly readyTimeoutMs: number,
-    private readonly onEvent: (event: RendererFrameEvent) => void,
-    /** Releases everything else the frame holds, once it stops. */
-    private readonly teardown: () => void,
-    /** Opens the renderer's document another way, at most once; the frame then loads it as its first document. */
-    private reopen?: () => void,
+    view: Window,
+    iframe: HTMLIFrameElement,
+    readyTimeoutMs: number,
+    onEvent: (event: RendererFrameEvent) => void,
+    teardown: () => void,
+    reopen?: () => void,
   ) {
+    this.view = view
+    this.iframe = iframe
+    this.readyTimeoutMs = readyTimeoutMs
+    this.onEvent = onEvent
+    this.teardown = teardown
+    this.reopen = reopen
     iframe.addEventListener('load', this.loaded)
     this.readyTimer = this.startReadyTimer()
   }

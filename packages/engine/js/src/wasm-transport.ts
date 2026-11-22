@@ -9,9 +9,9 @@ export type WasmEngineOptions = {module: WebAssembly.Module | BufferSource; url?
 
 interface EngineExports extends WebAssembly.Exports {
   memory: WebAssembly.Memory
-  engine_alloc(length: number): number
-  engine_free(pointer: number, length: number): void
-  engine_call(pointer: number, length: number): bigint
+  engine_alloc: (length: number) => number
+  engine_free: (pointer: number, length: number) => void
+  engine_call: (pointer: number, length: number) => bigint
 }
 
 function exportsOf(instance: WebAssembly.Instance): EngineExports {

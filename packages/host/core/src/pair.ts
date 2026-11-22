@@ -93,10 +93,10 @@ export interface ComparisonPair {
   /** Definition defaults for host and renderer settings (`definition.presentation`). */
   presentation: PresentationDefaults | undefined
   /** Chooses the base; an empty key shows one extraction. */
-  setBefore(key: string): void
-  setAfter(key: string): void
-  swap(): void
-  retry(): void
+  setBefore: (key: string) => void
+  setAfter: (key: string) => void
+  swap: () => void
+  retry: () => void
 }
 
 function failure(error: unknown): ComparisonError | Error {

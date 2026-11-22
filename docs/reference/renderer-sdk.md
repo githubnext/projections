@@ -66,15 +66,15 @@ A nested renderer frame, from `embedRenderer`: what to send it, and how to stop 
 
 | Member | Signature | Description |
 |---|---|---|
-| `dispose` | `"dispose"(): void` | Stops listening and removes the frame. |
-| `hover` | `"hover"(id: null \| string): void` | Sent only when the nested renderer declares `hover`. |
+| `dispose` | `"dispose": { (): void }` | Stops listening and removes the frame. |
+| `hover` | `"hover": { (id: null \| string): void }` | Sent only when the nested renderer declares `hover`. |
 | `iframe` | `readonly "iframe": HTMLIFrameElement` | The sandboxed frame, transparent until the nested renderer has painted. |
 | `ready` | `readonly "ready": Promise<RendererCapabilities>` | Resolves with the nested renderer's capabilities once it is ready; rejects when it fails. |
-| `select` | `"select"(id: null \| string): void` | Selects an item, by the nested renderer's own selection ID, or clears the selection (`null`). |
-| `setEnvironment` | `"setEnvironment"(environment: RendererEnvironment): void` | Sends a new theme, motion preference, locale or pane; `sizing` stays `fill` unless it says otherwise. |
-| `setInit` | `"setInit"(init: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }, progress?: ProgressPayload \| undefined): void` | Replaces what it presents (a new `init`), and optionally the position. |
-| `setOptions` | `"setOptions"(options: RendererOptions): void` | Replaces its settings. |
-| `setProgress` | `"setProgress"(progress: ProgressPayload): void` | Sends a new position to draw. |
+| `select` | `"select": { (id: null \| string): void }` | Selects an item, by the nested renderer's own selection ID, or clears the selection (`null`). |
+| `setEnvironment` | `"setEnvironment": { (environment: RendererEnvironment): void }` | Sends a new theme, motion preference, locale or pane; `sizing` stays `fill` unless it says otherwise. |
+| `setInit` | `"setInit": { (init: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }, progress?: ProgressPayload \| undefined): void }` | Replaces what it presents (a new `init`), and optionally the position. |
+| `setOptions` | `"setOptions": { (options: RendererOptions): void }` | Replaces its settings. |
+| `setProgress` | `"setProgress": { (progress: ProgressPayload): void }` | Sends a new position to draw. |
 
 ### `EmbedOptions`
 
@@ -119,26 +119,26 @@ are rounded to hundredths of a pixel.
 
 | Member | Signature | Description |
 |---|---|---|
-| `anchor` | `"anchor"(id: string, rect: AnchorRect \| null): void` | Reports where an entity is drawn, in this document's viewport, or `null` when it isn't visible (capability `anchors`). |
-| `annotation` | `"annotation"(id: string): void` | Reports that the person activated the annotation marker on an item (capability `annotations`); call `select(id)` first. |
-| `aspect` | `"aspect"(ratio: number): void` | Reports the shape (width / height) of the content the renderer fits to its stage, over the whole transition, so a host can arrange held panes for the larger fitted scale. Clamped to `rendererLimits.aspect`. |
+| `anchor` | `"anchor": { (id: string, rect: AnchorRect \| null): void }` | Reports where an entity is drawn, in this document's viewport, or `null` when it isn't visible (capability `anchors`). |
+| `annotation` | `"annotation": { (id: string): void }` | Reports that the person activated the annotation marker on an item (capability `annotations`); call `select(id)` first. |
+| `aspect` | `"aspect": { (ratio: number): void }` | Reports the shape (width / height) of the content the renderer fits to its stage, over the whole transition, so a host can arrange held panes for the larger fitted scale. Clamped to `rendererLimits.aspect`. |
 | `channel` | `readonly "channel": string` | The frame's channel nonce, from the URL fragment. |
-| `declareOptions` | `"declareOptions"(controls: Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false \| true; "type": "toggle" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" \| "download" \| "expand" \| "filter" \| "fit" \| "next" \| "previous" \| "reset" \| "search" \| "settings" \| "zoom-in" \| "zoom-out"; "type": "action" }>): void` | Replaces the controls the host draws for this renderer (initially those in `capabilities.controls`). Throws if a declaration is invalid. |
-| `dispose` | `"dispose"(): void` | Stops listening for host messages. |
-| `error` | `"error"(message: string): void` | Reports a rendering failure. The host shows it and keeps its own views available. |
-| `height` | `"height"(px: number): void` | Requests a frame height in CSS pixels. The host clamps it. |
-| `hover` | `"hover"(id: null \| string): void` | Reports the entity under the pointer (capability `hover`). |
-| `legend` | `"legend"(legend: RendererLegend): void` | Asks the host to draw the renderer's legend once beside the frames, with the host's design system, instead of drawing one in each pane. Items use theme tokens (preferred) or CSS colors; an empty list clears it. Throws when the legend is invalid. |
-| `observeHeight` | `"observeHeight"(element: Element): { (): void }` | Requests the height of `element` now and whenever it resizes. Returns a function that stops observing. |
-| `open` | `"open"(path: string, line?: number \| undefined): void` | Asks the host to open a repository file; the host decides whether to navigate. |
-| `rendered` | `"rendered"(progress: number, init?: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } \| undefined): void` | Acknowledges that the frame for `progress` has been painted. Pass the `init` payload it painted when the acknowledgement is deferred (after a paint, say), so that a paint of a document the host has since replaced isn't taken for the new one; without it, the latest `init` is assumed. |
-| `requestDocument` | `"requestDocument"(name: string): Promise<string>` | Asks the host for the document of the built-in renderer `name` (for example `graph`), to run in a frame nested in this one (`embedRenderer` does both). Resolves with its `index.html` text, as the host runs it; rejects with the host's reason when it supplies none (an unknown or custom renderer, or a host without documents), or after `rendererLimits.documentTimeoutMs` without an answer. Repeated requests for one name share one answer. |
-| `select` | `"select"(id: null \| string, path?: string \| undefined): void` | Reports the renderer's selection, or `null` when it clears it. `path`, an RFC 6901 pointer such as `/data/owner`, selects a property of the item (capability `properties`); it is ignored with a `null` ID and throws if invalid. |
-| `setControl` | `"setControl"(id: string, value: false \| number \| string \| true): void` | Sets a declared control's value from the renderer's own content, as the person changed it there (a sortable column header, say). The host applies it as if they had set it in its settings and answers with `options`; it ignores a value the control doesn't accept. |
-| `steps` | `"steps"(ends: Array<number>, slots?: number \| undefined): void` | Declares progress values at which the host may hold during playback, and optionally how many step slots the presentation spans (`timelineSlots`), for the host's default pace. |
-| `subscribe` | `"subscribe"(listener: { (message: { "generation"?: number; "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| { "generation"?: number; "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } \| { "height": number; "type": "viewport"; "width": number } \| { "id": null \| string; "path"?: string; "type": "select" } \| { "id": null \| string; "type": "hover" } \| { "id": string; "type": "action" } \| { "items": Array<AnnotationMark>; "type": "annotations" } \| { "options": RendererOptions; "type": "options" } \| { "type": "document" } & { "renderer": string } & { "error": string; "html"?: never } \| { "type": "document" } & { "renderer": string } & { "error"?: never; "html": string } \| { "type": "environment" } & RendererEnvironment \| { "type": "filter" } & FilterPayload \| { "type": "progress" } & ProgressPayload \| { "type": "scroll" } & ScrollPosition): void }): { (): void }` | Observes every valid host message after the handlers run. Returns a function that stops observing. |
-| `summary` | `"summary"(summary: RendererSummary): void` | Gives the host the words for its summary bar: a figure per extraction kind in the renderer's vocabulary (`SummaryItem`), in display order; an empty list returns the bar to the host's own words. Throws when the summary is invalid. |
-| `viewport` | `"viewport"(position: ScrollPosition): void` | Reports that the person scrolled a container (capability `scrollSync`). |
+| `declareOptions` | `"declareOptions": { (controls: Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false \| true; "type": "toggle" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" \| "download" \| "expand" \| "filter" \| "fit" \| "next" \| "previous" \| "reset" \| "search" \| "settings" \| "zoom-in" \| "zoom-out"; "type": "action" }>): void }` | Replaces the controls the host draws for this renderer (initially those in `capabilities.controls`). Throws if a declaration is invalid. |
+| `dispose` | `"dispose": { (): void }` | Stops listening for host messages. |
+| `error` | `"error": { (message: string): void }` | Reports a rendering failure. The host shows it and keeps its own views available. |
+| `height` | `"height": { (px: number): void }` | Requests a frame height in CSS pixels. The host clamps it. |
+| `hover` | `"hover": { (id: null \| string): void }` | Reports the entity under the pointer (capability `hover`). |
+| `legend` | `"legend": { (legend: RendererLegend): void }` | Asks the host to draw the renderer's legend once beside the frames, with the host's design system, instead of drawing one in each pane. Items use theme tokens (preferred) or CSS colors; an empty list clears it. Throws when the legend is invalid. |
+| `observeHeight` | `"observeHeight": { (element: Element): { (): void } }` | Requests the height of `element` now and whenever it resizes. Returns a function that stops observing. |
+| `open` | `"open": { (path: string, line?: number \| undefined): void }` | Asks the host to open a repository file; the host decides whether to navigate. |
+| `rendered` | `"rendered": { (progress: number, init?: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } \| undefined): void }` | Acknowledges that the frame for `progress` has been painted. Pass the `init` payload it painted when the acknowledgement is deferred (after a paint, say), so that a paint of a document the host has since replaced isn't taken for the new one; without it, the latest `init` is assumed. |
+| `requestDocument` | `"requestDocument": { (name: string): Promise<string> }` | Asks the host for the document of the built-in renderer `name` (for example `graph`), to run in a frame nested in this one (`embedRenderer` does both). Resolves with its `index.html` text, as the host runs it; rejects with the host's reason when it supplies none (an unknown or custom renderer, or a host without documents), or after `rendererLimits.documentTimeoutMs` without an answer. Repeated requests for one name share one answer. |
+| `select` | `"select": { (id: null \| string, path?: string \| undefined): void }` | Reports the renderer's selection, or `null` when it clears it. `path`, an RFC 6901 pointer such as `/data/owner`, selects a property of the item (capability `properties`); it is ignored with a `null` ID and throws if invalid. |
+| `setControl` | `"setControl": { (id: string, value: false \| number \| string \| true): void }` | Sets a declared control's value from the renderer's own content, as the person changed it there (a sortable column header, say). The host applies it as if they had set it in its settings and answers with `options`; it ignores a value the control doesn't accept. |
+| `steps` | `"steps": { (ends: Array<number>, slots?: number \| undefined): void }` | Declares progress values at which the host may hold during playback, and optionally how many step slots the presentation spans (`timelineSlots`), for the host's default pace. |
+| `subscribe` | `"subscribe": { (listener: { (message: { "generation"?: number; "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| { "generation"?: number; "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } \| { "height": number; "type": "viewport"; "width": number } \| { "id": null \| string; "path"?: string; "type": "select" } \| { "id": null \| string; "type": "hover" } \| { "id": string; "type": "action" } \| { "items": Array<AnnotationMark>; "type": "annotations" } \| { "options": RendererOptions; "type": "options" } \| { "type": "document" } & { "renderer": string } & { "error": string; "html"?: never } \| { "type": "document" } & { "renderer": string } & { "error"?: never; "html": string } \| { "type": "environment" } & RendererEnvironment \| { "type": "filter" } & FilterPayload \| { "type": "progress" } & ProgressPayload \| { "type": "scroll" } & ScrollPosition): void }): { (): void } }` | Observes every valid host message after the handlers run. Returns a function that stops observing. |
+| `summary` | `"summary": { (summary: RendererSummary): void }` | Gives the host the words for its summary bar: a figure per extraction kind in the renderer's vocabulary (`SummaryItem`), in display order; an empty list returns the bar to the host's own words. Throws when the summary is invalid. |
+| `viewport` | `"viewport": { (position: ScrollPosition): void }` | Reports that the person scrolled a container (capability `scrollSync`). |
 
 ### `RendererConnectionError`
 
@@ -170,17 +170,17 @@ Handlers for host messages. Each is optional; unknown or foreign messages never 
 
 | Member | Signature | Description |
 |---|---|---|
-| `action` | `"action"?(message: { id: string; }): void` | The person activated one of the renderer's `action` controls. |
-| `annotations` | `"annotations"?(items: Array<AnnotationMark>): void` | Markers to draw on items, replacing earlier ones (capability `annotations`). |
-| `environment` | `"environment"?(message: RendererEnvironment): void` | A new theme, motion preference, locale, pane or sizing; `applyEnvironment` applies it to CSS. |
-| `filter` | `"filter"?(message: { scope?: string[] \| null; ids: string[] \| null; query: string; changesOnly: boolean; }): void` | The host's find and "changes only" settings changed. |
-| `hover` | `"hover"?(message: { id: string \| null; }): void` | The entity the person points at in any pane, or `null` (capability `hover`). |
-| `init` | `"init"?(message: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }): void` | The document to present and the environment, first after `ready` and again whenever the host replaces the document; reset any per-document state. |
-| `options` | `"options"?(options: RendererOptions): void` | New settings, replacing the earlier ones: declared controls' values by `id` (see `controlValues`). |
-| `progress` | `"progress"?(message: ProgressPayload): void` | A new position to draw; acknowledge it with `client.rendered` once painted. |
-| `scroll` | `"scroll"?(position: ScrollPosition): void` | Scroll a container to mirror another pane (capability `scrollSync`); don't report that scroll as `viewport`. |
-| `select` | `"select"?(message: { path?: string; id: string \| null; }): void` | The host's selection: an item ID or `null`, and optionally a property of it (`path`, an RFC 6901 pointer). |
-| `viewport` | `"viewport"?(message: { height: number; width: number; }): void` | The frame's size in CSS px, on load and whenever it changes. |
+| `action` | `"action"?: { (message: { id: string; }): void }` | The person activated one of the renderer's `action` controls. |
+| `annotations` | `"annotations"?: { (items: Array<AnnotationMark>): void }` | Markers to draw on items, replacing earlier ones (capability `annotations`). |
+| `environment` | `"environment"?: { (message: RendererEnvironment): void }` | A new theme, motion preference, locale, pane or sizing; `applyEnvironment` applies it to CSS. |
+| `filter` | `"filter"?: { (message: { scope?: string[] \| null; ids: string[] \| null; query: string; changesOnly: boolean; }): void }` | The host's find and "changes only" settings changed. |
+| `hover` | `"hover"?: { (message: { id: string \| null; }): void }` | The entity the person points at in any pane, or `null` (capability `hover`). |
+| `init` | `"init"?: { (message: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }): void }` | The document to present and the environment, first after `ready` and again whenever the host replaces the document; reset any per-document state. |
+| `options` | `"options"?: { (options: RendererOptions): void }` | New settings, replacing the earlier ones: declared controls' values by `id` (see `controlValues`). |
+| `progress` | `"progress"?: { (message: ProgressPayload): void }` | A new position to draw; acknowledge it with `client.rendered` once painted. |
+| `scroll` | `"scroll"?: { (position: ScrollPosition): void }` | Scroll a container to mirror another pane (capability `scrollSync`); don't report that scroll as `viewport`. |
+| `select` | `"select"?: { (message: { path?: string; id: string \| null; }): void }` | The host's selection: an item ID or `null`, and optionally a property of it (`path`, an RFC 6901 pointer). |
+| `viewport` | `"viewport"?: { (message: { height: number; width: number; }): void }` | The frame's size in CSS px, on load and whenever it changes. |
 
 ## Interactions (`@githubnext/projections/renderer`)
 
@@ -296,10 +296,10 @@ The running interactions of one root (`connectInteractions`).
 
 | Member | Signature | Description |
 |---|---|---|
-| `dispose` | `"dispose"(): void` | Stops listening and observing, removes badges and annotation marks, and releases the document's rings. |
-| `refresh` | `"refresh"(): void` | Re-measures anchors and badges, for layout changes the controller can't observe. |
+| `dispose` | `"dispose": { (): void }` | Stops listening and observing, removes badges and annotation marks, and releases the document's rings. |
+| `refresh` | `"refresh": { (): void }` | Re-measures anchors and badges, for layout changes the controller can't observe. |
 | `selection` | `readonly "selection": { "id": null \| string; "path"?: string }` | The latest selection, from `setSelected`, the host's `select` (with its property `path`) or an annotation badge. |
-| `setSelected` | `"setSelected"(id: null \| string): void` | The renderer's current selection, whose position is reported as an anchor. |
+| `setSelected` | `"setSelected": { (id: null \| string): void }` | The renderer's current selection, whose position is reported as an anchor. |
 
 ### `InteractionOptions`
 
@@ -2857,7 +2857,7 @@ starts it.
 ### `documentRings`
 
 ```ts
-documentRings(view: Window): null | { "controller": RingController; "release"(): void }
+documentRings(view: Window): null | { "controller": RingController; "release": { (): void } }
 ```
 
 The document's ring controller, shared by every SDK connection in a window
@@ -2875,9 +2875,9 @@ Marks the hovered and selected entities' units for the ring stylesheet (`connect
 | Member | Signature | Description |
 |---|---|---|
 | `attribute` | `"attribute": string` | The attribute that carries an element's selection ID. |
-| `dispose` | `"dispose"(): void` | Stops observing the document, removes the ring stylesheet and every ring attribute the SDK set. |
-| `refresh` | `"refresh"(): void` | Re-marks now. |
-| `set` | `"set"(targets: RingTargets): void` | Updates the hovered or selected entity; omitted fields keep their value. |
+| `dispose` | `"dispose": { (): void }` | Stops observing the document, removes the ring stylesheet and every ring attribute the SDK set. |
+| `refresh` | `"refresh": { (): void }` | Re-marks now. |
+| `set` | `"set": { (targets: RingTargets): void }` | Updates the hovered or selected entity; omitted fields keep their value. |
 
 ### `ringEdgeAttribute`
 

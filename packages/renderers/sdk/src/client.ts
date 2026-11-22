@@ -15,6 +15,7 @@ import type {
   AnchorRect,
   ControlValue,
   HostMessage,
+  InitPayload,
   RendererControl,
   RendererEnvironment,
   RendererCapabilities,
@@ -54,8 +55,12 @@ export interface ConnectOptions {
 export interface RendererClient {
   /** The frame's channel nonce, from the URL fragment. */
   readonly channel: string
-  /** Acknowledges that the frame for `progress` has been painted. */
-  rendered(progress: number): void
+  /**
+   * Acknowledges that the frame for `progress` has been painted. Pass the `init` payload it painted when the
+   * acknowledgement is deferred (after a paint, say), so that a paint of a document the host has since replaced isn't
+   * taken for the new one; without it, the latest `init` is assumed.
+   */
+  rendered(progress: number, init?: InitPayload): void
   /**
    * Reports the renderer's selection, or `null` when it clears it. `path`, an
    * RFC 6901 pointer such as `/data/owner`, selects a property of the item
@@ -150,11 +155,13 @@ export class RendererConnectionError extends Error {
  * const client = connectRenderer(
  *   {
  *     init(payload) {
+ *       document = payload
  *       draw(payload)
  *     },
  *     progress({progress, highlighting}) {
  *       update(progress, highlighting)
- *       afterPaint(() => client.rendered(progress))
+ *       const painted = document
+ *       afterPaint(() => client.rendered(progress, painted))
  *     },
  *     environment: applyEnvironment,
  *   },
@@ -206,7 +213,8 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
   const clamp = (value: number) => Math.min(rendererLimits.maxHeight, Math.max(0, Math.ceil(value)))
   const client: RendererClient = {
     channel,
-    rendered: progress => post({type: 'rendered', progress: Math.min(1, Math.max(0, progress)), ...echoedGeneration(messages.get('init'))}),
+    rendered: (progress, init) =>
+      post({type: 'rendered', progress: Math.min(1, Math.max(0, progress)), ...echoedGeneration(messages.get('init'), init)}),
     select(id, path) {
       if (path !== undefined && !isPropertyPath(path))
         throw new RendererConnectionError('A selection path must be an RFC 6901 JSON pointer')

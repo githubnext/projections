@@ -295,12 +295,12 @@ export const generators: Generator[] = [
 ]
 
 /** A first line announcing a generated file: a comment saying it was generated. */
-const marker = /^(<!--|\/\/|#|\/\*)\s*(this file was )?(auto-?)?generated (by|from)\b/i
+const marker = /^(?:<!--|\/\/|#|\/\*)\s*(?:this file was )?(?:auto-?)?generated (?:by|from)\b/iu
 
 /** Files whose first line announces they are generated (Markdown, code, JSON and YAML). */
 export function markedFiles(root: string, files: readonly string[] = walkAll(root)): string[] {
   return files.filter(path => {
-    if (!/\.(md|ts|js|mjs|json|ya?ml|rs)$/.test(path)) return false
+    if (!/\.(?:md|ts|js|mjs|json|ya?ml|rs)$/u.test(path)) return false
     try {
       return marker.test(readFileSync(join(root, path), 'utf8').slice(0, 300).split('\n')[0] ?? '')
     } catch {

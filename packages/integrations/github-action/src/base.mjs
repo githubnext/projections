@@ -35,7 +35,7 @@ try {
     test ? environment.PROJECTIONS_TEST_REF : environment.GITHUB_REF,
   )
   if (subject.kind !== 'pull-request') process.exit(0)
-  if (!/^[A-Za-z0-9-]+\/[A-Za-z0-9_.-]+$/.test(repository)) throw new Error(`Unexpected repository ${repository}`)
+  if (!/^[A-Za-z0-9-]+\/[\w.-]+$/u.test(repository)) throw new Error(`Unexpected repository ${repository}`)
   for (const commit of [subject.base, subject.head]) {
     if (spawnSync('git', ['cat-file', '-e', `${commit}^{commit}`], {cwd: repo}).status !== 0) {
       spawnSync('git', ['fetch', '--no-tags', '--quiet', 'origin', commit], {cwd: repo})

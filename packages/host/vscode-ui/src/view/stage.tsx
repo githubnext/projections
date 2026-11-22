@@ -9,7 +9,7 @@ import {VscodeLegend} from '../views/legend.js'
 /** Pane cards (side by side, swipe) take the box's divider edge: one border, drawn inside. */
 const paneEdge: PaneEdge = {border: 'var(--borderWidth-thin) solid var(--phv-divider)', radius: '0'}
 /** Renderer and host messages read as sentences. */
-const sentence = (text: string | undefined) => (!text ? '' : /[.!?]$/.test(text) ? text : `${text}.`)
+const sentence = (text: string | undefined) => (!text ? '' : /[.!?]$/u.test(text) ? text : `${text}.`)
 
 interface PaneStatusProps {
   pane: PaneState

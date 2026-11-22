@@ -31,18 +31,18 @@ module.exports = async function currentView({folder, api, invoke}) {
   assert.ok(vscode.lm.tools.some(tool => tool.name === 'projections_current_view'))
   await until('the CI pipeline row', async () => api.rows()[0].projections.some(row => row.id === 'ci-jobs'))
   const opened = await invoke('projections_open_projection', {projection: 'ci-jobs', before: 'HEAD~1', after: 'HEAD', pin: true})
-  assert.match(opened, /^Opened CI pipeline \(ci-jobs\)/, opened)
+  assert.match(opened, /^Opened CI pipeline \(ci-jobs\)/u, opened)
   const view = await until(
     'the current view of the compared CI pipeline',
     async () => {
       const text = await invoke('projections_current_view', {})
-      return /^- removed \S+ Test \[/m.test(text) && /^Mode: /m.test(text) ? text : undefined
+      return /^- removed \S+ Test \[/mu.test(text) && /^Mode: /mu.test(text) ? text : undefined
     },
     90_000,
   )
-  assert.match(view, /^The projection tab in front is "CI pipeline" \(projection ci-jobs\) in /m, view)
-  assert.match(view, /^Definition: \.github\/projections\/ci-jobs\.json; extractor \x60github-actions-jobs\x60/m, view)
-  assert.match(view, /, pinned to this tab\./, view)
+  assert.match(view, /^The projection tab in front is "CI pipeline" \(projection ci-jobs\) in /mu, view)
+  assert.match(view, /^Definition: \.github\/projections\/ci-jobs\.json; extractor \x60github-actions-jobs\x60/mu, view)
+  assert.match(view, /, pinned to this tab\./u, view)
   assert.match(view, new RegExp(`^Revisions: before ${before}, after ${after}\\.$`, 'm'), view)
   // The mode the tab shows, as its title bar's mode toggle reads it (which it reports every half second).
   const modeNames = {'side-by-side': 'Side by side', animated: 'Animated', swipe: 'Swipe', diff: 'Diff'}
@@ -54,7 +54,7 @@ module.exports = async function currentView({folder, api, invoke}) {
   await api.control('ci-jobs', {op: 'view', action: 'setMode', value: 'swipe'})
   await until(
     'the current view in Swipe',
-    async () => /^Mode: Swipe \(of /m.test(await invoke('projections_current_view', {})) || undefined,
+    async () => /^Mode: Swipe \(of /mu.test(await invoke('projections_current_view', {})) || undefined,
   )
   // The agent sets the mode, refreshes the tab and screenshots what it shows: the same tools projections mcp answers
   // with its viewer.
@@ -65,21 +65,21 @@ module.exports = async function currentView({folder, api, invoke}) {
     pin: true,
     mode: 'side-by-side',
   })
-  assert.match(moded, /, in side-by-side/, moded)
-  assert.match(await invoke('projections_refresh', {}), /^Extracted again\.\n\nThe projection tab in front is "CI pipeline"/)
+  assert.match(moded, /, in side-by-side/u, moded)
+  assert.match(await invoke('projections_refresh', {}), /^Extracted again\.\n\nThe projection tab in front is "CI pipeline"/u)
   const shot = await vscode.lm.invokeTool('projections_screenshot', {input: {width: 640, height: 400}, toolInvocationToken: undefined})
   const shotText = shot.content.map(part => part.value ?? '').join('')
   // Rendering needs Chrome, Chromium or Edge, which a runner may lack.
-  if (!/needs? (Chrome|a browser)|No (Chrome|browser)|browser executable/i.test(shotText)) {
-    assert.match(shotText, /^Projection: ci-jobs, the one the "CI pipeline" tab shows\.[\s\S]*Rendered ci-jobs on /, shotText)
-    assert.match(shotText, /side-by-side/, shotText)
+  if (!/needs? (?:Chrome|a browser)|No (?:Chrome|browser)|browser executable/iu.test(shotText)) {
+    assert.match(shotText, /^Projection: ci-jobs, the one the "CI pipeline" tab shows\.[\s\S]*Rendered ci-jobs on /u, shotText)
+    assert.match(shotText, /side-by-side/u, shotText)
     assert.ok(
       shot.content.some(part => part.mimeType === 'image/png' && part.data?.length > 1000),
       shotText,
     )
   }
-  assert.match(view, /^- added \S+ Unit tests \[/m, view)
-  assert.match(view, /^Summary bar: /m, view)
+  assert.match(view, /^- added \S+ Unit tests \[/mu, view)
+  assert.match(view, /^Summary bar: /mu, view)
   // compare without a projection or revisions compares the tab's, and says so.
   const compared = await invoke('projections_compare', {})
   assert.match(
@@ -89,13 +89,13 @@ module.exports = async function currentView({folder, api, invoke}) {
     ),
     compared,
   )
-  assert.match(compared, /^ *Removed entity Test \[job:test\]$/m, compared)
+  assert.match(compared, /^ *Removed entity Test \[job:test\]$/mu, compared)
   assert.match(compared, new RegExp(`Comparing ${before} \\(`), compared)
   // Revisions other than the tab's are said not to be the ones on screen.
   const asked = await invoke('projections_compare', {before: 'HEAD~2', after: 'HEAD~1'})
   assert.match(
     asked,
-    /^Projection: ci-jobs, the one the "CI pipeline" tab shows\. Revisions: as asked\. Not the comparison the "CI pipeline" tab shows/,
+    /^Projection: ci-jobs, the one the "CI pipeline" tab shows\. Revisions: as asked\. Not the comparison the "CI pipeline" tab shows/u,
     asked,
   )
   // Before the commit that added the workflow, the pipeline didn't exist yet: the tab shows its jobs added, with a
@@ -107,11 +107,11 @@ module.exports = async function currentView({folder, api, invoke}) {
     'the CI pipeline added since before its workflow existed',
     async () => {
       const text = await invoke('projections_current_view', {})
-      return text.includes(`Notice: ${notice}`) && /^- added \S+ Test \[/m.test(text) ? text : undefined
+      return text.includes(`Notice: ${notice}`) && /^- added \S+ Test \[/mu.test(text) ? text : undefined
     },
     90_000,
   )
-  assert.match(missing, /^- added \S+ Build \[/m, missing)
-  assert.doesNotMatch(missing, /^- (removed|modified) /m, missing)
-  assert.doesNotMatch(missing, /^Status: failed/m, missing)
+  assert.match(missing, /^- added \S+ Build \[/mu, missing)
+  assert.doesNotMatch(missing, /^- (removed|modified) /mu, missing)
+  assert.doesNotMatch(missing, /^Status: failed/mu, missing)
 }

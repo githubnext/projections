@@ -4,7 +4,7 @@ import {extraction, openRenderer} from '@githubnext/projections-renderer-harness
 import {after, before, notesAfter, notesBefore, reportAfter, reportBefore} from './fixtures.ts'
 
 const lines = (text: string) => {
-  const result = text.split(/\r\n|\n|\r/)
+  const result = text.split(/\r\n|\n|\r/u)
   if (result.at(-1) === '') result.pop()
   return result
 }
@@ -43,12 +43,12 @@ function sides(frame: FrameLocator) {
 function decoration(frame: FrameLocator) {
   return frame.locator('.text-diff-view').evaluate(root => ({
     tinted: [...root.querySelectorAll('.td-delete, .td-insert')].filter(
-      line => !/^(transparent|rgba\(0, 0, 0, 0\)|color\(srgb [\d. ]+ \/ 0\))$/.test(getComputedStyle(line).backgroundColor),
+      line => !/^(?:transparent|rgba\(0, 0, 0, 0\)|color\(srgb [\d. ]+ \/ 0\))$/u.test(getComputedStyle(line).backgroundColor),
     ).length,
     markers: [...root.querySelectorAll('.td-mark')].filter(mark => mark.getBoundingClientRect().width > 0.5 && mark.textContent).length,
     cells: root.querySelectorAll('header .pk-group-status').length,
     status: [...root.querySelectorAll<HTMLElement>('header .pk-group-status')].filter(cell =>
-      /^(Added|Removed|Modified|Renamed)/.test(cell.innerText.replace(/\s/g, '')),
+      /^(?:Added|Removed|Modified|Renamed)/u.test(cell.innerText.replace(/\s/gu, '')),
     ).length,
     boxes: [...root.querySelectorAll<HTMLElement>('[data-entity-id], header > *')].map(item => {
       const box = item.getBoundingClientRect()
@@ -186,16 +186,16 @@ test('long unchanged runs fold into a gap that opens in place and folds again', 
     comparisonMode: 'diff',
     options: {textDiffLayout: 'unified'},
   })
-  const gaps = renderer.frame.getByRole('button', {name: /unchanged lines/})
+  const gaps = renderer.frame.getByRole('button', {name: /unchanged lines/u})
   await expect(gaps).toHaveCount(2)
-  await expect(gaps.first()).toHaveText(/12 unchanged lines/)
+  await expect(gaps.first()).toHaveText(/12 unchanged lines/u)
   await gaps.first().click()
-  await expect(renderer.frame.locator('.td-text', {hasText: /^line 1$/})).toBeVisible()
+  await expect(renderer.frame.locator('.td-text', {hasText: /^line 1$/u})).toBeVisible()
   // The opened gap stays above its lines, as the way to fold them again, from the keyboard too.
-  const hide = renderer.frame.getByRole('button', {name: /^Hide 12 unchanged lines$/})
+  const hide = renderer.frame.getByRole('button', {name: /^Hide 12 unchanged lines$/u})
   await expect(hide).toHaveAttribute('aria-expanded', 'true')
   await hide.press('Enter')
-  await expect(renderer.frame.locator('.td-text', {hasText: /^line 1$/})).toHaveCount(0)
+  await expect(renderer.frame.locator('.td-text', {hasText: /^line 1$/u})).toHaveCount(0)
   await expect(gaps.first()).toHaveAttribute('aria-expanded', 'false')
 })
 

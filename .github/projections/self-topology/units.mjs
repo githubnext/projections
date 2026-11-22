@@ -21,7 +21,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
    * Names, areas and path IDs start below it.
    */
   function containerFor(globs) {
-    const parents = sortedUnique(globs.map(pattern => path.posix.dirname(pattern.split('*')[0].replace(/\/$/, ''))))
+    const parents = sortedUnique(globs.map(pattern => path.posix.dirname(pattern.split('*')[0].replace(/\/$/u, ''))))
     const segments = parents.map(parent => (parent === '.' ? [] : parent.split('/')))
     if (!segments.length) return ''
     const common = segments.reduce((shared, next) =>
@@ -38,7 +38,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
 
   const isExcluded = relative =>
     excluded.some(prefix => {
-      const directory = prefix.replace(/\/$/, '')
+      const directory = prefix.replace(/\/$/u, '')
       return `/${relative}/`.includes(`/${directory}/`)
     })
   // A root is a repository-relative directory; `''` (written `.`) is the repository itself.
@@ -91,7 +91,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
           meta: {description: pkg.description ?? undefined},
         })
         unitByPackage.set(pkg.name, id)
-        unitByCrateIdent.set(pkg.name.replace(/-/g, '_'), id)
+        unitByCrateIdent.set(pkg.name.replace(/-/gu, '_'), id)
         for (const dependency of pkg.dependencies) {
           if (!dependency.path) continue
           manifestDependencies.push({
@@ -109,9 +109,9 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
     const rootManifest = `${prefix}package.json`
     const workspacePatterns = fileSet.has(rootManifest) ? (JSON.parse(read(rootManifest)).workspaces ?? []) : null
     // The workspaces' glob patterns, npm's and Cargo's, which say where the root keeps its groups of units.
-    const cargoMembers = /^\s*members\s*=\s*\[([^\]]*)\]/m.exec(read(`${prefix}Cargo.toml`))?.[1] ?? ''
-    root.globs = [...(workspacePatterns ?? []), ...[...cargoMembers.matchAll(/["']([^"']+)["']/g)].map(([, member]) => member)].filter(
-      pattern => pattern.includes('*') && !isExcluded(pattern.split('*')[0].replace(/\/$/, '')),
+    const cargoMembers = /^\s*members\s*=\s*\[([^\]]*)\]/mu.exec(read(`${prefix}Cargo.toml`))?.[1] ?? ''
+    root.globs = [...(workspacePatterns ?? []), ...[...cargoMembers.matchAll(/["']([^"']+)["']/gu)].map(([, member]) => member)].filter(
+      pattern => pattern.includes('*') && !isExcluded(pattern.split('*')[0].replace(/\/$/u, '')),
     )
     root.container = containerFor(root.globs)
     // IDs of units without a package name are their paths below the container, so moving the workspaces keeps them.
@@ -119,10 +119,10 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
     const manifests = files.filter(file => {
       if (!file.startsWith(prefix) || !file.endsWith('/package.json')) return false
       const directory = file.slice(prefix.length, -'/package.json'.length)
-      if (isExcluded(directory) || /(^|\/)(node_modules|fixtures|test|tests)(\/|$)/.test(directory)) return false
+      if (isExcluded(directory) || /(?:^|\/)(?:node_modules|fixtures|test|tests)(?:\/|$)/u.test(directory)) return false
       if (workspacePatterns === null) return directory.split('/').length === 1
       return workspacePatterns.some(pattern =>
-        new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]+')}$`).test(directory),
+        new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/gu, '\\$&').replace(/\*/gu, '[^/]+')}$`).test(directory),
       )
     })
     for (const manifest of manifests) {
@@ -161,7 +161,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
     // Components without a manifest, named by the `components` input's directory patterns; a matching directory with a
     // manifest is already a unit.
     const componentPatterns = (root.components ?? (root === roots[0] ? ['integrations/*'] : [])).map(
-      pattern => new RegExp(`(^|/)${pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]+')}$`),
+      pattern => new RegExp(`(^|/)${pattern.replace(/[.+?^${}()|[\]\\]/gu, '\\$&').replace(/\*/gu, '[^/]+')}$`),
     )
     const componentDirectories = sortedUnique(
       files
@@ -190,7 +190,7 @@ export function discoverUnits({repo, roots, files, fileSet, read, excluded}) {
     const helperLanguages = {'.go': 'go', '.py': 'python', '.java': 'java', '.cs': 'csharp'}
     const helperDirectories = new Map()
     for (const file of files) {
-      const match = file.startsWith(prefix) && /^(.*\/helper)\/.+(\.[a-z]+)$/.exec(file)
+      const match = file.startsWith(prefix) && /^(.*\/helper)\/.+(\.[a-z]+)$/u.exec(file)
       if (!match || !helperLanguages[match[2]] || isExcluded(match[1].slice(prefix.length))) continue
       const counts = helperDirectories.get(match[1]) ?? {}
       counts[helperLanguages[match[2]]] = (counts[helperLanguages[match[2]]] ?? 0) + 1

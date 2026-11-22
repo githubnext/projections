@@ -64,13 +64,13 @@ async function github(path) {
 }
 
 /** `4.24.0` or `shadcn@4.24.0` → `4.24.0`. */
-export const normalizeVersion = version => version.replace(/^shadcn@/, '')
+export const normalizeVersion = version => version.replace(/^shadcn@/u, '')
 export const tagOf = version => `shadcn@${normalizeVersion(version)}`
 
 /** The newest published `shadcn@x.y.z` release. */
 export async function latestRelease() {
   const releases = await github('releases?per_page=50')
-  const release = releases.find(candidate => /^shadcn@\d/.test(candidate.tag_name) && !candidate.prerelease && !candidate.draft)
+  const release = releases.find(candidate => /^shadcn@\d/u.test(candidate.tag_name) && !candidate.prerelease && !candidate.draft)
   if (!release) throw new Error(`no shadcn@ release in ${repository}`)
   return normalizeVersion(release.tag_name)
 }

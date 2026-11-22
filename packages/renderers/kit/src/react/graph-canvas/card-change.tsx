@@ -54,7 +54,7 @@ export function CardChangeMarks({
   if (emphasis <= 0.01) return null
   // Named by its geometry, not by render order (`useId`), so a frame's markup is the same however it was reached. Cards
   // of one size share it: a clip path is in the user space of what uses it, so theirs are the same shape.
-  const shape = `pk-card-shape-${[x, y, width, height].map(value => String(Math.round(value * 100) / 100).replace(/[^0-9-]/g, '_')).join('-')}`
+  const shape = `pk-card-shape-${[x, y, width, height].map(value => String(Math.round(value * 100) / 100).replace(/[^0-9-]/gu, '_')).join('-')}`
   const bottom = y + height
   const rule = bottom - footer
   const edge = {x: x + inset, y: y + inset, width: width - 2 * inset, height: height - 2 * inset, rx: Math.max(0, cardCornerRadius - inset)}

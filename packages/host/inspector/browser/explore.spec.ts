@@ -72,19 +72,19 @@ test('explore proposes projections, sweeps recent merges and opens a change in t
 
   // The session sweeps on open: one row per change, one column per projection.
   const grid = page.getByRole('table', {name: 'Projections on recent changes'})
-  await expect(grid.getByRole('columnheader', {name: /Prisma schema/})).toBeVisible()
+  await expect(grid.getByRole('columnheader', {name: /Prisma schema/u})).toBeVisible()
   const posts = grid.getByRole('row').filter({hasText: 'Add posts'})
   const docs = grid.getByRole('row').filter({hasText: 'Write docs'})
   await expect(posts.getByRole('rowheader')).toContainText('#7')
   const changed = posts.locator('[data-projection="prisma-schema"]')
   await expect(changed).toHaveAttribute('data-status', 'changed', {timeout: 30_000})
-  await expect(changed).toContainText(/\d+ changes?, \d+ steps?/)
+  await expect(changed).toContainText(/\d+ changes?, \d+ steps?/u)
   // Unchanged cells say so in words, not only by fading.
   await expect(docs.locator('[data-projection="prisma-schema"]')).toHaveText('No change')
   await expect(page.getByRole('button', {name: 'Sweep again'})).toBeEnabled()
 
   await changed.getByRole('link').click()
-  await expect(page).toHaveURL(/view=inspect&projection=prisma-schema&before=[0-9a-f]{40}&after=[0-9a-f]{40}/)
+  await expect(page).toHaveURL(/view=inspect&projection=prisma-schema&before=[0-9a-f]{40}&after=[0-9a-f]{40}/u)
   // The repository defines nothing yet, so the Inspector offers both ways in.
   const setup = page.getByRole('region', {name: 'Make a projection'})
   await expect(setup.getByRole('link', {name: 'explore this repository'})).toHaveAttribute('href', '?view=explore')
@@ -114,7 +114,7 @@ test('a thumbnail arriving while its cell is pressed never takes the click', asy
   release()
   await expect(link.locator('img')).toBeVisible()
   await page.mouse.up()
-  await expect(page).toHaveURL(/view=inspect&projection=prisma-schema&before=[0-9a-f]{40}&after=[0-9a-f]{40}/)
+  await expect(page).toHaveURL(/view=inspect&projection=prisma-schema&before=[0-9a-f]{40}&after=[0-9a-f]{40}/u)
 })
 
 test('the sweep summarizes each projection, adopting writes previewed files, and Add to CI writes nothing', async ({page, explore}) => {
@@ -133,7 +133,7 @@ test('the sweep summarizes each projection, adopting writes previewed files, and
   await changed.scrollIntoViewIfNeeded()
   await expect(changed.locator('img')).toBeVisible()
   await changed.hover()
-  await expect(page.getByRole('img', {name: /The Diff of Prisma schema on #7/})).toBeVisible()
+  await expect(page.getByRole('img', {name: /The Diff of Prisma schema on #7/u})).toBeVisible()
 
   // Adopt from the column header: preview first, then write.
   await prisma.getByRole('checkbox', {name: 'Adopt'}).check()
@@ -141,7 +141,7 @@ test('the sweep summarizes each projection, adopting writes previewed files, and
   const adopt = page.getByRole('region', {name: 'Adopt'})
   await expect(adopt).toContainText('.github/projections/prisma-schema.json')
   await expect(adopt).toContainText('prisma-schema-pr-7')
-  await adopt.getByRole('button', {name: /^Write/}).click()
+  await adopt.getByRole('button', {name: /^Write/u}).click()
   await expect(adopt).toContainText('Adopted prisma-schema')
   await expect(prisma.getByText('Adopted')).toBeVisible()
   const definition = JSON.parse(await readFile(join(explore.repo, '.github/projections/prisma-schema.json'), 'utf8'))
@@ -150,7 +150,7 @@ test('the sweep summarizes each projection, adopting writes previewed files, and
   // Where the CI step goes is the person's and their agent's decision: the page offers the prompt and the guide.
   const ci = page.getByRole('region', {name: 'Add to CI'})
   await expect(ci.getByLabel('Prompt')).toContainText('projections help agents ci')
-  await expect(ci.getByRole('link', {name: 'Read the guide'})).toHaveAttribute('href', /docs\/setup\/ci\.md$/)
+  await expect(ci.getByRole('link', {name: 'Read the guide'})).toHaveAttribute('href', /docs\/setup\/ci\.md$/u)
   await expect(ci.getByRole('button', {name: 'Ask your coding agent'})).toHaveCount(0)
   expect(existsSync(join(explore.repo, '.github/workflows'))).toBe(false)
 })

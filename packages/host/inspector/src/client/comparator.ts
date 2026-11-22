@@ -5,7 +5,7 @@ import {keys, record} from './guards.js'
 export const maxComparatorBytes = 16 * 1024 * 1024
 
 function decodeBase64(text: string, limit: number): Uint8Array {
-  if (text.length > Math.ceil(limit / 3) * 4 || text.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(text)) {
+  if (text.length > Math.ceil(limit / 3) * 4 || text.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/u.test(text)) {
     throw new Error('The local runner returned an invalid or oversized comparator file')
   }
   const binary = atob(text)
@@ -21,7 +21,7 @@ export function parseComparatorResponse(value: unknown): InspectorComparator {
     keys(value) === 'digest,rules' &&
     typeof value.rules === 'string' &&
     typeof value.digest === 'string' &&
-    /^sha256:[a-f0-9]{64}$/.test(value.digest)
+    /^sha256:[a-f0-9]{64}$/u.test(value.digest)
   ) {
     const bytes = decodeBase64(value.rules, maxComparatorBytes)
     if (!bytes.length) throw new Error('The local runner returned an empty comparator file')

@@ -52,13 +52,13 @@ test('dependency-injection: a diff card says what changed', async ({page}) => {
   await expect(repository.locator('.pk-svg-status')).toContainText('Lifetime changed')
   await expect(repository.locator('[data-entity-id="service:Orders:IOrderRepository:unkeyed:registration:0"]')).toHaveAttribute(
     'aria-label',
-    /lifetime changed, was Scoped, now Singleton/,
+    /lifetime changed, was Scoped, now Singleton/u,
   )
   await expect(frame.locator('.di-card[data-unit-id="service:Orders:IPricing:unkeyed"]')).toHaveAttribute('data-change', 'removed')
   await expect(frame.locator('.di-card[data-unit-id="service:Orders:IPriceCalculator:unkeyed"]')).toHaveAttribute('data-change', 'added')
   // The injecting card lists the dependency it lost and the one it gained, and says so in its band; both links are drawn.
   const service = frame.locator('.di-card[data-unit-id="service:Orders:IOrderService:unkeyed"]')
-  await expect(service).not.toHaveAttribute('data-change', /./)
+  await expect(service).not.toHaveAttribute('data-change', /./u)
   await expect(service.locator('.pk-svg-status')).toContainText('Dependencies changed')
   await expect(service.locator('.di-dependency[data-change="removed"]')).toHaveText('− IPricing')
   await expect(service.locator('.di-dependency[data-change="added"]')).toHaveText('+ IPriceCalculator')

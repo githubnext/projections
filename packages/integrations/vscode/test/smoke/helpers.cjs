@@ -41,12 +41,12 @@ async function session() {
   const choiceName = async () => {
     const bar = api.statusBar()
     // While the tab in front's job runs (and for a moment after, as the spinner shows at least 400 ms), it's a spinner.
-    if (!bar.visible || / \$\(sync(~spin)?\)$/.test(bar.text ?? '')) return undefined
-    return bar.text?.replace(/^\$\(projections-mark\) /, '').replace(/ \$\(warning\)$/, '')
+    if (!bar.visible || / \$\(sync(?:~spin)?\)$/u.test(bar.text ?? '')) return undefined
+    return bar.text?.replace(/^\$\(projections-mark\) /u, '').replace(/ \$\(warning\)$/u, '')
   }
   /** A subject as the status bar cuts it, at 24 characters with an ellipsis. */
   const short = text => ([...text].length <= 24 ? text : `${[...text].slice(0, 23).join('').trimEnd()}…`)
-  const swaps = async () => api.viewing().rows.filter(row => /\bswappable\b/.test(row.contextValue ?? '')).length
+  const swaps = async () => api.viewing().rows.filter(row => /\bswappable\b/u.test(row.contextValue ?? '')).length
   const summaryBar = async () =>
     (await api.control('packages', {op: 'elements', selector: '[data-summary-bar]', attribute: 'data-sentence'}))[0]?.value ?? ''
   const shownSummary = () => api.tabs('packages')[0]?.summary ?? null

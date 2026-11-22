@@ -6,8 +6,8 @@ import {svgStatusWidth} from '../dist/index.js'
 import {SvgChangeStatus} from '../dist/react.js'
 
 const status = props => renderToStaticMarkup(createElement('svg', null, createElement(SvgChangeStatus, {emphasis: 1, y: 30, ...props})))
-const words = markup => [...markup.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map(match => match[1])
-const textX = markup => [...markup.matchAll(/<text x="([-\d.]+)"/g)].map(match => Number(match[1]))
+const words = markup => [...markup.matchAll(/<text[^>]*>([^<]*)<\/text>/gu)].map(match => match[1])
+const textX = markup => [...markup.matchAll(/<text x="([-\d.]+)"/gu)].map(match => Number(match[1]))
 const upgrade = [{status: 'modified', glyph: '↑', icon: 'upgraded', label: 'Minor upgrade'}]
 
 test("a card's status centres its icon and word together on the band's middle", () => {
@@ -30,7 +30,7 @@ test('a status wider than its band ends in an ellipsis, whole in its tooltip', (
   const [word] = words(cut)
   assert.ok(word.endsWith('…') && 'Minor upgrade'.startsWith(word.slice(0, -1).trimEnd()), word)
   assert.ok(12 + 2.5 + word.length * 6.5 <= room, `${word} fits ${room}`)
-  assert.match(cut, /<title>Minor upgrade<\/title>/)
+  assert.match(cut, /<title>Minor upgrade<\/title>/u)
   // A later part goes before an earlier one is cut.
   const two = [{status: 'renamed', glyph: '→', icon: 'moved', label: 'Moved'}, ...upgrade]
   const first = status({
@@ -43,7 +43,7 @@ test('a status wider than its band ends in an ellipsis, whole in its tooltip', (
   assert.deepEqual(words(first)[0], 'Moved')
   assert.ok(words(first)[1].endsWith('…'))
   // Whole words carry no tooltip of their own.
-  assert.doesNotMatch(status({change: {status: 'added'}, x: 0, anchor: 'middle', room: 200}), /<title>/)
+  assert.doesNotMatch(status({change: {status: 'added'}, x: 0, anchor: 'middle', room: 200}), /<title>/u)
 })
 
 test('a held pane of side by side or swipe emphasizes every change it shows by the host highlighting, unscheduled', async () => {

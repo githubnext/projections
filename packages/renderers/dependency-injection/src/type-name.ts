@@ -15,7 +15,7 @@ export function shortTypeName(value: string): string {
     if (reader.at !== reader.text.length) throw new Error('trailing text')
     return name
   } catch {
-    const withoutGenerics = value.replace(/\x60\d+$/, '')
+    const withoutGenerics = value.replace(/\x60\d+$/u, '')
     return withoutGenerics.split('.').at(-1) ?? withoutGenerics
   }
 }
@@ -44,7 +44,7 @@ function segmentsOf(full: string): {name: string; arity: number}[] {
     .slice(lastDot + 1)
     .split('+')
     .map(segment => {
-      const arity = /\x60(\d+)$/.exec(segment)
+      const arity = /\x60(\d+)$/u.exec(segment)
       return {name: arity ? segment.slice(0, arity.index) : segment, arity: arity ? Number(arity[1]) : 0}
     })
 }
@@ -67,7 +67,7 @@ function readType(reader: Reader): string {
   }
   let suffix = ''
   // Arrays: `[]`, `[,]`.
-  while (peek(reader) === '[' && /^\[,*\]/.test(reader.text.slice(reader.at))) {
+  while (peek(reader) === '[' && /^\[,*\]/u.test(reader.text.slice(reader.at))) {
     const end = reader.text.indexOf(']', reader.at) + 1
     suffix += reader.text.slice(reader.at, end)
     reader.at = end

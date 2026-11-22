@@ -50,7 +50,7 @@ test('changes are worded as planned actions: Replace and Destroy differ in icon 
   expect(seen['aws_instance.bastion']).toBe('removed Destroy')
   expect(seen['aws_secretsmanager_secret.database']).toBe('added Create')
   expect(seen['module.database.aws_db_instance.replica']).toBe('modified Update in place')
-  expect(seen['aws_route53_record.database']).toMatch(/moved Moved.*modified Update in place/)
+  expect(seen['aws_route53_record.database']).toMatch(/moved Moved.*modified Update in place/u)
   // Highlighting never moves a card, and neither endpoint shows any status.
   for (const progress of [0, 1]) {
     await renderer.seek(progress, {highlighting: 'auto'})
@@ -64,7 +64,7 @@ test('changes are worded as planned actions: Replace and Destroy differ in icon 
     .toEqual(['2 to add', '3 to change', '1 to replace', '1 to destroy', '1 to move'])
   // The accessible name keeps the comparison's own word.
   await renderer.seek(0.5, {highlighting: 1})
-  await expect(renderer.frame.locator(`[data-entity-id="${database}"]`).first()).toHaveAttribute('aria-label', /Modified, Replace/)
+  await expect(renderer.frame.locator(`[data-entity-id="${database}"]`).first()).toHaveAttribute('aria-label', /Modified, Replace/u)
 })
 
 test('resource types are the monospace kind line; modules and virtual networks are boundaries', async ({page}) => {

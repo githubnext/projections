@@ -88,17 +88,17 @@ test('the rings check passes well-formed items and names the fix for ill-formed 
   const explained: [string, RegExp][] = [
     [
       'wrapper',
-      /visible edge of "wrapper" is drawn by div\.card, [\d.]+ px inside it.*put data-entity-id \(or data-projections-unit\) on div\.card instead/,
+      /visible edge of "wrapper" is drawn by div\.card, [\d.]+ px inside it.*put data-entity-id \(or data-projections-unit\) on div\.card instead/u,
     ],
-    ['spread', /"spread" draws its edge 1 px outside its box.*draw the edge as a border/],
-    ['overflow', /div is positioned \(absolute\) and paints its background over the top of "overflow"'s ring.*Keep it in normal flow/],
-    ['row-first', /"row-first" fills the top-left corner of ul\.group with a 0 px radius, but that corner's inner radius is 9 px/],
-    ['row-last', /"row-last" fills the bottom-left corner of ul\.group with a 0 px radius/],
+    ['spread', /"spread" draws its edge 1 px outside its box.*draw the edge as a border/u],
+    ['overflow', /div is positioned \(absolute\) and paints its background over the top of "overflow"'s ring.*Keep it in normal flow/u],
+    ['row-first', /"row-first" fills the top-left corner of ul\.group with a 0 px radius, but that corner's inner radius is 9 px/u],
+    ['row-last', /"row-last" fills the bottom-left corner of ul\.group with a 0 px radius/u],
     [
       'svg-covered',
-      /"svg-covered"'s visible edge is rect\.change-edge, drawn over its marked edge.*add data-projections-edge to rect\.change-edge/,
+      /"svg-covered"'s visible edge is rect\.change-edge, drawn over its marked edge.*add data-projections-edge to rect\.change-edge/u,
     ],
-    ['svg-unmarked', /"svg-unmarked" marks no edge shape.*add data-projections-edge to rect\.card-surface/],
+    ['svg-unmarked', /"svg-unmarked" marks no edge shape.*add data-projections-edge to rect\.card-surface/u],
   ]
   for (const [id, pattern] of explained) {
     const failures = await check(page, id)
@@ -160,11 +160,11 @@ test('the pixel check names a ring inside or outside its item', async ({page}) =
     reports[name] = report.failures
   }
   expect(
-    reports.inside!.some(failure => /starts .* inside the item's edge/.test(failure)),
+    reports.inside!.some(failure => /starts .* inside the item's edge/u.test(failure)),
     reports.inside!.join('\n'),
   ).toBe(true)
   expect(
-    reports.outside!.some(failure => /outside the item's edge|no ring is painted/.test(failure)),
+    reports.outside!.some(failure => /outside the item's edge|no ring is painted/u.test(failure)),
     reports.outside!.join('\n'),
   ).toBe(true)
 })

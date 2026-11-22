@@ -50,7 +50,7 @@ interface Manifest {
 
 /** The workspaces a script names with `--workspace <name>`. */
 function workspacesNamed(units: readonly Unit[], script: string): string[] {
-  const names = [...script.matchAll(/--workspace[= ](\S+)/g)].map(match => match[1]!)
+  const names = [...script.matchAll(/--workspace[= ](\S+)/gu)].map(match => match[1]!)
   return names.flatMap(name => findUnit(units, name)?.path ?? [])
 }
 
@@ -58,15 +58,15 @@ function workspacesNamed(units: readonly Unit[], script: string): string[] {
 export function tomlStrings(text: string, key: string): string[] {
   const body = new RegExp(`^${key}\\s*=\\s*\\[([\\s\\S]*?)^\\]`, 'm').exec(text)?.[1] ?? ''
   const lines = body.split('\n').filter(line => !line.trim().startsWith('#'))
-  return [...lines.join('\n').matchAll(/"([^"]*)"|'([^']*)'/g)].map(match => (match[1] ?? match[2])!)
+  return [...lines.join('\n').matchAll(/"([^"]*)"|'([^']*)'/gu)].map(match => (match[1] ?? match[2])!)
 }
 
 const includes = [
   // include_str!("../x.json") and include_bytes!, relative to the source file.
-  {pattern: /include_(?:str|bytes)!\(\s*"([^"]+)"\s*\)/g, fromCrate: false},
+  {pattern: /include_(?:str|bytes)!\(\s*"([^"]+)"\s*\)/gu, fromCrate: false},
   // concat!(env!("CARGO_MANIFEST_DIR"), "/../x") and Path::new(env!("CARGO_MANIFEST_DIR")).join("../x"), relative to the crate.
-  {pattern: /env!\("CARGO_MANIFEST_DIR"\)\s*,\s*"\/?([^"]+)"/g, fromCrate: true},
-  {pattern: /env!\("CARGO_MANIFEST_DIR"\)\)\.join\("([^"]+)"\)/g, fromCrate: true},
+  {pattern: /env!\("CARGO_MANIFEST_DIR"\)\s*,\s*"\/?([^"]+)"/gu, fromCrate: true},
+  {pattern: /env!\("CARGO_MANIFEST_DIR"\)\)\.join\("([^"]+)"\)/gu, fromCrate: true},
 ]
 
 /** What each crate's Rust sources read by path. The repository root and the crate's ancestors are left out: too broad. */
@@ -78,9 +78,9 @@ export function crateFileInputs(root: string, units: readonly Unit[]): FileInput
     const text = readText(root, file) ?? ''
     for (const {pattern, fromCrate} of includes) {
       for (const match of text.matchAll(pattern)) {
-        const path = posix.normalize(posix.join(fromCrate ? crate.path : posix.dirname(file), match[1]!)).replace(/\/$/, '')
+        const path = posix.normalize(posix.join(fromCrate ? crate.path : posix.dirname(file), match[1]!)).replace(/\/$/u, '')
         if (path.startsWith('..') || path === '.' || crate.path === path || crate.path.startsWith(`${path}/`)) continue
-        const test = /^(tests|benches)\//.test(posix.relative(crate.path, file))
+        const test = /^(?:tests|benches)\//u.test(posix.relative(crate.path, file))
         const key = `${crate.path} ${path}`
         found.set(key, {reader: crate.path, path, test: test && (found.get(key)?.test ?? true)})
       }
@@ -94,14 +94,14 @@ export function scenarioInputs(root: string, renderers: readonly string[]): File
   return renderers.flatMap(name => {
     const reader = `packages/renderers/${name}`
     const text = readText(root, `${reader}/scenarios.json`) ?? ''
-    const paths = [...text.matchAll(/"(\.\.\/[^"]+)"/g)].map(match => posix.normalize(posix.join(reader, match[1]!)))
+    const paths = [...text.matchAll(/"(\.\.\/[^"]+)"/gu)].map(match => posix.normalize(posix.join(reader, match[1]!)))
     return [...new Set(paths)].filter(path => !path.startsWith('..')).map(path => ({reader, path, test: false}))
   })
 }
 
 /** The workspaces under a suite's Playwright `testDir`, when that is outside the suite. */
 function underTestDir(root: string, units: readonly Unit[], suite: string): string[] {
-  const testDir = /testDir:\s*'([^']+)'/.exec(readText(root, `${suite}/playwright.config.ts`) ?? '')?.[1]
+  const testDir = /testDir:\s*'([^']+)'/u.exec(readText(root, `${suite}/playwright.config.ts`) ?? '')?.[1]
   if (!testDir) return []
   const directory = posix.normalize(posix.join(suite, testDir))
   if (directory === suite || directory.startsWith(`${suite}/`)) return []
@@ -129,7 +129,7 @@ export function repoFacts(root: string): RepoFacts {
     .map(entry => entry.name)
     .sort()
   const mutants = readText(root, '.cargo/mutants.toml') ?? ''
-  const coverage = [...script('.', 'test:rust:coverage').matchAll(/-p (\S+)/g)].flatMap(match => findUnit(units, match[1]!)?.path ?? [])
+  const coverage = [...script('.', 'test:rust:coverage').matchAll(/-p (\S+)/gu)].flatMap(match => findUnit(units, match[1]!)?.path ?? [])
   return {
     units,
     browserSuites: units

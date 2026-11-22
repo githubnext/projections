@@ -86,7 +86,7 @@ test('the bridge sends /api/ requests to the backend and relays status and body'
   assert.deepEqual(byId[7].body, {type: 'image/png', base64: 'AQID'})
   assert.deepEqual(byId[8], {tag: transportTag, id: 8, type: 'failure', message: 'The backend returned invalid JSON'})
   assert.deepEqual(byId[9], {tag: transportTag, id: 9, type: 'failure', message: 'The backend response exceeds the bridge limit'})
-  assert.match(byId[10].message, /exited \(1\)/)
+  assert.match(byId[10].message, /exited \(1\)/u)
   bridge.dispose()
 })
 
@@ -138,8 +138,8 @@ test('the JSON-RPC client matches replies by id, cancels on abort, relays notifi
   assert.deepEqual(notifications, [['changes', {generation: 2, changes: ['working-tree'], complete: true}]])
   const pending = client.call('initialize')
   client.close('The Projections backend exited (1)')
-  await assert.rejects(pending, /exited \(1\)/)
-  await assert.rejects(client.call('initialize'), /exited \(1\)/)
+  await assert.rejects(pending, /exited \(1\)/u)
+  await assert.rejects(client.call('initialize'), /exited \(1\)/u)
 })
 
 test(
@@ -182,18 +182,18 @@ test(
       replies.map(reply => reply.id),
       [1, 3],
     )
-    assert.ok(logged.some(line => /serving/.test(line)))
+    assert.ok(logged.some(line => /serving/u.test(line)))
   },
 )
 
 test('the webview policy loads nothing from the network and only nonce scripts run inline', () => {
   const policy = contentSecurityPolicy('https://*.vscode-cdn.net', 'n0nce')
-  assert.match(policy, /default-src 'none'/)
-  assert.match(policy, /script-src 'nonce-n0nce' https:\/\/\*\.vscode-cdn\.net 'wasm-unsafe-eval'/)
-  assert.match(policy, /connect-src https:\/\/\*\.vscode-cdn\.net(;|$)/)
-  assert.match(policy, /worker-src blob:/)
-  assert.match(policy, /frame-src blob:/)
-  assert.doesNotMatch(policy, /127\.0\.0\.1|localhost| 'unsafe-eval'/)
+  assert.match(policy, /default-src 'none'/u)
+  assert.match(policy, /script-src 'nonce-n0nce' https:\/\/\*\.vscode-cdn\.net 'wasm-unsafe-eval'/u)
+  assert.match(policy, /connect-src https:\/\/\*\.vscode-cdn\.net(;|$)/u)
+  assert.match(policy, /worker-src blob:/u)
+  assert.match(policy, /frame-src blob:/u)
+  assert.doesNotMatch(policy, /127\.0\.0\.1|localhost| 'unsafe-eval'/u)
   const html = webviewHtml({
     cspSource: 'https://x',
     config: {
@@ -207,21 +207,21 @@ test('the webview policy loads nothing from the network and only nonce scripts r
     codicons: 'https://x/vscode-ui/codicons/codicon.css',
     script: 'https://x/webview.js',
   })
-  assert.match(html, /<script type="module" nonce="n0nce" src="https:\/\/x\/webview.js">/)
+  assert.match(html, /<script type="module" nonce="n0nce" src="https:\/\/x\/webview.js">/u)
   // The VS Code UI: its stylesheets after the Inspector's, the codicon stylesheet VSCode Elements reads, its font under
   // the policy's font-src, and the mount root marked for the shell's VS Code style.
   assert.match(
     html,
-    /mount\.css">\n<link rel="stylesheet" href="https:\/\/x\/vscode-ui\/styles\.css">\n<link rel="stylesheet" href="https:\/\/x\/vscode-ui\/inspector\.css">/,
+    /mount\.css">\n<link rel="stylesheet" href="https:\/\/x\/vscode-ui\/styles\.css">\n<link rel="stylesheet" href="https:\/\/x\/vscode-ui\/inspector\.css">/u,
   )
-  assert.match(html, /<link id="vscode-codicon-stylesheet" rel="stylesheet" href="https:\/\/x\/vscode-ui\/codicons\/codicon\.css">/)
-  assert.match(policy, /font-src https:\/\/\*\.vscode-cdn\.net/)
-  assert.match(html, /<div id="root" data-host-ui="vscode">/)
+  assert.match(html, /<link id="vscode-codicon-stylesheet" rel="stylesheet" href="https:\/\/x\/vscode-ui\/codicons\/codicon\.css">/u)
+  assert.match(policy, /font-src https:\/\/\*\.vscode-cdn\.net/u)
+  assert.match(html, /<div id="root" data-host-ui="vscode">/u)
   // Before the script runs, VS Code's thin progress bar, shown only after 300 ms.
-  assert.match(html, /<div class="pj-boot" role="progressbar" aria-label="Loading…" data-loading-indicator>/)
-  assert.match(html, /\.pj-boot\{[^}]*height:2px[^}]*animation:pj-boot-show 0s linear 300ms forwards\}/)
-  assert.doesNotMatch(html, /1<\/script>/, 'config JSON cannot close its script element')
-  assert.doesNotMatch(html, /token/i)
+  assert.match(html, /<div class="pj-boot" role="progressbar" aria-label="Loading…" data-loading-indicator>/u)
+  assert.match(html, /\.pj-boot\{[^}]*height:2px[^}]*animation:pj-boot-show 0s linear 300ms forwards\}/u)
+  assert.doesNotMatch(html, /1<\/script>/u, 'config JSON cannot close its script element')
+  assert.doesNotMatch(html, /token/iu)
 })
 
 test("a projection tab's page paints its skeleton before any script: toolbar, loading status and summary strip", () => {
@@ -236,33 +236,33 @@ test("a projection tab's page paints its skeleton before any script: toolbar, lo
   const html = page({projection: 'packages', title: 'Packages <beta>', before: 'main', after: 'HEAD', chrome: 'none', toolbar: true})
   // The skeleton comes before the script, outside the mount root (which React replaces), and the panel's bar is gone.
   assert.ok(html.indexOf('data-skeleton') < html.indexOf('<script type="module"'))
-  assert.match(html, /<div class="pj-skeleton" data-skeleton[^>]*>.*<\/div><div id="root" data-host-ui="vscode"><\/div>/s)
-  assert.doesNotMatch(html, /pj-boot/)
+  assert.match(html, /<div class="pj-skeleton" data-skeleton[^>]*>.*<\/div><div id="root" data-host-ui="vscode"><\/div>/su)
+  assert.doesNotMatch(html, /pj-boot/u)
   // The toolbar strip is empty: no stand-ins for its controls (no mode group, no dimmed actions); the one codicon is the spinner.
-  assert.match(html, /<div class="pj-skeleton-toolbar" aria-hidden="true"><\/div>/)
-  assert.doesNotMatch(html, /pj-skeleton-(modes|end|icon)|codicon-(filter|settings-gear|info|diff-single)\b/)
-  assert.equal(html.match(/class="[^"]*\bcodicon\b/g)?.length, 1)
+  assert.match(html, /<div class="pj-skeleton-toolbar" aria-hidden="true"><\/div>/u)
+  assert.doesNotMatch(html, /pj-skeleton-(modes|end|icon)|codicon-(filter|settings-gear|info|diff-single)\b/u)
+  assert.equal(html.match(/class="[^"]*\bcodicon\b/gu)?.length, 1)
   assert.match(
     html,
-    /codicon-loading codicon-modifier-spin" aria-hidden="true" data-loading-indicator><\/span><span>Loading Packages &lt;beta>…<\/span>/,
+    /codicon-loading codicon-modifier-spin" aria-hidden="true" data-loading-indicator><\/span><span>Loading Packages &lt;beta>…<\/span>/u,
   )
-  assert.match(html, /<div class="pj-skeleton-bar"/)
+  assert.match(html, /<div class="pj-skeleton-bar"/u)
   // The real dimensions: a 35px toolbar with a hairline, a 22px summary strip, VS Code's colors only; no delay.
-  assert.match(html, /\.pj-skeleton-toolbar\{[^}]*height:35px;border-bottom:1px solid var\(--vscode-contrastBorder/)
-  assert.match(html, /\.pj-skeleton-bar\{[^}]*height:22px;border-top:1px solid/)
-  assert.doesNotMatch(html.slice(html.indexOf('.pj-skeleton{'), html.indexOf('</style>')), /animation-delay|300ms/)
-  assert.match(html, /prefers-reduced-motion:reduce\)\{\.pj-skeleton \.codicon-modifier-spin\{animation:none\}/)
+  assert.match(html, /\.pj-skeleton-toolbar\{[^}]*height:35px;border-bottom:1px solid var\(--vscode-contrastBorder/u)
+  assert.match(html, /\.pj-skeleton-bar\{[^}]*height:22px;border-top:1px solid/u)
+  assert.doesNotMatch(html.slice(html.indexOf('.pj-skeleton{'), html.indexOf('</style>')), /animation-delay|300ms/u)
+  assert.match(html, /prefers-reduced-motion:reduce\)\{\.pj-skeleton \.codicon-modifier-spin\{animation:none\}/u)
   // One revision: the same empty strip. A definition that can't load: no skeleton, its failure instead.
   assert.match(
     page({projection: 'packages', title: 'Packages', after: 'working-tree'}),
-    /<div class="pj-skeleton-toolbar" aria-hidden="true"><\/div>/,
+    /<div class="pj-skeleton-toolbar" aria-hidden="true"><\/div>/u,
   )
-  assert.doesNotMatch(page({projection: 'packages', failure: {title: 'x', diagnostics: []}}), /data-skeleton/)
+  assert.doesNotMatch(page({projection: 'packages', failure: {title: 'x', diagnostics: []}}), /data-skeleton/u)
   // The editor's first document, before the folder or the backend: the skeleton alone, no script.
   const first = skeletonHtml({cspSource: 'https://x', nonce: 'n0nce', title: 'Packages', codicons: 'https://x/codicon.css'})
-  assert.match(first, /data-skeleton/)
-  assert.match(first, /Loading Packages…/)
-  assert.doesNotMatch(first, /<script/)
+  assert.match(first, /data-skeleton/u)
+  assert.match(first, /Loading Packages…/u)
+  assert.doesNotMatch(first, /<script/u)
 })
 
 test('host requests from the webview are validated', () => {
@@ -283,17 +283,17 @@ test('host requests from the webview are validated', () => {
 test('the backend must speak a supported protocol and a compatible version; the CLI is found in order', () => {
   const info = {protocol: 1, version: '0.4.2', repository: '/r', trusted: false, explore: true}
   assert.deepEqual(parseInfo(info), info)
-  assert.throws(() => parseInfo({...info, trusted: 'yes'}), /unsupported protocol/)
-  assert.throws(() => parseInfo(null), /unsupported protocol/)
+  assert.throws(() => parseInfo({...info, trusted: 'yes'}), /unsupported protocol/u)
+  assert.throws(() => parseInfo(null), /unsupported protocol/u)
   const fromPath = {path: 'projections', source: 'path'}
   assert.equal(incompatibility(info, '0.4.0', fromPath), undefined)
-  assert.match(incompatibility({...info, protocol: 2}, '0.4.0', fromPath), /speaks protocol 2; this extension speaks 1/)
+  assert.match(incompatibility({...info, protocol: 2}, '0.4.0', fromPath), /speaks protocol 2; this extension speaks 1/u)
   assert.match(
     incompatibility(info, '0.5.0', fromPath),
-    /projections 0\.4\.2 at projections \(on PATH\) is not compatible with the Projections extension 0\.5\.0/,
+    /projections 0\.4\.2 at projections \(on PATH\) is not compatible with the Projections extension 0\.5\.0/u,
   )
-  assert.match(incompatibility(info, '0.5.0', {path: '/x', source: 'bundled'}), /Reinstall the Projections extension/)
-  assert.match(incompatibility(info, '0.5.0', {path: '/x', source: 'setting'}), /from projections\.cliPath.*point projections\.cliPath/)
+  assert.match(incompatibility(info, '0.5.0', {path: '/x', source: 'bundled'}), /Reinstall the Projections extension/u)
+  assert.match(incompatibility(info, '0.5.0', {path: '/x', source: 'setting'}), /from projections\.cliPath.*point projections\.cliPath/u)
   assert.equal(compatibleVersion('1.2.0', '1.9.3'), true)
   assert.equal(compatibleVersion('1.2.0', '2.0.0'), false)
   assert.equal(compatibleVersion('0.3.1', '0.3.0-rc.1'), true)
@@ -401,7 +401,7 @@ test('custom renderer files are fetched from the backend for the webview; nothin
     type: 'text/html; charset=utf-8',
     base64: Buffer.from('<p>map</p>').toString('base64'),
   })
-  assert.match((await bridge.rendererFile('/custom-renderers/cap/working-tree/x/index.html')).error, /unavailable \(403\).*trust/)
+  assert.match((await bridge.rendererFile('/custom-renderers/cap/working-tree/x/index.html')).error, /unavailable \(403\).*trust/u)
   for (const given of ['/api/definitions', '/custom-renderers/../api/x', '/custom-renderers/a#b', 'http://x/custom-renderers/a', 7]) {
     assert.equal((await bridge.rendererFile(given)).error, 'Not a custom renderer path', String(given))
   }
@@ -416,8 +416,8 @@ test('Adopt previews are validated, and refusals explain themselves', () => {
     written: false,
   }
   assert.equal(parseWrite(preview), preview)
-  assert.throws(() => parseWrite({...preview, files: [{path: 1}]}), /invalid preview/)
-  assert.throws(() => parseWrite(null), /invalid preview/)
+  assert.throws(() => parseWrite({...preview, files: [{path: 1}]}), /invalid preview/u)
+  assert.throws(() => parseWrite(null), /invalid preview/u)
   assert.equal(refusal({status: 403, body: {diagnostics: [{message: 'Writing needs --trust'}]}}), 'Writing needs --trust (403)')
   assert.equal(refusal({status: 409, body: 'changed'}), 'changed (409)')
 })

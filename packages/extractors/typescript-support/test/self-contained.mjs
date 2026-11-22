@@ -17,14 +17,14 @@ const built = path.join(packageRoot, 'dist/extractor.mjs')
 try {
   const text = await readFile(built, 'utf8')
   const builtins = new Set(builtinModules.flatMap(name => [name, `node:${name}`]))
-  const specifiers = [...text.matchAll(/(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*)["']([^"']+)["']/g)].map(match => match[1])
+  const specifiers = [...text.matchAll(/(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*)["']([^"']+)["']/gu)].map(match => match[1])
   assert.ok(specifiers.length > 0)
   assert.deepEqual(
     specifiers.filter(specifier => !builtins.has(specifier)),
     [],
     'The helper imports only Node.js built-ins',
   )
-  assert.doesNotMatch(text, /@githubnext\/projections-/, 'No Projections npm packages are referenced')
+  assert.doesNotMatch(text, /@githubnext\/projections-/u, 'No Projections npm packages are referenced')
 
   const helper = path.join(root, 'helper/extractor.mjs')
   await mkdir(path.dirname(helper), {recursive: true})
@@ -74,11 +74,11 @@ registerHooks({resolve(specifier, context, nextResolve) {
   const untyped = collect('typescript-public-api', {}, bare)
   assert.equal(untyped.status, 1)
   assert.equal(untyped.stdout, '')
-  assert.match(untyped.stderr, /No \x60typescript\x60 package is installed there/)
+  assert.match(untyped.stderr, /No \x60typescript\x60 package is installed there/u)
 
   const native = collect('code-statistics')
   assert.equal(native.status, 1)
-  assert.match(native.stderr, /The Node extractor helper does not implement code-statistics/)
+  assert.match(native.stderr, /The Node extractor helper does not implement code-statistics/u)
   console.log(
     `Self-contained helper verified: ${(text.length / 1024).toFixed(0)} KiB, Node.js built-ins only (${[...new Set(specifiers)].join(', ')})`,
   )

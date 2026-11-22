@@ -43,9 +43,9 @@ const scaffold = JSON.parse(readFileSync(join(renderer, 'package.json'), 'utf8')
 for (const field of ['dependencies', 'devDependencies']) {
   for (const [name, range] of Object.entries<string>(scaffold[field] ?? {})) {
     const installed = join(workspace, 'node_modules', name, 'package.json')
-    if (!/^[\^~]?\d/.test(range) || !existsSync(installed)) continue
+    if (!/^[\^~]?\d/u.test(range) || !existsSync(installed)) continue
     const {version} = JSON.parse(readFileSync(installed, 'utf8'))
-    if (version.split('.')[0] !== range.replace(/^[\^~]/, '').split('.')[0]) {
+    if (version.split('.')[0] !== range.replace(/^[\^~]/u, '').split('.')[0]) {
       throw new Error(`The scaffold asks for ${name}@${range}, but this workspace installs ${version}`)
     }
     scaffold[field][name] = version

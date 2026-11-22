@@ -10,7 +10,7 @@ const server = createServer(async (request, response) => {
     response.writeHead(200, {'Content-Type': 'text/html'}).end('<!doctype html><title>Comparator runtime</title>')
     return
   }
-  if (!/^\/(dist\/(?:[\w-]+\/)?[\w-]+\.js|test\/wasm\.mjs)$/.test(path)) {
+  if (!/^\/(?:dist\/(?:[\w-]+\/)?[\w-]+\.js|test\/wasm\.mjs)$/u.test(path)) {
     response.writeHead(404).end()
     return
   }

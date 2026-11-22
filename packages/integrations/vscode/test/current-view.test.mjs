@@ -60,31 +60,31 @@ const ci = {
 
 test('the current view names the projection, its choice and revisions, mode, counts, changes and selection', () => {
   const text = currentViewText(ci)
-  assert.match(text, /^The projection tab in front is "CI pipeline" \(projection ci-jobs\) in acme\.$/m)
+  assert.match(text, /^The projection tab in front is "CI pipeline" \(projection ci-jobs\) in acme\.$/mu)
   assert.match(
     text,
-    /^Definition: \.github\/projections\/ci-jobs\.json; extractor \x60github-actions-jobs\x60, renderer \x60dag\x60, the default comparator\.$/m,
+    /^Definition: \.github\/projections\/ci-jobs\.json; extractor \x60github-actions-jobs\x60, renderer \x60dag\x60, the default comparator\.$/mu,
   )
-  assert.match(text, /^Showing: Branch changes \(2 commits\)\. Before caf6ab7e \(merge base with main/m)
-  assert.match(text, /→ After d698c162 \(feature\/ci/)
-  assert.match(text, new RegExp(`^Revisions: before ${before}, after ${after}\\.$`, 'm'))
-  assert.match(text, /^Mode: Side by side \(of Diff, Side by side, Animated, Swipe\)\.$/m)
-  assert.match(text, /^Summary bar: 7 jobs \(\+5 −1\)\.$/m)
-  assert.match(text, /^Changes: 1 removed, 5 added of 7 items\.$/m)
-  assert.match(text, /^- removed job Test \[job:test\]$/m)
+  assert.match(text, /^Showing: Branch changes \(2 commits\)\. Before caf6ab7e \(merge base with main/mu)
+  assert.match(text, /→ After d698c162 \(feature\/ci/u)
+  assert.match(text, new RegExp(`^Revisions: before ${before}, after ${after}\\.$`, 'mu'))
+  assert.match(text, /^Mode: Side by side \(of Diff, Side by side, Animated, Swipe\)\.$/mu)
+  assert.match(text, /^Summary bar: 7 jobs \(\+5 −1\)\.$/mu)
+  assert.match(text, /^Changes: 1 removed, 5 added of 7 items\.$/mu)
+  assert.match(text, /^- removed job Test \[job:test\]$/mu)
   // A rename is unchanged, but it is a change: listed with its context.
-  assert.match(text, /^- unchanged \(declared\) job Lint \[job:lint\]\n {2}context: job Setup \[job:setup\]$/m)
+  assert.match(text, /^- unchanged \(declared\) job Lint \[job:lint\]\n {2}context: job Setup \[job:setup\]$/mu)
   // An identity change without context is listed too.
-  assert.match(text, /^- unchanged \(split\) job Format \[job:format\]$/m)
+  assert.match(text, /^- unchanged \(split\) job Format \[job:format\]$/mu)
   assert.match(
     text,
-    /^- added job Unit tests \[job:unit\]\n {2}context: job Setup \[job:setup\] and 2 more \(added by rule \x60needs\x60\)$/m,
+    /^- added job Unit tests \[job:unit\]\n {2}context: job Setup \[job:setup\] and 2 more \(added by rule \x60needs\x60\)$/mu,
   )
-  assert.doesNotMatch(text, /Build/, 'unchanged items are only counted')
-  assert.match(text, /^Selected: job Unit tests \[job:unit\], added\.$/m)
-  assert.match(text, /^Up to date\.$/m)
-  assert.match(text, /^Definition: the committed one\.$/m)
-  assert.match(text, /^Other projection tabs: Package dependencies\.$/m)
+  assert.doesNotMatch(text, /Build/u, 'unchanged items are only counted')
+  assert.match(text, /^Selected: job Unit tests \[job:unit\], added\.$/mu)
+  assert.match(text, /^Up to date\.$/mu)
+  assert.match(text, /^Definition: the committed one\.$/mu)
+  assert.match(text, /^Other projection tabs: Package dependencies\.$/mu)
 })
 
 test('the current view says when the tab is out of date, uses edits, shows one revision or is hidden', () => {
@@ -96,12 +96,12 @@ test('the current view says when the tab is out of date, uses edits, shows one r
     stale: {why: 'working tree', tier: 'extraction', files: 2},
     page: undefined,
   })
-  assert.match(stale, /^No projection tab is in front; the one shown last is "CI pipeline"/m)
-  assert.match(stale, /, pinned to this tab\./)
-  assert.match(stale, /^Out of date: working tree \(2 files changed since\)/m)
-  assert.match(stale, /uses the person's uncommitted edits/)
-  assert.match(stale, /page isn't loaded/)
-  assert.doesNotMatch(stale, /^Mode:/m)
+  assert.match(stale, /^No projection tab is in front; the one shown last is "CI pipeline"/mu)
+  assert.match(stale, /, pinned to this tab\./u)
+  assert.match(stale, /^Out of date: working tree \(2 files changed since\)/mu)
+  assert.match(stale, /uses the person's uncommitted edits/u)
+  assert.match(stale, /page isn't loaded/u)
+  assert.doesNotMatch(stale, /^Mode:/mu)
   const now = currentViewText({
     ...ci,
     choice: {id: 'now', name: 'Current state'},
@@ -112,13 +112,13 @@ test('the current view says when the tab is out of date, uses edits, shows one r
   })
   assert.match(
     now,
-    /^Showing: Current state\. One revision, working-tree \(Working tree · no uncommitted changes\): nothing is compared\.$/m,
+    /^Showing: Current state\. One revision, working-tree \(Working tree · no uncommitted changes\): nothing is compared\.$/mu,
   )
-  assert.doesNotMatch(now, /^Revisions:/m)
-  assert.match(now, /^Status: extracting/m)
-  assert.match(now, /^Summary bar: 1 job\.$/m)
-  assert.match(now, /chose Show committed: this result applies the committed one/)
-  assert.match(noProjectionTab, /No projection tab is open/)
+  assert.doesNotMatch(now, /^Revisions:/mu)
+  assert.match(now, /^Status: extracting/mu)
+  assert.match(now, /^Summary bar: 1 job\.$/mu)
+  assert.match(now, /chose Show committed: this result applies the committed one/u)
+  assert.match(noProjectionTab, /No projection tab is open/u)
   assert.equal(figureText({noun: {singular: 'step', plural: 'steps'}, count: 3, modified: 2}), '3 steps (~2)')
 })
 
@@ -128,10 +128,10 @@ test("compare without revisions compares the tab's, and says so; given ones say 
   const omitted = withTabDefaults('compare', {}, tab)
   // The tab's pair compares with the definition the tab applies, as on screen.
   assert.deepEqual(omitted.input, {projection: 'ci-jobs', before, after, definitionRevision: 'HEAD'})
-  assert.match(omitted.note, /^Projection: ci-jobs, the one the "CI pipeline" tab shows\./)
+  assert.match(omitted.note, /^Projection: ci-jobs, the one the "CI pipeline" tab shows\./u)
   assert.match(
     omitted.note,
-    /Revisions: caf6ab7e → d698c162, the ones the "CI pipeline" tab shows \(Branch changes\)\. This is the comparison on the person's screen\./,
+    /Revisions: caf6ab7e → d698c162, the ones the "CI pipeline" tab shows \(Branch changes\)\. This is the comparison on the person's screen\./u,
   )
   // Another projection on the tab's revisions, with the working tree's definition, as a tab would apply it.
   assert.deepEqual(withTabDefaults('compare', {projection: 'deps'}, tab).input, {
@@ -148,44 +148,44 @@ test("compare without revisions compares the tab's, and says so; given ones say 
     definition: 'head',
   })
   const same = withTabDefaults('compare', {projection: 'ci-jobs', before: 'caf6ab7e', after}, tab)
-  assert.match(same.note, /^Revisions: caf6ab7e → d698c162, the ones the "CI pipeline" tab shows\.$/)
+  assert.match(same.note, /^Revisions: caf6ab7e → d698c162, the ones the "CI pipeline" tab shows\.$/u)
   const other = withTabDefaults('compare', {projection: 'ci-jobs', before: 'HEAD~1', after: 'HEAD'}, tab)
   assert.deepEqual(other.input, {projection: 'ci-jobs', before: 'HEAD~1', after: 'HEAD'})
   assert.match(
     other.note,
-    /Not the comparison the "CI pipeline" tab shows \(Branch changes: caf6ab7e → d698c162\): don't present it as the one on screen\./,
+    /Not the comparison the "CI pipeline" tab shows \(Branch changes: caf6ab7e → d698c162\): don't present it as the one on screen\./u,
   )
   // A pinned tab's pair, named as pinned.
-  assert.match(withTabDefaults('compare', {}, {...tab, pinned: true}).note, /\(Branch changes, pinned to the tab\)/)
+  assert.match(withTabDefaults('compare', {}, {...tab, pinned: true}).note, /\(Branch changes, pinned to the tab\)/u)
   // One revision: the suggested pair, said not to be what's on screen.
   const single = withTabDefaults('compare', {}, {...tab, choice: 'Current state', pair: {after: 'working-tree'}})
   assert.deepEqual(single.input, {projection: 'ci-jobs'})
   assert.match(
     single.note,
-    /shows one revision \(Current state: working-tree\) and compares nothing, so these are the revisions Projections suggests: not what is on the person's screen\./,
+    /shows one revision \(Current state: working-tree\) and compares nothing, so these are the revisions Projections suggests: not what is on the person's screen\./u,
   )
   // No tab: the suggested pair, and a projection is needed.
   assert.deepEqual(withTabDefaults('compare', {projection: 'deps'}, undefined), {
     input: {projection: 'deps'},
     note: 'Revisions: the ones Projections suggests (no projection tab is open).',
   })
-  assert.throws(() => withTabDefaults('compare', {}, undefined), /Name a projection: no projection tab is open/)
+  assert.throws(() => withTabDefaults('compare', {}, undefined), /Name a projection: no projection tab is open/u)
 })
 
 test('check, open_projection, set_part and describe_part take the tab’s projection; others are left alone', () => {
   const tab = tabDefaults(ci)
   const checked = withTabDefaults('check', {render: true}, tab)
   assert.deepEqual(checked.input, {render: true, projections: ['ci-jobs']})
-  assert.match(checked.note, /name projections to check others/)
+  assert.match(checked.note, /name projections to check others/u)
   assert.deepEqual(withTabDefaults('check', {projections: ['deps']}, tab), {input: {projections: ['deps']}})
   assert.deepEqual(withTabDefaults('check', {}, undefined), {input: {}})
   assert.deepEqual(withTabDefaults('open_projection', {entity: 'job:test'}, tab).input, {entity: 'job:test', projection: 'ci-jobs'})
   assert.deepEqual(withTabDefaults('set_part', {renderer: 'graph'}, tab).input, {renderer: 'graph', projection: 'ci-jobs'})
-  assert.throws(() => withTabDefaults('set_part', {renderer: 'graph'}, undefined), /Name a projection/)
+  assert.throws(() => withTabDefaults('set_part', {renderer: 'graph'}, undefined), /Name a projection/u)
   const described = withTabDefaults('describe_part', {part: 'renderer'}, tab)
   assert.deepEqual(described.input, {part: 'renderer'})
-  assert.match(described.note, /uses the renderer \x60dag\x60; pass its ID to describe it\./)
-  assert.match(withTabDefaults('describe_part', {part: 'comparator'}, tab).note, /uses the default comparator; pass its ID/)
+  assert.match(described.note, /uses the renderer \x60dag\x60; pass its ID to describe it\./u)
+  assert.match(withTabDefaults('describe_part', {part: 'comparator'}, tab).note, /uses the default comparator; pass its ID/u)
   assert.deepEqual(withTabDefaults('describe_part', {part: 'renderer', id: 'graph'}, tab), {input: {part: 'renderer', id: 'graph'}})
   assert.deepEqual(withTabDefaults('sweep', {}, tab), {input: {}})
   assert.deepEqual(withTabDefaults('run_comparator_tests', {}, tab), {input: {}})
@@ -195,7 +195,7 @@ test("a screenshot takes the tab's projection, revisions, mode, playback, theme 
   const facts = {...ci, page: {...ci.page, mode: 'animated', progress: 0.25, colorMode: 'dark', width: 3000, height: 700}}
   const {input, note} = withTabDefaults('screenshot', {}, tabDefaults(facts))
   assert.deepEqual(input, {projection: 'ci-jobs', before, after, mode: 'animated', progress: 0.25, theme: 'dark', width: 2560, height: 700})
-  assert.match(note, /^Projection: ci-jobs, the one the "CI pipeline" tab shows\. Revisions: caf6ab7e → d698c162/)
+  assert.match(note, /^Projection: ci-jobs, the one the "CI pipeline" tab shows\. Revisions: caf6ab7e → d698c162/u)
   // Given values win; swipe has no image of its own; another projection keeps the tab's revisions but not its view.
   assert.equal(withTabDefaults('screenshot', {theme: 'light'}, tabDefaults(facts)).input.theme, 'light')
   const swiped = {...facts, page: {...facts.page, mode: 'swipe'}}
@@ -204,13 +204,13 @@ test("a screenshot takes the tab's projection, revisions, mode, playback, theme 
   assert.deepEqual(other, {projection: 'deps', before, after})
   const single = withTabDefaults('screenshot', {}, {...tabDefaults(facts), pair: {after: 'working-tree'}})
   assert.equal(single.input.after, 'working-tree')
-  assert.match(single.note, /Revision: working-tree, the one the "CI pipeline" tab shows/)
-  assert.throws(() => withTabDefaults('screenshot', {}, undefined), /Name a projection/)
+  assert.match(single.note, /Revision: working-tree, the one the "CI pipeline" tab shows/u)
+  assert.throws(() => withTabDefaults('screenshot', {}, undefined), /Name a projection/u)
 })
 
 test('the current view says the notices the tab shows, such as a declared input missing before', () => {
   const notice = "`.github/workflows/ci.yml` doesn't exist at `caf6ab7e`, so its contents show as added."
   const text = currentViewText({...ci, page: {...ci.page, notices: [notice]}})
   assert.ok(text.includes(`\nNotice: ${notice}\n`), text)
-  assert.doesNotMatch(currentViewText(ci), /^Notice:/m)
+  assert.doesNotMatch(currentViewText(ci), /^Notice:/mu)
 })

@@ -61,7 +61,7 @@ test('text view markers and relationships are selectable', async ({page}) => {
   // A relationship row is named by its endpoints, with a unicode arrow.
   await page
     .locator('table[data-collection="relationships"] tr[data-row-id="reserve"]')
-    .getByRole('button', {name: /^.+ → .+ \(calls\)$/})
+    .getByRole('button', {name: /^.+ → .+ \(calls\)$/u})
     .click()
   await expect(page.getByLabel('Host selection targets')).toContainText('"kind":"relationship"')
 })
@@ -99,7 +99,7 @@ test('the anchor follows a selection the renderer draws', async ({page}) => {
   // Browsers pause offscreen frames, and the anchor is clipped to what is visible.
   await page.locator('iframe.ph-frame').scrollIntoViewIfNeeded()
   await expect(page.locator('.ph-details-slot').getByLabel('Selection anchor')).toHaveText(
-    /^\{"x":-?\d+,"y":-?\d+,"width":\d+,"height":\d+,"side":"after"\}$/,
+    /^\{"x":-?\d+,"y":-?\d+,"width":\d+,"height":\d+,"side":"after"\}$/u,
   )
 })
 

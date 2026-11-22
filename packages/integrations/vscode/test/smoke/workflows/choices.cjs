@@ -23,7 +23,7 @@ module.exports = async function choices({folder, api, mergeBase, choiceName, swa
       .viewing()
       .rows.filter(row => row.kind !== 'group')
       .map(row => row.label)
-    const picked = shown.items.filter(item => !item.startsWith('---')).map(item => item.replace(/^\$\([^)]+\) /, ''))
+    const picked = shown.items.filter(item => !item.startsWith('---')).map(item => item.replace(/^\$\([^)]+\) /u, ''))
     assert.deepEqual(picked, [...listed, 'Show in Side Bar'])
     assert.deepEqual(shown.items.slice(0, 4), [
       '$(blank) Current state',
@@ -55,7 +55,7 @@ module.exports = async function choices({folder, api, mergeBase, choiceName, swa
   // One revision: the summary bar shows totals only.
   const totalsBar = await until('the summary bar with totals', async () => {
     const sentence = await summaryBar()
-    return /^\d+ workspaces? .*· \d+ dependenc(y|ies)/.test(sentence) && !/[+\u2212~]\d/.test(sentence) ? sentence : undefined
+    return /^\d+ workspaces? .*· \d+ dependenc(?:y|ies)/u.test(sentence) && !/[+\u2212~]\d/u.test(sentence) ? sentence : undefined
   })
   assert.ok(totalsBar)
   assert.equal(api.rows()[0].choice.id, 'now')
@@ -63,7 +63,7 @@ module.exports = async function choices({folder, api, mergeBase, choiceName, swa
   assert.equal(api.rows()[0].header, 'Current state · your files as they are now')
   await until('the row on Now', async () => api.rows()[0].projections[0].status === 'extracted')
   assert.equal(api.status(), '$(projections-mark) Current state')
-  assert.match(api.statusBar().tooltip, /your files, as they are now/)
+  assert.match(api.statusBar().tooltip, /your files, as they are now/u)
   // The item shows only where projections are in view: a projection tab in front, or a Projections view visible.
   {
     const textFile = vscode.Uri.joinPath(folder, 'package.json')
@@ -109,7 +109,7 @@ module.exports = async function choices({folder, api, mergeBase, choiceName, swa
   // The status bar names it as the row does; its tooltip has the span and its size.
   assert.equal(api.status(), '$(projections-mark) Uncommitted changes')
   await until('the uncommitted files in the tooltip', async () =>
-    /\x60[0-9a-f]{7}\x60 → your files\n\n\d+ files? uncommitted · \d+ files? changed/.test(api.statusBar().tooltip) ? true : undefined,
+    /\x60[0-9a-f]{7}\x60 → your files\n\n\d+ files? uncommitted · \d+ files? changed/u.test(api.statusBar().tooltip) ? true : undefined,
   )
   // Back to My branch, by its identity.
   await vscode.commands.executeCommand('projections.setChoice', folder, 'branch')

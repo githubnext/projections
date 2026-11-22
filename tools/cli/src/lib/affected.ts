@@ -22,13 +22,13 @@ export type ChangeKind = 'ts' | 'rust' | 'docs' | 'comparators' | 'manifests' | 
 export function kindsOf(paths: readonly string[]): ChangeKind[] {
   const kinds = new Set<ChangeKind>()
   for (const path of paths) {
-    if (/\.([cm]?[jt]sx?)$/.test(path)) kinds.add('ts')
-    if (/\.rs$|(^|\/)Cargo\.(toml|lock)$|^rust-toolchain\.toml$/.test(path)) kinds.add('rust')
-    if (/\.md$/.test(path)) kinds.add('docs')
-    if (/\.comparator(\.test)?\.ya?ml$/.test(path) || path.startsWith('packages/comparators/') || path.startsWith('packages/schemas/')) {
+    if (/\.[cm]?[jt]sx?$/u.test(path)) kinds.add('ts')
+    if (/\.rs$|(?:^|\/)Cargo\.(?:toml|lock)$|^rust-toolchain\.toml$/u.test(path)) kinds.add('rust')
+    if (/\.md$/u.test(path)) kinds.add('docs')
+    if (/\.comparator(?:\.test)?\.ya?ml$/u.test(path) || path.startsWith('packages/comparators/') || path.startsWith('packages/schemas/')) {
       kinds.add('comparators')
     }
-    if (/(^|\/)package(-lock)?\.json$|(^|\/)tsconfig[\w.]*\.json$|^\.npmrc$/.test(path)) kinds.add('manifests')
+    if (/(?:^|\/)package(?:-lock)?\.json$|(?:^|\/)tsconfig[\w.]*\.json$|^\.npmrc$/u.test(path)) kinds.add('manifests')
     if (path.startsWith('.github/')) kinds.add('workflows')
   }
   return [...kinds].sort()

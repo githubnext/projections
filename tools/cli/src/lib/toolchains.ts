@@ -17,9 +17,9 @@ export interface Toolchain {
 /** `channel = "1.97.1"` and the components and targets of rust-toolchain.toml. */
 export function rustToolchainFile(root: string): {channel: string; targets: string[]} | undefined {
   const text = readText(root, 'rust-toolchain.toml')
-  const channel = text && /^channel\s*=\s*"([^"]+)"/m.exec(text)?.[1]
+  const channel = text && /^channel\s*=\s*"([^"]+)"/mu.exec(text)?.[1]
   if (!text || !channel) return undefined
-  const targets = [...(/targets\s*=\s*\[([^\]]*)\]/.exec(text)?.[1]?.matchAll(/"([^"]+)"/g) ?? [])].map(match => match[1]!)
+  const targets = [...(/targets\s*=\s*\[([^\]]*)\]/u.exec(text)?.[1]?.matchAll(/"([^"]+)"/gu) ?? [])].map(match => match[1]!)
   return {channel, targets}
 }
 
@@ -99,7 +99,7 @@ export function optionalToolchains(root: string, skipDotnet = false): Toolchain[
     .filter(([name, required]) => required && !(skipDotnet && name === 'dotnet'))
     .map(([name, required, argv]) => {
       const installed = versionIn(probe(root, argv))
-      const wanted = required!.replace(/\.x$/, '')
+      const wanted = required!.replace(/\.x$/u, '')
       return {
         name,
         required,

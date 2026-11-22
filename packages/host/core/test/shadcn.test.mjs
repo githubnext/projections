@@ -16,7 +16,7 @@ const readOurs = async name => readFile(new URL(`${name}.tsx`, components), 'utf
 const portal = source =>
   source
     .replace("import {usePortalContainer} from '../lib/portal.js'\n", '')
-    .replaceAll(/^ *\/\/ local: portal into ScopedRoot.*\n/gm, '')
+    .replaceAll(/^ *\/\/ local: portal into ScopedRoot.*\n/gmu, '')
     .replaceAll(' container={usePortalContainer()}', '')
 const genuineEdits = {
   button: source => source.replace('pj:focus-visible:ring-ring/50 ', '$&pj:active:not-aria-[haspopup]:translate-y-px '),
@@ -27,10 +27,10 @@ const genuineEdits = {
 }
 
 test('every vendored shadcn/ui file has a pristine base, and every base a file', async () => {
-  const bases = (await readdir(upstream)).filter(file => file !== 'manifest.json').map(file => file.replace(/\.json$/, ''))
+  const bases = (await readdir(upstream)).filter(file => file !== 'manifest.json').map(file => file.replace(/\.json$/u, ''))
   const vendored = []
   for (const file of await readdir(components)) {
-    if (file.endsWith('.tsx') && parseHeader(await readFile(new URL(file, components), 'utf8'))) vendored.push(file.replace(/\.tsx$/, ''))
+    if (file.endsWith('.tsx') && parseHeader(await readFile(new URL(file, components), 'utf8'))) vendored.push(file.replace(/\.tsx$/u, ''))
   }
   assert.deepEqual(vendored.sort(), bases.sort())
 })
@@ -38,7 +38,7 @@ test('every vendored shadcn/ui file has a pristine base, and every base a file',
 test('the transformed base reproduces each vendored file except its documented local edits', async () => {
   for (const file of await readdir(upstream)) {
     if (file === 'manifest.json') continue
-    const name = file.replace(/\.json$/, '')
+    const name = file.replace(/\.json$/u, '')
     const ours = await readOurs(name)
     const header = parseHeader(ours)
     assert.equal(header.version, manifest.version, `${name}.tsx is at the base's release`)
@@ -59,7 +59,7 @@ test('classes get the pj: prefix and --pj- variables; cn-* hooks, Radix variable
 test('the variables a style prop sets are renamed like the ones its classes read', async () => {
   const content = 'export const Gap = () => <div style={{"--gap": 2, color: "red"}} className="gap-[--spacing(var(--gap))]" />\n'
   const output = await transformItem({name: 'gap', files: [{content}]}, {style: manifest.style, version: manifest.version})
-  assert.match(output, /style=\{\{'--pj-gap': 2, color: 'red'\}\} className="pj:gap-\[--spacing\(var\(--pj-gap\)\)\]"/)
+  assert.match(output, /style=\{\{'--pj-gap': 2, color: 'red'\}\} className="pj:gap-\[--spacing\(var\(--pj-gap\)\)\]"/u)
 })
 
 const editedItem = (item, from, to) => {
@@ -79,10 +79,10 @@ test('an upstream change merges into our file and keeps our edits and header not
     version: '9.9.9',
   })
   assert.equal(result.status, 'merged')
-  assert.match(result.text, /icon: 'pj:size-9\.5'/)
-  assert.doesNotMatch(result.text, /pj:active:not-aria-\[haspopup\]:translate-y-px/)
-  assert.match(result.text, /shadcn@9\.9\.9\. MIT/)
-  assert.match(result.text, /no \x60active:translate-y-px\x60 on the button/)
+  assert.match(result.text, /icon: 'pj:size-9\.5'/u)
+  assert.doesNotMatch(result.text, /pj:active:not-aria-\[haspopup\]:translate-y-px/u)
+  assert.match(result.text, /shadcn@9\.9\.9\. MIT/u)
+  assert.match(result.text, /no \x60active:translate-y-px\x60 on the button/u)
 })
 
 test('an upstream change to a line we edited is a conflict with diff3 markers', async () => {
@@ -98,9 +98,9 @@ test('an upstream change to a line we edited is a conflict with diff3 markers', 
   })
   assert.equal(result.status, 'conflict')
   assert.equal(result.conflicts, 1)
-  assert.match(result.text, /^<<<<<<< ours \(button\.tsx\)$/m)
-  assert.match(result.text, /^\|\|\|\|\|\|\| base \(shadcn@4\.23\.0\)$/m)
-  assert.match(result.text, /^>>>>>>> upstream \(shadcn@9\.9\.9\)$/m)
+  assert.match(result.text, /^<<<<<<< ours \(button\.tsx\)$/mu)
+  assert.match(result.text, /^\|\|\|\|\|\|\| base \(shadcn@4\.23\.0\)$/mu)
+  assert.match(result.text, /^>>>>>>> upstream \(shadcn@9\.9\.9\)$/mu)
 })
 
 test('an unchanged item only bumps the header release', async () => {

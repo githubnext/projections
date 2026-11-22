@@ -77,7 +77,7 @@ export const statusChecks: Pick<Checks, 'stable-layout' | 'status-text'> = {
   },
 }
 
-export const statusWords = /\b(Added|Removed|Modified|Renamed|Moved)\b/
+export const statusWords = /\b(Added|Removed|Modified|Renamed|Moved)\b/u
 
 /** Progress values a renderer is presented at in its progress modes: through the transition when animated, else the endpoints. */
 function progressSamples(modes: readonly ComparisonMode[]): number[] {

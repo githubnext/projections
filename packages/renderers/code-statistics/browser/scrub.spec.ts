@@ -157,7 +157,7 @@ test('the share chart scrubs deterministically and is neutral at both endpoints'
   })
   await renderer.seek(resizing(renderer.subject.mode === 'comparison' ? renderer.subject.comparison : undefined!))
   await expect(renderer.frame.locator('.stat-arc-change').first()).toBeVisible()
-  await expect(renderer.frame.getByRole('button', {name: /^TypeScript, 1,200 lines of code, \d+ percent, \+400, Modified$/})).toBeVisible()
+  await expect(renderer.frame.getByRole('button', {name: /^TypeScript, 1,200 lines of code, \d+ percent, \+400, Modified$/u})).toBeVisible()
 })
 
 test('host-drawn controls pivot measure, grouping and chart; the frame draws none of its own', async ({page}) => {
@@ -213,7 +213,7 @@ test('highlighting decorates only mid-transition and never changes values or pro
   const middle = resizing(renderer.subject.mode === 'comparison' ? renderer.subject.comparison : undefined!)
   await renderer.seek(middle)
   await expect(renderer.frame.locator('.stat-gain').first()).toBeVisible()
-  await expect(renderer.frame.getByRole('button', {name: /^Inspect TypeScript, 1,200 lines of code, \+400, Modified$/})).toBeVisible()
+  await expect(renderer.frame.getByRole('button', {name: /^Inspect TypeScript, 1,200 lines of code, \+400, Modified$/u})).toBeVisible()
   await expect(renderer.frame.locator('[data-entity-id="language:TypeScript"] .stat-status')).toHaveText('Modified')
   const highlighted = await rows()
   await renderer.seek(middle, {highlighting: 'off'})
@@ -255,15 +255,15 @@ test('painted rows follow the comparison steps, and a custom comparator order ch
 
 test('rows select by pointer and keyboard, and the host selection wins', async ({page}) => {
   const renderer = await openRenderer(page, {renderer: 'code-statistics', before, after, progress: 1, locale: 'en-US'})
-  await renderer.frame.getByRole('button', {name: /^Inspect TypeScript/}).click()
+  await renderer.frame.getByRole('button', {name: /^Inspect TypeScript/u}).click()
   await expect.poll(async () => (await renderer.state()).selections.at(-1)).toBe('language:TypeScript')
-  await renderer.frame.getByRole('button', {name: /^Inspect Go/}).focus()
+  await renderer.frame.getByRole('button', {name: /^Inspect Go/u}).focus()
   await page.keyboard.press('Enter')
   await expect.poll(async () => (await renderer.state()).selections.at(-1)).toBe('language:Go')
   await renderer.select('language:Python')
-  await expect(renderer.frame.getByRole('button', {name: /^Inspect Python/})).toHaveAttribute('aria-pressed', 'true')
+  await expect(renderer.frame.getByRole('button', {name: /^Inspect Python/u})).toHaveAttribute('aria-pressed', 'true')
   // A departed language's row is out of the tab order.
-  await expect(renderer.frame.getByRole('button', {name: /^Inspect Ruby/, includeHidden: true})).toHaveAttribute('tabindex', '-1')
+  await expect(renderer.frame.getByRole('button', {name: /^Inspect Ruby/u, includeHidden: true})).toHaveAttribute('tabindex', '-1')
 })
 
 test('a single revision fits the frame with no steps and no change decoration', async ({page}, testInfo) => {

@@ -135,7 +135,7 @@ test('long unchanged runs fold into gaps around each change, and an opened gap s
 
 test('an extraction and the unchanged outputs of a comparison are plain numbered text', async () => {
   const markup = render(props(extractionModel(after), 1, {comparing: false}))
-  assert.ok(!/class="badge|pk-change-status|td-mark|td-delete|td-insert|td-filler|Removed: |Added: /.test(markup))
+  assert.ok(!/class="badge|pk-change-status|td-mark|td-delete|td-insert|td-filler|Removed: |Added: /u.test(markup))
   const {model} = await comparison()
   const diff = render(props(model, 1))
   const section = (html, id) => html.match(new RegExp(`<section[^>]*data-entity-id="${id}".*?</section>`))?.[0]
@@ -152,30 +152,30 @@ test('the diff shows every output with both line sets, marked and spoken, and te
     assert.match(markup, new RegExp(`data-layout="${layout}"`))
     for (const id of ['report', 'help', 'gone', 'new']) assert.match(markup, new RegExp(`data-entity-id="${id}"`))
     assert.ok(markup.includes('Total: ') && markup.includes('>3<') && markup.includes('>4<'))
-    assert.match(markup, /Removed: <\/span><span class="td-text">Total: <span class="td-word">3<\/span>/)
-    assert.match(markup, /Added: <\/span><span class="td-text">Total: <span class="td-word">4<\/span>/)
-    assert.match(markup, /Removed: <\/span><span class="td-text">bye/)
-    assert.match(markup, /Added: <\/span><span class="td-text">hi/)
-    assert.match(markup, /class="td-mark"[^>]*>−</)
+    assert.match(markup, /Removed: <\/span><span class="td-text">Total: <span class="td-word">3<\/span>/u)
+    assert.match(markup, /Added: <\/span><span class="td-text">Total: <span class="td-word">4<\/span>/u)
+    assert.match(markup, /Removed: <\/span><span class="td-text">bye/u)
+    assert.match(markup, /Added: <\/span><span class="td-text">hi/u)
+    assert.match(markup, /class="td-mark"[^>]*>−</u)
     assert.ok(markup.includes('&lt;script&gt;x&lt;/script&gt;') && !markup.includes('<script>'))
     assert.ok(!markup.includes('aria-label="Text diff layout"'), 'the layout control is host-drawn')
   }
   const split = render(props(model, 1))
-  assert.match(split, /data-layout="split"/)
-  assert.match(split, /td-caption td-side-before">Before</)
+  assert.match(split, /data-layout="split"/u)
+  assert.match(split, /td-caption td-side-before">Before</u)
   // A line on one side faces a blank filler, so unchanged lines stay aligned.
-  assert.match(split, /td-cell td-filler td-side-before/)
+  assert.match(split, /td-cell td-filler td-side-before/u)
 })
 
 test('without highlighting the diff keeps its content and status cells, and drops only the tint and status words', async () => {
   const {model} = await comparison()
   const strip = markup =>
-    markup.replace(/--emphasis:[^;"]*;?/g, '').replace(/<span class="pk-status-text".*?<\/span><\/span>(?=<\/span><\/header>)/g, '')
+    markup.replace(/--emphasis:[^;"]*;?/gu, '').replace(/<span class="pk-status-text".*?<\/span><\/span>(?=<\/span><\/header>)/gu, '')
   const on = render(props(model, 1, {highlighting: 1}))
   const off = render(props(model, 1, {highlighting: 0}))
-  assert.match(on, /--emphasis:1/)
-  assert.match(off, /--emphasis:0/)
-  assert.doesNotMatch(off, /pk-status-text/)
+  assert.match(on, /--emphasis:1/u)
+  assert.match(off, /--emphasis:0/u)
+  assert.doesNotMatch(off, /pk-status-text/u)
   assert.equal(strip(off), strip(on))
 })
 
@@ -191,7 +191,7 @@ test("each changed output states its status as text in a reserved cell at its he
       )[1],
     )
   assert.deepEqual(['report', 'gone', 'new', 'help'].map(status), ['Modified', 'Removed', 'Added', ''])
-  assert.match(markup, /--pk-status-width:11ch/)
+  assert.match(markup, /--pk-status-width:11ch/u)
 })
 
 test("a formatted output's command label is a code identifier heading before its status cell; a prose title is not", async () => {
@@ -201,26 +201,26 @@ test("a formatted output's command label is a code identifier heading before its
     markup.match(new RegExp(`<section[^>]*data-entity-id="${id}"[^>]*><header class="pk-group-header">(.*?)</header>`))[1]
   assert.match(
     header('report'),
-    /^<h2 class="pk-group-title" id="[^"]+"><button type="button" class="pk-group-label pk-truncate pk-diff-text" data-projections-identifier="" title="report" aria-pressed="false">report<\/button><\/h2><span class="pk-change-status pk-group-status" data-change-footer=""><span class="pk-status-text"[^>]*><span class="pk-status-part modified"/,
+    /^<h2 class="pk-group-title" id="[^"]+"><button type="button" class="pk-group-label pk-truncate pk-diff-text" data-projections-identifier="" title="report" aria-pressed="false">report<\/button><\/h2><span class="pk-change-status pk-group-status" data-change-footer=""><span class="pk-status-text"[^>]*><span class="pk-status-part modified"/u,
   )
-  assert.match(header('new'), /title="new"/)
-  assert.doesNotMatch(header('new'), /data-projections-identifier/)
+  assert.match(header('new'), /title="new"/u)
+  assert.doesNotMatch(header('new'), /data-projections-identifier/u)
 })
 
 test('a removed output is marked removed, so its title is struck through; an unchanged one is not marked', async () => {
   const {model} = await comparison()
   const markup = render(props(model, 1))
   const open = id => markup.match(new RegExp(`<section[^>]*data-entity-id="${id}"[^>]*>`))[0]
-  assert.match(open('gone'), /data-change="removed"/)
-  assert.match(open('new'), /data-change="added"/)
-  assert.match(open('report'), /data-change="modified"/)
-  assert.doesNotMatch(open('help'), /data-change/)
+  assert.match(open('gone'), /data-change="removed"/u)
+  assert.match(open('new'), /data-change="added"/u)
+  assert.match(open('report'), /data-change="modified"/u)
+  assert.doesNotMatch(open('help'), /data-change/u)
   // The output's section is labelled by its heading.
-  const labelled = open('gone').match(/aria-labelledby="([^"]+)"/)[1]
+  const labelled = open('gone').match(/aria-labelledby="([^"]+)"/u)[1]
   assert.match(markup, new RegExp(`<h2 class="pk-group-title" id="${labelled}"><button[^>]*>gone</button>`))
   // A single extraction draws no status and no marks.
   const single = render(props(extractionModel(before), 1, {comparing: false}))
-  assert.doesNotMatch(single, /data-change|pk-group-status/)
+  assert.doesNotMatch(single, /data-change|pk-group-status/u)
 })
 
 test('outputs keep extraction order, with removals where they were', async () => {
@@ -237,19 +237,19 @@ test('outputs keep extraction order, with removals where they were', async () =>
 
 test('invalid output data fails with a clear error', async () => {
   const bad = [
-    [graph([{id: 'o', kind: 'output', label: 'o', data: {text: 42}}]), /must contain string data\.text/],
-    [graph([output('o', 'x', 'markdown')]), /invalid data\.presentation/],
-    [graph([{id: 'o', kind: 'note', label: 'o', data: {text: 'x'}}]), /must have kind "output"/],
+    [graph([{id: 'o', kind: 'output', label: 'o', data: {text: 42}}]), /must contain string data\.text/u],
+    [graph([output('o', 'x', 'markdown')]), /invalid data\.presentation/u],
+    [graph([{id: 'o', kind: 'note', label: 'o', data: {text: 'x'}}]), /must have kind "output"/u],
     [
       {...graph([output('a', 'x'), output('b', 'y')]), relationships: [{id: 'r', kind: 'calls', from: 'a', to: 'b'}]},
-      /does not support relationships/,
+      /does not support relationships/u,
     ],
-    [{...graph([output('o', 'x')]), schema: 'dag/v0'}, /requires graph\/v0/],
+    [{...graph([output('o', 'x')]), schema: 'dag/v0'}, /requires graph\/v0/u],
   ]
   for (const [extraction, message] of bad) {
     assert.throws(() => validateModel(extractionModel(extraction)), message)
     assert.throws(() => render(props(extractionModel(extraction), 1, {comparing: false})), message)
   }
   assert.deepEqual(readOutput(output('o', '')), {id: 'o', label: 'o', text: '', presentation: 'formatted'})
-  assert.match(render(props(extractionModel(graph([output('o', '')])), 1, {comparing: false})), /\(no output\)/)
+  assert.match(render(props(extractionModel(graph([output('o', '')])), 1, {comparing: false})), /\(no output\)/u)
 })

@@ -10,7 +10,7 @@ const maxNamed = 5
 
 /** `text` as an inline code span of protocol prose. */
 function code(text: string): string {
-  return `\`${text.replace(/[\x60\\]/g, character => `\\${character}`)}\``
+  return `\`${text.replace(/[\x60\\]/gu, character => `\\${character}`)}\``
 }
 
 /** How notices name an extraction's revision: `the working tree`, or the commit's first eight hex digits as code. */
@@ -68,15 +68,15 @@ export function missingInputNotice(document: ExtractionDocument): string | undef
 /** Only a source location: `node:internal/modules/cjs/loader:1607`, `/app/x.js:3:9`, a stack frame or `File "x.py", line 3`. */
 function isLocation(line: string): boolean {
   if (line.startsWith('at ') || (line.startsWith('File "') && line.includes('", line '))) return true
-  return /^\(?\S*?:\d+(?::\d+)?\)?$/.test(line) && !/\s/.test(line)
+  return /^\(?\S*?:\d+(?::\d+)?\)?$/u.test(line) && !/\s/u.test(line)
 }
-const isCaret = (line: string) => line.includes('^') && /^[\^~ ]+$/.test(line)
+const isCaret = (line: string) => line.includes('^') && /^[\^~ ]+$/u.test(line)
 const isNoise = (line: string) =>
   ['note: run with `RUST_BACKTRACE', 'stack backtrace:', 'Require stack:', 'Node.js v'].some(prefix => line.startsWith(prefix)) ||
-  (line.startsWith('- ') && isLocation(line.slice(2).replace(/ /g, '')))
+  (line.startsWith('- ') && isLocation(line.slice(2).replace(/ /gu, '')))
 /** `Error: …`, `TypeError: …`, `ModuleNotFoundError: …`, `error[E0425]: …` or `fatal: …`. */
 function isError(line: string): boolean {
-  const head = /^(?:Uncaught )?([^\s:]+):/.exec(line)?.[1]?.toLowerCase()
+  const head = /^(?:Uncaught )?([^\s:]+):/u.exec(line)?.[1]?.toLowerCase()
   return Boolean(head && (head.endsWith('error') || head.endsWith('exception') || head.startsWith('error[') || head === 'fatal'))
 }
 
@@ -116,9 +116,9 @@ export function reported(stderr: string): string | undefined {
  * ran it (`/…/projections exited with exit status: 1: …`), which an older runner put first; the raw output keeps it.
  */
 export function failureMessage(message: string): string {
-  const line = reported(message.replace(/^(?:[A-Za-z]:)?[\\/]\S*\s+exited with [^:]+: [^:]+?(?::\s+|$)/, ''))
+  const line = reported(message.replace(/^(?:[A-Za-z]:)?[\\/]\S*\s+exited with [^:]+: [^:]+(?::\s+|$)/u, ''))
   if (line !== undefined) return line
   // Nothing after the prefix: the process said nothing, so say which one by its name.
-  const program = /^(?:[A-Za-z]:)?[\\/]\S*?([^\\/\s]+)\s+(exited with [^:]+: [^:]+?)(?::\s+|$)/.exec(message)
+  const program = /^(?:[A-Za-z]:)?[\\/](?:\S*[\\/])?([^\\/\s]+)\s+(exited with [^:]+: [^:]+)(?::\s+|$)/u.exec(message)
   return program ? `${program[1]} ${program[2]}` : message.trim()
 }

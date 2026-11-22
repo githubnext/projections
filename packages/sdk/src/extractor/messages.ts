@@ -9,7 +9,7 @@ export const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
 /** `noun` with its indefinite article. */
-export const article = (noun: string) => `${/^[aeiou]/i.test(noun) ? 'an' : 'a'} ${noun}`
+export const article = (noun: string) => `${/^[aeiou]/iu.test(noun) ? 'an' : 'a'} ${noun}`
 
 /** What `value` is, in JSON's terms: `null`, `a string`, `an array`, `an object`, … */
 export function described(value: unknown): string {

@@ -10,8 +10,8 @@ const webkitTrace = process.platform === 'darwin' ? {trace: 'off' as const} : {}
 
 export default defineConfig({
   testDir: '..',
-  testMatch: /[\\/]browser[\\/][^\\/]+\.spec\.ts$/,
-  testIgnore: /[\\/]node_modules[\\/]/,
+  testMatch: /[\\/]browser[\\/][^\\/]+\.spec\.ts$/u,
+  testIgnore: /[\\/]node_modules[\\/]/u,
   fullyParallel: true,
   // CI runners have few cores (two for private repositories); more workers than cores starve Linux WebKit.
   workers: process.env.CI ? '100%' : 4,

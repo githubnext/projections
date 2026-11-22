@@ -44,7 +44,7 @@ async function sampleMove(frame: Frame, act: () => Promise<void>): Promise<Sampl
           group
             .querySelector('path.database-link')!
             .getAttribute('d')!
-            .match(/-?[\d.]+/g) ?? []
+            .match(/-?[\d.]+/gu) ?? []
         )
           .slice(0, 2)
           .map(Number)
@@ -115,7 +115,7 @@ test('opening and closing a fold and switching to All move the schema with every
   expectAttached(await sampleMove(frame, () => fold.click()), 'opening a fold')
   // The open fold stays in its place, as the way to fold the columns again, from the keyboard too.
   const hide = frame.locator(`section[data-entity-id=${JSON.stringify(table)}] .database-fold-button[aria-expanded="true"]`)
-  await expect(hide).toHaveText(/^Hide /)
+  await expect(hide).toHaveText(/^Hide /u)
   expectAttached(await sampleMove(frame, () => hide.press('Enter')), 'closing it')
   await expect(frame.locator(`section[data-entity-id=${JSON.stringify(table)}] .database-fold-button`)).toHaveAttribute(
     'aria-expanded',
@@ -155,7 +155,7 @@ interface Line {
 async function doubledLines(frame: Frame): Promise<string[]> {
   return frame.evaluate(() => {
     const lines: Line[] = []
-    const drawn = (color: string) => color !== 'transparent' && !/rgba\([^)]*,\s*0\)$/.test(color)
+    const drawn = (color: string) => color !== 'transparent' && !/rgba\([^)]*,\s*0\)$/u.test(color)
     const name = (element: Element) =>
       `${element.tagName.toLowerCase()}.${[...element.classList].slice(0, 2).join('.')}${element.getAttribute('data-entity-id') ? `[${element.getAttribute('data-entity-id')}]` : ''}`
     for (const element of document.body.querySelectorAll<HTMLElement>('*')) {
@@ -189,10 +189,10 @@ async function doubledLines(frame: Frame): Promise<string[]> {
       }
       // An inset shadow with only a vertical offset, or a spread, draws a top or bottom edge. An outer shadow without blur
       // draws the element's box moved by its offset and grown by its spread: what shows above or below the box is a line.
-      for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/)) {
-        const color = /(rgba?|color)\([^)]*\)/.exec(shadow)?.[0] ?? ''
+      for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/u)) {
+        const color = /(?:rgba?|color)\([^)]*\)/u.exec(shadow)?.[0] ?? ''
         if (!drawn(color)) continue
-        const [x = 0, y = 0, blur = 0, spread = 0] = (shadow.replace(color, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat)
+        const [x = 0, y = 0, blur = 0, spread = 0] = (shadow.replace(color, '').match(/-?[\d.]+px/gu) ?? []).map(parseFloat)
         if (!shadow.includes('inset')) {
           if (blur > 0) continue
           const [above, below] = [box.top + y - spread, box.bottom + y + spread]
@@ -271,7 +271,7 @@ async function entities(frame: Frame) {
     const recede = (element: Element) => {
       if (!element.hasAttribute('data-projections-filtered')) return 1
       const style = getComputedStyle(element)
-      return element.closest('svg') ? Number(style.opacity) : Number(/opacity\(([\d.]+)\)/.exec(style.filter)?.[1] ?? 1)
+      return element.closest('svg') ? Number(style.opacity) : Number(/opacity\(([\d.]+)\)/u.exec(style.filter)?.[1] ?? 1)
     }
     return [...document.querySelectorAll('[data-entity-id]')].map(element => {
       const box = element.getBoundingClientRect()

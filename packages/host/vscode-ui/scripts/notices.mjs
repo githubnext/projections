@@ -27,7 +27,7 @@ for (const [name, path] of await runtimeDependencies(manifest)) {
   const json = JSON.parse(await readFile(path, 'utf8'))
   const directory = dirname(path)
   const files = readdirSync(directory)
-    .filter(file => /^licen[cs]e(-code)?(\.(md|txt))?$/i.test(file))
+    .filter(file => /^licen[cs]e(?:-code)?(?:\.(?:md|txt))?$/iu.test(file))
     .sort()
   sections.push('', `## ${name} ${json.version} (${json.license})`, '')
   if (!files.length) {
@@ -41,8 +41,8 @@ for (const [name, path] of await runtimeDependencies(manifest)) {
     sections.push(
       '```text',
       (await readFile(join(directory, file), 'utf8'))
-        .replace(/^\uFEFF/, '')
-        .replace(/\r\n?/g, '\n')
+        .replace(/^\uFEFF/u, '')
+        .replace(/\r\n?/gu, '\n')
         .trimEnd(),
       '```',
     )

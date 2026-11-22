@@ -46,8 +46,8 @@ test('selection and hover in one pane mark the same entity in the other', async 
   await open(page, 'mode=side-by-side&before=v1&after=v3&connector')
   await entity(pane(page, 'before'), 'payments').click()
   await expect(page.getByLabel('Host selection', {exact: true})).toHaveText('payments')
-  await expect(entity(pane(page, 'after'), 'payments')).toHaveClass(/selected/)
-  await expect(entity(pane(page, 'before'), 'payments')).toHaveClass(/selected/)
+  await expect(entity(pane(page, 'after'), 'payments')).toHaveClass(/selected/u)
+  await expect(entity(pane(page, 'before'), 'payments')).toHaveClass(/selected/u)
   // The detail card overlays the stage; close it to hover what it covers (the selection stays).
   await page.locator('[data-detail-card]').getByRole('button', {name: 'Close details'}).click()
   await entity(pane(page, 'after'), 'checkout').hover()
@@ -125,7 +125,7 @@ test('swipe stacks both revisions behind a divider moved by pointer and keyboard
   const value = Number(await divider.getAttribute('aria-valuenow'))
   expect(value).toBeGreaterThanOrEqual(23)
   expect(value).toBeLessThanOrEqual(27)
-  await expect(page.locator('.ph-swipe')).toHaveAttribute('style', /--ph-split: 2\d(\.\d)?%/)
+  await expect(page.locator('.ph-swipe')).toHaveAttribute('style', /--ph-split: 2\d(\.\d)?%/u)
 })
 
 test('scrolling one swipe layer scrolls the other', async ({page}) => {
@@ -178,7 +178,7 @@ test('renderers without the interaction capabilities still share selection', asy
   await open(page, 'mode=side-by-side&before=v1&after=v3&renderer=minimal')
   await pane(page, 'before').locator('[data-entity-id="payments"] button').click()
   await expect(page.getByLabel('Host selection', {exact: true})).toHaveText('payments')
-  await expect(pane(page, 'after').locator('[data-entity-id="payments"]')).toHaveClass(/selected/)
+  await expect(pane(page, 'after').locator('[data-entity-id="payments"]')).toHaveClass(/selected/u)
   await expect(page.locator('.ph-panes')).toHaveAttribute('data-connector', 'none')
   await page.locator('[data-detail-card]').getByRole('button', {name: 'Close details'}).click()
   await pane(page, 'after').locator('[data-entity-id="payments"] button').hover()
@@ -299,7 +299,7 @@ test('modes show in canonical order and open in diff, else side by side, when th
   await open(page, 'renderer=hostile&probe=diffonly&before=v1&after=v3&mode=default')
   await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', 'diff')
   await expect(page.getByRole('radiogroup', {name: 'Comparison mode'})).toHaveCount(0)
-  await expect(page.getByRole('button', {name: /^Comparison mode/})).toHaveCount(0)
+  await expect(page.getByRole('button', {name: /^Comparison mode/u})).toHaveCount(0)
 })
 
 test('a renderer declaring diff gets one frame, init in diff mode and no progress', async ({page}) => {
@@ -310,7 +310,7 @@ test('a renderer declaring diff gets one frame, init in diff mode and no progres
   await expect((await modeGroup(page)).getByRole('radio')).toHaveText(['Diff', 'Animated'])
   await page.keyboard.press('Escape')
   await expect(page.locator('iframe.ph-frame')).toHaveCount(1)
-  const report = page.getByRole('alert').filter({hasText: /init:/})
+  const report = page.getByRole('alert').filter({hasText: /init:/u})
   await expect(report).toContainText('init:diff progress=0')
   // No playback outside animated mode.
   await expect(page.getByRole('slider', {name: 'Transition'})).toHaveCount(0)

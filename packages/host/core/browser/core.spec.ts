@@ -17,7 +17,7 @@ test('a core-only host shows side by side with its own controls and no playback'
   // Selection, highlighting and the connector come from the core.
   await pane(page, 'before').locator('[data-entity-id="payments"]').first().click()
   await expect(page.getByLabel('Custom selection')).toHaveText('Payments')
-  await expect(pane(page, 'after').locator('[data-entity-id="payments"]').first()).toHaveClass(/selected/)
+  await expect(pane(page, 'after').locator('[data-entity-id="payments"]').first()).toHaveClass(/selected/u)
   await expect(page.locator('.ph-panes')).not.toHaveAttribute('data-connector', 'none')
   await expect(pane(page, 'before').locator('.pk')).toHaveAttribute('data-highlighting', '1')
   // The custom find field filters through the protocol: non-matching entities are marked in the frames.

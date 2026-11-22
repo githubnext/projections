@@ -82,17 +82,17 @@ test('the detail card lists generated values first, and leaves them and their ba
 
 test('generated values render with the Generated mark, and the regenerated toggle filters to them', () => {
   const markup = renderToStaticMarkup(createElement(GeneratedList, {generated: rowDetails(subject, row('orders'), rows).generated}))
-  assert.match(markup, /data-generated-mark=""/)
-  assert.match(markup, /Regenerated because the input and the model/)
-  assert.match(markup, /aria-pressed="false"[^>]*>Word diff/)
+  assert.match(markup, /data-generated-mark=""/u)
+  assert.match(markup, /Regenerated because the input and the model/u)
+  assert.match(markup, /aria-pressed="false"[^>]*>Word diff/u)
   let controller
   function Probe(props) {
     controller = useProjection({subject, projection: {id: 'classes', title: 'Classes'}, ...props})
     return createElement(RegeneratedToggle, {projection: controller})
   }
   const toggle = renderToStaticMarkup(createElement(Probe, {initialRegeneratedOnly: true}))
-  assert.match(toggle, /data-regenerated="1"/)
-  assert.match(toggle, />1 regenerated</)
+  assert.match(toggle, /data-regenerated="1"/u)
+  assert.match(toggle, />1 regenerated</u)
   assert.deepEqual(
     controller.visibleRows.map(item => item.id),
     ['cart'],

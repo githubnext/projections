@@ -25,9 +25,9 @@ test('packed protocol+engine install and execute without workspace links or Rust
     const installed = join(directory, 'node_modules/@githubnext/projections-engine')
     assert.equal((await lstat(installed)).isSymbolicLink(), false)
     const notices = await readFile(join(installed, 'artifacts/THIRD_PARTY_NOTICES.txt'), 'utf8')
-    assert.match(notices, /serde_jcs 0\.2\.0/)
-    assert.match(notices, /ryu-js 0\.2\.2/)
-    assert.match(notices, /LICENSE-APACHE/)
+    assert.match(notices, /serde_jcs 0\.2\.0/u)
+    assert.match(notices, /ryu-js 0\.2\.2/u)
+    assert.match(notices, /LICENSE-APACHE/u)
     await writeFile(
       join(directory, 'verify.mjs'),
       `

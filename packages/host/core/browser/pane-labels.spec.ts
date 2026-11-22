@@ -58,7 +58,7 @@ for (const [mode, label] of [
       await expect(frames).toHaveCount(2)
       for (const frame of await frames.all()) {
         await expect(frame.contentFrame()!.locator('.node-surface').first()).toBeVisible()
-        await expect(frame.contentFrame()!.locator('html')).toHaveAttribute('data-pane', /^(before|after)$/)
+        await expect(frame.contentFrame()!.locator('html')).toHaveAttribute('data-pane', /^(before|after)$/u)
         await expect(frame.contentFrame()!.getByText('Identity connects the two states')).toHaveCount(0)
       }
       const labels = await page.locator(label).evaluateAll(elements =>

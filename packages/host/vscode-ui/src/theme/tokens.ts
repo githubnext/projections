@@ -38,7 +38,7 @@ export function vscodeThemeTokens(variables: VscodeVariables, kind: VscodeThemeK
   const tokens: Record<ThemeTokenName, string> = {...defaults, ...vscodeMetrics, ...codiconTokens}
   const raw = (name: ThemeTokenName) => {
     for (const variable of vscodeTokenMap[name] ?? []) {
-      const value = variables[variable]?.trim().replace(/\s+/g, ' ')
+      const value = variables[variable]?.trim().replace(/\s+/gu, ' ')
       if (value && value.length <= maxValueLength && !value.includes('var(')) return value
     }
     return undefined

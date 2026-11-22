@@ -71,10 +71,10 @@ const render = p => renderToStaticMarkup(createElement(ApiView, p))
 const footer = '<div class="pk-change-footer api-declaration-footer" data-change-footer=""></div>'
 /** A row's footer status text: the word per part (icons carry no text), empty for an unchanged row. */
 const statusOf = body =>
-  plain(/<div class="pk-change-footer api-declaration-footer" data-change-footer="">(.*?)<\/div>/.exec(body)?.[1] ?? '')
+  plain(/<div class="pk-change-footer api-declaration-footer" data-change-footer="">(.*?)<\/div>/u.exec(body)?.[1] ?? '')
 const rowsOf = markup =>
   Object.fromEntries(
-    [...markup.matchAll(/<section [^>]*data-entity-id="([^"]+)"[^>]*>(.*?)<\/section>/g)].map(([, id, body]) => [id, body]),
+    [...markup.matchAll(/<section [^>]*data-entity-id="([^"]+)"[^>]*>(.*?)<\/section>/gu)].map(([, id, body]) => [id, body]),
   )
 
 test('segments merge two signatures, removals before the additions that replace them', () => {
@@ -138,28 +138,28 @@ test('the diff renders every change with its status footer and signature diff, a
   assert.equal(statusOf(rows.added), 'Added')
   assert.match(
     rows.added,
-    /class="api-signature added" data-projections-identifier=""><span class="api-line-mark" aria-hidden="true">\+<\/span>added\(\): void/,
+    /class="api-signature added" data-projections-identifier=""><span class="api-line-mark" aria-hidden="true">\+<\/span>added\(\): void/u,
   )
   assert.equal(statusOf(rows.legacy), 'Removed')
   assert.match(
     rows.legacy,
-    /class="api-signature removed" data-projections-identifier=""><span class="api-line-mark" aria-hidden="true">−<\/span>legacy\(\): void/,
+    /class="api-signature removed" data-projections-identifier=""><span class="api-line-mark" aria-hidden="true">−<\/span>legacy\(\): void/u,
   )
   assert.equal(statusOf(rows.greet), 'Modified')
   assert.match(
     rows.greet,
-    /<pre class="api-signature" data-projections-identifier=""><span>greet\(<\/span><ins>name: string<\/ins><span>\): string<\/span><\/pre>/,
+    /<pre class="api-signature" data-projections-identifier=""><span>greet\(<\/span><ins>name: string<\/ins><span>\): string<\/span><\/pre>/u,
   )
-  assert.match(rows.greet, /Signature changed from “greet\(\): string” to “greet\(name: string\): string”/)
+  assert.match(rows.greet, /Signature changed from “greet\(\): string” to “greet\(name: string\): string”/u)
   // A rewritten signature splits into a removed line above an added one.
   assert.match(
     rows.parse,
-    /class="api-signature removed" data-projections-identifier="">.*>parse\(text: string\): Node<\/pre><pre class="api-signature added" data-projections-identifier="">.*>tokenize\(input: Buffer\): Token\[\]<\/pre>/,
+    /class="api-signature removed" data-projections-identifier="">.*>parse\(text: string\): Node<\/pre><pre class="api-signature added" data-projections-identifier="">.*>tokenize\(input: Buffer\): Token\[\]<\/pre>/u,
   )
   assert.ok(!rows.stable.includes('pk-status') && !rows.stable.includes('<del') && !rows.stable.includes('<ins'))
   // The unchanged row still reserves its footer, so every row has the same rhythm.
   assert.ok(rows.stable.endsWith(footer))
-  assert.match(rows.stable, /<pre class="api-signature" data-projections-identifier="">stable\(\): void<\/pre>/)
+  assert.match(rows.stable, /<pre class="api-signature" data-projections-identifier="">stable\(\): void<\/pre>/u)
 })
 
 test('a renamed declaration shows its previous label and its renamed signature', async () => {
@@ -169,11 +169,11 @@ test('a renamed declaration shows its previous label and its renamed signature',
   assert.equal(statusOf(rows.getJson), 'RenamedModified')
   assert.match(
     rows.getJson,
-    /Previously <\/span><span data-projections-identifier="" class="pk-identifier pk-truncate" title="fetchJson"><del>fetchJson<\/del><\/span>/,
+    /Previously <\/span><span data-projections-identifier="" class="pk-identifier pk-truncate" title="fetchJson"><del>fetchJson<\/del><\/span>/u,
   )
-  assert.match(rows.getJson, /<del>fetchJson<\/del><ins>getJson<\/ins>/)
+  assert.match(rows.getJson, /<del>fetchJson<\/del><ins>getJson<\/ins>/u)
   // Side-by-side, the before pane names it as the before revision did, under its row ID.
-  assert.match(rowsOf(render(props(model, {progress: 0, highlighting: 0}))).getJson, />fetchJson<\/button>/)
+  assert.match(rowsOf(render(props(model, {progress: 0, highlighting: 0}))).getJson, />fetchJson<\/button>/u)
 })
 
 test('names, IDs and signatures are marked as code identifiers; status sits in the row footer, not beside the name', async () => {
@@ -181,22 +181,22 @@ test('names, IDs and signatures are marked as code identifiers; status sits in t
   const rows = rowsOf(render(props(model, {diff: true})))
   assert.match(
     rows.getJson,
-    /<span class="api-declaration-head">.*<button [^>]*class="entity-link pk-truncate" data-projections-identifier="" title="getJson"[^>]*>getJson<\/button><\/span>/,
+    /<span class="api-declaration-head">.*<button [^>]*class="entity-link pk-truncate" data-projections-identifier="" title="getJson"[^>]*>getJson<\/button><\/span>/u,
   )
   assert.match(
     rows.getJson,
-    /<div class="pk-change-footer api-declaration-footer" data-change-footer=""><span class="pk-status-text"[^>]*><span class="pk-status-part renamed"/,
+    /<div class="pk-change-footer api-declaration-footer" data-change-footer=""><span class="pk-status-text"[^>]*><span class="pk-status-part renamed"/u,
   )
-  assert.doesNotMatch(rows.getJson, /class="pk-status[^"]*" data-projections-identifier/)
+  assert.doesNotMatch(rows.getJson, /class="pk-status[^"]*" data-projections-identifier/u)
   assert.match(
     rows['ClientOptions.retries'],
-    /data-projections-identifier="" title="ClientOptions.retries"[^>]*>ClientOptions.retries<\/button>/,
+    /data-projections-identifier="" title="ClientOptions.retries"[^>]*>ClientOptions.retries<\/button>/u,
   )
   for (const body of Object.values(rows)) {
-    for (const pre of body.match(/<pre [^>]*>/g)) assert.match(pre, /data-projections-identifier=""/)
+    for (const pre of body.match(/<pre [^>]*>/gu)) assert.match(pre, /data-projections-identifier=""/u)
   }
   const nested = render(props(await comparison(member('headers'), member('header')), {diff: true}))
-  assert.match(nested, /<code class="semantic-id" data-projections-identifier="">/)
+  assert.match(nested, /<code class="semantic-id" data-projections-identifier="">/u)
 })
 
 function member(name) {
@@ -216,10 +216,10 @@ function member(name) {
 test('a nested declaration is named as code spells it, not by its encoded ID', async () => {
   const model = await comparison(member('headers'), member('headers'))
   const html = render(props(model, {diff: true}))
-  assert.match(html, /<code class="semantic-id"[^>]*>Response\.headers<\/code>/)
-  assert.doesNotMatch(plain(html), /%3A/)
+  assert.match(html, /<code class="semantic-id"[^>]*>Response\.headers<\/code>/u)
+  assert.doesNotMatch(plain(html), /%3A/u)
   // A top-level declaration's name is its label, so no second line repeats it.
-  assert.equal(html.match(/class="semantic-id"/g).length, 1)
+  assert.equal(html.match(/class="semantic-id"/gu).length, 1)
 })
 
 test('qualified names fall back to the decoded ID where two declarations would share one', () => {
@@ -243,13 +243,13 @@ test('without highlighting the diff keeps its content and footers and drops only
   const model = await comparison()
   const on = render(props(model, {diff: true}))
   const off = render(props(model, {diff: true, highlighting: 0}))
-  assert.match(on, /data-highlighting="on"/)
-  assert.doesNotMatch(off, /pk-status-text/)
+  assert.match(on, /data-highlighting="on"/u)
+  assert.doesNotMatch(off, /pk-status-text/u)
   assert.equal(
     off,
     on
       .replace('data-highlighting="on"', 'data-highlighting="off"')
-      .replace(/<span class="pk-status-text".*?<\/span><\/span><\/div>/g, '</div>'),
+      .replace(/<span class="pk-status-text".*?<\/span><\/span><\/div>/gu, '</div>'),
   )
 })
 
@@ -266,10 +266,10 @@ test('side-by-side panes list each revision; with highlighting each marks its si
   assert.ok(!('added' in start) && !('legacy' in end))
   assert.equal(statusOf(start.legacy), 'Removed')
   assert.equal(statusOf(end.added), 'Added')
-  assert.match(start.legacy, /class="api-signature removed"/)
-  assert.match(end.added, /class="api-signature added"/)
-  assert.match(start.greet, /class="api-signature removed" data-projections-identifier="">.*<span>greet\(<\/span><span>\): string<\/span>/)
-  assert.match(end.greet, /class="api-signature added" data-projections-identifier="">.*<mark>name: string<\/mark>/)
+  assert.match(start.legacy, /class="api-signature removed"/u)
+  assert.match(end.added, /class="api-signature added"/u)
+  assert.match(start.greet, /class="api-signature removed" data-projections-identifier="">.*<span>greet\(<\/span><span>\): string<\/span>/u)
+  assert.match(end.greet, /class="api-signature added" data-projections-identifier="">.*<mark>name: string<\/mark>/u)
   assert.ok(!start.parse.includes('<mark'), 'a rewrite is not marked run by run')
   assert.ok(!start.stable.includes('pk-status') && !end.stable.includes('<mark'))
 })
@@ -285,8 +285,8 @@ test('text is never inserted as HTML', async () => {
 test('more than 500 declarations show a notice', () => {
   const many = api(Array.from({length: 520}, (_, index) => declaration(`d${String(index).padStart(3, '0')}`, `d${index}(): void`)))
   const markup = render(props(extractionModel(many), {comparing: false, highlighting: 0}))
-  assert.match(markup, /Showing 500 of 520 declarations/)
-  assert.equal(markup.match(/data-entity-id=/g).length, 500)
+  assert.match(markup, /Showing 500 of 520 declarations/u)
+  assert.equal(markup.match(/data-entity-id=/gu).length, 500)
 })
 
 /** The default comparison classified as the api-compatibility comparator would. */
@@ -307,36 +307,36 @@ async function classified(options = {}, metadata = {compatibility}) {
   const model = await comparison()
   return {...props(model, options), init: {mode: 'comparison', comparison: {metadata}}}
 }
-const compatibilityOfRow = body => plain(/<span class="api-compatibility [a-z]+"[^>]*>(.*?)<\/span><\/div>/.exec(body)?.[1] ?? '')
+const compatibilityOfRow = body => plain(/<span class="api-compatibility [a-z]+"[^>]*>(.*?)<\/span><\/div>/u.exec(body)?.[1] ?? '')
 
 test('a classified diff keeps its notices, lists breaking changes first and states each level with its reason', async () => {
   const markup = render(await classified({diff: true}))
   // The host's summary bar counts the levels (see summary.test.mjs); the view draws no summary line of its own.
-  assert.doesNotMatch(markup, /api-compatibility-counts|2 breaking|Test rules/)
+  assert.doesNotMatch(markup, /api-compatibility-counts|2 breaking|Test rules/u)
   assert.match(
     markup,
-    /^<div class="api-view pk-stage"[^>]*><div class="api-panel" data-projections-content=""><div class="api-compatibility-notices" data-projections-content="">/,
+    /^<div class="api-view pk-stage"[^>]*><div class="api-panel" data-projections-content=""><div class="api-compatibility-notices" data-projections-content="">/u,
   )
   const rows = rowsOf(markup)
   assert.deepEqual(Object.keys(rows), ['legacy', 'parse', 'added', 'greet', 'stable'])
   assert.equal(compatibilityOfRow(rows.legacy), 'Breaking')
   // Titles and assistive text take plain text: the code markers are dropped.
-  assert.match(rows.legacy, /data-compatibility="breaking"[^>]*title="legacy was removed"/)
+  assert.match(rows.legacy, /data-compatibility="breaking"[^>]*title="legacy was removed"/u)
   // The rules name and notices are prose with inline code too.
   assert.match(
     markup,
-    /<p class="api-compatibility-notice">One revision lacks <code class="pk-code" data-projections-identifier="">data.contract<\/code>.<\/p>/,
+    /<p class="api-compatibility-notice">One revision lacks <code class="pk-code" data-projections-identifier="">data.contract<\/code>.<\/p>/u,
   )
   assert.ok(!markup.includes('`'), 'no code marker is ever shown')
   assert.equal(compatibilityOfRow(rows.added), 'Additive')
   assert.match(
     rows.parse,
-    /<p class="api-compatibility-reason" data-compatibility="breaking" style="visibility:visible;opacity:1" aria-hidden="false">Binary and source: Parameter <code class="pk-code" data-projections-identifier="">text<\/code> no longer accepts <code class="pk-code" data-projections-identifier="">string<\/code><\/p>/,
+    /<p class="api-compatibility-reason" data-compatibility="breaking" style="visibility:visible;opacity:1" aria-hidden="false">Binary and source: Parameter <code class="pk-code" data-projections-identifier="">text<\/code> no longer accepts <code class="pk-code" data-projections-identifier="">string<\/code><\/p>/u,
   )
   // Change status keeps its own fixed cell before the compatibility.
   assert.match(
     rows.legacy,
-    /<div class="pk-change-footer api-declaration-footer" data-change-footer=""><span class="pk-status-text api-change-status"/,
+    /<div class="pk-change-footer api-declaration-footer" data-change-footer=""><span class="pk-status-text api-change-status"/u,
   )
   assert.ok(!rows.stable.includes('api-compatibility'))
   // An unchanged row's footer is exactly the kit's empty footer.
@@ -348,7 +348,7 @@ test('without highlighting a classified diff keeps every reserved line and drops
   assert.equal(compatibilityOfRow(off.legacy), '')
   assert.match(
     off.legacy,
-    /<p class="api-compatibility-reason" data-compatibility="breaking" style="visibility:hidden;opacity:0" aria-hidden="true">/,
+    /<p class="api-compatibility-reason" data-compatibility="breaking" style="visibility:hidden;opacity:0" aria-hidden="true">/u,
   )
 })
 
@@ -362,12 +362,12 @@ test('breaking only lists the breaking changes, in both modes', async () => {
     ...(await classified({diff: true}, {compatibility: {...compatibility, changes: {added: compatibility.changes.added}}})),
     controls: options.controls,
   })
-  assert.match(none, /No breaking changes/)
+  assert.match(none, /No breaking changes/u)
 })
 
 test('side by side, the level reads its reason to assistive technology instead of a reason line', async () => {
   const rows = rowsOf(render(await classified({progress: 0})))
-  assert.match(rows.legacy, /data-icon="breaking" aria-hidden="true"><\/span>Breaking<span class="sr-only">: legacy was removed<\/span>/)
+  assert.match(rows.legacy, /data-icon="breaking" aria-hidden="true"><\/span>Breaking<span class="sr-only">: legacy was removed<\/span>/u)
   assert.ok(!rows.legacy.includes('api-compatibility-reason'))
   // At the endpoint without highlighting, nothing is stated.
   assert.ok(!rowsOf(render(await classified({progress: 0, highlighting: 0}))).legacy.includes('api-compatibility '))

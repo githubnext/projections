@@ -30,7 +30,7 @@ export function partDocs(index: DocsIndex | undefined, part: 'extractor' | 'comp
 
 /** A bundled page's name (`extractors/x.md`, leading slashes ignored), or undefined when it can't be one (`..`, empty). */
 export function docsPage(path: string): string | undefined {
-  const segments = path.replace(/^\/+/, '').split('/')
+  const segments = path.replace(/^\/+/u, '').split('/')
   if (!segments.length || segments.some(segment => !segment || segment === '.' || segment === '..' || segment.includes('\\'))) {
     return undefined
   }

@@ -42,11 +42,11 @@ test('the development server accepts sandboxed frames and loopback pages only, a
 
 test('a renderer config takes a view or an entry, and capabilities only for a view', () => {
   const base = {name: 'flags', title: 'Flags'}
-  assert.throws(() => rendererConfig(base), /needs a view/)
-  assert.throws(() => rendererConfig({...base, view: 'src/view.tsx', entry: 'src/main.tsx'}), /not both/)
+  assert.throws(() => rendererConfig(base), /needs a view/u)
+  assert.throws(() => rendererConfig({...base, view: 'src/view.tsx', entry: 'src/main.tsx'}), /not both/u)
   assert.throws(
     () => rendererConfig({...base, entry: 'src/main.tsx', changeHighlighting: 'none'}),
-    /declares its capabilities to mountRenderer/,
+    /declares its capabilities to mountRenderer/u,
   )
   const config = rendererConfig({...base, view: 'src/view.tsx'})
   assert.equal(config.build.lib.entry, rendererEntryId)
@@ -68,16 +68,16 @@ test('the generated entry mounts the view with the capabilities the config decla
     capabilities: {drawsRelationships: false},
     accepts: [{schema: 'graph'}],
   })
-  assert.match(source, /^import "@githubnext\/projections\/kit\/react\.css"$/m)
-  assert.match(source, /^import \{mountRenderer\} from "@githubnext\/projections\/kit\/react"$/m)
-  assert.match(source, /^import \* as view from "\/repo\/src\/view\.tsx"$/m)
-  assert.match(source, /= \{\.\.\.view\}\nconst component = View \?\? fallback$/m)
-  assert.match(source, /accepts: \[\{"schema":"graph"\}\]/)
+  assert.match(source, /^import "@githubnext\/projections\/kit\/react\.css"$/mu)
+  assert.match(source, /^import \{mountRenderer\} from "@githubnext\/projections\/kit\/react"$/mu)
+  assert.match(source, /^import \* as view from "\/repo\/src\/view\.tsx"$/mu)
+  assert.match(source, /= \{\.\.\.view\}\nconst component = View \?\? fallback$/mu)
+  assert.match(source, /accepts: \[\{"schema":"graph"\}\]/u)
   assert.match(
     source,
-    /capabilities: \{"drawsRelationships":false,"changeHighlighting":"supported","comparisonModes":\["diff","side-by-side"\]\}/,
+    /capabilities: \{"drawsRelationships":false,"changeHighlighting":"supported","comparisonModes":\["diff","side-by-side"\]\}/u,
   )
-  assert.match(source, /import\.meta\.hot\.dispose\(\(\) => renderer\.unmount\(\)\)/)
+  assert.match(source, /import\.meta\.hot\.dispose\(\(\) => renderer\.unmount\(\)\)/u)
 })
 
 /** A renderer package whose kit is a stub that records how it was mounted. */
@@ -102,7 +102,7 @@ test('the development server serves an edit written straight after another, as a
   const root = stubRenderer({'src/view.js': 'export const label = "Payments"\n'})
   const view = join(root, 'src/view.js')
   const server = await createServer({
-    ...rendererConfig({name: 'flags', title: 'Flags', view: 'src/view.js', kit: join(root, 'kit').replace(/\\/g, '/')}),
+    ...rendererConfig({name: 'flags', title: 'Flags', view: 'src/view.js', kit: join(root, 'kit').replace(/\\/gu, '/')}),
     root,
     configFile: false,
     logLevel: 'silent',
@@ -110,7 +110,7 @@ test('the development server serves an edit written straight after another, as a
   try {
     await server.listen(0)
     const served = async () => (await fetch(`${server.resolvedUrls.local[0]}src/view.js`)).text()
-    assert.match(await served(), /"Payments"/)
+    assert.match(await served(), /"Payments"/u)
     while (!server.watcher.getWatched()[dirname(view)]?.includes('view.js')) await new Promise(resolve => setTimeout(resolve, 10))
     const changed = () =>
       new Promise((resolve, reject) => {
@@ -120,12 +120,12 @@ test('the development server serves an edit written straight after another, as a
     let change = changed()
     writeFileSync(view, 'export const label = "PAYMENTS"\n')
     await change
-    assert.match(await served(), /"PAYMENTS"/)
+    assert.match(await served(), /"PAYMENTS"/u)
     // Within the 50 ms after a change in which Vite's watcher reports no other change to the file by default.
     change = changed()
     writeFileSync(view, 'export const label = "Payments"\n')
     await change
-    assert.match(await served(), /"Payments"/)
+    assert.match(await served(), /"Payments"/u)
   } finally {
     await server.close()
     rmSync(root, {recursive: true, force: true})
@@ -142,11 +142,11 @@ test('a view builds into the bundle with renderer.json from the same config', as
       name: 'flags',
       title: 'Flags',
       comparisonModes: ['diff', 'side-by-side'],
-      kit: join(root, 'kit').replace(/\\/g, '/'),
+      kit: join(root, 'kit').replace(/\\/gu, '/'),
     })
     await build({...config, root, configFile: false, logLevel: 'silent'})
     const html = readFileSync(join(root, 'dist/index.html'), 'utf8')
-    assert.match(html, /\.pk\s*\{\s*display:\s*block/, "the kit's styles are inlined")
+    assert.match(html, /\.pk\s*\{\s*display:\s*block/u, "the kit's styles are inlined")
     const script = html.slice(html.lastIndexOf('<script>') + '<script>'.length, html.lastIndexOf('</script>'))
     new Function(script)()
     const {component, options} = globalThis.mounted
@@ -168,7 +168,7 @@ test('a missing view fails the build, naming it', async () => {
   const root = stubRenderer({})
   try {
     const config = rendererConfig({view: 'src/view.tsx', name: 'flags', title: 'Flags', kit: join(root, 'kit')})
-    await assert.rejects(build({...config, root, configFile: false, logLevel: 'silent'}), /view src\/view\.tsx doesn't exist/)
+    await assert.rejects(build({...config, root, configFile: false, logLevel: 'silent'}), /view src\/view\.tsx doesn't exist/u)
   } finally {
     rmSync(root, {recursive: true, force: true})
   }
@@ -189,27 +189,27 @@ test('the development server serves the generated entry, and makes a mounting en
       logLevel: 'silent',
     })
     await server.listen(0)
-    const origin = server.resolvedUrls.local[0].replace(/\/$/, '')
+    const origin = server.resolvedUrls.local[0].replace(/\/$/u, '')
     const text = async path => (await fetch(`${origin}${path}`)).text()
     return {server, text}
   }
   try {
-    const generated = await serve({view: 'src/view.js', kit: join(root, 'kit').replace(/\\/g, '/')})
+    const generated = await serve({view: 'src/view.js', kit: join(root, 'kit').replace(/\\/gu, '/')})
     try {
       const page = await generated.text('/')
-      assert.match(page, /<script type="module" src="\/@id\/__x00__virtual:projections-renderer-entry"><\/script>/)
+      assert.match(page, /<script type="module" src="\/@id\/__x00__virtual:projections-renderer-entry"><\/script>/u)
       const entry = await generated.text('/@id/__x00__virtual:projections-renderer-entry')
-      assert.match(entry, /src\/view\.js/)
-      assert.match(entry, /mountRenderer\(component/)
-      assert.match(entry, /import\.meta\.hot\.accept\(\)/)
+      assert.match(entry, /src\/view\.js/u)
+      assert.match(entry, /mountRenderer\(component/u)
+      assert.match(entry, /import\.meta\.hot\.accept\(\)/u)
     } finally {
       await generated.server.close()
     }
     const own = await serve({entry: 'src/main.js'})
     try {
-      assert.match(await own.text('/src/main.js'), /if \(import\.meta\.hot\) import\.meta\.hot\.accept\(\)/)
+      assert.match(await own.text('/src/main.js'), /if \(import\.meta\.hot\) import\.meta\.hot\.accept\(\)/u)
       const hot = await own.text('/src/hot.js')
-      assert.equal(hot.match(/import\.meta\.hot/g).length, 2, "Vite's hot context and the accept, nothing added")
+      assert.equal(hot.match(/import\.meta\.hot/gu).length, 2, "Vite's hot context and the accept, nothing added")
     } finally {
       await own.server.close()
     }

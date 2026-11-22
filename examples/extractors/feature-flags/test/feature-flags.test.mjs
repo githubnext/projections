@@ -23,7 +23,7 @@ test('resolves configured APIs, static keys and package ownership, and warns on 
   )
   assert(state.entities.some(node => node.kind === 'package' && node.label === 'shop'))
   assert(state.relationships.some(edge => edge.kind === 'checks'))
-  assert.match(JSON.stringify(state.metadata), /dynamic flag key/)
+  assert.match(JSON.stringify(state.metadata), /dynamic flag key/u)
   assert(state.entities.every(node => node.evidence?.every(item => !path.isAbsolute(item.source))))
 })
 
@@ -47,21 +47,21 @@ test('repeated occurrences keep a bounded evidence sample', async () => {
 })
 
 test('missing conventions, invalid arguments and a missing compiler fail explicitly', async () => {
-  await assert.rejects(run('feature-flags', fixture('feature-flags', 'flags')), /flagApis is required/)
-  await assert.rejects(run('feature-flags', fixture('feature-flags', 'flags'), {flagApis: [{}]}), /requires nonempty module/)
+  await assert.rejects(run('feature-flags', fixture('feature-flags', 'flags')), /flagApis is required/u)
+  await assert.rejects(run('feature-flags', fixture('feature-flags', 'flags'), {flagApis: [{}]}), /requires nonempty module/u)
   await assert.rejects(
     run('feature-flags', fixture('feature-flags', 'flags'), {...cases('feature-flags')[0].inputs, flagArgument: -1}),
-    /nonnegative integer/,
+    /nonnegative integer/u,
   )
   // TypeScript comes from the working checkout, never from the examined revision or NODE_PATH.
   await isolated('feature-flags', 'flags', root =>
     assert.rejects(
       run('feature-flags', root, cases('feature-flags')[0].inputs, {checkout: root}),
-      /not installed in your working checkout/,
+      /not installed in your working checkout/u,
     ),
   )
   await assert.rejects(
     run('feature-flags', fixture('feature-flags', 'flags'), cases('feature-flags')[0].inputs, {checkout: null}),
-    /only to trusted extractors/,
+    /only to trusted extractors/u,
   )
 })

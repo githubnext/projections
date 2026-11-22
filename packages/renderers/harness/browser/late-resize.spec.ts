@@ -28,7 +28,7 @@ async function delayResizes(page: Page, delay: number): Promise<void> {
               return typeof value === 'function' ? value.bind(target) : value
             },
             set: (target, key, value) => {
-              if (key === 'height' && /^\d+px$/.test(String(value))) setTimeout(() => Reflect.set(target, key, value, target), lateMs)
+              if (key === 'height' && /^\d+px$/u.test(String(value))) setTimeout(() => Reflect.set(target, key, value, target), lateMs)
               else Reflect.set(target, key, value, target)
               return true
             },

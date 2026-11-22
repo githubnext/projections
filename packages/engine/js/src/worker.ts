@@ -104,7 +104,7 @@ export async function createWorkerEngine(options: WorkerEngineOptions = {}): Pro
       return
     }
     if (message.type === 'ready' && !initialized) {
-      if (!('digest' in message) || typeof message.digest !== 'string' || !/^sha256:[0-9a-f]{64}$/.test(message.digest)) {
+      if (!('digest' in message) || typeof message.digest !== 'string' || !/^sha256:[0-9a-f]{64}$/u.test(message.digest)) {
         stop(new EngineTransportError('Engine worker returned an invalid comparator digest'))
         return
       }

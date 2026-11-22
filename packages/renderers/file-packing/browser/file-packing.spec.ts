@@ -90,7 +90,7 @@ test('depth and folder controls collapse and hide folders', async ({page}) => {
 test('the diff keeps removed files where they were and marks every change', async ({page}) => {
   const renderer = await openStage(page, harnessInspector(), {scenario: 'file-packing/sample-app', comparisonMode: 'diff'})
   const removed = renderer.frame.locator('[data-entity-id="file:src/vendor/moment.js"]')
-  await expect(removed).toHaveAttribute('aria-label', /Removed/)
+  await expect(removed).toHaveAttribute('aria-label', /Removed/u)
   await expect(removed.locator('.fp-emphasis.removed')).toHaveCount(1)
   await expect(renderer.frame.locator('[data-entity-id="file:src/search/rank.ts"] .fp-emphasis.added')).toHaveCount(1)
   await expect(renderer.frame.locator('.fp-labels .pk-status-part.modified').first()).toBeVisible()
@@ -146,7 +146,7 @@ test("a settings map takes the definition's kind colors and nouns, draws flags a
   expect(nouns).toMatchObject({secret: 'secret keys', hidden: 'hidden', 'not-patchable': 'not patchable', 'pre-release': 'pre-releases'})
   // A secret, hidden key carries a hidden dot in the hidden kind's color, and says so.
   const key = renderer.frame.locator('[data-entity-id="setting:providers.atlas.credentialsFile"]')
-  await expect(key).toHaveAttribute('aria-label', /flagged hidden/)
+  await expect(key).toHaveAttribute('aria-label', /flagged hidden/u)
   const fill = (selector: string) =>
     renderer.frame
       .locator(selector)

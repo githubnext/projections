@@ -36,7 +36,7 @@ async function geometry(frame: FrameLocator) {
         group
           .querySelector('path.database-link')!
           .getAttribute('d')!
-          .match(/-?[\d.]+/g) ?? []
+          .match(/-?[\d.]+/gu) ?? []
       )
         .slice(0, 2)
         .map(Number)
@@ -102,7 +102,7 @@ test('scrubbing a new table forward and back keeps cards apart, links attached a
         }
       }
       for (const link of frame.links) {
-        const dependent = `table:${link.key.replace(/^column:/, '').split('.')[0]}`
+        const dependent = `table:${link.key.replace(/^column:/u, '').split('.')[0]}`
         const card = frame.tables.find(table => table.id === dependent)!
         expect(card, `link ${link.key} has its card at ${progress}`).toBeTruthy()
         expect(
@@ -145,14 +145,14 @@ test('relationships can be hidden by the host, and selection flows both ways', a
 
   await renderer.frame.locator('[data-entity-id="column:Invoices.CustomerId"]').click()
   await expect.poll(async () => (await renderer.state()).selections.at(-1)).toBe('column:Invoices.CustomerId')
-  await expect(renderer.frame.locator('[data-entity-id="column:Invoices.CustomerId"]')).toHaveClass(/selected/)
+  await expect(renderer.frame.locator('[data-entity-id="column:Invoices.CustomerId"]')).toHaveClass(/selected/u)
   await expect(renderer.frame.locator('.database-link.selected')).toHaveCount(1)
   await renderer.select('table:Users')
-  await expect(renderer.frame.locator('section[data-entity-id="table:Users"]')).toHaveClass(/selected/)
+  await expect(renderer.frame.locator('section[data-entity-id="table:Users"]')).toHaveClass(/selected/u)
   // An index is a row of its table: its button selects it from the keyboard.
   await renderer.frame.locator('[data-entity-id="index:IX_Users_Email"] button').press('Enter')
   await expect.poll(async () => (await renderer.state()).selections.at(-1)).toBe('index:IX_Users_Email')
-  await expect(renderer.frame.locator('[data-entity-id="index:IX_Users_Email"]')).toHaveClass(/selected/)
+  await expect(renderer.frame.locator('[data-entity-id="index:IX_Users_Email"]')).toHaveClass(/selected/u)
   await renderer.frame.locator('[data-entity-id="index:IX_Users_Email"]').press('Escape')
   await expect.poll(async () => (await renderer.state()).selections.at(-1)).toBe(null)
 })
@@ -253,7 +253,7 @@ test('keys and indexes are rows of their own tables, single-column keys are colu
   const id = await marker.getAttribute('data-entity-id')
   await marker.click()
   await expect.poll(async () => (await renderer.state()).selections.at(-1)).toBe(id)
-  await expect(marker).toHaveClass(/selected/)
+  await expect(marker).toHaveClass(/selected/u)
 })
 
 test('keys of no table wrap centered and balanced, with no holes', async ({page}) => {
@@ -426,14 +426,14 @@ test('status appears in reserved space: nothing moves with highlighting, and eve
     }
     // A tinted tag always says why.
     for (const tag of shown.filter(item => item.tinted)) {
-      expect(tag.text, `${tag.id} states its status at ${progress}`).toMatch(/Added|Removed|Modified|Renamed/)
+      expect(tag.text, `${tag.id} states its status at ${progress}`).toMatch(/Added|Removed|Modified|Renamed/u)
     }
   }
   const state = await renderer.state()
   let named = 0
   for (const end of state.steps.filter(value => value > 0 && value < 1)) {
     await renderer.seek(end, {highlighting: 1})
-    named += (await statuses()).filter(item => /^(Added|Removed|Modified|Renamed)/.test(item.text)).length
+    named += (await statuses()).filter(item => /^(?:Added|Removed|Modified|Renamed)/u.test(item.text)).length
   }
   expect(named, 'steps state their changes as icon and word').toBeGreaterThan(0)
 })
@@ -469,12 +469,12 @@ test("a column row's status is a two-character icon cell, so names and types kee
     expect(row.room, `${row.id}'s glyph cell`).toBeLessThanOrEqual(2 * row.ch + 8.5)
     if (row.glyph) {
       expect([row.glyph, row.title, row.word], `${row.id} shows its icon and keeps the word`).toEqual([
-        expect.stringMatching(/^(added|removed|modified|renamed)$/),
+        expect.stringMatching(/^(added|removed|modified|renamed)$/u),
         row.title,
         row.title,
       ])
     }
-    if (row.glyph) expect(row.title).toMatch(/Added|Removed|Modified|Renamed/)
+    if (row.glyph) expect(row.title).toMatch(/Added|Removed|Modified|Renamed/u)
   }
   expect(measured.filter(row => row.glyph).map(row => `${row.glyph} ${row.title}`)).toContain('added Added')
   // Headers keep the visible word: the new table names itself once its step has run.
@@ -601,7 +601,7 @@ test('a card is wide enough for its name, kind and status: the OrderStatus enum 
     width: 1440,
   })
   const header = renderer.frame.locator('section[data-entity-id="enum:OrderStatus"] header')
-  await expect(header).not.toHaveClass(/wrapped/)
+  await expect(header).not.toHaveClass(/wrapped/u)
   await expect(header.locator('.entity-link')).toHaveText('OrderStatus')
   expect(await header.evaluate(element => element.getBoundingClientRect().height)).toBeLessThanOrEqual(38.5)
 })
@@ -620,7 +620,7 @@ function drawnLinks(view: Element) {
   for (const group of view.querySelectorAll<SVGGElement>('[data-link-key]')) {
     if (Number(group.getAttribute('opacity')) < 0.05) continue
     const d = group.querySelector('path.database-link')!.getAttribute('d') ?? ''
-    const numbers = (d.match(/-?[\d.]+/g) ?? []).map(Number)
+    const numbers = (d.match(/-?[\d.]+/gu) ?? []).map(Number)
     const points = Array.from({length: numbers.length / 2}, (_, index) => ({x: numbers[2 * index]!, y: numbers[2 * index + 1]!}))
     const key = group.dataset.linkKey!
     const from = view.querySelector<HTMLElement>(`.database-table[data-entity-id="${CSS.escape(group.dataset.from ?? '')}"]`)
@@ -648,7 +648,7 @@ function drawnLinks(view: Element) {
     if (!side(from, points[0]!, sides[0]!)) issues.push(`${key}: leaves off its table's ${sides[0]} side`)
     // The shaft ends at the arrowhead's base; the head's tip is on the target's side.
     const head = view.querySelector(`path.database-arrowhead[data-head-of-link="${CSS.escape(key)}"]`)
-    const tip = (head?.getAttribute('d')?.match(/-?[\d.]+/g) ?? []).map(Number)
+    const tip = (head?.getAttribute('d')?.match(/-?[\d.]+/gu) ?? []).map(Number)
     if (to && tip.length >= 2 && !(tip[1]! > place(to).top && tip[1]! < place(to).top + place(to).height)) {
       issues.push(`${key}: enters off its table's ${sides[1]} side`)
     }

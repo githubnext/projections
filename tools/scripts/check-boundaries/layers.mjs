@@ -100,14 +100,18 @@ export const layers = [
 export const crateRules = [
   {crates: 'packages/extractors/sdk', production: ['projections-engine'], dev: []},
   // Tests may check extractions with the public Engine and the default comparator.
-  {crates: 'packages/extractors/*', production: [/^projections-extractor-/], dev: ['projections-engine', 'projections-comparator-default']},
+  {
+    crates: 'packages/extractors/*',
+    production: [/^projections-extractor-/u],
+    dev: ['projections-engine', 'projections-comparator-default'],
+  },
   {crates: 'packages/comparators/default', production: ['projections-engine'], dev: []},
   // The rules comparator is Engine infrastructure layered on the default comparator's
   // matching core; its tests run it in the sandbox the comparator runtime provides.
   {
     crates: 'packages/comparators/rules',
     production: ['projections-engine', 'projections-comparator-default', 'projections-rules-yaml'],
-    dev: [/^projections-/],
+    dev: [/^projections-/u],
   },
   // The YAML subset rules and their tests are written in, and the tests' format: it never evaluates rules.
   {crates: 'packages/comparators/rules/yaml', production: ['projections-engine'], dev: []},
@@ -126,6 +130,6 @@ export const crateRules = [
       'projections-extractor-sdk',
       'projections-rules-yaml',
     ],
-    dev: [/^projections-/],
+    dev: [/^projections-/u],
   },
 ]

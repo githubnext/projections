@@ -19,7 +19,7 @@ export async function fromSuggestion(wizard: Wizard, {folder, directory}: Target
     suggestions.map(candidate => ({
       label: candidate.title,
       description: candidate.id,
-      detail: `${candidate.description ?? ''}${candidate.requiresTrust ? ' · Runs repository code' : ''}`.replace(/^ · /, ''),
+      detail: `${candidate.description ?? ''}${candidate.requiresTrust ? ' · Runs repository code' : ''}`.replace(/^ · /u, ''),
       candidate,
     })),
     {title: `${title}: suggestion`, placeHolder: 'A built-in projection that applies here', matchOnDescription: true},

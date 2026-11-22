@@ -48,5 +48,5 @@ test('every codicon the UI draws is in the codicon font, and every control icon 
 })
 
 test('no comparison mode is drawn with a playback glyph', () => {
-  for (const name of Object.values(modeCodicons)) assert.doesNotMatch(name, /play|pause|debug|triangle|record/)
+  for (const name of Object.values(modeCodicons)) assert.doesNotMatch(name, /play|pause|debug|triangle|record/u)
 })

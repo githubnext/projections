@@ -20,19 +20,19 @@ test('dependency graphs lay out left to right, roots first, with transitive pack
   await expect(frame.locator('[data-entity-id="package:express"]')).toBeVisible()
   await expect(frame.locator('[data-entity-id="package:body-parser"]')).toHaveCount(0)
   const summary = frame.locator('[data-graph-synthetic="transitive:package:express"]')
-  await expect(summary).toContainText(/\d+ more packages/)
-  await expect(summary).toHaveAttribute('aria-label', /^Show \d+ transitive packages of express$/)
+  await expect(summary).toContainText(/\d+ more packages/u)
+  await expect(summary).toHaveAttribute('aria-label', /^Show \d+ transitive packages of express$/u)
   // Summaries stand for no entity, so hosts never see their IDs.
   await expect(frame.locator('[data-entity-id^="transitive"]')).toHaveCount(0)
   expect((await renderer.state()).steps).toEqual([])
   await expect(frame.locator('.node-emphasis, .pk-svg-status')).toHaveCount(0)
   // The summary is prose; package names and versions are identifiers.
-  expect(await summary.locator('.node-label').evaluate(element => getComputedStyle(element).fontFamily)).not.toMatch(/mono/i)
+  expect(await summary.locator('.node-label').evaluate(element => getComputedStyle(element).fontFamily)).not.toMatch(/mono/iu)
   expect(
     await frame
       .locator('[data-entity-id="package:express"] .node-detail')
       .evaluate(element => element.textContent + getComputedStyle(element).fontFamily),
-  ).toMatch(/^5\.1\.0.*mono/i)
+  ).toMatch(/^5\.1\.0.*mono/iu)
   // Selecting a summary expands it in place and reports no selection to the host.
   await summary.click()
   await expect(frame.locator('[data-entity-id="package:body-parser"]')).toBeVisible()
@@ -43,7 +43,7 @@ test('an expanded package collapses again from the card in its summary’s place
   const renderer = await openRenderer(page, {renderer: 'dependencies', extraction: after})
   const frame = renderer.frame
   const card = frame.locator('[data-graph-synthetic="transitive:package:express"]')
-  const count = Number(/\d+/.exec((await card.locator('.node-label').textContent())!)![0])
+  const count = Number(/\d+/u.exec((await card.locator('.node-label').textContent())!)![0])
   await expect(card).toHaveAttribute('aria-label', `Show ${count} transitive packages of express`)
   await expect(card).toHaveAttribute('aria-expanded', 'false')
   await card.focus()
@@ -54,7 +54,7 @@ test('an expanded package collapses again from the card in its summary’s place
   await expect(card).toHaveAttribute('aria-label', `Collapse ${count} transitive packages of express`)
   await expect(card).toHaveAttribute('aria-expanded', 'true')
   await expect(card).toBeFocused()
-  expect(await card.locator('.node-label').evaluate(element => getComputedStyle(element).fontFamily)).not.toMatch(/mono/i)
+  expect(await card.locator('.node-label').evaluate(element => getComputedStyle(element).fontFamily)).not.toMatch(/mono/iu)
   // A package the collapse hides is no longer selected.
   await renderer.select('package:body-parser')
   await card.focus()
@@ -104,7 +104,7 @@ test('every change is shown with the path that pulls it in, and version bumps re
     if (text.includes('Upgraded') && (await status.locator('[data-icon="upgraded"]').count())) upgraded = true
   }
   expect(upgraded, 'express states its upgrade as icon and word').toBe(true)
-  await expect(frame.locator('[data-entity-id="package:express"]')).toHaveAttribute('aria-label', /Modified, Upgraded/)
+  await expect(frame.locator('[data-entity-id="package:express"]')).toHaveAttribute('aria-label', /Modified, Upgraded/u)
 })
 
 test('a shared package keeps the edge that pulls it in and counts its other dependents; selecting it brings them forward', async ({
@@ -115,7 +115,7 @@ test('a shared package keeps the edge that pulls it in and counts its other depe
   const edgesInto = (id: string) => frame.locator(`.graph-link[data-to="${id}"]`).count()
   // debug is pulled in by express first, and also used by body-parser, send and finalhandler: one edge, and a count.
   const debug = frame.locator('[data-entity-id="package:debug"]')
-  await expect(debug.locator('.node-kind')).toContainText(/\+\d+ dependents?/)
+  await expect(debug.locator('.node-kind')).toContainText(/\+\d+ dependents?/u)
   const primary = await edgesInto('package:debug')
   // Every dependency draws them all again.
   await renderer.setOptions({paths: true})
@@ -125,13 +125,13 @@ test('a shared package keeps the edge that pulls it in and counts its other depe
   await expect.poll(() => edgesInto('package:debug')).toBe(primary)
   // Selected, its dependents and dependencies come forward, drawn edge or not; everything else recedes.
   await renderer.select('package:debug')
-  await expect(frame.locator('[data-entity-id="package:debug"]')).not.toHaveClass(/receded/)
-  await expect(frame.locator('[data-entity-id="package:body-parser"]')).not.toHaveClass(/receded/)
-  await expect(frame.locator('[data-entity-id="package:react"]')).toHaveClass(/receded/)
+  await expect(frame.locator('[data-entity-id="package:debug"]')).not.toHaveClass(/receded/u)
+  await expect(frame.locator('[data-entity-id="package:body-parser"]')).not.toHaveClass(/receded/u)
+  await expect(frame.locator('[data-entity-id="package:react"]')).toHaveClass(/receded/u)
   await expect(
     frame
       .locator('.graph-footer, [role="status"]')
-      .filter({hasText: /packages? depends? on debug/})
+      .filter({hasText: /packages? depends? on debug/u})
       .first(),
   ).toBeAttached()
 })

@@ -8,8 +8,8 @@ export function releaseAsset(runnerOs, runnerArch) {
   return `gh-projections-${os}-${arch}${os === 'windows' ? '.exe' : ''}`
 }
 
-const versionTag = /^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/
-const majorTag = /^v\d+$/
+const versionTag = /^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u
+const majorTag = /^v\d+$/u
 
 /**
  * The release tag to install: an explicit version, the action's own version tag, or the latest release (`undefined`).
@@ -42,7 +42,7 @@ export function newestInMajor(releases, major) {
     .filter(release => !release.isDraft && !release.isPrerelease)
     .map(release => ({
       tag: release.tagName,
-      parts: /^v(\d+)\.(\d+)\.(\d+)$/
+      parts: /^v(\d+)\.(\d+)\.(\d+)$/u
         .exec(release.tagName ?? '')
         ?.slice(1)
         .map(Number),
@@ -56,8 +56,8 @@ export function newestInMajor(releases, major) {
 /** The expected digest of `asset` in a `sha256sum`-format checksum file, such as the release's `<asset>.sha256`. */
 export function expectedDigest(sums, asset) {
   const matches = sums
-    .split(/\r?\n/)
-    .map(line => /^([0-9a-f]{64}) [ *]?(.+)$/.exec(line.trim()))
+    .split(/\r?\n/u)
+    .map(line => /^([0-9a-f]{64}) [ *]?(.+)$/u.exec(line.trim()))
     .filter(match => match?.[2] === asset)
   if (matches.length !== 1) throw new Error(`The checksum file must list ${asset} exactly once`)
   return matches[0][1]

@@ -39,7 +39,7 @@ export function published(text) {
 
 /** The published README for the README text `text`: without front matter. */
 export function publishedReadme(text) {
-  return text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/, '')
+  return text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/u, '')
 }
 
 // Run as a script, not imported.

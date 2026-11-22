@@ -82,7 +82,7 @@ test('intermediate frames follow the kit ease, not a linear ramp', async () => {
     const typescript = slots(html).find(slot => slot.id === 'language:TypeScript')
     // The bar, the hatched gain inside it and the count all follow the eased value.
     assert.ok(Math.abs(typescript.width - (value / 1400) * 100) < 1e-9, `TypeScript bar at local ${local}`)
-    const gain = html.match(/data-statistics-id="language:TypeScript".*?class="stat-gain"[^>]* style="left:([\d.e-]+)%/)
+    const gain = html.match(/data-statistics-id="language:TypeScript".*?class="stat-gain"[^>]* style="left:([\d.e-]+)%/u)
     assert.ok(Math.abs(Number(gain[1]) - (1000 / value) * 100) < 1e-9, `TypeScript gain at local ${local}`)
     assert.match(html, new RegExp(`aria-label="Inspect TypeScript, ${Math.round(value).toLocaleString('en-US')} lines of code`))
     // The donut's slice and its percentage use the same eased counts (CSS shrinks in the same step).
@@ -131,7 +131,7 @@ test('a custom comparator order changes the visual order', async () => {
   assert.ok(at('Python').width > 0)
   assert.equal(at('Ruby').opacity, 1, 'Ruby has not left yet')
   assert.equal(at('Ruby').rows, 1)
-  assert.match(await render(ends[0], 1, {model}), /aria-label="Inspect TypeScript, 1,000 lines of code, \+400"/)
+  assert.match(await render(ends[0], 1, {model}), /aria-label="Inspect TypeScript, 1,000 lines of code, \+400"/u)
 })
 
 test('an explicit reverse order is followed when playing backward', async () => {
@@ -145,7 +145,7 @@ test('an explicit reverse order is followed when playing backward', async () => 
   const leaving = await render(ends.at(-1), 1, {model, schedule: backward})
   assert.equal(at(leaving, 'Ruby').opacity, 1, 'leaving progress 1, Ruby returns first')
   assert.equal(at(leaving, 'Python').opacity, 1, 'Python has not left')
-  assert.match(leaving, /aria-label="Inspect TypeScript, 1,400 lines of code/)
+  assert.match(leaving, /aria-label="Inspect TypeScript, 1,400 lines of code/u)
   const mirror = await render(ends.at(-1), 1, {model: (await compared(before, after)).model})
   assert.equal(at(mirror, 'Python').rows, 0, 'under the mirror order Python leaves first')
   assert.equal(at(mirror, 'Ruby').rows, 0)
@@ -188,16 +188,16 @@ test('the Files control counts tests or the rest, and every language still follo
   // The host's summary bar states the total in the Files scope; the view draws no header.
   assert.deepEqual(await total({scope: 'tests'}), {count: 770, change: 290, noun: 'lines of code in tests'})
   assert.deepEqual(await total({scope: 'other'}), {count: 1930, change: 170, noun: 'lines of code outside tests'})
-  assert.doesNotMatch(await render(1, 0, {controls: {scope: 'tests'}}), /statistics-header|statistics-scope|<strong>/)
-  assert.match(await render(1, 0, {controls: {scope: 'tests', measure: 'files'}}), /aria-label="Inspect TypeScript, 6 files, \+2"/)
+  assert.doesNotMatch(await render(1, 0, {controls: {scope: 'tests'}}), /statistics-header|statistics-scope|<strong>/u)
+  assert.match(await render(1, 0, {controls: {scope: 'tests', measure: 'files'}}), /aria-label="Inspect TypeScript, 6 files, \+2"/u)
   // A scope lists only the languages it counts something in: CSS and Shell have no tests.
   const tests = await render(1, 0, {controls: {scope: 'tests'}})
-  assert.match(tests, /aria-label="Inspect Go, /)
-  assert.doesNotMatch(tests, /aria-label="Inspect (CSS|Shell), /)
-  assert.match(await render(1, 0, {controls: {scope: 'other'}}), /aria-label="Inspect CSS, /)
-  assert.match(await render(1, 0), /aria-label="Inspect Shell, /, 'every file still lists every language')
+  assert.match(tests, /aria-label="Inspect Go, /u)
+  assert.doesNotMatch(tests, /aria-label="Inspect (CSS|Shell), /u)
+  assert.match(await render(1, 0, {controls: {scope: 'other'}}), /aria-label="Inspect CSS, /u)
+  assert.match(await render(1, 0), /aria-label="Inspect Shell, /u, 'every file still lists every language')
   // Mid-transition, TypeScript's test code moves only inside its own step.
-  assert.match(await render('mid', 1, {controls: {scope: 'tests'}}), /aria-label="Inspect TypeScript, 430 lines of code, \+260, Modified"/)
+  assert.match(await render('mid', 1, {controls: {scope: 'tests'}}), /aria-label="Inspect TypeScript, 430 lines of code, \+260, Modified"/u)
 })
 
 test('helpers format signed deltas and full-turn donut slices', () => {
@@ -205,7 +205,7 @@ test('helpers format signed deltas and full-turn donut slices', () => {
   assert.equal(signed(-20), '−20')
   assert.equal(signed(0), '0')
   const whole = donutSlice(160, 120, 74, -Math.PI / 2, Math.PI * 1.5)
-  assert.equal((whole.match(/ A/g) ?? []).length, 4, 'a full turn is drawn as half-turn arcs')
+  assert.equal((whole.match(/ A/gu) ?? []).length, 4, 'a full turn is drawn as half-turn arcs')
   assert.equal(donutSlice(160, 120, 74, 1, 1), '')
 })
 
@@ -244,34 +244,34 @@ async function render(progress, highlighting, overrides = {}) {
 function slots(html) {
   return [
     ...html.matchAll(
-      /<div class="stat-slot[^"]*" data-statistics-id="([^"]+)" style="grid-template-rows:([\d.e-]+)fr;opacity:([\d.e-]+)"[^>]*>.*?class="stat-bar[^"]*" data-projections-category="[^"]+" style="width:([\d.e-]+)%;background:([^"]+)"/g,
+      /<div class="stat-slot[^"]*" data-statistics-id="([^"]+)" style="grid-template-rows:([\d.e-]+)fr;opacity:([\d.e-]+)"[^>]*>.*?class="stat-bar[^"]*" data-projections-category="[^"]+" style="width:([\d.e-]+)%;background:([^"]+)"/gu,
     ),
   ].map(([, id, rows, opacity, width, colour]) => ({id, rows: Number(rows), opacity: Number(opacity), width: Number(width), colour}))
 }
 
 test('endpoints are neutral and the midpoint interpolates every count', async () => {
   for (const progress of [0, 1]) {
-    assert.doesNotMatch(await render(progress, 0), /stat-gain|stat-loss|stat-delta-label|class="badge|pk-status-text/)
+    assert.doesNotMatch(await render(progress, 0), /stat-gain|stat-loss|stat-delta-label|class="badge|pk-status-text/u)
   }
   assert.deepEqual(await total(), {count: 2700, change: 460, noun: 'lines of code'})
-  assert.doesNotMatch(await render(1, 0), /<strong>/, "the total is the host's summary bar's")
+  assert.doesNotMatch(await render(1, 0), /<strong>/u, "the total is the host's summary bar's")
   const mid = await render('mid', 1)
-  assert.match(mid, /aria-label="Inspect Go, 400 lines of code"/)
-  assert.match(mid, /stat-gain/)
-  assert.match(mid, /stat-loss/)
+  assert.match(mid, /aria-label="Inspect Go, 400 lines of code"/u)
+  assert.match(mid, /stat-gain/u)
+  assert.match(mid, /stat-loss/u)
   // Every row reserves its status cell; changed languages state their status as icon and word.
-  const rows = [...mid.matchAll(/class="stat-row/g)].length
-  assert.equal([...mid.matchAll(/class="pk-change-status stat-status"/g)].length, rows)
-  assert.match(mid, /data-change-status="modified"><span class="pk-icon" data-icon="modified" aria-hidden="true"><\/span>Modified/)
-  assert.match(mid, /aria-label="Inspect TypeScript, 1,200 lines of code, \+400, Modified"/)
+  const rows = [...mid.matchAll(/class="stat-row/gu)].length
+  assert.equal([...mid.matchAll(/class="pk-change-status stat-status"/gu)].length, rows)
+  assert.match(mid, /data-change-status="modified"><span class="pk-icon" data-icon="modified" aria-hidden="true"><\/span>Modified/u)
+  assert.match(mid, /aria-label="Inspect TypeScript, 1,200 lines of code, \+400, Modified"/u)
   const legend = await render('mid', 1, {controls: {chart: 'share'}})
   assert.equal(
-    [...legend.matchAll(/class="pk-change-status stat-status"/g)].length,
-    [...legend.matchAll(/class="stat-values-row"/g)].length,
+    [...legend.matchAll(/class="pk-change-status stat-status"/gu)].length,
+    [...legend.matchAll(/class="stat-values-row"/gu)].length,
   )
-  assert.match(legend, /data-change-status="modified"/)
-  assert.match(await render('mid', 1, {controls: {measure: 'files'}}), /aria-label="Inspect TypeScript, 13 files, \+2, Modified"/)
-  assert.match(await render('mid', 1, {locale: 'de-DE'}), /aria-label="Inspect TypeScript, 1\.200 lines of code, \+400, Modified"/)
+  assert.match(legend, /data-change-status="modified"/u)
+  assert.match(await render('mid', 1, {controls: {measure: 'files'}}), /aria-label="Inspect TypeScript, 13 files, \+2, Modified"/u)
+  assert.match(await render('mid', 1, {locale: 'de-DE'}), /aria-label="Inspect TypeScript, 1\.200 lines of code, \+400, Modified"/u)
 })
 
 test('languages enter and leave without mounting, unmounting or changing colour', async () => {
@@ -302,19 +302,19 @@ test('languages take their GitHub Linguist colors, the same as file packing, in 
 
 test('composition, share and host-controlled options render; a single revision is neutral', async () => {
   const composition = await render('mid', 1, {controls: {byLanguage: false}})
-  assert.match(composition, /Every physical line counts once/)
-  assert.doesNotMatch(composition, /aria-label="Measure"/)
-  assert.doesNotMatch(composition, /aria-label="Grouping"/)
+  assert.match(composition, /Every physical line counts once/u)
+  assert.doesNotMatch(composition, /aria-label="Measure"/u)
+  assert.doesNotMatch(composition, /aria-label="Grouping"/u)
   const share = await render('mid', 1, {controls: {chart: 'share'}})
-  assert.match(share, /aria-label="Share of lines of code by language"/)
-  assert.match(share, /aria-label="TypeScript, 1,200 lines of code, \d+ percent, \+400, Modified"/)
+  assert.match(share, /aria-label="Share of lines of code by language"/u)
+  assert.match(share, /aria-label="TypeScript, 1,200 lines of code, \d+ percent, \+400, Modified"/u)
   // The host draws the controls; the frame draws none.
   const local = await render(1, 0)
-  assert.doesNotMatch(local, /aria-label="(Measure|Chart|Grouping)"|<select|aria-pressed="(true|false)">(Bars|Share)/)
+  assert.doesNotMatch(local, /aria-label="(Measure|Chart|Grouping)"|<select|aria-pressed="(true|false)">(Bars|Share)/u)
   const {model} = await compared(before, after)
   const single = await render(1, 0, {model: extractionModel(after), comparing: false})
-  assert.match(single, /data-diff-highlighting="false"/)
-  assert.doesNotMatch(single, /stat-gain|stat-loss|class="badge/)
+  assert.match(single, /data-diff-highlighting="false"/u)
+  assert.doesNotMatch(single, /stat-gain|stat-loss|class="badge/u)
   assert.equal(model.entities.length, 6)
 })
 
@@ -327,7 +327,7 @@ test('a dozen-language migration keeps every row through the transition and ends
   assert.equal(frames[0].length, 12)
   for (const slot of frames[0]) assert.equal(frames.at(-1).find(other => other.id === slot.id).colour, slot.colour)
   const html = await render(1, 0, {model})
-  assert.doesNotMatch(html, /stat-gain|stat-loss|stat-delta-label|class="badge/)
+  assert.doesNotMatch(html, /stat-gain|stat-loss|stat-delta-label|class="badge/u)
   const sum = extraction => extraction.entities.reduce((lines, entity) => lines + entity.data.code, 0)
   assert.deepEqual(await total({}, model), {
     count: sum(gateway.after),
@@ -346,9 +346,9 @@ test('generic measurements draw each entity’s data.value in its unit, with onl
     'one value per row: no measure, grouping or files',
   )
   const end = await render(1, 0, {model})
-  assert.match(end, /aria-label="methods by scope"/)
-  assert.match(end, /aria-label="Inspect projects:read, 17 methods/)
-  assert.doesNotMatch(end, /lines of code/)
+  assert.match(end, /aria-label="methods by scope"/u)
+  assert.match(end, /aria-label="Inspect projects:read, 17 methods/u)
+  assert.doesNotMatch(end, /lines of code/u)
   const [fact] = codeStatisticsFacts({init: {mode: 'comparison'}, model, controls: {}, rendererName: 'code-statistics'})
   assert.deepEqual(
     {count: fact.count, added: fact.added, noun: fact.noun},

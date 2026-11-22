@@ -70,7 +70,7 @@ for (const renderer of ['auto']) {
       .evaluate(element => element.scrollIntoView({block: 'center'}))
     await expect(badge).toBeVisible()
     await expect(badge).toHaveText('2')
-    await expect(badge).toHaveAccessibleName(/^2 comments on /)
+    await expect(badge).toHaveAccessibleName(/^2 comments on /u)
     await expect(frame(page).locator('[data-entity-id="payments"][data-projections-annotated]').first()).toBeAttached()
     await badge.click()
     await expect(output(page, 'Annotation activations')).toHaveText('payments')
@@ -94,7 +94,7 @@ test('a renderer without the annotations capability still shares selection', asy
   await expect(frame(page).locator('[data-projections-annotation]')).toHaveCount(0)
   await selectTarget(page, 'entity.after.payments')
   await expect(output(page, 'Target resolution')).toContainText('"status":"present"')
-  await expect(frame(page).locator('[data-entity-id="payments"]')).toHaveClass(/selected/)
+  await expect(frame(page).locator('[data-entity-id="payments"]')).toHaveClass(/selected/u)
 })
 
 test('the selection anchor follows the item through page scrolling and comparison modes', async ({page}) => {
@@ -180,7 +180,7 @@ test('relationships are selectable in a graph renderer and resolve to relationsh
   await expect(page.locator('.ph-frame-host')).toHaveAttribute('data-renderer', 'graph')
   // A relationship without a label of its own is named by its endpoints, with a unicode arrow.
   const edge = frame(page).locator('.graph-link[data-entity-id="reserve"] .edge-hit').first()
-  await expect(edge).toHaveAccessibleName(/^Inspect relationship .+ → .+ \(calls\)/)
+  await expect(edge).toHaveAccessibleName(/^Inspect relationship .+ → .+ \(calls\)/u)
   const id = await frame(page).locator('.graph-link[data-entity-id="reserve"]').first().getAttribute('data-entity-id')
   await edge.focus()
   await page.keyboard.press('Enter')

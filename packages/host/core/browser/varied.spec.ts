@@ -61,7 +61,7 @@ test('the renderer marks only the change beyond tolerance, and items that varied
   await expect(frame(page).getByRole('img', {name: 'Volatile field changed beyond tolerance'})).toHaveCount(1)
   for (const id of ['test:parse', 'test:emit']) {
     const item = frame(page).locator(`[data-entity-id="${id}"]`).first()
-    await expect(item).not.toHaveAttribute('data-change', /./)
+    await expect(item).not.toHaveAttribute('data-change', /./u)
     await expect(item.locator('[data-change-status], [data-varied]')).toHaveCount(0)
   }
 })
@@ -76,7 +76,7 @@ test('the detail card lists each varied path with its values and tolerance, in t
   await expect(beyond).toContainText('400')
   await expect(beyond).toContainText('beyond tolerance (volatile)')
   for (const selector of ['.ph-field-name', '.ph-varied-values']) {
-    expect(await beyond.locator(selector).evaluate(element => getComputedStyle(element).fontFamily)).toMatch(/mono/i)
+    expect(await beyond.locator(selector).evaluate(element => getComputedStyle(element).fontFamily)).toMatch(/mono/iu)
   }
   // Listed as a volatile value, not as a changed field.
   await expect(card(page).locator('[data-field="data:durationMs"]')).toHaveCount(0)

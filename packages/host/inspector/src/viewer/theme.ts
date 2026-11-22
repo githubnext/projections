@@ -173,6 +173,6 @@ export function markStatusBar() {
   const header = document.querySelector('.pi-viewer-header')
   const color = header && getComputedStyle(header).backgroundColor
   const root = document.documentElement
-  if (!color || /^rgba\(.*,\s*0(\.0+)?\)$|transparent/.test(color)) return
+  if (!color || /^rgba\(.*,\s*0(?:\.0+)?\)$|transparent/u.test(color)) return
   if (root.style.getPropertyValue('--status-bar-color') !== color) root.style.setProperty('--status-bar-color', color)
 }

@@ -11,7 +11,7 @@ const quoted = value => JSON.stringify(value) ?? String(value)
 /** Whether `value` is a JSON object: not null, not an array. */
 const isObject = value => typeof value === 'object' && value !== null && !Array.isArray(value)
 /** `noun` with its indefinite article. */
-const article = noun => `${/^[aeiou]/i.test(noun) ? 'an' : 'a'} ${noun}`
+const article = noun => `${/^[aeiou]/iu.test(noun) ? 'an' : 'a'} ${noun}`
 /** What `value` is, in JSON's terms: `null`, `a string`, `an array`, `an object`, … */
 function described(value) {
   if (value === null || value === void 0) return String(value)
@@ -57,7 +57,7 @@ function listed(items, field) {
   else list = Object.entries(items).map(([key, item]) => keyed(key, item))
   for (const item of list) {
     if (typeof item.id !== 'string' || !item.id)
-      throw new RangeError(`${article(singular[field]).replace(/^a/, 'A')}'s id must be a nonempty string, not ${quoted(item.id)}`)
+      throw new RangeError(`${article(singular[field]).replace(/^a/u, 'A')}'s id must be a nonempty string, not ${quoted(item.id)}`)
     for (const name of requiredFields[field])
       if (typeof item[name] !== 'string') throw new RangeError(`The ${singular[field]} ${quoted(item.id)} needs ${name}, a string`)
   }
@@ -232,7 +232,7 @@ const request = new Request()
 const MAX_BASIS_PARTS = 16
 /** The longest value of one basis part, in UTF-8 bytes. */
 const MAX_BASIS_PART_BYTES = 256
-const partName = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
+const partName = /^[A-Za-z][\w-]{0,63}$/u
 /**
  * RFC 8785 canonical JSON: object keys in UTF-16 code-unit order (JavaScript's default string order), numbers and
  * strings as `JSON.stringify` writes them, no whitespace. The bytes the Engine hashes.

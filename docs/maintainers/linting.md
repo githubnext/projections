@@ -3,8 +3,10 @@
 ESLint is the only linter (`eslint.config.js`); oxfmt formats, so no rule here
 is about layout. The configuration is strict: typescript-eslint's
 `strictTypeChecked` and `stylisticTypeChecked` presets, more of its rules, and
-the core rules that find bugs. A rule is off only for a reason recorded below,
-never because fixing its violations is work.
+the core rules that find bugs, and
+[eslint-plugin-regexp](https://ota-meshi.github.io/eslint-plugin-regexp/)'s
+recommended rules with the `u` flag required. A rule is off only for a reason
+recorded below, never because fixing its violations is work.
 
 ## How it runs
 

@@ -4,7 +4,7 @@ import type {LegendShape} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ProjectionController} from '../projection.js'
 
 /** A change fill token (`color-added-muted`, `color-removed-highlight`) and the same-hue edge token it takes. */
-const changeFill = /^(color-(?:added|removed|modified|moved))-(?:muted|highlight)$/
+const changeFill = /^(color-(?:added|removed|modified|moved))-(?:muted|highlight)$/u
 
 /** The line swatches' border styles: a solid, dashed or dotted 2px rule. */
 const lineStyles: Partial<Record<LegendShape, 'solid' | 'dashed' | 'dotted'>> = {line: 'solid', dashed: 'dashed', dotted: 'dotted'}

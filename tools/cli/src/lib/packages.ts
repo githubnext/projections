@@ -41,15 +41,15 @@ export function npmWorkspaces(root: string): string[] {
 export function cargoMembers(root: string): string[] {
   const text = readText(root, 'Cargo.toml')
   if (!text) return []
-  const members = /\[workspace\][\s\S]*?\bmembers\s*=\s*\[([\s\S]*?)\]/.exec(text)?.[1] ?? ''
-  return [...members.matchAll(/"([^"]+)"/g)].flatMap(match => expandMember(root, match[1]!, 'Cargo.toml'))
+  const members = /\[workspace\][\s\S]*?\bmembers\s*=\s*\[([\s\S]*?)\]/u.exec(text)?.[1] ?? ''
+  return [...members.matchAll(/"([^"]+)"/gu)].flatMap(match => expandMember(root, match[1]!, 'Cargo.toml'))
 }
 
 /** A crate's `[package] name` and the relative paths of its path dependencies (every dependency table). */
 export function parseCrate(text: string): {name: string | undefined; paths: string[]} {
-  const name = /\[package\][^[]*?\bname\s*=\s*"([^"]+)"/.exec(text)?.[1]
+  const name = /\[package\][^[]*?\bname\s*=\s*"([^"]+)"/u.exec(text)?.[1]
   // Dependencies with a path are inline tables (`name = { path = "../x" }`); `[[bin]] path = ...` lines are not.
-  const paths = [...text.matchAll(/^\s*[\w-]+\s*=\s*\{[^}\n]*\bpath\s*=\s*"([^"]+)"/gm)].map(match => match[1]!)
+  const paths = [...text.matchAll(/^\s*[\w-]+\s*=\s*\{[^}\n]*\bpath\s*=\s*"([^"]+)"/gmu)].map(match => match[1]!)
   return {name, paths}
 }
 
@@ -136,7 +136,7 @@ export function ownerOf(units: readonly Unit[], path: string): Unit | undefined 
 
 /** Finds a unit by directory, npm name or crate name. */
 export function findUnit(units: readonly Unit[], target: string): Unit | undefined {
-  const normalized = target.replace(/^\.\//, '').replace(/\/$/, '')
+  const normalized = target.replace(/^\.\//u, '').replace(/\/$/u, '')
   return units.find(unit => unit.path === normalized || unit.names.includes(normalized))
 }
 

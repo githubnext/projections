@@ -170,6 +170,6 @@ export function relevantFiles(
   presentation: readonly string[] = [],
 ): string[] {
   const under = (path: string, roots: readonly string[]) =>
-    roots.some(root => path === root.replace(/\/+$/, '') || path.startsWith(root.endsWith('/') ? root : `${root}/`))
+    roots.some(root => path === root.replace(/\/+$/u, '') || path.startsWith(root.endsWith('/') ? root : `${root}/`))
   return files.filter(path => !under(path, presentation) && (readsEdits(stamp, applies) || !under(path, definitionDirectories)))
 }

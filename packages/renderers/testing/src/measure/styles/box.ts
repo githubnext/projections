@@ -40,7 +40,7 @@ export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOM
     if (layout(`margin-${side}`) || (centred && (side === 'left' || side === 'right'))) return
     spacing[`margin-${side}`] = margins[at]!
   })
-  if (/flex|grid/.test(style.display)) {
+  if (/flex|grid/u.test(style.display)) {
     for (const property of ['row-gap', 'column-gap']) {
       const value = style.getPropertyValue(property)
       if (value.endsWith('px')) spacing[property] = px(value)

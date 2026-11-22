@@ -31,18 +31,18 @@ export interface Draft {
 
 /** Credential-shaped substrings: GitHub, npm, Slack, AWS, OpenAI-style and JWT tokens, bearer headers, URL passwords and key=value secrets. */
 const secrets: [RegExp, string][] = [
-  [/\b(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b/g, '[redacted token]'],
-  [/\bnpm_[A-Za-z0-9]{30,}\b/g, '[redacted token]'],
-  [/\bxox[abpr]-[A-Za-z0-9-]{10,}\b/g, '[redacted token]'],
-  [/\b(AKIA|ASIA)[A-Z0-9]{16}\b/g, '[redacted key]'],
-  [/\bsk-[A-Za-z0-9_-]{20,}\b/g, '[redacted key]'],
-  [/\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/g, '[redacted jwt]'],
-  [/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g, '[redacted private key]'],
-  [/\b(authorization:\s*(?:bearer|token|basic))\s+[^\s'"]+/gi, '$1 [redacted]'],
-  [/\b(bearer)\s+[A-Za-z0-9._~+/-]{16,}=*/gi, '$1 [redacted]'],
-  [/(\w+:\/\/[^/\s:@]+:)[^@\s/]+@/g, '$1[redacted]@'],
+  [/\b(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,})\b/gu, '[redacted token]'],
+  [/\bnpm_[A-Za-z0-9]{30,}\b/gu, '[redacted token]'],
+  [/\bxox[abpr]-[A-Za-z0-9-]{10,}\b/gu, '[redacted token]'],
+  [/\b(AKIA|ASIA)[A-Z0-9]{16}\b/gu, '[redacted key]'],
+  [/\bsk-[\w-]{20,}\b/gu, '[redacted key]'],
+  [/\beyJ[\w-]{8,}\.[\w-]{8,}\.[\w-]{8,}\b/gu, '[redacted jwt]'],
+  [/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/gu, '[redacted private key]'],
+  [/\b(authorization:\s*(?:bearer|token|basic))\s+[^\s'"]+/giu, '$1 [redacted]'],
+  [/\b(bearer)\s+[\w.~+/-]{16,}=*/giu, '$1 [redacted]'],
+  [/(\w+:\/\/[^/\s:@]+:)[^@\s/]+@/gu, '$1[redacted]@'],
   [
-    /\b((?:[A-Za-z_][\w-]*?)?(?:token|secret|password|passwd|api[_-]?key|access[_-]?key|private[_-]?key|credentials?))(\s*[=:]\s*)(['"]?)[^\s'"]{6,}\3/gi,
+    /\b((?:[A-Z_][\w-]*?)?(?:token|secret|password|passwd|api[_-]?key|access[_-]?key|private[_-]?key|credentials?))(\s*[=:]\s*)(['"]?)[^\s'"]{6,}\3/giu,
     '$1$2$3[redacted]$3',
   ],
 ]
@@ -59,7 +59,7 @@ export function redactPaths(text: string, root: string, home: string): string {
     for (const prefix of variants(home)) redacted = redacted.split(prefix).join('~')
   }
   // Other users' home directories (another checkout in a log line, for example).
-  return redacted.replace(/(\/Users\/|\/home\/|[A-Za-z]:\\Users\\)[^/\\\s'"]+/g, '~')
+  return redacted.replace(/(?:\/Users\/|\/home\/|[A-Za-z]:\\Users\\)[^/\\\s'"]+/gu, '~')
 }
 
 export function redactSecrets(text: string): string {
@@ -74,7 +74,7 @@ export function redact(text: string, root: string, home: string): string {
 export function repositorySlug(value: string | {url?: string} | undefined): string | undefined {
   const url = typeof value === 'string' ? value : value?.url
   if (!url) return undefined
-  const match = /github\.com[/:]([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/.exec(url) ?? /^(?:github:)?([\w.-]+)\/([\w.-]+)$/.exec(url)
+  const match = /github\.com[/:]([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/u.exec(url) ?? /^(?:github:)?([\w.-]+)\/([\w.-]+)$/u.exec(url)
   return match ? `${match[1]}/${match[2]}` : undefined
 }
 
@@ -108,7 +108,7 @@ export function buildDraft(
   options: {repository: string; root: string; home: string},
 ): Draft {
   const clean = (text: string | undefined) => (text?.trim() ? bounded(redact(text.trim(), options.root, options.home)) : undefined)
-  const summary = clean(input.summary)?.replace(/\s+/g, ' ') ?? 'Agent feedback'
+  const summary = clean(input.summary)?.replace(/\s+/gu, ' ') ?? 'Agent feedback'
   const title = `[agent feedback] ${summary.length > 90 ? `${summary.slice(0, 89)}…` : summary}`
   const fields: Record<string, string> = {
     summary,
@@ -145,7 +145,7 @@ export function similarity(a: string, b: string): number {
     new Set(
       text
         .toLowerCase()
-        .replace(/\[agent feedback\]/g, '')
+        .replace(/\[agent feedback\]/gu, '')
         .split(/[^\p{L}\p{N}]+/u)
         .filter(word => word.length > 2),
     )

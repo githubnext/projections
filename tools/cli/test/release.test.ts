@@ -74,16 +74,16 @@ test('setting the version changes every shipped manifest, their dependencies and
       'packages/sdk/Cargo.toml',
       'tools/cli/package.json',
     ])
-    assert.match(read(root, 'Cargo.toml'), /\[workspace\.package\]\nversion = "0\.2\.0"\n/)
+    assert.match(read(root, 'Cargo.toml'), /\[workspace\.package\]\nversion = "0\.2\.0"\n/u)
     assert.match(
       read(root, 'packages/sdk/Cargo.toml'),
-      /engine = \{ path = "\.\.\/engine", version = "0\.2\.0", default-features = false \}/,
+      /engine = \{ path = "\.\.\/engine", version = "0\.2\.0", default-features = false \}/u,
     )
-    assert.match(read(root, 'packages/sdk/Cargo.toml'), /serde = \{ version = "0\.1\.0" \}/, 'registry dependencies keep theirs')
+    assert.match(read(root, 'packages/sdk/Cargo.toml'), /serde = \{ version = "0\.1\.0" \}/u, 'registry dependencies keep theirs')
     const lock = read(root, 'Cargo.lock')
-    assert.match(lock, /name = "engine"\nversion = "0\.2\.0"/)
-    assert.match(lock, /name = "demo"\nversion = "0\.0\.0"/, 'examples are never released')
-    assert.match(lock, /name = "serde"\nversion = "0\.1\.0"/)
+    assert.match(lock, /name = "engine"\nversion = "0\.2\.0"/u)
+    assert.match(lock, /name = "demo"\nversion = "0\.0\.0"/u, 'examples are never released')
+    assert.match(lock, /name = "serde"\nversion = "0\.1\.0"/u)
     assert.equal(
       read(root, 'packages/js/sdk/package.json'),
       json({name: '@x/sdk', version: '0.2.0', devDependencies: {'@x/core': '0.2.0'}}),

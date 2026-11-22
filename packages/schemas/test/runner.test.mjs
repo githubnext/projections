@@ -42,5 +42,5 @@ test('a malformed nested entry is a boundary error naming the request and its JS
   assert.throws(() => decodeRunnerResponse('sweep', {sweep: {...sweep, cells: [{...cell, status: 'skipped'}]}}), {
     message: `The local runner's response to GET /api/sweep is invalid at /sweep/cells/0/status: must be one of "changed", "unchanged", "failed"`,
   })
-  assert.throws(() => decodeRunnerResponse('pairs', null), {message: /GET \/api\/pairs is invalid at its root: must be object/})
+  assert.throws(() => decodeRunnerResponse('pairs', null), {message: /GET \/api\/pairs is invalid at its root: must be object/u})
 })

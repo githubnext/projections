@@ -20,7 +20,7 @@ const sha256 = async file =>
   createHash('sha256')
     .update(await readFile(file))
     .digest('hex')
-const [expected] = (await readFile(`${archive}.sha256`, 'utf8')).trim().split(/\s+/)
+const [expected] = (await readFile(`${archive}.sha256`, 'utf8')).trim().split(/\s+/u)
 if ((await sha256(archive)) !== expected) throw new Error(`${archive} does not match its .sha256`)
 const extracted = await mkdtemp(path.join(tmpdir(), 'projections-release-asset-'))
 try {

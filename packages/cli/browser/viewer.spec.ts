@@ -88,7 +88,8 @@ const state = async () => (await control('control/state')).body
 async function pathsIn(page: Page) {
   const text = await page.evaluate(() => document.body.innerText)
   return (
-    text.match(/(^|[\s("'\x60])(\/|~\/|\.{1,2}\/)\S*|[\w.-]+\/[\w.-]+\/\S*|\b[\w-]+\.(json|mjs|js|ts|yaml|yml)\b|[A-Za-z]:\\\S*/g) ?? []
+    text.match(/(?:^|[\s("'\x60])(?:\/|~\/|\.{1,2}\/)\S*|[\w.-]+\/[\w.-]+\/\S*|\b[\w-]+\.(?:json|mjs|js|ts|yaml|yml)\b|[A-Za-z]:\\\S*/gu) ??
+    []
   )
 }
 
@@ -213,7 +214,7 @@ test("in the Copilot app's canvas, the page follows the app's theme tokens and c
     document.head.append(style)
     document.documentElement.setAttribute('data-color-mode', 'dark')
   })
-  await expect(page.locator('html')).toHaveClass(/pi-app-theme/)
+  await expect(page.locator('html')).toHaveClass(/pi-app-theme/u)
   await expect(page.locator('.pi-viewer').first()).toHaveAttribute('data-color-mode', 'dark')
   await expect(page.locator('.pi-viewer-header')).toHaveCSS('background-color', 'rgb(20, 22, 28)')
   await expect(page.locator('.pi-viewer-header')).toHaveCSS('font-family', 'Georgia, serif')
@@ -235,7 +236,7 @@ async function openCanvas(page: Page, link = url) {
   expect((await control('control/show', {projection: 'packages', before: 'HEAD', after: long})).status).toBe(200)
   await page.goto(link)
   await expect(page.locator('.ph')).toHaveAttribute('data-renderer-status', 'ready', {timeout: 60_000})
-  await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', /.+/)
+  await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', /.+/u)
   // The page has applied what the agent shows, including a mode an earlier test left: until then, a mode it applies
   // replaces one clicked before it (on a slow machine, the comparison is still extracting at this point).
   await expect
@@ -255,7 +256,7 @@ test("where a browser blocks renderer frames from loading the viewer's URLs, the
   // Claude Code's Preview pane cancels any request from an opaque origin to a loopback address as a client block: a
   // sandboxed renderer frame's navigation to the viewer. The page's own requests still go through.
   const blocked: string[] = []
-  await page.route(/\/renderers\/.+\/index\.html$/, (route, request) => {
+  await page.route(/\/renderers\/.+\/index\.html$/u, (route, request) => {
     if (!request.isNavigationRequest() || !request.frame().parentFrame()) return route.continue()
     blocked.push(request.url())
     return route.abort('blockedbyclient')
@@ -263,7 +264,7 @@ test("where a browser blocks renderer frames from loading the viewer's URLs, the
   await openCanvas(page)
   expect(blocked.length).toBeGreaterThan(0)
   const frame = page.locator('.ph-frame').first()
-  await expect(frame).toHaveAttribute('src', /^blob:/)
+  await expect(frame).toHaveAttribute('src', /^blob:/u)
   await expect(frame).toHaveAttribute('sandbox', 'allow-scripts')
   const renderer = page.frames().find(each => each.url().startsWith('blob:'))!
   // The document is the renderer's, in an opaque origin, under the renderer policy the page put first in its head, and
@@ -294,7 +295,7 @@ test("where a browser blocks renderer frames from loading the viewer's URLs, the
 test('at a canvas width, the header text is whole and centred', async ({page}) => {
   const failed: string[] = []
   page.on('response', response => {
-    if (response.status() >= 400) failed.push(`${response.status()} ${new URL(response.url()).pathname.replace(/^\/\w+/, '')}`)
+    if (response.status() >= 400) failed.push(`${response.status()} ${new URL(response.url()).pathname.replace(/^\/\w+/u, '')}`)
   })
   await openCanvas(page)
   // The page asks only for what a viewer serves (never the Inspector's fixtures).
@@ -515,7 +516,7 @@ test("in the Copilot app's canvas, the renderer's stage, text and families are t
   })
   // Colors in other notations reach the renderer as sRGB.
   await expect.poll(async () => (await painted()).text).toBe('rgb(31, 35, 40)')
-  expect((await painted()).stage).toMatch(/^rgb\((24\d|25\d), (24\d|25\d), (24\d|25\d)\)$/)
+  expect((await painted()).stage).toMatch(/^rgb\((24\d|25\d), (24\d|25\d), (24\d|25\d)\)$/u)
 })
 
 /** A warm off-white agent harness, and its dark twin, as `projections view --theme` takes them. */
@@ -575,8 +576,8 @@ test("a theme seed that isn't valid is ignored, and the page and the agent say s
   // A color that isn't one, which a stylesheet would take as CSS.
   await page.goto(themed({light: {background: 'white;}body{display:none'}}))
   await expect(page.locator('.pi-viewer-status')).toHaveText("This link's theme isn't valid, so the page keeps its own")
-  await expect(page.locator('.pi-viewer-status')).toHaveAttribute('title', /theme\.light\.background isn't a color/)
-  await expect(page.locator('html')).not.toHaveClass(/pi-app-theme/)
+  await expect(page.locator('.pi-viewer-status')).toHaveAttribute('title', /theme\.light\.background isn't a color/u)
+  await expect(page.locator('html')).not.toHaveClass(/pi-app-theme/u)
   expect(warnings.join('\n')).toContain("theme.light.background isn't a color")
   await expect.poll(async () => (await state()).page?.theme?.ignored).toContain("isn't a color")
   expect((await control('control/tool/current_view', {})).body.content[0].text).toContain(
@@ -588,7 +589,7 @@ test('the agent reads what a page did with its theme seed while the page is stil
   // The page reports its theme in its first report, before the projection loads: with the definitions held, it never does.
   let release = () => {}
   const held = new Promise<void>(resolve => (release = resolve))
-  await page.route(/\/api\/definitions/, async route => {
+  await page.route(/\/api\/definitions/u, async route => {
     await held
     await route.continue().catch(() => {})
   })
@@ -718,7 +719,7 @@ test('a named viewer is its own page, and the person switches its projection fro
   await expect(dialog).toHaveCount(0)
   await expect(trigger).toBeFocused()
   await trigger.click()
-  await dialog.getByRole('option', {name: /^Package map, packages/}).click()
+  await dialog.getByRole('option', {name: /^Package map, packages/u}).click()
 
   // That viewer shows it, and the agent reads that the person chose it; the default viewer is unchanged.
   await expect(header.locator('.pi-viewer-title')).toHaveText('Package map')
@@ -763,7 +764,7 @@ test('the person pins the projections pane from the title, and closes it back to
   expect(toolbar?.x).toBeCloseTo(240, 0)
 
   // Choosing another shows it; the pane stays pinned across a reload, without taking focus.
-  await pane.getByRole('button', {name: /Broken map/}).click()
+  await pane.getByRole('button', {name: /Broken map/u}).click()
   await expect(header.locator('.pi-viewer-title')).toHaveText('Broken map')
   await expect(pane.locator('[aria-current="page"]')).toContainText('Broken map')
   await page.reload()
@@ -774,7 +775,7 @@ test('the person pins the projections pane from the title, and closes it back to
   await pane.locator('[aria-current="page"]').focus()
   await page.setViewportSize({width: 860, height: 800})
   await expect(pane).toHaveCount(0)
-  const narrow = header.getByRole('button', {name: /, switch projection$/})
+  const narrow = header.getByRole('button', {name: /, switch projection$/u})
   await expect(narrow).toBeFocused()
   await narrow.click()
   await expect(dialog.getByRole('option', {name: 'Pin projections pane'})).toHaveCount(0)

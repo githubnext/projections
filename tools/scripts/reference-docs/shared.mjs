@@ -25,8 +25,8 @@ export const header = sources =>
  */
 export const cell = value =>
   String(value ?? '')
-    .replace(/\s*\n\s*/g, ' ')
-    .replace(/\|/g, '\\|')
+    .replace(/\s*\n\s*/gu, ' ')
+    .replace(/\|/gu, '\\|')
     .trim()
 export const code = value => {
   const text = String(value)
@@ -39,7 +39,7 @@ export const table = (headings, rows) =>
   )
 export const sentence = text => {
   const value = String(text ?? '').trim()
-  return value && !/[.!?]$/.test(value) ? `${value}.` : value
+  return value && !/[.!?]$/u.test(value) ? `${value}.` : value
 }
 export const json = value => `\`\`\`json\n${JSON.stringify(value, null, 2)}\n\`\`\``
 
@@ -103,13 +103,20 @@ export async function builtRenderers() {
 }
 
 const ignoreMarker = '<!-- prettier-ignore -->'
-const delimiterRow = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/
+/** A Markdown table's delimiter row: cells of dashes, optionally colon-aligned, between optional outer pipes. */
+const isDelimiterRow = line =>
+  line
+    .trim()
+    .replace(/^\|/u, '')
+    .replace(/\|$/u, '')
+    .split('|')
+    .every(column => /^:?-+:?$/u.test(column.trim()))
 const tableCells = line =>
   line
     .trim()
-    .replace(/^\|/, '')
-    .replace(/(?<!\\)\|$/, '')
-    .split(/(?<!\\)\|/)
+    .replace(/^\|/u, '')
+    .replace(/(?<!\\)\|$/u, '')
+    .split(/(?<!\\)\|/u)
     .map(text => text.trim())
 
 /**
@@ -122,8 +129,8 @@ export function markWideTables(text) {
   let fenced = false
   for (let index = 0; index < lines.length;) {
     const line = lines[index]
-    if (/^\s*(\x60\x60\x60|~~~)/.test(line)) fenced = !fenced
-    if (fenced || !line.trimStart().startsWith('|') || !delimiterRow.test(lines[index + 1] ?? '')) {
+    if (/^\s*(?:\x60\x60\x60|~~~)/u.test(line)) fenced = !fenced
+    if (fenced || !line.trimStart().startsWith('|') || !isDelimiterRow(lines[index + 1] ?? '')) {
       out.push(line)
       index++
       continue
@@ -137,7 +144,7 @@ export function markWideTables(text) {
     const columns = Math.max(...rows.map(row => row.length))
     const widths = Array.from({length: columns}, (_, column) => Math.max(3, ...rows.map(row => row[column]?.length ?? 0)))
     const width = widths.reduce((sum, value) => sum + value, 0) + 3 * columns + 1
-    if (width > 140 && out.at(-1)?.trim() !== ignoreMarker) out.push(`${/^\s*/.exec(line)[0]}${ignoreMarker}`)
+    if (width > 140 && out.at(-1)?.trim() !== ignoreMarker) out.push(`${/^\s*/u.exec(line)[0]}${ignoreMarker}`)
     out.push(...lines.slice(index, end))
     index = end
   }

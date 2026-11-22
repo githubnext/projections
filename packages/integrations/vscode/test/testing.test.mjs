@@ -63,7 +63,7 @@ test('a listing maps to files and located cases, dropping what is malformed', ()
   ])
   assert.equal(diagnosticsText(files[1].diagnostics), 'A case asserts nothing (line 4)')
   assert.equal(diagnosticsText([]), undefined)
-  assert.throws(() => parseListing({}), /unexpected shape/)
+  assert.throws(() => parseListing({}), /unexpected shape/u)
   for (const bad of ['', '/a', 'a/../b', 'a\\b', 'C:/a', 'a//b', './a', 'a\nb']) assert.equal(repositoryPath(bad), false, bad)
   assert.equal(repositoryPath('.github/projections/deps/compare.comparator.test.yaml'), true)
 })
@@ -132,7 +132,7 @@ test('results map to outcomes: located failures with expected and actual, skips,
     {message: 'Not YAML', location: {path: 'broken.comparator.test.yaml', line: 2, column: 1}},
   ])
   assert.deepEqual(failureMessages({id: 'x', name: 'x', status: 'fail', failures: [], message: 'Failed'}), [{message: 'Failed'}])
-  assert.throws(() => parseResults({files: []}), /unexpected shape/)
+  assert.throws(() => parseResults({files: []}), /unexpected shape/u)
 })
 
 test("several projections' runs of one file merge: a failure in any fails the case, and messages name the run", () => {
@@ -233,7 +233,7 @@ test('backends are shared per source, replaced on restart or exit with holders t
   await new Promise(resolve => setTimeout(resolve, 0))
   assert.equal(started[4].stopped, 1)
   assert.equal(pool.held('repo'), false)
-  await assert.rejects(tests.current(), /released/)
+  await assert.rejects(tests.current(), /released/u)
   other.dispose()
   await new Promise(resolve => setTimeout(resolve, 0))
   assert.equal(started[2].stopped, 1)
@@ -249,7 +249,7 @@ test('a backend that fails to start is tried again on next use', async () => {
     source => source,
   )
   const lease = pool.lease('repo')
-  await assert.rejects(lease.current(), /no CLI/)
+  await assert.rejects(lease.current(), /no CLI/u)
   assert.equal((await lease.current()).name, 'ok')
   lease.dispose()
 })
@@ -306,12 +306,12 @@ test('the real backend lists comparator tests and runs them: a pass, and a failu
       const failed = cases.get('billing leads')
       assert.equal(failed.status, 'failed')
       assert.equal(failed.messages[0].location.line, 15)
-      assert.match(failed.messages[0].message, /package:@acme\/billing/)
+      assert.match(failed.messages[0].message, /package:@acme\/billing/u)
       assert.ok(failed.messages[0].expected.includes('package:@acme/billing'))
       // Writing snapshots needs --trust.
       const update = await runner.request({method: 'POST', path: runPath, body: runBodies('all', true)[0]})
       assert.equal(update.status, 403)
-      assert.match(refusalMessage(update.status, update.body), /--trust/)
+      assert.match(refusalMessage(update.status, update.body), /--trust/u)
     } finally {
       runner.stop()
       await runner.exited

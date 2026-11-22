@@ -26,7 +26,7 @@ export function npmPackages(lock) {
 /** crates.io packages in a Cargo.lock; path and git dependencies have no registry source. */
 export function cratePackages(text) {
   const found = []
-  for (const block of text.split(/^\[\[package\]\]$/m).slice(1)) {
+  for (const block of text.split(/^\[\[package\]\]$/mu).slice(1)) {
     const field = name => new RegExp(`^${name} = "([^"]*)"$`, 'm').exec(block)?.[1]
     if (field('source')?.startsWith('registry+')) found.push({ecosystem: 'crates.io', name: field('name'), version: field('version')})
   }

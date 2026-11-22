@@ -87,12 +87,12 @@ test('the diff draws each workflow once in its group, with each section’s dire
   const section = (id: string) => card.locator(`.aw-section[data-section="${id}"]`)
   await expect(section('loads').locator('.aw-direction')).toHaveText('Widened')
   await expect(section('loads').locator('.pk-change-pill[data-change="removed"]')).toContainText('skills/check-links')
-  await expect(section('repos').locator('.pk-change-pill[data-change="added"]')).toHaveText(/octo-org\/docs-site/)
+  await expect(section('repos').locator('.pk-change-pill[data-change="added"]')).toHaveText(/octo-org\/docs-site/u)
   // A limit that moves reads old → new: in one pill when short, as the old pill leaving and the new arriving when not.
   const examples = renderer.frame.locator('[data-entity-id="workflow:.github/workflows/docs-bot-examples.md"]')
-  await expect(examples.locator('.aw-section[data-section="budgets"] .pk-value-change')).toHaveText(/60 min.*30 min/)
-  await expect(section('budgets').locator('.pk-change-pill[data-change="removed"]')).toHaveText(/2,000/)
-  await expect(section('budgets').locator('.pk-change-pill[data-change="added"]')).toHaveText(/5,000/)
+  await expect(examples.locator('.aw-section[data-section="budgets"] .pk-value-change')).toHaveText(/60 min.*30 min/u)
+  await expect(section('budgets').locator('.pk-change-pill[data-change="removed"]')).toHaveText(/2,000/u)
+  await expect(section('budgets').locator('.pk-change-pill[data-change="added"]')).toHaveText(/5,000/u)
   // A lock state that changes reads old → new on the card's meta line.
   const lock = renderer.frame.locator(`[data-entity-id="${triage}"] .aw-meta .pk-value-change`)
   await expect(lock.locator('[data-change="removed"] .aw-lock')).toHaveText('Lock current')

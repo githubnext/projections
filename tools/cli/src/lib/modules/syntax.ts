@@ -3,8 +3,8 @@ import {existsSync, readFileSync} from 'node:fs'
 import {join, posix} from 'node:path'
 import ts from 'typescript'
 
-export const sources = /\.(?:[cm]?[jt]sx?)$/
-export const skipped = /(?:^|\/)(?:node_modules|dist|fixtures|test-results|playwright-report|storybook-static)(?:\/|$)/
+export const sources = /\.[cm]?[jt]sx?$/u
+export const skipped = /(?:^|\/)(?:node_modules|dist|fixtures|test-results|playwright-report|storybook-static)(?:\/|$)/u
 
 export interface Import {
   specifier: string
@@ -61,7 +61,7 @@ export function importsOf(path: string, text: string): Import[] {
 /** The source file a relative specifier names, trying the TypeScript extensions an emitted `.js` stands for. */
 export function resolveRelative(root: string, from: string, specifier: string): string | undefined {
   const base = posix.normalize(posix.join(posix.dirname(from), specifier))
-  const stem = base.replace(/\.(?:[cm]?js|jsx)$/, '')
+  const stem = base.replace(/\.(?:[cm]?js|jsx)$/u, '')
   const candidates = [
     base,
     ...['.ts', '.tsx', '.mts', '.js', '.mjs', '.jsx'].map(extension => stem + extension),

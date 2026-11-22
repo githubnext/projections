@@ -11,14 +11,14 @@ async function themeTokens() {
     const start = css.indexOf(`${selector} {\n    --pj-background`)
     assert.ok(start >= 0, `theme.css defines ${selector}`)
     const body = css.slice(start, css.indexOf('\n  }', start))
-    return Object.fromEntries([...body.matchAll(/--pj-([\w-]+):\s*([^;]+);/g)].map(([, name, value]) => [name, value.trim()]))
+    return Object.fromEntries([...body.matchAll(/--pj-([\w-]+):([^;]+);/gu)].map(([, name, value]) => [name, value.trim()]))
   }
   return {light: block('.pj-root'), dark: block('.pj-root.pj-dark')}
 }
 
 /** sRGB channels (0–1, gamma-encoded) of an `oklch(L C H)` color, clipped to the gamut. */
 function oklchToSrgb(value) {
-  const match = /^oklch\(([\d.]+) ([\d.]+) ([\d.]+)\)$/.exec(value)
+  const match = /^oklch\(([\d.]+) ([\d.]+) ([\d.]+)\)$/u.exec(value)
   assert.ok(match, `an opaque oklch color: ${value}`)
   const [l, c, h] = match.slice(1).map(Number)
   const a = c * Math.cos((h * Math.PI) / 180),
@@ -141,8 +141,8 @@ test('renderer tokens are sRGB, follow the Projector palette and keep annotation
   for (const mode of ['light', 'dark']) {
     const tokens = shadcnRendererTokens(mode)
     for (const [name, value] of Object.entries(tokens)) {
-      assert.doesNotMatch(value, /oklch|oklab|color-mix|var\(/, `${mode} ${name} is a concrete sRGB value`)
-      if (name.startsWith('color-') || name.startsWith('chart-')) assert.match(value, /^#[\da-f]{6}([\da-f]{2})?$/, `${mode} ${name}`)
+      assert.doesNotMatch(value, /oklch|oklab|color-mix|var\(/u, `${mode} ${name} is a concrete sRGB value`)
+      if (name.startsWith('color-') || name.startsWith('chart-')) assert.match(value, /^#[\da-f]{6}([\da-f]{2})?$/u, `${mode} ${name}`)
     }
     assert.deepEqual(
       Object.fromEntries(Object.entries(tokens).filter(([name]) => name.startsWith('color-'))),

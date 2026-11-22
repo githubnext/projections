@@ -30,7 +30,7 @@ export async function ringGeometry(frame: Frame, id: string, {focused = false}: 
         ),
       ].filter(unit => !keyboard || unit.matches(':focus-visible, :has(:focus-visible)'))
       const corner = (value: string, width: number, height: number): [number, number] => {
-        const [h = '0', v = h] = value.split(/\s+/)
+        const [h = '0', v = h] = value.split(/\s+/u)
         const length = (part: string, reference: number) => (part.endsWith('%') ? (px(part) / 100) * reference : px(part))
         return [length(h, width), length(v, height)]
       }

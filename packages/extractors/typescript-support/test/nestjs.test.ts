@@ -148,7 +148,7 @@ test('the container NestJS composes in preview mode: tokens, scopes, factories, 
   )
   assert.equal(entity(state, 'module:ConfigModule').data?.global, true)
   // Only application code: no Nest internals, and the bootstrap never ran.
-  assert.ok(!state.entities.some(item => /ModuleRef|ApplicationConfig|InternalCoreModule/.test(item.id)))
+  assert.ok(!state.entities.some(item => /ModuleRef|ApplicationConfig|InternalCoreModule/u.test(item.id)))
   assert.ok(!existsSync(path.join(root, 'started.txt')), 'main.ts is never run')
   assert.ok(
     state.entities
@@ -180,7 +180,7 @@ test('loading the application requires trust', async t => {
   const root = await revision(t)
   const result = await runHelper('nestjs-di', request(root, {}, false), await checkout())
   assert.equal(result.status, 1)
-  assert.match(result.stderr, /pass --trust/)
+  assert.match(result.stderr, /pass --trust/u)
 })
 
 test("the repository's own @nestjs/core is required, never a bundled one", async t => {
@@ -190,7 +190,7 @@ test("the repository's own @nestjs/core is required, never a bundled one", async
   await installPackages(bare, ['typescript'])
   const result = await runHelper('nestjs-di', request(root), bare)
   assert.equal(result.status, 1)
-  assert.match(result.stderr, /nestjs-di requires the repository's own \x60@nestjs\/core\x60 package/)
+  assert.match(result.stderr, /nestjs-di requires the repository's own \x60@nestjs\/core\x60 package/u)
 })
 
 test('an explicit root module, ECMAScript-style specifiers, path aliases, resolved optional dependencies and every framework provider', async t => {
@@ -231,7 +231,7 @@ export class StandaloneModule {}
   )
   assert.deepEqual([metrics?.to, metrics?.data?.optional, metrics?.data?.position], ['service:StandaloneModule:string:METRICS', true, 3])
   const error = await runHelper('nestjs-di', request(root, {module: 'src/standalone.module.ts'}), await checkout())
-  assert.match(error.stderr, /inputs\.module must be "<file>#<exported module class>"/)
+  assert.match(error.stderr, /inputs\.module must be "<file>#<exported module class>"/u)
 })
 
 test('a bootstrap file is required when none is conventional', async t => {
@@ -246,7 +246,7 @@ test('a bootstrap file is required when none is conventional', async t => {
     `import { NestFactory } from '@nestjs/core';\nimport { AppModule } from './app.module';\nvoid NestFactory.create(AppModule);\n`,
   )
   const ambiguous = await runHelper('nestjs-di', request(root), await checkout())
-  assert.match(ambiguous.stderr, /More than one bootstrap file calls NestFactory \(src\/server\.ts, src\/worker\.ts\)/)
+  assert.match(ambiguous.stderr, /More than one bootstrap file calls NestFactory \(src\/server\.ts, src\/worker\.ts\)/u)
   const state = await collect(root, {entry: 'src/worker.ts'})
   assert.equal(state.metadata?.entry, 'src/worker.ts')
 })

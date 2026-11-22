@@ -148,7 +148,7 @@ for (const primary of [true, false]) {
     const list = document[name].extensions ?? []
     for (const [position, extension] of list.entries()) {
       if (primary && position > 0) continue
-      const key = extension.replace(/^\./, '').toLowerCase()
+      const key = extension.replace(/^\./u, '').toLowerCase()
       if (!(key in extensions)) extensions[key] = index.get(name)
     }
   }

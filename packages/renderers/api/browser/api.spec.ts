@@ -29,7 +29,7 @@ function rows(root: Locator) {
       id: row.dataset.entityId!,
       status: [...row.querySelectorAll('.api-declaration-footer .pk-status-part')].map(part => part.textContent),
       lines: [...row.querySelectorAll<HTMLElement>('pre')].map(
-        pre => `${pre.className.replace('api-signature', '').trim() || 'plain'}:${pre.textContent!.replace(/^[−+]/, '')}`,
+        pre => `${pre.className.replace('api-signature', '').trim() || 'plain'}:${pre.textContent!.replace(/^[−+]/u, '')}`,
       ),
       runs: [...row.querySelectorAll('del, ins, mark')].map(run => `${run.localName}:${run.textContent}`),
     })),
@@ -73,7 +73,7 @@ test('the diff lists every declaration once, with its status as text and inline 
   )
   // Change emphasis is tinted; an unchanged declaration is painted exactly as in an unchanged comparison.
   const tint = await renderer.frame.locator('[data-entity-id="legacy"] pre').evaluate(element => getComputedStyle(element).backgroundColor)
-  expect(tint).not.toMatch(/^(transparent|rgba\(0, 0, 0, 0\))$/)
+  expect(tint).not.toMatch(/^(transparent|rgba\(0, 0, 0, 0\))$/u)
   const stable = await paint(renderer.frame.locator('[data-entity-id="stable"]'))
   await openRenderer(page, {renderer: 'api', before: after, after, comparisonMode: 'diff'})
   expect(await paint(page.frameLocator('iframe').first().locator('[data-entity-id="stable"]'))).toBe(stable)
@@ -87,7 +87,7 @@ test('without highlighting the diff keeps its content and layout and drops only 
     view.evaluate(element => ({
       backgrounds: [...element.querySelectorAll('pre, del, ins, mark')]
         .map(node => getComputedStyle(node).backgroundColor)
-        .filter(color => !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(color)),
+        .filter(color => !/^(?:transparent|rgba\(0, 0, 0, 0\))$/u.test(color)),
       status: [...new Set([...element.querySelectorAll('.pk-status-part')].map(part => getComputedStyle(part).color))],
       boxes: [...element.querySelectorAll('[data-entity-id], .api-declaration-footer')].map(node => {
         const box = node.getBoundingClientRect()
@@ -346,10 +346,10 @@ test('a classified comparison states compatibility as text, lists breaking chang
     })),
   ).toEqual({
     code: [
-      ['currency', expect.stringMatching(/mono/i)],
-      ['currencyCode', expect.stringMatching(/mono/i)],
+      ['currency', expect.stringMatching(/mono/iu)],
+      ['currencyCode', expect.stringMatching(/mono/iu)],
     ],
-    prose: expect.not.stringMatching(/mono/i),
+    prose: expect.not.stringMatching(/mono/iu),
   })
   expect(await overflow(view)).toBe(0)
 

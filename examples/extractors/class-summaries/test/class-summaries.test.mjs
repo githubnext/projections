@@ -52,10 +52,10 @@ test('classes carry generated summaries with a basis of input, prompt and model'
     ['Cart', 'Orders'],
   )
   const cart = classes(extraction).find(entity => entity.label === 'Cart')
-  assert.match(cart.data.summary, /^Cart .*items, add, remove\.$/)
+  assert.match(cart.data.summary, /^Cart .*items, add, remove\.$/u)
   assert.deepEqual(Object.keys(cart.data.summaryBasis).sort(), ['input', 'model', 'prompt'])
   assert.equal(cart.data.summaryBasis.model, 'fake-summarizer@1')
-  assert.match(cart.data.summaryBasis.input, /^sha256:[0-9a-f]{64}$/)
+  assert.match(cart.data.summaryBasis.input, /^sha256:[0-9a-f]{64}$/u)
   assert.deepEqual(extraction.volatile, [
     {collection: 'entities', kinds: ['class'], path: '/data/summary', generated: true, basis: '/data/summaryBasis'},
   ])

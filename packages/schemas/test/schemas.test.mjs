@@ -71,7 +71,7 @@ test('every published schema is draft 2020-12 at its URL, compiles strictly and 
     const schema = strict.getSchema(id(name)).schema
     assert.equal(schema.$schema, 'https://json-schema.org/draft/2020-12/schema')
     assert.equal(schema.$id, id(name))
-    for (const reference of JSON.stringify(schema).matchAll(/"\$ref":"([^"#]*)/g)) {
+    for (const reference of JSON.stringify(schema).matchAll(/"\$ref":"([^"#]*)/gu)) {
       if (reference[1]) {
         assert.ok(
           names.some(other => id(other) === reference[1]),

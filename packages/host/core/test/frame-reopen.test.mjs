@@ -67,7 +67,7 @@ test('a renderer that answers while its document is reopened keeps its document 
   assert.equal(iframe.src, 'http://127.0.0.1:1/T/renderers/graph/index.html')
   iframe.load()
   assert.equal(lifecycle.status, 'failed')
-  assert.match(events.at(-1).message, /navigated its frame/)
+  assert.match(events.at(-1).message, /navigated its frame/u)
 })
 
 test("a document that can't be opened doesn't stop a renderer that answered meanwhile", async () => {

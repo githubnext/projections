@@ -98,16 +98,16 @@ export class ProjectionSources {
     const definition = model.definition(id)
     const file = await definitionFile(folder, id)
     const relative = (uri: vscode.Uri) => vscode.workspace.asRelativePath(uri, false)
-    const at = (path: string) => vscode.Uri.joinPath(folder.uri, ...path.replace(/^\.\//, '').split('/'))
+    const at = (path: string) => vscode.Uri.joinPath(folder.uri, ...path.replace(/^\.\//u, '').split('/'))
     const parts = definition ? sourceParts(definition, await this.docs.index()) : []
     const comparator = parts.find(part => part.part === 'comparator')?.file
-    const tests = comparator?.replace(/\.comparator\.(ya?ml)$/, '.comparator.test.$1')
+    const tests = comparator?.replace(/\.comparator\.(ya?ml)$/u, '.comparator.test.$1')
     const bundle =
       definition && typeof definition.renderer !== 'string'
-        ? definition.renderer.bundle.replace(/^\.\//, '').replace(/\/+$/, '')
+        ? definition.renderer.bundle.replace(/^\.\//u, '').replace(/\/+$/u, '')
         : undefined
     // A custom renderer's package: its bundle's directory, or the one above a built `dist`/`build`.
-    const packageDir = bundle ? bundle.replace(/\/(dist|build|out)$/, '') : undefined
+    const packageDir = bundle ? bundle.replace(/\/(?:dist|build|out)$/u, '') : undefined
     let rendererSource: string | undefined
     // An entry of its own, else the view module `rendererConfig({view})` generates the entry for.
     const candidates = [

@@ -233,8 +233,8 @@ test('M2: the badge beside the choice, from provenanceBadge', () => {
   }
   const ci = resultBadge(fromCi, provenanceBadge)
   assert.equal(ci.label, 'From CI')
-  assert.match(ci.detail, /^Before: The official extraction, published by CI run 4242 of acme\/service/)
-  assert.match(ci.detail, /\nAfter: Extracted on this machine in your checkout/)
+  assert.match(ci.detail, /^Before: The official extraction, published by CI run 4242 of acme\/service/u)
+  assert.match(ci.detail, /\nAfter: Extracted on this machine in your checkout/u)
   assert.equal(resultBadge({...now, sides: [{ref: 'working-tree', execution: m2Local}]}, provenanceBadge).label, 'Local')
   // The one that most qualifies the result wins.
   const stale = {...fromCi, sides: [fromCi.sides[0], {ref: head, execution: {...m2Local, fidelity: 'stale'}}]}
@@ -296,7 +296,7 @@ test('M5: the scope identity is each scope path’s Git object, hashed as local 
         ['missing', undefined],
       ]),
     )
-    assert.match(digest1, /^sha256:[0-9a-f]{64}$/)
+    assert.match(digest1, /^sha256:[0-9a-f]{64}$/u)
     // Outside the scope: the same identity. Inside: another.
     await writeFile(join(root, 'README.md'), 'changed\n')
     git('commit', '--quiet', '-am', 'two')

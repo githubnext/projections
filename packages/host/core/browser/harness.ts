@@ -16,10 +16,10 @@ export const story = (id: string, query = '') => new URL(`iframe.html?id=${id}&v
  * holds pass `holds=timeline`.
  */
 export const explorer = (query = '') => {
-  const params = query.replace(/^[?&]/, '')
+  const params = query.replace(/^[?&]/u, '')
   // Specs written for playback open in animated mode unless they choose one; `mode=default` keeps the renderer's default.
-  const withHolds = /(^|&)holds=/.test(params) ? params : [params, 'holds=pause'].filter(Boolean).join('&')
-  return story('harness-default-ui--explorer', /(^|&)mode=/.test(withHolds) ? withHolds : `${withHolds}&mode=animated`)
+  const withHolds = /(?:^|&)holds=/u.test(params) ? params : [params, 'holds=pause'].filter(Boolean).join('&')
+  return story('harness-default-ui--explorer', /(?:^|&)mode=/u.test(withHolds) ? withHolds : `${withHolds}&mode=animated`)
 }
 /** A file the build serves, for example `renderers/graph/index.html`, or the server's `__probe-log`. */
 export const served = (path: string) => new URL(path, base()).href
@@ -94,7 +94,7 @@ export async function closeMenus(scope: Scope) {
   await expect(dialogs).toHaveCount(0)
 }
 /** The row's chip while the table or text view is shown in place of the renderer: one click returns to the renderer. */
-export const showAsChip = (scope: Scope) => scope.getByRole('button', {name: /^Showing (table|text); show the /})
+export const showAsChip = (scope: Scope) => scope.getByRole('button', {name: /^Showing (table|text); show the /u})
 
 /** The "Comparison mode" radio group, inline or in its menu (opened). */
 export async function modeGroup(scope: Scope): Promise<Locator> {
@@ -104,7 +104,7 @@ export async function modeGroup(scope: Scope): Promise<Locator> {
   const menu = openDialog(scope, 'Comparison mode')
   if (!(await menu.isVisible())) {
     await scope
-      .getByRole('button', {name: /^Comparison mode: /})
+      .getByRole('button', {name: /^Comparison mode: /u})
       .first()
       .click()
   }
@@ -133,7 +133,7 @@ export async function expectMode(scope: Scope, name: string) {
 }
 /** The mode switch in either form: none when there is nothing to choose. */
 export const modeControls = (scope: Scope) =>
-  scope.getByRole('radiogroup', {name: 'Comparison mode'}).or(scope.getByRole('button', {name: /^Comparison mode: /}))
+  scope.getByRole('radiogroup', {name: 'Comparison mode'}).or(scope.getByRole('button', {name: /^Comparison mode: /u}))
 
 /** The pair picker's "Compare from" or "To" select, inline or in the "Revisions" popover (opened). */
 export async function pairSelect(scope: Scope, label: 'Compare from' | 'To' | 'Show'): Promise<Locator> {
@@ -143,7 +143,7 @@ export async function pairSelect(scope: Scope, label: 'Compare from' | 'To' | 'S
   const popover = openDialog(scope, 'Revisions')
   if (!(await popover.isVisible())) {
     await scope
-      .getByRole('button', {name: /^Revisions?: /})
+      .getByRole('button', {name: /^Revisions?: /u})
       .first()
       .click()
   }
@@ -186,7 +186,7 @@ export async function openSettings(scope: Scope): Promise<Locator> {
 }
 /** A Settings submenu's item, by its label (its current value follows in its name). */
 export const submenuItem = (menu: Locator, name: string) =>
-  menu.getByRole('menuitem', {name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`)})
+  menu.getByRole('menuitem', {name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')}\\b`)})
 /** Opens a Settings submenu, for example "Highlight changes" or "Playback", and returns it. */
 export async function openSettingsSubmenu(scope: Scope, name: string): Promise<Locator> {
   const menu = openMenu(scope, name)
@@ -201,7 +201,7 @@ export async function openSettingsSubmenu(scope: Scope, name: string): Promise<L
 /** An item of a menu: a radio choice, a checkbox or a plain item. */
 export const menuItem = (menu: Locator, name: string) => {
   // Exactly the label, or the label and the text after it (a checkbox's detail, "Loop Back and forth").
-  const label = new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}( |$)`)
+  const label = new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')}( |$)`)
   return menu
     .getByRole('menuitemradio', {name: label})
     .or(menu.getByRole('menuitemcheckbox', {name: label}))

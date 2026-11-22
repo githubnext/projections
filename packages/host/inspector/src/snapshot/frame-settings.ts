@@ -25,7 +25,7 @@ export function snapshotFrameSettings(query: URLSearchParams): SnapshotFrameSett
   if (hug && frame !== 'card') throw new Error('Only the card frame hugs its content')
   const matte = query.get('matte') ?? undefined
   if (matte === undefined) return {frame, ...(hug ? {hug} : {})}
-  if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(matte)) throw new Error('The snapshot matte must be #rgb or #rrggbb')
+  if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/iu.test(matte)) throw new Error('The snapshot matte must be #rgb or #rrggbb')
   if (frame !== 'card') throw new Error('The snapshot matte fills the corners of the card frame')
   return {frame, matte, ...(hug ? {hug} : {})}
 }

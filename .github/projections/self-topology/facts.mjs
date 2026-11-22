@@ -13,14 +13,14 @@ import {actionScripts, channelWords} from './releases.mjs'
 /** Linguist's name for a source file's language, or undefined for a file that isn't counted. */
 export function linguistOf(file, language) {
   if (language === 'shell') return 'Shell'
-  if (/\.rs$/.test(file)) return 'Rust'
-  if (/\.(m|c)?tsx?$/.test(file)) return 'TypeScript'
-  if (/\.(m|c)?jsx?$/.test(file)) return 'JavaScript'
-  if (/\.go$/.test(file)) return 'Go'
-  if (/\.py$/.test(file)) return 'Python'
-  if (/\.java$/.test(file)) return 'Java'
-  if (/\.cs$/.test(file)) return 'C#'
-  if (/\.css$/.test(file)) return 'CSS'
+  if (/\.rs$/u.test(file)) return 'Rust'
+  if (/\.(?:m|c)?tsx?$/u.test(file)) return 'TypeScript'
+  if (/\.(?:m|c)?jsx?$/u.test(file)) return 'JavaScript'
+  if (/\.go$/u.test(file)) return 'Go'
+  if (/\.py$/u.test(file)) return 'Python'
+  if (/\.java$/u.test(file)) return 'Java'
+  if (/\.cs$/u.test(file)) return 'C#'
+  if (/\.css$/u.test(file)) return 'CSS'
   return undefined
 }
 
@@ -37,26 +37,26 @@ export function rounded(count) {
 }
 
 // Files that are data for tests or third-party code, counted as neither source nor tests.
-const notCounted = /(^|\/)(fixtures|testdata|examples|vendor|generated|snapshots)(\/|$)|\.d\.ts$|\.min\.js$/
+const notCounted = /(?:^|\/)(?:fixtures|testdata|examples|vendor|generated|snapshots)(?:\/|$)|\.d\.ts$|\.min\.js$/u
 
 /** A YAML front matter field, unquoted (a plain, quoted or folded scalar on one or more lines). */
 export function frontMatterField(text, field) {
-  const match = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)
+  const match = /^---\r?\n([\s\S]*?)\r?\n---/u.exec(text)
   if (!match) return undefined
-  const lines = match[1].split(/\r?\n/)
+  const lines = match[1].split(/\r?\n/u)
   const start = lines.findIndex(line => line.startsWith(`${field}:`))
   if (start < 0) return undefined
   let value = lines[start].slice(field.length + 1).trim()
-  if (/^[>|][-+]?$/.test(value) || value === '') {
+  if (/^[>|][-+]?$/u.test(value) || value === '') {
     const block = []
     for (const line of lines.slice(start + 1)) {
-      if (!/^\s+\S/.test(line)) break
+      if (!/^\s+\S/u.test(line)) break
       block.push(line.trim())
     }
     value = block.join(' ')
   }
-  if (/^".*"$/.test(value)) value = JSON.parse(value)
-  else if (/^'.*'$/.test(value)) value = value.slice(1, -1).replaceAll("''", "'")
+  if (/^".*"$/u.test(value)) value = JSON.parse(value)
+  else if (/^'.*'$/u.test(value)) value = value.slice(1, -1).replaceAll("''", "'")
   return value.trim() || undefined
 }
 
@@ -71,17 +71,17 @@ export const frontMatterIcon = text => frontMatterField(text, 'icon')
 
 /** A README's first prose paragraph's first sentence, without Markdown links, code marks or emphasis. */
 export function firstSentence(text) {
-  const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '')
+  const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/u, '')
   const paragraph = body
-    .split(/\r?\n\s*\r?\n/)
+    .split(/\r?\n\s*\n/u)
     .map(block => block.trim())
-    .find(block => block && !/^(#|<|!\[|\x60\x60\x60|\||- |\* |\d+\. |>)/.test(block))
+    .find(block => block && !/^(?:[#<|>]|!\[|\x60\x60\x60|- |\* |\d+\. )/u.test(block))
   if (!paragraph) return undefined
   const plain = paragraph
-    .replace(/\s+/g, ' ')
-    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/[\x60*_]/g, '')
-  const sentence = /^(.*?[.!?])(\s|$)/.exec(plain)?.[1] ?? plain
+    .replace(/\s+/gu, ' ')
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/gu, '$1')
+    .replace(/[\x60*_]/gu, '')
+  const sentence = /^(.*?[.!?])(?:\s|$)/u.exec(plain)?.[1] ?? plain
   return sentence.trim() || undefined
 }
 
@@ -89,10 +89,10 @@ export function firstSentence(text) {
 function coverageGates(texts) {
   const gates = new Map()
   for (const text of texts) {
-    for (const command of text.match(/cargo llvm-cov[^\n"]*/g) ?? []) {
-      const floor = /--fail-under-lines[ =](\d+(\.\d+)?)/.exec(command)?.[1]
+    for (const command of text.match(/cargo llvm-cov[^\n"]*/gu) ?? []) {
+      const floor = /--fail-under-lines[ =](\d+(?:\.\d+)?)/u.exec(command)?.[1]
       if (!floor) continue
-      for (const [, name] of command.matchAll(/(?:^|\s)(?:-p|--package)[ =]([\w-]+)/g)) {
+      for (const [, name] of command.matchAll(/(?:^|\s)(?:-p|--package)[ =]([\w-]+)/gu)) {
         gates.set(name, Math.max(gates.get(name) ?? 0, Number(floor)))
       }
     }
@@ -102,12 +102,12 @@ function coverageGates(texts) {
 
 /** The directories `cargo mutants` examines, from `.cargo/mutants.toml`'s `examine_globs` (the part before a glob). */
 function mutantDirectories(text) {
-  const list = /examine_globs\s*=\s*\[([^\]]*)\]/.exec(text)?.[1] ?? ''
-  return [...list.matchAll(/["']([^"']+)["']/g)].map(([, glob]) =>
+  const list = /examine_globs\s*=\s*\[([^\]]*)\]/u.exec(text)?.[1] ?? ''
+  return [...list.matchAll(/["']([^"']+)["']/gu)].map(([, glob]) =>
     glob
-      .split(/[*?[{]/)[0]
-      .replace(/\/(src\/?)?$/, '')
-      .replace(/\/$/, ''),
+      .split(/[*?[{]/u)[0]
+      .replace(/\/(src\/?)?$/u, '')
+      .replace(/\/$/u, ''),
   )
 }
 
@@ -115,10 +115,10 @@ function mutantDirectories(text) {
  * Tokens in lines of code without comments: words, numbers and quoted strings, each one. A Rust `'` quotes one
  * character (`'a` alone is a lifetime, a word).
  */
-const quoted = /"(?:\\.|[^"\\])*"|\x60(?:\\.|[^\x60\\])*\x60|[A-Za-z_$][\w$]*|\d[\w.]*/
+const quoted = /"(?:\\.|[^"\\])*"|\x60(?:\\.|[^\x60\\])*\x60|[A-Za-z_$][\w$]*|\d[\w.]*/u
 const tokenPatterns = {
-  rust: new RegExp(`'(?:\\\\.|[^'\\\\])'|${quoted.source}`, 'g'),
-  other: new RegExp(`'(?:\\\\.|[^'\\\\\\n])*'|${quoted.source}`, 'g'),
+  rust: new RegExp(`'(?:\\\\.|[^'\\\\])'|${quoted.source}`, 'gu'),
+  other: new RegExp(`'(?:\\\\.|[^'\\\\\\n])*'|${quoted.source}`, 'gu'),
 }
 export const tokens = (lines, language) =>
   lines.reduce((count, line) => count + (line.match(tokenPatterns[language === 'rust' ? 'rust' : 'other'])?.length ?? 0), 0)
@@ -128,11 +128,11 @@ export const provedWords = count => `${count} ${count === 1 ? 'function' : 'func
 /** How a unit that depends on proved code reads. */
 export const usesProved = 'uses Verus-proved code'
 
-const propertyTests = /\bproptest!|\bproptest::|\bquickcheck\b|from\s+['"]fast-check['"]|\bfc\.(assert|property)\(/
-const verusBlock = /\bverus!\s*\{/
+const propertyTests = /\bproptest!|\bproptest::|\bquickcheck\b|from\s+['"]fast-check['"]|\bfc\.(?:assert|property)\(/u
+const verusBlock = /\bverus!\s*\{/u
 
 /** Functions with a Verus specification: `requires` or `ensures` between their name and their body. */
-const provedFunctions = text => text.match(/\bfn\s+\w+[^{;]*?\b(requires|ensures)\b/g)?.length ?? 0
+const provedFunctions = text => text.match(/\bfn\s+\w[^{;]+?\b(requires|ensures)\b/gu)?.length ?? 0
 
 /**
  * Each unit's facts, keyed by unit ID. `context` is the extractor's: its units, their files with roles, the comment
@@ -142,7 +142,7 @@ export function unitFacts(context) {
   const {units, unitFiles, read, files, roots, relationships, stripComments} = context
   const texts = [
     ...roots.map(root => `${root.path ? `${root.path}/` : ''}package.json`),
-    ...files.filter(file => /(^|\/)\.github\/workflows\/[^/]+\.ya?ml$/.test(file)),
+    ...files.filter(file => /(?:^|\/)\.github\/workflows\/[^/]+\.ya?ml$/u.test(file)),
   ].map(read)
   const gates = coverageGates(texts)
   const mutants = roots.flatMap(root =>
@@ -212,7 +212,7 @@ export function unitFacts(context) {
 
 /** What a unit is for, and the icon its README's front matter names for it. */
 function describe(unit, context) {
-  const readme = unit.single ? undefined : `${unit.directory.replace(/#.*$/, '')}/README.md`
+  const readme = unit.single ? undefined : `${unit.directory.replace(/#.*$/u, '')}/README.md`
   const text = readme && context.fileSet.has(readme) ? context.read(readme) : ''
   const icon = unit.kind !== 'wasm-module' && frontMatterIcon(text)
   return {...purpose(unit, context, readme, text), ...(icon ? {icon} : {})}

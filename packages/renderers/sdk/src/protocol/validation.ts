@@ -2,7 +2,7 @@
 import {rendererProtocolVersion, rendererLimits} from './frame.js'
 import type {Envelope} from './frame.js'
 
-export const cssColor = /^(#[0-9a-f]{3}|#[0-9a-f]{6}|#[0-9a-f]{8}|(rgb|rgba|hsl|hsla)\([0-9.,%\s/+-]{1,64}\))$/i
+export const cssColor = /^(#[0-9a-f]{3}|#[0-9a-f]{6}|#[0-9a-f]{8}|(rgb|rgba|hsl|hsla)\([0-9.,%\s/+-]{1,64}\))$/iu
 
 /**
  * Whether `value` is an RFC 6901 JSON pointer (for example `/data/owner`),
@@ -12,7 +12,7 @@ export function isPropertyPath(value: unknown): value is string {
   return (
     typeof value === 'string' &&
     value.length <= rendererLimits.textLength &&
-    (value === '' || (value.startsWith('/') && !/~[^01]|~$/.test(value)))
+    (value === '' || (value.startsWith('/') && !/~[^01]|~$/u.test(value)))
   )
 }
 
@@ -30,10 +30,10 @@ export function keys(value: Record<string, unknown>, allowed: readonly string[])
 }
 export const envelopeKeys = ['projections', 'channel', 'type']
 
-export const tokenNamePattern = /^[a-z0-9][a-z0-9-]{0,63}$/
+export const tokenNamePattern = /^[a-z0-9][a-z0-9-]{0,63}$/u
 /** A renderer name, as `renderer.json` declares it. */
-export const rendererNamePattern = /^[a-z0-9][a-z0-9-]{0,63}$/
-export const controlIdPattern = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/
+export const rendererNamePattern = /^[a-z0-9][a-z0-9-]{0,63}$/u
+export const controlIdPattern = /^[A-Za-z0-9][\w.-]{0,63}$/u
 
 export function label(value: unknown, max = 80): value is string {
   return typeof value === 'string' && value.trim().length > 0 && value.length <= max

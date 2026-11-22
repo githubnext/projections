@@ -38,7 +38,7 @@ test("a refused preparation fails with the backend's reason, and aborting cancel
   const refused = {request: async () => ({status: 403, contentType: 'application/json', body: {error: 'trust the workspace'}, size: 1})}
   await assert.rejects(
     prepareEnvironment(refused, {}, () => {}),
-    /trust the workspace/,
+    /trust the workspace/u,
   )
   const requests = []
   const abort = new AbortController()
@@ -78,7 +78,7 @@ test('event lines, workspace arguments and provenance badges', () => {
   // An artifact nothing authenticated (an imported directory) is labelled imported, never official.
   const imported = provenanceBadge(document({source: 'ci', fidelity: 'exact', official: false, ci: {repository: 'o/r', run: 4}}))
   assert.equal(imported.label, 'Imported')
-  assert.match(imported.detail, /^Imported from an artifact that names CI run 4 of o\/r; unauthenticated/)
+  assert.match(imported.detail, /^Imported from an artifact that names CI run 4 of o\/r; unauthenticated/u)
   assert.equal(provenanceBadge(document({source: 'ci', fidelity: 'exact', ci: {repository: 'o/r', run: 4}})).label, 'Imported')
   assert.equal(provenanceBadge(document({source: 'local-in-place', fidelity: 'stale'})).label, 'Stale')
   assert.equal(provenanceBadge(document({source: 'local-workspace', fidelity: 'approximate'})).label, 'Approximate')

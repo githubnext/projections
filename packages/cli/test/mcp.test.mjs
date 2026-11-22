@@ -84,7 +84,7 @@ test('projections mcp speaks MCP: initialize, list tools, call them, and write i
   assert.equal(initialized.result.protocolVersion, '2025-06-18')
   assert.deepEqual(initialized.result.capabilities, {tools: {listChanged: false}})
   assert.equal(initialized.result.serverInfo.name, 'projections')
-  assert.match(initialized.result.instructions, /list_projections/)
+  assert.match(initialized.result.instructions, /list_projections/u)
   server.send({method: 'notifications/initialized'})
   assert.deepEqual((await server.call('ping')).result, {})
 
@@ -112,7 +112,7 @@ test('projections mcp speaks MCP: initialize, list tools, call them, and write i
 
   const listed = await server.tool('list_projections')
   assert.equal(listed.isError, false)
-  assert.match(listed.text, /- services-node: Services extracted by Node\. Extractor command \x60node collect\.mjs\x60/)
+  assert.match(listed.text, /- services-node: Services extracted by Node\. Extractor command \x60node collect\.mjs\x60/u)
   assert.deepEqual(
     listed.structuredContent.projections.map(projection => projection.id),
     ['services-node', 'services-python'],
@@ -121,14 +121,14 @@ test('projections mcp speaks MCP: initialize, list tools, call them, and write i
   // The suggested pair: the last commit, which added a service.
   const compared = await server.tool('compare', {projection: 'services-node'})
   assert.equal(compared.isError, false, compared.text)
-  assert.match(compared.text, /HEAD~1 → HEAD/)
-  assert.match(compared.text, /Added entity .*queue/)
+  assert.match(compared.text, /HEAD~1 → HEAD/u)
+  assert.match(compared.text, /Added entity .*queue/u)
   assert.ok(compared.structuredContent.counts.added >= 1)
 
   // Nothing is shown in the viewer, so a projection must be named.
   const invalid = await server.tool('compare', {})
   assert.equal(invalid.isError, true)
-  assert.match(invalid.text, /Name a projection/)
+  assert.match(invalid.text, /Name a projection/u)
   const unknown = await server.call('tools/call', {name: 'no_such_tool', arguments: {}})
   assert.equal(unknown.error.code, -32602)
 
@@ -136,22 +136,22 @@ test('projections mcp speaks MCP: initialize, list tools, call them, and write i
   const definition = path.join(root, '.github/projections/services-node.json')
   const preview = await server.tool('set_part', {projection: 'services-node', renderer: 'graph'})
   assert.equal(preview.isError, false, preview.text)
-  assert.match(preview.text, /- {3}"renderer": "architecture"/)
-  assert.match(preview.text, /\+ {3}"renderer": "graph"/)
+  assert.match(preview.text, /- {3}"renderer": "architecture"/u)
+  assert.match(preview.text, /\+ {3}"renderer": "graph"/u)
   const token = preview.structuredContent.confirm
   assert.match(preview.text, new RegExp(`confirm: "${token}"`))
-  assert.match(await readFile(definition, 'utf8'), /"architecture"/)
+  assert.match(await readFile(definition, 'utf8'), /"architecture"/u)
   await writeFile(definition, (await readFile(definition, 'utf8')).replace('Services extracted by Node', 'Node services'))
   const stale = await server.tool('set_part', {projection: 'services-node', renderer: 'graph', confirm: token})
   assert.equal(stale.isError, true)
-  assert.match(stale.text, /^Not written/)
-  assert.match(await readFile(definition, 'utf8'), /"architecture"/)
+  assert.match(stale.text, /^Not written/u)
+  assert.match(await readFile(definition, 'utf8'), /"architecture"/u)
   const written = await server.tool('set_part', {projection: 'services-node', renderer: 'graph', confirm: stale.structuredContent.confirm})
   assert.equal(written.isError, false, written.text)
   assert.equal(written.structuredContent.written, true)
   const saved = await readFile(definition, 'utf8')
-  assert.match(saved, /"renderer": "graph"/)
-  assert.match(saved, /Node services/)
+  assert.match(saved, /"renderer": "graph"/u)
+  assert.match(saved, /Node services/u)
 
   // A cancelled call is not answered; the server carries on.
   const sweepId = 1000
@@ -174,24 +174,24 @@ test('projections mcp shows a projection in the viewer: open_projection, current
 
   const nothing = await server.tool('current_view')
   assert.equal(nothing.isError, false)
-  assert.match(nothing.text, /Nothing is shown/)
+  assert.match(nothing.text, /Nothing is shown/u)
 
   const shown = await server.tool('open_projection', {projection: 'services-node', choice: 'last-commit', mode: 'side-by-side'})
   assert.equal(shown.isError, false, shown.text)
   const url = shown.structuredContent.url
-  assert.match(url, /^http:\/\/127\.0\.0\.1:\d+\/[0-9a-f]{64}\/$/)
-  assert.match(shown.text, /Showing: Last commit\. Before HEAD~1/)
+  assert.match(url, /^http:\/\/127\.0\.0\.1:\d+\/[0-9a-f]{64}\/$/u)
+  assert.match(shown.text, /Showing: Last commit\. Before HEAD~1/u)
   assert.equal((await fetch(url)).status, 200)
   assert.equal((await fetch(new URL('/', url))).status, 404)
 
   const current = await server.tool('current_view')
-  assert.match(current.text, /The viewer shows "[^"]+" \(projection services-node\)/)
+  assert.match(current.text, /The viewer shows "[^"]+" \(projection services-node\)/u)
   assert.deepEqual([current.structuredContent.before.ref, current.structuredContent.after.ref], ['HEAD~1', 'HEAD'])
 
   // Other tools default to what the viewer shows, and say so.
   const compared = await server.tool('compare')
   assert.equal(compared.isError, false, compared.text)
-  assert.match(compared.text, /^Projection: services-node, the one the viewer shows\. Revisions: HEAD~1 → HEAD, the ones the viewer shows/)
+  assert.match(compared.text, /^Projection: services-node, the one the viewer shows\. Revisions: HEAD~1 → HEAD, the ones the viewer shows/u)
 
   // The screenshot is rendered here, without a page open.
   const shot = await server.call('tools/call', {name: 'screenshot', arguments: {theme: 'dark', width: 640, height: 400}})
@@ -203,7 +203,7 @@ test('projections mcp shows a projection in the viewer: open_projection, current
 
   const refreshed = await server.tool('refresh')
   assert.equal(refreshed.isError, false)
-  assert.match(refreshed.text, /extract again/)
+  assert.match(refreshed.text, /extract again/u)
 
   server.child.stdin.end()
   assert.deepEqual(await server.exited, {code: 0, signal: null})
@@ -226,18 +226,18 @@ test('serve --stdio offers the same tools, and the view actions, as tools/list a
   await mcp.exited
   const explored = await backend.tool('explore')
   assert.equal(explored.isError, false)
-  assert.match(explored.text, /- repository-map: /)
+  assert.match(explored.text, /- repository-map: /u)
   // An editor confirms writes itself: the preview carries the token, not instructions to call again.
   const adopt = {projections: ['repository-map'], bookmarks: 0}
   const preview = await backend.tool('adopt', adopt)
   assert.equal(preview.isError, false, preview.text)
-  assert.match(preview.text, /Would create \S*repository-map\.json/)
+  assert.match(preview.text, /Would create \S*repository-map\.json/u)
   assert.ok(preview.structuredContent.confirm)
-  assert.doesNotMatch(preview.text, /confirm: "/)
+  assert.doesNotMatch(preview.text, /confirm: "/u)
   // Without --trust, and outside an explore session, writing is refused.
   const refused = await backend.tool('adopt', {...adopt, confirm: preview.structuredContent.confirm})
   assert.equal(refused.isError, true)
-  assert.match(refused.text, /--trust/)
+  assert.match(refused.text, /--trust/u)
   backend.child.stdin.end()
   assert.deepEqual(await backend.exited, {code: 0, signal: null})
   assert.deepEqual(backend.invalid, [])

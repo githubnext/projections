@@ -20,7 +20,7 @@ async function transitionOf(a, b, options = {available: 1100}, schedule = schedu
  * held), so the reverse comparison mirrors the motion, not the reading.
  */
 const unread = model => compileTimeline(model.steps).map(step => ({...step, travel: 1}))
-const tableName = id => id.replace(/^table:/, '')
+const tableName = id => id.replace(/^table:/u, '')
 const tableCard = (frame, label) => {
   const found = frame.tables.find(candidate => tableName(candidate.change.id) === label)
   assert.ok(found, `missing table ${label}`)
@@ -82,7 +82,7 @@ test('places principals left of their dependents', async () => {
 test('connects foreign-key columns to the principal key column', async () => {
   const {transition} = await transitionOf(before, after)
   const frame = transition(1)
-  const keys = frame.links.map(link => `${link.dependentColumn.replace(/^column:/, '')}->${tableName(link.principal)}`).sort()
+  const keys = frame.links.map(link => `${link.dependentColumn.replace(/^column:/u, '')}->${tableName(link.principal)}`).sort()
   assert.deepEqual(keys, [
     'Customers.OrganizationId->Organizations',
     'InvoiceLines.InvoiceId->Invoices',
@@ -334,34 +334,38 @@ test('endpoints carry no change decoration; the middle states each change as tex
     const markup = renderToStaticMarkup(createElement(DatabaseRenderer, props(model, progress, 0)))
     assert.ok(!markup.includes('class="badge') && !markup.includes('pk-status-text'), `no status at ${progress}`)
     assert.ok(
-      [...markup.matchAll(/--emphasis:([\d.]+)/g)].every(match => Number(match[1]) === 0),
+      [...markup.matchAll(/--emphasis:([\d.]+)/gu)].every(match => Number(match[1]) === 0),
       `no tag tint at ${progress}`,
     )
   }
   const middle = renderToStaticMarkup(createElement(DatabaseRenderer, props(model, 0.75, 1)))
-  assert.match(middle, /data-change-status="added"><span class="pk-icon" data-icon="added" aria-hidden="true"><\/span>Added/)
+  assert.match(middle, /data-change-status="added"><span class="pk-icon" data-icon="added" aria-hidden="true"><\/span>Added/u)
   // Keys and indexes are rows of their tables, never free-floating tags; every header and row reserves its status cell.
   assert.ok(!middle.includes('class="database-tags"'), 'no free-floating tags')
-  assert.match(middle, /class="database-column database-row database-keyrow pk-part first"/)
+  assert.match(middle, /class="database-column database-row database-keyrow pk-part first"/u)
   assert.equal(
-    count(middle, /class="pk-change-status database-status/g),
-    count(middle, /<header /g),
+    count(middle, /class="pk-change-status database-status/gu),
+    count(middle, /<header /gu),
     'headers reserve a status cell with the word',
   )
-  assert.equal(count(middle, /class="database-glyph"/g), count(middle, /class="database-column /g), 'column rows reserve a glyph cell')
+  assert.equal(count(middle, /class="database-glyph"/gu), count(middle, /class="database-column /gu), 'column rows reserve a glyph cell')
   // A column row shows the icon; the word is there for assistive technology and as the cell's title.
   assert.match(
     middle,
-    /<span class="database-glyph" data-change-footer="" title="Added"><span class="pk-status-text"[^>]*><span class="pk-status-part added" data-change-status="added" aria-hidden="true"><span class="pk-icon" data-icon="added" aria-hidden="true"><\/span><\/span><span class="sr-only">Added<\/span>/,
+    /<span class="database-glyph" data-change-footer="" title="Added"><span class="pk-status-text"[^>]*><span class="pk-status-part added" data-change-status="added" aria-hidden="true"><span class="pk-icon" data-icon="added" aria-hidden="true"><\/span><\/span><span class="sr-only">Added<\/span>/u,
   )
   assert.match(
     middle,
-    /data-entity-id="index:IX_Users_OrganizationId"[^>]*>.*?<span class="sr-only">Added<\/span>/,
+    /data-entity-id="index:IX_Users_OrganizationId"[^>]*>.*?<span class="sr-only">Added<\/span>/u,
     'a changed index row names its status',
   )
   const single = renderToStaticMarkup(createElement(DatabaseRenderer, props(extractionModel(after), 1, 0)))
   assert.ok(single.includes('Organizations') && !single.includes('class="badge') && !single.includes('pk-status-text'))
-  assert.equal(count(single, /class="database-glyph"/g), count(single, /class="database-column /g), 'unchanged rows keep their status cell')
+  assert.equal(
+    count(single, /class="database-glyph"/gu),
+    count(single, /class="database-column /gu),
+    'unchanged rows keep their status cell',
+  )
 })
 
 test('views are cards of their columns, labeled as views', () => {
@@ -382,14 +386,14 @@ test('views are cards of their columns, labeled as views', () => {
     ['id'],
   )
   const markup = renderToStaticMarkup(createElement(DatabaseRenderer, props(extractionModel(extraction), 1, 0)))
-  assert.match(markup, /aria-label="View summary"/)
-  assert.match(markup, /class="database-kind">view</)
-  assert.match(markup, /aria-label="Table accounts"/)
+  assert.match(markup, /aria-label="View summary"/u)
+  assert.match(markup, /class="database-kind">view</u)
+  assert.match(markup, /aria-label="Table accounts"/u)
   // Table, column and type names are identifiers (monospace); the "view" kind stays sans.
-  assert.match(markup, /data-projections-identifier=""><span class="database-line">summary<\/span>/)
-  assert.match(markup, /data-projections-identifier=""><span class="database-line">id<\/span>/)
-  assert.match(markup, /<code data-projections-identifier=""><span class="database-line">Int<\/span><\/code>/)
-  assert.doesNotMatch(markup, /class="database-kind"[^>]*data-projections-identifier/)
+  assert.match(markup, /data-projections-identifier=""><span class="database-line">summary<\/span>/u)
+  assert.match(markup, /data-projections-identifier=""><span class="database-line">id<\/span>/u)
+  assert.match(markup, /<code data-projections-identifier=""><span class="database-line">Int<\/span><\/code>/u)
+  assert.doesNotMatch(markup, /class="database-kind"[^>]*data-projections-identifier/u)
 })
 
 test('Prisma and Django: keys live in their tables, single-column keys are column markers, and an enum is a card of its values', async () => {
@@ -405,14 +409,14 @@ test('Prisma and Django: keys live in their tables, single-column keys are colum
     // Its columns are foreign keys too: their markers read FK and stand for the foreign-key constraints.
     for (const column of line.columns.filter(row => row.kind === 'column' && row.role === 'pk-fk')) {
       assert.equal(column.marker.label, 'FK')
-      assert.match(column.marker.key, /foreign-key/)
+      assert.match(column.marker.key, /foreign-key/u)
     }
     // Single-column primary keys are their column's PK marker, never a row.
     for (const card of frame.tables.filter(candidate => candidate.entity.kind === 'table')) {
       assert.ok(!card.columns.some(row => row.kind === 'key' && row.key.text === 'id'), `${card.entity.label} has no id key row`)
     }
   }
-  const statusAt = progress => tableCard(prisma.transition(progress), 'enum:OrderStatus'.replace(/^table:/, ''))
+  const statusAt = progress => tableCard(prisma.transition(progress), 'enum:OrderStatus'.replace(/^table:/u, ''))
   assert.deepEqual(
     statusAt(0).columns.map(row => row.entity.label),
     ['PENDING', 'PAID', 'SHIPPED'],

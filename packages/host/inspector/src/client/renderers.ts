@@ -9,7 +9,7 @@ export function parseRendererList(value: unknown, origin: string): InspectorRend
     !record(value) ||
     !names ||
     names.length > 100 ||
-    names.some(name => typeof name !== 'string' || !/^[a-z0-9][a-z0-9-]{0,63}$/.test(name)) ||
+    names.some(name => typeof name !== 'string' || !/^[a-z0-9][a-z0-9-]{0,63}$/u.test(name)) ||
     Object.keys(value).some(key => key !== 'renderers' && key !== 'customRendererBase')
   ) {
     throw new Error('The local runner returned an invalid renderer list')

@@ -74,7 +74,7 @@ async function ringStarts(page: Page, frame: Frame, box: {left: number; top: num
       const context = canvas.getContext('2d', {willReadFrequently: true})!
       context.drawImage(image, 0, 0)
       const scale = canvas.width / innerWidth
-      const [sr = 0, sg = 0, sb = 0] = (ringStroke.match(/[\d.]+/g) ?? []).map(Number)
+      const [sr = 0, sg = 0, sb = 0] = (ringStroke.match(/[\d.]+/gu) ?? []).map(Number)
       // The ring's own color, give or take antialiasing against what is under its edge.
       const blue = (x: number, y: number) => {
         const [r, g, b] = context.getImageData(Math.round(x * scale), Math.round(y * scale), 1, 1).data

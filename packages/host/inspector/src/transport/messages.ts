@@ -8,9 +8,9 @@ export function isApiPath(path: unknown): path is string {
     path.startsWith('/api/') &&
     !path.includes('#') &&
     !path.includes('\\') &&
-    !/(^|\/)\.\.?(\/|\?|$)/.test(path.split('?')[0]!) &&
+    !/(?:^|\/)\.\.?(?:\/|\?|$)/u.test(path.split('?')[0]!) &&
     // eslint-disable-next-line no-control-regex
-    !/[\u0000-\u001f\u007f]/.test(path)
+    !/[\u0000-\u001f\u007f]/u.test(path)
   )
 }
 

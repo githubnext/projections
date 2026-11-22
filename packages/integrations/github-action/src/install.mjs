@@ -33,7 +33,7 @@ if (process.env.INPUT_BUILD_FROM_SOURCE === 'true') {
   copyFileSync(path.join(root, 'target', 'release', windows ? 'projections.exe' : 'projections'), installed)
 } else {
   const repository = process.env.INPUT_CLI_REPOSITORY || 'githubnext/projections'
-  if (!/^[A-Za-z0-9-]+\/[A-Za-z0-9_.-]+$/.test(repository)) throw new Error(`cli-repository must be owner/name, not ${repository}`)
+  if (!/^[A-Za-z0-9-]+\/[\w.-]+$/u.test(repository)) throw new Error(`cli-repository must be owner/name, not ${repository}`)
   const asset = releaseAsset(process.env.RUNNER_OS, process.env.RUNNER_ARCH)
   let tag = releaseTag(process.env.INPUT_VERSION, process.env.ACTION_REF)
   if (isMajorTag(tag)) {

@@ -34,9 +34,9 @@ export function normalizeColors(value: string): string {
   if (!value.includes('(')) return value
   const context = canvasContext()
   if (!context) return value
-  return value.replace(/\b(?:rgba?|hsla?|color|oklab|oklch|lab|lch)\([^()]*\)/g, color => {
+  return value.replace(/\b(?:rgba?|hsla?|color|oklab|oklch|lab|lch)\([^()]*\)/gu, color => {
     // Canvas keeps `color(srgb …)` as written; spell it as rgba first.
-    const srgb = /^color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\)$/.exec(color)
+    const srgb = /^color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\)$/u.exec(color)
     const input = srgb
       ? `rgba(${[srgb[1], srgb[2], srgb[3]].map(channel => Math.round(Number(channel) * 255)).join(', ')}, ${srgb[4] ?? 1})`
       : color
@@ -44,7 +44,7 @@ export function normalizeColors(value: string): string {
     context.fillStyle = input
     // Alpha to two decimals: 0.7 and 0.701961 (179/255) are one color.
     return String(context.fillStyle).replace(
-      /rgba\(([^)]*), ([\d.]+)\)/,
+      /rgba\(([^)]*), ([\d.]+)\)/u,
       (_, rgb: string, alpha: string) => `rgba(${rgb}, ${Number(alpha).toFixed(2)})`,
     )
   })
@@ -54,7 +54,7 @@ export function normalizeColors(value: string): string {
 function decoration(style: CSSStyleDeclaration): string {
   const line = style.getPropertyValue('text-decoration-line')
   const color = normalizeColors(style.getPropertyValue('text-decoration-color'))
-  return line === 'none' || /rgba\([^)]*, 0(\.00)?\)$/.test(color) ? 'none' : `${line} ${color}`
+  return line === 'none' || /rgba\([^)]*, 0(?:\.00)?\)$/u.test(color) ? 'none' : `${line} ${color}`
 }
 
 /** Content only assistive technology perceives (`sr-only` and friends) is not painted. */
@@ -63,7 +63,7 @@ export function visuallyHidden(element: Element, style: CSSStyleDeclaration): bo
   return (
     (box.width <= 1 && box.height <= 1 && style.overflow === 'hidden') ||
     style.clipPath.includes('inset(50%)') ||
-    /rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)/.test(style.clip)
+    /rect\(0(?:px)?,? 0(?:px)?,? 0(?:px)?,? 0(?:px)?\)/u.test(style.clip)
   )
 }
 
@@ -84,7 +84,7 @@ export function visible(element: Element): boolean {
 
 export function describe(element: Element): string {
   const id = element.getAttribute('data-entity-id')
-  const classes = (element.getAttribute('class') ?? '').trim().split(/\s+/).filter(Boolean).slice(0, 2)
+  const classes = (element.getAttribute('class') ?? '').trim().split(/\s+/u).filter(Boolean).slice(0, 2)
   return `${element.tagName.toLowerCase()}${classes.map(name => `.${name}`).join('')}${id === null ? '' : `[data-entity-id="${id}"]`}`
 }
 
@@ -163,8 +163,8 @@ export function paintOf(element: Element): {paint: string; text: string; categor
 export const px = (value: string) => parseFloat(value) || 0
 export function colorAlpha(color: string): number {
   if (!color || color === 'transparent' || color === 'none') return 0
-  const slash = /\/\s*([\d.]+)(%?)\s*\)$/.exec(color)
+  const slash = /\/\s*([\d.]+)(%?)\s*\)$/u.exec(color)
   if (slash) return slash[2] ? Number(slash[1]) / 100 : Number(slash[1])
-  const rgba = /^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\s*\)$/.exec(color)
+  const rgba = /^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\s*\)$/u.exec(color)
   return rgba ? Number(rgba[1]) : 1
 }

@@ -42,13 +42,13 @@ test('publish APIs attribute events to their enclosing publisher and warn on dyn
       .sort(),
     ['archived', 'created'],
   )
-  assert.match(JSON.stringify(state.metadata), /dynamic event/)
+  assert.match(JSON.stringify(state.metadata), /dynamic event/u)
 })
 
 test('requires at least one registration convention', async () => {
-  await assert.rejects(run('message-handlers', fixture('message-handlers', 'handlers')), /requires inputs/)
+  await assert.rejects(run('message-handlers', fixture('message-handlers', 'handlers')), /requires inputs/u)
   await assert.rejects(
     run('message-handlers', fixture('message-handlers', 'handlers'), {...handlers.inputs, eventArgument: 1.5}),
-    /nonnegative integer/,
+    /nonnegative integer/u,
   )
 })

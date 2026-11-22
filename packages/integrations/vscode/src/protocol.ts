@@ -216,8 +216,8 @@ export const runnerOrigin = 'http://stdio.invalid'
 /** A repository-relative path the webview may ask to open: no absolute paths, drive letters or `..` segments. */
 export function relativePath(path: unknown): string | undefined {
   if (typeof path !== 'string' || !path || path.length > 1024 || path.includes('\0')) return undefined
-  const normalized = path.replace(/\\/g, '/').replace(/^\.\//, '')
-  if (normalized.startsWith('/') || /^[A-Za-z]:/.test(normalized) || normalized.split('/').some(part => part === '..')) return undefined
+  const normalized = path.replace(/\\/gu, '/').replace(/^\.\//u, '')
+  if (normalized.startsWith('/') || /^[A-Za-z]:/u.test(normalized) || normalized.split('/').some(part => part === '..')) return undefined
   return normalized
 }
 
@@ -228,5 +228,5 @@ export function position(value: unknown): number | undefined {
 
 /** A revision the webview may ask to reveal: `working-tree`, or a plain ref or commit, never an option. */
 export function revision(value: unknown): string | undefined {
-  return typeof value === 'string' && /^[A-Za-z0-9][A-Za-z0-9._/~^@{}-]{0,199}$/.test(value) && !value.includes('..') ? value : undefined
+  return typeof value === 'string' && /^[A-Za-z0-9][\w./~^@{}-]{0,199}$/u.test(value) && !value.includes('..') ? value : undefined
 }

@@ -25,14 +25,14 @@ test('bookmarks are added to the file projections reads', () => {
       ['packages-bbbbbbbb-2', 'packages-bbbbbbbb-2'],
     ],
   )
-  assert.throws(() => addBookmark('{"format": "other"}', {projectionId: 'p', before: a, after: b, title: 't'}), /not a bookmarks file/)
+  assert.throws(() => addBookmark('{"format": "other"}', {projectionId: 'p', before: a, after: b, title: 't'}), /not a bookmarks file/u)
 })
 
 test('bookmark writes keep the file’s indentation, else indent by two spaces', () => {
   const four = `${JSON.stringify({format: 'projections.bookmarks', version: 0, bookmarks: []}, null, 4)}\n`
   const added = addBookmark(four, {projectionId: 'p', before: 'v1', after: 'main', title: 'Since v1'})
   assert.equal(added.text, `${JSON.stringify(JSON.parse(added.text), null, 4)}\n`)
-  assert.match(added.text, /^ {4}"bookmarks": \[\n {8}\{\n {12}"id": "p-main",$/m)
+  assert.match(added.text, /^ {4}"bookmarks": \[\n {8}\{\n {12}"id": "p-main",$/mu)
   const tabs = removeBookmark(added.text.replaceAll('    ', '\t'), 'p-main')
   assert.equal(tabs, '{\n\t"format": "projections.bookmarks",\n\t"version": 0,\n\t"bookmarks": []\n}\n')
   const minified = addBookmark('{"format":"projections.bookmarks","version":0,"bookmarks":[]}', {

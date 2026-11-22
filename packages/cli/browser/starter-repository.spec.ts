@@ -28,24 +28,24 @@ test('the repository Inspector presents the renderer package scenarios beside th
     // The Explorer's Compare section lists them as "Renderer scenarios", beside the Before → After pair.
     const scenarios = page.getByRole('list', {name: 'Renderer scenarios'})
     await expect(scenarios.getByRole('button')).toHaveCount(2)
-    await expect(scenarios.getByRole('button', {name: /^Checkout splits out payments/})).toHaveAttribute('aria-pressed', 'false')
-    await scenarios.getByRole('button', {name: /^Checkout splits out payments/}).click()
-    await expect(scenarios.getByRole('button', {name: /^Checkout splits out payments/})).toHaveAttribute('aria-pressed', 'true')
+    await expect(scenarios.getByRole('button', {name: /^Checkout splits out payments/u})).toHaveAttribute('aria-pressed', 'false')
+    await scenarios.getByRole('button', {name: /^Checkout splits out payments/u}).click()
+    await expect(scenarios.getByRole('button', {name: /^Checkout splits out payments/u})).toHaveAttribute('aria-pressed', 'true')
     // Its pair, compared in the browser and drawn by the package's renderer; no extractor ran.
     await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible()
     const frame = page.frameLocator('iframe').first()
     await expect(frame.locator('[data-entity-id="service:payments"]')).toBeAttached()
     await expect(page.locator('.pi-titlebar').getByRole('status')).toHaveAttribute('data-activity', 'scenario')
 
-    await scenarios.getByRole('button', {name: /^One revision/}).click()
+    await scenarios.getByRole('button', {name: /^One revision/u}).click()
     await expect(page.locator('.ph[data-mode="extraction"]')).toBeVisible()
 
     // Back to the Before → After pair.
     await page
       .getByRole('region', {name: 'Compare'})
-      .getByRole('button', {name: /^Back to /})
+      .getByRole('button', {name: /^Back to /u})
       .click()
-    await expect(scenarios.getByRole('button', {name: /^One revision/})).toHaveAttribute('aria-pressed', 'false')
+    await expect(scenarios.getByRole('button', {name: /^One revision/u})).toHaveAttribute('aria-pressed', 'false')
     await expect(page.locator('.pi-titlebar').getByRole('status')).not.toHaveAttribute('data-activity', 'scenario')
   } finally {
     await harness.close()

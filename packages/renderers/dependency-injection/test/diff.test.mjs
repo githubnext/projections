@@ -197,30 +197,30 @@ test('diff mode marks every change in place and says it in words, leaving the su
   const {model} = await diffOf('orders')
   const props = highlighting => diffProps(model, highlighting)
   const html = renderToStaticMarkup(createElement(DependencyInjectionRenderer, props(1)))
-  assert.doesNotMatch(html, /pk-diff-summary|di-summary/)
+  assert.doesNotMatch(html, /pk-diff-summary|di-summary/u)
   assert.match(
     html,
-    /data-unit-id="service:Orders:IPricing:unkeyed" data-entity-id="service:Orders:IPricing:unkeyed"[^>]*data-change="removed"/,
+    /data-unit-id="service:Orders:IPricing:unkeyed" data-entity-id="service:Orders:IPricing:unkeyed"[^>]*data-change="removed"/u,
   )
-  assert.match(html, /data-unit-id="service:Orders:IPriceCalculator:unkeyed"[^>]*data-change="added"/)
-  assert.match(html, /data-unit-id="service:Orders:IOrderRepository:unkeyed"[^>]*data-change="modified"/)
+  assert.match(html, /data-unit-id="service:Orders:IPriceCalculator:unkeyed"[^>]*data-change="added"/u)
+  assert.match(html, /data-unit-id="service:Orders:IOrderRepository:unkeyed"[^>]*data-change="modified"/u)
   // The registration that changed is marked and says so.
   assert.match(
     html,
-    /data-entity-id="service:Orders:IOrderRepository:unkeyed:registration:0" role="button" tabindex="0" aria-label="Inspect registration of IOrderRepository, [^"]*, Modified, lifetime changed, was Scoped, now Singleton"[^>]*data-change="modified"/,
+    /data-entity-id="service:Orders:IOrderRepository:unkeyed:registration:0" role="button" tabindex="0" aria-label="Inspect registration of IOrderRepository, [^"]*, Modified, lifetime changed, was Scoped, now Singleton"[^>]*data-change="modified"/u,
   )
-  assert.match(html, /<tspan class="di-was">Scoped<\/tspan><tspan class="di-arrow"> → <\/tspan><tspan class="di-now">Singleton<\/tspan>/)
-  assert.match(html, /<text[^>]*>Lifetime changed<\/text>/)
+  assert.match(html, /<tspan class="di-was">Scoped<\/tspan><tspan class="di-arrow"> → <\/tspan><tspan class="di-now">Singleton<\/tspan>/u)
+  assert.match(html, /<text[^>]*>Lifetime changed<\/text>/u)
   assert.match(
     html,
-    /aria-label="Inspect implementation OrderService, [^"]*, Unchanged, dependency removed: IPricing, dependency added: IPriceCalculator"/,
+    /aria-label="Inspect implementation OrderService, [^"]*, Unchanged, dependency removed: IPricing, dependency added: IPriceCalculator"/u,
   )
   // A removed link is dashed even with highlighting off; changes keep their marks, drawn plain.
-  assert.match(html, /data-edge-key="dependsOn:OrderService:pricing"[^>]*data-change="removed"/)
+  assert.match(html, /data-edge-key="dependsOn:OrderService:pricing"[^>]*data-change="removed"/u)
   const plain = renderToStaticMarkup(createElement(DependencyInjectionRenderer, props(0)))
-  assert.doesNotMatch(plain, /pk-svg-status|node-footer-band/)
-  assert.match(plain, /data-edge-key="dependsOn:OrderService:pricing"[^]*?stroke-dasharray="5 3"/)
-  assert.match(plain, /--emphasis:0/)
+  assert.doesNotMatch(plain, /pk-svg-status|node-footer-band/u)
+  assert.match(plain, /data-edge-key="dependsOn:OrderService:pricing"[\s\S]*?stroke-dasharray="5 3"/u)
+  assert.match(plain, /--emphasis:0/u)
 })
 
 /** The `orders` pair with a contract, its implementation (in both revisions) and a key renamed to long identifiers. */
@@ -296,7 +296,7 @@ test('a diff card shows long names and values whole, wrapping them and growing t
   )
   // The markup draws all of it, and nothing is cut short with an ellipsis.
   const html = renderToStaticMarkup(createElement(DependencyInjectionRenderer, diffProps(model, 1)))
-  assert.doesNotMatch(html, /…/)
+  assert.doesNotMatch(html, /…/u)
   for (const line of text('contract')) assert.ok(html.includes(`>${joined(line)}</text>`), joined(line))
 })
 
@@ -304,7 +304,7 @@ test('diff markup never cuts text short', async () => {
   for (const scenario of scenarios) {
     const {model} = await diffOf(scenario)
     const html = renderToStaticMarkup(createElement(DependencyInjectionRenderer, diffProps(model, 1)))
-    assert.doesNotMatch(html, /…/, scenario)
+    assert.doesNotMatch(html, /…/u, scenario)
   }
 })
 
@@ -390,7 +390,7 @@ test('change lines flow whole: a facet keeps its name and both values, and depen
   assert.ok(long.length > 1)
   for (const line of long) {
     const width = line.reduce(
-      (sum, piece) => sum + piece.text.trimEnd().length * (/was|now/.test(piece.part) ? monoAdvance : sansAdvance),
+      (sum, piece) => sum + piece.text.trimEnd().length * (/was|now/u.test(piece.part) ? monoAdvance : sansAdvance),
       0,
     )
     assert.ok(width <= lineRoom + 1e-6, JSON.stringify(line))

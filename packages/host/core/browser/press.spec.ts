@@ -96,7 +96,7 @@ for (const [view, query] of [
     await expect(page.locator('.ph')).toHaveAttribute('data-renderer-status', 'ready')
     const seen = await pressAll(page, '0px 1px')
     expect(seen).toEqual(expect.arrayContaining(['Settings', 'About this projection', 'Enter full screen']))
-    expect(seen.some(name => /^Play|^Pause/.test(name))).toBe(true)
+    expect(seen.some(name => /^Play|^Pause/u.test(name))).toBe(true)
     if (view === 'renderer') expect(seen).toEqual(expect.arrayContaining(['Zoom out', 'Fit to view', 'Zoom in', 'Swap', 'Animated']))
     else expect(seen.some(name => name.startsWith('Showing table'))).toBe(true)
     // At rest nothing is offset.

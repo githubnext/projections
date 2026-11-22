@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url'
 const image = process.env.PROJECTIONS_CONTAINER_IMAGE
 assert.match(
   image ?? '',
-  /^[a-zA-Z0-9][a-zA-Z0-9._:/-]*@sha256:[a-f0-9]{64}$/,
+  /^[a-zA-Z0-9][\w.:/-]*@sha256:[a-f0-9]{64}$/u,
   'Prepare and explicitly select an immutable PROJECTIONS_CONTAINER_IMAGE',
 )
 const source = fileURLToPath(new URL('../../../', import.meta.url))

@@ -1,6 +1,7 @@
 import {readdirSync} from 'node:fs'
 import js from '@eslint/js'
 import reactHooks from 'eslint-plugin-react-hooks'
+import regexp from 'eslint-plugin-regexp'
 import globals from 'globals'
 import {defineConfig} from 'eslint/config'
 import tseslint from 'typescript-eslint'
@@ -12,7 +13,7 @@ import {lifecycleFiles, machinesPlugin} from './tools/scripts/check-machines/lif
 const shadcn = 'packages/host/core/src/ui/components'
 const vendored = readdirSync(`${import.meta.dirname}/${shadcn}/upstream`)
   .filter(file => file.endsWith('.json') && file !== 'manifest.json')
-  .map(file => `${shadcn}/${file.replace(/\.json$/, '.tsx')}`)
+  .map(file => `${shadcn}/${file.replace(/\.json$/u, '.tsx')}`)
 
 export default defineConfig(
   {
@@ -49,6 +50,7 @@ export default defineConfig(
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
+  regexp.configs['flat/recommended'],
   {
     languageOptions: {
       globals: {...globals.node, ...globals.browser},
@@ -120,6 +122,8 @@ export default defineConfig(
       'consistent-return': 'off',
       curly: ['error', 'multi-line'],
       eqeqeq: ['error', 'always'],
+      // The u flag: strict escapes, and code points rather than UTF-16 halves (docs/maintainers/linting.md).
+      'regexp/require-unicode-regexp': 'error',
       // `!!value` narrows `value` in TypeScript; `Boolean(value)` doesn't.
       'no-implicit-coercion': ['error', {allow: ['!!']}],
       ...Object.fromEntries(

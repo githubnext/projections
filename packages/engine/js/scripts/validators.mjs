@@ -5,7 +5,7 @@ import {schemaUrl} from '@githubnext/projections-schemas'
 // Every published schema, since documents refer to one another (the extraction to its domain schemas).
 const directory = new URL(import.meta.resolve('@githubnext/projections-schemas/schemas/extraction/v0.json'), import.meta.url)
 const root = new URL('../../', directory)
-const files = (await readdir(root, {recursive: true})).filter(file => /(?:^|[\\/])v\d+\.json$/.test(file))
+const files = (await readdir(root, {recursive: true})).filter(file => /(?:^|[\\/])v\d+\.json$/u.test(file))
 const schemas = await Promise.all(files.map(async file => JSON.parse(await readFile(new URL(file.split('\\').join('/'), root), 'utf8'))))
 const references = new Map(schemas.map(schema => [schema.$id, schema]))
 const modules = [

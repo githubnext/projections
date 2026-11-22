@@ -44,7 +44,7 @@ module.exports = async function newProjection({folder, api}) {
     assert.equal(id.value, 'workspace-dependencies')
     // An ID the repository has is refused in place.
     await created.answer('packages')
-    await until('the ID refused', async () => /already exists/.test(created.input()?.validation ?? '') || undefined)
+    await until('the ID refused', async () => /already exists/u.test(created.input()?.validation ?? '') || undefined)
     await created.answer('package-map')
     await until('the title box', async () => (created.input()?.title === 'New projection: title' ? true : undefined))
     await created.answer('Package map')

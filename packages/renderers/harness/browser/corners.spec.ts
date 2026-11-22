@@ -106,8 +106,8 @@ test("the report finds a data table's square heading poking past its frame", asy
   })
   await stage.measure('settle')
   const report = await cornerReport(page, stage.frame.locator('.pk-table-scroll').first(), {frame: 1})
-  expect(report.failures.some(failure => /^box top-left corner/.test(failure))).toBe(true)
-  expect(report.failures.some(failure => /^box top-right corner/.test(failure))).toBe(true)
+  expect(report.failures.some(failure => /^box top-left corner/u.test(failure))).toBe(true)
+  expect(report.failures.some(failure => /^box top-right corner/u.test(failure))).toBe(true)
 })
 
 test('the report finds a square header band covering its group border', async ({page}, info) => {
@@ -121,5 +121,5 @@ test('the report finds a square header band covering its group border', async ({
   })
   await stage.measure('settle')
   const report = await cornerReport(page, stage.frame.locator('.rp-panel').filter({hasText: 'Network'}).first())
-  expect(report.failures.filter(failure => /^box top-(left|right) corner at 45°: the border is/.test(failure))).toHaveLength(2)
+  expect(report.failures.filter(failure => /^box top-(?:left|right) corner at 45°: the border is/u.test(failure))).toHaveLength(2)
 })

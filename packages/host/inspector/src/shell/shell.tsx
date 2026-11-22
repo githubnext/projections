@@ -147,7 +147,7 @@ export function Shell({
     const listener = (event: KeyboardEvent) => {
       if (!(isMac ? event.metaKey : event.ctrlKey) || event.shiftKey) return
       // With Alt, `key` is a composed character (⌥B is ∫ on a Mac): the physical key names the letter.
-      const key = /^Key[A-Z]$/.test(event.code) ? event.code.slice(3).toLowerCase() : event.key.toLowerCase()
+      const key = /^Key[A-Z]$/u.test(event.code) ? event.code.slice(3).toLowerCase() : event.key.toLowerCase()
       if (key === 'k' && !event.altKey) {
         event.preventDefault()
         setPalette(open => !open)

@@ -17,8 +17,8 @@ function dirtyHashes(root: string): Map<string, string> {
   for (const line of status.split('\n')) {
     const path = line
       .slice(3)
-      .replace(/^.* -> /, '')
-      .replace(/^"|"$/g, '')
+      .replace(/^.* -> /u, '')
+      .replace(/^"|"$/gu, '')
     if (!path) continue
     const relative = path.startsWith(prefix) ? path.slice(prefix.length) : path
     const absolute = join(root, relative)
@@ -42,7 +42,7 @@ export function fixPlan(
   const set = scoped ? changeSet(root, options.since) : undefined
   const files = set?.changes.filter(change => change.status !== 'deleted').map(change => change.path) ?? []
   const steps: FixStep[] = []
-  const formattable = files.filter(path => /\.([cm]?[jt]sx?|json|jsonc|ya?ml|css|html|toml)$/.test(path))
+  const formattable = files.filter(path => /\.(?:[cm]?[jt]sx?|json|jsonc|ya?ml|css|html|toml)$/u.test(path))
   steps.push(
     scoped && !formattable.length
       ? {name: 'format', commands: [], reason: 'no formattable file changed'}

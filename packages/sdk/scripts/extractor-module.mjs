@@ -39,11 +39,11 @@ try {
     logLevel: 'warn',
   })
   // The bundler names each source module in a comment, with the platform's separators.
-  bundled = readFileSync(join(output, 'extractor.mjs'), 'utf8').replace(/^\/\/ src\\.*$/gm, line => line.replaceAll('\\', '/'))
+  bundled = readFileSync(join(output, 'extractor.mjs'), 'utf8').replace(/^\/\/ src\\.*$/gmu, line => line.replaceAll('\\', '/'))
 } finally {
   rmSync(output, {recursive: true, force: true})
 }
-if (/^\s*import\s.*from\s+['"](?!node:)/m.test(bundled)) throw new Error('The extractor module must import only node: built-ins')
+if (/^\s*import\s.*from\s+['"](?!node:)/mu.test(bundled)) throw new Error('The extractor module must import only node: built-ins')
 
 const oxfmt = join(dirname(createRequire(import.meta.url).resolve('oxfmt/package.json')), 'bin/oxfmt')
 const text = execFileSync(process.execPath, [oxfmt, `--stdin-filepath=${target}`], {

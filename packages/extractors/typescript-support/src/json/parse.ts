@@ -2,7 +2,7 @@
 export function parseJson(source: string): unknown {
   let cursor = 0
   const whitespace = (): void => {
-    while (/[ \r\n\t]/.test(source[cursor] ?? '\0')) cursor++
+    while (/[ \r\n\t]/u.test(source[cursor] ?? '\0')) cursor++
   }
   const string = (): string => {
     const start = cursor++
@@ -55,7 +55,7 @@ export function parseJson(source: string): unknown {
       }
       throw new Error('Unterminated JSON container')
     }
-    const token = /^(?:true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)/.exec(source.slice(cursor))?.[0]
+    const token = /^(?:true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)/u.exec(source.slice(cursor))?.[0]
     if (!token) throw new Error('Invalid JSON value')
     if (token !== 'true' && token !== 'false' && token !== 'null') {
       const number = Number(token)

@@ -5,7 +5,7 @@ import {pathToFileURL} from 'node:url'
 
 export async function inlineImports(path) {
   const source = await readFile(path, 'utf8')
-  const imports = [...source.matchAll(/^@import '([^']+)';\n/gm)]
+  const imports = [...source.matchAll(/^@import '([^']+)';\n/gmu)]
   if (!imports.length) return source
   const start = imports[0].index
   const end = imports.at(-1).index + imports.at(-1)[0].length

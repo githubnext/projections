@@ -25,9 +25,9 @@ export function customRendererPath(path: unknown): path is string {
     path.startsWith('/custom-renderers/') &&
     !path.includes('#') &&
     !path.includes('\\') &&
-    !/(^|\/)\.\.?(\/|\?|$)/.test(path.split('?')[0]!) &&
+    !/(?:^|\/)\.\.?(?:\/|\?|$)/u.test(path.split('?')[0]!) &&
     // eslint-disable-next-line no-control-regex
-    !/[\u0000-\u001f\u007f]/.test(path)
+    !/[\u0000-\u001f\u007f]/u.test(path)
   )
 }
 
@@ -51,7 +51,7 @@ export function relayed(response: RunnerResponse, blob: boolean): Relayed {
   if (bytes > maxResponseBytes) return {type: 'failure', message: 'The backend response exceeds the bridge limit'}
   if (status >= 200 && status < 300 && blob) return {type: 'response', status, body: {type: contentType, base64: encoded}}
   if (status >= 200 && status < 300) {
-    return /^application\/(?:[\w.+-]+\+)?json\b/i.test(contentType)
+    return /^application\/(?:[\w.+-]+\+)?json\b/iu.test(contentType)
       ? {type: 'response', status, body: response.body}
       : {type: 'failure', message: 'The backend returned invalid JSON'}
   }

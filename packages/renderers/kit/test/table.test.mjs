@@ -88,24 +88,24 @@ const table = props =>
 
 test('the table is a labelled table whose sorted heading says its direction', () => {
   const markup = table({sort: {column: 'lines', direction: 'descending'}})
-  assert.match(markup, /role="table" aria-label="Files"/)
-  assert.equal(markup.match(/aria-sort="descending"/g)?.length, 1)
+  assert.match(markup, /role="table" aria-label="Files"/u)
+  assert.equal(markup.match(/aria-sort="descending"/gu)?.length, 1)
   assert.match(
     markup,
-    /role="columnheader"[^>]*aria-sort="descending"[^>]*><button type="button" class="pk-table-sort"><span class="pk-table-text">Lines/,
+    /role="columnheader"[^>]*aria-sort="descending"[^>]*><button type="button" class="pk-table-sort"><span class="pk-table-text">Lines/u,
   )
-  assert.equal(markup.match(/role="rowheader"/g)?.length, rows.length)
+  assert.equal(markup.match(/role="rowheader"/gu)?.length, rows.length)
 })
 
 test('the diff draws a changed cell as was and now, and marks only the innermost changes', () => {
   const markup = table({diff: true, emphasis: () => 1})
   const modified = markup.slice(markup.indexOf('data-entity-id="m"'), markup.indexOf('data-entity-id="n"'))
-  assert.match(modified, /<del class="pk-change-pill" data-change="removed"><span class="sr-only">was <\/span>5<\/del>/)
-  assert.match(modified, /<ins class="pk-change-pill" data-change="added"><span class="sr-only">, now <\/span>40<\/ins>/)
+  assert.match(modified, /<del class="pk-change-pill" data-change="removed"><span class="sr-only">was <\/span>5<\/del>/u)
+  assert.match(modified, /<ins class="pk-change-pill" data-change="added"><span class="sr-only">, now <\/span>40<\/ins>/u)
   const removed = markup.slice(markup.indexOf('data-entity-id="r"'), markup.indexOf('data-entity-id="a"'))
-  assert.match(removed, /pk-region/)
-  assert.doesNotMatch(removed, /pk-change-pill/)
-  assert.match(removed, /pk-diff-text/)
+  assert.match(removed, /pk-region/u)
+  assert.doesNotMatch(removed, /pk-change-pill/u)
+  assert.match(removed, /pk-diff-text/u)
 })
 
 test('the Changes scope folds each run of unshown rows, in the sorted order', () => {
@@ -118,10 +118,10 @@ test('the Changes scope folds each run of unshown rows, in the sorted order', ()
   })
   // Sorted a, b, m, r, n: b and m fold between a and r; n alone stays a row.
   assert.deepEqual(
-    [...markup.matchAll(/data-entity-id="(\w)"|"pk-fold-label">(\d) unchanged files/g)].map(match => match[1] ?? `fold ${match[2]}`),
+    [...markup.matchAll(/data-entity-id="(\w)"|"pk-fold-label">(\d) unchanged files/gu)].map(match => match[1] ?? `fold ${match[2]}`),
     ['a', 'fold 2', 'r', 'n'],
   )
-  assert.match(markup, /role="row" class="pk-table-row pk-table-fold"><div role="cell" class="pk-table-fold-cell">/)
+  assert.match(markup, /role="row" class="pk-table-row pk-table-fold"><div role="cell" class="pk-table-fold-cell">/u)
 })
 
 test('an unchanged row whose values vary within tolerance draws no change', () => {
@@ -129,7 +129,7 @@ test('an unchanged row whose values vary within tolerance draws no change', () =
   const markup = renderToStaticMarkup(
     createElement(DataTable, {label: 'Files', columns, rows: [varied], comparing: true, diff: true, emphasis: () => 1}),
   )
-  assert.doesNotMatch(markup, /pk-change-pill|data-change=/)
+  assert.doesNotMatch(markup, /pk-change-pill|data-change=/u)
 })
 
 test('a value only one version has is one pill, and a changed cell reserves both widths', () => {
@@ -137,26 +137,26 @@ test('a value only one version has is one pill, and a changed cell reserves both
   const diff = renderToStaticMarkup(
     createElement(DataTable, {label: 'Files', columns, rows: [grown], comparing: true, diff: true, emphasis: () => 1}),
   )
-  assert.doesNotMatch(diff, /<del/)
-  assert.match(diff, /<ins class="pk-change-pill" data-change="added"><span class="sr-only">now <\/span>1,000,000<\/ins>/)
+  assert.doesNotMatch(diff, /<del/u)
+  assert.match(diff, /<ins class="pk-change-pill" data-change="added"><span class="sr-only">now <\/span>1,000,000<\/ins>/u)
   const shrunk = {...grown, before: grown.after, after: {name: 'g', lines: 1, owner: 'x'}}
   const moving = renderToStaticMarkup(
     createElement(DataTable, {label: 'Files', columns, rows: [shrunk], comparing: true, progress: 0.8, emphasis: () => 0}),
   )
   assert.match(
     moving,
-    /<span class="pk-table-reserve"><span class="pk-table-text">1<\/span><span class="pk-table-reserve-other" aria-hidden="true">1,000,000<\/span><\/span>/,
+    /<span class="pk-table-reserve"><span class="pk-table-text">1<\/span><span class="pk-table-reserve-other" aria-hidden="true">1,000,000<\/span><\/span>/u,
   )
 })
 
 test('the progress modes show the version reached and nothing changed at the endpoints', () => {
   const before = table({progress: 0, emphasis: () => 0})
-  assert.doesNotMatch(before, /data-change="/)
-  assert.match(before, /data-entity-id="a"[^>]*inert=""[^>]*aria-hidden="true" style="--emphasis:0;opacity:0"/)
-  assert.doesNotMatch(before, /data-entity-id="b"[^>]*inert/)
+  assert.doesNotMatch(before, /data-change="/u)
+  assert.match(before, /data-entity-id="a"[^>]*inert=""[^>]*aria-hidden="true" style="--emphasis:0;opacity:0"/u)
+  assert.doesNotMatch(before, /data-entity-id="b"[^>]*inert/u)
   const moving = table({progress: 0.7, emphasis: row => (row.status === 'unchanged' ? 0 : 0.5)})
   const modified = moving.slice(moving.indexOf('data-entity-id="m"'), moving.indexOf('data-entity-id="n"'))
-  assert.match(modified, /class="pk-change-pill pk-table-value" data-change="added"><span class="sr-only">now <\/span>40/)
+  assert.match(modified, /class="pk-change-pill pk-table-value" data-change="added"><span class="sr-only">now <\/span>40/u)
   const settled = table({progress: 1, emphasis: () => 0})
-  assert.doesNotMatch(settled, /pk-change-pill/)
+  assert.doesNotMatch(settled, /pk-change-pill/u)
 })

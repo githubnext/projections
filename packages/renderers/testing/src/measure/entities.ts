@@ -109,7 +109,7 @@ export function legends(): string[] {
     .filter(
       element =>
         element.matches('[data-projections-legend], .kind-legend') ||
-        (/legend/i.test(element.getAttribute('aria-label') ?? '') && !element.closest('[data-entity-id]')),
+        (/legend/iu.test(element.getAttribute('aria-label') ?? '') && !element.closest('[data-entity-id]')),
     )
     .filter(element => !element.parentElement?.closest('[data-projections-legend], .kind-legend'))
     .filter(visible)

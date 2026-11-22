@@ -35,7 +35,7 @@ module.exports = async function testing({tests}) {
   assert.equal(failed?.state, 'failed', JSON.stringify(results))
   assert.equal(failed.messages[0].path, 'tools/first.comparator.test.yaml')
   assert.equal(failed.messages[0].line, 15)
-  assert.match(failed.messages[0].message, /package:@acme\/billing/)
+  assert.match(failed.messages[0].message, /package:@acme\/billing/u)
   assert.ok(failed.messages[0].expected.includes('package:@acme/billing'), JSON.stringify(failed))
   // One case alone.
   const one = await tests.run({path: 'tools/first.comparator.test.yaml', cases: ['core leads']})

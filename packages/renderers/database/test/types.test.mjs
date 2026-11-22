@@ -76,7 +76,7 @@ test('real Prisma and Django retypes read as type changes', async () => {
     )
     assert.ok(html.includes(`Modified, type ${from} to ${to}`), `${id} in the markup`)
     // Types are drawn whole, in pieces the browser may wrap between.
-    const shown = [...html.matchAll(/<code[^>]*>(.*?)<\/code>/g)].map(match => plain(match[1]))
+    const shown = [...html.matchAll(/<code[^>]*>(.*?)<\/code>/gu)].map(match => plain(match[1]))
     assert.ok(shown.includes(to), `${id} shows ${to}`)
   }
 })

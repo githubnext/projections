@@ -79,23 +79,23 @@ function docText(text, language) {
   return (text ?? '')
     .split('\n')
     .map(line => {
-      if (/^\s*\x60\x60\x60/.test(line)) {
+      if (/^\s*\x60\x60\x60/u.test(line)) {
         fenced = !fenced
         // rustdoc treats an unlabeled block as Rust.
-        return fenced && /^\s*\x60\x60\x60\s*$/.test(line) ? line.replace('```', `\`\`\`${language}`) : line
+        return fenced && /^\s*\x60\x60\x60\s*$/u.test(line) ? line.replace('```', `\`\`\`${language}`) : line
       }
       if (fenced) return line
-      const heading = /^#{1,6}\s+(.*)$/.exec(line)
-      if (heading) return `**${heading[1]}**`
+      const heading = /^#{1,6}\s(.*)$/u.exec(line)
+      if (heading) return `**${heading[1].trimStart()}**`
       // Intra-doc links (rustdoc's [`Name`]) have no target on this page.
-      return line.replace(/\[(\x60[^\x60\]]+\x60)\](?![([])/g, '$1')
+      return line.replace(/\[(\x60[^\x60\]]+\x60)\](?![([])/gu, '$1')
     })
     .join('\n')
 }
 export const firstParagraph = text =>
   (text ?? '')
-    .split(/\n\s*\n/)[0]
-    .replace(/\s*\n\s*/g, ' ')
+    .split(/\n\s*\n/u)[0]
+    .replace(/\s*\n\s*/gu, ' ')
     .trim()
 
 export function apiPage({

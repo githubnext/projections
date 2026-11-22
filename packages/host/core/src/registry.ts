@@ -123,7 +123,7 @@ export async function loadRendererCatalog({
   if (names) {
     const manifests = await Promise.all(
       names
-        .filter(name => /^[a-z0-9][a-z0-9-]{0,63}$/.test(name))
+        .filter(name => /^[a-z0-9][a-z0-9-]{0,63}$/u.test(name))
         .map(async name => parseRendererManifest(await json(new URL(`${name}/renderer.json`, root), fetcher, signal))),
     )
     return manifests.map(manifest => catalogEntry(manifest, root, 'builtin'))

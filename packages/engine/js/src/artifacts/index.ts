@@ -50,7 +50,7 @@ function assertSchema<T>(value: unknown, validate: SchemaValidator<T>): asserts 
   const issue = validate.errors?.[0]
   throw new ArtifactError(
     'ARTIFACT_SCHEMA',
-    issue?.instanceLocation.replace(/^#/, '') ?? '',
+    issue?.instanceLocation.replace(/^#/u, '') ?? '',
     `Invalid artifact envelope (${issue?.keywordLocation ?? 'schema mismatch'})`,
   )
 }

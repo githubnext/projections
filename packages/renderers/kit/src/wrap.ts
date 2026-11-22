@@ -120,7 +120,7 @@ function breakSets(widths: readonly number[], gap: number, count: number, limit:
 }
 
 /** Characters a long identifier or value breaks after first, in order of preference: `_ . / - , :`, then spaces. */
-const breakAfter = /[_./\-,:\s]/
+const breakAfter = /[_./\-,:\s]/u
 
 /**
  * Data text shown whole on lines of at most `limit` characters: words fill

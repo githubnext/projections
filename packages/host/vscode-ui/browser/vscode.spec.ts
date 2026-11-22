@@ -10,7 +10,7 @@ test.describe('the VS Code UI renders in every captured VS Code theme', () => {
       await ready(page)
       const root = page.locator('.phv-root')
       await expect(root).toHaveAttribute('data-host-ui', 'vscode')
-      const classes = (await page.locator('.sb-vscode-frame').getAttribute('class'))!.split(/\s+/)
+      const classes = (await page.locator('.sb-vscode-frame').getAttribute('class'))!.split(/\s+/u)
       const kind = classes.includes('vscode-high-contrast-light')
         ? 'high-contrast-light'
         : classes.includes('vscode-high-contrast')
@@ -106,7 +106,7 @@ test('the toolbar is reachable with Tab, shows VS Code focus outlines and opens 
   await expect(menu).toBeHidden()
   expect((await focused(page)).label).toBe('Settings')
   // The Show as chip returns to the renderer.
-  await page.getByRole('button', {name: /^Showing table; show the/}).click()
+  await page.getByRole('button', {name: /^Showing table; show the/u}).click()
   await expect(page.locator('.phv-root')).toHaveAttribute('data-view', 'renderer')
 })
 
@@ -118,7 +118,7 @@ test('Filter is VS Code’s find input in a widget, and its count follows the qu
   await expect(widget).toBeVisible()
   expect(await focused(page)).toMatchObject({tag: 'input', host: 'vscode-textfield'})
   await page.keyboard.type('payments')
-  await expect(widget.getByRole('status')).toHaveText(/rows match/)
+  await expect(widget.getByRole('status')).toHaveText(/rows match/u)
   await page.keyboard.press('Escape')
   await expect(widget).toBeHidden()
   expect((await focused(page)).label).toBe('Filter')
@@ -141,7 +141,7 @@ test('animated playback is drawn like the debug toolbar and plays, steps and scr
   await expect(page.locator('.phv-root')).toHaveAttribute('data-position', '1')
   // At the end there is no next step: the action is disabled on its shadow button.
   await expect(playback.getByRole('button', {name: 'Next step'})).toBeDisabled()
-  const play = playback.getByRole('button', {name: /^Play/})
+  const play = playback.getByRole('button', {name: /^Play/u})
   await expect(play).toBeVisible()
   const colorsOf = await page.locator('.phv-play').evaluate(element => getComputedStyle(element).color)
   const debugContinue = await page.locator('.sb-vscode-frame').evaluate(frame => {

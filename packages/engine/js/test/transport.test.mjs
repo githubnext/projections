@@ -66,20 +66,20 @@ test('comparator modules must have zero imports, the ABI exports and well-formed
     0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 2, 13, 1, 3, 101, 110, 118, 5, 99, 108, 111, 99, 107, 0, 0,
   ])
   assert.equal(WebAssembly.Module.imports(new WebAssembly.Module(importing)).length, 1)
-  await assert.rejects(createWasmEngine(engine, {module: importing}), /zero imports/)
+  await assert.rejects(createWasmEngine(engine, {module: importing}), /zero imports/u)
   const noExports = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0])
   const wasm = await createWasmEngine(engine, {module: noExports})
   await assert.rejects(
     wasm.compare(empty, empty),
-    error => error instanceof EngineTransportError && /comparator module ABI/.test(error.message),
+    error => error instanceof EngineTransportError && /comparator module ABI/u.test(error.message),
   )
-  await assert.rejects(createNativeEngine({comparator: {module: importing}}).compare(empty, empty), /zero imports/)
+  await assert.rejects(createNativeEngine({comparator: {module: importing}}).compare(empty, empty), /zero imports/u)
 })
 
 test('browser entries and package root never import native APIs', async () => {
   for (const name of ['index', 'browser', 'wasm-transport', 'comparator-transport', 'transport', 'worker', 'worker-entry']) {
     const source = await readFile(new URL(`../dist/${name}.js`, import.meta.url), 'utf8')
-    assert.doesNotMatch(source, /(?:node:|\.\/native\.js)/)
+    assert.doesNotMatch(source, /(?:node:|\.\/native\.js)/u)
   }
 })
 

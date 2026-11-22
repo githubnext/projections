@@ -29,7 +29,7 @@ export function styleTokens(): StyleTokens {
   const names = themeTokenNames as readonly string[]
   const colors: Record<string, string> = {}
   // Theme colors, and the categorical palette (`chart-*`).
-  for (const name of names) if (/^(color|chart)-/.test(name) && tokenValue(name)) colors[name] = resolveColor(tokenValue(name))
+  for (const name of names) if (/^(?:color|chart)-/u.test(name) && tokenValue(name)) colors[name] = resolveColor(tokenValue(name))
   const tokens: StyleTokens = {
     colors,
     fontSizes: lengths(names.filter(name => name.startsWith('font-size') || name === 'label-font-size')),
@@ -48,7 +48,7 @@ export function styleTokens(): StyleTokens {
 function ownText(element: Element): string {
   let text = ''
   for (const node of element.childNodes) if (node.nodeType === Node.TEXT_NODE) text += node.textContent ?? ''
-  return text.replace(/\s+/g, ' ').trim()
+  return text.replace(/\s+/gu, ' ').trim()
 }
 
 /**

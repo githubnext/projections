@@ -11,7 +11,7 @@ import {applyEdits, parse} from './source.mjs'
 const oxfmtConfig = new URL('../../../../../.oxfmtrc.json', import.meta.url)
 
 const iconLibraries = new Set(['lucide', 'tabler', 'hugeicons', 'phosphor', 'remixicon'])
-const kebab = name => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+const kebab = name => name.replace(/([a-z0-9])([A-Z])/gu, '$1-$2').toLowerCase()
 
 // Replaces `<IconPlaceholder lucide="CheckIcon" tabler=… />` with `<CheckIcon />` (keeping its other attributes) and
 // returns the lucide icons used.
@@ -46,14 +46,14 @@ function rewriteImport(declaration, sourceFile) {
   const bindings = declaration.importClause?.namedBindings
   const named = bindings && ts.isNamedImports(bindings) ? bindings.elements : []
   if (named.some(element => element.name.text === 'IconPlaceholder')) return []
-  if (specifier === 'cn' || /(^|\/)lib\/utils$/.test(specifier)) return [`import {cn} from '../lib/utils.js'`]
+  if (specifier === 'cn' || /(?:^|\/)lib\/utils$/u.test(specifier)) return [`import {cn} from '../lib/utils.js'`]
   if (specifier === 'radix-ui') {
     return named.map(element => {
       const primitive = (element.propertyName ?? element.name).text
       return `import * as ${element.name.text} from '@radix-ui/react-${kebab(primitive)}'`
     })
   }
-  const sibling = /^@\/registry\/[\w-]+\/ui\/([\w-]+)$/.exec(specifier)
+  const sibling = /^@\/registry\/[\w-]+\/ui\/([\w-]+)$/u.exec(specifier)
   const text = declaration.getText(sourceFile)
   return [sibling ? text.replace(declaration.moduleSpecifier.getText(sourceFile), `'./${sibling[1]}.js'`) : text]
 }
@@ -65,8 +65,8 @@ function rewriteImports(text, icons) {
   const imports = sourceFile.statements.filter(ts.isImportDeclaration)
   if (imports.length === 0) return text
   const lines = imports.flatMap(declaration => rewriteImport(declaration, sourceFile))
-  const isReact = line => /from ['"]react['"]$/.test(line)
-  if (!lines.some(isReact) && /\bReact\./.test(text)) lines.unshift(`import * as React from 'react'`)
+  const isReact = line => /from ['"]react['"]$/u.test(line)
+  if (!lines.some(isReact) && /\bReact\./u.test(text)) lines.unshift(`import * as React from 'react'`)
   if (icons.length) lines.splice(lines.findIndex(isReact) + 1, 0, `import {${icons.join(', ')}} from 'lucide-react'`)
   return text.slice(0, imports[0].getStart(sourceFile)) + lines.join('\n') + text.slice(imports.at(-1).end)
 }

@@ -19,8 +19,8 @@ assert.deepEqual(
   JSON.stringify(manifest.projections),
 )
 const document = id => readFileSync(path.join(path.dirname(manifestPath), 'projections', `${id}.json`), 'utf8')
-assert.match(document('teams'), /team:zeta/, 'the Python extractor saw the added team')
-assert.match(document('services'), /service:payments/, 'the Node extractor saw the retired service')
+assert.match(document('teams'), /team:zeta/u, 'the Python extractor saw the added team')
+assert.match(document('services'), /service:payments/u, 'the Node extractor saw the retired service')
 if (snapshots) {
   const images = readdirSync(snapshots).filter(file => file.endsWith('.png'))
   assert.ok(images.length >= 2 && images.every(file => file.startsWith('teams')), images.join(', '))

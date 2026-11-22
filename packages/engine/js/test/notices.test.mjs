@@ -44,25 +44,25 @@ test('a crate without license files at a covered version passes; dev-dependencie
 test('a crate locked at a version the manifest doesn’t cover names both versions and the fix, once', () => {
   const found = problems(manifest({cel: ['0.15.0']}), [crate('cel', '0.16.0', false)])
   assert.equal(found.length, 1)
-  assert.match(found[0], /cel is locked at 0\.16\.0, but notices\/notices\.json covers cel 0\.15\.0/)
+  assert.match(found[0], /cel is locked at 0\.16\.0, but notices\/notices\.json covers cel 0\.15\.0/u)
   assert.match(
     found[0],
-    /fetch the license from https:\/\/github\.com\/example\/upstream at the matching tag and update notices\/notices\.json/,
+    /fetch the license from https:\/\/github\.com\/example\/upstream at the matching tag and update notices\/notices\.json/u,
   )
 })
 
 test('a crate the manifest has no entry for fails, naming its repository', () => {
   const [found] = problems([], [crate('cel', '0.15.0', false)])
-  assert.match(found, /cel 0\.15\.0 ships no license files and notices\/notices\.json has no entry for it/)
-  assert.match(found, /https:\/\/github\.com\/example\/cel/)
+  assert.match(found, /cel 0\.15\.0 ships no license files and notices\/notices\.json has no entry for it/u)
+  assert.match(found, /https:\/\/github\.com\/example\/cel/u)
 })
 
 test('an entry no compiled crate needs is stale', () => {
   assert.deepEqual(problems(manifest({json5: ['0.4.1']}), [crate('json5', '0.4.1', true)]), [
     'notices/notices.json covers json5 0.4.1, but json5 0.4.1 ships its own license files: remove 0.4.1 from notices/notices.json (and notices/upstream/ once it covers nothing)',
   ])
-  assert.match(problems(manifest({gone: ['1.0.0']}), [])[0], /covers gone 1\.0\.0, but no build compiles in gone:/)
-  assert.match(problems(manifest({'dev-only': ['1.0.0']}), [])[0], /no build compiles in dev-only:/)
+  assert.match(problems(manifest({gone: ['1.0.0']}), [])[0], /covers gone 1\.0\.0, but no build compiles in gone:/u)
+  assert.match(problems(manifest({'dev-only': ['1.0.0']}), [])[0], /no build compiles in dev-only:/u)
 })
 
 test('of two locked versions, only the one without license files needs covering', () => {
@@ -85,7 +85,7 @@ test('the README table is written from the manifest, and rewriting it is stable'
   ]
   assert.match(
     readmeTable(entries),
-    /\| \x60yaml-rust2\/\x60 \| \x60yaml-rust2\x60 0\.13\.0 \| \x60LICENSE-MIT\x60 \(upstream \x60MIT-LICENSE\x60\) \|/,
+    /\| \x60yaml-rust2\/\x60 \| \x60yaml-rust2\x60 0\.13\.0 \| \x60LICENSE-MIT\x60 \(upstream \x60MIT-LICENSE\x60\) \|/u,
   )
   const readme = withTable('intro\n<!-- generated: notices -->\nold\n<!-- end generated: notices -->\nafter\n', entries)
   assert.ok(readme.startsWith('intro\n<!-- generated: notices -->\n<!-- prettier-ignore -->\n'))

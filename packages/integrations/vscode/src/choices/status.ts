@@ -60,7 +60,7 @@ export function statusItem(input: StatusInput): {text: string; tooltip: string; 
   const others = input.others ?? []
   // A commit subject could hold `$(…)`, which the status bar would draw as an icon. The icons follow the tab in front.
   const icon = running ? ` ${runningIcon(running.still)}` : front ? ` ${outOfDateIcon}` : ''
-  const text = `${markIcon} ${name.replace(/\$\(/g, '\\$(')}${icon}`
+  const text = `${markIcon} ${name.replace(/\$\(/gu, '\\$(')}${icon}`
   const full =
     choice.id === 'custom' || (choice.id.startsWith('pair:') && !choice.title) ? pairName(pair, labels) : choiceName(choice, facts)
   const span = pair.before
@@ -71,7 +71,7 @@ export function statusItem(input: StatusInput): {text: string; tooltip: string; 
     ...(choice.id === 'branch' ? [branchDetail(facts)] : []),
     ...(pair.before && input.files !== undefined ? [`${plural(input.files, 'file')} changed`] : []),
   ]
-  const pullTitle = choice.id.startsWith('pr:') && choice.title ? choice.title.replace(/^#\d+\s*/, '') : undefined
+  const pullTitle = choice.id.startsWith('pr:') && choice.title ? choice.title.replace(/^#\d+\s*/u, '') : undefined
   const tooltip = [
     `**${escapeMarkdown(full)}**${input.folder ? ` in ${escapeMarkdown(input.folder)}` : ''}`,
     ...(pullTitle ? ['', escapeMarkdown(pullTitle)] : []),

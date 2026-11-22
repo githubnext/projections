@@ -11,7 +11,7 @@ import {contrast, distance, oklch} from '../scripts/colors.mjs'
 import {changeChromaRatio, chartPalette, profiles, separation} from '../scripts/calibration.mjs'
 
 test('paths and names resolve to Linguist languages, variants to their group', () => {
-  assert.match(linguistRelease, /^v\d+\.\d+\.\d+$/)
+  assert.match(linguistRelease, /^v\d+\.\d+\.\d+$/u)
   const of = path => languageOfPath(path)?.name
   assert.equal(of('src/app.ts'), 'TypeScript')
   assert.equal(of('types/index.d.ts'), 'TypeScript')
@@ -135,9 +135,9 @@ test('vendored third-party data in a bundle is attributed with its license', asy
     await writeFile(join(directory, 'LICENSE'), 'Copyright (c) 2020 Example\n\nPermission is hereby granted.\n')
     await writeFile(join(directory, 'tables.js'), 'export const x = 1\n')
     const notices = bundleNotices('Title', [join(directory, 'tables.js'), join(root, 'src', 'own.js')])
-    assert.match(notices, /===== example tables v1\.2\.3 \(MIT\) =====/)
-    assert.match(notices, /Copyright \(c\) 2020 Example/)
-    assert.match(notices, /--- LICENSE ---/)
+    assert.match(notices, /===== example tables v1\.2\.3 \(MIT\) =====/u)
+    assert.match(notices, /Copyright \(c\) 2020 Example/u)
+    assert.match(notices, /--- LICENSE ---/u)
   } finally {
     await rm(root, {recursive: true, force: true})
   }

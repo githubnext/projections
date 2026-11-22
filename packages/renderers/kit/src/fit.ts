@@ -84,7 +84,7 @@ export const contentMinimumCap = 360
  * the page; content taller than that at the opening scale is fitted to the capped stage, or opens at the floor and pans.
  */
 export function contentHeightCap(token: string | undefined, viewport: {height: number} | undefined): number | undefined {
-  const match = /^\s*(\d+(?:\.\d+)?)(px|vh)\s*$/.exec(token ?? '')
+  const match = /^\s*(\d+(?:\.\d+)?)(px|vh)\s*$/u.exec(token ?? '')
   if (!match) return undefined
   const value = Number(match[1])
   if (match[2] === 'px') return Math.max(contentMinimumCap, Math.round(value))
@@ -111,7 +111,7 @@ export function parseStageCover(token: string | undefined): CoverRect[] | undefi
   if (token === undefined) return undefined
   const rects: CoverRect[] = []
   for (const part of token.split(',')) {
-    const numbers = part.trim().split(/\s+/).map(Number)
+    const numbers = part.trim().split(/\s+/u).map(Number)
     if (numbers.length !== 4 || numbers.some(value => !Number.isFinite(value))) continue
     const [x, y, width, height] = numbers as [number, number, number, number]
     if (width > 0 && height > 0) rects.push({x, y, width, height})

@@ -22,7 +22,7 @@ test('Express and Fastify factories, chains and method arrays become inferred ro
       .sort(),
     ['GET /health', 'GET /items', 'GET /orders', 'GET /users', 'POST /orders', 'PUT /items'],
   )
-  assert.match(JSON.stringify(state.metadata), /mounting/)
+  assert.match(JSON.stringify(state.metadata), /mounting/u)
   assert(state.entities.filter(node => node.kind === 'route').every(node => node.confidence === 'inferred'))
 })
 
@@ -40,7 +40,7 @@ test('CommonJS export-equals factories resolve as default imports', async () => 
 test('type errors fail with locations unless only syntax is checked', async () => {
   await isolated('http-routes', 'commonjs', async root => {
     appendFileSync(`${root}/index.ts`, 'export const broken: number = "text";\n')
-    await assert.rejects(run('http-routes', root), /index\.ts:2: TS2322/)
+    await assert.rejects(run('http-routes', root), /index\.ts:2: TS2322/u)
     assert.equal((await run('http-routes', root, {diagnostics: 'syntax'})).entities.filter(node => node.kind === 'route').length, 2)
   })
 })

@@ -31,7 +31,7 @@ function measureCards(root: Element): CardStatus[] {
   })
 }
 
-const words: Record<string, RegExp> = {added: /Added/, removed: /Removed/, modified: /Modified/, renamed: /Renamed/}
+const words: Record<string, RegExp> = {added: /Added/u, removed: /Removed/u, modified: /Modified/u, renamed: /Renamed/u}
 
 /**
  * Change status on graph cards: while a change is emphasized its card states

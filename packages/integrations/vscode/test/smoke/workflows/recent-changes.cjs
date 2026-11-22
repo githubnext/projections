@@ -21,13 +21,13 @@ module.exports = async function recentChanges({folder, api, choiceName, short}) 
     120_000,
   )
   assert.ok(api.viewingFinds() >= 1)
-  assert.match(found.description, /^[0-9a-f]{7}$/)
-  assert.match(found.tooltip, /Changes Packages \\\(\d+ changes?\\\)/)
-  assert.match(found.contextValue, /\bbookmarkable\b/)
+  assert.match(found.description, /^[0-9a-f]{7}$/u)
+  assert.match(found.tooltip, /Changes Packages \\\(\d+ changes?\\\)/u)
+  assert.match(found.contextValue, /\bbookmarkable\b/u)
   await api.viewingActivate(found.id)
-  const [before, after] = found.id.replace(/^recent:/, '').split('..')
+  const [before, after] = found.id.replace(/^recent:/u, '').split('..')
   await until('the status bar on the commit', async () => ((await choiceName()) === short(found.label) ? true : undefined))
-  assert.match(api.rows()[0].choice.id, /^pair:/)
+  assert.match(api.rows()[0].choice.id, /^pair:/u)
   await until('the tab on the commit', async () => {
     const summary = api.tabs('packages')[0]?.summary
     return summary?.pair?.before === before && summary.pair.after === after ? true : undefined
@@ -50,9 +50,9 @@ module.exports = async function recentChanges({folder, api, choiceName, short}) 
   assert.ok(JSON.parse(await fs.readFile(bookmarksPath, 'utf8')).bookmarks.some(item => item.projectionId === 'packages'))
   await api.viewingActivate(bookmark.id)
   await until('the status bar on the bookmark', async () =>
-    (await choiceName()) === short(bookmark.label.replace(/^Bookmark: /, '')) ? true : undefined,
+    (await choiceName()) === short(bookmark.label.replace(/^Bookmark: /u, '')) ? true : undefined,
   )
-  assert.match(api.statusBar().tooltip, /^\*\*Bookmark: /)
+  assert.match(api.statusBar().tooltip, /^\*\*Bookmark: /u)
   await api.viewingActivate(bookmark.id, 'remove')
   await until('the bookmark removed', async () => (api.viewing().rows.some(row => row.id.startsWith('bookmark:')) ? undefined : true))
   await fs.rm(bookmarksPath, {force: true})
@@ -75,7 +75,7 @@ module.exports = async function recentChanges({folder, api, choiceName, short}) 
   await until('the renderer scenarios', async () => {
     const row = (await api.definition()).rows.find(item => item.kind === 'renderer')
     return (
-      row.children.some(item => item.kind === 'scenarios' && item.description === '1 scenario' && /scenario-demo/.test(item.tooltip)) ||
+      row.children.some(item => item.kind === 'scenarios' && item.description === '1 scenario' && /scenario-demo/u.test(item.tooltip)) ||
       undefined
     )
   })

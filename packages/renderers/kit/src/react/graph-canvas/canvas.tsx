@@ -1,5 +1,5 @@
 // The graph canvas: lays out each comparison step, then draws the transition.
-import {useEffect, useMemo, useRef, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {statusParts} from '../../emphasis.js'
@@ -15,6 +15,7 @@ import type {FieldLine} from '../../diff/lines.js'
 import {graphEntityLimit} from './props.js'
 import type {GraphCanvasProps} from './props.js'
 import {LaidOutGraph} from './laid-out-graph.js'
+import {sameItems} from './same-items.js'
 import {expanderMetrics} from './entity-card.js'
 import {badgeCardWidth, badgeGrowth} from '../../graph-canvas/badges.js'
 import {fanInWidths} from '../../graph-canvas/fan-in.js'
@@ -90,17 +91,18 @@ export function GraphCanvas(props: GraphCanvasProps) {
     return lines
   }, [diff, changedFields, model])
   // A graph's cards share the width its longest card text needs (`graphCardsWidth`), and a diff card's text is laid out
-  // whole, its card growing to hold it. The card's text functions are read as they are now, without relaying out when a renderer passes new but
-  // equivalent ones.
-  const text = useRef(props)
-  text.current = props
+  // whole, its card growing to hold it. The card's text functions are read as they are when what the cards are laid out
+  // from changes, without relaying out when a renderer passes new but equivalent ones.
   const textScale = useCardTextScale()
   // Cards with badges grow a row for each row of them, and are at least as wide as their widest badge needs.
   const {badges, icon} = props
+  const textInputs = [diff, model, fields, textScale, badges, icon, comparing, orientation]
+  const [text, setText] = useState({inputs: textInputs, props})
+  if (!sameItems(text.inputs, textInputs)) setText({inputs: textInputs, props})
   const badgeWidth = useMemo(() => badgeCardWidth(model.entities, badges, textScale), [model, badges, textScale])
   const cards = useMemo(() => {
     if (!diff) return undefined
-    const {kindLine, detail, prose, describeStatus} = text.current
+    const {kindLine, detail, prose, describeStatus} = text.props
     const card = (row: EntityChange<Entity>, width?: number) => {
       const entity = (row.after ?? row.before)!
       return diffCardText({
@@ -114,28 +116,28 @@ export function GraphCanvas(props: GraphCanvasProps) {
         status: describeStatus?.(statusNode(row)) ?? statusParts(row),
         textScale,
         width,
-        reserve: expanderRoom(text.current, row),
+        reserve: expanderRoom(text.props, row),
       })
     }
     // The graph's cards share the width the widest needs, and their text wraps to it.
     const width = Math.max(cardWidthRange.min, badgeWidth, ...model.entities.map(row => card(row).width))
     return new Map(model.entities.map(row => [row.id, card(row, width)]))
-  }, [diff, model, fields, textScale, badgeWidth, icon])
+  }, [diff, model, fields, textScale, badgeWidth, icon, text])
   // Hubs grow so the relationships into them keep apart (see `fanInWidths`); otherwise the cards keep one width and
   // line up in columns.
   const {subtitle} = props
   const widths = useMemo(() => {
     if (cards) return fanInWidths(model, new Map([...cards].map(([id, card]) => [id, card.width])), orientation)
-    const {kindLine, detail, prose, describeStatus} = text.current
+    const {kindLine, detail, prose, describeStatus} = text.props
     const status = describeStatus && ((row: EntityChange<Entity>) => describeStatus(statusNode(row)))
     const rowText = {kindLine, detail, prose, icon, status, comparing, textScale}
     const width = Math.max(
       badgeWidth,
       cardWidthRange.min,
-      ...model.entities.map(row => graphCardWidth(row, rowText) + expanderRoom(text.current, row)),
+      ...model.entities.map(row => graphCardWidth(row, rowText) + expanderRoom(text.props, row)),
     )
     return fanInWidths(model, new Map(model.entities.map(row => [row.id, width] as const)), orientation)
-  }, [cards, model, comparing, textScale, badgeWidth, orientation, icon])
+  }, [cards, model, comparing, textScale, badgeWidth, orientation, icon, text])
   // Cards grow for their badge rows and their subtitle's lines.
   const badgeRows = useMemo(
     () => (badges ? badgeGrowth(model.entities, badges, widths, textScale) : undefined),
@@ -192,12 +194,11 @@ export function GraphCanvas(props: GraphCanvasProps) {
   // the new one), so presenting another document is one change, not empty and then drawn. Another document is drawn
   // afresh (framed and zoomed as it opens); a new layout or view of the same one keeps the view.
   const document = source ?? model
-  const drawn = useRef<Drawn>(undefined)
-  const last = drawn.current
+  const [last, setLast] = useState<Drawn>()
   // A layout the props have moved past is drawn only in place of a view of the same document already shown. As the
   // first view it would open on what the host no longer shows (every item, while the scope it sent with its documents
   // is laid out), then jump to the layout it asked for.
-  const shown: Drawn | undefined =
+  const next: Drawn | undefined =
     transition && (ready || last?.document === document)
       ? {
           key: last && last.document === document ? last.key : (last?.key ?? 0) + 1,
@@ -214,7 +215,8 @@ export function GraphCanvas(props: GraphCanvasProps) {
           stale: !ready,
         }
       : last
-  drawn.current = shown
+  const shown = next && last && sameDrawn(next, last) ? last : next
+  if (shown !== last) setLast(shown)
   return shown ? (
     <LaidOutGraph
       key={shown.key}
@@ -254,4 +256,25 @@ interface Drawn {
   subtitleGrowth: ReadonlyMap<string, number> | undefined
   /** Whether `transition` was laid out for earlier props than `props` (see `LaidOutGraphProps.stale`). */
   stale: boolean
+}
+
+/** Every field of a drawing. */
+const drawnFields = [
+  'key',
+  'document',
+  'props',
+  'transition',
+  'orientation',
+  'count',
+  'fields',
+  'cards',
+  'textScale',
+  'badgeGrowth',
+  'subtitleGrowth',
+  'stale',
+] as const satisfies readonly (keyof Drawn)[]
+
+/** Whether two drawings are the same: every field the same value. */
+function sameDrawn(a: Drawn, b: Drawn): boolean {
+  return drawnFields.every(field => a[field] === b[field])
 }

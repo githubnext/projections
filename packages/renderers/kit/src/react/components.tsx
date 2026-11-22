@@ -1,9 +1,9 @@
-import {Component, Fragment, useContext, useEffect, useLayoutEffect, useRef, useState} from 'react'
+import {Component, Fragment, use, useEffect, useLayoutEffect, useRef, useState} from 'react'
 import type {ErrorInfo, HTMLAttributes, ReactNode} from 'react'
 import type {ChangeStatus} from '@githubnext/projections-schemas'
 import {proseSpans} from '@githubnext/projections-schemas'
 import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import {identifier, variedBeyond, variedBeyondLabel} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed, variedBeyond, variedBeyondLabel} from '@githubnext/projections-renderer-sdk/presentation'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {arrowHead, arrowHeadLength, arrowHeadStyle} from '../arrowhead.js'
 import {LegendContext} from './legend-context.js'
@@ -241,17 +241,22 @@ export function SvgChangeStatus({
   const spans = words.map(text => svgIcon + svgIconGap + width(text))
   const total = line(words)
   const start = anchor === 'end' ? x - total : anchor === 'middle' ? x - total / 2 : x
+  // Each part's left edge, its icon then its word, one after another.
+  const lefts: number[] = []
   let cursor = start
+  for (const span of spans) {
+    lefts.push(cursor)
+    cursor += span + svgPartGap
+  }
   const cut = words.some((text, index) => text !== parts[index]!.label)
   return (
     <g className="pk-svg-status" opacity={Math.min(1, emphasis)} aria-hidden={emphasis < 0.05}>
       {cut && <title>{parts.map(part => part.label).join(', ')}</title>}
       {words.map((text, index) => {
         const part = parts[index]!
-        const left = cursor
-        cursor += spans[index]! + svgPartGap
+        const left = lefts[index]!
         return (
-          <g key={index} className={`pk-status-part ${part.status}`} data-change-status={part.status}>
+          <g key={part.status} className={`pk-status-part ${part.status}`} data-change-status={part.status}>
             <SvgIcon name={part.icon} x={left} y={y - svgIcon + 2} size={svgIcon} />
             <text ref={index === 0 ? word : undefined} x={left + svgIcon + svgIconGap} y={y}>
               {text}
@@ -305,13 +310,13 @@ export function Identifier({
 export function Prose({children}: {children: string}) {
   return (
     <>
-      {proseSpans(children).map((span, index) =>
+      {keyed(proseSpans(children), span => `${span.code ? 'code' : 'text'}:${span.text}`).map(([key, span]) =>
         span.code ? (
-          <code key={index} className="pk-code" {...identifier}>
+          <code key={key} className="pk-code" {...identifier}>
             {span.text}
           </code>
         ) : (
-          <Fragment key={index}>{span.text}</Fragment>
+          <Fragment key={key}>{span.text}</Fragment>
         ),
       )}
     </>
@@ -327,7 +332,7 @@ export function NameLine({children, badges, className}: {children: ReactNode; ba
   return (
     <span className={`pk-name-line${className ? ` ${className}` : ''}`}>
       <span className="pk-name">{children}</span>
-      {badges && <span className="pk-badges">{badges}</span>}
+      {badges ? <span className="pk-badges">{badges}</span> : null}
     </span>
   )
 }
@@ -364,7 +369,7 @@ export function Notice({shown, total, noun}: {shown: number; total: number; noun
  * Outside a kit renderer it draws them as compact chips.
  */
 export function KindLegend({kinds, label = 'Entity kinds'}: {kinds: readonly string[]; label?: string}) {
-  const report = useContext(LegendContext)
+  const report = use(LegendContext)
   const key = JSON.stringify([label, kinds])
   useEffect(() => {
     if (!report) return

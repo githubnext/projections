@@ -1,5 +1,5 @@
 // Parts of a drawn card: its kind line, boundary heading, status footer and diff lines.
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {TransitionNode} from '../../graph-transition.js'
 import {entityKindLine, kindText} from '../../card-text.js'
@@ -39,16 +39,16 @@ export function DiffCardLines({card, top, left}: {card: DiffCardText; top: numbe
   const tones = {was: 'pk-svg-was', now: 'pk-svg-now', arrow: 'pk-svg-arrow', note: 'node-note'} as const
   return (
     <g className="node-text">
-      {card.lines.map((line, index) => (
+      {keyed(card.lines, line => line.spans.map(span => span.text).join('')).map(([key, line]) => (
         <text
-          key={index}
+          key={key}
           x={left + line.x}
           y={top + line.y}
           className={`${line.className} pk-diff-text`}
           {...(line.anchor ? {textAnchor: line.anchor} : {})}
           {...(line.identifier ? identifier : {})}
         >
-          {line.spans.map((span, at) =>
+          {keyed(line.spans, span => `${span.tone ?? ''}:${span.text}`).map(([at, span]) =>
             span.tone ? (
               <tspan key={at} className={tones[span.tone]}>
                 {span.text}

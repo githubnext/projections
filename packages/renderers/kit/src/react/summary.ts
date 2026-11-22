@@ -1,4 +1,4 @@
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import type {SummaryNouns} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
@@ -7,9 +7,11 @@ import type {SummaryNouns} from '@githubnext/projections-renderer-sdk/presentati
  * order. Pass a stable value (memoize a function); `undefined` returns to `MountOptions.nouns`.
  */
 export function useSummaryNouns(declare: (nouns: SummaryNouns | undefined) => void, nouns: SummaryNouns | undefined): void {
+  // The nouns as they were when their value last changed, so an equal object passed again declares nothing.
   const key = typeof nouns === 'function' ? nouns : JSON.stringify(nouns ?? null)
+  const [declared, setDeclared] = useState({key, nouns})
+  if (declared.key !== key) setDeclared({key, nouns})
   useEffect(() => {
-    declare(nouns)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [declare, key])
+    declare(declared.nouns)
+  }, [declare, declared])
 }

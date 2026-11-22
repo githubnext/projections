@@ -5,6 +5,7 @@ import type {ElementType} from 'react'
 import {ChevronsDownUp, ChevronsUpDown} from 'lucide'
 import {foldList} from '../scope.js'
 import type {ChangesScope, Folded} from '../scope.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * Folds a list for the Changes scope (`foldList`) and keeps which folds the person expanded, until the scope's shown
@@ -89,7 +90,9 @@ function FoldGlyph({open}: {open: boolean}) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {(open ? ChevronsDownUp : ChevronsUpDown).map(([tag, attributes], index) => createElement(tag, {key: index, ...attributes}))}
+      {keyed(open ? ChevronsDownUp : ChevronsUpDown, ([tag, attributes]) => `${tag}${JSON.stringify(attributes)}`).map(
+        ([key, [tag, attributes]]) => createElement(tag, {key, ...attributes}),
+      )}
     </svg>
   )
 }

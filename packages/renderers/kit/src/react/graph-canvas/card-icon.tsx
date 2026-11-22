@@ -4,6 +4,7 @@ import type {Entity} from '@githubnext/projections-schemas'
 import {cardIconMetrics, cardIconNode, rowIcons} from '../../card-icons.js'
 import type {CardIconName} from '../../card-icons.js'
 import type {TransitionNode} from '../../graph-transition.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** How far a 12px line's cap height is centred above its baseline: an icon's middle sits there. */
 const capMiddle = 4.2
@@ -27,7 +28,9 @@ export function CardIconGlyph({name, x, baseline, opacity = 1}: {name: CardIconN
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      {cardIconNode(name).map(([tag, attributes], index) => createElement(tag, {key: index, ...attributes}))}
+      {keyed(cardIconNode(name), ([tag, attributes]) => `${tag}${JSON.stringify(attributes)}`).map(([key, [tag, attributes]]) =>
+        createElement(tag, {key, ...attributes}),
+      )}
     </g>
   )
 }

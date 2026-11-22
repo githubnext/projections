@@ -124,16 +124,16 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
     if (!init || !model) return <div className="pk-waiting" aria-busy="true" />
     if (model.model instanceof Error) return <Failure title="This comparison could not be presented" message={model.model.message} />
     return (
-      <ContentAspect.Provider value={reportAspect}>
-        <FrameFill.Provider value={fill}>
-          <FrameSizing.Provider value={sizing}>
-            <FrameViewport.Provider value={renderer.viewport}>
-              <StageInset.Provider value={stageInset}>
-                <StageCover.Provider value={stageCover}>
-                  <StageMaxHeight.Provider value={stageMaxHeight}>
-                    <PaintGate.Provider value={hold}>
+      <ContentAspect value={reportAspect}>
+        <FrameFill value={fill}>
+          <FrameSizing value={sizing}>
+            <FrameViewport value={renderer.viewport}>
+              <StageInset value={stageInset}>
+                <StageCover value={stageCover}>
+                  <StageMaxHeight value={stageMaxHeight}>
+                    <PaintGate value={hold}>
                       <RendererBoundary resetKey={init} onError={onError}>
-                        <LegendContext.Provider value={reportLegend}>
+                        <LegendContext value={reportLegend}>
                           <Renderer
                             init={init}
                             model={document!.model as ComparisonModel}
@@ -169,21 +169,22 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
                             environment={environment!}
                             requestDocument={requestDocument}
                           />
-                        </LegendContext.Provider>
+                        </LegendContext>
                       </RendererBoundary>
-                    </PaintGate.Provider>
-                  </StageMaxHeight.Provider>
-                </StageCover.Provider>
-              </StageInset.Provider>
-            </FrameViewport.Provider>
-          </FrameSizing.Provider>
-        </FrameFill.Provider>
-      </ContentAspect.Provider>
+                    </PaintGate>
+                  </StageMaxHeight>
+                </StageCover>
+              </StageInset>
+            </FrameViewport>
+          </FrameSizing>
+        </FrameFill>
+      </ContentAspect>
     )
   }
   return (
     <div
       ref={root}
+      role="presentation"
       className="pk"
       data-renderer={options.name}
       data-fill={filling ? '' : undefined}
@@ -195,9 +196,9 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
       data-reduced-motion={renderer.environment?.reducedMotion ? 'true' : undefined}
       onKeyDown={onKeyDown}
     >
-      <StageInsetTop.Provider value={stageInsetTop}>
-        <StageInsetBottom.Provider value={stageInsetBottom}>{content()}</StageInsetBottom.Provider>
-      </StageInsetTop.Provider>
+      <StageInsetTop value={stageInsetTop}>
+        <StageInsetBottom value={stageInsetBottom}>{content()}</StageInsetBottom>
+      </StageInsetTop>
     </div>
   )
 }

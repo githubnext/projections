@@ -1,6 +1,6 @@
 // Zooming and panning a fitted stage: the zoom actions, Ctrl/⌘-wheel and pinch, the scroll anchor, the text floor the
 // view opens at and the dot grid behind the content.
-import {useEffect, useLayoutEffect, useRef, useState} from 'react'
+import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react'
 import type {RefObject} from 'react'
 import {openingFloorPx} from '@githubnext/projections-renderer-sdk/presentation'
 import {placedAttribute} from '../focus.js'
@@ -23,7 +23,7 @@ const topLeft: ScrollStart = {x: 0, y: 0}
  * Returns a function that keeps the view where its caller just scrolled it.
  */
 export function useScrollAnchor(
-  scroller: RefObject<HTMLElement | null>,
+  scrollerRef: RefObject<HTMLElement | null>,
   scale: number,
   opening = false,
   start: ScrollStart = topLeft,
@@ -41,9 +41,11 @@ export function useScrollAnchor(
   // Not for an opening centred on a focus (`clearCover` false), which the placement already centres in the view.
   const clear = clearCover && cover?.length ? (insetTop ?? 0) : 0
   const current = useRef({scale, opening, start, onMove, clear})
-  current.current = {scale, opening, start, onMove, clear}
+  useLayoutEffect(() => {
+    current.current = {scale, opening, start, onMove, clear}
+  })
   // Places the view: at its start while it opens, else around the middle it had.
-  const place = useRef((element: HTMLElement, recentre: boolean) => {
+  const place = useCallback((element: HTMLElement, recentre: boolean) => {
     const {scale, opening, start, clear} = current.current
     if (!scale) return
     if (opening && !moved.current) {
@@ -63,9 +65,9 @@ export function useScrollAnchor(
       element.scrollTop = y * element.scrollHeight - element.clientHeight / 2
     } else return
     center.current = middle(element)
-  }).current
+  }, [])
   useEffect(() => {
-    const element = scroller.current
+    const element = scrollerRef.current
     if (!element) return
     // The view is placed here, so the shell's opening scroll (see `useOpeningReveal`) leaves it alone.
     element.setAttribute(placedAttribute, '')
@@ -91,16 +93,16 @@ export function useScrollAnchor(
       for (const type of inputEvents) element.removeEventListener(type, onInput)
       observer.disconnect()
     }
-  }, [scroller, place])
+  }, [scrollerRef, place])
   useLayoutEffect(() => {
-    const element = scroller.current
+    const element = scrollerRef.current
     if (element) place(element, true)
-  }, [scroller, scale, opening, start, clear, place])
+  }, [scrollerRef, scale, opening, start, clear, place])
   // The view as it is now is the one to keep: after its owner moves it, a later change keeps that middle.
-  return useRef(() => {
-    const element = scroller.current
+  return useCallback(() => {
+    const element = scrollerRef.current
     if (element) center.current = middle(element)
-  }).current
+  }, [scrollerRef])
 }
 
 /** Input by which a person scrolls a view themselves. */
@@ -122,10 +124,10 @@ function middle(element: HTMLElement): {x: number; y: number} {
  * Visually hidden HTML text (laid out at most 1 px wide or high, like `.sr-only`) doesn't count. Measured before paint
  * whenever `key` changes, for example the content's layout, never while scrubbing.
  */
-export function useOpeningFloor(root: RefObject<Element | null>, key: unknown): number {
+export function useOpeningFloor(rootRef: RefObject<Element | null>, key: unknown): number {
   const [scale, setScale] = useState(0)
   useLayoutEffect(() => {
-    const element = root.current
+    const element = rootRef.current
     if (!element) return
     let smallest = Infinity
     const walker = element.ownerDocument.createTreeWalker(element, NodeFilter.SHOW_TEXT)
@@ -135,9 +137,9 @@ export function useOpeningFloor(root: RefObject<Element | null>, key: unknown): 
       const size = parseFloat(getComputedStyle(text).fontSize)
       if (size > 0) smallest = Math.min(smallest, size)
     }
-    const next = Number.isFinite(smallest) ? openingFloorPx / smallest : 0
-    setScale(previous => (Math.abs(previous - next) < 1e-6 ? previous : next))
-  }, [root, key])
+    // To a millionth, so measuring the same text again doesn't render again.
+    setScale(Number.isFinite(smallest) ? Math.round((openingFloorPx / smallest) * 1e6) / 1e6 : 0)
+  }, [rootRef, key])
   return scale
 }
 
@@ -168,17 +170,20 @@ export function useStageZoom(
 ): StageZoom {
   // `undefined` until the person zooms or pans: the opening zoom, which follows the fit.
   const [chosen, setChosen] = useState<number>()
-  const held = useRef<unknown>(undefined)
-  if (options.hold && options.hold.key !== held.current && fit > 0 && options.hold.scale > 0) {
-    held.current = options.hold.key
+  const [held, setHeld] = useState<unknown>()
+  if (options.hold && options.hold.key !== held && fit > 0 && options.hold.scale > 0) {
+    setHeld(options.hold.key)
     const zoom = clampZoom(options.hold.scale / fit, fit)
     if (zoom !== chosen) setChosen(zoom)
   }
   const opening = options.opening ? clampZoom(options.opening.zoom, fit) : openingZoom(fit, options.floor ?? 0)
+  // The committed fit and zoom, for the zoom actions and gestures.
   const fitted = useRef(fit)
-  fitted.current = fit
   const current = useRef(opening)
-  current.current = chosen ?? opening
+  useLayoutEffect(() => {
+    fitted.current = fit
+    current.current = chosen ?? opening
+  })
   useControlActions(onAction, {
     'zoom-in': () => setChosen(clampZoom(current.current * zoomLimits.step, fitted.current)),
     'zoom-out': () => setChosen(clampZoom(current.current / zoomLimits.step, fitted.current)),
@@ -198,7 +203,7 @@ export function useStageZoom(
     return () => element.removeEventListener('wheel', onWheel)
   }, [scroller])
   // Panning keeps the opening zoom: a later resize no longer recomputes it.
-  const onMove = useRef(() => setChosen(previous => previous ?? current.current)).current
+  const onMove = useCallback(() => setChosen(previous => previous ?? current.current), [])
   // A larger stage raises the fit, which can lower the most a zoom may be.
   const shown = Math.min(chosen ?? opening, maxZoom(fit))
   const keep = useScrollAnchor(

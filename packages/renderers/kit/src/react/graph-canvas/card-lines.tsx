@@ -105,9 +105,14 @@ export function CardLines({node, text}: {node: TransitionNode; text: CardLinesLa
       <CardDetail node={node} text={text} />
       {relabeled ? (
         // The old name rises out as the new one rises in.
-        [node.before!, node.after!].map((item, index) => (
+        (
+          [
+            ['before', node.before!],
+            ['after', node.after!],
+          ] as const
+        ).map(([side, item], index) => (
           <text
-            key={index}
+            key={side}
             x={textLeft}
             y={labelY + (index ? relabelRise : 0) - relabelRise * node.local}
             {...labelFont}
@@ -133,7 +138,7 @@ function CardDetail({node, text}: {node: TransitionNode; text: CardLinesLayout})
     ? shownDetails.map((shown, index) =>
         shown ? (
           <text
-            key={index}
+            key={index ? 'after' : 'before'}
             x={textRight}
             y={kindY}
             textAnchor="end"

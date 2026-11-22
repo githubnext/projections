@@ -259,10 +259,10 @@ rule, how each unit was reached, and each job and suite with its `when` traced.
 The `changes` job uploads the plan as the `ci-plan` artifact, and
 [what CI runs for what](docs/maintainers/ci-plan.md) lists each case's plan.
 
-To change what runs, update the rules file and add a case to
-`tools/cli/test/ci-plan.cases.json`; `npm run tools -- test tools/cli` checks
-the file, its references, the workflow's gating and every case. A change to the
-rules runs everything.
+To change what runs, edit the rules, run `npm run tools -- ci replay` (how
+recent pull requests' plans change, in runner-minutes), and add a case to
+`tools/cli/test/ci-plan.cases.json`; `tools test tools/cli` checks the rules,
+the workflow's gating and every case. A rules change runs everything.
 
 Everything also runs on pushes to `main`, nightly, on manual runs (**Run
 workflow** on the Projections workflow), and when a pull request carries the

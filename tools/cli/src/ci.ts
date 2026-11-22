@@ -1,6 +1,7 @@
-// `ci`: what CI runs for a change and why (CONTRIBUTING.md#what-ci-runs), from the same plan CI's `changes` job makes.
+// `ci`: what CI runs for a change and why (CONTRIBUTING.md#what-ci-runs), from the same plan CI's `changes` job makes,
+// and how a change to the rules changes it.
 import {Cli, z} from 'incur'
-import {ciExplainReport} from './commands/work/ci.ts'
+import {ciExplainReport, ciReplayReport} from './commands/work/ci.ts'
 import {guard, next} from './outcome.ts'
 
 const trace = z.array(z.string()).describe('The rules that ran or skipped it: ✓ held, ✗ did not, indented by nesting')
@@ -50,6 +51,58 @@ export function ciCommands(root: string) {
           labels: c.options.labels.split(',').filter(Boolean),
         }),
       ),
+  })
+  const side = z.object({runners: z.number(), minutes: z.number(), macos: z.number()})
+  const difference = z.object({
+    name: z.string(),
+    added: z.array(z.string()),
+    removed: z.array(z.string()),
+    changedChecks: z.array(z.string()).describe('Checks in both whose suites, shards or filters differ'),
+    minutes: z.number(),
+  })
+  ci.command('replay', {
+    description:
+      'Before changing .github/ci-rules.json or the planner: the plans of the last merged pull requests and of every tracked file alone, under the rules and planner at --base and in the working tree, compared by check (suites, shards and filters included) and priced in runner-minutes',
+    hint: "Local only, not a CI step. Prices are measured job times in tools/cli/src/lib/ci-replay.ts. Plans use this checkout's graph for both sides.",
+    options: z.object({
+      base: z.string().default('origin/main').describe('The rules and planner to compare with, and whose history to replay'),
+      commits: z.number().default(40).describe('How many merged pull requests (first-parent commits of --base) to replay'),
+      files: z.boolean().default(true).describe('Also plan every tracked file alone'),
+    }),
+    examples: [
+      {description: 'The working tree against origin/main'},
+      {options: {commits: 100, files: false}, description: 'More history, no files'},
+    ],
+    output: z.object({
+      base: z.string(),
+      summary: z.array(z.string()),
+      commits: z.object({
+        before: side,
+        after: side,
+        selective: z.object({before: side, after: side}),
+        full: z.number(),
+        differences: z.array(difference),
+      }),
+      files: z
+        .object({
+          count: z.number(),
+          changed: z.number(),
+          minutes: z.number(),
+          kinds: z.array(
+            z.object({
+              count: z.number(),
+              added: z.array(z.string()),
+              removed: z.array(z.string()),
+              changed: z.array(z.string()),
+              examples: z.array(z.string()),
+            }),
+          ),
+        })
+        .optional(),
+      unpriced: z.array(z.string()).describe('Checks with no measured price, counted as free'),
+      next,
+    }),
+    run: c => guard(() => ciReplayReport(root, c.options)),
   })
   return ci
 }

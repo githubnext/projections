@@ -111,7 +111,7 @@ function diffTables({rows, union, state, lines}: Analysis, layout: SchemaLayout)
 /** Tags: entities no card holds, ordered by kind and label. */
 function diffTags({rows, union, state}: Analysis) {
   const label = (id: string) => state.entities.get(id)!.label
-  const tagIds = [...union.others].sort(
+  const tagIds = union.others.toSorted(
     (a, b) => compareIds(state.entities.get(a)!.kind, state.entities.get(b)!.kind) || compareIds(label(a), label(b)) || compareIds(a, b),
   )
   const tags: FrameTag[] = tagIds.map(id => {

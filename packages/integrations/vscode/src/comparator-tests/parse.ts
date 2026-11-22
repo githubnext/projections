@@ -15,7 +15,7 @@ import {
 /** `GET /api/comparator-tests`' body: its files, dropping malformed entries. */
 export function parseListing(body: unknown): ListedFile[] {
   const files = record(body)?.files
-  if (!Array.isArray(files)) throw new Error('The backend listed comparator tests in an unexpected shape')
+  if (!Array.isArray(files)) throw new TypeError('The backend listed comparator tests in an unexpected shape')
   return files.flatMap(entry => {
     const file = record(entry)
     if (!file || !repositoryPath(file.path)) return []
@@ -61,7 +61,7 @@ function failures(value: unknown): CaseFailure[] {
 /** `POST /api/comparator-tests/run`'s body: one result per file and projection. */
 export function parseResults(body: unknown): FileResult[] {
   const results = record(body)?.results
-  if (!Array.isArray(results)) throw new Error('The backend reported comparator test results in an unexpected shape')
+  if (!Array.isArray(results)) throw new TypeError('The backend reported comparator test results in an unexpected shape')
   return results.flatMap(entry => {
     const result = record(entry)
     if (!result || !repositoryPath(result.path)) return []

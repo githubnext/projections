@@ -37,7 +37,7 @@ export const rendererBlobDocument = (html: string, nonce: string): string =>
  * An opener that fetches the renderer document from the page's own origin and opens it with the page's script
  * `nonce`. Only same-origin HTML documents are opened.
  */
-export function fetchedRendererDocuments(nonce: string, view: Window = window): RendererDocumentOpener {
+export function fetchedRendererDocuments(nonce: string, view: Window = globalThis.window): RendererDocumentOpener {
   return async url => {
     if (url.origin !== view.location.origin) throw new Error(`${url.origin} is not this page's origin`)
     const response = await view.fetch(new URL(`${url.pathname}${url.search}`, url.origin), {credentials: 'omit'})

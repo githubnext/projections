@@ -57,7 +57,7 @@ export function addBookmark(
   const next = [
     ...bookmarks,
     {id, title: bookmark.title.slice(0, 1000) || id, projectionId: bookmark.projectionId, before: bookmark.before, after: bookmark.after},
-  ].sort((a, b) => String(a.id).localeCompare(String(b.id)))
+  ].toSorted((a, b) => String(a.id).localeCompare(String(b.id)))
   return {text: jsonText({format: 'projections.bookmarks', version: 0, bookmarks: next}, text), id}
 }
 

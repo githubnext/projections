@@ -90,7 +90,7 @@ export const trustText = {
 /** The built renderers in packages/renderers/*, by directory name: each one's package.json and built renderer.json. */
 export async function builtRenderers() {
   const found = []
-  for (const directory of (await readdir(join(root, 'packages/renderers'))).sort()) {
+  for (const directory of (await readdir(join(root, 'packages/renderers'))).toSorted()) {
     const manifestPath = `packages/renderers/${directory}/package.json`
     if (!(await exists(manifestPath))) continue
     const pkg = JSON.parse(await readFile(join(root, manifestPath), 'utf8'))

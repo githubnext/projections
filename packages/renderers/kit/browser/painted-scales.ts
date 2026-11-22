@@ -7,7 +7,7 @@ import {expect, type FrameLocator, type Page} from '@playwright/test'
 export async function recordPaintedScales(page: Page, selector: string): Promise<void> {
   await page.context().addInitScript(target => {
     const painted: string[] = []
-    Object.assign(window, {paintedScales: painted})
+    Object.assign(globalThis, {paintedScales: painted})
     const record = () => {
       const scale = document.querySelector(target)?.getAttribute('data-scale')
       if (scale && Number(scale) > 0 && painted.at(-1) !== scale) painted.push(scale)
@@ -32,6 +32,6 @@ export async function paintedScales(page: Page, frame: FrameLocator): Promise<{h
       {intervals: [250]},
     )
     .toBe(true)
-  const scales = await frame.locator('body').evaluate(() => (window as unknown as {paintedScales: string[]}).paintedScales)
+  const scales = await frame.locator('body').evaluate(() => (globalThis as unknown as {paintedScales: string[]}).paintedScales)
   return {height, scales}
 }

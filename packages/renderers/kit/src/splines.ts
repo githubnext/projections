@@ -151,7 +151,7 @@ function align(before: Spline, after: Spline): [Spline, Spline] {
   if (cached) return cached
   const a = segmentEnds(before),
     b = segmentEnds(after)
-  const cuts = [...new Set([...a, ...b].slice().sort((x, y) => x - y))].filter(
+  const cuts = [...new Set([...a, ...b].slice().toSorted((x, y) => x - y))].filter(
     (fraction, index, all) => fraction < 1 - cutTolerance && (!index || fraction - all[index - 1]! > cutTolerance),
   )
   let result: [Spline, Spline] = [splitAt(before, a, cuts), splitAt(after, b, cuts)]
@@ -266,7 +266,7 @@ export function arrowEnding(
       const onAxis = {x: tip.x - direction.x * run, y: tip.y - direction.y * run}
       const shaft = [...points.slice(0, -4), onAxis, ...lineSpline(onAxis, base).slice(1)]
       if (points.length > 4) {
-        shaft[shaft.length - 5] = {x: shaft[shaft.length - 5]!.x + onAxis.x - p.x, y: shaft[shaft.length - 5]!.y + onAxis.y - p.y}
+        shaft[shaft.length - 5] = {x: shaft.at(-5)!.x + onAxis.x - p.x, y: shaft.at(-5)!.y + onAxis.y - p.y}
       }
       return {shaft, tip, direction, base, head: head.path}
     }

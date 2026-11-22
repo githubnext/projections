@@ -66,7 +66,7 @@ function addPackage(project: Project, add: Add, pkg: Package): void {
   const exports = pkg.manifest.exports
   for (const [subpath, value] of mappings(pkg.manifest)) {
     if (value === null) continue
-    const paths = [...new Set(targets(value))].sort()
+    const paths = [...new Set(targets(value))].toSorted()
     if (!paths.length) throw new Error(`Unsupported package exports for ${code(pkg.name)} ${code(subpath)}; set \`inputs.entrypoints\``)
     for (const target of paths) {
       if (!target.startsWith('./') && exports !== undefined) {

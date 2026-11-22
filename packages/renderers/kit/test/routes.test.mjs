@@ -534,7 +534,7 @@ test('ports on a side divide it evenly (two routes enter at its thirds), clear o
         const point = layout.points.get(target),
           size = layout.sizes.get(target)
         // In the order the routes come from: where they leave their sources.
-        const ordered = [...list].sort((a, b) => across(a.route[0]) - across(b.route[0]))
+        const ordered = [...list].toSorted((a, b) => across(a.route[0]) - across(b.route[0]))
         const ports = ordered.map(({route}) => across(route.at(-1)))
         // Routes from one source share a port and may take either order.
         const distinct = ordered.every(
@@ -542,14 +542,14 @@ test('ports on a side divide it evenly (two routes enter at its thirds), clear o
         )
         const length = axis.y ? size.width : size.height
         const issues = portIssues(
-          distinct ? ports : [...ports].sort((a, b) => a - b),
+          distinct ? ports : ports.toSorted((a, b) => a - b),
           across(point),
           length,
           length / (ports.length + 1),
           portInset,
         )
         // As far apart as the side allows: its equal parts, or as many as fit between the corners' insets.
-        const sorted = [...ports].sort((a, b) => a - b)
+        const sorted = ports.toSorted((a, b) => a - b)
         const step = Math.min(length / (ports.length + 1), (length - 2 * portInset) / (ports.length - 1))
         if (ports.length > 1 && Math.abs(sorted[1] - sorted[0] - step) > 0.5) {
           issues.push(`spacing ${(sorted[1] - sorted[0]).toFixed(1)}, not ${step.toFixed(1)}`)

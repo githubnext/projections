@@ -80,7 +80,7 @@ export function luminance(color: Rgba): number {
 export function contrast(foreground: Rgba, background: Rgba): number {
   const back = background.a < 1 ? composite(background, {r: 255, g: 255, b: 255, a: 1}) : background
   const front = foreground.a < 1 ? composite(foreground, back) : foreground
-  const [light, dark] = [luminance(front), luminance(back)].sort((x, y) => y - x) as [number, number]
+  const [light, dark] = [luminance(front), luminance(back)].toSorted((x, y) => y - x) as [number, number]
   return (light + 0.05) / (dark + 0.05)
 }
 

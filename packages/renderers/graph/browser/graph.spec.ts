@@ -159,7 +159,7 @@ test('a graph too small to read fitted opens at the 8 px text floor, keeps one f
   expect(opening.scroll[1]).toBe(0)
   // Both endpoints share the framing: the scale, viewBox and scroll stay put through the transition and back.
   const ramp = Array.from({length: 21}, (_, index) => index / 20)
-  for (const values of [ramp, [...ramp].reverse(), [0.7, 0.25, 1, 0.45, 0]]) {
+  for (const values of [ramp, ramp.toReversed(), [0.7, 0.25, 1, 0.45, 0]]) {
     await renderer.scrub(values, async () => {
       const {zoom, scale, viewBox, scroll} = await framing()
       expect({zoom, scale, viewBox, scroll}).toEqual({

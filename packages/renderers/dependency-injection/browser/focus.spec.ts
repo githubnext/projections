@@ -22,7 +22,7 @@ const cardState = (card: Element): CardState => {
   const outlined = [card, ...card.querySelectorAll('*')]
     .filter(node => {
       const style = getComputedStyle(node)
-      return style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0
+      return style.outlineStyle !== 'none' && Number.parseFloat(style.outlineWidth) > 0
     })
     .map(node => node.getAttribute('class') ?? node.tagName)
   // The ring is the card surface's own stroke: the surface is the marked edge, and its stroke shows the state.
@@ -132,7 +132,7 @@ test("a link's origin dot shows its ring color where later links leave the same 
     canvas.height = image.height
     const context = canvas.getContext('2d')!
     context.drawImage(image, 0, 0)
-    return [...context.getImageData(0, 0, 1, 1).data.slice(0, 3)]
+    return Array.from(context.getImageData(0, 0, 1, 1).data.slice(0, 3))
   }, shot.toString('base64'))
   const expected = fill
     .match(/\d+(?:\.\d+)?/gu)!

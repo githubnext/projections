@@ -54,7 +54,7 @@ export function property(project, checker, expression, key, seen = new Set()) {
   if (seen.has(node)) return undefined
   seen.add(node)
   if (!ts.isObjectLiteralExpression(node)) return undefined
-  for (const member of [...node.properties].reverse()) {
+  for (const member of [...node.properties].toReversed()) {
     if (ts.isSpreadAssignment(member)) {
       const found = property(project, checker, member.expression, key, seen)
       if (found) return found

@@ -24,7 +24,7 @@ const helpers = {
   python: testCase => [
     python,
     [path('extractor-helpers/driver.py'), testCase],
-    {PYTHONPATH: path('../python'), PYTHONDONTWRITEBYTECODE: '1', PYTHONIOENCODING: 'utf-8'},
+    {PYTHONPATH: path('../python'), PYTHONDONTWRITEBYTECODE: '1', PYTHONIOENCODING: 'utf8'},
   ],
 }
 

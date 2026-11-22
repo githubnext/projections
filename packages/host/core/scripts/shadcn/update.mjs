@@ -140,7 +140,7 @@ async function main() {
   const tracked = (await readdir(upstream))
     .filter(file => file.endsWith('.json') && file !== 'manifest.json')
     .map(file => file.slice(0, -'.json'.length))
-    .sort()
+    .toSorted()
   if (options.check && options['dry-run']) throw new UsageError('Pass --check or --dry-run, not both')
   const names = positionals.length ? positionals : tracked
   const release = await resolveRelease(manifest, positionals.length > 0 && names.every(name => !tracked.includes(name)))

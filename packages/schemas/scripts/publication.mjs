@@ -54,9 +54,9 @@ export async function publication() {
   const {emit, schemaDocuments} = await import('../dist/typebox/index.js')
   const problems = []
   const paths = readdirSync(directory, {recursive: true})
-    .map(path => path.split('\\').join('/'))
+    .map(path => path.replaceAll('\\', '/'))
     .filter(path => path.endsWith('.json'))
-    .sort()
+    .toSorted()
   const files = paths.map(path => {
     const bytes = readFileSync(join(directory, path))
     return {path, bytes, schema: JSON.parse(bytes.toString('utf8'))}

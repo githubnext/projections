@@ -112,8 +112,8 @@ try {
       const errors = []
       page.on('pageerror', error => errors.push(error.message))
       await page.goto(`http://127.0.0.1:${server.address().port}/`)
-      await page.waitForFunction(() => typeof window.runArtifactChecks === 'function')
-      const result = await page.evaluate(() => window.runArtifactChecks())
+      await page.waitForFunction(() => typeof globalThis.runArtifactChecks === 'function')
+      const result = await page.evaluate(() => globalThis.runArtifactChecks())
       assert.deepEqual(result.extraction, before)
       assert.deepEqual(result.compared, comparison)
       assert.deepEqual(result.failures, [true, true])

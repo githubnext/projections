@@ -183,7 +183,7 @@ export class ExtractionCoordinator {
 
   /** Forgets the done extractions `drop` picks, so they are extracted again when next shown. */
   readonly forget = (drop: (id: string, ref: string, definition: string) => boolean) => {
-    for (const key of [...this.#extracted.keys()]) {
+    for (const key of Array.from(this.#extracted.keys())) {
       const [id, definition, ref] = JSON.parse(key) as [string, string, string]
       if (drop(id, ref, definition)) this.#extracted.delete(key)
     }

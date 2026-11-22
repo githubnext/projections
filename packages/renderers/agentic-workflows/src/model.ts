@@ -177,7 +177,7 @@ function workflowItem(row: EntityChange<Entity>, side: Side, findings: Finding[]
       row.after && spec.read(dataOf(row.after), row.before && dataOf(row.before)),
       side,
     ),
-    directions: [...new Set(findings.filter(finding => findingSections[finding.name] === spec.id).map(directionOf))].sort(),
+    directions: [...new Set(findings.filter(finding => findingSections[finding.name] === spec.id).map(directionOf))].toSorted(),
   }))
   return {row, entity, ...(row.before ? {before: row.before} : {}), ...(row.after ? {after: row.after} : {}), sections, findings}
 }
@@ -210,7 +210,7 @@ function categories(workflows: readonly WorkflowItem[], side: Side): MatrixCateg
       return {
         section,
         title,
-        columns: [...columns.values()].sort((a, b) => Number(b.gate) - Number(a.gate) || collator.compare(a.key, b.key)),
+        columns: [...columns.values()].toSorted((a, b) => Number(b.gate) - Number(a.gate) || collator.compare(a.key, b.key)),
       }
     })
     .filter(category => category.columns.length > 0)
@@ -230,7 +230,7 @@ export function buildModel(model: ComparisonModel, side: Side, metadata?: unknow
     .filter(row => (row.after ?? row.before)!.kind === 'workflow')
     .map(row => workflowItem(row, side, findings(row)))
     .filter((item): item is WorkflowItem => item !== undefined)
-    .sort(byLabel)
+    .toSorted(byLabel)
   const groupRows = model.entities.filter(row => (row.after ?? row.before)!.kind === 'group')
   const groupOf = (item: WorkflowItem) => {
     const group = dataOf(item.entity).group
@@ -242,7 +242,7 @@ export function buildModel(model: ComparisonModel, side: Side, metadata?: unknow
       const title = (row.after ?? row.before)!.label
       return {row, title, workflows: workflows.filter(item => groupOf(item) === title)}
     })
-    .sort((a, b) => collator.compare(a.title, b.title))
+    .toSorted((a, b) => collator.compare(a.title, b.title))
   const loose = workflows.filter(item => !groups.some(group => group.workflows.includes(item)))
   if (loose.length || !groups.length) groups.push({title: groups.length ? 'Other workflows' : 'Workflows', workflows: loose})
   return {side, groups, categories: categories(workflows, side), interpreted: found !== undefined}

@@ -12,8 +12,9 @@ const scriptPath = /\.(?:[cm]?js|ts)$/u
 function scriptsNamed(root: string, text: string, from: string, directory: string): string[] {
   const named = [...text.matchAll(/(?:^|[\s'"\x60(])((?:\.{1,2}\/|packages\/|tools\/|scripts\/)[\w./-]+)/gu)].map(match => match[1]!)
   return named
-    .filter(path => scriptPath.test(path))
-    .flatMap(path => [posix.normalize(posix.join(path.startsWith('.') ? from : directory, path)), posix.normalize(path)])
+    .flatMap(path =>
+      scriptPath.test(path) ? [posix.normalize(posix.join(path.startsWith('.') ? from : directory, path)), posix.normalize(path)] : [],
+    )
     .filter(path => !path.startsWith('..') && existsSync(join(root, path)))
 }
 
@@ -36,14 +37,14 @@ export function buildDependencies(root: string, units: readonly Unit[], unit: Un
     }
     queue.push(...scriptsNamed(root, text, posix.dirname(file), '.'))
   }
-  return [...found].sort()
+  return [...found].toSorted()
 }
 
 /** The units with their build dependencies added to `dependsOn`. */
 export function withBuildDependencies(root: string, units: readonly Unit[]): Unit[] {
   return units.map(unit =>
     unit.kinds.includes('npm')
-      ? {...unit, dependsOn: [...new Set([...unit.dependsOn, ...buildDependencies(root, units, unit)])].sort()}
+      ? {...unit, dependsOn: [...new Set([...unit.dependsOn, ...buildDependencies(root, units, unit)])].toSorted()}
       : unit,
   )
 }

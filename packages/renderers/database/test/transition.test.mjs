@@ -40,9 +40,9 @@ const content = frame => ({
       item.entity.label,
       item.columns.map(column => `${column.role ?? '-'}:${column.entity.label}:${column.entity.data?.type}`),
     ])
-    .sort(),
-  links: frame.links.map(link => link.key).sort(),
-  tags: frame.tags.map(tag => (tag.label.mix < 0.5 ? tag.label.from : tag.label.to)).sort(),
+    .toSorted(),
+  links: frame.links.map(link => link.key).toSorted(),
+  tags: frame.tags.map(tag => (tag.label.mix < 0.5 ? tag.label.from : tag.label.to)).toSorted(),
 })
 
 test('orders columns primary key, then foreign keys, then by name', async () => {
@@ -53,7 +53,7 @@ test('orders columns primary key, then foreign keys, then by name', async () => 
   assert.deepEqual(order.slice(0, 3), ['pk:Id', 'fk:CustomerId', 'fk:OrganizationId'])
   const rest = order.slice(3)
   assert.ok(rest.every(entry => entry.startsWith('-:')))
-  assert.deepEqual(rest, [...rest].sort())
+  assert.deepEqual(rest, rest.toSorted())
   // The table's indexes follow its columns as rows of the card; its single-column primary key is the Id column's marker.
   const kinds = rows.map(row => row.kind)
   assert.equal(kinds.indexOf('key'), kinds.lastIndexOf('column') + 1)
@@ -170,7 +170,7 @@ for (const available of [1100, 980, 480]) {
     const final = transition(1)
     const frames = samples()
     let previous
-    for (const progress of [...frames, ...frames.slice().reverse()]) {
+    for (const progress of [...frames, ...frames.slice().toReversed()]) {
       const frame = transition(progress)
       assert.equal(frame.width, final.width, 'framing is stable')
       assert.equal(frame.height, final.height, 'framing is stable')
@@ -508,7 +508,7 @@ test('a key row is tall enough for its columns and name whole on a narrow card',
   const named = loan.columns.find(row => row.kind === 'key' && row.key.name === 'loan_member_due')
   assert.ok(named.height > schemaMetrics.row, 'the row grows to show its name under its columns')
   // Rows stack without overlapping, and the card holds them all.
-  const rows = [...loan.columns].sort((a, b) => a.top - b.top)
+  const rows = [...loan.columns].toSorted((a, b) => a.top - b.top)
   for (let index = 1; index < rows.length; index++) assert.ok(rows[index].top >= rows[index - 1].top + rows[index - 1].height - 1e-6)
   assert.ok(rows.at(-1).top + rows.at(-1).height <= loan.box.height + 1e-6)
 })
@@ -667,7 +667,7 @@ test('links meeting one row on one side spread evenly over a band centred on its
           const row = ends[0].column === undefined ? undefined : card.columns.find(item => item.change.id === ends[0].column)
           const anchor = anchorY(card.box, row?.top, card.header)
           const top = row ? card.box.y + row.top : card.box.y
-          const ordered = [...ends].sort(
+          const ordered = [...ends].toSorted(
             (p, q) => p.approach - q.approach || (p.link < q.link ? -1 : p.link > q.link ? 1 : p.end < q.end ? -1 : 1),
           )
           if (ends.length > 1) spread++

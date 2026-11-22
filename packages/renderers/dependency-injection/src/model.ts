@@ -78,7 +78,7 @@ export function buildDiModel(state: Pick<DependencyInjectionExtraction, 'entitie
     return node && isKind(node, 'registration') ? node : undefined
   }
   for (const service of state.entities.filter(node => isKind(node, 'service'))) {
-    const registrationIds = [...(registrations.get(service.id) ?? [])].sort((a, b) => {
+    const registrationIds = (registrations.get(service.id) ?? []).toSorted((a, b) => {
       const left = registrationOf(a)?.data.ordinal ?? 0
       const right = registrationOf(b)?.data.ordinal ?? 0
       return left === right ? compareIds(a, b) : left - right

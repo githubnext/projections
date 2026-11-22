@@ -39,7 +39,7 @@ export function compose(input: Composition): Extraction {
   for (const link of links) if (kept.has(link.from) && kept.has(link.to)) items.addLink(link)
 
   const unique = <T extends {id: string}>(values: T[]): T[] =>
-    [...new Map(values.map(item => [item.id, item])).values()].sort((a, b) => compareIds(a.id, b.id))
+    [...new Map(values.map(item => [item.id, item])).values()].toSorted((a, b) => compareIds(a.id, b.id))
   const metadata: Record<string, Json> = {
     nestjs: input.nestVersion,
     rootModule: input.rootName,

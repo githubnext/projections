@@ -8,7 +8,7 @@ export interface RowPlace {
 
 /** Each row's place in its card, from the rows' tops. */
 export function rowPlaces(columns: readonly FrameColumn[]): Map<string, RowPlace> {
-  const sorted = [...columns].sort((a, b) => a.top - b.top)
+  const sorted = columns.toSorted((a, b) => a.top - b.top)
   return new Map(sorted.map((row, index) => [row.change.id, {first: index === 0, last: index === sorted.length - 1}]))
 }
 

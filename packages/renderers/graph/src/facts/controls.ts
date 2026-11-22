@@ -20,7 +20,7 @@ export function drawnKinds(model: ComparisonModel, rendererName: string): string
   const kinds = new Set<string>()
   for (const row of model.relationships) for (const side of [row.before, row.after]) if (side) kinds.add(side.kind)
   if (rendererName === 'architecture') kinds.delete('contains')
-  return [...kinds].sort()
+  return [...kinds].toSorted()
 }
 
 /**

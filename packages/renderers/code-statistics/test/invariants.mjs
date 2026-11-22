@@ -16,9 +16,9 @@ export function measureRenderedFrame(root = document) {
       label: slot.querySelector('.stat-label, .entity-link, .stat-values-row > span')?.textContent ?? '',
       top,
       height,
-      size: parseFloat(slot.style.gridTemplateRows),
+      size: Number.parseFloat(slot.style.gridTemplateRows),
       opacity: Number(slot.style.opacity),
-      width: bar ? parseFloat(bar.style.width) : null,
+      width: bar ? Number.parseFloat(bar.style.width) : null,
       // A share row's colour is its slice's.
       colour: bar
         ? getComputedStyle(bar).backgroundColor

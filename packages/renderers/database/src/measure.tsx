@@ -40,19 +40,19 @@ export function useTextMeasure(): {probe: ReactNode; measure?: MeasureText; chro
       }
       const width = (selector: string) => element.querySelector<HTMLElement>(selector)!.getBoundingClientRect().width
       const px = (selector: string, property: string) =>
-        parseFloat(getComputedStyle(element.querySelector(selector)!).getPropertyValue(property)) || 0
+        Number.parseFloat(getComputedStyle(element.querySelector(selector)!).getPropertyValue(property)) || 0
       const status = getComputedStyle(element.querySelector('[data-measure="status"]')!)
       const chrome: TextChrome = {
         headerPad: px('header', 'padding-left'),
         headerGap: px('header', 'column-gap'),
         // A status part: an icon 1em square, 0.3em before its word (the kit's .pk-status-part); parts are a gap apart.
-        statusIcon: 1.3 * parseFloat(status.fontSize),
-        statusGap: parseFloat(status.columnGap) || 8,
+        statusIcon: 1.3 * Number.parseFloat(status.fontSize),
+        statusGap: Number.parseFloat(status.columnGap) || 8,
         // A value pill (the kit's .pk-change-pill): label padding and a border each side; values a space-1 apart.
         pillPad:
-          2 * (parseFloat(getComputedStyle(element).getPropertyValue('--projections-label-padding-x')) || 7) +
-          2 * (parseFloat(getComputedStyle(element).getPropertyValue('--projections-border-width')) || 1),
-        valueGap: parseFloat(getComputedStyle(element).getPropertyValue('--projections-space-1')) || 4,
+          2 * (Number.parseFloat(getComputedStyle(element).getPropertyValue('--projections-label-padding-x')) || 7) +
+          2 * (Number.parseFloat(getComputedStyle(element).getPropertyValue('--projections-border-width')) || 1),
+        valueGap: Number.parseFloat(getComputedStyle(element).getPropertyValue('--projections-space-1')) || 4,
         rowPadLeft: px('.database-measure-row.column', 'padding-left'),
         rowPadRight: px('.database-measure-row.column', 'padding-right'),
         rowGap: px('.database-measure-row.column', 'column-gap'),

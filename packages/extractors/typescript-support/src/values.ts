@@ -7,7 +7,7 @@ export const compareIds = (left: string, right: string): number => (left < right
 export function stableJson(value: unknown): string {
   return JSON.stringify(value, (_, item: unknown) =>
     item !== null && typeof item === 'object' && !Array.isArray(item)
-      ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => compareIds(a, b)))
+      ? Object.fromEntries(Object.entries(item).toSorted(([a], [b]) => compareIds(a, b)))
       : item,
   )
 }

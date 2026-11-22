@@ -26,7 +26,7 @@ export interface SnapshotSettings extends SnapshotFrameSettings, SnapshotPlaybac
 }
 export type SnapshotMode = Extract<ComparisonMode, 'animated' | 'side-by-side' | 'diff'>
 
-const modes: readonly SnapshotMode[] = ['animated', 'side-by-side', 'diff']
+const modes: ReadonlySet<SnapshotMode> = new Set(['animated', 'side-by-side', 'diff'])
 
 /** Reads the snapshot settings from the page's query string, rejecting anything unexpected. */
 export function snapshotSettings(search: string): SnapshotSettings {
@@ -35,7 +35,7 @@ export function snapshotSettings(search: string): SnapshotSettings {
   if (theme !== 'light' && theme !== 'dark') throw new Error(`Unknown snapshot theme ${theme}`)
   const framing = snapshotFrameSettings(query)
   const mode = query.get('mode') ?? undefined
-  if (mode !== undefined && !modes.includes(mode as SnapshotMode)) throw new Error(`Unknown snapshot mode ${mode}`)
+  if (mode !== undefined && !modes.has(mode as SnapshotMode)) throw new Error(`Unknown snapshot mode ${mode}`)
   const progressText = query.get('progress')
   const progress = progressText === null ? undefined : Number(progressText)
   if (progress !== undefined && (progressText === '' || !Number.isFinite(progress) || progress < 0 || progress > 1)) {

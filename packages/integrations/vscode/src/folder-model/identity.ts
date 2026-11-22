@@ -35,7 +35,7 @@ export class WorkingIdentities {
         // The changes rule, below.
       }
     }
-    const tree = [...records].reverse().find(record => record.tree)?.tree
+    const tree = records.toReversed().find(record => record.tree)?.tree
     return tree ? {tree} : undefined
   }
 }

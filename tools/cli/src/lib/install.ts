@@ -73,9 +73,9 @@ export function onPathList(directory: string, path = process.env.PATH ?? ''): bo
 export function tarballSpec(projectDirectory: string, tarball: string): string {
   const from = canonical(projectDirectory)
   const to = canonical(tarball)
-  const fromParts = from.slice(parse(from).root.length).split(sep).filter(Boolean)
-  const toParts = to.slice(parse(to).root.length).split(sep).filter(Boolean)
-  const shared = parse(from).root === parse(to).root && fromParts[0] !== undefined && fromParts[0] === toParts[0]
+  const fromTop = from.slice(parse(from).root.length).split(sep).find(Boolean)
+  const toTop = to.slice(parse(to).root.length).split(sep).find(Boolean)
+  const shared = parse(from).root === parse(to).root && fromTop !== undefined && fromTop === toTop
   const path = shared ? relative(from, to) : to
   return `file:${path.split(sep).join('/')}`
 }

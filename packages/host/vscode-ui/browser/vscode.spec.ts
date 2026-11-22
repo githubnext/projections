@@ -13,9 +13,9 @@ test.describe('the VS Code UI renders in every captured VS Code theme', () => {
       const classes = (await page.locator('.sb-vscode-frame').getAttribute('class'))!.split(/\s+/u)
       const kind = classes.includes('vscode-high-contrast-light')
         ? 'high-contrast-light'
-        : classes.includes('vscode-high-contrast')
+        : classes.has('vscode-high-contrast')
           ? 'high-contrast'
-          : classes.includes('vscode-light')
+          : classes.has('vscode-light')
             ? 'light'
             : 'dark'
       await expect(root).toHaveAttribute('data-vscode-theme-kind', kind)

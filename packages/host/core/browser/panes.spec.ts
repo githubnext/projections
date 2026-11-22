@@ -19,7 +19,7 @@ async function open(page: Page, query: string) {
 async function watchPulse(frame: FrameLocator, id: string) {
   await frame.locator('body').evaluate((body, watchedId) => {
     const record = {seen: false, start: 0, end: 0}
-    ;(window as unknown as {pulse: typeof record}).pulse = record
+    ;(globalThis as unknown as {pulse: typeof record}).pulse = record
     new MutationObserver(records => {
       for (const change of records) {
         const element = change.target as Element
@@ -31,7 +31,7 @@ async function watchPulse(frame: FrameLocator, id: string) {
       }
     }).observe(body, {subtree: true, attributes: true, attributeFilter: ['data-projections-pulse']})
   }, id)
-  return () => frame.locator('body').evaluate(() => (window as unknown as {pulse: {seen: boolean; start: number; end: number}}).pulse)
+  return () => frame.locator('body').evaluate(() => (globalThis as unknown as {pulse: {seen: boolean; start: number; end: number}}).pulse)
 }
 
 test('side by side draws no connector by default and offers no setting for one', async ({page}) => {

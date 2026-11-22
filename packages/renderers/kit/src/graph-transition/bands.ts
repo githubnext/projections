@@ -17,7 +17,7 @@ export function layerBands(layout: GraphLayout, orientation: 'vertical' | 'horiz
       const size = layout.sizes.get(id)!
       return {id, start: point[flow] - size[depth] / 2, depth: size[depth]}
     })
-    .sort((a, b) => a.start - b.start)
+    .toSorted((a, b) => a.start - b.start)
   const layers: (typeof cards)[] = []
   for (const card of cards) {
     const layer = layers.at(-1)

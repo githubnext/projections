@@ -74,6 +74,8 @@ addEventListener('message', event => {
     } catch (error) {
       port.postMessage({id: request.id, error: error instanceof Error ? error.message : String(error)})
     }
-  }
+  })
+  // Listening with addEventListener, unlike onmessage, needs the port started.
+  port.start()
   port.postMessage({id: 0, result: 'connected'})
 })

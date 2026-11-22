@@ -121,7 +121,7 @@ export function presentComparison(before: Extraction, after: Extraction, compari
       if (!prior || referenced.before.has(item.id)) throw new Error(`Comparison omits ${collection} item ${item.id}`)
       rows.push({id: unique(item.id), before: prior, after: item, status: 'unchanged', correspondence: 'exact'})
     }
-    return rows.sort((a, b) => compareIds(a.id, b.id))
+    return rows.toSorted((a, b) => compareIds(a.id, b.id))
   }
   const rows = {
     entities: present('entities', before.entities, after.entities),

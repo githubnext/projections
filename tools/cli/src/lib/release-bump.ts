@@ -45,7 +45,7 @@ export function setReleaseVersion(root: string, next: string): string[] {
   const releasedCrates = new Set(crates.filter(crate => crate.released).map(crate => crate.name))
   for (const crate of crates) {
     let text = crate.text
-    for (const dependency of pathDependencies(crate.text).reverse()) {
+    for (const dependency of pathDependencies(crate.text).toReversed()) {
       if (releasedCrates.has(dependency.name)) text = versionAt(text, dependency.index)
     }
     update(root, crate.file, crate.text, text, changed)
@@ -53,7 +53,7 @@ export function setReleaseVersion(root: string, next: string): string[] {
   const lock = readText(root, 'Cargo.lock')
   if (lock !== undefined) {
     let text = lock
-    for (const locked of lockedCrates(lock).reverse()) if (releasedCrates.has(locked.name)) text = versionAt(text, locked.index)
+    for (const locked of lockedCrates(lock).toReversed()) if (releasedCrates.has(locked.name)) text = versionAt(text, locked.index)
     update(root, 'Cargo.lock', lock, text, changed)
   }
 

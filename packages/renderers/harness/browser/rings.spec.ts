@@ -107,7 +107,7 @@ test('the rings check passes well-formed items and names the fix for ill-formed 
 
 test('a ring is styling on the item: it moves, scales and scrolls with it in the same frame', async ({page}) => {
   await open(page, 'approach=sdk')
-  await page.evaluate(() => window.ring('plain', 'selected'))
+  await page.evaluate(() => globalThis.ring('plain', 'selected'))
   const samples = await page.evaluate(
     () =>
       new Promise<{outline: string; offset: string}[]>(resolve => {

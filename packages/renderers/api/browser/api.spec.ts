@@ -96,7 +96,7 @@ test('without highlighting the diff keeps its content and layout and drops only 
       status: [...new Set([...element.querySelectorAll('.pk-status-part')].map(part => getComputedStyle(part).color))],
       boxes: [...element.querySelectorAll('[data-entity-id], .api-declaration-footer')].map(node => {
         const box = node.getBoundingClientRect()
-        return [box.x, box.y, box.width, box.height].join()
+        return [box.x, box.y, box.width, box.height].join(',')
       }),
     }))
   await expect(view).toHaveAttribute('data-highlighting', 'off')
@@ -255,7 +255,7 @@ for (const [mode, width] of [
       width,
     })
     const lines = await nameLines(renderer.frame.locator('.api-view'))
-    expect(lines.map(line => line.id).sort()).toEqual([
+    expect(lines.map(line => line.id).toSorted()).toEqual([
       'ClientOptions.retries',
       'RequestConfiguration.maximumRedirectsBeforeFailing',
       'getJson',
@@ -332,7 +332,7 @@ test('a classified comparison states compatibility as text, lists breaking chang
       .locator('[data-entity-id]')
       .evaluateAll(elements => elements.map(row => row.querySelector('.api-compatibility')?.getAttribute('data-compatibility') ?? 'none'))
   const listed = await levels()
-  expect(listed.slice(0, 8)).toEqual(Array(8).fill('breaking'))
+  expect(listed.slice(0, 8)).toEqual(Array.from({length: 8}, () => 'breaking'))
   expect(listed.slice(8)).not.toContain('breaking')
   const breaking = view.locator('[data-entity-id]').first()
   await expect(breaking.locator('.api-compatibility')).toHaveText('Breaking')
@@ -360,5 +360,5 @@ test('a classified comparison states compatibility as text, lists breaking chang
 
   await renderer.setOptions({breakingOnly: true})
   await expect(view.locator('[data-entity-id]')).toHaveCount(8)
-  expect(await levels()).toEqual(Array(8).fill('breaking'))
+  expect(await levels()).toEqual(Array.from({length: 8}, () => 'breaking'))
 })

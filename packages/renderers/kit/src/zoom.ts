@@ -1,5 +1,4 @@
 import {defineControls} from '@githubnext/projections-renderer-sdk/protocol'
-import {openingFloorPx} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * Zoom actions the host draws for a scalable stage (see `useStageZoom`); pass
@@ -43,7 +42,7 @@ export function clampZoom(value: number, fit: number): number {
  */
 export type ScrollStart = {x: number; y: number} | ((view: {scale: number; width: number; height: number}) => {left: number; top: number})
 
-export {openingFloorPx}
+export {openingFloorPx} from '@githubnext/projections-renderer-sdk/presentation'
 export {contentStart} from './content-start.js'
 export type {ContentBox} from './content-start.js'
 

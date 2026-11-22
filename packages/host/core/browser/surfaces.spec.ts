@@ -35,17 +35,17 @@ function installColorProbe(page: Page) {
       probe.remove()
       return rgba(value)
     }
-    Object.assign(window, {__pj: {rgba, token}})
+    Object.assign(globalThis, {__pj: {rgba, token}})
   })
 }
 
 /** Background and edge colors of an element, each as sRGB channels and alpha. */
 async function paint(locator: Locator) {
   return locator.evaluate(element => {
-    const {rgba} = (window as unknown as {__pj: {rgba: (color: string) => number[]}}).__pj
+    const {rgba} = (globalThis as unknown as {__pj: {rgba: (color: string) => number[]}}).__pj
     const style = getComputedStyle(element)
     const side = (name: 'top' | 'right' | 'bottom' | 'left') =>
-      parseFloat(style.getPropertyValue(`border-${name}-width`)) > 0 ? rgba(style.getPropertyValue(`border-${name}-color`)) : null
+      Number.parseFloat(style.getPropertyValue(`border-${name}-width`)) > 0 ? rgba(style.getPropertyValue(`border-${name}-color`)) : null
     return {background: rgba(style.backgroundColor), top: side('top'), bottom: side('bottom'), left: side('left')}
   })
 }
@@ -61,7 +61,7 @@ const tokenValue = (page: Page, name: string) =>
 async function tintedRegions(page: Page) {
   return page.evaluate(
     ({scopes, changes}) => {
-      const {rgba, token} = (window as unknown as {__pj: {rgba: (color: string) => number[]; token: (name: string) => number[]}}).__pj
+      const {rgba, token} = (globalThis as unknown as {__pj: {rgba: (color: string) => number[]; token: (name: string) => number[]}}).__pj
       const same = (x: number[], y: number[]) => x.every((channel, index) => Math.abs(channel - y[index]!) <= 2)
       const fills = [
         ...changes.map(change => ({hue: change, fill: token(`${change}-muted`), edge: token(`${change}-border`)})),
@@ -86,9 +86,9 @@ async function tintedRegions(page: Page) {
         }
         const edges = [
           ...(['top', 'right', 'bottom', 'left'] as const)
-            .filter(side => parseFloat(style.getPropertyValue(`border-${side}-width`)) >= 1)
+            .filter(side => Number.parseFloat(style.getPropertyValue(`border-${side}-width`)) >= 1)
             .map(side => rgba(style.getPropertyValue(`border-${side}-color`))),
-          ...(parseFloat(style.outlineWidth) >= 1 && style.outlineStyle !== 'none' ? [rgba(style.outlineColor)] : []),
+          ...(Number.parseFloat(style.outlineWidth) >= 1 && style.outlineStyle !== 'none' ? [rgba(style.outlineColor)] : []),
           ...colors(style.boxShadow),
         ].filter(color => same(color, match.edge)).length
         regions.push({element: label, hue: match.hue, edges})

@@ -85,8 +85,8 @@ export function placeUnlinked(
   const extent = {flow: size[depth], across: size[breadth]}
   const hinted = [...unlinked]
     .filter(id => hints.has(id))
-    .sort((a, b) => hints.get(a)![across] - hints.get(b)![across] || hints.get(a)![flow] - hints.get(b)![flow] || compareIds(a, b))
-  const rest = [...unlinked].filter(id => !hints.has(id)).sort(compareIds)
+    .toSorted((a, b) => hints.get(a)![across] - hints.get(b)![across] || hints.get(a)![flow] - hints.get(b)![flow] || compareIds(a, b))
+  const rest = [...unlinked].filter(id => !hints.has(id)).toSorted(compareIds)
   const placed = new Map<string, Box>()
   const own = new Map<string, Block>()
   const target = relativeHints(input, boxes)
@@ -186,7 +186,7 @@ function inReadingOrder(ids: readonly string[], placed: Map<string, Box>, {flow,
     bySize.set(key, [...(bySize.get(key) ?? []), id])
   }
   for (const group of bySize.values()) {
-    const places = group.map(id => placed.get(id)!).sort((a, b) => a[flow] - b[flow] || a[across] - b[across])
+    const places = group.map(id => placed.get(id)!).toSorted((a, b) => a[flow] - b[flow] || a[across] - b[across])
     for (const [index, id] of group.entries()) placed.set(id, places[index]!)
   }
 }
@@ -231,7 +231,7 @@ function layerSlots(input: ElkInput, boxes: ReadonlyMap<string, Box>, {flow, dep
     .filter(node => !groups.has(node.id))
     .map(node => boxes.get(elkId.get(node.id)!)!)
     .map(box => ({start: box[flow], end: box[flow] + box[depth]}))
-    .sort((a, b) => a.start - b.start || a.end - b.end)) {
+    .toSorted((a, b) => a.start - b.start || a.end - b.end)) {
     const layer = layers.at(-1)
     if (layer && extent.start < layer.end) layer.end = Math.max(layer.end, extent.end)
     else layers.push({...extent})
@@ -281,7 +281,7 @@ function obstacles(input: ElkInput, boxes: ReadonlyMap<string, Box>, polylines: 
 function stretches(blocks: readonly Block[]): Stretch[] {
   const taken = blocks
     .map(block => ({start: block.across.start - nodeSpacing, end: block.across.end + nodeSpacing, card: block.card}))
-    .sort((a, b) => a.start - b.start || a.end - b.end)
+    .toSorted((a, b) => a.start - b.start || a.end - b.end)
   const result: Stretch[] = []
   let cursor = rootPadding,
     cardBefore = false

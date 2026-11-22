@@ -4,24 +4,22 @@ import type {StageSubject} from '@githubnext/projections-renderer-testing'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 
 declare global {
-  interface Window {
-    /** Every view a graph frame committed: its zoom over the fit, its drawing's width and its stage's. */
-    graphViews?: {zoom: number; drawn: number; stage: number; left: number; top: number; label: string | null}[]
-  }
+  /** Every view a graph frame committed: its zoom over the fit, its drawing's width and its stage's. */
+  var graphViews: {zoom: number; drawn: number; stage: number; left: number; top: number; label: string | null}[] | undefined
 }
 
 /** Records, in every renderer frame, each view its graph commits, however briefly it's shown. */
 async function recordGraphViews(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    if (window === window.top) return
-    window.graphViews = []
+    if (globalThis.window === globalThis.top) return
+    globalThis.graphViews = []
     const record = () => {
       const scroller = document.querySelector<HTMLElement>('.graph-scroll')
       const drawing = scroller?.querySelector<SVGSVGElement>('svg.graph')
       if (!scroller || !drawing || !Number(drawing.dataset.scale)) return
-      window.graphViews!.push({
+      globalThis.graphViews!.push({
         zoom: Number(scroller.dataset.zoom),
-        drawn: parseFloat(drawing.style.width),
+        drawn: Number.parseFloat(drawing.style.width),
         stage: scroller.clientWidth,
         left: scroller.scrollLeft,
         top: scroller.scrollTop,
@@ -83,13 +81,13 @@ for (const focused of [false, true]) {
     const drawing = frame.locator('svg.graph')
     await expect(drawing).toBeVisible()
     const everything = (await drawing.getAttribute('aria-label'))!
-    const opened = (await frame.evaluate(() => window.graphViews!.splice(0))).at(-1)!
+    const opened = (await frame.evaluate(() => globalThis.graphViews!.splice(0))).at(-1)!
     if (focused) expect(opened.zoom, 'the focus opens zoomed in on its item').toBeGreaterThan(1)
     else expect(opened.drawn, 'the whole graph opens fitted').toBeLessThanOrEqual(opened.stage + 1)
     await stage.filter({query: '', changesOnly: true, ids: null, scope: changesScope(stage.subject)})
     await expect(drawing).not.toHaveAttribute('aria-label', everything)
     await stage.seek(1)
-    const views = await frame.evaluate(() => window.graphViews!.splice(0))
+    const views = await frame.evaluate(() => globalThis.graphViews!.splice(0))
     for (const view of views) {
       if (view.label === everything) {
         expect({zoom: view.zoom, left: view.left, top: view.top}, 'the old layout keeps its opening view').toEqual({
@@ -119,7 +117,7 @@ test('a graph whose scope arrives with its documents opens on the scope, never o
   await openStage(page, inspector, {...load, filter: {query: '', changesOnly: true, ids: null, scope: changesScope(subject)}})
   const frame = await rendererFrame(page)
   await expect(frame.locator('svg.graph')).toBeVisible()
-  const views = await frame.evaluate(() => window.graphViews!.splice(0))
+  const views = await frame.evaluate(() => globalThis.graphViews!.splice(0))
   expect(views.length, 'the graph was drawn').toBeGreaterThan(0)
   const labels = [...new Set(views.map(view => view.label))]
   expect(labels, 'one layout, the scope’s').toHaveLength(1)

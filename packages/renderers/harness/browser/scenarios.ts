@@ -5,7 +5,7 @@ const renderers = new URL('../../', import.meta.url)
 
 /** Every built-in renderer scenario: its key, package directory and whether it names a custom comparator. */
 export const scenarios = readdirSync(renderers)
-  .sort()
+  .toSorted()
   .filter(name => existsSync(new URL(`${name}/scenarios.json`, renderers)))
   .flatMap(name => {
     const path = new URL(`${name}/scenarios.json`, renderers)

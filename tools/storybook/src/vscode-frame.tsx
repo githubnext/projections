@@ -14,7 +14,9 @@ const captured = import.meta.glob<VscodeThemeFixture>('../../../packages/host/vs
 const order = ['dark-modern', 'light-modern', 'dark-high-contrast', 'light-high-contrast', 'solarized-dark', 'dark-2026']
 
 /** The representative VS Code themes, in the theme switcher's order. */
-export const vscodeThemes: readonly VscodeThemeFixture[] = Object.values(captured).sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
+export const vscodeThemes: readonly VscodeThemeFixture[] = Object.values(captured).toSorted(
+  (a, b) => order.indexOf(a.id) - order.indexOf(b.id),
+)
 
 export const vscodeThemeOf = (globals: Record<string, unknown>): VscodeThemeFixture =>
   vscodeThemes.find(theme => theme.id === globals.vscodeTheme) ?? vscodeThemes[0]!

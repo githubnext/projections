@@ -76,7 +76,7 @@ function canonical(value: unknown): string {
 }
 
 export function price(checks: readonly Execution[]): Priced {
-  const priced: Priced = {runners: 0, minutes: 0, macos: 0, checks: checks.map(canonical).sort(), unpriced: []}
+  const priced: Priced = {runners: 0, minutes: 0, macos: 0, checks: checks.map(canonical).toSorted(), unpriced: []}
   for (const check of checks) {
     let minutes: number | undefined
     if (check.job in PRICES.shards) minutes = PRICES.shards[check.job]
@@ -267,9 +267,9 @@ export function replay(
       count: files.length,
       changed,
       minutes: Math.round(minutes),
-      kinds: [...kinds.values()].sort((a, b) => b.count - a.count).slice(0, 20),
+      kinds: [...kinds.values()].toSorted((a, b) => b.count - a.count).slice(0, 20),
     }
   }
-  result.unpriced = [...unpriced].sort()
+  result.unpriced = [...unpriced].toSorted()
   return result
 }

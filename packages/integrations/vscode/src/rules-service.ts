@@ -108,7 +108,7 @@ export function utf16Character(text: string, column: number): number {
  * on the same line), its length, type and modifier bits, all in UTF-16. `line` reads a 0-based line's text.
  */
 export function encodeTokens(tokens: readonly RulesToken[], line: (index: number) => string): number[] {
-  const sorted = [...tokens].sort((a, b) => a.line - b.line || a.column - b.column)
+  const sorted = tokens.toSorted((a, b) => a.line - b.line || a.column - b.column)
   const data: number[] = []
   let previousLine = 0
   let previousStart = 0
@@ -216,6 +216,7 @@ export class RulesService {
       worker.postMessage({id, request} satisfies WorkerRequest)
     }).then(value => {
       const error = (value as {error?: unknown} | null)?.error
+      // eslint-disable-next-line unicorn/prefer-type-error -- the string is the worker's error message, not a wrong type
       if (typeof error === 'string') throw new Error(error)
       return value
     })

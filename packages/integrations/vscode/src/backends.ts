@@ -85,7 +85,7 @@ export class BackendPool<S> {
         void runner.exited.then(() => {
           if (entry.runner === starting) entry.runner = undefined
         })
-        if (replacing) for (const listener of [...entry.listeners]) listener(runner)
+        if (replacing) for (const listener of Array.from(entry.listeners)) listener(runner)
       },
       () => {
         // A backend that failed to start is tried again on next use.

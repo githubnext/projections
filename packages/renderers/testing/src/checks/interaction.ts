@@ -84,7 +84,7 @@ export const interactionChecks: Pick<Checks, 'affordances' | 'rings' | 'selectio
 
   async selection(driver, subject, {modes}) {
     await driver.load(subject, {progress: 1, ...primaryMode(subject, modes)})
-    const ids = [...(await driver.measure<string[]>('entities'))].reverse()
+    const ids = (await driver.measure<string[]>('entities')).toReversed()
     if (!ids.length) throw new Skip('The renderer draws no entities (elements with data-entity-id).')
     const id = ids[0]!
     const reports = async () => (await driver.state()).selections

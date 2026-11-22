@@ -29,7 +29,7 @@ function groupHooks(hooks: Map<string, HookItem>): CategoryView[] {
       ...category,
       hooks: [...hooks.values()]
         .filter(hook => (text(hook.entity.data?.category) ?? 'other') === category.id || (category.id === 'other' && !known(hook)))
-        .sort(byLabel),
+        .toSorted(byLabel),
     }))
     .filter(category => category.hooks.length > 0)
 }

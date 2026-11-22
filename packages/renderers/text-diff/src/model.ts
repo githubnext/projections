@@ -18,7 +18,7 @@ export const lineLimit = 2000
 export function readOutput(entity: Entity): Output {
   if (entity.kind !== 'output') throw new Error(`Text diff entity "${entity.id}" must have kind "output", not "${entity.kind}"`)
   const text = entity.data?.text
-  if (typeof text !== 'string') throw new Error(`Text diff output "${entity.id}" must contain string data.text`)
+  if (typeof text !== 'string') throw new TypeError(`Text diff output "${entity.id}" must contain string data.text`)
   const presentation = entity.data?.presentation ?? 'formatted'
   if (presentation !== 'prose' && presentation !== 'formatted') {
     throw new Error(`Text diff output "${entity.id}" has invalid data.presentation: expected "prose" or "formatted"`)

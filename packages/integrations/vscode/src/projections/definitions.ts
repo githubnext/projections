@@ -90,7 +90,7 @@ const titleOrder = new Intl.Collator(undefined, {sensitivity: 'base', numeric: t
  * and accents, numbers by value), then by ID, so rows read in order whatever their files are named.
  */
 export function byTitle<T>(items: readonly T[], title: (item: T) => string, id: (item: T) => string): T[] {
-  return [...items].sort(
+  return items.toSorted(
     (a, b) => titleOrder.compare(title(a), title(b)) || titleOrder.compare(id(a), id(b)) || (id(a) < id(b) ? -1 : id(a) > id(b) ? 1 : 0),
   )
 }

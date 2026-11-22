@@ -70,7 +70,7 @@ export function changeReason(
 export function repositoryKey(list: Pick<InspectorDefinitionList, 'definitions'>): string {
   return list.definitions
     .map(definition => definition.id)
-    .sort()
+    .toSorted()
     .join(',')
 }
 

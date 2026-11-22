@@ -130,7 +130,7 @@ export function useOpeningFloor(root: RefObject<Element | null>, key: unknown): 
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       const text = node.parentElement
       if (!text || !node.textContent?.trim() || !drawnText(text)) continue
-      const size = parseFloat(getComputedStyle(text).fontSize)
+      const size = Number.parseFloat(getComputedStyle(text).fontSize)
       if (size > 0) smallest = Math.min(smallest, size)
     }
     const next = Number.isFinite(smallest) ? openingFloorPx / smallest : 0
@@ -233,15 +233,15 @@ function useDotGrid(scroller: RefObject<HTMLElement | null>, scale: number): voi
           box.left -
           element.clientLeft +
           element.scrollLeft +
-          parseFloat(style.paddingLeft || '0') +
-          parseFloat(style.borderLeftWidth || '0')
+          Number.parseFloat(style.paddingLeft || '0') +
+          Number.parseFloat(style.borderLeftWidth || '0')
         origin.y =
           drawn.top -
           box.top -
           element.clientTop +
           element.scrollTop +
-          parseFloat(style.paddingTop || '0') +
-          parseFloat(style.borderTopWidth || '0')
+          Number.parseFloat(style.paddingTop || '0') +
+          Number.parseFloat(style.borderTopWidth || '0')
       }
       const grid = dotGrid(scale, origin)
       const set = (name: string, value: string) => {

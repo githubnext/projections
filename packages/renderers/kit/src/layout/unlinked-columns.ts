@@ -34,7 +34,7 @@ export function alignColumns(
       if (columns.some(edge => Math.abs(edge - box[across]) <= 0.5)) continue
       const edges = columns
         .filter(edge => Math.abs(edge - box[across]) > 0.5 && Math.abs(edge - box[across]) <= columnReach && edge >= rootPadding)
-        .sort((a, b) => Math.abs(a - box[across]) - Math.abs(b - box[across]) || a - b)
+        .toSorted((a, b) => Math.abs(a - box[across]) - Math.abs(b - box[across]) || a - b)
       const near = blocks.filter(block => block !== mine && overlaps(block))
       const fits = (edge: number) =>
         near.every(block => block.across.end + nodeSpacing <= edge + 0.5 || block.across.start - nodeSpacing >= edge + box[breadth] - 0.5)

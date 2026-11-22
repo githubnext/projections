@@ -26,7 +26,7 @@ const allClasses = [...new Set(Object.values(vscodeThemeClasses).flat())]
  * and its kind classes, replacing a theme applied before. For pages outside VS Code, such as Storybook and tests.
  */
 export function applyVscodeTheme(element: HTMLElement, theme: Pick<VscodeThemeFixture, 'bodyClasses' | 'variables'>) {
-  for (const name of [...element.style]) if (name.startsWith('--vscode-')) element.style.removeProperty(name)
+  for (const name of Array.from(element.style)) if (name.startsWith('--vscode-')) element.style.removeProperty(name)
   for (const [name, value] of Object.entries(theme.variables)) element.style.setProperty(name, value)
   element.classList.remove(...allClasses)
   element.classList.add(...theme.bodyClasses)

@@ -28,8 +28,8 @@ export function inkBounds([shownUrl, hiddenUrl, within]: [string, string, InkBou
   }
   return Promise.all([load(shownUrl), load(hiddenUrl)]).then(([shown, hidden]) => {
     const {width, height} = shown
-    const rows = new Array<number>(height).fill(0)
-    const columns = new Array<number>(width).fill(0)
+    const rows = Array.from({length: height}, () => 0)
+    const columns = Array.from({length: width}, () => 0)
     const differences: number[] = []
     for (let y = Math.max(0, Math.floor(within.top)); y < Math.min(height, Math.ceil(within.bottom)); y++) {
       for (let x = Math.max(0, Math.floor(within.left)); x < Math.min(width, Math.ceil(within.right)); x++) {

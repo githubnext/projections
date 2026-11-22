@@ -7,7 +7,7 @@ function endRoom(toolbar: HTMLElement): number {
   const mode = toolbar.querySelector('[data-toolbar-region="mode"]')
   const end = toolbar.querySelector('[data-toolbar-region="end"]')
   if (!mode || !end?.parentElement) return 0
-  const gap = parseFloat(getComputedStyle(end.parentElement).columnGap) || 0
+  const gap = Number.parseFloat(getComputedStyle(end.parentElement).columnGap) || 0
   const actions = end.getBoundingClientRect()
   return actions.right - mode.getBoundingClientRect().right - gap - actions.width
 }

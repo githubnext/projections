@@ -24,7 +24,7 @@ async function attachPictures(report: RingPixelReport, label: string) {
 const perScenario = 6
 const scenariosPerRenderer = 2
 
-for (const directory of [...new Set(scenarios.map(item => item.directory))]) {
+for (const directory of new Set(scenarios.map(item => item.directory))) {
   test(`${directory}: rings replace each item's own edge, in pixels`, async ({page}) => {
     test.slow()
     const inspector = harnessInspector()

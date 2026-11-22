@@ -107,7 +107,7 @@ test('selecting a resource brings forward what depends on it, unless the control
       'aws_secretsmanager_secret_version.database',
       'aws_ssm_parameter.database_url',
       'module.database.aws_db_instance.replica',
-    ].sort(),
+    ].toSorted(),
   )
   await expect(renderer.frame.locator('.graph-link.receded').first()).toBeAttached()
   await renderer.setOptions({dependents: false})

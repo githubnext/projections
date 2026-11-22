@@ -93,10 +93,10 @@ test('projections mcp speaks MCP: initialize, list tools, call them, and write i
   const {tools} = (await server.call('tools/list')).result
   const names = tools.map(tool => tool.name)
   for (const name of ['list_projections', 'compare', 'explore', 'sweep', 'check', 'run_comparator_tests', 'describe_part', 'adopt']) {
-    assert.ok(names.includes(name), names.join())
+    assert.ok(names.includes(name), names.join(','))
   }
   // Where the CI step goes is the person's decision: no tool writes a workflow.
-  assert.ok(!names.includes('publish'), names.join())
+  assert.ok(!names.includes('publish'), names.join(','))
   // One catalog: the view tools are listed here too, answered by the viewer.
   for (const name of ['open_projection', 'current_view', 'refresh', 'screenshot']) assert.ok(names.includes(name), name)
   assert.deepEqual(

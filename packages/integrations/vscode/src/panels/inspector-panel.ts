@@ -43,7 +43,7 @@ export class InspectorPanel extends InspectorWebview {
 
   /** The most recently opened panel of a kind, for tests driving a document or scenarios panel. */
   static latest(kind: PanelSource['kind']): InspectorPanel | undefined {
-    return [...InspectorPanel.panels.values()].filter(panel => panel.source.kind === kind).at(-1)
+    return [...InspectorPanel.panels.values()].findLast(panel => panel.source.kind === kind)
   }
 
   static disposeAll() {

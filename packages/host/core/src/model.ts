@@ -128,7 +128,7 @@ export function subjectRows(subject: ViewSubject): Row[] {
         ...(change.context ? {context: change.context} : {}),
       }
     })
-    .sort((a, b) => (a.step ?? Infinity) - (b.step ?? Infinity))
+    .toSorted((a, b) => (a.step ?? Infinity) - (b.step ?? Infinity))
   const unchanged = (['entities', 'relationships'] as const).flatMap(collection =>
     (after[collection] as (Entity | Relationship)[])
       .filter(item => !referenced.after.has(`${collection}:${item.id}`))

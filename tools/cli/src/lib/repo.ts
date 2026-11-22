@@ -64,7 +64,7 @@ export function walk(root: string, directory = '.', filter: (path: string) => bo
     }
   }
   visit(posix(directory))
-  return found.sort()
+  return found.toSorted()
 }
 
 /** The newest modification time (ms) of any file under `directory`, or undefined when it has none. */
@@ -125,7 +125,7 @@ export function expandMember(root: string, pattern: string, marker: string): str
     return readdirSync(join(root, parent), {withFileTypes: true})
       .filter(entry => entry.isDirectory() && existsSync(join(root, parent, entry.name, marker)))
       .map(entry => `${parent}/${entry.name}`)
-      .sort()
+      .toSorted()
   } catch {
     return []
   }

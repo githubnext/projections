@@ -124,7 +124,7 @@ test('"varied only" shows exactly the items that varied within tolerance, and ex
   )
 
   const changes = probe({initialChangesOnly: true})
-  assert.deepEqual(changes.visibleRows.map(item => item.id).sort(), ['load', 'save'])
+  assert.deepEqual(changes.visibleRows.map(item => item.id).toSorted(), ['load', 'save'])
 })
 
 test('turning one filter on turns the other off', () => {

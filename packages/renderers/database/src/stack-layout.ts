@@ -23,7 +23,7 @@ export function laneAssignments(
       const b = anchor(geometry, boxes.get(link.principal)!, link.principal, link.principalColumn)
       return {key: link.key, top: Math.min(a, b), bottom: Math.max(a, b)}
     })
-    .sort((a, b) => a.bottom - a.top - (b.bottom - b.top) || compareIds(a.key, b.key))
+    .toSorted((a, b) => a.bottom - a.top - (b.bottom - b.top) || compareIds(a.key, b.key))
   const lanes: {top: number; bottom: number}[][] = []
   const result = new Map<string, number>()
   for (const span of spans) {

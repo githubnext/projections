@@ -23,7 +23,7 @@ function manifests(files: SourceFiles): Package[] {
     const name = typeof manifest.name === 'string' && manifest.name.trim() ? manifest.name : directory || '(root)'
     candidates.push({name, directory, manifest})
   }
-  return candidates.sort(deepestFirst)
+  return candidates.toSorted(deepestFirst)
 }
 
 /**
@@ -39,7 +39,7 @@ export function apiPackages(files: SourceFiles, programs: ts.Program[], entryFil
     ...entryFiles.map(file => path.resolve(files.root, file)),
   ])
   const packages: Package[] = []
-  for (const file of [...rootFiles].sort()) {
+  for (const file of [...rootFiles].toSorted()) {
     const relative = slash(path.relative(files.root, file))
     const pkg = candidates.find(item => !item.directory || relative.startsWith(`${item.directory}/`))
     if (pkg && !packages.includes(pkg)) {
@@ -50,5 +50,5 @@ export function apiPackages(files: SourceFiles, programs: ts.Program[], entryFil
     }
   }
   if (!packages.some(pkg => !pkg.directory)) packages.push({name: '(root)', directory: '', manifest: {}})
-  return packages.sort(deepestFirst)
+  return packages.toSorted(deepestFirst)
 }

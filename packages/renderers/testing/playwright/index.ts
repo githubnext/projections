@@ -28,9 +28,7 @@ import type {
 export type * from '../src/types.js'
 
 declare global {
-  interface Window {
-    projectionsStage: StageApi
-  }
+  var projectionsStage: StageApi
 }
 
 export {connectInspector, startInspector} from './server.js'
@@ -153,7 +151,7 @@ function handle(page: Page, subject: StageSubject, record: StageRecord): StageHa
       call(`measure(${probe})`, () =>
         page.evaluate(([probeName, probeArgs]) => window.projectionsStage.measure<T>(probeName, probeArgs), [probe, args] as const),
       ),
-    state: () => call('state', () => page.evaluate(() => window.projectionsStage.state())),
+    state: () => call('state', () => page.evaluate(() => globalThis.projectionsStage.state())),
   }
 }
 
@@ -179,7 +177,7 @@ export async function openStage(
         overrides,
       ] as const),
     )
-    const subject = await ask(record, 'subject', () => page.evaluate(() => window.projectionsStage.subject()))
+    const subject = await ask(record, 'subject', () => page.evaluate(() => globalThis.projectionsStage.subject()))
     return handle(page, subject, record)
   }
   const {extraction, before, after, comparison, comparatorOptions, ...rest} = request as OpenRequest &
@@ -265,7 +263,7 @@ export async function expectScenarioToPass(
 /** `count + 1` evenly spaced progress values from 0 to 1, optionally followed by the way back. */
 export function samples(count = 20, {roundTrip = false}: {roundTrip?: boolean} = {}): number[] {
   const forward = Array.from({length: count + 1}, (_, index) => Math.round((index / count) * 1e6) / 1e6)
-  return roundTrip ? [...forward, ...forward.slice(0, -1).reverse()] : forward
+  return roundTrip ? [...forward, ...forward.slice(0, -1).toReversed()] : forward
 }
 
 /**

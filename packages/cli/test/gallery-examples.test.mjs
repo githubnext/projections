@@ -76,7 +76,7 @@ test('every before-and-after project in docs/images/sources/ is drawn by readme-
     const directory = `docs/images/sources/${entry.name}`
     if (entry.isDirectory() && existsSync(path.join(root, directory, 'before'))) examples.push(directory)
   }
-  assert.deepEqual([...used].sort(), examples.sort())
+  assert.deepEqual([...used].toSorted(), examples.toSorted())
   for (const example of used) assert.ok(existsSync(path.join(root, example, 'after')), `${example}/after`)
 })
 

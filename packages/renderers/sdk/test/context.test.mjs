@@ -55,9 +55,9 @@ const rows = scopeRows(presentComparison(before, after, comparison))
 
 test('a change brings its container and a changed relationship its endpoints, as context', () => {
   const scope = changeContext(rows, {before, after})
-  assert.deepEqual([...scope.changes].sort(), ['tool:listen', 'tool:view/viewer', 'tool:view>tool:view/viewer'])
+  assert.deepEqual([...scope.changes].toSorted(), ['tool:listen', 'tool:view/viewer', 'tool:view>tool:view/viewer'])
   assert.deepEqual([...scope.context], ['tool:view'])
-  assert.deepEqual([...scope.shown].sort(), ['tool:listen', 'tool:view', 'tool:view/viewer', 'tool:view>tool:view/viewer'])
+  assert.deepEqual([...scope.shown].toSorted(), ['tool:listen', 'tool:view', 'tool:view/viewer', 'tool:view>tool:view/viewer'])
 })
 
 test('narrowed changes bring only their own context', () => {
@@ -85,7 +85,7 @@ test('containment follows each revision, through every level, with the relations
     ),
     {before: nested, after: changed},
   )
-  assert.deepEqual([...scope.context].sort(), ['a', 'a/b', 'a/b>a/b/c', 'a>a/b'])
+  assert.deepEqual([...scope.context].toSorted(), ['a', 'a/b', 'a/b>a/b/c', 'a>a/b'])
 })
 
 test('containment follows the domain schema, and a vocabulary that names its structure by entity kinds', () => {
@@ -122,7 +122,7 @@ test("a comparison's own context is used, with the rules that added to it, and d
   const presented = presentComparison(before, after, withContext)
   assert.deepEqual(presented.entities.find(row => row.id === 'tool:view/viewer').context.rules, ['siblings'])
   const contextRows = scopeRows(presented)
-  assert.deepEqual([...changeContext(contextRows, {before, after}).context].sort(), ['tool:check', 'tool:view'])
+  assert.deepEqual([...changeContext(contextRows, {before, after}).context].toSorted(), ['tool:check', 'tool:view'])
   const contextOf = rowContexts(contextRows, {before, after})
   assert.deepEqual(contextOf(contextRows.find(row => row.id === 'tool:view/viewer')), {
     rows: ['tool:check', 'tool:view'],
@@ -182,7 +182,7 @@ test("a shown relationship's endpoints are shown, though the context that names 
   }
   const contextRows = scopeRows(presentComparison(before, after, withRelationship))
   const scope = changeContext(contextRows, {before, after}, ['tool:listen'])
-  assert.deepEqual([...scope.context].sort(), ['tool:check', 'tool:check/path', 'tool:check>tool:check/path'])
+  assert.deepEqual([...scope.context].toSorted(), ['tool:check', 'tool:check/path', 'tool:check>tool:check/path'])
   // The change's own context stays as the comparison says.
   assert.deepEqual(rowContexts(contextRows, {before, after})(contextRows.find(row => row.id === 'tool:listen')).rows, [
     'tool:check>tool:check/path',
@@ -198,7 +198,7 @@ test('a shown entity brings the items containing it, though the context that nam
   }
   const contextRows = scopeRows(presentComparison(before, after, withProperty))
   const scope = changeContext(contextRows, {before, after}, ['tool:listen'])
-  assert.deepEqual([...scope.context].sort(), ['tool:check', 'tool:check/path', 'tool:check>tool:check/path'])
+  assert.deepEqual([...scope.context].toSorted(), ['tool:check', 'tool:check/path', 'tool:check>tool:check/path'])
 })
 
 test('a containment relationship one revision brings has its endpoints in both', () => {

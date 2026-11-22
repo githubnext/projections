@@ -11,7 +11,7 @@ import {dirname, join, normalize} from 'node:path'
 export function slug(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\p{L}\p{M}\p{N}\p{Pc} -]/gu, '')
+    .replaceAll(/[^\p{L}\p{M}\p{N}\p{Pc} -]/gu, '')
     .replaceAll(' ', '-')
 }
 
@@ -69,7 +69,7 @@ export function links(markdown: string): Link[] {
       if (target) found.push({target, line: lineAt(match.index)})
     }
   }
-  return found.sort((a, b) => a.line - b.line)
+  return found.toSorted((a, b) => a.line - b.line)
 }
 
 /** Links to other sites, mail and the like: anything with a scheme or a host. */
@@ -177,7 +177,7 @@ export function repositoryFiles(root: string): string[] {
     maxBuffer: 64 * 1024 * 1024,
   })
   if (listed.status !== 0) return walk(root)
-  return [...new Set(listed.stdout.split('\0').filter(Boolean))].filter(path => kind(root, path) === 'file').sort()
+  return [...new Set(listed.stdout.split('\0').filter(Boolean))].filter(path => kind(root, path) === 'file').toSorted()
 }
 
 /** Every link problem in the repository: Markdown links and anchors, then documentation paths named in source. */

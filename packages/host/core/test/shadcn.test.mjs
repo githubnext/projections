@@ -32,7 +32,7 @@ test('every vendored shadcn/ui file has a pristine base, and every base a file',
   for (const file of await readdir(components)) {
     if (file.endsWith('.tsx') && parseHeader(await readFile(new URL(file, components), 'utf8'))) vendored.push(file.replace(/\.tsx$/u, ''))
   }
-  assert.deepEqual(vendored.sort(), bases.sort())
+  assert.deepEqual(vendored.toSorted(), bases.toSorted())
 })
 
 test('the transformed base reproduces each vendored file except its documented local edits', async () => {

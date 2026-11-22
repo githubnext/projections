@@ -25,16 +25,16 @@ async function schema(page: Page): Promise<Frame> {
 async function sampleMove(frame: Frame, act: () => Promise<void>): Promise<Sample[]> {
   await frame.evaluate(() => {
     const samples: Sample[] = []
-    const window_ = window as unknown as {samples: Sample[]; sampling: boolean}
+    const window_ = globalThis as unknown as {samples: Sample[]; sampling: boolean}
     window_.samples = samples
     window_.sampling = true
     const read = () => {
       const view = document.querySelector<HTMLElement>('.database-view')!
       const cards = [...view.querySelectorAll<HTMLElement>('.database-table')].map(card => ({
-        x: parseFloat(card.style.left),
-        y: parseFloat(card.style.top),
-        width: parseFloat(card.style.width),
-        height: parseFloat(card.style.height),
+        x: Number.parseFloat(card.style.left),
+        y: Number.parseFloat(card.style.top),
+        width: Number.parseFloat(card.style.width),
+        height: Number.parseFloat(card.style.height),
       }))
       // How visible each link is: its own opacity and its layer's, which nothing may hide while the schema moves.
       const layer = Number(getComputedStyle(view.querySelector('.database-links')!).opacity)
@@ -62,7 +62,7 @@ async function sampleMove(frame: Frame, act: () => Promise<void>): Promise<Sampl
   // Past the move (320 ms) and a few frames more.
   await frame.waitForTimeout(700)
   return frame.evaluate(() => {
-    const window_ = window as unknown as {samples: Sample[]; sampling: boolean}
+    const window_ = globalThis as unknown as {samples: Sample[]; sampling: boolean}
     window_.sampling = false
     return window_.samples
   })
@@ -177,7 +177,7 @@ async function doubledLines(frame: Frame): Promise<string[]> {
         if (y >= top && y < bottom) lines.push({y, width, left, right, by: name(element)})
       }
       for (const side of ['Top', 'Bottom'] as const) {
-        const width = parseFloat(style.getPropertyValue(`border-${side.toLowerCase()}-width`))
+        const width = Number.parseFloat(style.getPropertyValue(`border-${side.toLowerCase()}-width`))
         if (
           width > 0 &&
           style.getPropertyValue(`border-${side.toLowerCase()}-style`) !== 'none' &&
@@ -199,13 +199,13 @@ async function doubledLines(frame: Frame): Promise<string[]> {
           if (above < box.top) add(above, box.top - above, left, right)
           if (below > box.bottom) add(box.bottom, below - box.bottom, left, right)
         } else if (spread > 0) {
-          add(box.top + parseFloat(style.borderTopWidth), spread)
-          add(box.bottom - parseFloat(style.borderBottomWidth) - spread, spread)
-        } else if (x === 0 && y > 0) add(box.top + parseFloat(style.borderTopWidth), y)
-        else if (x === 0 && y < 0) add(box.bottom - parseFloat(style.borderBottomWidth) + y, -y)
+          add(box.top + Number.parseFloat(style.borderTopWidth), spread)
+          add(box.bottom - Number.parseFloat(style.borderBottomWidth) - spread, spread)
+        } else if (x === 0 && y > 0) add(box.top + Number.parseFloat(style.borderTopWidth), y)
+        else if (x === 0 && y < 0) add(box.bottom - Number.parseFloat(style.borderBottomWidth) + y, -y)
       }
-      const outline = parseFloat(style.outlineWidth)
-      if (style.outlineStyle !== 'none' && outline > 0 && parseFloat(style.outlineOffset) <= -outline && drawn(style.outlineColor)) {
+      const outline = Number.parseFloat(style.outlineWidth)
+      if (style.outlineStyle !== 'none' && outline > 0 && Number.parseFloat(style.outlineOffset) <= -outline && drawn(style.outlineColor)) {
         add(box.top, outline)
         add(box.bottom - outline, outline)
       }

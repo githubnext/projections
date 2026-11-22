@@ -56,5 +56,5 @@ result({
   schema: 'api/v0',
   entities: parts.flatMap(part => part.entities),
   relationships: parts.flatMap(part => part.relationships),
-  ...(missingInputs.length ? {missingInputs: missingInputs.sort()} : {}),
+  ...(missingInputs.length ? {missingInputs: missingInputs.toSorted()} : {}),
 })

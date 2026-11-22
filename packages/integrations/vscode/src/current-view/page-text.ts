@@ -26,7 +26,7 @@ function modeLine(page: PageView): string {
   // In the order the host offers them: Diff, Side by side, Animated, then Swipe.
   const order = Object.keys(modeNames)
   const rank = (item: string) => (order.includes(item) ? order.indexOf(item) : order.length)
-  const offered = [...(page.modes ?? [])].sort((a, b) => rank(a) - rank(b)).map(item => modeNames[item] ?? item)
+  const offered = (page.modes ?? []).toSorted((a, b) => rank(a) - rank(b)).map(item => modeNames[item] ?? item)
   const shownAs = page.showAs && page.showAs !== 'renderer' ? `, as a ${page.showAs}` : ''
   return `Mode: ${mode ?? 'one revision'}${offered.length > 1 ? ` (of ${offered.join(', ')})` : ''}${shownAs}${page.changesOnly ? ', changes only' : ''}.`
 }

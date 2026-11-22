@@ -11,7 +11,7 @@ function repository(files: Record<string, string>): {root: string; paths: string
     mkdirSync(dirname(join(root, path)), {recursive: true})
     writeFileSync(join(root, path), text)
   }
-  return {root, paths: Object.keys(files).sort(), [Symbol.dispose]: () => rmSync(root, {recursive: true, force: true})}
+  return {root, paths: Object.keys(files).toSorted(), [Symbol.dispose]: () => rmSync(root, {recursive: true, force: true})}
 }
 
 test('slugs follow GitHub: lowercase, punctuation dropped, each space a hyphen', () => {
@@ -24,7 +24,7 @@ test('slugs follow GitHub: lowercase, punctuation dropped, each space a hyphen',
 test('anchors: headings outside fences, numbered repeats, inline Markdown flattened and HTML ids', () => {
   const page =
     '---\ndescription: d\n---\n# Title\n\n## `run` the [CLI](x.md)\n\n```sh\n# not a heading\n```\n\n## Usage\n\n## Usage\n\n<a id="custom"></a>\n'
-  assert.deepEqual([...anchors(page)].sort(), ['custom', 'run-the-cli', 'title', 'usage', 'usage-1'])
+  assert.deepEqual([...anchors(page)].toSorted(), ['custom', 'run-the-cli', 'title', 'usage', 'usage-1'])
 })
 
 test('links: inline, images, references and HTML, never inside code', () => {

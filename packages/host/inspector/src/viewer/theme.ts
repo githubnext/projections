@@ -136,7 +136,7 @@ export function pageTheme(doc: Document = document, seed?: ThemeSeed): NonNullab
     if (nextKey === key) return
     current = next
     key = nextKey
-    for (const listener of [...listeners]) listener()
+    for (const listener of Array.from(listeners)) listener()
   }
   const observer = new MutationObserver(changed)
   const start = () => {

@@ -63,7 +63,7 @@ function listed(items, field) {
       if (typeof item[name] !== 'string') throw new RangeError(`The ${singular[field]} ${quoted(item.id)} needs ${name}, a string`)
   }
   const id = item => item.id
-  return list.sort((left, right) => (id(left) < id(right) ? -1 : id(left) > id(right) ? 1 : 0))
+  return list.toSorted((left, right) => (id(left) < id(right) ? -1 : id(left) > id(right) ? 1 : 0))
 }
 /**
  * The extraction `result()` writes, without writing it: `protocolVersion` and `schema` (default `graph/v0`) filled
@@ -103,11 +103,11 @@ let written = false
 function result(fields = {}) {
   if (written) throw new Error("result() already wrote this extractor's extraction; call it once, with everything")
   const document = extraction(fields)
-  const lists = [document.entities, document.relationships]
+  const lists = /* @__PURE__ */ new Set([document.entities, document.relationships])
   let item
   const text = JSON.stringify(document, function (_key, value) {
     if (this === document) item = void 0
-    else if (lists.includes(this)) item = value.id
+    else if (lists.has(this)) item = value.id
     if ((typeof value === 'number' && !Number.isFinite(value)) || typeof value === 'bigint' || typeof value === 'function')
       throw new TypeError(
         `${item === void 0 ? 'The extraction' : `The item ${quoted(item)}`} holds a value JSON can't represent (${String(value)}); use objects, arrays, strings, finite numbers, booleans and null`,
@@ -250,7 +250,7 @@ function canonicalJson(value) {
   if (Array.isArray(value)) return `[${value.map(item => canonicalJson(item)).join(',')}]`
   const object = value
   return `{${Object.keys(object)
-    .sort()
+    .toSorted()
     .filter(key => object[key] !== void 0)
     .map(key => `${JSON.stringify(key)}:${canonicalJson(object[key])}`)
     .join(',')}}`

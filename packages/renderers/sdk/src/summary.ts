@@ -85,7 +85,7 @@ export function summaryCounts(subject: SummarySubject): SummaryCount[] {
   const order = (collection: Collection) =>
     [...counts.values()]
       .filter(item => item.collection === collection)
-      .sort((a, b) => b.count - a.count || (a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0))
+      .toSorted((a, b) => b.count - a.count || (a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0))
   return [...order('entities'), ...order('relationships')]
 }
 

@@ -147,8 +147,9 @@ test('graph zoom enlarges the opening view and Fit shows everything', async ({pa
       const svg = scroller.querySelector('svg.graph')!
       const box = scroller.getBoundingClientRect()
       const drawn = svg.getBoundingClientRect()
-      const origin = drawn.left - box.left - scroller.clientLeft + scroller.scrollLeft + parseFloat(getComputedStyle(svg).paddingLeft)
-      const read = (name: string) => parseFloat(scroller.style.getPropertyValue(name))
+      const origin =
+        drawn.left - box.left - scroller.clientLeft + scroller.scrollLeft + Number.parseFloat(getComputedStyle(svg).paddingLeft)
+      const read = (name: string) => Number.parseFloat(scroller.style.getPropertyValue(name))
       const spacing = read('--pk-grid-spacing')
       const off = (((origin - read('--pk-grid-x') - spacing / 2) % spacing) + spacing) % spacing
       return {attachment: getComputedStyle(scroller).backgroundAttachment, spacing, off: Math.min(off, spacing - off)}

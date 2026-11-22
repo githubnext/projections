@@ -30,7 +30,7 @@ export const code = (text: string): string => `\`${escape(text)}\``
 /** TypeScript spells file names with `/` on every platform; this is the native path. */
 export const native = (fileName: string): string => path.resolve(fileName)
 export const id = (...parts: string[]): string => parts.map(encodeURIComponent).join(':')
-export const sort = <T extends {id: string}>(items: T[]): T[] => items.sort((a, b) => compareIds(a.id, b.id))
+export const sort = <T extends {id: string}>(items: T[]): T[] => items.toSorted((a, b) => compareIds(a.id, b.id))
 export const inputs = (context: ExtractorContext): Record<string, Json> => context.input.projection.definition.inputs ?? {}
 /** `value` as a nonempty array of nonempty strings, or an error naming the input `label`. */
 export function strings(value: unknown, label: string): string[] {

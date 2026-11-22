@@ -44,7 +44,7 @@ export function StatusTab({change, emphasis, measure = false}: {change: StatusCh
       if (!pill) return
       // Layout widths, unscaled by a zoomed or fitted drawing, at the tab's natural width, and the pill's corner as
       // drawn (its top corner, which the tab never squares; a radius larger than half its height draws as half).
-      const radius = Math.min(parseFloat(getComputedStyle(pill).borderTopRightRadius) || 0, pill.offsetHeight / 2)
+      const radius = Math.min(Number.parseFloat(getComputedStyle(pill).borderTopRightRadius) || 0, pill.offsetHeight / 2)
       // The tab starts on the pill's left border, so only the right corner needs clearing.
       if (tab.offsetWidth + radius > pill.offsetWidth + 0.5) element.setAttribute('data-flush', '')
     }

@@ -64,7 +64,7 @@ test('npm-script-posix flags scripts cmd.exe cannot run', () => {
 })
 
 test('every rule has a case', () => {
-  assert.deepEqual(rules.map(rule => rule.name).sort(), [...Object.keys(cases), 'npm-script-posix'].sort())
+  assert.deepEqual(rules.map(rule => rule.name).toSorted(), [...Object.keys(cases), 'npm-script-posix'].toSorted())
 })
 
 test('a shebang and a Rust unit test module are not shipped code', () => {

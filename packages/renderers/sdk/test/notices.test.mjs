@@ -24,7 +24,7 @@ async function packagesOf(moduleIds) {
     const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'))
     if (!manifest.name.startsWith('@githubnext/')) found.add(`${manifest.name} ${manifest.version}`)
   }
-  return [...found].sort()
+  return [...found].toSorted()
 }
 
 /** Builds a renderer package in memory without the bundle plugin, so the script chunk keeps its module graph. */

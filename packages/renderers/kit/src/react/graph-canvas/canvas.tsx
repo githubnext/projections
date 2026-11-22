@@ -40,7 +40,7 @@ function statusNode(row: EntityChange<Entity>): TransitionNode {
 function useCardTextScale(): number {
   const [scale] = useState(() => {
     if (typeof document === 'undefined') return 1
-    const size = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-font-size-xs'))
+    const size = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-font-size-xs'))
     return size > 0 ? Math.round((size / 12) * 1000) / 1000 : 1
   })
   return scale
@@ -70,7 +70,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
   const compound = props.compound ?? false
   const {include, count} = useMemo(() => {
     const ids = model.entities.map(row => row.id).filter(id => !visibleIds || visibleIds.has(id))
-    return {include: new Set([...ids].sort(compareIds).slice(0, graphEntityLimit)), count: ids.length}
+    return {include: new Set(ids.toSorted(compareIds).slice(0, graphEntityLimit)), count: ids.length}
   }, [model, visibleIds])
   // Shared prerequisites join and split at one point in a pipeline's own layout; comparisons draw every link.
   const junctions = !comparing && model.schema === 'dag/v0' && model.entities.every(row => (row.after ?? row.before)!.kind === 'job')

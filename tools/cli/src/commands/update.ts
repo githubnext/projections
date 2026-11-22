@@ -56,7 +56,7 @@ export function shadcnCommand(options: ShadcnOptions): Command {
 
 /** The script's one JSON line, the last line of its output that parses. */
 export function parseScriptResult(output: string): ScriptResult | undefined {
-  for (const line of output.trimEnd().split('\n').reverse()) {
+  for (const line of output.trimEnd().split('\n').toReversed()) {
     if (!line.startsWith('{')) continue
     try {
       return JSON.parse(line) as ScriptResult

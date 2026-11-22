@@ -10,7 +10,7 @@ export function fitText(text: string, room: number): string | undefined {
 }
 
 export const nameOf = (entity: Entity, path: string | undefined) => {
-  const base = (path ?? entity.label).split('/').filter(Boolean).at(-1)
+  const base = (path ?? entity.label).split('/').findLast(Boolean)
   return base ?? entity.label
 }
 
@@ -132,7 +132,7 @@ export function placeLabels(
   const placed: Box[] = []
   const free = (box: Box) =>
     !placed.some(other => other.left < box.right && box.left < other.right && other.top < box.bottom && box.top < other.bottom)
-  const order = [...circles].sort(
+  const order = circles.toSorted(
     (a, b) => Number(a.filled) - Number(b.filled) || (a.filled ? b.r - a.r : a.depth - b.depth || b.r - a.r) || (a.id < b.id ? -1 : 1),
   )
   const bottomNames: {circle: Circle; text: string; name: string}[] = []

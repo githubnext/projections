@@ -60,7 +60,7 @@ test('exports follow export * and named re-exports; unused ones are those no oth
     'lib/src/extra.ts': 'export const whole = 1',
     'app/src/main.ts': "import {used, type Shape} from 'lib'\nimport * as extra from 'lib/extra'",
   })
-  assert.deepEqual(exportedNames(root, 'lib/src/index.ts').sort(), ['Shape', 'default', 'renamed', 'unused', 'used'])
+  assert.deepEqual(exportedNames(root, 'lib/src/index.ts').toSorted(), ['Shape', 'default', 'renamed', 'unused', 'used'])
   assert.deepEqual(importsOf('x.ts', "export {a} from 'p'\nconst m = await import('q')"), [
     {specifier: 'p', names: ['a'], typeOnly: false},
     {specifier: 'q', names: '*'},

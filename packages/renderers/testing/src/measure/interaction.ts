@@ -45,7 +45,7 @@ export function clickEntity(id: string): boolean {
 
 /** A person's click on `target` at (`x`, `y`): pointer and mouse down and up, then the click (its first, `detail` 1). */
 function dispatchClick(target: Element, x: number, y: number): void {
-  const init = {bubbles: true, cancelable: true, composed: true, clientX: x, clientY: y, button: 0, view: window}
+  const init = {bubbles: true, cancelable: true, composed: true, clientX: x, clientY: y, button: 0, view: globalThis.window}
   target.dispatchEvent(new PointerEvent('pointerdown', {...init, pointerId: 1, isPrimary: true}))
   target.dispatchEvent(new MouseEvent('mousedown', {...init, detail: 1}))
   target.dispatchEvent(new PointerEvent('pointerup', {...init, pointerId: 1, isPrimary: true}))

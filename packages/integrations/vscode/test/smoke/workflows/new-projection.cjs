@@ -30,15 +30,15 @@ module.exports = async function newProjection({folder, api}) {
     const extractors = await until('the extractor pick', async () =>
       api.pickItems()?.title === 'New projection: extractor' ? api.pickItems() : undefined,
     )
-    assert.ok(extractors.items.includes('Workspace dependencies'), extractors.items.join())
+    assert.ok(extractors.items.includes('Workspace dependencies'), extractors.items.join(','))
     await api.pick('Workspace dependencies')
     const renderers = await until('the renderer pick', async () =>
       api.pickItems()?.title === 'New projection: renderer' ? api.pickItems() : undefined,
     )
     // The extractor's default first; only renderers that present graph/v0.
     assert.equal(renderers.items[0], 'Graph')
-    assert.ok(renderers.items.includes('File packing'), renderers.items.join())
-    assert.ok(!renderers.items.includes('Database'), renderers.items.join())
+    assert.ok(renderers.items.includes('File packing'), renderers.items.join(','))
+    assert.ok(!renderers.items.includes('Database'), renderers.items.join(','))
     await api.pick('File packing')
     const id = await until('the ID box', async () => (created.input()?.title === 'New projection: ID' ? created.input() : undefined))
     assert.equal(id.value, 'workspace-dependencies')

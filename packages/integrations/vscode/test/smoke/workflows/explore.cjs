@@ -13,7 +13,7 @@ module.exports = async function explore({folder}) {
     const found = await elements('[data-candidate]', 'data-candidate')
     return found.length ? found.map(item => item.value) : undefined
   })
-  assert.ok(candidates.includes('repository-map'), candidates.join())
+  assert.ok(candidates.includes('repository-map'), candidates.join(','))
   // A sweep of the recent changes, and a candidate's cell opened in the Inspector on that change.
   await control({op: 'click', selector: 'section[aria-labelledby="pi-sweep-title"] form button[type="submit"]'})
   const cell = 'td.pi-sweep-cell[data-projection="repository-map"] a'
@@ -31,7 +31,7 @@ module.exports = async function explore({folder}) {
     const summary = await control({op: 'summary'})
     return summary.projection?.id === 'repository-map' && summary.pair.after === opened.get('after') ? summary : undefined
   })
-  assert.deepEqual(candidate.projections.map(item => item.id).sort(), ['packages', 'repository-map'])
+  assert.deepEqual(candidate.projections.map(item => item.id).toSorted(), ['packages', 'repository-map'])
   assert.equal(candidate.pair.before, opened.get('before'))
 
   // Adopt with a dry run: the preview of the definition it would write, writing nothing.

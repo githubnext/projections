@@ -48,7 +48,7 @@ export function newestInMajor(releases, major) {
         .map(Number),
     }))
     .filter(release => release.parts?.[0] === wanted)
-    .sort((a, b) => b.parts[1] - a.parts[1] || b.parts[2] - a.parts[2])
+    .toSorted((a, b) => b.parts[1] - a.parts[1] || b.parts[2] - a.parts[2])
   if (!stable.length) throw new Error(`No stable ${major}.x.y release to install`)
   return stable[0].tag
 }

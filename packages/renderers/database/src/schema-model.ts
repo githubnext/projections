@@ -22,7 +22,7 @@ export function layerDepths(nodes: readonly string[], edges: readonly {from: str
   for (const children of outgoing.values()) children.sort(compareIds)
   const acyclic = new Map(nodes.map(id => [id, new Set<string>()]))
   const walked = new Map<string, 'open' | 'done'>()
-  for (const root of [...nodes].sort(compareIds)) {
+  for (const root of nodes.toSorted(compareIds)) {
     if (walked.has(root)) continue
     walked.set(root, 'open')
     const path = [{id: root, next: 0}]
@@ -68,7 +68,7 @@ export function cardsOf(state: SchemaState) {
   const tables = [...nodes]
     .filter(([, entity]) => isCard(entity))
     .map(([id]) => id)
-    .sort(compareIds)
+    .toSorted(compareIds)
   const tableSet = new Set(tables)
   const columnsOf = new Map(tables.map(id => [id, [] as string[]]))
   const tableOf = new Map<string, string>()
@@ -105,7 +105,7 @@ function cardRows(
       columns.set(table, ids)
       continue
     }
-    const keys = (rowsOf.get(table) ?? []).sort((a, b) => {
+    const keys = (rowsOf.get(table) ?? []).toSorted((a, b) => {
       const order = (id: string) => {
         const index = keyOrder.indexOf(keyType(nodes.get(id)!))
         return index < 0 ? keyOrder.length : index

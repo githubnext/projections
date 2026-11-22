@@ -118,7 +118,7 @@ export function buildInputs(root: string, unit: Unit): string[] {
       add(path)
     }
   }
-  return [...inputs].sort()
+  return [...inputs].toSorted()
 }
 
 /** The content signature of the files `buildInputs` lists: a build is current only with the inputs it was built from. */

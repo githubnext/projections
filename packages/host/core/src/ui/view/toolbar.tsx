@@ -90,7 +90,7 @@ export function ViewToolbar({
         ...(on('search') ? (['filter'] as const) : []),
       ],
     },
-    `${comparing}-${mode}-${view}-${views.join()}-${showPlayback}-${showZoom}-${p.controls.length}-${p.stepEnds.length > 0}-${Boolean(props.actions)}-${p.availableModes.join()}-${p.variation?.within ?? 0}-${p.variation?.regenerated ?? 0}-${showScope && p.scope}`,
+    `${comparing}-${mode}-${view}-${views.join(',')}-${showPlayback}-${showZoom}-${p.controls.length}-${p.stepEnds.length > 0}-${Boolean(props.actions)}-${p.availableModes.join(',')}-${p.variation?.within ?? 0}-${p.variation?.regenerated ?? 0}-${showScope && p.scope}`,
   )
   const centred = plan.cluster === 'centre'
   const filterFits = () => Boolean(row.current && filterFitsRow(row.current, {centred, sliderMin}))

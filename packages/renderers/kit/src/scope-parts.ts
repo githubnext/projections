@@ -42,7 +42,7 @@ function foldLabel(rows: readonly {before?: {kind: string}; after?: {kind: strin
     counts.set(kind, (counts.get(kind) ?? 0) + 1)
   }
   const words = [...counts]
-    .sort((a, b) => b[1] - a[1])
+    .toSorted((a, b) => b[1] - a[1])
     .map(([kind, count]) => {
       const noun = humanizeKind(kind)
       return `${count.toLocaleString('en-US')} ${count === 1 ? noun.singular : noun.plural}`
@@ -79,7 +79,7 @@ export function foldParts<X extends Extraction>(
     const hiddenRows = hidden.map(id => rows.get(id)!)
     const kinds = new Map<string, number>()
     for (const part of hiddenRows) kinds.set((part.after ?? part.before)!.kind, (kinds.get((part.after ?? part.before)!.kind) ?? 0) + 1)
-    const kind = [...kinds].sort((a, b) => b[1] - a[1])[0]![0]
+    const kind = [...kinds].toSorted((a, b) => b[1] - a[1])[0]![0]
     const id = `${foldPrefix}${row.id}`
     folds.set(id, hidden)
     const label = foldLabel(hiddenRows)

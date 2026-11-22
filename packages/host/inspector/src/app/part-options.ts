@@ -110,12 +110,12 @@ export function rendererOptions(
         const fits =
           !extraction ||
           (entry.accepts ? rendererAccepts(entry, extraction) : !family || entry.name === family || entry.handles.includes(family))
-        const families = domainSchemas.map(item => item.split('/')[0])
+        const families = new Set(domainSchemas.map(item => item.split('/')[0]))
         const expects = entry.accepts
           ? describeAccepts(entry.accepts)
           : [...new Set([entry.name, ...entry.handles])]
-              .filter((name, index) => index === 0 || families.includes(name))
-              .filter(name => families.includes(name) || entry.handles.every(handled => !families.includes(handled)))
+              .filter((name, index) => index === 0 || families.has(name))
+              .filter(name => families.has(name) || entry.handles.every(handled => !families.has(handled)))
               .slice(0, 2)
               .map(name => `\`${name}/v0\``)
               .join(' or ')

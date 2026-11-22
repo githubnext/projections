@@ -15,7 +15,7 @@ import {record} from './shared.js'
  * skipped, since they are never program sources.
  */
 async function files(root: string, prefix = '', result: string[] = []): Promise<string[]> {
-  const entries = (await readdir(path.join(root, prefix), {withFileTypes: true})).sort((a, b) =>
+  const entries = (await readdir(path.join(root, prefix), {withFileTypes: true})).toSorted((a, b) =>
     a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
   )
   if (prefix && entries.some(entry => entry.name === 'CACHEDIR.TAG' && entry.isFile())) return result
@@ -51,7 +51,7 @@ async function listed(root: string): Promise<string[]> {
     if (entry && (entry.isFile() || entry.isSymbolicLink())) result.push(name)
   }
   if (result.length > 50_000) throw new Error('Extractor input exceeds 50000 files')
-  return result.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+  return result.toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0))
 }
 
 /** The oldest Node.js release the helper supports: the oldest Node.js release still maintained upstream. */

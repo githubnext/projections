@@ -34,6 +34,7 @@ function generate(title, source) {
     if (typeof value.$ref === 'string' && !value.$ref.startsWith('#')) return {...value, $ref: `#/$defs/${value.$ref}`}
     return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, hoist(item)]))
   }
+  // eslint-disable-next-line unicorn/prefer-structured-clone -- the schema's JSON form, not a clone: drops TypeBox's non-JSON keys and undefined values
   const root = hoist(JSON.parse(JSON.stringify(source)))
   const schema = {
     $schema: 'https://json-schema.org/draft/2020-12/schema',

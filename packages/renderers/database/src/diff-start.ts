@@ -28,8 +28,8 @@ export function changesStart(view: RefObject<HTMLElement | null>, content: RefOb
     // Content that overflows the view (the only kind a start places) starts after the view's padding.
     const style = getComputedStyle(scroller)
     return {
-      left: parseFloat(style.paddingLeft) + first.x * scale - margin,
-      top: parseFloat(style.paddingTop) + first.y * scale - margin,
+      left: Number.parseFloat(style.paddingLeft) + first.x * scale - margin,
+      top: Number.parseFloat(style.paddingTop) + first.y * scale - margin,
     }
   }
 }

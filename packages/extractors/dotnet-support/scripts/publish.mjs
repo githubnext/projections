@@ -81,8 +81,8 @@ export function publishHelper({
 /** Whether two directories hold the same files with the same bytes (the helper's are flat). */
 function sameFiles(left, right) {
   if (!existsSync(right)) return false
-  const names = readdirSync(left).sort()
-  if (JSON.stringify(names) !== JSON.stringify(readdirSync(right).sort())) return false
+  const names = readdirSync(left).toSorted()
+  if (JSON.stringify(names) !== JSON.stringify(readdirSync(right).toSorted())) return false
   return names.every(name => readFileSync(path.join(left, name)).equals(readFileSync(path.join(right, name))))
 }
 
@@ -124,7 +124,7 @@ export const helperFiles = ['Projections.Dotnet.deps.json', 'Projections.Dotnet.
  * and dependency injection and EF Core from the examined application.
  */
 export function verifyHelper(directory = publishDirectory) {
-  const files = readdirSync(directory).sort()
+  const files = readdirSync(directory).toSorted()
   if (JSON.stringify(files) !== JSON.stringify(helperFiles)) {
     throw new Error(`The .NET helper must ship only ${helperFiles.join(', ')}; found ${files.join(', ')}`)
   }

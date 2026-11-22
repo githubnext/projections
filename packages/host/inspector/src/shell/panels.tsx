@@ -59,7 +59,7 @@ export function RawOutput({jobs}: {jobs: readonly InspectorJob[]}) {
   }
   return (
     <div className="pj:flex pj:flex-col pj:gap-4">
-      {[...jobs].reverse().map(item => (
+      {jobs.toReversed().map(item => (
         <section key={item.id} className="pi-output pj:flex pj:min-w-0 pj:flex-col pj:gap-1.5">
           <h3 className="pj:text-xs pj:font-semibold">
             Run {item.id}: {item.status}

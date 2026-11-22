@@ -30,7 +30,7 @@ export interface TreeNode {
 /** Parent of each active row from its links: the first link to it, in ID order, that closes no cycle. */
 function parents(snapshot: Snapshot): Map<string, string> {
   const parent = new Map<string, string>()
-  const links = [...snapshot.links].sort((a, b) => compareIds(a.to, b.to) || compareIds(a.from, b.from))
+  const links = snapshot.links.toSorted((a, b) => compareIds(a.to, b.to) || compareIds(a.from, b.from))
   for (const {from, to} of links) {
     if (from === to || parent.has(to) || !snapshot.active.has(from) || !snapshot.active.has(to)) continue
     let cursor: string | undefined = from
@@ -71,7 +71,7 @@ export function tree(snapshot: Snapshot, settings: PackSettings): {tops: TreeNod
       const declared = settings.weight(snapshot.entity(id))
       const counted = collapse(id, totals)
       const value = declared > 0 ? declared : counted
-      const category = [...totals].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0]?.[0]
+      const category = [...totals].toSorted((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0]?.[0]
       return {id, value, filled: true, ...(category === undefined ? {} : {category})}
     }
     const entity = snapshot.entity(id)

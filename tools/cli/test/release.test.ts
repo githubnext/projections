@@ -70,7 +70,7 @@ test('setting the version changes every shipped manifest, their dependencies and
   try {
     assert.deepEqual(versionProblems(root, 'v0.1.0'), [])
     const changed = setReleaseVersion(root, '0.2.0')
-    assert.deepEqual(changed.sort(), [
+    assert.deepEqual(changed.toSorted(), [
       'Cargo.lock',
       'Cargo.toml',
       'package-lock.json',

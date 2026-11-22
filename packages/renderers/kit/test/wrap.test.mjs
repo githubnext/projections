@@ -13,7 +13,7 @@ test('a row that fits stays one line', () => {
 
 test('two lines balance instead of leaving orphans, the top line never shorter', () => {
   // Greedy at 600 takes eleven 50s and leaves two orphans; balanced keeps two lines, seven over six.
-  const widths = Array(13).fill(50)
+  const widths = Array.from({length: 13}, () => 50)
   assert.deepEqual(
     greedyWrap(widths, 4, 600).map(line => line.length),
     [11, 2],
@@ -100,7 +100,7 @@ test('when greedy order forces a longer later line, a top-heavy break set wins i
 })
 
 test('narrowing the room adds a line only when the items no longer fit, and the result stays balanced', () => {
-  const widths = Array(9).fill(60)
+  const widths = Array.from({length: 9}, () => 60)
   const wide = balancedWrap(widths, 8, 700)
   const narrow = balancedWrap(widths, 8, 400)
   assert.equal(wide.lines.length, 1)

@@ -37,7 +37,7 @@ const visible = frame =>
   frame.nodes
     .filter(node => node.opacity > 0.999)
     .map(node => node.id)
-    .sort()
+    .toSorted()
 
 test('presented changes carry the comparison steps resolved to rows', () => {
   const presented = presentComparison(before, after, comparison)
@@ -153,7 +153,7 @@ test('an explicit reverse order reads what it takes away travelling backward', (
   const explicit = presentComparison(before, after, {
     ...comparison,
     order: {reverse: 'explicit'},
-    reverseSteps: [...comparison.steps].reverse(),
+    reverseSteps: comparison.steps.toReversed(),
   })
   const backward = scheduleSteps(explicit, -1)
   const unadd = backward.find(step => step.entities.includes('c'))
@@ -170,7 +170,7 @@ test('an explicit reverse order reads what it takes away travelling backward', (
 })
 
 test('a custom comparator order changes the visual order, and an explicit reverse order is followed backward', () => {
-  const reordered = presentComparison(before, after, {...comparison, steps: [...comparison.steps].reverse()})
+  const reordered = presentComparison(before, after, {...comparison, steps: comparison.steps.toReversed()})
   const [first] = stepEnds(scheduleSteps(reordered))
   assert.deepEqual(visible(createFrame(after, reordered, first)), ['a', 'b', 'c'], 'c arrives before b leaves')
 

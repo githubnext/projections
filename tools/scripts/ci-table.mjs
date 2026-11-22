@@ -32,7 +32,7 @@ function runs(plan) {
   const browser = Object.entries(
     Object.groupBy(
       checks.filter(check => check.job === 'browser'),
-      check => check.suites.join(),
+      check => check.suites.join(','),
     ),
   )
   const suites = browser.map(([key, items]) => {

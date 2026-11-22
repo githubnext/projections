@@ -32,7 +32,7 @@ function requested(input: ToolInput, model: FolderModel): {chosen?: {id: string}
 async function openedTab(id: string, folder: vscode.WorkspaceFolder): Promise<ProjectionTab> {
   const deadline = Date.now() + 20_000
   let tab: ProjectionTab | undefined
-  while (!(tab = [...ProjectionTab.tabs].reverse().find(item => item.projection === id && item.folder === folder))) {
+  while (!(tab = [...ProjectionTab.tabs].toReversed().find(item => item.projection === id && item.folder === folder))) {
     if (Date.now() > deadline) throw new Error(`The ${id} tab didn't open`)
     await sleep(100)
   }
@@ -87,7 +87,7 @@ export function openProjectionTool(
   return async (input: ToolInput): Promise<string> => {
     const folder = toolFolder(input.folder)
     if (typeof input.projection !== 'string') {
-      throw new Error('Name a projection: no projection tab is open to take it from (list_projections lists them)')
+      throw new TypeError('Name a projection: no projection tab is open to take it from (list_projections lists them)')
     }
     const id = input.projection
     const model = sidebar.model(folder)

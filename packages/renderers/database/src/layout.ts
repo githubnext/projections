@@ -31,7 +31,7 @@ function sharedRanks(models: readonly SchemaModel[]): SchemaModel[] {
   }
   const depth = layerDepths(tables, [...edges.values()])
   return models.map(model => {
-    const used = [...new Set(model.tables.map(table => depth.get(table)!))].sort((a, b) => a - b)
+    const used = [...new Set(model.tables.map(table => depth.get(table)!))].toSorted((a, b) => a - b)
     const dense = new Map(used.map((value, index) => [value, index]))
     return {...model, rank: new Map(model.tables.map(table => [table, dense.get(depth.get(table)!)!]))}
   })

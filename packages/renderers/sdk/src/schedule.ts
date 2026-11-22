@@ -147,7 +147,7 @@ export function scheduleSteps<S extends PresentedStep = PresentedStep>(
     // Compiled in the order of travel, then mirrored: what reads first travelling backward lies at the high end.
     return compileTimeline(order.reverseSteps, {lead: adds})
       .map(step => ({...step, time: 1 - step.time, lead: step.tail, tail: step.lead, travel: -1 as const}))
-      .reverse()
+      .toReversed()
   }
   return compileTimeline(order.steps, {lead: removes}).map(step => ({...step, travel: 1 as const}))
 }
@@ -189,7 +189,7 @@ export function stepEnds(schedule: readonly Pick<ScheduledStep, 'time' | 'radius
     .map(step => (direction === 1 ? step.time + step.radius + step.hold / 2 : step.time - step.radius - step.hold / 2))
     .map(value => Math.round(value * 1e9) / 1e9)
     .filter(value => value > 0 && value < 1)
-  return [...new Set(ends)].sort((a, b) => a - b)
+  return [...new Set(ends)].toSorted((a, b) => a - b)
 }
 
 /**

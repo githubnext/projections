@@ -11,17 +11,17 @@ export interface EmittedSchema {
 }
 
 const first = ['$schema', '$id', '$ref', 'title', 'description', 'type', 'const', 'enum', 'additionalProperties', 'required', 'properties']
-const last = ['$defs']
+const last = new Set(['$defs'])
 
 function ordered(entries: [string, unknown][]): [string, unknown][] {
   const rank = (key: string) => {
     const index = first.indexOf(key)
     if (index >= 0) return index - first.length
-    return last.includes(key) ? 1 : 0
+    return last.has(key) ? 1 : 0
   }
   return entries
     .map((entry, index) => [entry, index] as const)
-    .sort((a, b) => rank(a[0][0]) - rank(b[0][0]) || a[1] - b[1])
+    .toSorted((a, b) => rank(a[0][0]) - rank(b[0][0]) || a[1] - b[1])
     .map(([entry]) => entry)
 }
 

@@ -43,7 +43,7 @@ export function fieldChanges(
   }
   const keys = options.fields
     ? options.fields.filter(key => !['label', 'kind', 'confidence'].includes(key))
-    : [...new Set([...Object.keys(before.data ?? {}), ...Object.keys(after.data ?? {})])].sort()
+    : [...new Set([...Object.keys(before.data ?? {}), ...Object.keys(after.data ?? {})])].toSorted()
   for (const key of keys) {
     const a = before.data?.[key],
       b = after.data?.[key]

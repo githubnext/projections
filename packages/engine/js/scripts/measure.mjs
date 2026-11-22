@@ -7,7 +7,7 @@ import {browserHarness, graph} from './harness.mjs'
 
 const native = createNativeEngine()
 const harness = await browserHarness()
-const median = values => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)]
+const median = values => [...values].toSorted((a, b) => a - b)[Math.floor(values.length / 2)]
 const output = {
   environment: {node: process.version, platform: platform(), arch: arch(), cpu: cpus()[0].model, browser: harness.browser.version()},
   artifacts: {

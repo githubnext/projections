@@ -18,7 +18,7 @@ const codeExtensions = ['.ts', '.tsx', '.mts', '.cts']
 /** A vendored third-party file, kept as upstream ships it (packages/host/core/src/ui/components): its header says so. */
 const vendored = source => /^\/\/ Adapted from /mu.test(source.text.slice(0, 200))
 
-const toPosix = path => path.split('\\').join('/')
+const toPosix = path => path.replaceAll('\\', '/')
 const repositoryPath = path => toPosix(relative(root, path))
 
 /** The workspace directories the root package.json lists, with `dir/*` patterns expanded. */
@@ -31,7 +31,7 @@ async function workspaces() {
       continue
     }
     const parent = pattern.slice(0, -2)
-    for (const entry of (await readdir(join(root, parent), {withFileTypes: true})).sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const entry of (await readdir(join(root, parent), {withFileTypes: true})).toSorted((a, b) => a.name.localeCompare(b.name))) {
       if (entry.isDirectory() && (await exists(`${parent}/${entry.name}/package.json`))) found.push(`${parent}/${entry.name}`)
     }
   }

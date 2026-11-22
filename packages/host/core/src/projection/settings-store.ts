@@ -123,7 +123,7 @@ export function createSettingsStore(initial: ProjectionOptions): SettingsStore {
     const next = change(settings)
     if (next === settings) return
     settings = next
-    for (const listener of [...listeners]) listener()
+    for (const listener of Array.from(listeners)) listener()
   }
   return {
     getSnapshot: () => settings,

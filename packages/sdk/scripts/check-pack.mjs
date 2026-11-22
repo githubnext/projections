@@ -81,7 +81,7 @@ try {
     // Packed as published (see manifest.mjs), then the manifest and README are put back.
     const packed = packPublished(scratch, npm)
     tarball = join(scratch, packed.filename)
-    files = packed.files.map(file => file.path).sort()
+    files = packed.files.map(file => file.path).toSorted()
     console.log(
       `${packed.filename}: ${files.length} files, ${(packed.size / 1024).toFixed(1)} kB packed, ${(packed.unpackedSize / 1024).toFixed(1)} kB unpacked`,
     )

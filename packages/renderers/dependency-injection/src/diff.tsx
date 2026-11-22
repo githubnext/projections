@@ -4,7 +4,6 @@ import {
   changeMark,
   classifyChange,
   describeChange,
-  edgesInOrder,
   emphasisInset,
   cardTextMetrics,
   statusIcons,
@@ -37,6 +36,7 @@ import {facetNouns, type DiFacetChange} from './facets.js'
 import {
   LifetimeMark,
   LinkView,
+  RaisedLinks,
   linkOrigins,
   activate,
   diLegend,
@@ -401,11 +401,10 @@ export function DiffView({model, emphasis, selectedId, hoveredId, onSelect, repo
   const routes = useMemo(() => routeLinks(boxes, diff.links, outset), [boxes, diff, outset])
   const units = diff.units.slice(0, diUnitLimit)
   const shown = new Set(units.map(unit => unit.id))
-  const links = edgesInOrder(
-    diff.links.filter(link => shown.has(link.fromId) && shown.has(link.toId)),
-    link => link,
-    [hoveredId, selectedId],
-  )
+  const links = diff.links.filter(link => shown.has(link.fromId) && shown.has(link.toId))
+  // Ringed: the hovered and selected IDs, and the card a ringed part (a registration, an implementation) belongs to.
+  const ringed = [hoveredId, selectedId]
+  ringed.push(...units.filter(unit => ringed.some(id => id !== null && unitParts(unit.unit).includes(id))).map(unit => unit.id))
   const selectedUnits = new Set(units.filter(unit => selectedId !== null && unitParts(unit.unit).includes(selectedId)).map(unit => unit.id))
   const bounds = useMemo(() => {
     const all = [...boxes.values()]
@@ -483,6 +482,14 @@ export function DiffView({model, emphasis, selectedId, hoveredId, onSelect, repo
               diff
             />
           ))}
+          <RaisedLinks
+            links={links}
+            routes={routes}
+            markerId={markerId}
+            ringed={ringed}
+            emphasisOf={link => emphasis(link, link.id)}
+            diff
+          />
           <EdgeOrigins edges={linkOrigins(links, routes, link => emphasis(link, link.id))} />
         </svg>
       </div>

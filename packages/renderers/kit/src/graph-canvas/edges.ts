@@ -44,7 +44,7 @@ export function drawnEdge(
   return {d: splinePath(shaft), start, tip, base, head, direction}
 }
 
-/** What `edgesInOrder` reads from an edge: its key, its entity's ID and the cards at its ends. */
+/** What `raisedEdges` reads from an edge: its key, its entity's ID and the cards at its ends. */
 export interface OrderedEdge {
   /** Its stable key, which `hot` names. */
   key: string
@@ -57,21 +57,23 @@ export interface OrderedEdge {
 }
 
 /**
- * Edges in drawing order: one ringed now (`ringed`: the hovered and selected IDs; or `hot`, by key, a synthetic edge
- * under the pointer or keyboard focus, which the SDK doesn't ring) last, and before it those a ringed card at either
- * end has, so each is traced whole over the others it runs beside. Otherwise the order is kept.
+ * The edges drawn again over the others, in drawing order, so each is traced whole however many it runs beside: those
+ * a ringed card at either end has, then the ringed ones (`ringed`: the hovered and selected IDs, a card's own and the
+ * card's that a ringed part belongs to; or `hot`, by key, synthetic edges under the pointer or keyboard focus, which
+ * the SDK doesn't ring). Only their artwork is drawn again: the edges themselves, and their hit targets, keep their
+ * order, so keyboard focus moves through them in a stable order.
  */
-export function edgesInOrder<T>(
+export function raisedEdges<T>(
   items: readonly T[],
   edgeOf: (item: T) => OrderedEdge,
   ringed: readonly (string | null | undefined)[],
-  hot: string | null = null,
+  hot: ReadonlySet<string> = new Set(),
 ): T[] {
   const ids = ringed.filter((id): id is string => typeof id === 'string')
   const rank = (item: T) => {
     const edge = edgeOf(item)
-    if (edge.key === hot || ids.includes(edge.id)) return 2
+    if (hot.has(edge.key) || ids.includes(edge.id)) return 2
     return ids.some(id => id === edge.fromId || id === edge.toId) ? 1 : 0
   }
-  return items.toSorted((a, b) => rank(a) - rank(b))
+  return items.filter(item => rank(item) > 0).toSorted((a, b) => rank(a) - rank(b))
 }

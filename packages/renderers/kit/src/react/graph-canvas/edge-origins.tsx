@@ -18,6 +18,8 @@ export interface EdgeOrigin {
   stroke: string
   /** Hovered or focused while synthetic, which the SDK doesn't ring: drawn in the hover color. */
   hot?: boolean
+  /** Outside a focus (GraphCanvas `focus`): its copy recedes, and a dot only receded edges share. */
+  receded?: boolean
 }
 
 /**
@@ -28,7 +30,7 @@ export interface EdgeOrigin {
  * shares it.
  */
 export function EdgeOrigins({edges}: {edges: readonly EdgeOrigin[]}) {
-  const starts = new Map<string, Point & {opacity: number; strokes: Set<string>}>()
+  const starts = new Map<string, Point & {opacity: number; strokes: Set<string>; receded: boolean}>()
   for (const edge of edges) {
     const at = `${edge.start.x.toFixed(2)},${edge.start.y.toFixed(2)}`
     const seen = starts.get(at)
@@ -36,6 +38,7 @@ export function EdgeOrigins({edges}: {edges: readonly EdgeOrigin[]}) {
       ...edge.start,
       opacity: Math.max(seen?.opacity ?? 0, edge.opacity),
       strokes: new Set([...(seen?.strokes ?? []), edge.stroke]),
+      receded: (seen?.receded ?? true) && Boolean(edge.receded),
     })
   }
   return (
@@ -46,7 +49,7 @@ export function EdgeOrigins({edges}: {edges: readonly EdgeOrigin[]}) {
           cx={start.x}
           cy={start.y}
           r={edgeOriginRadius}
-          className="graph-edge-origin"
+          className={`graph-edge-origin${start.receded ? ' receded' : ''}`}
           data-at={at}
           opacity={start.opacity}
           style={start.strokes.size === 1 ? {fill: [...start.strokes][0]} : undefined}
@@ -58,7 +61,7 @@ export function EdgeOrigins({edges}: {edges: readonly EdgeOrigin[]}) {
           cx={edge.start.x}
           cy={edge.start.y}
           r={edgeOriginRadius}
-          className={`graph-edge-origin-ring${edge.hot ? ' hot' : ''}`}
+          className={`graph-edge-origin-ring${edge.hot ? ' hot' : ''}${edge.receded ? ' receded' : ''}`}
           data-origin-of={edge.key}
           {...(edge.id === undefined ? {} : {'data-projections-edge': 'fill', 'data-projections-ring-with': edge.id})}
           opacity={edge.opacity}

@@ -1229,16 +1229,6 @@ edgePresence(edge: EntityChange<Relationship>, progress: number): number
 
 Whether a relationship is present at this point, so lists match the timeline.
 
-### `edgesInOrder`
-
-```ts
-edgesInOrder<T>(items: Array<T>, edgeOf: { (item: T): OrderedEdge }, ringed: Array<null | string | undefined>, hot?: null | string): Array<T>
-```
-
-Edges in drawing order: one ringed now (`ringed`: the hovered and selected IDs; or `hot`, by key, a synthetic edge
-under the pointer or keyboard focus, which the SDK doesn't ring) last, and before it those a ringed card at either
-end has, so each is traced whole over the others it runs beside. Otherwise the order is kept.
-
 ### `EdgeTurn`
 
 ```ts
@@ -2164,7 +2154,7 @@ else the multiple that brings it there.
 interface OrderedEdge
 ```
 
-What `edgesInOrder` reads from an edge: its key, its entity's ID and the cards at its ends.
+What `raisedEdges` reads from an edge: its key, its entity's ID and the cards at its ends.
 
 | Member | Signature | Description |
 |---|---|---|
@@ -2409,6 +2399,18 @@ type RadiusStep = "full" | "lg" | "md" | "sm"
 ```
 
 Steps of the corner radius scale: `sm` (6px) to `lg` (10px), and `full` for pills; `md` is the `radius` token.
+
+### `raisedEdges`
+
+```ts
+raisedEdges<T>(items: Array<T>, edgeOf: { (item: T): OrderedEdge }, ringed: Array<null | string | undefined>, hot?: ReadonlySet<string>): Array<T>
+```
+
+The edges drawn again over the others, in drawing order, so each is traced whole however many it runs beside: those
+a ringed card at either end has, then the ringed ones (`ringed`: the hovered and selected IDs, a card's own and the
+card's that a ringed part belongs to; or `hot`, by key, synthetic edges under the pointer or keyboard focus, which
+the SDK doesn't ring). Only their artwork is drawn again: the edges themselves, and their hit targets, keep their
+order, so keyboard focus moves through them in a stable order.
 
 ### `ramp`
 
@@ -3817,6 +3819,7 @@ An edge as its origin dot needs it.
 | `id` | `"id"?: string \| undefined` | The entity it rings with (`data-projections-ring-with`), unless it is synthetic. |
 | `key` | `"key": string` | Its stable key. |
 | `opacity` | `"opacity": number` | Its presence now, which its dot fades with. |
+| `receded` | `"receded"?: false \| true` | Outside a focus (GraphCanvas `focus`): its copy recedes, and a dot only receded edges share. |
 | `start` | `"start": Point` | Where its line starts, on its source's edge. |
 | `stroke` | `"stroke": string` | Its line's color as drawn now: a change's hue while it is emphasized. |
 

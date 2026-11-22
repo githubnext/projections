@@ -11,6 +11,7 @@ import {
   edgeMarkerId,
   edgePaint,
   graphEdgeWeight,
+  raisedEdges,
   type BoxEdge,
   type Point,
   type RendererLegend,
@@ -209,6 +210,76 @@ export function linkOrigins(
   })
 }
 
+/** A link's line, in its paint, with its arrowhead (the marker its `LinkView` defines, `arrowId`). */
+function LinkLine({link, d, arrowId, emphasis, diff}: {link: DiLinkFrame; d: string; arrowId: string; emphasis: number; diff: boolean}) {
+  const dashed = (diff || emphasis > 0.01) && link.status === 'removed'
+  return (
+    <g style={edgePaint(link, emphasis, graphEdgeWeight)}>
+      <path
+        d={d}
+        data-projections-edge="line"
+        className={`graph-edge ${link.collection ? 'collection' : ''} ${link.optional ? 'optional' : ''} ${link.resolution ? 'resolution' : ''} ${link.alias ? 'alias' : ''} ${emphasis > 0.01 ? `graph-edge-emphasis ${classifyChange(link)}` : ''}`}
+        style={{stroke: 'inherit', strokeWidth: 'inherit'}}
+        markerEnd={`url(#${arrowId})`}
+        strokeDasharray={dashed ? '5 3' : undefined}
+      />
+    </g>
+  )
+}
+
+/**
+ * A link's line drawn again over the others (the kit's `raisedEdges`: a ringed card's links, then the ringed one), so
+ * it is traced whole: artwork only, ringing with its link (`data-projections-ring-with`). The links themselves, and
+ * their hit paths, keep their order, so keyboard focus moves through them in a stable order.
+ */
+export function RaisedLinkView({
+  link,
+  route,
+  markerId,
+  emphasis,
+  diff = false,
+}: {
+  link: DiLinkFrame
+  route: LinkRoute
+  markerId: string
+  emphasis: number
+  diff?: boolean
+}) {
+  return (
+    <g className="graph-link-raised" opacity={link.opacity} data-edge-key={link.key} data-projections-ring-with={link.id}>
+      <LinkLine link={link} d={route.d} arrowId={edgeMarkerId(markerId, link.key)} emphasis={emphasis} diff={diff} />
+    </g>
+  )
+}
+
+/** The layer of raised links (`RaisedLinkView`), over the links, for those `ringed` IDs raise (the kit's `raisedEdges`). */
+export function RaisedLinks({
+  links,
+  routes,
+  markerId,
+  ringed,
+  emphasisOf,
+  diff = false,
+}: {
+  links: readonly DiLinkFrame[]
+  routes: ReadonlyMap<string, LinkRoute>
+  markerId: string
+  ringed: readonly (string | null)[]
+  emphasisOf: (link: DiLinkFrame) => number
+  diff?: boolean
+}) {
+  return (
+    <g className="graph-links-raised" aria-hidden="true">
+      {raisedEdges(links, link => link, ringed).flatMap(link => {
+        const route = routes.get(link.key)
+        return route
+          ? [<RaisedLinkView key={link.key} link={link} route={route} markerId={markerId} emphasis={emphasisOf(link)} diff={diff} />]
+          : []
+      })}
+    </g>
+  )
+}
+
 /**
  * One link, in the kit's edge style: a focusable hit path and the arrow (its
  * origin dot is the kit's `EdgeOrigins`), and its parameter while either card is selected. In diff mode it carries
@@ -239,7 +310,6 @@ export function LinkView({
   const arrowId = edgeMarkerId(markerId, link.key)
   const kind = link.alias ? 'alias' : link.resolution ? 'runtime resolution' : 'constructor dependency'
   const part = diff && link.key.endsWith(':before') ? ', old endpoints' : diff && link.key.endsWith(':after') ? ', new endpoints' : ''
-  const dashed = (diff || emphasis > 0.01) && link.status === 'removed'
   // A link's annotation badge sits at its target end, clear of the source card's status footer.
   return (
     <g
@@ -275,16 +345,7 @@ export function LinkView({
               : `${link.parameter ? `${link.parameter}: ` : ''}constructor dependency`}
         </title>
       </path>
-      <g style={paint}>
-        <path
-          d={d}
-          data-projections-edge="line"
-          className={`graph-edge ${link.collection ? 'collection' : ''} ${link.optional ? 'optional' : ''} ${link.resolution ? 'resolution' : ''} ${link.alias ? 'alias' : ''} ${emphasis > 0.01 ? `graph-edge-emphasis ${classifyChange(link)}` : ''}`}
-          style={{stroke: 'inherit', strokeWidth: 'inherit'}}
-          markerEnd={`url(#${arrowId})`}
-          strokeDasharray={dashed ? '5 3' : undefined}
-        />
-      </g>
+      <LinkLine link={link} d={d} arrowId={arrowId} emphasis={emphasis} diff={diff} />
       {labelled && (!!link.parameter || link.resolution || link.alias) && (
         <text
           x={(start.x + end.x) / 2}

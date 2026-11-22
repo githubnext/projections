@@ -6,12 +6,13 @@ import {cardBorderOutset, type BorderWidths} from '../../border.js'
 import {classifyChange, edgePaint, graphEdgeWeight, type ChangeClassification} from '../../emphasis.js'
 import type {TransitionEdge, TransitionNode} from '../../graph-transition.js'
 import {changeMark} from '../../diff/model.js'
-import {drawnEdge, edgesInOrder} from '../../graph-canvas/edges.js'
+import {drawnEdge, raisedEdges} from '../../graph-canvas/edges.js'
 import type {Point} from '../../edge-arrows.js'
 import {edgeDescription, type Drawing} from './drawing.js'
 
-/** The default for an optional list prop: one array, so a default never changes between renders. */
+/** The defaults for optional list and set props: one each, so a default never changes between renders. */
 const none: readonly never[] = []
+const noKeys: ReadonlySet<string> = new Set()
 
 export interface DrawnLink {
   edge: TransitionEdge
@@ -56,9 +57,46 @@ export function drawnLinks(
   })
 }
 
-/** Relationships in drawing order: the ringed, and a ringed card's, last (`edgesInOrder`). */
-export function linksInOrder(links: readonly DrawnLink[], drawing: Drawing, hot: string | null): DrawnLink[] {
-  return edgesInOrder(links, link => link.edge, [drawing.props.hoveredId, drawing.props.selectedId], hot)
+/** The relationships drawn again over the others: a ringed card's, then the ringed ones (`raisedEdges`). */
+export function raisedLinks(links: readonly DrawnLink[], drawing: Drawing, hot: ReadonlySet<string>): DrawnLink[] {
+  return raisedEdges(links, link => link.edge, [drawing.props.hoveredId, drawing.props.selectedId], hot)
+}
+
+/** Whether a relationship recedes, outside a focus (GraphCanvas `focus`). */
+export function linkRecedes({edge}: DrawnLink, {props, receded}: Drawing): boolean {
+  return Boolean(props.focus) && (receded(edge.fromId) || receded(edge.toId))
+}
+
+/** A relationship's line: emphasis is its own stroke, ending at the arrowhead's base like the shaft. */
+function EdgeLine({link}: {link: DrawnLink}) {
+  const {arrow, relationship, emphasis, change, paint} = link
+  return (
+    <path
+      d={arrow.d}
+      data-projections-edge="line"
+      className={`graph-edge ${relationship.confidence === 'inferred' ? 'inferred' : ''} ${emphasis > 0.01 ? `graph-edge-emphasis ${change}` : ''}`}
+      style={paint}
+      strokeDasharray={emphasis > 0.01 && change === 'removed' ? '5 3' : undefined}
+    />
+  )
+}
+
+/**
+ * A relationship's line drawn again over the others (`raisedLinks`): artwork only, ringing with its relationship
+ * (`data-projections-ring-with`), or in the hover color while a synthetic one is `hot`.
+ */
+export function RaisedLink({link, drawing, hot}: {link: DrawnLink; drawing: Drawing; hot: boolean}) {
+  const synthetic = drawing.props.synthetic?.(link.edge.id) ?? false
+  return (
+    <g
+      className={`graph-link-raised${linkRecedes(link, drawing) ? ' receded' : ''}${synthetic && hot ? ' hot' : ''}`}
+      opacity={link.edge.opacity}
+      data-edge-key={link.edge.key}
+      {...(synthetic ? {} : {'data-projections-ring-with': link.edge.id})}
+    >
+      <EdgeLine link={link} />
+    </g>
+  )
 }
 
 export function GraphLink({
@@ -67,7 +105,8 @@ export function GraphLink({
   sharedOpen,
   inspect,
   hot = false,
-  onHot,
+  onPointer,
+  onFocusChange,
 }: {
   link: DrawnLink
   drawing: Drawing
@@ -75,19 +114,21 @@ export function GraphLink({
   inspect: (edge: TransitionEdge) => void
   /** A synthetic relationship under the pointer or keyboard focus: drawn in the hover color, as the SDK rings others. */
   hot?: boolean
-  /** Reports the pointer or focus entering (`true`) or leaving it. */
-  onHot?: (hot: boolean) => void
+  /** Reports the pointer entering (`true`) or leaving it. */
+  onPointer?: (over: boolean) => void
+  /** Reports keyboard focus entering (`true`) or leaving it. */
+  onFocusChange?: (focused: boolean) => void
 }) {
-  const {edge, arrow, relationship, name, emphasis, change, paint} = link
-  const {props, diff, receded} = drawing
+  const {edge, arrow, name, change} = link
+  const {props, diff} = drawing
   const menu = edge.shared
   const synthetic = props.synthetic?.(edge.id) ?? false
-  // A selected or hovered card's relationships, drawn over the others (`linksInOrder`).
+  // A selected or hovered card's relationships, drawn again over the others (`raisedLinks`).
   const incident = [props.selectedId, props.hoveredId].some(id => id !== null && (id === edge.fromId || id === edge.toId))
   // A relationship's annotation badge sits at its target end, clear of the source card's status footer.
   return (
     <g
-      className={`graph-link${props.focus && (receded(edge.fromId) || receded(edge.toId)) ? ' receded' : ''}${synthetic && hot ? ' hot' : ''}`}
+      className={`graph-link${linkRecedes(link, drawing) ? ' receded' : ''}${synthetic && hot ? ' hot' : ''}`}
       opacity={edge.opacity}
       {...(synthetic ? {'data-graph-synthetic': edge.id} : {'data-entity-id': edge.id})}
       data-edge-key={edge.key}
@@ -107,10 +148,10 @@ export function GraphLink({
         aria-expanded={menu ? sharedOpen : undefined}
         aria-label={`Inspect relationship ${name}${props.comparing ? `, ${edgeDescription(edge)}` : ''}`}
         onClick={() => inspect(edge)}
-        onPointerEnter={() => onHot?.(true)}
-        onPointerLeave={() => onHot?.(false)}
-        onFocus={() => onHot?.(true)}
-        onBlur={() => onHot?.(false)}
+        onPointerEnter={() => onPointer?.(true)}
+        onPointerLeave={() => onPointer?.(false)}
+        onFocus={() => onFocusChange?.(true)}
+        onBlur={() => onFocusChange?.(false)}
         onKeyDown={event => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
@@ -120,14 +161,7 @@ export function GraphLink({
       >
         <title>{name}</title>
       </path>
-      {/* Emphasis is this path's own stroke, ending at the arrowhead's base like the shaft. */}
-      <path
-        d={arrow.d}
-        data-projections-edge="line"
-        className={`graph-edge ${relationship.confidence === 'inferred' ? 'inferred' : ''} ${emphasis > 0.01 ? `graph-edge-emphasis ${change}` : ''}`}
-        style={paint}
-        strokeDasharray={emphasis > 0.01 && change === 'removed' ? '5 3' : undefined}
-      />
+      <EdgeLine link={link} />
     </g>
   )
 }
@@ -148,13 +182,13 @@ export function Arrowheads({
   links,
   drawing,
   junctions = none,
-  hot = null,
+  hot = noKeys,
 }: {
   links: readonly DrawnLink[]
   drawing: Drawing
   junctions?: readonly Point[]
-  /** The synthetic relationship under the pointer or keyboard focus, by key (see `GraphLink`'s `hot`). */
-  hot?: string | null
+  /** The synthetic relationships under the pointer or keyboard focus, by key (see `GraphLink`'s `hot`). */
+  hot?: ReadonlySet<string>
 }) {
   const {props, receded} = drawing
   return (
@@ -162,7 +196,7 @@ export function Arrowheads({
       {links.map(({edge, arrow, paint}) => (
         <g
           key={edge.key}
-          className={`graph-link-head${props.focus && (receded(edge.fromId) || receded(edge.toId)) ? ' receded' : ''}${edge.key === hot ? ' hot' : ''}`}
+          className={`graph-link-head${props.focus && (receded(edge.fromId) || receded(edge.toId)) ? ' receded' : ''}${hot.has(edge.key) ? ' hot' : ''}`}
           opacity={edge.opacity}
           data-edge-key={edge.key}
           data-head-of={edge.id}

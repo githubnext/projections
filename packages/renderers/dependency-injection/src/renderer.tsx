@@ -6,7 +6,6 @@ import {
   classifyChange,
   contentStart,
   describeChange,
-  edgesInOrder,
   textPill,
   type ScrollStart,
 } from '@githubnext/projections-renderer-kit'
@@ -31,6 +30,7 @@ import {markSpan} from './lifetime-mark.js'
 import {
   LifetimeMark,
   LinkView,
+  RaisedLinks,
   linkOrigins,
   diLegend,
   activate,
@@ -424,11 +424,10 @@ function TransitionView({
   )
   const units = frame.units.slice(0, diUnitLimit)
   const shown = new Set(units.map(unit => unit.id))
-  const links = edgesInOrder(
-    frame.links.filter(link => shown.has(link.fromId) && shown.has(link.toId)),
-    link => link,
-    [hoveredId, selectedId],
-  )
+  const links = frame.links.filter(link => shown.has(link.fromId) && shown.has(link.toId))
+  // Ringed: the hovered and selected IDs, and the card a ringed part (a registration, an implementation) belongs to.
+  const ringed = [hoveredId, selectedId]
+  ringed.push(...units.filter(unit => ringed.some(id => id !== null && unitParts(unit.unit).includes(id))).map(unit => unit.id))
   const selectedUnits = new Set(
     frame.units.filter(unit => selectedId !== null && unitParts(unit.unit).includes(selectedId)).map(unit => unit.id),
   )
@@ -532,6 +531,13 @@ function TransitionView({
                 onSelect={onSelect}
               />
             ))}
+            <RaisedLinks
+              links={links}
+              routes={routes}
+              markerId={markerId}
+              ringed={ringed}
+              emphasisOf={link => emphasize(link, transition.linkStepRow(link.key))}
+            />
             <EdgeOrigins edges={linkOrigins(links, routes, link => emphasize(link, transition.linkStepRow(link.key)))} />
           </svg>
         )}

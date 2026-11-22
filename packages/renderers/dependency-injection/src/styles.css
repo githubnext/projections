@@ -110,15 +110,18 @@
   fill: var(--pk-part-tint);
 }
 
-/* A link's own line styles, on the kit's edge (`graph-edge`): a collection, a runtime resolution, an alias. */
-.graph-edge.collection {
+/*
+ * A link's own line styles, on the kit's edge (`graph-edge`): a collection, a runtime resolution, an alias. A removed
+ * link's dash (its `stroke-dasharray`) wins over its kind's, with highlighting on or off.
+ */
+.graph-edge.collection:not([stroke-dasharray]) {
   stroke-dasharray: 6 3;
 }
-.graph-edge.resolution {
+.graph-edge.resolution:not([stroke-dasharray]) {
   stroke-dasharray: 4 4;
 }
 /* An alias forwards to another registration: dotted, so it never reads as an injection. */
-.graph-edge.alias {
+.graph-edge.alias:not([stroke-dasharray]) {
   stroke-dasharray: 1 4;
 }
 .graph-edge.optional {

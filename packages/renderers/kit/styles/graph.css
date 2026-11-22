@@ -137,7 +137,10 @@
 }
 /* Cards and relationships outside a focus (see GraphCanvas `focus`) recede; filter opacity composes with fades. */
 .graph-node.receded,
-.graph-link.receded {
+.graph-link.receded,
+.graph-link-raised.receded,
+.graph-edge-origin.receded,
+.graph-edge-origin-ring.receded {
   filter: opacity(0.28);
 }
 .node-label {
@@ -219,11 +222,16 @@
 .graph-link-head.receded {
   filter: opacity(0.28);
 }
+/* A ringed relationship's line drawn again over the others (`RaisedLink`): artwork only, never hit. */
+.graph-links-raised {
+  pointer-events: none;
+}
 /*
  * Synthetic relationships (no entity ID) aren't ringed by the SDK: under the pointer or keyboard focus (`hot`) the
  * line, arrowhead and origin dot take the hover ring's color and width, as the SDK draws an entity's.
  */
-.graph-link.hot > .graph-edge {
+.graph-link.hot > .graph-edge,
+.graph-link-raised.hot > .graph-edge {
   stroke: var(--pr-hover) !important;
   stroke-width: var(--pr-hover-width) !important;
 }

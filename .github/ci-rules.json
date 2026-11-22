@@ -155,7 +155,7 @@
       "matrix": [
         {
           "name": "ubuntu-latest, checks",
-          "description": "Every change but documentation alone: the static checks, types, lint, the Storybook build, the generated reference docs and the self-projection",
+          "description": "Every change but documentation alone: the static checks, types, lint, the Storybook build and the self-projection",
           "when": {
             "not": "docsOnly"
           },
@@ -166,7 +166,7 @@
         },
         {
           "name": "ubuntu-latest, Node",
-          "description": "Every change but documentation alone: the Node suites, the installed CLI proofs and the GitHub Action end to end",
+          "description": "Every change but documentation alone: the Node suites, the installed CLI proofs, the GitHub Action end to end and the generated reference docs",
           "when": {
             "not": "docsOnly"
           },

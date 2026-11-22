@@ -102,10 +102,10 @@ run on Linux and macOS.
 | GitHub Action end to end (`.github/actions/action-e2e`)    | `public-product`                       | `public-product`           | `windows-integration`                               |
 
 `public-product` runs as parallel jobs, each building the workspace first: on
-Linux, `ubuntu-latest, checks` (static checks, types, lint, generated
-documentation and the self-projection), `ubuntu-latest, Node` (the Node suites,
-installed proofs and the Action end to end) and `ubuntu-latest, Rust` (the Rust,
-native tool and Docker suites); on macOS, `macos-latest, Rust` and
+Linux, `ubuntu-latest, checks` (static checks, types, lint and the
+self-projection), `ubuntu-latest, Node` (the Node suites, installed proofs, the
+Action end to end and generated documentation) and `ubuntu-latest, Rust` (the
+Rust, native tool and Docker suites); on macOS, `macos-latest, Rust` and
 `macos-latest, Node` (everything else). `windows-integration` runs as two
 parallel jobs too: `browser` (the browser suites and the Action) and `VS Code`.
 This table describes what pushes to `main` and the nightly run cover; pull

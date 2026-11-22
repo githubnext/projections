@@ -12,8 +12,9 @@ export const RULES = '.github/ci-rules.json'
 
 export function loadCiRules(root: string): CiRules {
   const rules = readJson<CiRules>(root, RULES)
-  if (!rules?.files?.length || !rules.jobs || !rules.browser?.suites)
+  if (!rules?.files?.length || !rules.jobs || !rules.browser?.suites) {
     throw new Error(`${RULES} is missing or has no files, jobs or browser`)
+  }
   return rules
 }
 
@@ -29,10 +30,11 @@ export function resolveGroups(rules: CiRules, facts: RepoFacts): Map<string, Set
     if (stack.includes(name)) throw new Error(`${RULES}: group ${[...stack, name].join(' → ')} refers to itself`)
     type Selector = (typeof group.include)[number]
     const select = (selector: Selector): string[] => {
-      if (typeof selector === 'string')
+      if (typeof selector === 'string') {
         return selector.startsWith('@')
           ? [...resolve(selector.slice(1), [...stack, name])]
           : units.filter(path => matches(path, [selector]))
+      }
       if ('kind' in selector) return facts.units.filter(unit => unit.kinds.includes(selector.kind)).map(unit => unit.path)
       if (selector.facts === 'coverage') return facts.coverage
       return facts.harnessRenderers.map(renderer => `packages/renderers/${renderer}`)
@@ -53,14 +55,15 @@ export function resolveGroups(rules: CiRules, facts: RepoFacts): Map<string, Set
  */
 export function reach(units: readonly Unit[], touched: Iterable<string>, tested: ReadonlySet<string>): Map<string, string> {
   const reverse = new Map<string, string[]>()
-  for (const unit of units)
+  for (const unit of units) {
     for (const dependency of unit.dependsOn) reverse.set(dependency, [...(reverse.get(dependency) ?? []), unit.path])
+  }
   const witness = new Map<string, string>()
   for (const unit of touched) witness.set(unit, unit)
   const queue = [...witness.keys()].filter(unit => !tested.has(unit)).sort()
   const expanded = new Set(queue)
   while (queue.length) {
-    const unit = queue.shift() as string
+    const unit = queue.shift()!
     for (const dependant of (reverse.get(unit) ?? []).sort()) {
       if (!witness.has(dependant)) witness.set(dependant, unit)
       if (expanded.has(dependant)) continue
@@ -72,7 +75,7 @@ export function reach(units: readonly Unit[], touched: Iterable<string>, tested:
 }
 
 /** What a predicate is evaluated against: a pull request that follows its change. */
-export type Context = {
+export interface Context {
   rules: CiRules
   groups: Map<string, Set<string>>
   docsOnly: boolean
@@ -117,6 +120,9 @@ export const FULL = 'Everything runs'
 export function reasons(when: When, context: Context): string[] {
   if (typeof when === 'string' || !holds(when, context)) return []
   if ('any' in when) return [...new Set(when.any.flatMap(item => reasons(item, context)))]
-  if ('if' in when) return [context.rules.conditions[when.if]?.description as string]
+  if ('if' in when) {
+    const condition = context.rules.conditions[when.if]
+    return condition ? [condition.description] : []
+  }
   return []
 }

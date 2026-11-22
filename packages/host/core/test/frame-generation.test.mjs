@@ -63,8 +63,9 @@ function setup() {
   })
   const channel = new URLSearchParams(new URL(iframe.src ?? frame.iframe.src ?? iframe.attributes.src).hash.slice(1)).get('channel')
   const answer = message => {
-    for (const listener of Array.from(listeners))
+    for (const listener of Array.from(listeners)) {
       listener({data: {projections: 0, channel, ...message}, source: contentWindow, origin: 'null'})
+    }
   }
   return {frame, events, sent, answer, init}
 }

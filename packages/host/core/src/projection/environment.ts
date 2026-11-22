@@ -36,8 +36,8 @@ export function watchMedia(onChange: (media: Media) => void): () => void {
 
 /** The color mode (an explicit one, else the person's preference), its theme and whether motion is reduced. */
 export function createHostEnvironment({memo, byValue}: Memos) {
-  const tokensOf = byValue<{[name: string]: string}>()
-  const themeOf = memo((colorMode: ColorMode, tokens: {[name: string]: string}) => hostTheme(colorMode, tokens))
+  const tokensOf = byValue<Record<string, string>>()
+  const themeOf = memo((colorMode: ColorMode, tokens: Record<string, string>) => hostTheme(colorMode, tokens))
   return (options: Pick<ProjectionOptions, 'colorMode' | 'themeTokens'>, media: Media) => {
     const colorMode: ColorMode =
       options.colorMode === 'light' || options.colorMode === 'dark' ? options.colorMode : media.prefersDark ? 'dark' : 'light'

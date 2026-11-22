@@ -145,8 +145,9 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
         batched(() => {
           const clamped = unit(next)
           const options = latest
-          if (options.position === undefined)
+          if (options.position === undefined) {
             setSettings(previous => (previous.position === clamped ? previous : {...previous, position: clamped}))
+          }
           options.onPositionChange?.(clamped)
           if (options.progress !== undefined) options.onProgressChange?.(shown.view.timing.toProgress(clamped))
         }),
@@ -213,8 +214,9 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
         options.position === undefined &&
         options.progress === undefined &&
         Math.abs(timing.toProgress(timing.position) - kept.progress) > 1e-9
-      )
+      ) {
         setSettings(previous => ({...previous, position: timing.toPosition(kept.progress)}))
+      }
       statusEvents({status: view.status, paint: view.paint, playing: view.playing, mode: view.mode, progress: timing.progress}, options)
       if (reported.selectedId?.value !== view.selectedId) {
         reported.selectedId = {value: view.selectedId}

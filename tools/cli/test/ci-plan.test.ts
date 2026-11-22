@@ -45,12 +45,13 @@ function check(plan: CiPlan, expect: CiPlanCase['expect'], label: string) {
   for (const unit of expect.changedInclude ?? []) assert.ok(plan.changed.includes(unit), `${label}: changes ${unit}`)
   for (const unit of expect.dependantsInclude ?? []) assert.ok(unit in plan.dependants, `${label}: reaches ${unit}`)
   for (const unit of expect.dependantsExclude ?? []) assert.ok(!(unit in plan.dependants), `${label}: doesn't reach ${unit}`)
-  if (expect.classes)
+  if (expect.classes) {
     assert.deepEqual(
       plan.files.map(file => file.class),
       expect.classes,
       `${label}: classes (${plan.files.map(file => file.rule).join('; ')})`,
     )
+  }
 }
 
 const table = JSON.parse(readFileSync(new URL('ci-plan.cases.json', import.meta.url), 'utf8')) as CiPlanCases

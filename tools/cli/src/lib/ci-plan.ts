@@ -52,7 +52,7 @@ export interface CiPlan {
 }
 
 /** One check the plan runs, as GitHub lists it, and what it runs. */
-export type Execution = {
+export interface Execution {
   check: string
   job: string
   /** A matrix entry's values. */

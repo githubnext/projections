@@ -34,16 +34,18 @@ function surfaceOf(element: Element, root: Element): HTMLElement | undefined {
  * A surface's inner top and bottom: inside its borders, or in a table that collapses them, inside half of each rule
  * (which straddles the cells' edge), the one under it drawn by the cell below.
  */
-function innerEdges(surface: HTMLElement, box: DOMRect): {top: number; bottom: number} {
+function innerEdges(surface: HTMLElement, box: DOMRect, scale = 1): {top: number; bottom: number} {
   const style = getComputedStyle(surface)
-  const [top, bottom] = [px(style.borderTopWidth), px(style.borderBottomWidth)]
+  // Borders are laid out widths; the box is drawn, scaled.
+  const width = (value: string) => px(value) * scale
+  const [top, bottom] = [width(style.borderTopWidth), width(style.borderBottomWidth)]
   const table = surface.closest('table')
   if (!(surface instanceof HTMLTableCellElement) || !table || getComputedStyle(table).borderCollapse !== 'collapse') {
     return {top: box.top + top, bottom: box.bottom - bottom}
   }
   const next = surface.parentElement?.nextElementSibling
   const under = next instanceof HTMLTableRowElement ? next.cells[surface.cellIndex] : undefined
-  return {top: box.top + top / 2, bottom: box.bottom - Math.max(bottom, under ? px(getComputedStyle(under).borderTopWidth) : 0) / 2}
+  return {top: box.top + top / 2, bottom: box.bottom - Math.max(bottom, under ? width(getComputedStyle(under).borderTopWidth) : 0) / 2}
 }
 
 /**
@@ -59,7 +61,7 @@ function stretched(surface: HTMLElement, line: Line): boolean {
   const self = getComputedStyle(surface).alignSelf
   const align = self === 'auto' ? row.alignItems : self
   const lineHeight = px(getComputedStyle(surface).lineHeight) || (line.baseline - line.capTop) * 2
-  return (align === 'stretch' || align === 'normal') && surface.getBoundingClientRect().height > 1.5 * lineHeight
+  return (align === 'stretch' || align === 'normal') && surface.offsetHeight > 1.5 * lineHeight
 }
 
 interface Line {
@@ -105,9 +107,22 @@ function fontMetrics(style: CSSStyleDeclaration): {ascent: number; cap: number} 
   return metrics
 }
 
-/** Where a text node's capitals and baseline are, from its font's metrics and the box of its text. */
-function capitals(text: Text, style: CSSStyleDeclaration): Line | undefined {
-  const {ascent, cap} = fontMetrics(style)
+/**
+ * How much an element is drawn scaled from its layout (a renderer that zooms or fits its drawing with a transform): its
+ * drawn height over its laid-out height, 1 when it has none.
+ */
+function drawnScale(element: HTMLElement): number {
+  const laidOut = element.offsetHeight
+  return laidOut > 0 ? element.getBoundingClientRect().height / laidOut : 1
+}
+
+/**
+ * Where a text node's capitals and baseline are, in the page: its fragments are drawn scaled by `scale`, and its font's
+ * metrics, measured on an untransformed line, are scaled with them.
+ */
+function capitals(text: Text, style: CSSStyleDeclaration, scale: number): Line | undefined {
+  const metrics = fontMetrics(style)
+  const [ascent, cap] = [metrics.ascent * scale, metrics.cap * scale]
   const range = document.createRange()
   range.selectNodeContents(text)
   const fragments = [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0)
@@ -147,18 +162,20 @@ export function offCentreLabels(root: Element = document.body): OffCentreLabel[]
     const style = getComputedStyle(parent)
     if (style.visibility === 'hidden' || visuallyHidden(parent, style) || effectiveOpacity(parent) <= 0.01) continue
     const surface = surfaceOf(parent, root)
-    const line = surface && capitals(node, style)
+    const line = surface && capitals(node, style, drawnScale(surface))
     if (!surface || !line) continue
     lines.set(surface, merged(lines.get(surface), line))
   }
   const found: OffCentreLabel[] = []
   for (const [surface, line] of lines) {
     const box = surface.getBoundingClientRect()
-    if (box.height > tallest || Math.max(...line.tops) - Math.min(...line.tops) > (line.baseline - line.capTop) / 2) continue
+    if (surface.offsetHeight > tallest || Math.max(...line.tops) - Math.min(...line.tops) > (line.baseline - line.capTop) / 2) continue
     if (stretched(surface, line)) continue
-    const edges = innerEdges(surface, box)
-    const above = line.capTop - edges.top
-    const below = edges.bottom - line.baseline
+    // In the surface's own pixels, as it was laid out, however it is drawn.
+    const scale = drawnScale(surface)
+    const edges = innerEdges(surface, box, scale)
+    const above = (line.capTop - edges.top) / scale
+    const below = (edges.bottom - line.baseline) / scale
     // Text outside its surface (a label over a band's edge) isn't centred in it by design.
     if (above < 0 || below < 0) continue
     if (Math.abs(above - below) > labelTolerance) {

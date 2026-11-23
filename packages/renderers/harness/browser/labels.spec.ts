@@ -57,3 +57,40 @@ test("a one-line label's box is its line height, in every scenario", async ({pag
   }
   expect(off).toEqual([])
 })
+
+// A renderer that fits its drawing with a transform (database scales its content) draws its labels scaled: they are
+// measured in their own laid-out pixels, so a centred label stays centred at any scale.
+test('the label-centring probe measures labels drawn scaled as laid out', async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'One engine shows the probe works; the checks run in every one.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'runtime-policy/deployment', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  expect(await stage.measure<OffCentreLabel[]>('labels')).toEqual([])
+  await stage.frame.locator('.pk').evaluate(root => {
+    for (const child of root.children) if (child instanceof HTMLElement) child.style.transform = 'scale(0.6)'
+  })
+  expect(await stage.measure<OffCentreLabel[]>('labels')).toEqual([])
+})
+
+// Words with a code span in them are prose, not an identifier: the label keeps the UI font (only a ValueChange marked
+// `code` sets its values in the monospace font).
+test('a label of mixed prose keeps the UI font around its code', async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'Computed fonts, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'runtime-policy/deployment', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  const fonts = await stage.frame.locator('.pk').evaluate(root => {
+    const probe = document.createElement('span')
+    probe.className = 'pk-label'
+    probe.innerHTML = 'Using <code class="pk-code" data-projections-identifier="">cache</code> now'
+    root.prepend(probe)
+    const code = probe.querySelector('code') ?? probe
+    return {label: getComputedStyle(probe).fontFamily, code: getComputedStyle(code).fontFamily, ui: getComputedStyle(root).fontFamily}
+  })
+  expect(fonts.label).toBe(fonts.ui)
+  expect(fonts.code).not.toBe(fonts.ui)
+  // And in the scenario's own warning notes, which are such prose.
+  const notes = await stage.frame
+    .locator('.rp-warning > .pk-label')
+    .evaluateAll(labels => labels.map(label => getComputedStyle(label).fontFamily))
+  expect(notes.length).toBeGreaterThan(0)
+  expect(new Set(notes)).toEqual(new Set([fonts.ui]))
+})

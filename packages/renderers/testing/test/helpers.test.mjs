@@ -28,7 +28,7 @@ test('connectInspector builds page URLs on the workbench origin', () => {
 })
 
 test('check failures are flattened with their titles; samples round trip', () => {
-  assert.equal(allChecks.length, 28)
+  assert.equal(allChecks.length, 29)
   const failures = checkFailures([
     {id: 'legend', title: checkTitles.legend, status: 'fail', details: ['two legends'], durationMs: 1},
     {id: 'selection', title: checkTitles.selection, status: 'pass', details: [], durationMs: 1},
@@ -620,6 +620,32 @@ test('label-centring fails a label off its centre, once per kind, saying which w
   assert.equal(failing.status, 'fail')
   assert.deepEqual(failing.details, [
     'span.chip[data-entity-id="a"] sets its text 0.5px high of its centre (4px above the capitals, 5px below the baseline): put the text in the kit\'s `pk-label` (2 like it)',
+  ])
+})
+
+test('centred-pixels fails a box centred off whole pixels, once per kind, naming its gaps', async () => {
+  const pixelDriver = children => ({
+    async load() {
+      return {status: 'ready', steps: [], capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']}}
+    },
+    async measure(call) {
+      return call === 'pixels' ? children : undefined
+    },
+    sleep: () => Promise.resolve(),
+  })
+  const [passing] = await runChecks(pixelDriver([]), subject, {checks: ['centred-pixels']})
+  assert.equal(passing.status, 'pass', passing.details.join('\n'))
+  const off = (id, before, after) => ({
+    element: `span.pk-icon[data-entity-id="${id}"]`,
+    holder: 'header.band',
+    axis: 'vertical',
+    before,
+    after,
+  })
+  const [failing] = await runChecks(pixelDriver([off('a', 11.5, 11.5), off('b', 9.5, 9.5)]), subject, {checks: ['centred-pixels']})
+  assert.equal(failing.status, 'fail')
+  assert.deepEqual(failing.details, [
+    'span.pk-icon[data-entity-id="a"] sits 11.5px above and 11.5px below in header.band: centre it on whole pixels, in whole, even room (the kit\'s `pk-label` and even icons) (2 like it)',
   ])
 })
 

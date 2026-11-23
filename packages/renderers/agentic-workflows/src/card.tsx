@@ -102,7 +102,7 @@ function Meta({item, diff}: {item: WorkflowItem; diff: boolean}) {
     status === undefined ? undefined : (
       <span className="aw-lock" data-lock={status}>
         {status !== 'current' && <Icon name="warning" className="aw-icon" />}
-        {lockText(status)}
+        <span className="pk-label">{lockText(status)}</span>
       </span>
     )
   return (

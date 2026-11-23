@@ -31,7 +31,8 @@ export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOM
   const lineHeight = px(style.lineHeight)
   const least = px(style.minHeight)
   if (style.getPropertyValue('text-box-trim') === 'trim-both' && lineHeight > 0 && least >= lineHeight - 1 / 64) {
-    const inset = Math.round(((least - lineHeight) / 2) * 64) / 64
+    // Its line box is rounded up to a whole pixel.
+    const inset = Math.round(((least - Math.ceil(lineHeight - 1 / 64)) / 2) * 64) / 64
     for (const side of ['top', 'bottom'] as const) if (spacing[`padding-${side}`] !== undefined) spacing[`padding-${side}`] = inset
   }
   const margins = sides.map(side => px(style.getPropertyValue(`margin-${side}`)))

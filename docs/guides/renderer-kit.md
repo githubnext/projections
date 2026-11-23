@@ -163,9 +163,10 @@ only the detected code spans (`identifierParts`) in monospace.
 of its capitals, differently in each engine. Put a chip, bar or button's text in
 its own `pk-label` (a block or flex item, in the text's own font): it trims the
 box to the capitals and baseline (`text-box`) and pads it back to its line
-height, so whatever centres it centres the capitals. Extra room goes in
-`--pk-label-inset`; the `label-centring` renderer check holds every chip, bar
-and button to it.
+height, rounded up to a whole pixel, so whatever centres it centres the
+capitals; with the SDK's even icons (`round(1em, 2px)`), a band sized by them
+centres an icon on whole pixels (`centred-pixels`). Extra room goes in
+`--pk-label-inset`; `label-centring` holds every chip, bar and button to it.
 
 Protocol text that already marks code spans in backticks—reasons, summaries,
 notices, diagnostics, and details (see

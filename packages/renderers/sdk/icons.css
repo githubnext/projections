@@ -11,6 +11,9 @@
   flex: none;
   width: 1em;
   height: 1em;
+  /* An even square, so it centres on whole pixels in a whole, even box (a 13px font's icon is 14px). */
+  width: round(nearest, 1em, 2px);
+  height: round(nearest, 1em, 2px);
   vertical-align: -0.125em;
   background-color: currentColor;
   -webkit-mask: var(--projections-icon) center / contain no-repeat;

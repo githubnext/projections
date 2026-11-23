@@ -95,7 +95,7 @@
 .pk .pk-group-title {
   display: flex;
   flex: 0 1 auto;
-  align-items: baseline;
+  align-items: center;
   gap: var(--projections-space-1);
   min-width: 0;
   margin: 0 0 0 calc(-1 * var(--projections-space-1));
@@ -111,17 +111,14 @@
  */
 /*
  * The subject's icon leads the title, muted, at the band's inset (cancelling the heading's negative margin), so it
- * lines up with the cells under it and the title follows it. Its box is a line in the title's font, so it sits on the
- * title's baseline; the icon is lowered from the baseline by half the difference between its square and the cap
- * height, so it is centred on the capitals.
+ * lines up with the cells under it and the title follows it. The title centres it with its words, which are labels
+ * (`pk-label`) centred on their capitals, so it is centred on the capitals, on whole pixels in the band.
  */
 .pk .pk-group-icon {
+  display: flex;
   flex: none;
   margin-inline-start: var(--projections-space-1);
   color: var(--muted);
-}
-.pk .pk-group-icon > [data-icon] {
-  vertical-align: calc(0.5cap - 0.5em);
 }
 .pk .pk-group-label {
   flex: 0 1 auto;

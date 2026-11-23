@@ -1,7 +1,7 @@
 // Painted boxes centred in a bar, chip or button off whole pixels (probe call `pixels`).
 import type {OffPixelChild} from '../types.js'
 import {innerEdges} from './labels.js'
-import {colorAlpha, describe, px} from './paint.js'
+import {colorAlpha, describe, effectiveOpacity, px} from './paint.js'
 
 /** The tallest (or, across, widest) box whose centred contents are held to whole pixels: a bar, chip or button. */
 const largest = 48
@@ -9,20 +9,43 @@ const largest = 48
 const widestGap = 16
 const whole = (value: number) => Math.abs(value - Math.round(value)) <= 0.02
 
-/** Whether an HTML element paints: a background (an icon's mask over its color included), a visible border, or replaced content. */
+const replaced = 'img, canvas, video, iframe'
+
+/**
+ * Whether an HTML element paints, seen (its own and its ancestors' opacity): a background (an icon's mask over its color
+ * included), a visible border, or replaced content, which is a box even when it's inline.
+ */
 function painted(element: Element): boolean {
   if (!(element instanceof HTMLElement)) return false
   const style = getComputedStyle(element)
-  if (style.visibility === 'hidden' || ['none', 'inline', 'contents'].includes(style.display) || Number(style.opacity) <= 0.01) return false
-  if (colorAlpha(style.backgroundColor) > 0.01 || style.backgroundImage !== 'none' || element.matches('img, canvas, video, iframe')) {
-    return true
-  }
+  const boxless = ['none', 'contents'].includes(style.display) || (style.display === 'inline' && !element.matches(replaced))
+  if (style.visibility === 'hidden' || boxless || effectiveOpacity(element) <= 0.01) return false
+  if (colorAlpha(style.backgroundColor) > 0.01 || style.backgroundImage !== 'none' || element.matches(replaced)) return true
   return ['top', 'right', 'bottom', 'left'].some(
     side =>
       style.getPropertyValue(`border-${side}-style`) !== 'none' &&
       px(style.getPropertyValue(`border-${side}-width`)) > 0 &&
       colorAlpha(style.getPropertyValue(`border-${side}-color`)) > 0.01,
   )
+}
+
+/**
+ * A surface's inner left and right: inside its borders, or in a table that collapses them, inside half of each rule
+ * it shares with the cell beside it (the wider of the two cells' borders there).
+ */
+function innerSides(surface: HTMLElement, box: DOMRect): {left: number; right: number} {
+  const style = getComputedStyle(surface)
+  const [left, right] = [px(style.borderLeftWidth), px(style.borderRightWidth)]
+  const table = surface.closest('table')
+  if (!(surface instanceof HTMLTableCellElement) || !table || getComputedStyle(table).borderCollapse !== 'collapse') {
+    return {left: box.left + left, right: box.right - right}
+  }
+  const beside = (cell: Element | null, side: 'Left' | 'Right') =>
+    cell instanceof HTMLTableCellElement ? px(getComputedStyle(cell)[`border${side}Width`]) : 0
+  return {
+    left: box.left + Math.max(left, beside(surface.previousElementSibling, 'Right')) / 2,
+    right: box.right - Math.max(right, beside(surface.nextElementSibling, 'Left')) / 2,
+  }
 }
 
 /**
@@ -53,9 +76,7 @@ export function offPixelChildren(root: Element = document.body): OffPixelChild[]
     const outer = holder.getBoundingClientRect()
     if (inner.width < 4 || inner.height < 4) continue
     const edges = innerEdges(holder, outer)
-    const style = getComputedStyle(holder)
-    const left = outer.left + px(style.borderLeftWidth)
-    const right = outer.right - px(style.borderRightWidth)
+    const {left, right} = innerSides(holder, outer)
     const gaps = [
       ['vertical', centredGaps(inner.top - edges.top, edges.bottom - inner.bottom, outer.height)],
       ['horizontal', centredGaps(inner.left - left, right - inner.right, outer.width)],

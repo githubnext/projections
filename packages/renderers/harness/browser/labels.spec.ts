@@ -114,3 +114,33 @@ test('the centred-pixels probe finds an icon a half pixel off in its band, and n
   const found = (await stage.measure<OffPixelChild[]>('pixels')).map(child => `${child.element} in ${child.holder}`)
   expect(found).toEqual(expect.arrayContaining([expect.stringMatching(/^span\.pk-icon in header\.pk-group-header/u)]))
 })
+
+/**
+ * What the centred-pixels probe holds and how it measures: an image is a box though it's inline; a box inside an
+ * invisible container isn't seen; a collapsed table cell's room is inside half of each rule it shares, the one under it
+ * drawn by the cell below it, not the next row's widest.
+ */
+test('the centred-pixels probe sees inline images, skips invisible boxes and measures collapsed cells inside half their rules', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'One engine shows the probe works; the checks run in every one.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'runtime-policy/deployment', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  await stage.frame.locator('body').evaluate(body => {
+    const fixture = document.createElement('div')
+    const square = (size: number, name: string) =>
+      `<span class="${name}" style="display:block;margin:auto;width:${size}px;height:${size}px;background:#333"></span>`
+    const cell = (style: string, content = '') => `<td style="border:1px solid #888;padding:0;${style}">${content}</td>`
+    fixture.innerHTML = `
+      <div style="opacity:0"><div style="display:flex;align-items:center;width:32px;height:32px;background:#eee">${square(13, 'px-hidden')}</div></div>
+      <div style="width:32px;height:32px;background:#eee;text-align:center;line-height:0"><img class="px-image" width="13" height="13" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></div>
+      <table style="border-collapse:collapse;border-spacing:0">
+        <tr>${cell('width:32px;height:33px', square(14, 'px-cell'))}${cell('width:32px;height:33px')}</tr>
+        <tr>${cell('height:8px')}${cell('height:8px;border-top-width:3px')}</tr>
+      </table>`
+    fixture.style.cssText = 'position:absolute;top:0;left:0;z-index:10;background:#fff'
+    body.append(fixture)
+  })
+  const found = (await stage.measure<OffPixelChild[]>('pixels')).map(child => `${child.element} ${child.axis}`)
+  expect(found).toEqual(['img.px-image horizontal'])
+})

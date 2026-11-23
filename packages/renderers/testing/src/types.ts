@@ -147,6 +147,7 @@ export type ProbeCall =
   | 'accents'
   | 'frames'
   | 'labels'
+  | 'pixels'
   | 'routes'
   | 'viewport'
 
@@ -310,6 +311,17 @@ export interface CoveredFrame {
   rule?: string
 }
 
+/** A painted box centred in a bar, chip or button off whole pixels (probe call `pixels`). */
+export interface OffPixelChild {
+  /** The centred box and the bar, chip or button holding it, described. */
+  element: string
+  holder: string
+  /** The axis it is centred on, and its gaps either side (above and below, or left and right), in CSS px. */
+  axis: 'vertical' | 'horizontal'
+  before: number
+  after: number
+}
+
 /** A chip, bar or button whose text isn't centred on its capitals (probe call `labels`). */
 export interface OffCentreLabel {
   /** The chip, bar or button, described. */
@@ -393,6 +405,7 @@ export type CheckId =
   | 'nested-accents'
   | 'frame-edges'
   | 'label-centring'
+  | 'centred-pixels'
   | 'link-routes'
 
 /**

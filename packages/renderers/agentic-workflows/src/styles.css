@@ -55,9 +55,21 @@
   align-items: baseline;
   gap: var(--projections-space-1);
 }
-/* The icon is centred on the line, and the words give the lock its baseline, so it sits on the line around it. */
+/* In a line of prose, the icon is centred on the line, and the words give the lock its baseline. */
 .aw-lock > .pk-icon {
   align-self: center;
+}
+/*
+ * In a pill the lock is the label: its words are one (`pk-label`), and its icon centres beside them, both on whole
+ * pixels, so the pill's own label holds the lock's box rather than trimming a line around it.
+ */
+.pk .pk-pill-label.pk-label:has(> .aw-lock) {
+  display: flex;
+  text-box: none;
+  padding-block: 0;
+}
+.pk-pill-label > .aw-lock {
+  align-items: center;
 }
 .aw-lock:not([data-lock='current']) {
   color: var(--text);

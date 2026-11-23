@@ -30,11 +30,22 @@ function surfaceOf(element: Element, root: Element): HTMLElement | undefined {
   return undefined
 }
 
+/** The columns a table cell covers, from its row's cells before it (a cell spanning rows from above isn't counted). */
+function columns(cell: HTMLTableCellElement): [number, number] {
+  let start = 0
+  for (const before of cell.parentElement instanceof HTMLTableRowElement ? cell.parentElement.cells : []) {
+    if (before === cell) break
+    start += before.colSpan
+  }
+  return [start, start + cell.colSpan]
+}
+
 /**
  * A surface's inner top and bottom: inside its borders, or in a table that collapses them, inside half of each rule
- * (which straddles the cells' edge), the one under it drawn by the cell below.
+ * (which straddles the cells' edge), the one under it drawn by the cells below it, in the next row of the table
+ * (another section's first included); the table's last row has no rule under it.
  */
-function innerEdges(surface: HTMLElement, box: DOMRect, scale = 1): {top: number; bottom: number} {
+export function innerEdges(surface: HTMLElement, box: DOMRect, scale = 1): {top: number; bottom: number} {
   const style = getComputedStyle(surface)
   // Borders are laid out widths; the box is drawn, scaled.
   const width = (value: string) => px(value) * scale
@@ -43,9 +54,13 @@ function innerEdges(surface: HTMLElement, box: DOMRect, scale = 1): {top: number
   if (!(surface instanceof HTMLTableCellElement) || !table || getComputedStyle(table).borderCollapse !== 'collapse') {
     return {top: box.top + top, bottom: box.bottom - bottom}
   }
-  const next = surface.parentElement?.nextElementSibling
-  const under = next instanceof HTMLTableRowElement ? next.cells[surface.cellIndex] : undefined
-  return {top: box.top + top / 2, bottom: box.bottom - Math.max(bottom, under ? width(getComputedStyle(under).borderTopWidth) : 0) / 2}
+  const row = surface.parentElement
+  const next = row instanceof HTMLTableRowElement && table instanceof HTMLTableElement ? table.rows[row.rowIndex + 1] : undefined
+  // The rule under it, from the next row's cells over its columns: one may span them (a section's title).
+  const [from, to] = columns(surface)
+  const below = next ? [...next.cells].filter(cell => columns(cell)[0] < to && columns(cell)[1] > from) : []
+  const under = Math.max(0, ...below.map(cell => width(getComputedStyle(cell).borderTopWidth)))
+  return {top: box.top + top / 2, bottom: box.bottom - Math.max(bottom, under) / 2}
 }
 
 /**

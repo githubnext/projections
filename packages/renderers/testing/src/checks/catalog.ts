@@ -84,6 +84,7 @@ export const checkTitles: Record<CheckId, string> = {
   'nested-accents': 'No change colors inside change colors',
   'frame-edges': 'Rounded edges drawn over what fills their corners',
   'label-centring': 'Labels centred on their capitals',
+  'centred-pixels': 'Centred on whole pixels',
   'link-routes': 'Links routed around cards',
 }
 
@@ -141,6 +142,8 @@ export const checkDescriptions: Record<CheckId, string> = {
     "A box with rounded corners and an edge (a border, or an outline inside it) whose painted contents reach a corner draws its edge over them: as the kit's frame (`pk-frame`, or a `Group`, which draws its border again above its contents), or as an outline its contents sit under. Where a fill's curve meets the edge's, whichever is painted last dilutes the other's antialiased pixels, so an edge painted first comes out thinner around the curve than along its sides, even where the fill follows the inner radius. A kit frame's `::after` is that edge: a renderer's rule may recolor it, but one that draws there (content, a fill, a size) fails, as its drawing loses to the kit's or moves the edge.",
   'label-centring':
     "A chip, bar or button's text is centred on its capitals: a capital E has as much room above it as below it, within half a pixel. A line of text centred by its line height sits a little high or low, by how its font's ascent, descent and cap height compare; the kit's `pk-label` trims the text's box to its capitals and baseline and pads it back to its line height, so whatever centres the box centres the capitals. Measured from the font's metrics on every HTML element up to 48px tall that paints a background (or edges above and below) under one line of its own text, by its main text (its largest font size); text in SVG is not checked. Checked at full width in the light theme.",
+  'centred-pixels':
+    "A painted box centred in a bar, chip or button (an icon, a pill, a mark) sits at equal, whole-pixel gaps either side: a half pixel either side, or a pixel more on one side, is drawn unevenly once snapped to device pixels. A box centres on whole pixels in whole, even room: the kit's `pk-label` gives a label a whole line box, and icons are even squares. Measured on every painted HTML box centred, within a pixel, in its nearest painted ancestor at most 48px across that way, with at most 16px either side; a collapsed table rule counts half to each cell. Checked at full width in the diff (or the extraction).",
   'link-routes':
     'Every link a renderer routes between cards (marked data-projections-route) goes around the cards in its way. When no route around them exists, the renderer draws the one that overlaps them least and marks it data-projections-route="crossing", naming the cards in data-projections-route-crosses, and this check reports it. Checked at full width in the diff and at the end of the animation; skipped for a renderer that routes no links.',
 }

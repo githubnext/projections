@@ -9,6 +9,7 @@ import {
   affordanceFailures,
   nestedAccents,
   offCentreLabels,
+  offPixelChildren,
   clickBackground,
   clickEntity,
   clippedContent,
@@ -63,6 +64,7 @@ const calls: Record<ProbeCall, (args: unknown) => unknown> = {
   accents: () => nestedAccents(),
   frames: () => [...coveredFrames(), ...claimedOverlays()],
   labels: () => offCentreLabels(),
+  pixels: () => offPixelChildren(),
   routes: () => linkRoutes(),
 }
 

@@ -239,17 +239,8 @@
   background: var(--accent-soft);
 }
 /* A marker whose constraint changes takes the change's color while emphasized; the row's status cell names it. */
-.database-key[data-change='added'] {
-  color: color-mix(in srgb, var(--green) calc(var(--emphasis) * 100%), var(--muted));
-}
-.database-key[data-change='removed'] {
-  color: color-mix(in srgb, var(--red) calc(var(--emphasis) * 100%), var(--muted));
-}
-.database-key[data-change='modified'] {
-  color: color-mix(in srgb, var(--amber) calc(var(--emphasis) * 100%), var(--muted));
-}
-.database-key[data-change='renamed'] {
-  color: color-mix(in srgb, var(--violet) calc(var(--emphasis) * 100%), var(--muted));
+.database-key[data-change] {
+  color: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis) * 100%), var(--muted));
 }
 /* An enum is a card of its values. */
 :is(.database-value, .database-measure-row.value) .database-rowtext code.database-value-name {
@@ -407,21 +398,9 @@
   max-width: 100%;
 }
 /* Change tints follow the host's highlighting through --emphasis, so they are gone at both endpoints. */
-.database-tag.added {
-  border-color: color-mix(in srgb, var(--green-border) calc(var(--emphasis) * 100%), var(--divider));
-  background: color-mix(in srgb, var(--green-soft) calc(var(--emphasis) * 100%), var(--raised));
-}
-.database-tag.removed {
-  border-color: color-mix(in srgb, var(--red-border) calc(var(--emphasis) * 100%), var(--divider));
-  background: color-mix(in srgb, var(--red-soft) calc(var(--emphasis) * 100%), var(--raised));
-}
-.database-tag.modified {
-  border-color: color-mix(in srgb, var(--amber-border) calc(var(--emphasis) * 100%), var(--divider));
-  background: color-mix(in srgb, var(--amber-soft) calc(var(--emphasis) * 100%), var(--raised));
-}
-.database-tag.renamed {
-  border-color: color-mix(in srgb, var(--violet-border) calc(var(--emphasis) * 100%), var(--divider));
-  background: color-mix(in srgb, var(--violet-soft) calc(var(--emphasis) * 100%), var(--raised));
+.database-tag[data-change-hue] {
+  border-color: color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis) * 100%), var(--divider));
+  background: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis) * 100%), var(--raised));
 }
 .database-tag-label {
   display: inline-grid;

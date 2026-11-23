@@ -150,27 +150,16 @@
 
 /* Change emphasis: line tints, run highlights and colored markers. Without highlighting the same content stays, neutral. */
 /* A tinted line always has its edge in the same hue (the kit's change-region pairing), never a fill alone. */
-[data-highlighting='on'] .api-signature.added {
-  background: var(--green-soft);
-  box-shadow: inset 0 0 0 var(--projections-border-width) var(--green-border);
+[data-highlighting='on'] .api-signature[data-change-hue] {
+  background: var(--pk-region-fill);
+  box-shadow: inset 0 0 0 var(--projections-border-width) var(--pk-region-edge);
 }
-[data-highlighting='on'] .api-signature.removed {
-  background: var(--red-soft);
-  box-shadow: inset 0 0 0 var(--projections-border-width) var(--red-border);
+[data-highlighting='on'] .api-signature[data-change-hue] .api-line-mark {
+  color: var(--pk-change-ink);
 }
-[data-highlighting='on'] .api-signature.added .api-line-mark {
-  color: var(--green);
-}
-[data-highlighting='on'] .api-signature.removed .api-line-mark {
-  color: var(--red);
-}
-[data-highlighting='on'] .api-signature.added mark,
-[data-highlighting='on'] .api-signature ins {
-  background: var(--green-highlight);
-}
-[data-highlighting='on'] .api-signature.removed mark,
-[data-highlighting='on'] .api-signature del {
-  background: var(--red-highlight);
+[data-highlighting='on'] .api-signature[data-change-hue] mark,
+[data-highlighting='on'] .api-signature :is(ins, del) {
+  background: var(--pk-change-highlight);
 }
 /* Changed runs never rest on color alone: removed text is struck, added and marked text underlined. */
 .api-signature :is(ins, mark) {

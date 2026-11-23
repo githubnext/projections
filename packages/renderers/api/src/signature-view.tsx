@@ -9,7 +9,7 @@ const toneMarks: Record<Tone, string> = {added: '+', removed: '−'}
 /** One signature line; a toned line carries a `+` or `−` marker in its gutter. */
 function Line({tone, children}: {tone?: Tone | undefined; children: ReactNode}) {
   return (
-    <pre className={`api-signature pk-label${tone ? ` ${tone}` : ''}`} {...identifier}>
+    <pre className={`api-signature pk-label${tone ? ` ${tone}` : ''}`} {...(tone ? {'data-change-hue': tone} : {})} {...identifier}>
       {tone && (
         <span className="api-line-mark pk-label" aria-hidden="true">
           {toneMarks[tone]}
@@ -29,9 +29,13 @@ function Marked({tokens}: {tokens: Token[]}) {
 
 const segmentElement = (segment: Segment, index: number) =>
   segment.kind === 'removed' ? (
-    <del key={index}>{segment.text}</del>
+    <del key={index} data-change-hue="removed">
+      {segment.text}
+    </del>
   ) : segment.kind === 'added' ? (
-    <ins key={index}>{segment.text}</ins>
+    <ins key={index} data-change-hue="added">
+      {segment.text}
+    </ins>
   ) : (
     <span key={index}>{segment.text}</span>
   )

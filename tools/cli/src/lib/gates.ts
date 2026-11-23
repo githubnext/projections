@@ -86,6 +86,13 @@ export const gates: Gate[] = [
     plan: () => ({commands: [npm('run', '--silent', 'check:portability')]}),
   },
   {
+    name: 'change-hues',
+    fast: true,
+    description:
+      'Renderers built on the kit color changes only through its change marks, beyond .change-hues.yaml (npm run check:change-hues)',
+    plan: () => ({commands: [npm('run', '--silent', 'check:change-hues')]}),
+  },
+  {
     name: 'icons',
     fast: true,
     description: 'The product icons and their generated outputs are current (npm run check:icons)',

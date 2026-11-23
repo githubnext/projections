@@ -15,6 +15,8 @@ const lineClass: Record<DiTextLine['role'], string> = {
 }
 
 const toneClass = {was: 'di-was', arrow: 'di-arrow', now: 'di-now'} as const
+/** The change hue of a tone's text (the kit's change variables): the old value removed, the new one added. */
+const toneHue = {was: 'removed', now: 'added'} as const
 
 /**
  * One line of a diff card's text, from the text column or ending at the card's right inset: code in the monospace
@@ -25,6 +27,7 @@ export function DiLine({line, top, lifetime}: {line: DiTextLine; top: number; li
   const span = (piece: DiSpan, index: number) => {
     const attributes = {
       ...(piece.tone ? {className: toneClass[piece.tone]} : {}),
+      ...(piece.tone && piece.tone !== 'arrow' ? {'data-change-hue': toneHue[piece.tone]} : {}),
       ...(piece.code && !allCode ? identifier : {}),
     }
     return Object.keys(attributes).length ? (

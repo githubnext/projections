@@ -148,11 +148,8 @@ button.stat-hit:hover {
   font-size: var(--projections-font-size-xs);
   font-variant-numeric: tabular-nums;
 }
-.stat-delta-label.added {
-  color: var(--green);
-}
-.stat-delta-label.removed {
-  color: var(--red);
+.stat-delta-label[data-change] {
+  color: var(--pk-change-ink);
 }
 
 .statistics-share {
@@ -248,11 +245,8 @@ button.stat-hit:hover {
  * (fill and same-hue edge, scaled by --emphasis); inside the bar the lines gained are edged in the added hue and the
  * lines lost are a dashed ghost in the removed hue, so a row says both what changed and by how much.
  */
-.statistics-view .stat-diff-delta.added {
-  color: color-mix(in srgb, var(--green) calc(var(--emphasis, 1) * 100%), var(--text));
-}
-.statistics-view .stat-diff-delta.removed {
-  color: color-mix(in srgb, var(--red) calc(var(--emphasis, 1) * 100%), var(--text));
+.statistics-view .stat-diff-delta[data-change] {
+  color: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis, 1) * 100%), var(--text));
 }
 .stat-diff-value {
   display: grid;
@@ -286,12 +280,12 @@ button.stat-hit:hover {
 /* A selected changed row keeps its change edge: the SDK's selection ring draws over it. */
 /* Gained lines: the bar's own colour and hatch, edged in the added hue. */
 .stat-gain.diff {
-  box-shadow: inset 0 0 0 var(--stroke-strong) var(--green);
+  box-shadow: inset 0 0 0 var(--stroke-strong) var(--pk-change-ink);
 }
 /* Lost lines: a hatched ghost in the removed hue with a dashed edge, where the Before bar ended. */
 .stat-loss.diff {
-  background: repeating-linear-gradient(135deg, var(--red-border) 0 1.5px, transparent 1.5px 5px), var(--red-soft);
-  border-color: var(--red);
+  background: repeating-linear-gradient(135deg, var(--pk-region-edge) 0 1.5px, transparent 1.5px 5px), var(--pk-region-fill);
+  border-color: var(--pk-change-ink);
 }
 
 .statistics-share.diff .stat-rings {

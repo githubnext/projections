@@ -20,7 +20,13 @@ function Directions({directions, strength}: {directions: readonly Direction[]; s
   return (
     <span className="aw-directions">
       {directions.map(direction => (
-        <span key={direction} className="aw-direction" data-direction={direction} style={{opacity: Math.min(1, strength)}}>
+        <span
+          key={direction}
+          className="aw-direction"
+          data-direction={direction}
+          {...(direction === 'widened' ? {'data-change-hue': 'modified'} : {})}
+          style={{opacity: Math.min(1, strength)}}
+        >
           <Icon name={direction === 'widened' ? 'warning' : direction === 'narrowed' ? 'info' : 'changed'} className="aw-icon" />
           {directionWords[direction]}
         </span>

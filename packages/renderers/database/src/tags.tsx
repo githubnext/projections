@@ -189,6 +189,7 @@ function TagPill({tag, slot, props, diff}: {tag: FrameTag; slot: TagSlot | undef
         aria-pressed={props.selectedId === id}
         onClick={() => props.onSelect(id)}
         className={`${tagClass} ${classifyChange(tag.change)}${props.selectedId === id ? ' selected' : ''}`}
+        {...(classifyChange(tag.change) === 'unchanged' ? {} : {'data-change-hue': classifyChange(tag.change)})}
         style={{'--emphasis': emphasis} as CSSProperties}
         {...(diff ? changeMark(tag.change) : {})}
         {...(former ? {title: `${shown} (was ${former})`} : {})}

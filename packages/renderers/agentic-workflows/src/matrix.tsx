@@ -48,7 +48,12 @@ function Row({item, view, frame}: {item: WorkflowItem; view: AgenticModel; frame
         category.columns.map(column => {
           const value = cell(item, category, column, frame)
           return (
-            <td key={`${category.section}:${column.key}`} className="aw-matrix-cell" data-cell={value}>
+            <td
+              key={`${category.section}:${column.key}`}
+              className="aw-matrix-cell"
+              data-cell={value}
+              {...(value === 'added' || value === 'removed' ? {'data-change-hue': value} : {})}
+            >
               <span className="aw-matrix-glyph" aria-hidden="true">
                 <span className="pk-label">{glyphs[value]}</span>
               </span>

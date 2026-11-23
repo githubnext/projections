@@ -180,6 +180,7 @@ export const Circles = memo(
             {emphasis > 0.01 && changed && (
               <circle
                 className={`fp-emphasis ${classifyChange(row)}${holdsChanges ? ' pk-holds-changes' : ''}`}
+                data-change-hue={classifyChange(row)}
                 data-projections-edge=""
                 r={Math.max(0, r - 1)}
                 opacity={Math.min(1, emphasis)}

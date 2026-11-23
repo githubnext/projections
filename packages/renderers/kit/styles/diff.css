@@ -1,28 +1,40 @@
 /*
  * Diff mode (see `diffModel` and `changeMark`). Every item of the union carries `data-change` with its change; the
- * hue follows it into the item, so a mark always pairs a fill with a same-hue edge. HTML regions use `pk-region`
+ * hue follows it into the item, so a mark always pairs a fill with a same-hue edge. A renderer colors a change only
+ * through these: `--pk-change-ink` (text, signs, lines), `--pk-change-strong` (text on the fill), `--pk-change-highlight`
+ * (a word's tint), `--pk-region-fill` and `--pk-region-edge` (npm run check:change-hues). A part of a changed item
+ * drawn in a change's hue (a value's old and new text, an inserted word, a delta) takes `data-change-hue` instead: the
+ * same variables, but not a changed item, so the item around it keeps its own mark. HTML regions use `pk-region`
  * (above); an SVG item draws its own shape (`pk-diff-shape`) the same way, dashed when removed. Text of a removed item
  * (`pk-diff-text`) is struck through and muted, so removal never rests on color alone.
  */
-.pk [data-change='added'] {
+.pk :is([data-change='added'], [data-change-hue='added']) {
   --pk-region-fill: var(--green-soft);
   --pk-region-edge: var(--green-border);
   --pk-change-ink: var(--green);
+  --pk-change-strong: var(--green-strong);
+  --pk-change-highlight: var(--green-highlight);
 }
-.pk [data-change='removed'] {
+.pk :is([data-change='removed'], [data-change-hue='removed']) {
   --pk-region-fill: var(--red-soft);
   --pk-region-edge: var(--red-border);
   --pk-change-ink: var(--red);
+  --pk-change-strong: var(--red-strong);
+  --pk-change-highlight: var(--red-highlight);
 }
-.pk [data-change='modified'] {
+.pk :is([data-change='modified'], [data-change-hue='modified']) {
   --pk-region-fill: var(--amber-soft);
   --pk-region-edge: var(--amber-border);
   --pk-change-ink: var(--amber);
+  --pk-change-strong: var(--amber-strong);
+  --pk-change-highlight: var(--amber-highlight);
 }
-.pk :is([data-change='renamed'], [data-change='moved']) {
+.pk :is([data-change='renamed'], [data-change='moved'], [data-change-hue='renamed'], [data-change-hue='moved']) {
   --pk-region-fill: var(--violet-soft);
   --pk-region-edge: var(--violet-border);
   --pk-change-ink: var(--violet);
+  --pk-change-strong: var(--violet-strong);
+  --pk-change-highlight: var(--violet-highlight);
 }
 .pk [data-change] > .pk-diff-shape {
   fill: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis, 1) * 100%), var(--raised));

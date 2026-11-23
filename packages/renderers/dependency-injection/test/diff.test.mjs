@@ -211,7 +211,10 @@ test('diff mode marks every change in place and says it in words, leaving the su
     html,
     /data-entity-id="service:Orders:IOrderRepository:unkeyed:registration:0" role="button" tabindex="0" aria-label="Inspect registration of IOrderRepository, [^"]*, Modified, lifetime changed, was Scoped, now Singleton"[^>]*data-change="modified"/u,
   )
-  assert.match(html, /<tspan class="di-was">Scoped<\/tspan><tspan class="di-arrow"> → <\/tspan><tspan class="di-now">Singleton<\/tspan>/u)
+  assert.match(
+    html,
+    /<tspan class="di-was" data-change-hue="removed">Scoped<\/tspan><tspan class="di-arrow"> → <\/tspan><tspan class="di-now" data-change-hue="added">Singleton<\/tspan>/u,
+  )
   assert.match(html, /<text[^>]*>Lifetime changed<\/text>/u)
   assert.match(
     html,

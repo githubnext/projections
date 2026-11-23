@@ -39,12 +39,12 @@ export function Badge({
     <>
       {renamed && (
         <span className="badge renamed" style={{opacity: emphasis}} aria-hidden={emphasis < 0.05}>
-          {statusLabels.renamed}
+          <span className="pk-label">{statusLabels.renamed}</span>
         </span>
       )}
       {(!renamed || status !== 'unchanged') && (
         <span className={`badge ${status}`} style={{opacity: emphasis}} aria-hidden={emphasis < 0.05}>
-          {statusLabels[status]}
+          <span className="pk-label">{statusLabels[status]}</span>
         </span>
       )}
       {variedBeyond({status, varied}) && <VariedMarker emphasis={emphasis} />}
@@ -91,7 +91,7 @@ function StatusText({change, emphasis, boxed = false}: {change: StatusChange; em
       {parts.map(part => (
         <span key={part.status} className={`pk-status-part ${part.status}`} data-change-status={part.status}>
           <Icon name={part.icon} />
-          {boxed ? <span className="pk-status-word">{part.label}</span> : part.label}
+          <span className={boxed ? 'pk-status-word pk-label' : 'pk-label'}>{part.label}</span>
         </span>
       ))}
       {variedBeyond(change) && <VariedMarker />}

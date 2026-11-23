@@ -88,6 +88,13 @@
   line-height: 18px;
   overflow-wrap: anywhere;
 }
+/* The names, types and keys and a pill's value are trimmed to their capitals (`pk-label`), which needs a block. */
+.database-name,
+.database-rowtext .entity-link > .pk-label,
+.database-key > .pk-label,
+.pk .database-change-values .pk-change-pill > .pk-label {
+  display: block;
+}
 /* Too narrow for the name beside its kind and status: the name takes the first lines, the kind and status the last. */
 .database-table header.wrapped {
   flex-wrap: wrap;
@@ -118,7 +125,9 @@
   height: 32px;
   display: flex;
   align-items: flex-start;
-  padding: 8px var(--projections-space-3) 8px var(--projections-space-2);
+  /* Lines centred in the room under the row's top rule: the rule takes a pixel of its 32. */
+  padding: calc(8px - var(--projections-border-width) / 2) var(--projections-space-3) calc(8px - var(--projections-border-width) / 2)
+    var(--projections-space-2);
   line-height: 16px;
   gap: var(--projections-space-2);
   border-top: var(--projections-border-width) solid var(--border);

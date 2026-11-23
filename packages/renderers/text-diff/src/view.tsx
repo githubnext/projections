@@ -43,7 +43,7 @@ export function outputOrder(model: ComparisonModel): EntityChange<Entity>[] {
 
 function Gutter({number, side}: {number: number | undefined; side?: 'old' | 'new'}) {
   return (
-    <span className={`td-num${side ? ` td-num-${side}` : ''}`} aria-hidden="true">
+    <span className={`td-num pk-label${side ? ` td-num-${side}` : ''}`} aria-hidden="true">
       {number ?? ''}
     </span>
   )
@@ -52,11 +52,11 @@ function Gutter({number, side}: {number: number | undefined; side?: 'old' | 'new
 function LineText({kind, text, ending, words}: {kind: LineKind; text: string; ending?: string | undefined; words?: Word[] | undefined}) {
   return (
     <>
-      <span className="td-mark" aria-hidden="true">
+      <span className="td-mark pk-label" aria-hidden="true">
         {marks[kind]}
       </span>
       {kind !== 'equal' && <span className="sr-only">{spoken[kind]}</span>}
-      <span className="td-text">
+      <span className="td-text pk-label">
         {words
           ? keyed(words, word => `${word.changed ? 'changed' : 'same'}:${word.text}`).map(([key, word]) =>
               word.changed ? (
@@ -69,7 +69,7 @@ function LineText({kind, text, ending, words}: {kind: LineKind; text: string; en
             )
           : text}
       </span>
-      {ending && <span className="td-ending">{` ${ending}`}</span>}
+      {ending && <span className="td-ending pk-label">{` ${ending}`}</span>}
     </>
   )
 }
@@ -218,8 +218,8 @@ function SplitDiff({diff, presentation, expanded, expand, collapse}: DiffProps) 
   return (
     <div className="td-body" data-layout="split" data-presentation={presentation}>
       <div className="td-split td-diff" style={style}>
-        <div className="td-caption td-side-before">Before</div>
-        <div className="td-caption td-side-after">After</div>
+        <div className="td-caption td-side-before pk-label">Before</div>
+        <div className="td-caption td-side-after pk-label">After</div>
         {parts.map((part: Segment) =>
           part.kind !== 'rows' ? (
             <Gap

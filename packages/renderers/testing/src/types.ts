@@ -146,6 +146,7 @@ export type ProbeCall =
   | 'stageInsets'
   | 'accents'
   | 'frames'
+  | 'labels'
   | 'routes'
   | 'viewport'
 
@@ -309,6 +310,15 @@ export interface CoveredFrame {
   rule?: string
 }
 
+/** A chip, bar or button whose text isn't centred on its capitals (probe call `labels`). */
+export interface OffCentreLabel {
+  /** The chip, bar or button, described. */
+  element: string
+  /** The room between its inner top edge and the capitals' top, and between the baseline and its inner bottom edge, in CSS px. */
+  above: number
+  below: number
+}
+
 /** A change or accent color drawn inside another's surface (probe call `accents`). */
 export interface NestedAccent {
   outer: AccentPaint
@@ -382,6 +392,7 @@ export type CheckId =
   | 'spacing'
   | 'nested-accents'
   | 'frame-edges'
+  | 'label-centring'
   | 'link-routes'
 
 /**

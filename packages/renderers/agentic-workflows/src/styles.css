@@ -52,8 +52,12 @@
 }
 .aw-lock {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--projections-space-1);
+}
+/* The icon is centred on the line, and the words give the lock its baseline, so it sits on the line around it. */
+.aw-lock > .pk-icon {
+  align-self: center;
 }
 .aw-lock:not([data-lock='current']) {
   color: var(--text);
@@ -206,8 +210,11 @@
   width: 100%;
 }
 /* Every body row is one fixed line high, whatever its status shows, so emphasis never moves a row. */
+.aw-matrix {
+  --aw-row-height: 1.5rem;
+}
 .aw-matrix tbody tr {
-  height: 1.5rem;
+  height: var(--aw-row-height);
 }
 .aw-matrix tbody :is(th, td) {
   padding-block: 0;
@@ -219,7 +226,7 @@
 .aw-matrix .aw-matrix-status > .pk-change-status {
   display: flex;
   align-items: center;
-  height: 1.5rem;
+  height: var(--aw-row-height);
   overflow: hidden;
 }
 .aw-matrix-select {
@@ -234,6 +241,16 @@
 .aw-matrix-cell {
   font-family: var(--font-mono);
   font-weight: var(--projections-font-weight-semibold);
+}
+/*
+ * The row's height, centring its mark (a `pk-label`, trimmed to its capitals) exactly: a table cell centres its content
+ * to whole pixels, which leaves an odd pixel's room under it.
+ */
+.aw-matrix-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--aw-row-height);
 }
 .aw-matrix-cell[data-cell='present'] {
   color: var(--muted);

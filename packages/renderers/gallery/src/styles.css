@@ -87,6 +87,8 @@
   gap: var(--projections-space-1);
 }
 .pk .gl-revision {
+  display: inline-flex;
+  align-items: center;
   height: var(--projections-control-height-sm);
   padding: 0 var(--projections-space-2);
   border: var(--projections-border-width) solid var(--border);

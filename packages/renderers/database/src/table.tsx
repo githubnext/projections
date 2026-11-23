@@ -91,7 +91,7 @@ function ValueRow({card, row}: {card: Card; row: FrameColumn}) {
     >
       <span className="database-key" />
       <span className="database-rowtext">
-        <code className={`database-value-name${text}`} {...identifier}>
+        <code className={`database-value-name pk-label${text}`} {...identifier}>
           <Breakable lines={wrap('value', version.label, fits)} />
         </code>
       </span>
@@ -123,16 +123,20 @@ function KeyRow({card, row, keyRow}: {card: Card; row: FrameColumn; keyRow: NonN
         card,
         <>
           <span className="database-key" title={keyRow.title}>
-            <span aria-hidden="true">{keyRow.marker}</span>
+            <span className="pk-label" aria-hidden="true">
+              {keyRow.marker}
+            </span>
             <span className="sr-only">{keyRow.title}</span>
           </span>
           {/* Data whole, never truncated: the columns and the name wrap, and the row is laid out tall enough for them. */}
           <span className="database-rowtext">
             <button type="button" className={`entity-link${text}`} aria-pressed={selected} title={title} {...identifier}>
-              <Breakable lines={wrap('key', keyRow.text, fits)} />
+              <span className="pk-label">
+                <Breakable lines={wrap('key', keyRow.text, fits)} />
+              </span>
             </button>
             {keyRow.name && (
-              <code className={text.trim() || undefined} {...identifier}>
+              <code className={`pk-label${text}`} {...identifier}>
                 <Breakable lines={wrap('key', keyRow.name, fits)} />
               </code>
             )}
@@ -252,10 +256,12 @@ function ColumnRow({card, row}: {card: Card; row: FrameColumn}) {
           {/* Name and type whole: on one line when the card has room, else each wraps and the type goes under the name. */}
           <span className="database-rowtext">
             <button type="button" className={`entity-link${text}`} aria-pressed={selected} {...identifier}>
-              <Breakable lines={wrap('column', version.label, fits)} />
+              <span className="pk-label">
+                <Breakable lines={wrap('column', version.label, fits)} />
+              </span>
             </button>
             <code
-              className={text.trim() || undefined}
+              className={`pk-label${text}`}
               title={declaredType(version) ? `${type} (${declaredType(version)})` : undefined}
               {...identifier}
             >
@@ -303,10 +309,12 @@ function CardHeader({card, entity, header, status}: {card: Card; entity: Entity;
             className="database-change-values"
           />
         ) : (
-          <Breakable lines={wrap('name', entity.label, headerFits)} />
+          <span className="database-name pk-label">
+            <Breakable lines={wrap('name', entity.label, headerFits)} />
+          </span>
         )}
       </button>
-      {(view || enumCard) && <span className="database-kind">{view ? 'view' : 'enum'}</span>}
+      {(view || enumCard) && <span className="database-kind pk-label">{view ? 'view' : 'enum'}</span>}
       <ChangeStatus change={change} emphasis={props.emphasis(change)} className={`database-status${status ? '' : ' empty'}`} />
     </header>
   )

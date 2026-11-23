@@ -22,7 +22,7 @@ export function GraphFooter(props: {
       {shared.length > 0 && (
         <div className="shared-routes">
           <button type="button" aria-expanded={sharedOpen} onClick={() => setSharedOpen(open => !open)}>
-            Inspect {shared.length} shared dependencies
+            <span className="pk-label">Inspect {shared.length} shared dependencies</span>
           </button>
           {sharedOpen && (
             <ul className="shared-routes-list" aria-label="Shared dependencies">
@@ -35,7 +35,9 @@ export function GraphFooter(props: {
                       onSelect(edge.id)
                     }}
                   >
-                    {displayed(nodeById.get(edge.fromId)!).label} → {displayed(nodeById.get(edge.toId)!).label}
+                    <span className="pk-label">
+                      {displayed(nodeById.get(edge.fromId)!).label} → {displayed(nodeById.get(edge.toId)!).label}
+                    </span>
                   </button>
                 </li>
               ))}

@@ -146,7 +146,7 @@ function TagMeasures({tags, changes}: {tags: readonly Tag[]; changes: ReadonlyMa
     return (
       <span key={tag.id} data-measure-id={tag.id} className="database-tag-slot">
         <span className={tagClass}>
-          <span className="database-tag-name" {...identifier}>
+          <span className="database-tag-name pk-label" {...identifier}>
             <span className="database-tag-label">
               {tag.labels.map(label => (
                 <span key={label}>{label}</span>
@@ -193,7 +193,7 @@ function TagPill({tag, slot, props, diff}: {tag: FrameTag; slot: TagSlot | undef
         {...(diff ? changeMark(tag.change) : {})}
         {...(former ? {title: `${shown} (was ${former})`} : {})}
       >
-        <span className={`database-tag-name${diff ? ' pk-diff-text' : ''}`} {...identifier}>
+        <span className={`database-tag-name pk-label${diff ? ' pk-diff-text' : ''}`} {...identifier}>
           {renamed ? (
             <span className="database-tag-label" aria-hidden="true">
               <span style={{opacity: 1 - fade}}>{tag.label.from}</span>

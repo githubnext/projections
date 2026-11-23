@@ -30,6 +30,26 @@
 .badge.unchanged {
   color: var(--muted);
 }
+/*
+ * A label centred on its capitals: its text box trimmed to the capitals' top and the baseline, then padded back to its
+ * line height, so it keeps its size and whatever centres it (a flex row, a pill's line) centres the capitals: a capital
+ * E has as much room above it as below. Put it on the element holding the text, a block or a flex item (an inline box
+ * isn't trimmed). It owns its block padding (the doubled class outweighs a component's own padding); room of its own
+ * goes in `--pk-label-inset`. Without `text-box` it is an ordinary line.
+ */
+@supports (text-box: trim-both cap alphabetic) {
+  .pk .pk-label.pk-label {
+    text-box: trim-both cap alphabetic;
+    /*
+     * Its box is its line height exactly, whatever capitals the engine trims to and however it rounds the padding: at
+     * least that tall, its text centred in it, padded half a pixel short of centring it alone so it never grows past it.
+     */
+    box-sizing: border-box;
+    min-height: calc(1lh + 2 * var(--pk-label-inset, 0px));
+    padding-block: calc((1lh - 1cap) / 2 - 0.5px + var(--pk-label-inset, 0px));
+    align-content: center;
+  }
+}
 .pk-truncate {
   display: inline-block;
   max-width: 100%;

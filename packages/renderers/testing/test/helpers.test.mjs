@@ -28,7 +28,7 @@ test('connectInspector builds page URLs on the workbench origin', () => {
 })
 
 test('check failures are flattened with their titles; samples round trip', () => {
-  assert.equal(allChecks.length, 27)
+  assert.equal(allChecks.length, 28)
   const failures = checkFailures([
     {id: 'legend', title: checkTitles.legend, status: 'fail', details: ['two legends'], durationMs: 1},
     {id: 'selection', title: checkTitles.selection, status: 'pass', details: [], durationMs: 1},
@@ -594,6 +594,32 @@ test('frame-edges fails a rounded corner whose fill is painted over its edge, in
   })
   assert.deepEqual(claimed.details, [
     '`.card::after { content }` draws in the `::after` of section.pk-group, a kit frame, which is its edge: draw it in an element of its own (2 like it)',
+  ])
+})
+
+test('label-centring fails a label off its centre, once per kind, saying which way', async () => {
+  const labelDriver = labels => ({
+    async load() {
+      return {status: 'ready', steps: [], capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']}}
+    },
+    async measure(call) {
+      return call === 'labels' ? labels : undefined
+    },
+    sleep: () => Promise.resolve(),
+  })
+  const [passing] = await runChecks(labelDriver([]), subject, {checks: ['label-centring']})
+  assert.equal(passing.status, 'pass', passing.details.join('\n'))
+  const [failing] = await runChecks(
+    labelDriver([
+      {element: 'span.chip[data-entity-id="a"]', above: 4, below: 5},
+      {element: 'span.chip[data-entity-id="b"]', above: 4.2, below: 5.1},
+    ]),
+    subject,
+    {checks: ['label-centring']},
+  )
+  assert.equal(failing.status, 'fail')
+  assert.deepEqual(failing.details, [
+    'span.chip[data-entity-id="a"] sets its text 0.5px high of its centre (4px above the capitals, 5px below the baseline): put the text in the kit\'s `pk-label` (2 like it)',
   ])
 })
 

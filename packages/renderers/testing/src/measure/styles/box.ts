@@ -26,6 +26,14 @@ export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOM
     return value === 'auto' || value.endsWith('%')
   }
   for (const side of sides) if (!layout(`padding-${side}`)) spacing[`padding-${side}`] = px(style.getPropertyValue(`padding-${side}`))
+  // A label trimmed to its capitals (the kit's `pk-label`) is at least its line height and its inset either side, and
+  // padded to centre its text in that: the padding is the font's, and only the inset is spacing.
+  const lineHeight = px(style.lineHeight)
+  const least = px(style.minHeight)
+  if (style.getPropertyValue('text-box-trim') === 'trim-both' && lineHeight > 0 && least >= lineHeight - 1 / 64) {
+    const inset = Math.round(((least - lineHeight) / 2) * 64) / 64
+    for (const side of ['top', 'bottom'] as const) if (spacing[`padding-${side}`] !== undefined) spacing[`padding-${side}`] = inset
+  }
   const margins = sides.map(side => px(style.getPropertyValue(`margin-${side}`)))
   const [, right, , left] = margins
   // Without Typed OM, equal side margins on a narrower block are taken as auto centring.

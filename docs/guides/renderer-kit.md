@@ -159,6 +159,14 @@ the badges stay on the same line without wrapping or clipping. For mixed labels
 such as `GET /api/cart` or `Inter.woff2 (preloaded)`, `IdentifierText` renders
 only the detected code spans (`identifierParts`) in monospace.
 
+**Labels centred on their capitals.** A line box sets text a little high or low
+of its capitals, differently in each engine. Put a chip, bar or button's text in
+its own `pk-label` (a block or flex item, in the text's own font): it trims the
+box to the capitals and baseline (`text-box`) and pads it back to its line
+height, so whatever centres it centres the capitals. Extra room goes in
+`--pk-label-inset`; the `label-centring` renderer check holds every chip, bar
+and button to it.
+
 Protocol text that already marks code spans in backticks—reasons, summaries,
 notices, diagnostics, and details (see
 [text with inline code](../contracts.md#text-with-inline-code))—should be

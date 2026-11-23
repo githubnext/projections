@@ -126,6 +126,7 @@
 .pk .pk-group-label {
   flex: 0 1 auto;
   padding: var(--projections-space-1);
+  --pk-label-inset: var(--projections-space-1);
   border-radius: var(--projections-radius-sm);
   font-size: inherit;
 }
@@ -266,7 +267,12 @@
 .pk .pk-relationship.pk-region {
   margin-block: 1px;
 }
+/* Its words are a label (`pk-label`), a block in its button, centred on their capitals in the row's tint. */
+.pk .pk-relationship > button > .pk-label {
+  display: block;
+}
 .pk .pk-relationship > button {
+  display: block;
   width: 100%;
   padding: 0 var(--projections-space-1);
   border: 0;

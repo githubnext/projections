@@ -1,29 +1,36 @@
 import type {ReactNode} from 'react'
+import {identifier as identifierAttributes} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * A value that changed: the old one struck through in a removed pill, then
  * the new one in an added pill, stacked (the default) or on one line with an
  * arrow. Assistive technology reads "was …, now …". A missing side shows
- * only the other pill.
+ * only the other pill. `code` marks the values as identifiers (a type, a
+ * version), in the monospace font.
  */
 export function ValueChange({
   before,
   after,
   layout = 'stacked',
+  code = false,
   className,
 }: {
   before?: ReactNode
   after?: ReactNode
   layout?: 'stacked' | 'inline'
+  code?: boolean
   className?: string
 }) {
   const has = (value: ReactNode) => value !== undefined && value !== null && value !== false
+  const label = code ? identifierAttributes : {}
   return (
     <span className={`pk-value-change${className ? ` ${className}` : ''}`} data-layout={layout}>
       {has(before) && (
         <del className="pk-change-pill" data-change="removed">
           <span className="sr-only">was </span>
-          {before}
+          <span className="pk-label" {...label}>
+            {before}
+          </span>
         </del>
       )}
       {has(before) && has(after) && layout === 'inline' && (
@@ -34,7 +41,9 @@ export function ValueChange({
       {has(after) && (
         <ins className="pk-change-pill" data-change="added">
           <span className="sr-only">{has(before) ? ', now ' : 'now '}</span>
-          {after}
+          <span className="pk-label" {...label}>
+            {after}
+          </span>
         </ins>
       )}
     </span>
@@ -80,12 +89,12 @@ export function ChangePills({
         const content = (
           <>
             {change && (
-              <span className="pk-pill-sign" aria-hidden="true">
+              <span className="pk-pill-sign pk-label" aria-hidden="true">
                 {change === 'added' ? '+' : '−'}
               </span>
             )}
             {change && <span className="sr-only">{change === 'added' ? 'Added: ' : 'Removed: '}</span>}
-            <span className="pk-pill-label">{item.label}</span>
+            <span className="pk-pill-label pk-label">{item.label}</span>
           </>
         )
         const selected = item.entityId !== undefined && selectedId === item.entityId

@@ -65,7 +65,7 @@ export function StatusTab({change, emphasis, measure = false}: {change: StatusCh
           {parts.map(part => (
             <span key={part.status} className={`pk-status-part ${part.status}`} data-change-status={part.status}>
               <Icon name={part.icon} />
-              {part.label}
+              <span className="pk-label">{part.label}</span>
             </span>
           ))}
           {varied && <VariedMarker />}

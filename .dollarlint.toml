@@ -212,6 +212,10 @@ file = ".portability.yaml"
 schema = "./packages/schemas/internal/portability.json"
 
 [[schemas.associations]]
+file = ".change-hues.yaml"
+schema = "./packages/schemas/internal/change-hues.json"
+
+[[schemas.associations]]
 file = "packages/engine/verified/verus.toml"
 schema = "./packages/schemas/internal/verus.json"
 

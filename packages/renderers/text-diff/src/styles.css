@@ -151,11 +151,8 @@
   color: var(--muted);
   user-select: none;
 }
-.td-delete .td-mark {
-  color: color-mix(in srgb, var(--red) calc(var(--emphasis) * 100%), var(--muted));
-}
-.td-insert .td-mark {
-  color: color-mix(in srgb, var(--green) calc(var(--emphasis) * 100%), var(--muted));
+:is(.td-delete, .td-insert) .td-mark {
+  color: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis) * 100%), var(--muted));
 }
 /* Changed lines are kit change regions (`pk-region`): the tint and its edges both scale with --emphasis. */
 /* Words a changed line doesn't share with the line it pairs with: tinted and underlined, so they don't rest on color alone. */
@@ -166,17 +163,11 @@
   text-decoration-thickness: var(--projections-border-width);
   text-decoration-color: color-mix(in srgb, currentColor calc(var(--emphasis) * 100%), transparent);
 }
-.td-delete .td-word {
-  background: color-mix(in srgb, var(--red) calc(var(--emphasis) * 22%), transparent);
+:is(.td-delete, .td-insert) .td-word {
+  background: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis) * 22%), transparent);
 }
-.td-insert .td-word {
-  background: color-mix(in srgb, var(--green) calc(var(--emphasis) * 22%), transparent);
-}
-.td-diff .td-delete .td-num {
-  color: color-mix(in srgb, var(--red) calc(var(--emphasis) * 100%), var(--muted));
-}
-.td-diff .td-insert .td-num {
-  color: color-mix(in srgb, var(--green) calc(var(--emphasis) * 100%), var(--muted));
+.td-diff :is(.td-delete, .td-insert) .td-num {
+  color: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis) * 100%), var(--muted));
 }
 
 /* Two columns: one grid, so a wrapped line and the cell facing it share a row. */
@@ -208,9 +199,6 @@
  */
 .pk .td-split .td-side-before.pk-region-run[data-change][data-run-end] {
   --pk-run-out-bottom: var(--stroke);
-}
-.pk .td-split .td-side-before[data-change='removed'] + .td-side-after:not([data-change]) {
-  border-left-color: color-mix(in srgb, var(--red-border) calc(var(--emphasis, 1) * 100%), var(--divider));
 }
 /* No line here: the shorter side's room is hatched over the inset surface, never a blank row. */
 .td-filler {

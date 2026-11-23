@@ -1,0 +1,4 @@
+# Change hues that renderers built on the kit name themselves, intended (tools/scripts/check-change-hues.mjs, run by
+# npm run check:change-hues). A change is colored through the kit's change marks; an entry is for a hue that is
+# categorical rather than a change. Each entry excuses its file and says why. An entry that no longer matches fails.
+allow: []

@@ -166,11 +166,11 @@
 }
 /* The old value struck through in the removed hue, then the new one in the added hue; plain with highlighting off. */
 .di-was {
-  fill: color-mix(in srgb, var(--red) calc(var(--emphasis, 1) * 100%), var(--muted));
+  fill: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis, 1) * 100%), var(--muted));
   text-decoration: line-through;
 }
 .di-now {
-  fill: color-mix(in srgb, var(--green) calc(var(--emphasis, 1) * 100%), var(--text));
+  fill: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis, 1) * 100%), var(--text));
 }
 .di-dependency-sign {
   font-family: var(--font-mono);

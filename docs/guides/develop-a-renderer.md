@@ -225,6 +225,15 @@ what broke and where), or skipped:
   their card or row. Nested parts should be tinted rather than outlined.
 - **No change colors inside change colors** — Color only the innermost changed
   elements. A container that displays changes inside it stays neutral.
+- **Change hues only through the kit** — A renderer built on the kit never names
+  a change hue (`--green`, `--red-soft`, `--projections-color-added`, …). It
+  marks the item with its change (`changeMark`: `data-change`, or `pk-region`),
+  or a part of one (a value's old and new text, an inserted word) with
+  `data-change-hue`, and reads `--pk-change-ink`, `--pk-change-strong`,
+  `--pk-change-highlight`, `--pk-region-fill` or `--pk-region-edge`, which
+  follow the kit's nesting rule. `npm run check:change-hues` holds this
+  repository's renderers to it; a hue that is categorical rather than a change
+  is a reasoned entry in `.change-hues.yaml`.
 - **Rounded edges drawn over their contents** — A rounded, bordered box whose
   fills reach its corners draws its border again over them (the kit's
   `pk-frame`, or a `Group`), so its corners are never thinner than its sides.

@@ -10,12 +10,13 @@
  * puts `class="pk"` on its own root element.
  *
  * The rules live in `styles/`, imported here in cascade order: the page and the `.pk` root, change regions (`pk-region`
- * with `data-change`), content buttons and hover, badges, status lines and icons, and text (names, identifiers, code,
+ * with `data-change`) and change marks (`data-change`, `data-change-hue`), content buttons and hover, badges, status lines and icons, and text (names, identifiers, code,
  * empty and error states). `react.css` adds the kit components' rules after them. The published package inlines the
  * partials into one file.
  */
 @import './styles/root.css';
 @import './styles/regions.css';
+@import './styles/changes.css';
 @import './styles/controls.css';
 @import './styles/status.css';
 @import './styles/text.css';

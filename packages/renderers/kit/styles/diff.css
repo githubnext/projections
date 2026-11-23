@@ -1,29 +1,9 @@
 /*
- * Diff mode (see `diffModel` and `changeMark`). Every item of the union carries `data-change` with its change; the
- * hue follows it into the item, so a mark always pairs a fill with a same-hue edge. HTML regions use `pk-region`
- * (above); an SVG item draws its own shape (`pk-diff-shape`) the same way, dashed when removed. Text of a removed item
- * (`pk-diff-text`) is struck through and muted, so removal never rests on color alone.
+ * Diff mode (see `diffModel` and `changeMark`). Every item of the union carries `data-change` with its change, whose
+ * hue `changes.css` sets for everything in it. HTML regions use `pk-region`; an SVG item draws its own shape
+ * (`pk-diff-shape`) the same way, dashed when removed. Text of a removed item (`pk-diff-text`) is struck through and
+ * muted, so removal never rests on color alone.
  */
-.pk [data-change='added'] {
-  --pk-region-fill: var(--green-soft);
-  --pk-region-edge: var(--green-border);
-  --pk-change-ink: var(--green);
-}
-.pk [data-change='removed'] {
-  --pk-region-fill: var(--red-soft);
-  --pk-region-edge: var(--red-border);
-  --pk-change-ink: var(--red);
-}
-.pk [data-change='modified'] {
-  --pk-region-fill: var(--amber-soft);
-  --pk-region-edge: var(--amber-border);
-  --pk-change-ink: var(--amber);
-}
-.pk :is([data-change='renamed'], [data-change='moved']) {
-  --pk-region-fill: var(--violet-soft);
-  --pk-region-edge: var(--violet-border);
-  --pk-change-ink: var(--violet);
-}
 .pk [data-change] > .pk-diff-shape {
   fill: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis, 1) * 100%), var(--raised));
   stroke: color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis, 1) * 100%), var(--divider));

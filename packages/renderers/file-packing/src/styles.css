@@ -55,18 +55,14 @@
   pointer-events: none;
   stroke-width: calc(var(--stroke-strong) + var(--stroke));
 }
-.fp-emphasis.added {
-  stroke: var(--green-border);
+.fp-emphasis:is([data-change-hue='added'], [data-change-hue='removed']) {
+  stroke: var(--pk-region-edge);
 }
 .fp-emphasis.removed {
-  stroke: var(--red-border);
   stroke-dasharray: 5 3;
 }
-.fp-emphasis.modified {
-  stroke: var(--amber);
-}
-.fp-emphasis.renamed {
-  stroke: var(--violet);
+.fp-emphasis:is([data-change-hue='modified'], [data-change-hue='renamed']) {
+  stroke: var(--pk-change-ink);
 }
 /* A folder with changes drawn inside it: a neutral ring, so only the innermost changes are colored. */
 .fp-emphasis.pk-holds-changes {

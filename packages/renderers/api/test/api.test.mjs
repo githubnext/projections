@@ -140,23 +140,23 @@ test('the diff renders every change with its status footer and signature diff, a
   assert.equal(statusOf(rows.added), 'Added')
   assert.match(
     rows.added,
-    /class="api-signature pk-label added" data-projections-identifier=""><span class="api-line-mark pk-label" aria-hidden="true">\+<\/span>added\(\): void/u,
+    /class="api-signature pk-label added" data-change-hue="added" data-projections-identifier=""><span class="api-line-mark pk-label" aria-hidden="true">\+<\/span>added\(\): void/u,
   )
   assert.equal(statusOf(rows.legacy), 'Removed')
   assert.match(
     rows.legacy,
-    /class="api-signature pk-label removed" data-projections-identifier=""><span class="api-line-mark pk-label" aria-hidden="true">−<\/span>legacy\(\): void/u,
+    /class="api-signature pk-label removed" data-change-hue="removed" data-projections-identifier=""><span class="api-line-mark pk-label" aria-hidden="true">−<\/span>legacy\(\): void/u,
   )
   assert.equal(statusOf(rows.greet), 'Modified')
   assert.match(
     rows.greet,
-    /<pre class="api-signature pk-label" data-projections-identifier=""><span>greet\(<\/span><ins>name: string<\/ins><span>\): string<\/span><\/pre>/u,
+    /<pre class="api-signature pk-label" data-projections-identifier=""><span>greet\(<\/span><ins data-change-hue="added">name: string<\/ins><span>\): string<\/span><\/pre>/u,
   )
   assert.match(rows.greet, /Signature changed from “greet\(\): string” to “greet\(name: string\): string”/u)
   // A rewritten signature splits into a removed line above an added one.
   assert.match(
     rows.parse,
-    /class="api-signature pk-label removed" data-projections-identifier="">.*>parse\(text: string\): Node<\/pre><pre class="api-signature pk-label added" data-projections-identifier="">.*>tokenize\(input: Buffer\): Token\[\]<\/pre>/u,
+    /class="api-signature pk-label removed" data-change-hue="removed" data-projections-identifier="">.*>parse\(text: string\): Node<\/pre><pre class="api-signature pk-label added" data-change-hue="added" data-projections-identifier="">.*>tokenize\(input: Buffer\): Token\[\]<\/pre>/u,
   )
   assert.ok(!rows.stable.includes('pk-status') && !rows.stable.includes('<del') && !rows.stable.includes('<ins'))
   // The unchanged row still reserves its footer, so every row has the same rhythm.
@@ -173,7 +173,7 @@ test('a renamed declaration shows its previous label and its renamed signature',
     rows.getJson,
     /Previously <\/span><span data-projections-identifier="" class="pk-identifier pk-truncate" title="fetchJson"><del>fetchJson<\/del><\/span>/u,
   )
-  assert.match(rows.getJson, /<del>fetchJson<\/del><ins>getJson<\/ins>/u)
+  assert.match(rows.getJson, /<del data-change-hue="removed">fetchJson<\/del><ins data-change-hue="added">getJson<\/ins>/u)
   // Side-by-side, the before pane names it as the before revision did, under its row ID.
   assert.match(rowsOf(render(props(model, {progress: 0, highlighting: 0}))).getJson, />fetchJson<\/button>/u)
 })
@@ -272,9 +272,12 @@ test('side-by-side panes list each revision; with highlighting each marks its si
   assert.match(end.added, /class="api-signature pk-label added"/u)
   assert.match(
     start.greet,
-    /class="api-signature pk-label removed" data-projections-identifier="">.*<span>greet\(<\/span><span>\): string<\/span>/u,
+    /class="api-signature pk-label removed" data-change-hue="removed" data-projections-identifier="">.*<span>greet\(<\/span><span>\): string<\/span>/u,
   )
-  assert.match(end.greet, /class="api-signature pk-label added" data-projections-identifier="">.*<mark>name: string<\/mark>/u)
+  assert.match(
+    end.greet,
+    /class="api-signature pk-label added" data-change-hue="added" data-projections-identifier="">.*<mark>name: string<\/mark>/u,
+  )
   assert.ok(!start.parse.includes('<mark'), 'a rewrite is not marked run by run')
   assert.ok(!start.stable.includes('pk-status') && !end.stable.includes('<mark'))
 })

@@ -233,27 +233,16 @@
  * The change hue here only colors signs and chip edges.
  */
 :is(.rp-row, .rp-region, .rp-lane)[data-change],
-.rp-chip {
-  --change: var(--violet);
-  --change-soft: var(--violet-soft);
-  --change-edge: var(--violet-border);
+.rp-chip[data-change-hue] {
+  --change: var(--pk-change-ink);
+  --change-soft: var(--pk-region-fill);
+  --change-edge: var(--pk-region-edge);
 }
-:is(.rp-row, .rp-region, .rp-lane)[data-change='added'],
-.rp-chip.added {
-  --change: var(--green);
-  --change-soft: var(--green-soft);
-  --change-edge: var(--green-border);
-}
-:is(.rp-row, .rp-region, .rp-lane)[data-change='removed'],
-.rp-chip.removed {
-  --change: var(--red);
-  --change-soft: var(--red-soft);
-  --change-edge: var(--red-border);
-}
-:is(.rp-row, .rp-region, .rp-lane)[data-change='modified'] {
-  --change: var(--amber);
-  --change-soft: var(--amber-soft);
-  --change-edge: var(--amber-border);
+/* An unchanged chip is never emphasized; its hue is the neutral it mixes with. */
+.rp-chip:not([data-change-hue]) {
+  --change: var(--muted);
+  --change-soft: var(--raised);
+  --change-edge: var(--divider);
 }
 /* Removed content is struck once, wherever its region was marked. */
 :is(.rp-row.departed, .rp-region.departed, .rp-lane.departed) :is(.rp-main, .rp-effect) {
@@ -317,11 +306,11 @@
 .rp-old {
   color: var(--muted);
   text-decoration: line-through;
-  background: color-mix(in srgb, var(--red-highlight) calc(var(--emphasis, 0) * 100%), transparent);
+  background: color-mix(in srgb, var(--pk-change-highlight) calc(var(--emphasis, 0) * 100%), transparent);
 }
 .rp-new {
   text-decoration: none;
-  background: color-mix(in srgb, var(--green-highlight) calc(var(--emphasis, 0) * 100%), transparent);
+  background: color-mix(in srgb, var(--pk-change-highlight) calc(var(--emphasis, 0) * 100%), transparent);
 }
 :is(.rp-old, .rp-new) > .rp-conditions {
   background: inherit;

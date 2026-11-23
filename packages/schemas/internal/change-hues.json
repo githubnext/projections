@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Change hue exceptions (internal)",
+  "description": "Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates .change-hues.yaml (see .dollarlint.toml).",
+  "type": "object",
+  "required": ["allow"],
+  "properties": {
+    "allow": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "reason"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^/\\\\][^\\\\]*$",
+            "description": "A repository-relative path."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Why the hue is categorical, not a change."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

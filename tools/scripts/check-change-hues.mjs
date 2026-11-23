@@ -2,8 +2,8 @@
 // never the hue itself. The kit's `data-change` (and `pk-region`) set `--pk-change-ink`, `--pk-change-strong`,
 // `--pk-change-highlight`, `--pk-region-fill` and `--pk-region-edge` for the change an element is marked with, and its
 // nesting rule drains them from anything that holds changes, so only the innermost changes are colored. A renderer that
-// names a change hue (the kit's `--green`, `--red-soft`, … or the theme's `--projections-color-added`, …) bypasses
-// that. A renderer without the kit (the minimal example) colors changes from the theme's tokens itself and isn't read.
+// names a change hue (the kit's `--green`, `--red-soft`, … or the theme's `--projections-color-added`, …), or reads one
+// (`token.color('added')`, `getPropertyValue('--red')`), bypasses that. A renderer without the kit (the minimal example) colors changes from the theme's tokens itself and isn't read.
 // Intentional uses, where a hue is categorical rather than a change, are in .change-hues.yaml, each with its reason;
 // an exception that no longer matches fails too.
 import {execFileSync} from 'node:child_process'
@@ -14,7 +14,7 @@ import {parse} from 'yaml'
 
 const hue = String.raw`(?:green|red|amber|violet)(?:-(?:soft|border|strong|highlight))?`
 const pattern = new RegExp(
-  String.raw`var\(\s*--${hue}\s*[,)]|--projections-color-(?:added|removed|modified|moved)(?:-[a-z]+)?\b|color-(?:added|removed|modified|moved)(?:-[a-z]+)?['"\x60]`,
+  String.raw`var\(\s*--${hue}\s*[,)]|--projections-color-(?:added|removed|modified|moved)(?:-[a-z]+)?\b|color-(?:added|removed|modified|moved)(?:-[a-z]+)?['"\x60]|\.color\(\s*['"\x60](?:added|removed|modified|moved)(?:-[a-z]+)?['"\x60]|['"\x60]--${hue}['"\x60]`,
   'u',
 )
 export const advice =
@@ -65,6 +65,8 @@ if (import.meta.main) {
     .split('\0')
     .filter(path => /^(?:packages\/renderers|examples\/renderers)\/[^/]+\/package\.json$/u.test(path))
     .map(path => path.slice(0, -'/package.json'.length))
+    // Tracked files deleted from the working tree are still listed.
+    .filter(directory => existsSync(join(root, directory, 'package.json')))
     .filter(directory => kitRenderer(directory, JSON.parse(readFileSync(join(root, directory, 'package.json'), 'utf8'))))
   const files = []
   for (const directory of directories) {

@@ -9,6 +9,9 @@ test('a change hue is found in CSS and code, by alias or theme token; kit marks 
     '  stroke: var(--amber-border, #9a6700);',
     '  --added: var(--projections-color-added, #1a7f37);',
     "  const ink = tokenVar('color-removed')",
+    "  const ink = token.color('added')",
+    "  const tint = token.color('removed-highlight')",
+    "  const red = getComputedStyle(root).getPropertyValue('--red')",
   ]) {
     assert.equal(findings(line).length, 1, line)
   }
@@ -18,6 +21,8 @@ test('a change hue is found in CSS and code, by alias or theme token; kit marks 
     '  color: var(--accent);',
     '  border-color: var(--red-ish-custom);',
     '  fill: var(--projections-chart-3);',
+    "  const accent = token.color('accent')",
+    "  const ink = getComputedStyle(root).getPropertyValue('--pk-change-ink')",
   ]) {
     assert.deepEqual(findings(line), [], line)
   }

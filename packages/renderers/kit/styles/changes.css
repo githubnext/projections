@@ -1,0 +1,36 @@
+/*
+ * Change marks, for any renderer on the kit, with or without React (see `changeMark`). An item carrying `data-change`
+ * sets the change's hue for everything in it: a renderer colors a change only through `--pk-change-ink` (text, signs,
+ * lines), `--pk-change-strong` (text on the fill), `--pk-change-highlight` (a word's tint), `--pk-region-fill` and
+ * `--pk-region-edge` (npm run check:change-hues). A part of a changed item drawn in a change's hue (a value's old and
+ * new text, an inserted word, a delta) takes `data-change-hue` instead: the same variables, but not a changed item, so
+ * the item around it keeps its own mark. `nesting.css` drains them from anything that holds changes.
+ */
+.pk :is([data-change='added'], [data-change-hue='added']) {
+  --pk-region-fill: var(--green-soft);
+  --pk-region-edge: var(--green-border);
+  --pk-change-ink: var(--green);
+  --pk-change-strong: var(--green-strong);
+  --pk-change-highlight: var(--green-highlight);
+}
+.pk :is([data-change='removed'], [data-change-hue='removed']) {
+  --pk-region-fill: var(--red-soft);
+  --pk-region-edge: var(--red-border);
+  --pk-change-ink: var(--red);
+  --pk-change-strong: var(--red-strong);
+  --pk-change-highlight: var(--red-highlight);
+}
+.pk :is([data-change='modified'], [data-change-hue='modified']) {
+  --pk-region-fill: var(--amber-soft);
+  --pk-region-edge: var(--amber-border);
+  --pk-change-ink: var(--amber);
+  --pk-change-strong: var(--amber-strong);
+  --pk-change-highlight: var(--amber-highlight);
+}
+.pk :is([data-change='renamed'], [data-change='moved'], [data-change-hue='renamed'], [data-change-hue='moved']) {
+  --pk-region-fill: var(--violet-soft);
+  --pk-region-edge: var(--violet-border);
+  --pk-change-ink: var(--violet);
+  --pk-change-strong: var(--violet-strong);
+  --pk-change-highlight: var(--violet-highlight);
+}

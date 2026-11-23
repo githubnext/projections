@@ -88,16 +88,6 @@
   line-height: 18px;
   overflow-wrap: anywhere;
 }
-/*
- * A pill's value is an identifier: its label takes the identifier's font, so it trims to the identifier's capitals.
- */
-.pk .database-change-values .pk-change-pill > .pk-label {
-  font-family: var(--font-mono);
-  font-size: calc(1em - 1px);
-}
-.pk .database-change-values .pk-change-pill > .pk-label > [data-projections-identifier] {
-  font-size: inherit;
-}
 /* The names, types and keys and a pill's value are trimmed to their capitals (`pk-label`), which needs a block. */
 .database-name,
 .database-rowtext .entity-link > .pk-label,

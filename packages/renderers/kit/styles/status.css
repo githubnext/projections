@@ -40,7 +40,14 @@
 @supports (text-box: trim-both cap alphabetic) {
   .pk .pk-label.pk-label {
     text-box: trim-both cap alphabetic;
-    padding-block: calc((1lh - 1cap) / 2 + var(--pk-label-inset, 0px));
+    /*
+     * Its box is its line height exactly, whatever capitals the engine trims to and however it rounds the padding: at
+     * least that tall, its text centred in it, padded half a pixel short of centring it alone so it never grows past it.
+     */
+    box-sizing: border-box;
+    min-height: calc(1lh + 2 * var(--pk-label-inset, 0px));
+    padding-block: calc((1lh - 1cap) / 2 - 0.5px + var(--pk-label-inset, 0px));
+    align-content: center;
   }
 }
 .pk-truncate {

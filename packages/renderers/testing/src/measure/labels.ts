@@ -79,7 +79,7 @@ const fonts = new Map<string, {ascent: number; cap: number}>()
  * tall (the capitals' height `text-box` trims to). Canvas metrics can't say: WebKit rounds them, but not its layout,
  * and a glyph's ink differs between engines.
  */
-export function fontMetrics(style: CSSStyleDeclaration): {ascent: number; cap: number} {
+function fontMetrics(style: CSSStyleDeclaration): {ascent: number; cap: number} {
   const properties = ['font-style', 'font-weight', 'font-stretch', 'font-size', 'font-family']
   const font = properties.map(property => style.getPropertyValue(property)).join('|')
   const known = fonts.get(font)

@@ -1,5 +1,5 @@
 import type {Entity} from '@githubnext/projections-schemas'
-import {identifier, type EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
+import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {describeChange, statusParts} from '@githubnext/projections-renderer-kit'
 import {Icon, ValueChange} from '@githubnext/projections-renderer-kit/react'
 import {Breakable} from './measure.js'
@@ -66,17 +66,13 @@ export function ChangeLines({
   return lines.map((line, index) => {
     const shown = line.after !== undefined && shows(line.after)
     const fits = oneLine(slots[index] ?? 0)
-    const value = (text: string | undefined) =>
-      text === undefined ? undefined : (
-        <span {...identifier}>
-          <Breakable lines={wrap('type', text, fits, 'pill')} />
-        </span>
-      )
+    const value = (text: string | undefined) => (text === undefined ? undefined : <Breakable lines={wrap('type', text, fits, 'pill')} />)
     return (
       <span key={line.key} className={`database-slot database-change-line${fits ? '' : ' wrapped'}`}>
         <span className="database-change-word">{line.word}</span>
         {(line.before !== undefined || line.after !== undefined) && (
           <ValueChange
+            code
             layout={fits ? 'inline' : 'stacked'}
             before={value(line.before)}
             after={shown ? undefined : value(line.after)}

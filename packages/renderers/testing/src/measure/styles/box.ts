@@ -1,6 +1,5 @@
 // An HTML element's box as the spacing check sees it: border widths, spacing and corner radii.
 import {px} from '../paint.js'
-import {fontMetrics} from '../labels.js'
 
 const sides = ['top', 'right', 'bottom', 'left'] as const
 const corners = ['top-left', 'top-right', 'bottom-right', 'bottom-left'] as const
@@ -27,16 +26,13 @@ export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOM
     return value === 'auto' || value.endsWith('%')
   }
   for (const side of sides) if (!layout(`padding-${side}`)) spacing[`padding-${side}`] = px(style.getPropertyValue(`padding-${side}`))
-  // A label trimmed to its capitals (the kit's `pk-label`) is padded back to its line height: that much is the font's,
-  // and only the rest (its inset) is spacing.
+  // A label trimmed to its capitals (the kit's `pk-label`) is at least its line height and its inset either side, and
+  // padded to centre its text in that: the padding is the font's, and only the inset is spacing.
   const lineHeight = px(style.lineHeight)
-  if (style.getPropertyValue('text-box-trim') === 'trim-both' && lineHeight > 0) {
-    const optical = (lineHeight - fontMetrics(style).cap) / 2
-    for (const side of ['top', 'bottom'] as const) {
-      const padding = spacing[`padding-${side}`]
-      // A trimmed text that isn't padded back (a table cell's, whose cell pads it) is spaced as it is.
-      if (padding !== undefined && padding >= optical - 1 / 64) spacing[`padding-${side}`] = Math.round((padding - optical) * 64) / 64
-    }
+  const least = px(style.minHeight)
+  if (style.getPropertyValue('text-box-trim') === 'trim-both' && lineHeight > 0 && least >= lineHeight - 1 / 64) {
+    const inset = Math.round(((least - lineHeight) / 2) * 64) / 64
+    for (const side of ['top', 'bottom'] as const) if (spacing[`padding-${side}`] !== undefined) spacing[`padding-${side}`] = inset
   }
   const margins = sides.map(side => px(style.getPropertyValue(`margin-${side}`)))
   const [, right, , left] = margins

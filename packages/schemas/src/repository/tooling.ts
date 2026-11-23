@@ -17,6 +17,19 @@ export const PortabilitySchema = Closed({
   ),
 })
 
+/**
+ * `.change-hues.yaml`: the renderer files built on the kit that may name a change hue, where it is categorical rather
+ * than a change (tools/scripts/check-change-hues.mjs).
+ */
+export const ChangeHuesSchema = Closed({
+  allow: Type.Array(
+    Closed({
+      path: RepositoryPath,
+      reason: Type.String({minLength: 1, pattern: '\\S', description: 'Why the hue is categorical, not a change.'}),
+    }),
+  ),
+})
+
 /** `packages/engine/verified/verus.toml`: the Verus release that proves the verified crate (scripts/verify.mjs). */
 export const VerusSchema = Closed({
   release: Type.String({pattern: '^[0-9][0-9A-Za-z.]*$', description: "Verus's release name, such as `0.2026.11.02.8bf68ee`."}),

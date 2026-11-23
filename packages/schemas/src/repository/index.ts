@@ -13,6 +13,7 @@ export interface RepositorySchema {
 
 export const repositorySchemas: RepositorySchema[] = [
   {name: 'portability', title: 'Portability exceptions', files: '.portability.yaml', schema: tooling.PortabilitySchema},
+  {name: 'change-hues', title: 'Change hue exceptions', files: '.change-hues.yaml', schema: tooling.ChangeHuesSchema},
   {name: 'verus', title: 'Verus pins', files: 'packages/engine/verified/verus.toml', schema: tooling.VerusSchema},
   {name: 'notices', title: 'Third-party notices', files: 'notices/notices.json', schema: tooling.NoticesSchema},
   {
